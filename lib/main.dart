@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/routes/routerPage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/theme_provider.dart';
@@ -15,6 +16,8 @@ void main() {
       child: ScreenUtilInit(
         designSize: Size(360, 690), // Tamaño base del diseño
         builder: (context, child) {
+          WidgetsFlutterBinding.ensureInitialized();
+
           return MyApp();
         },
       ),
@@ -54,8 +57,16 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: themeProvider.currentTheme,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', 'ES'), // Español (España)
+      ],
       // initialRoute:_hasSeenIntro! ? '/loginPage' : '/loginPage', // Asegurarse de que no sea null.
-      home: _buildHomeScreen() ,
+      home: _buildHomeScreen(),
       routes: routes,
     );
   }
@@ -71,6 +82,6 @@ class _MyAppState extends State<MyApp> {
     }
 
     // Decidir la pantalla inicial con base en el valor de _hasSeenIntro.
-    return _hasSeenIntro! ? const LoginScreen() : const WelcomeScreen();
+    return _hasSeenIntro! ? const Homescreen() : const WelcomeScreen();
   }
 }

@@ -5,5 +5,7 @@ final Map<String, WidgetBuilder> routes = {
   '/introPage': (BuildContext context) => const WelcomeScreen(),
   '/homePage': (BuildContext context) => const Homescreen(),
   '/loginPage':( BuildContext context) => const LoginScreen(),
-  
+  '/registerPage':( BuildContext context) => const RegisterScreen(),
+  '/forgotPasswordPage':( BuildContext context) => const RecoverPassScreen(),
+  '/changePasswordPage':( BuildContext context) => const ChangePassScreen(),
 };
