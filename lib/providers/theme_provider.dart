@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:biblia_palabra_de_vida_app/themes/appTheme.dart';
+import 'package:biblia_palabra_de_vida_app/themes/app_theme.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ThemeData _currentTheme = themes.first.toThemeData();

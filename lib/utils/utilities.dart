@@ -1,0 +1,1 @@
+export 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';

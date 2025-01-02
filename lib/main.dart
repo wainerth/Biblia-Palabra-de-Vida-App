@@ -1,9 +1,9 @@
-import 'package:biblia_palabra_de_vida_app/routes/routerPage.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/routes/router_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:biblia_palabra_de_vida_app/providers/theme_provider.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,13 +12,14 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
       ],
       child: ScreenUtilInit(
-        designSize: Size(360, 690), // Tamaño base del diseño
+        designSize: const Size(360, 690), // Tamaño base del diseño
         builder: (context, child) {
           WidgetsFlutterBinding.ensureInitialized();
 
-          return MyApp();
+          return const MyApp();
         },
       ),
     ),
@@ -33,7 +34,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool? _hasSeenIntro; // Usar null para diferenciar cuando aún no está cargado.
+  bool? _hasSeenIntro;
 
   @override
   void initState() {
@@ -44,7 +45,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _loadDataPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      print("esperando asignación");
+      // print("esperando asignación");
       _hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
     });
   }
@@ -53,7 +54,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
-    // Cuando _hasSeenIntro no es null, renderizar la ruta inicial.
+    // Cuando _hasSeenIntro no es null, muestra la ruta inicial.
     return MaterialApp(
       title: 'Flutter Demo',
       theme: themeProvider.currentTheme,
@@ -65,7 +66,6 @@ class _MyAppState extends State<MyApp> {
       supportedLocales: const [
         Locale('es', 'ES'), // Español (España)
       ],
-      // initialRoute:_hasSeenIntro! ? '/loginPage' : '/loginPage', // Asegurarse de que no sea null.
       home: _buildHomeScreen(),
       routes: routes,
     );
@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> {
   Widget _buildHomeScreen() {
     // Mostrar indicador de carga mientras _hasSeenIntro es null.
     if (_hasSeenIntro == null) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -82,6 +82,6 @@ class _MyAppState extends State<MyApp> {
     }
 
     // Decidir la pantalla inicial con base en el valor de _hasSeenIntro.
-    return _hasSeenIntro! ? const Homescreen() : const WelcomeScreen();
+    return _hasSeenIntro! ? const HomeScreen() : const WelcomeScreen();
   }
 }

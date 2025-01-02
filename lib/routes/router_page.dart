@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 
 final Map<String, WidgetBuilder> routes = {
   '/introPage': (BuildContext context) => const WelcomeScreen(),
-  '/homePage': (BuildContext context) => const Homescreen(),
+  '/homePage': (BuildContext context) => const HomeScreen(),
   '/loginPage':( BuildContext context) => const LoginScreen(),
   '/registerPage':( BuildContext context) => const RegisterScreen(),
   '/forgotPasswordPage':( BuildContext context) => const RecoverPassScreen(),
   '/changePasswordPage':( BuildContext context) => const ChangePassScreen(),
+  '/layoutPage': (BuildContext context) => const PageScreen(),
+  '/mapPage': (BuildContext context) => MapScreen(levels: [],)
 };

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
 class EndIntroScreen extends StatelessWidget {
-  const EndIntroScreen({Key? key}) : super(key: key);
+  const EndIntroScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +26,9 @@ class EndIntroScreen extends StatelessWidget {
 class WisdomPathPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint_0_fill = Paint()..style = PaintingStyle.fill;
-    paint_0_fill.color = Colors.white.withOpacity(1.0);
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint_0_fill);
+    Paint paint0Fill = Paint()..style = PaintingStyle.fill;
+    paint0Fill.color = Colors.white.withValues(alpha: 255); //
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint0Fill);
 
     Path path_1 = Path();
     path_1.moveTo(size.width * 0.1890438, size.height * 0.9699030);
@@ -38,13 +38,13 @@ class WisdomPathPainter extends CustomPainter {
     path_1.lineTo(size.width * 0.1890438, size.height * 0.9699030);
     path_1.close();
 
-    Paint paint_1_fill = Paint()..style = PaintingStyle.fill;
-    paint_1_fill.shader = ui.Gradient.linear(
+    Paint paint1Fill = Paint()..style = PaintingStyle.fill;
+    paint1Fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.2955957, size.height * 0.9613867),
         Offset(size.width * 0.3683541, size.height * 1.178446),
-        [Color(0xffFFDF6E).withOpacity(0), Color(0xffFFCD1B).withOpacity(0.5)],
+        [const Color(0xffFFDF6E).withOpacity(0), const Color(0xffFFCD1B).withOpacity(0.5)],
         [0, 1]);
-    canvas.drawPath(path_1, paint_1_fill);
+    canvas.drawPath(path_1, paint1Fill);
 
     Path path_2 = Path();
     path_2.moveTo(size.width * 0.6879498, size.height * 0.9571636);
@@ -58,7 +58,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_2_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.5802225, size.height * 0.9536250),
         Offset(size.width * 0.5499928, size.height * 1.173084),
-        [Color(0xffFFDF6E).withOpacity(0), Color(0xffFFCD1B).withOpacity(0.5)],
+        [const Color(0xffFFDF6E).withOpacity(0), const Color(0xffFFCD1B).withOpacity(0.5)],
         [0, 1]);
     canvas.drawPath(path_2, paint_2_fill);
 
@@ -74,12 +74,12 @@ class WisdomPathPainter extends CustomPainter {
     paint_3_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.8083469, size.height * 1.001418),
         Offset(size.width * 0.7158110, size.height * 1.184720),
-        [Color(0xffFFDF6E).withOpacity(0), Color(0xffFFCD1B).withOpacity(0.5)],
+        [const Color(0xffFFDF6E).withOpacity(0), const Color(0xffFFCD1B).withOpacity(0.5)],
         [0, 1]);
     canvas.drawPath(path_3, paint_3_fill);
 
     Paint paint_4_fill = Paint()..style = PaintingStyle.fill;
-    paint_4_fill.color = Color(0xffE8F3FF).withOpacity(1.0);
+    paint_4_fill.color = const Color(0xffE8F3FF).withOpacity(1.0);
     canvas.drawRRect(
         RRect.fromRectAndCorners(
             Rect.fromLTWH(size.width * 0.01674641, size.height * 0.02803738,
@@ -123,7 +123,7 @@ class WisdomPathPainter extends CustomPainter {
     path_5.close();
 
     Paint paint_5_fill = Paint()..style = PaintingStyle.fill;
-    paint_5_fill.color = Color(0xff12CBC4).withOpacity(1.0);
+    paint_5_fill.color = const Color(0xff12CBC4).withOpacity(1.0);
     canvas.drawPath(path_5, paint_5_fill);
 
     Path path_6 = Path();
@@ -232,11 +232,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_6_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.001188361;
-    paint_6_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_6_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_6, paint_6_stroke);
 
     Paint paint_6_fill = Paint()..style = PaintingStyle.fill;
-    paint_6_fill.color = Color(0xff000000).withOpacity(0);
+    paint_6_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_6, paint_6_fill);
 
     Path path_7 = Path();
@@ -345,11 +345,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_7_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.001188361;
-    paint_7_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_7_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_7, paint_7_stroke);
 
     Paint paint_7_fill = Paint()..style = PaintingStyle.fill;
-    paint_7_fill.color = Color(0xff000000).withOpacity(0);
+    paint_7_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_7, paint_7_fill);
 
     Path path_8 = Path();
@@ -458,11 +458,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_8_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.001188361;
-    paint_8_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_8_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_8, paint_8_stroke);
 
     Paint paint_8_fill = Paint()..style = PaintingStyle.fill;
-    paint_8_fill.color = Color(0xff000000).withOpacity(0);
+    paint_8_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_8, paint_8_fill);
 
     Path path_9 = Path();
@@ -571,11 +571,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_9_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.001188361;
-    paint_9_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_9_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_9, paint_9_stroke);
 
     Paint paint_9_fill = Paint()..style = PaintingStyle.fill;
-    paint_9_fill.color = Color(0xff000000).withOpacity(0);
+    paint_9_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_9, paint_9_fill);
 
     Path path_10 = Path();
@@ -669,7 +669,7 @@ class WisdomPathPainter extends CustomPainter {
     path_10.close();
 
     Paint paint_10_fill = Paint()..style = PaintingStyle.fill;
-    paint_10_fill.color = Color(0xffFFF7F1).withOpacity(1.0);
+    paint_10_fill.color = const Color(0xffFFF7F1).withOpacity(1.0);
     canvas.drawPath(path_10, paint_10_fill);
 
     Path path_11 = Path();
@@ -750,7 +750,7 @@ class WisdomPathPainter extends CustomPainter {
     path_11.close();
 
     Paint paint_11_fill = Paint()..style = PaintingStyle.fill;
-    paint_11_fill.color = Color(0xffF27728).withOpacity(1.0);
+    paint_11_fill.color = const Color(0xffF27728).withOpacity(1.0);
     canvas.drawPath(path_11, paint_11_fill);
 
     Path path_12 = Path();
@@ -790,7 +790,7 @@ class WisdomPathPainter extends CustomPainter {
     path_12.close();
 
     Paint paint_12_fill = Paint()..style = PaintingStyle.fill;
-    paint_12_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_12_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_12, paint_12_fill);
 
     Path path_13 = Path();
@@ -830,7 +830,7 @@ class WisdomPathPainter extends CustomPainter {
     path_13.close();
 
     Paint paint_13_fill = Paint()..style = PaintingStyle.fill;
-    paint_13_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_13_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_13, paint_13_fill);
 
     Path path_14 = Path();
@@ -870,7 +870,7 @@ class WisdomPathPainter extends CustomPainter {
     path_14.close();
 
     Paint paint_14_fill = Paint()..style = PaintingStyle.fill;
-    paint_14_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_14_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_14, paint_14_fill);
 
     Path path_15 = Path();
@@ -910,7 +910,7 @@ class WisdomPathPainter extends CustomPainter {
     path_15.close();
 
     Paint paint_15_fill = Paint()..style = PaintingStyle.fill;
-    paint_15_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_15_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_15, paint_15_fill);
 
     Path path_16 = Path();
@@ -950,7 +950,7 @@ class WisdomPathPainter extends CustomPainter {
     path_16.close();
 
     Paint paint_16_fill = Paint()..style = PaintingStyle.fill;
-    paint_16_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_16_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_16, paint_16_fill);
 
     Path path_17 = Path();
@@ -990,7 +990,7 @@ class WisdomPathPainter extends CustomPainter {
     path_17.close();
 
     Paint paint_17_fill = Paint()..style = PaintingStyle.fill;
-    paint_17_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_17_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_17, paint_17_fill);
 
     Path path_18 = Path();
@@ -1030,7 +1030,7 @@ class WisdomPathPainter extends CustomPainter {
     path_18.close();
 
     Paint paint_18_fill = Paint()..style = PaintingStyle.fill;
-    paint_18_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_18_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_18, paint_18_fill);
 
     Path path_19 = Path();
@@ -1070,7 +1070,7 @@ class WisdomPathPainter extends CustomPainter {
     path_19.close();
 
     Paint paint_19_fill = Paint()..style = PaintingStyle.fill;
-    paint_19_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_19_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_19, paint_19_fill);
 
     Path path_20 = Path();
@@ -1110,7 +1110,7 @@ class WisdomPathPainter extends CustomPainter {
     path_20.close();
 
     Paint paint_20_fill = Paint()..style = PaintingStyle.fill;
-    paint_20_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_20_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_20, paint_20_fill);
 
     Path path_21 = Path();
@@ -1150,7 +1150,7 @@ class WisdomPathPainter extends CustomPainter {
     path_21.close();
 
     Paint paint_21_fill = Paint()..style = PaintingStyle.fill;
-    paint_21_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_21_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_21, paint_21_fill);
 
     Path path_22 = Path();
@@ -1190,7 +1190,7 @@ class WisdomPathPainter extends CustomPainter {
     path_22.close();
 
     Paint paint_22_fill = Paint()..style = PaintingStyle.fill;
-    paint_22_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_22_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_22, paint_22_fill);
 
     Path path_23 = Path();
@@ -1230,7 +1230,7 @@ class WisdomPathPainter extends CustomPainter {
     path_23.close();
 
     Paint paint_23_fill = Paint()..style = PaintingStyle.fill;
-    paint_23_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_23_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_23, paint_23_fill);
 
     Path path_24 = Path();
@@ -1270,7 +1270,7 @@ class WisdomPathPainter extends CustomPainter {
     path_24.close();
 
     Paint paint_24_fill = Paint()..style = PaintingStyle.fill;
-    paint_24_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_24_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_24, paint_24_fill);
 
     Path path_25 = Path();
@@ -1310,7 +1310,7 @@ class WisdomPathPainter extends CustomPainter {
     path_25.close();
 
     Paint paint_25_fill = Paint()..style = PaintingStyle.fill;
-    paint_25_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_25_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_25, paint_25_fill);
 
     Path path_26 = Path();
@@ -1322,7 +1322,7 @@ class WisdomPathPainter extends CustomPainter {
     path_26.close();
 
     Paint paint_26_fill = Paint()..style = PaintingStyle.fill;
-    paint_26_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_26_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_26, paint_26_fill);
 
     Path path_27 = Path();
@@ -1334,7 +1334,7 @@ class WisdomPathPainter extends CustomPainter {
     path_27.close();
 
     Paint paint_27_fill = Paint()..style = PaintingStyle.fill;
-    paint_27_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_27_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_27, paint_27_fill);
 
     Path path_28 = Path();
@@ -1346,7 +1346,7 @@ class WisdomPathPainter extends CustomPainter {
     path_28.close();
 
     Paint paint_28_fill = Paint()..style = PaintingStyle.fill;
-    paint_28_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_28_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_28, paint_28_fill);
 
     Path path_29 = Path();
@@ -1358,7 +1358,7 @@ class WisdomPathPainter extends CustomPainter {
     path_29.close();
 
     Paint paint_29_fill = Paint()..style = PaintingStyle.fill;
-    paint_29_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_29_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_29, paint_29_fill);
 
     Path path_30 = Path();
@@ -1370,7 +1370,7 @@ class WisdomPathPainter extends CustomPainter {
     path_30.close();
 
     Paint paint_30_fill = Paint()..style = PaintingStyle.fill;
-    paint_30_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_30_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_30, paint_30_fill);
 
     Path path_31 = Path();
@@ -1382,7 +1382,7 @@ class WisdomPathPainter extends CustomPainter {
     path_31.close();
 
     Paint paint_31_fill = Paint()..style = PaintingStyle.fill;
-    paint_31_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_31_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_31, paint_31_fill);
 
     Path path_32 = Path();
@@ -1394,7 +1394,7 @@ class WisdomPathPainter extends CustomPainter {
     path_32.close();
 
     Paint paint_32_fill = Paint()..style = PaintingStyle.fill;
-    paint_32_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_32_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_32, paint_32_fill);
 
     Path path_33 = Path();
@@ -1406,7 +1406,7 @@ class WisdomPathPainter extends CustomPainter {
     path_33.close();
 
     Paint paint_33_fill = Paint()..style = PaintingStyle.fill;
-    paint_33_fill.color = Color(0xffE26B1E).withOpacity(1.0);
+    paint_33_fill.color = const Color(0xffE26B1E).withOpacity(1.0);
     canvas.drawPath(path_33, paint_33_fill);
 
     Paint paint_34_fill = Paint()..style = PaintingStyle.fill;
@@ -1431,7 +1431,7 @@ class WisdomPathPainter extends CustomPainter {
         paint_35_stroke);
 
     Paint paint_35_fill = Paint()..style = PaintingStyle.fill;
-    paint_35_fill.color = Color(0xff000000).withOpacity(0);
+    paint_35_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawRRect(
         RRect.fromRectAndCorners(
             Rect.fromLTWH(size.width * 0.8225670, size.height * 0.04731308,
@@ -2316,7 +2316,7 @@ class WisdomPathPainter extends CustomPainter {
     path_41.close();
 
     Paint paint_41_fill = Paint()..style = PaintingStyle.fill;
-    paint_41_fill.color = Color(0xff12CBC4).withOpacity(1.0);
+    paint_41_fill.color = const Color(0xff12CBC4).withOpacity(1.0);
     canvas.drawPath(path_41, paint_41_fill);
 
     Path path_42 = Path();
@@ -2360,12 +2360,12 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_42_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.004784689;
-    paint_42_stroke.color = Color(0xffFFFEFF).withOpacity(0.5);
+    paint_42_stroke.color = const Color(0xffFFFEFF).withOpacity(0.5);
     paint_42_stroke.strokeCap = StrokeCap.round;
     canvas.drawPath(path_42, paint_42_stroke);
 
     Paint paint_42_fill = Paint()..style = PaintingStyle.fill;
-    paint_42_fill.color = Color(0xff000000).withOpacity(0);
+    paint_42_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_42, paint_42_fill);
 
     Path path_43 = Path();
@@ -2409,12 +2409,12 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_43_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.004784689;
-    paint_43_stroke.color = Color(0xffFFFEFF).withOpacity(1.0);
+    paint_43_stroke.color = const Color(0xffFFFEFF).withOpacity(1.0);
     paint_43_stroke.strokeCap = StrokeCap.round;
     canvas.drawPath(path_43, paint_43_stroke);
 
     Paint paint_43_fill = Paint()..style = PaintingStyle.fill;
-    paint_43_fill.color = Color(0xff000000).withOpacity(0);
+    paint_43_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_43, paint_43_fill);
 
     Path path_44 = Path();
@@ -2486,12 +2486,12 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_44_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_44_stroke.color = Color(0xffFFFEFF).withOpacity(1.0);
+    paint_44_stroke.color = const Color(0xffFFFEFF).withOpacity(1.0);
     paint_44_stroke.strokeCap = StrokeCap.round;
     canvas.drawPath(path_44, paint_44_stroke);
 
     Paint paint_44_fill = Paint()..style = PaintingStyle.fill;
-    paint_44_fill.color = Color(0xff000000).withOpacity(0);
+    paint_44_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_44, paint_44_fill);
 
     Path path_45 = Path();
@@ -2535,12 +2535,12 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_45_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.004784689;
-    paint_45_stroke.color = Color(0xffFFFEFF).withOpacity(0.5);
+    paint_45_stroke.color = const Color(0xffFFFEFF).withOpacity(0.5);
     paint_45_stroke.strokeCap = StrokeCap.round;
     canvas.drawPath(path_45, paint_45_stroke);
 
     Paint paint_45_fill = Paint()..style = PaintingStyle.fill;
-    paint_45_fill.color = Color(0xff000000).withOpacity(0);
+    paint_45_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_45, paint_45_fill);
 
     Path path_46 = Path();
@@ -2584,12 +2584,12 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_46_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.004784689;
-    paint_46_stroke.color = Color(0xffFFFEFF).withOpacity(1.0);
+    paint_46_stroke.color = const Color(0xffFFFEFF).withOpacity(1.0);
     paint_46_stroke.strokeCap = StrokeCap.round;
     canvas.drawPath(path_46, paint_46_stroke);
 
     Paint paint_46_fill = Paint()..style = PaintingStyle.fill;
-    paint_46_fill.color = Color(0xff000000).withOpacity(0);
+    paint_46_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_46, paint_46_fill);
 
     Paint paint_47_fill = Paint()..style = PaintingStyle.fill;
@@ -2703,11 +2703,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_48_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_48_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_48_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_48, paint_48_stroke);
 
     Paint paint_48_fill = Paint()..style = PaintingStyle.fill;
-    paint_48_fill.color = Color(0xff000000).withOpacity(0);
+    paint_48_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_48, paint_48_fill);
 
     Path path_49 = Path();
@@ -2816,11 +2816,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_49_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_49_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_49_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_49, paint_49_stroke);
 
     Paint paint_49_fill = Paint()..style = PaintingStyle.fill;
-    paint_49_fill.color = Color(0xff000000).withOpacity(0);
+    paint_49_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_49, paint_49_fill);
 
     Path path_50 = Path();
@@ -2929,11 +2929,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_50_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_50_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_50_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_50, paint_50_stroke);
 
     Paint paint_50_fill = Paint()..style = PaintingStyle.fill;
-    paint_50_fill.color = Color(0xff000000).withOpacity(0);
+    paint_50_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_50, paint_50_fill);
 
     Path path_51 = Path();
@@ -3042,11 +3042,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_51_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_51_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_51_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_51, paint_51_stroke);
 
     Paint paint_51_fill = Paint()..style = PaintingStyle.fill;
-    paint_51_fill.color = Color(0xff000000).withOpacity(0);
+    paint_51_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_51, paint_51_fill);
 
     Path path_52 = Path();
@@ -7666,7 +7666,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_53_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.4921699, size.height * 0.6142956),
         Offset(size.width * 0.5687632, size.height * 0.8243738),
-        [Color(0xffFFDF6E).withOpacity(0), Color(0xffFFCD1B).withOpacity(0.5)],
+        [const Color(0xffFFDF6E).withOpacity(0), const Color(0xffFFCD1B).withOpacity(0.5)],
         [0, 1]);
     canvas.drawPath(path_53, paint_53_fill);
 
@@ -7682,7 +7682,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_54_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.7605718, size.height * 0.6073960),
         Offset(size.width * 0.7257177, size.height * 0.8201671),
-        [Color(0xffFFDF6E).withOpacity(0), Color(0xffFFCD1B).withOpacity(0.5)],
+        [const Color(0xffFFDF6E).withOpacity(0), const Color(0xffFFCD1B).withOpacity(0.5)],
         [0, 1]);
     canvas.drawPath(path_54, paint_54_fill);
 
@@ -7698,7 +7698,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_55_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.2906794, size.height * 0.6703189),
         Offset(size.width * 0.4248158, size.height * 0.8396799),
-        [Color(0xffFFDF6E).withOpacity(0), Color(0xffFFCD1B).withOpacity(0.5)],
+        [const Color(0xffFFDF6E).withOpacity(0), const Color(0xffFFCD1B).withOpacity(0.5)],
         [0, 1]);
     canvas.drawPath(path_55, paint_55_fill);
 
@@ -7714,7 +7714,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_56_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.9782153, size.height * 0.6543563),
         Offset(size.width * 0.8779187, size.height * 0.8293551),
-        [Color(0xffFFDF6E).withOpacity(0), Color(0xffFFCD1B).withOpacity(0.5)],
+        [const Color(0xffFFDF6E).withOpacity(0), const Color(0xffFFCD1B).withOpacity(0.5)],
         [0, 1]);
     canvas.drawPath(path_56, paint_56_fill);
 
@@ -7730,7 +7730,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_57_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.1780194, size.height * 0.7549077),
         Offset(size.width * 0.3186411, size.height * 0.8626133),
-        [Color(0xffFFDF6E).withOpacity(0), Color(0xffFFCD1B).withOpacity(0.5)],
+        [const Color(0xffFFDF6E).withOpacity(0), const Color(0xffFFCD1B).withOpacity(0.5)],
         [0, 1]);
     canvas.drawPath(path_57, paint_57_fill);
 
@@ -7746,7 +7746,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_58_fill.shader = ui.Gradient.linear(
         Offset(size.width * 1.129502, size.height * 0.7333213),
         Offset(size.width * 1.010490, size.height * 0.8472255),
-        [Color(0xffFFDF6E).withOpacity(0), Color(0xffFFCD1B).withOpacity(0.5)],
+        [const Color(0xffFFDF6E).withOpacity(0), const Color(0xffFFCD1B).withOpacity(0.5)],
         [0, 1]);
     canvas.drawPath(path_58, paint_58_fill);
 
@@ -7831,7 +7831,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_59_fill.shader = ui.Gradient.linear(
         Offset(size.width * 1.007328, size.height * 0.7321624),
         Offset(size.width * 0.9629665, size.height * 0.8580023),
-        [Color(0xffFFCF25).withOpacity(1), Color(0xffFD8C43).withOpacity(1)],
+        [const Color(0xffFFCF25).withOpacity(1), const Color(0xffFD8C43).withOpacity(1)],
         [0, 1]);
     canvas.drawPath(path_59, paint_59_fill);
 
@@ -7929,7 +7929,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_60_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.5029689, size.height * 0.6703785),
         Offset(size.width * 0.5203278, size.height * 0.8726682),
-        [Color(0xffFFCF25).withOpacity(1), Color(0xffFD8C43).withOpacity(1)],
+        [const Color(0xffFFCF25).withOpacity(1), const Color(0xffFD8C43).withOpacity(1)],
         [0, 1]);
     canvas.drawPath(path_60, paint_60_fill);
 
@@ -8157,7 +8157,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_61_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.5262249, size.height * 0.6800140),
         Offset(size.width * 0.5340287, size.height * 0.7709533),
-        [Color(0xffFFF2C2).withOpacity(1), Color(0xffFFCF25).withOpacity(1)],
+        [const Color(0xffFFF2C2).withOpacity(1), const Color(0xffFFCF25).withOpacity(1)],
         [0, 1]);
     canvas.drawPath(path_61, paint_61_fill);
 
@@ -8385,7 +8385,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_62_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.7482201, size.height * 0.7180269),
         Offset(size.width * 0.7300694, size.height * 0.7756449),
-        [Color(0xffFFF2C2).withOpacity(1), Color(0xffFFCF25).withOpacity(1)],
+        [const Color(0xffFFF2C2).withOpacity(1), const Color(0xffFFCF25).withOpacity(1)],
         [0, 1]);
     canvas.drawPath(path_62, paint_62_fill);
 
@@ -8613,7 +8613,7 @@ class WisdomPathPainter extends CustomPainter {
     paint_63_fill.shader = ui.Gradient.linear(
         Offset(size.width * 0.3109187, size.height * 0.7260713),
         Offset(size.width * 0.3388756, size.height * 0.7827453),
-        [Color(0xffFFF2C2).withOpacity(1), Color(0xffFFCF25).withOpacity(1)],
+        [const Color(0xffFFF2C2).withOpacity(1), const Color(0xffFFCF25).withOpacity(1)],
         [0, 1]);
     canvas.drawPath(path_63, paint_63_fill);
 
@@ -8790,7 +8790,7 @@ class WisdomPathPainter extends CustomPainter {
     path_65.close();
 
     Paint paint_65_fill = Paint()..style = PaintingStyle.fill;
-    paint_65_fill.color = Color(0xffE5D273).withOpacity(0.83);
+    paint_65_fill.color = const Color(0xffE5D273).withOpacity(0.83);
     canvas.drawPath(path_65, paint_65_fill);
 
     Paint paint_66_fill = Paint()..style = PaintingStyle.fill;
@@ -8818,7 +8818,7 @@ class WisdomPathPainter extends CustomPainter {
     path_67.close();
 
     Paint paint_67_fill = Paint()..style = PaintingStyle.fill;
-    paint_67_fill.color = Color(0xffC4C4C4).withOpacity(0.83);
+    paint_67_fill.color = const Color(0xffC4C4C4).withOpacity(0.83);
     canvas.drawPath(path_67, paint_67_fill);
 
     Paint paint_68_fill = Paint()..style = PaintingStyle.fill;
@@ -8961,7 +8961,7 @@ class WisdomPathPainter extends CustomPainter {
     path_69.close();
 
     Paint paint_69_fill = Paint()..style = PaintingStyle.fill;
-    paint_69_fill.color = Color(0xff886D6D).withOpacity(0.93);
+    paint_69_fill.color = const Color(0xff886D6D).withOpacity(0.93);
     canvas.drawPath(path_69, paint_69_fill);
 
     Path path_70 = Path();
@@ -11301,7 +11301,7 @@ class WisdomPathPainter extends CustomPainter {
     path_70.close();
 
     Paint paint_70_fill = Paint()..style = PaintingStyle.fill;
-    paint_70_fill.color = Color(0xffFD943D).withOpacity(1.0);
+    paint_70_fill.color = const Color(0xffFD943D).withOpacity(1.0);
     canvas.drawPath(path_70, paint_70_fill);
 
     Path path_71 = Path();
@@ -11410,11 +11410,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_71_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_71_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_71_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_71, paint_71_stroke);
 
     Paint paint_71_fill = Paint()..style = PaintingStyle.fill;
-    paint_71_fill.color = Color(0xff000000).withOpacity(0);
+    paint_71_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_71, paint_71_fill);
 
     Path path_72 = Path();
@@ -11523,11 +11523,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_72_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_72_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_72_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_72, paint_72_stroke);
 
     Paint paint_72_fill = Paint()..style = PaintingStyle.fill;
-    paint_72_fill.color = Color(0xff000000).withOpacity(0);
+    paint_72_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_72, paint_72_fill);
 
     Path path_73 = Path();
@@ -11636,11 +11636,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_73_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_73_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_73_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_73, paint_73_stroke);
 
     Paint paint_73_fill = Paint()..style = PaintingStyle.fill;
-    paint_73_fill.color = Color(0xff000000).withOpacity(0);
+    paint_73_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_73, paint_73_fill);
 
     Path path_74 = Path();
@@ -11749,11 +11749,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_74_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_74_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_74_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_74, paint_74_stroke);
 
     Paint paint_74_fill = Paint()..style = PaintingStyle.fill;
-    paint_74_fill.color = Color(0xff000000).withOpacity(0);
+    paint_74_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_74, paint_74_fill);
 
     Path path_75 = Path();
@@ -11862,11 +11862,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_75_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_75_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_75_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_75, paint_75_stroke);
 
     Paint paint_75_fill = Paint()..style = PaintingStyle.fill;
-    paint_75_fill.color = Color(0xff000000).withOpacity(0);
+    paint_75_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_75, paint_75_fill);
 
     Path path_76 = Path();
@@ -11975,11 +11975,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_76_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_76_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_76_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_76, paint_76_stroke);
 
     Paint paint_76_fill = Paint()..style = PaintingStyle.fill;
-    paint_76_fill.color = Color(0xff000000).withOpacity(0);
+    paint_76_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_76, paint_76_fill);
 
     Path path_77 = Path();
@@ -12088,11 +12088,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_77_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_77_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_77_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_77, paint_77_stroke);
 
     Paint paint_77_fill = Paint()..style = PaintingStyle.fill;
-    paint_77_fill.color = Color(0xff000000).withOpacity(0);
+    paint_77_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_77, paint_77_fill);
 
     Path path_78 = Path();
@@ -12201,11 +12201,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_78_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_78_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_78_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_78, paint_78_stroke);
 
     Paint paint_78_fill = Paint()..style = PaintingStyle.fill;
-    paint_78_fill.color = Color(0xff000000).withOpacity(0);
+    paint_78_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_78, paint_78_fill);
 
     Path path_79 = Path();
@@ -12314,11 +12314,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_79_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_79_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_79_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_79, paint_79_stroke);
 
     Paint paint_79_fill = Paint()..style = PaintingStyle.fill;
-    paint_79_fill.color = Color(0xff000000).withOpacity(0);
+    paint_79_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_79, paint_79_fill);
 
     Path path_80 = Path();
@@ -12427,11 +12427,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_80_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_80_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_80_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_80, paint_80_stroke);
 
     Paint paint_80_fill = Paint()..style = PaintingStyle.fill;
-    paint_80_fill.color = Color(0xff000000).withOpacity(0);
+    paint_80_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_80, paint_80_fill);
 
     Path path_81 = Path();
@@ -12540,11 +12540,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_81_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_81_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_81_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_81, paint_81_stroke);
 
     Paint paint_81_fill = Paint()..style = PaintingStyle.fill;
-    paint_81_fill.color = Color(0xff000000).withOpacity(0);
+    paint_81_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_81, paint_81_fill);
 
     Path path_82 = Path();
@@ -12653,11 +12653,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_82_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_82_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_82_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_82, paint_82_stroke);
 
     Paint paint_82_fill = Paint()..style = PaintingStyle.fill;
-    paint_82_fill.color = Color(0xff000000).withOpacity(0);
+    paint_82_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_82, paint_82_fill);
   //fin de la mascara
     Path path_83 = Path();
@@ -12766,11 +12766,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_83_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_83_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_83_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_83, paint_83_stroke);
 
     Paint paint_83_fill = Paint()..style = PaintingStyle.fill;
-    paint_83_fill.color = Color(0xff000000).withOpacity(0);
+    paint_83_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_83, paint_83_fill);
 
     Path path_84 = Path();
@@ -12879,11 +12879,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_84_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_84_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_84_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_84, paint_84_stroke);
 
     Paint paint_84_fill = Paint()..style = PaintingStyle.fill;
-    paint_84_fill.color = Color(0xff000000).withOpacity(0);
+    paint_84_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_84, paint_84_fill);
 
     Path path_85 = Path();
@@ -12992,11 +12992,11 @@ class WisdomPathPainter extends CustomPainter {
     Paint paint_85_stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_85_stroke.color = Color(0xffFFFEFF).withOpacity(0.16);
+    paint_85_stroke.color = const Color(0xffFFFEFF).withOpacity(0.16);
     canvas.drawPath(path_85, paint_85_stroke);
 
     Paint paint_85_fill = Paint()..style = PaintingStyle.fill;
-    paint_85_fill.color = Color(0xff000000).withOpacity(0);
+    paint_85_fill.color = const Color(0xff000000).withOpacity(0);
     canvas.drawPath(path_85, paint_85_fill);
 
     Paint paint_86_fill = Paint()..style = PaintingStyle.fill;
@@ -13024,7 +13024,7 @@ class WisdomPathPainter extends CustomPainter {
     path_87.close();
 
     Paint paint_87_fill = Paint()..style = PaintingStyle.fill;
-    paint_87_fill.color = Color(0xffC4C4C4).withOpacity(0.83);
+    paint_87_fill.color = const Color(0xffC4C4C4).withOpacity(0.83);
     canvas.drawPath(path_87, paint_87_fill);
 
     Path path_88 = Path();
