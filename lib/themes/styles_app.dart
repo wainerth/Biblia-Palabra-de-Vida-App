@@ -14,15 +14,15 @@ class StylesApp {
 /** tamaño e fuentes */ ///
   double get fontSizeTitle {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return 64.sp;
+      return 36.sp;
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return 48.sp;
+      return 36.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 68.sp;
+      return 36.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 78.sp;
+      return 48.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 80.sp;
+      return 60.sp;
     } else {
       return 16.sp;
     }
@@ -182,14 +182,12 @@ class StylesApp {
 
   TextStyle get textStyNameNumber => GoogleFonts.getFont('Alfa Slab One',
       fontSize: fontSizeBody3, fontWeight: FontWeight.normal);
-  
-  
-  TextStyle get textStyCompleteLevelTitle => GoogleFonts.getFont('Alfa Slab One',
-      fontSize: fontSizeTitle1, fontWeight: FontWeight.normal);
+
+  TextStyle get textStyCompleteLevelTitle =>
+      GoogleFonts.getFont('Alfa Slab One',
+          fontSize: fontSizeTitle1, fontWeight: FontWeight.normal);
   TextStyle get textStyCompleteLevelBody => GoogleFonts.getFont('Alfa Slab One',
       fontSize: fontSizeBody3, fontWeight: FontWeight.normal);
-
-
 
   TextStyle get textStyleTitleBlue => GoogleFonts.getFont('Alfa Slab One',
       fontSize: fontSizeTitle1,
@@ -370,29 +368,58 @@ class StylesApp {
 
   Size get sizeContainer {
     if (screenWidth <= SizeScreensApp().sm) {
-      return Size(72.0,72.0); // Ajustar estos valores según tus necesidades
+      return Size(72.0, 72.0); // Ajustar estos valores según tus necesidades
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(90.0,90.0); // Ajustar estos valores según tus necesidades
+      return Size(90.0, 90.0); // Ajustar estos valores según tus necesidades
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(90,90.0); // Ajustar estos valores según tus necesidades
+      return Size(90, 90.0); // Ajustar estos valores según tus necesidades
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(90.0,90.0); // Ajustar estos valores según tus necesidades
+      return Size(90.0, 90.0); // Ajustar estos valores según tus necesidades
     } else {
-      return Size(100.0,100.0); // Ajustar estos valores según tus necesidades
+      return Size(100.0, 100.0); // Ajustar estos valores según tus necesidades
     }
   }
+
   Size get sizeContainerSub {
     if (screenWidth <= SizeScreensApp().sm) {
-      return Size(52.0,52.0); // Ajustar estos valores según tus necesidades
+      return Size(52.0, 52.0); // Ajustar estos valores según tus necesidades
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(70.0,70.0); // Ajustar estos valores según tus necesidades
+      return Size(70.0, 70.0); // Ajustar estos valores según tus necesidades
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(70,70.0); // Ajustar estos valores según tus necesidades
+      return Size(70, 70.0); // Ajustar estos valores según tus necesidades
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(80.0,80.0); // Ajustar estos valores según tus necesidades
+      return Size(80.0, 80.0); // Ajustar estos valores según tus necesidades
     } else {
-      return Size(90.0,90.0); // Ajustar estos valores según tus necesidades
+      return Size(90.0, 90.0); // Ajustar estos valores según tus necesidades
     }
+  }
+
+  Size get sizeContainerLevel {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return Size(120.0, 102.0); // Ajustar estos valores según tus necesidades
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return Size(150.0, 102.0); // Ajustar estos valores según tus necesidades
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return Size(150.0, 102.0); // Ajustar estos valores según tus necesidades
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return Size(190.0, 102.0); // Ajustar estos valores según tus necesidades
+    } else {
+      return Size(250.0, 102.0); // Ajustar estos valores según tus necesidades
+    }
+  }
+
+  Offset  positionedLevels (double percentage) {
+    // if (screenWidth <= SizeScreensApp().sm) {
+      return Offset(screenWidth * percentage, MediaQuery.sizeOf(context).height * percentage);
+    // } else if (screenWidth <= SizeScreensApp().md) {
+    //   return Offset(0.0, 0.0);
+    // } else if (screenWidth <= SizeScreensApp().lg) {
+    //   return Offset(0.0, 0.0);
+    // } else if (screenWidth <= SizeScreensApp().xlg) {
+    //   return Offset(0.0, 0.0);
+    // } else {
+    //   return Offset(0.0, 0.0);
+    // }
   }
 }
 

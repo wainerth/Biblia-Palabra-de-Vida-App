@@ -104,7 +104,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }) {
     return SingleChildScrollView(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           if (backImages.isNotEmpty) _buildBackgroundImages(backImages),
           _buildContent(image, title, subTitle, description),
@@ -115,19 +115,27 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   Widget _buildBackgroundImages(List<String> backImages) {
     return SizedBox(
-      height: 150,
+      height: 130,
       child: Stack(
         children: [
           if (backImages.length > 1)
             Positioned(
               left: 0.0,
               top: 44.0,
-              child: Image.asset(backImages[1], fit: BoxFit.contain),
+              child: Image.asset(
+                backImages[1],
+                fit: BoxFit.fill,
+                height: 76.0,
+              ),
             ),
           Positioned(
             right: 0.0,
             top: 27.0,
-            child: Image.asset(backImages[0], fit: BoxFit.contain),
+            child: Image.asset(
+              backImages[0],
+              fit: BoxFit.fill,
+              height: 108.0,
+            ),
           ),
         ],
       ),
@@ -141,7 +149,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
     return Container(
       constraints: BoxConstraints(
-        minHeight: MediaQuery.of(context).size.height - 150,
+        minHeight: MediaQuery.of(context).size.height,
       ),
       width: double.infinity,
       child: Column(
@@ -153,7 +161,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               padding: const EdgeInsets.only(top: 28.0),
               child: Image.asset(image,
                   width: MediaQuery.sizeOf(context).width,
-                  fit: BoxFit.fitWidth),
+                  // height: 350.0,
+                  alignment: Alignment.topCenter,
+                  fit: BoxFit.fitHeight),
             ),
           if (title.isNotEmpty)
             Center(
@@ -179,14 +189,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       constraints: const BoxConstraints(minHeight: 400),
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: const AssetImage("/backgroundBox.png"),
-          fit: StylesApp(context).fitImage,
-        ),
+            image: const AssetImage("/backgroundBox.png"),
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const SizedBox(height: 48.0),
+          const SizedBox(height: 23.0),
           if (subTitle.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(8.0),

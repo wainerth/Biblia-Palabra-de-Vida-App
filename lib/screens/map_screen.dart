@@ -12,12 +12,12 @@ class MapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List coordATop = [20.0, 140.0, 330.0, 500.0];
+    List coordATop = [20.0, 140.0, 330.0, 550.0];
 
-    List coordALeft = [80.0, 204.0, 250.0, 240.0];
+    List coordALeft = [80.0, 204.0, 270.0, 290.0];
 
     List coordBTop = [0.0, 150.0, 350.0, 520.0];
-    List coordBLeft = [80.0, 15.0, 5.0, 15.0];
+    List coordBLeft = [130.0, 65.0, 5.0, 15.0];
 
     List<Level> levels = List<Level>.from([
       {
@@ -158,7 +158,7 @@ class MapScreen extends StatelessWidget {
       },
       {
         "id": "18",
-        "name": "Interpretador de Sueños",
+        "name": "Interpretador\n de Sueños",
         "unLockLevel": true,
         "color": "8c31d6",
         "section": {"sectionName": "Genesis"},
@@ -227,98 +227,104 @@ class MapScreen extends StatelessWidget {
                       ? coordATop[i]
                       : coordBTop[i], // Ajusta la posición vertical
                   left: index % 2 == 0 ? coordALeft[i] : coordBLeft[i],
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: StylesApp(context)
-                            .sizeContainer
-                            .width, // Ajusta el tamaño según tus necesidades
-                        height: StylesApp(context).sizeContainer.height,
-                        decoration: BoxDecoration(
-                            color: Color(
-                                int.tryParse('0xFF${grupo[i].color}') ??
-                                    0XFF000000),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Color.fromARGB(
-                                100, // Opacidad: 50%
-                                int.parse('0xFF${grupo[i].color}'.substring(2),
-                                    radix: 16),
-                                int.parse(
-                                    '0xFF${grupo[i].color}'.substring(4, 6),
-                                    radix: 16),
-                                int.parse('0xFF${grupo[i].color}'.substring(6),
-                                    radix: 16),
-                              ),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                  offset: Offset(0, 8),
-                                  blurStyle: BlurStyle.outer)
-                            ]),
-                        child: Center(
-                          child: Container(
-                            width: StylesApp(context)
-                                .sizeContainerSub
-                                .width, // Ajusta el tamaño según tus necesidades
-                            height: StylesApp(context).sizeContainerSub.height,
-                            padding: EdgeInsets.all(0.0),
-                            decoration: BoxDecoration(
-                              color: Color.fromARGB(
-                                100, // Opacidad: 50%
-                                int.parse('0xFF${grupo[i].color}'.substring(2),
-                                    radix: 16),
-                                int.parse(
-                                    '0xFF${grupo[i].color}'.substring(4, 6),
-                                    radix: 16),
-                                int.parse('0xFF${grupo[i].color}'.substring(6),
-                                    radix: 16),
-                              ),
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: StylesApp(context).sizeContainerLevel.width,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: StylesApp(context)
+                              .sizeContainer
+                              .width, // Ajusta el tamaño según tus necesidades
+                          height: StylesApp(context).sizeContainer.height,
+                          decoration: BoxDecoration(
+                              color: Color(
+                                  int.tryParse('0xFF${grupo[i].color}') ??
+                                      0XFF000000),
                               shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                                child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Text(
-                                  textAlign: TextAlign.center,
-                                  grupo[i].id,
-                                  style: StylesApp(context)
-                                      .textStyleLevelNumber
-                                      .copyWith(
-                                        height: 1,
-                                        color: Colors.white,
-                                      ),
+                              border: Border.all(
+                                color: Color.fromARGB(
+                                  100, // Opacidad: 50%
+                                  int.parse('0xFF${grupo[i].color}'.substring(2),
+                                      radix: 16),
+                                  int.parse(
+                                      '0xFF${grupo[i].color}'.substring(4, 6),
+                                      radix: 16),
+                                  int.parse('0xFF${grupo[i].color}'.substring(6),
+                                      radix: 16),
                                 ),
-                                Text(
-                                  "paso",
-                                  style: StylesApp(context)
-                                      .textStyleLevelNumber
-                                      .copyWith(
-                                          fontSize:
-                                              StylesApp(context).fontSizeBody5,
-                                          color: Colors.white),
-                                )
-                              ],
-                            )),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.5),
+                                    offset: Offset(0, 8),
+                                    blurStyle: BlurStyle.outer)
+                              ]),
+                          child: Center(
+                            child: Container(
+                              width: StylesApp(context)
+                                  .sizeContainerSub
+                                  .width, // Ajusta el tamaño según tus necesidades
+                              height: StylesApp(context).sizeContainerSub.height,
+                              padding: EdgeInsets.all(0.0),
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(
+                                  100, // Opacidad: 50%
+                                  int.parse('0xFF${grupo[i].color}'.substring(2),
+                                      radix: 16),
+                                  int.parse(
+                                      '0xFF${grupo[i].color}'.substring(4, 6),
+                                      radix: 16),
+                                  int.parse('0xFF${grupo[i].color}'.substring(6),
+                                      radix: 16),
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                  child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Text(
+                                    textAlign: TextAlign.center,
+                                    grupo[i].id,
+                                    style: StylesApp(context)
+                                        .textStyleLevelNumber
+                                        .copyWith(
+                                          height: 1,
+                                          color: Colors.white,
+                                        ),
+                                  ),
+                                  Text(
+                                    "paso",
+                                    style: StylesApp(context)
+                                        .textStyleLevelNumber
+                                        .copyWith(
+                                            fontSize:
+                                                StylesApp(context).fontSizeBody5,
+                                            color: Colors.white),
+                                  )
+                                ],
+                              )),
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        "${grupo[i].id} ${grupo[i].name}",
-                        style: StylesApp(context).textStyNameNumber.copyWith(
-                              color: Colors.white,
-                            ),
-                      ),
-                    ],
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          textAlign: TextAlign.center,
+                          "${grupo[i].id} ${grupo[i].name}",
+                          style: StylesApp(context).textStyNameNumber.copyWith(
+                                color: Colors.white,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               },
