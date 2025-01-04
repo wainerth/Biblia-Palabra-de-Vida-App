@@ -6,6 +6,7 @@ class Level {
   final String color;
   final Section section;
   final String img;
+  final double score;
 
   Level({
     required this.id,
@@ -14,6 +15,7 @@ class Level {
     required this.color,
     required this.section,
     required this.img,
+    this.score = 0.0,
   });
 
   factory Level.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class Level {
       color: json['color'],
       section: Section.fromJson(json['section']),
       img:json['img'],
+      score: json['score'],
     );
   }
 }
@@ -73,7 +76,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl1.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "2",
@@ -85,7 +89,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl2.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "3",
@@ -97,7 +102,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl3.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "4",
@@ -109,7 +115,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl4.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "5",
@@ -121,7 +128,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl5.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "6",
@@ -133,7 +141,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl6.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "7",
@@ -145,7 +154,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl7.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "8",
@@ -157,7 +167,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl8.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "9",
@@ -169,7 +180,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl9.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "10",
@@ -181,7 +193,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl10.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "11",
@@ -193,7 +206,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl11.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "12",
@@ -205,7 +219,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl12.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "13",
@@ -217,7 +232,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl13.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "14",
@@ -229,7 +245,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl14.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "15",
@@ -241,7 +258,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl15.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "16",
@@ -253,7 +271,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl16.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "17",
@@ -265,7 +284,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl19.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "18",
@@ -277,7 +297,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl17.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "19",
@@ -289,7 +310,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl18.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "20",
@@ -301,7 +323,8 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl20.png"
-      }
+      },
+      "score":150.0
     },
     {
       "id": "21",
@@ -313,6 +336,7 @@ List<Level> levels = List<Level>.from([
       },
       "img": {
         "urlImg": "images/levels/lvl21.png"
-      }
+      },
+      "score":150.0
     }
 ].map((levelJson) => Level.fromJson(levelJson)).toList());

@@ -125,6 +125,19 @@ class StylesApp {
       return 16.sp;
     }
   }
+  double get fontSizeBody6 {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return 12.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 12.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 12.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 16.sp;
+    } else {
+      return 16.sp;
+    }
+  }
 
   double get fontSizeBtn {
     if (screenWidth <= SizeScreensApp().sm) {
@@ -220,6 +233,17 @@ class StylesApp {
   TextStyle get textStyleBody5 => GoogleFonts.getFont(
         "Aclonica",
         fontSize: fontSizeBody4,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBody6 => GoogleFonts.getFont(
+        "Aclonica",
+        fontSize: fontSizeBody6,
+        color: const Color(0XFFFFF5F5),
+      );
+
+  TextStyle get textStyleBody7 => GoogleFonts.getFont(
+        "Aclonica",
+        fontSize: fontSizeBody2,
         color: const Color(0XFFFFF5F5),
       );
 
@@ -408,18 +432,42 @@ class StylesApp {
     }
   }
 
-  Offset  positionedLevels (double percentage) {
+  double get minHeightContentPage {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return MediaQuery.of(context).size.height - 130;
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return MediaQuery.of(context).size.height - 130;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return MediaQuery.of(context).size.height - 130;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return MediaQuery.of(context).size.height;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return MediaQuery.of(context).size.height;
+    } else {
+      return MediaQuery.of(context).size.height;
+    }
+  }
+
+  double get imgResponsive {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return MediaQuery.sizeOf(context).width;
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return MediaQuery.sizeOf(context).width;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 400.0;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 400.0;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 400.0;
+    } else {
+      return 400.0;
+    }
+  }
+
+  Offset positionedLevels(double percentage) {
     // if (screenWidth <= SizeScreensApp().sm) {
-      return Offset(screenWidth * percentage, MediaQuery.sizeOf(context).height * percentage);
-    // } else if (screenWidth <= SizeScreensApp().md) {
-    //   return Offset(0.0, 0.0);
-    // } else if (screenWidth <= SizeScreensApp().lg) {
-    //   return Offset(0.0, 0.0);
-    // } else if (screenWidth <= SizeScreensApp().xlg) {
-    //   return Offset(0.0, 0.0);
-    // } else {
-    //   return Offset(0.0, 0.0);
-    // }
+    return Offset(screenWidth * percentage,
+        MediaQuery.sizeOf(context).height * percentage);
   }
 }
 

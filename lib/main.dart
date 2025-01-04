@@ -57,6 +57,7 @@ class _MyAppState extends State<MyApp> {
     // Cuando _hasSeenIntro no es null, muestra la ruta inicial.
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: themeProvider.currentTheme,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

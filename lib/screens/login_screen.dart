@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: TextButton(
                                     onPressed: () {
                                       
-                                      Navigator.pushNamed(context, '/mapPage');
+                                      Navigator.pushNamed(context, '/layoutPage');
                                     },
                                     style: StylesApp(context).btnSecondarySmall,
                                     child: const Text("Iniciar sesión"),

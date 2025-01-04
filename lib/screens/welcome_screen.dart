@@ -29,6 +29,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       body: Stack(
         children: [
           Container(
+            height: MediaQuery.of(context).size.height,
             child: PageView(
               controller: _controller,
               onPageChanged: (index) {
@@ -105,8 +106,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (backImages.isNotEmpty) _buildBackgroundImages(backImages),
+      
+          if(!backImages.isNotEmpty) const SizedBox(height: 130),
           _buildContent(image, title, subTitle, description),
         ],
       ),
@@ -149,21 +153,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
     return Container(
       constraints: BoxConstraints(
-        minHeight: MediaQuery.of(context).size.height,
+        minHeight: StylesApp(context).minHeightContentPage,
       ),
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Text(MediaQuery.sizeOf(context).height.toString()),
           if (image.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 28.0),
               child: Image.asset(image,
                   width: MediaQuery.sizeOf(context).width,
-                  // height: 350.0,
+                  height: 400.0,
                   alignment: Alignment.topCenter,
-                  fit: BoxFit.fitHeight),
+                  fit: BoxFit.contain),
             ),
           if (title.isNotEmpty)
             Center(
@@ -174,7 +179,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     .copyWith(fontSize: StylesApp(context).fontSizeTitle),
               ),
             ),
-          if (image.isEmpty) const SizedBox(height: 78),
+          // if (image.isEmpty) const SizedBox(height: 78),
           _buildDescriptionBox(subTitle, description,
               StylesApp(context).textStyleTitle, fontBody),
         ],
@@ -186,7 +191,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       TextStyle fontTitle, TextStyle fontBody) {
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 400),
+      constraints: const BoxConstraints(minHeight: 200),
       decoration: BoxDecoration(
         image: DecorationImage(
             image: const AssetImage("/backgroundBox.png"),

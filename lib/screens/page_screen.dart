@@ -30,7 +30,7 @@ class _PageScreenState extends State<PageScreen> {
       body:  _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         // Personaliza los estilos si es necesario
-        backgroundColor: Colors.white, // Fondo blanco para mayor visibilidad
+        backgroundColor: Color(0xFF7D7878), // Fondo blanco para mayor visibilidad
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         items: getBottomNavigationBarItems(),
