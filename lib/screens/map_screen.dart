@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 class MapScreen extends StatelessWidget {
@@ -235,7 +236,7 @@ class MapScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             spacing: 0,
             children: [
-              _buildHeader(context),
+              // _buildHeader(context),
               Container(
                 height: MediaQuery.sizeOf(context).height,
                 child: ListView.builder(
@@ -245,196 +246,201 @@ class MapScreen extends StatelessWidget {
                     List<Level> grupo = gruposDeNiveles[index];
                     String image =
                         index % 2 == 0 ? imagePaths[0] : imagePaths[1];
-                    return Stack(
-                      alignment: Alignment.center,
+                    return Column(
                       children: [
-                        Container(
-                          constraints: BoxConstraints(
-                              minHeight: MediaQuery.sizeOf(context).height),
-                          child: Image.asset(
-                            image,
-                            width: double.infinity,
-                            height: 708, //MediaQuery.sizeOf(context).height,
-                            fit: BoxFit.fill,
-                          ),
-                        ),
-                        for (i = 0; i < grupo.length; i++) ...{
-                          Positioned(
-                            top: index % 2 == 0
-                                ? StylesApp(context)
-                                    .positionedLevels(coordATop[i])
-                                    .dy
-                                : StylesApp(context)
-                                    .positionedLevels(coordBTop[i])
-                                    .dy, // Ajusta la posición vertical
-                            left: index % 2 == 0
-                                ? StylesApp(context)
-                                    .positionedLevels(coordALeft[i])
-                                    .dx
-                                : StylesApp(context)
-                                    .positionedLevels(coordBLeft[i])
-                                    .dx,
-                            child: Container(
-                              // decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                            if (index == 0) _buildHeader(context),
+                        Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            Container(
                               constraints: BoxConstraints(
-                                maxWidth:
-                                    StylesApp(context).sizeContainerLevel.width,
+                                  minHeight: MediaQuery.sizeOf(context).height),
+                              child: Image.asset(
+                                image,
+                                width: double.infinity,
+                                height: 708, //MediaQuery.sizeOf(context).height,
+                                fit: BoxFit.fill,
                               ),
-                              child: Stack(
-                                children: [
-                                  Center(
-                                    child: _starStatus(
-                                        context,
-                                        grupo[i].score,
-                                        StylesApp(context)
-                                            .sizeContainerLevel
-                                            .width),
+                            ),
+                            for (i = 0; i < grupo.length; i++) ...{
+                              Positioned(
+                                top: index % 2 == 0
+                                    ? StylesApp(context)
+                                        .positionedLevels(coordATop[i])
+                                        .dy
+                                    : StylesApp(context)
+                                        .positionedLevels(coordBTop[i])
+                                        .dy, // Ajusta la posición vertical
+                                left: index % 2 == 0
+                                    ? StylesApp(context)
+                                        .positionedLevels(coordALeft[i])
+                                        .dx
+                                    : StylesApp(context)
+                                        .positionedLevels(coordBLeft[i])
+                                        .dx,
+                                child: Container(
+                                  // decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                                  constraints: BoxConstraints(
+                                    maxWidth:
+                                        StylesApp(context).sizeContainerLevel.width,
                                   ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                  child: Stack(
                                     children: [
-                                      SizedBox(
-                                        height: 30,
-                                      ),
                                       Center(
-                                        child: Stack(
-                                          children: [
-                                            Container(
-                                              width: StylesApp(context)
-                                                  .sizeContainer
-                                                  .width, // Ajusta el tamaño según tus necesidades
-                                              height: StylesApp(context)
-                                                  .sizeContainer
-                                                  .height,
-                                              decoration: BoxDecoration(
-                                                  color: Color(int.tryParse(
-                                                          '0xFF${grupo[i].color}') ??
-                                                      0XFF000000),
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                    color: Color.fromARGB(
-                                                      100, // Opacidad: 50%
-                                                      int.parse(
-                                                          '0xFF${grupo[i].color}'
-                                                              .substring(2),
-                                                          radix: 16),
-                                                      int.parse(
-                                                          '0xFF${grupo[i].color}'
-                                                              .substring(4, 6),
-                                                          radix: 16),
-                                                      int.parse(
-                                                          '0xFF${grupo[i].color}'
-                                                              .substring(6),
-                                                          radix: 16),
-                                                    ),
-                                                    width: 1,
-                                                  ),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                        color: Colors.black
-                                                            .withValues(
-                                                                alpha: 0.5),
-                                                        offset: Offset(0, 8),
-                                                        blurStyle:
-                                                            BlurStyle.outer)
-                                                  ]),
-                                              child: Center(
-                                                  child: _buildItemLevel(
-                                                      context, grupo[i])),
-                                            ),
-                                            if (grupo[i].unLockLevel == false)
-                                              Positioned.fill(
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: const Color(
-                                                            0xFFA9B8BE)
-                                                        .withOpacity(
-                                                            0.9), // Ajusta la opacidad
-                                                  ),
+                                        child: _starStatus(
+                                            context,
+                                            grupo[i].score,
+                                            StylesApp(context)
+                                                .sizeContainerLevel
+                                                .width),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            height: 30,
+                                          ),
+                                          Center(
+                                            child: Stack(
+                                              children: [
+                                                Container(
                                                   width: StylesApp(context)
                                                       .sizeContainer
-                                                      .width,
-
-                                                  // color: Colors.black.withOpacity(
-                                                  //     0.5), // Ajusta la opacidad
+                                                      .width, // Ajusta el tamaño según tus necesidades
+                                                  height: StylesApp(context)
+                                                      .sizeContainer
+                                                      .height,
+                                                  decoration: BoxDecoration(
+                                                      color: Color(int.tryParse(
+                                                              '0xFF${grupo[i].color}') ??
+                                                          0XFF000000),
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(
+                                                        color: Color.fromARGB(
+                                                          100, // Opacidad: 50%
+                                                          int.parse(
+                                                              '0xFF${grupo[i].color}'
+                                                                  .substring(2),
+                                                              radix: 16),
+                                                          int.parse(
+                                                              '0xFF${grupo[i].color}'
+                                                                  .substring(4, 6),
+                                                              radix: 16),
+                                                          int.parse(
+                                                              '0xFF${grupo[i].color}'
+                                                                  .substring(6),
+                                                              radix: 16),
+                                                        ),
+                                                        width: 1,
+                                                      ),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                            color: Colors.black
+                                                                .withValues(
+                                                                    alpha: 0.5),
+                                                            offset: Offset(0, 8),
+                                                            blurStyle:
+                                                                BlurStyle.outer)
+                                                      ]),
+                                                  child: Center(
+                                                      child: _buildItemLevel(
+                                                          context, grupo[i])),
                                                 ),
-                                              ),
-                                          ],
-                                        ),
+                                                if (grupo[i].unLockLevel == false)
+                                                  Positioned.fill(
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color: const Color(
+                                                                0xFFA9B8BE)
+                                                            .withOpacity(
+                                                                0.9), // Ajusta la opacidad
+                                                      ),
+                                                      width: StylesApp(context)
+                                                          .sizeContainer
+                                                          .width,
+                        
+                                                      // color: Colors.black.withOpacity(
+                                                      //     0.5), // Ajusta la opacidad
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Text(
+                                            textAlign: TextAlign.center,
+                                            "${grupo[i].id} ${grupo[i].name}",
+                                            style: StylesApp(context)
+                                                .textStyNameNumber
+                                                .copyWith(
+                                                  color: Colors.white,
+                                                ),
+                                          ),
+                                        ],
                                       ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            },
+                            if (index == gruposDeNiveles.length - 1)
+                              Container(
+                                height: 349,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                      image: AssetImage("/Felicitaciones.png"),
+                                      fit: StylesApp(context).fitImage),
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
                                       SizedBox(
-                                        height: 10,
+                                        height: 60,
                                       ),
                                       Text(
                                         textAlign: TextAlign.center,
-                                        "${grupo[i].id} ${grupo[i].name}",
+                                        'Felicidades',
                                         style: StylesApp(context)
-                                            .textStyNameNumber
+                                            .textStyCompleteLevelTitle
                                             .copyWith(
-                                              color: Colors.white,
+                                              color: Color(0XFF12CBC4),
+                                            ),
+                                      ),
+                                      SizedBox(
+                                        height: 7,
+                                      ),
+                                      Text(
+                                        textAlign: TextAlign.center,
+                                        'Culminaste la Etapa 1/27',
+                                        style: StylesApp(context)
+                                            .textStyCompleteLevelBody
+                                            .copyWith(
+                                              color: Color(0XFF12CBC4),
+                                            ),
+                                      ),
+                                      SizedBox(
+                                        height: 17,
+                                      ),
+                                      Text(
+                                        textAlign: TextAlign.center,
+                                        'Introducción al Antiguo\n  Testamento',
+                                        style: StylesApp(context)
+                                            .textStyCompleteLevelBody
+                                            .copyWith(
+                                              color: Color(0XFF12CBC4),
                                             ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        },
-                        if (index == gruposDeNiveles.length - 1)
-                          Container(
-                            height: 349,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                  image: AssetImage("/Felicitaciones.png"),
-                                  fit: StylesApp(context).fitImage),
-                            ),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    height: 60,
-                                  ),
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    'Felicidades',
-                                    style: StylesApp(context)
-                                        .textStyCompleteLevelTitle
-                                        .copyWith(
-                                          color: Color(0XFF12CBC4),
-                                        ),
-                                  ),
-                                  SizedBox(
-                                    height: 7,
-                                  ),
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    'Culminaste la Etapa 1/27',
-                                    style: StylesApp(context)
-                                        .textStyCompleteLevelBody
-                                        .copyWith(
-                                          color: Color(0XFF12CBC4),
-                                        ),
-                                  ),
-                                  SizedBox(
-                                    height: 17,
-                                  ),
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    'Introducción al Antiguo\n  Testamento',
-                                    style: StylesApp(context)
-                                        .textStyCompleteLevelBody
-                                        .copyWith(
-                                          color: Color(0XFF12CBC4),
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
+                                ),
+                              )
+                          ],
+                        ),
                       ],
                     );
                   },
@@ -460,7 +466,9 @@ _buildHeader(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context,'/aventurePage');
+              },
               icon: Icon(Icons.cancel_outlined),
               color: Colors.white,
             ),
@@ -474,7 +482,20 @@ _buildHeader(BuildContext context) {
               ),
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                 showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return CustomModalWidget(
+                                title: 'Conoce el nuevo testamento',
+                                content:
+                                    'Este sesión tiene como objetivo hacer una introducción del nuevo testamento, identificar los libros que lo componen y brindar información de entorno cronológico geopolítico de los hechos.',
+                                buttonText: 'Aceptar',
+                              );
+                            },
+                          );
+              },
               color: Colors.white,
               icon: Icon(Icons.control_point_outlined),
             ),
@@ -494,7 +515,7 @@ _buildHeader(BuildContext context) {
           padding: const EdgeInsets.only(top: 18.0, left: 12.0, right: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 0.0 ,
+            spacing: 0.0,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -514,15 +535,13 @@ _buildHeader(BuildContext context) {
                       onPressed: () {},
                       icon: Icon(Icons.chat_bubble),
                       color: Colors.white,
-                      
                     ),
                   ),
                 ],
               ),
               Row(
-                mainAxisAlignment:  MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
-
                 children: [
                   Text(
                     'Los Evangelio de Mateo',
@@ -534,7 +553,7 @@ _buildHeader(BuildContext context) {
                     height: 30.0,
                     child: IconButton(
                       padding: EdgeInsets.all(0.0),
-                    
+
                       // iconSize: 20.0,
                       onPressed: () {},
                       icon: Icon(Icons.file_download_outlined),

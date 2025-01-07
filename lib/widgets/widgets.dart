@@ -1,3 +1,10 @@
+export 'package:biblia_palabra_de_vida_app/widgets/custom_modal_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/button_theme_widget.dart';
+
+export 'package:flutter/material.dart';
+
+export 'package:audioplayers/audioplayers.dart';
+
 export 'package:biblia_palabra_de_vida_app/widgets/Background_images.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/head_widget.dart';

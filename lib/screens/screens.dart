@@ -1,3 +1,8 @@
+export 'package:biblia_palabra_de_vida_app/screens/detail_profile_screen.dart';
+
+export 'package:biblia_palabra_de_vida_app/screens/aventure_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/bible_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/community_screen.dart';
 
 export 'package:biblia_palabra_de_vida_app/screens/page_screen.dart';
 
@@ -17,3 +22,4 @@ export 'package:biblia_palabra_de_vida_app/screens/login_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/register_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/welcome_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/map_screen.dart';
+

@@ -138,6 +138,19 @@ class StylesApp {
       return 16.sp;
     }
   }
+  double get fontSizeBody18 {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return 18.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 18.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 22.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 22.sp;
+    } else {
+      return 16.sp;
+    }
+  }
 
   double get fontSizeBtn {
     if (screenWidth <= SizeScreensApp().sm) {
@@ -246,6 +259,16 @@ class StylesApp {
         fontSize: fontSizeBody2,
         color: const Color(0XFFFFF5F5),
       );
+  TextStyle get textStyleBody8 => GoogleFonts.getFont(
+        "Aclonica",
+        fontSize: fontSizeBody18,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get chipLevels => GoogleFonts.getFont(
+        "Aclonica",
+        fontSize: 14.0,
+        color: const Color(0XFF000000),
+      );
 
   TextStyle get buttonTextStyle => GoogleFonts.getFont(
         "Aclonica",
@@ -287,6 +310,22 @@ class StylesApp {
   ButtonStyle get btnSecondarySmall => ButtonStyle(
         padding: WidgetStateProperty.all(
           const EdgeInsets.symmetric(vertical: 11.5, horizontal: 20),
+        ),
+        shape: WidgetStateProperty.all(RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10), // Radio del borde
+        )),
+        shadowColor: const WidgetStatePropertyAll(Color(0XFF000000)),
+        minimumSize: WidgetStateProperty.all(btnSizeSmall),
+        maximumSize: WidgetStateProperty.all(btnSizeSmall),
+        foregroundColor:
+            WidgetStateProperty.all<Color>(const Color(0XFFFFFFFF)),
+        backgroundColor:
+            WidgetStateProperty.all<Color>(const Color(0XFFFD8C43)),
+        textStyle: WidgetStateProperty.all(buttonTextStyle),
+      );
+  ButtonStyle get btnWidgetSmall => ButtonStyle(
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(vertical: 5.5, horizontal: 9.0),
         ),
         shape: WidgetStateProperty.all(RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10), // Radio del borde

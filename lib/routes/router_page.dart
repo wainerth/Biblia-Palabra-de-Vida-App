@@ -9,5 +9,9 @@ final Map<String, WidgetBuilder> routes = {
   '/forgotPasswordPage':( BuildContext context) => const RecoverPassScreen(),
   '/changePasswordPage':( BuildContext context) => const ChangePassScreen(),
   '/layoutPage': (BuildContext context) => const PageScreen(),
-  '/mapPage': (BuildContext context) => MapScreen(levels: [],)
+  '/mapPage': (BuildContext context) => MapScreen(levels: [],),
+  '/aventurePage': (BuildContext context) => AventureScreen(),
+  '/bibliaPage': (BuildContext context) =>BibleScreen(),
+  '/communityPage': (BuildContext context) => CommunityScreen(),
+  '/detailProfilePage': (BuildContext context) => DetailProfileScreen(),
 };

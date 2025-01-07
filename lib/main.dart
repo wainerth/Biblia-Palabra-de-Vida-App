@@ -54,7 +54,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
-    // Cuando _hasSeenIntro no es null, muestra la ruta inicial.
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
