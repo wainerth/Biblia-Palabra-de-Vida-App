@@ -1,9 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-
 class AventureScreen extends StatefulWidget {
   const AventureScreen({super.key});
 
@@ -12,9 +9,7 @@ class AventureScreen extends StatefulWidget {
 }
 
 class _AventureScreenState extends State<AventureScreen> {
-  final PageController _controller = PageController();
-  bool _isLastPage = false;
-  bool hasSeenIntro = true;
+ 
   List<CourseModel> courses = [];
   @override
   void initState() {
@@ -60,249 +55,21 @@ class _AventureScreenState extends State<AventureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          _buildHeader(context),
-          if (hasSeenIntro) ...{
-            _buildIntroSlide(context),
-          } else ...{
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            HeaderWidget(),
             ListViewCardAventure(),
-          }
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  _buildHeader(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(minHeight: 90.0),
-      decoration: BoxDecoration(
-        color: Color(0XFFFD8C43),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      padding: EdgeInsets.all(0.0),
-      child: Row(
-        spacing: 0,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: SizedBox(
-                    height: 61.0,
-                    width: 61.0,
-                    child: CircleAvatar(
-                      radius: 61,
-                      backgroundImage: AssetImage(
-                        "/avatar.png",
-                      ),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    "Robinson",
-                    style: StylesApp(context).textStyleBody5,
-                  ),
-                )
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text.rich(
-                  textAlign: TextAlign.left,
-                  style: StylesApp(context).textStyleBody8,
-                  TextSpan(
-                    children: [TextSpan(text: "Exp:"), TextSpan(text: "571")],
-                  ),
-                ),
-                Text.rich(
-                  style: StylesApp(context).textStyleBody8,
-                  TextSpan(
-                    children: [
-                      TextSpan(text: "Racha:"),
-                      TextSpan(text: "0 días")
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Column(
-              spacing: 0,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      "3",
-                      style: StylesApp(context).textStyleBody8,
-                    ),
-                    Icon(
-                      size: 21.0,
-                      Icons.star,
-                      color: Colors.white,
-                    )
-                  ],
-                ),
-                IconButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'detailProfilePage');
-                    },
-                    padding: EdgeInsets.all(0),
-                    iconSize: 20.0,
-                    icon: Icon(
-                      size: 30.0,
-                      Icons.fast_forward_sharp,
-                      color: Colors.white,
-                    ))
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
 
-  _buildIntroSlide(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          height: MediaQuery.of(context).size.height - 90.0,
-          child: PageView(
-            controller: _controller,
-            onPageChanged: (index) {
-              setState(() {
-                _isLastPage = index == 4;
-                if (_controller.page! > 2.5) {
-                  setState(() {
-                    _isLastPage = true;
-                  });
-                } else {
-                  setState(() {
-                    _isLastPage = false;
-                  });
-                }
-              });
-            },
-            children: [
-              _buildPage(context, "/introAventureOne.png"),
-              _buildPage(context, "/introAventureTwo.png"),
-              _buildPage(context, "/introAventureThree.png"),
-              _buildPage(context, "/introAventureFour.png"),
-            ],
-          ),
-        ),
-        if (!_isLastPage)
-          Positioned(
-            top: 0,
-            right: 16,
-            child: _buildSkipButton(context),
-          ),
-        Positioned(
-          bottom: 16,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: SmoothPageIndicator(
-              controller: _controller,
-              count: 4,
-              effect: const WormEffect(
-                activeDotColor: Colors.blue,
-                dotColor: Colors.grey,
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 16,
-          right: 16,
-          child: _buildNextButton(context),
-        ),
-      ],
-    );
-  }
-
-  _buildPage(BuildContext context, String imageUrl) {
-    return Container(
-      // padding: EdgeInsets.symmetric(horizontal: 4.0),
-      child: Image.asset(
-        imageUrl,
-        fit: BoxFit.fill,
-      ),
-    );
-  }
-
-  Widget _buildSkipButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        setState(() {
-          hasSeenIntro = false;
-        });
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Colors.transparent),
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-      child: const Text(
-        'Omitir el Intro',
-        style: TextStyle(color: Colors.white),
-      ),
-    );
-  }
-
-  Widget _buildNextButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        if (_isLastPage) {
-          setState(() {
-            hasSeenIntro = false;
-          });
-        } else {
-          if (_controller.page! >= 2) {
-            setState(() {
-              _isLastPage = true;
-            });
-          } else {
-            _controller.nextPage(
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.ease,
-            );
-          }
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _isLastPage ? Color(0XFF006AFF) : Colors.transparent,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Colors.transparent),
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-      child: _isLastPage
-          ? Text(
-              "Iniciar Aventura",
-              style: StylesApp(context).textStyleBody7,
-            )
-          : const Icon(Icons.arrow_forward, color: Colors.white),
-    );
-  }
 
   ListViewCardAventure() {
-    return Container(
+    return SizedBox(
       height: MediaQuery.sizeOf(context).height - 90.0,
       child: ListView.builder(
         itemCount: courses.length,
@@ -355,7 +122,7 @@ class _AventureScreenState extends State<AventureScreen> {
                                               BorderRadius.circular(100.0),
                                           image: DecorationImage(
                                             image:
-                                                AssetImage(courses[index]!.img),
+                                                AssetImage(courses[index].img),
                                             fit: BoxFit.cover,
                                           ),
                                         ),
@@ -453,8 +220,7 @@ class _AventureScreenState extends State<AventureScreen> {
     final starSpacing = (containerWidth - (3 * starSize)) / 3;
 
     return Center(
-      child: Container(
-        // decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+      child: SizedBox(
         height: 50.0,
         child: Stack(
           children: [
@@ -522,3 +288,4 @@ class _AventureScreenState extends State<AventureScreen> {
     );
   }
 }
+

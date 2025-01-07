@@ -1,3 +1,9 @@
+export 'package:biblia_palabra_de_vida_app/widgets/header_widget_progress.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/header_widget.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/dinamic_bottom_navigation_bar.dart';
+
 export 'package:biblia_palabra_de_vida_app/widgets/custom_modal_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/button_theme_widget.dart';
 

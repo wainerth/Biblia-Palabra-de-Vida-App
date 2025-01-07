@@ -223,6 +223,10 @@ class StylesApp {
       fontSize: fontSizeSubTitle,
       fontWeight: FontWeight.normal,
       color: const Color(0xFFFD8C43));
+  TextStyle get textStyleTitleWithe => GoogleFonts.getFont('Alfa Slab One',
+      fontSize: fontSizeSubTitle,
+      fontWeight: FontWeight.normal,
+      color: const Color(0xFFFFFFFF));
 
   // TextStyle(fontFamily: "Erica One", fontSize: fontSizeTitle,fontWeight: FontWeight.w800);
 
@@ -241,6 +245,11 @@ class StylesApp {
         "Aclonica",
         fontSize: fontSizeBody3,
         color: const Color(0XFF000000),
+      );
+  TextStyle get textStyleBodyWhite4 => GoogleFonts.getFont(
+        "Aclonica",
+        fontSize: fontSizeBody3,
+        color: const Color(0XFFFFFFFF),
       );
 
   TextStyle get textStyleBody5 => GoogleFonts.getFont(

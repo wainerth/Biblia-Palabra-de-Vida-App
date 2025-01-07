@@ -14,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
       {
         'label': 'Aventura',
         'img': '/aventura.png',
-        'route': '/aventurePage',
+        'route': '/introAventurePage',
       },
       {
         'label': 'La Biblia',
@@ -91,7 +91,7 @@ class ProfileScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: GestureDetector(
-        onTap: () => Navigator.of(context).pushNamed(card['route']!),
+        onTap: () => Navigator.pushNamed(context , card['route']!),
         child: Column(
           children: [
             Container(
@@ -394,10 +394,15 @@ _buildPositionSection(BuildContext context) {
               child: Container(
                 width: 40.0,
                 height: 30.0,
-                child: const Icon(
-                  Icons.fast_forward_outlined,
-                  color: Colors.white,
-                  size: 30.0,
+                child: IconButton(
+                  onPressed: (){
+                    Navigator.pushNamed(context,'/detailProfilePage');
+                  },
+                  icon: Icon(
+                    Icons.fast_forward_outlined,
+                    color: Colors.white,
+                    size: 30.0,
+                  ),
                 ),
               ),
             ),

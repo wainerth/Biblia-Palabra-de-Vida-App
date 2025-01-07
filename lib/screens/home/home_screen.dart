@@ -95,14 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(
                 height: 67.0,
               ),
-              // TextButton(
-              //   onPressed: () {},
-              //   style: StylesApp(context).btnTertiary,
-              //   child: const Text("Leer la Biblia"),
-              // ),
-              // const SizedBox(
-              //   height: 67.0,
-              // ),
             ],
           ),
         ),

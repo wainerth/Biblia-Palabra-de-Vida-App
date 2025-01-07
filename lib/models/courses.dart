@@ -13,6 +13,7 @@ class CourseModel {
     this.img = '',
     required this.status,
     required this.title,
+    
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {

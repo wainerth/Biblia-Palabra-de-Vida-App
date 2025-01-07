@@ -15,7 +15,7 @@ class _PageScreenState extends State<PageScreen> {
     ProfileScreen(),
     AudioScreen(),
     FavoriteScreen(),
-    Configscreen(),
+    ConfigScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -27,12 +27,13 @@ class _PageScreenState extends State<PageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:  _screens[_selectedIndex],
+      body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        // Personaliza los estilos si es necesario
-        backgroundColor: Color(0xFF7D7878), // Fondo blanco para mayor visibilidad
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        showUnselectedLabels: true,
+        backgroundColor: Color(0XFF7D7878),
+        selectedItemColor: Color(0XFF12CBC4),
+        unselectedItemColor: Colors.white,
         items: getBottomNavigationBarItems(),
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
