@@ -8,14 +8,14 @@ class HeaderWidgetProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double score = 10000;
+    double score = 200;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
           image: const AssetImage("/elipsisTopColor.png"),
-          fit: StylesApp(context).fitImage,
-          alignment: Alignment.topCenter,
+          fit: BoxFit.cover,
+          alignment: Alignment.bottomCenter,
         ),
       ),
       child: Stack(
@@ -54,10 +54,10 @@ class HeaderWidgetProgress extends StatelessWidget {
                     children: [
                       Container(
                         constraints:
-                            BoxConstraints(maxWidth: 160, minHeight: 160),
+                            BoxConstraints(maxWidth: 115.0, minHeight: 115.0),
                         width: double.infinity,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(160),
+                            borderRadius: BorderRadius.circular(115.0),
                             border: Border.all(
                                 width: 6.0, color: Color(0XFFFFFFFF))),
                         child: Image.asset(
@@ -71,7 +71,7 @@ class HeaderWidgetProgress extends StatelessWidget {
               ),
               Text(
                 "Robinson",
-                style: StylesApp(context).textStyleTitleWithe,
+                style: StylesApp(context).textStyleTitleWithe24,
               ),
               SizedBox(
                 height: 10.0,

@@ -1,3 +1,5 @@
+export 'package:biblia_palabra_de_vida_app/widgets/current_month_calendar_widget.dart';
+
 export 'package:biblia_palabra_de_vida_app/widgets/header_widget_progress.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/header_widget.dart';
