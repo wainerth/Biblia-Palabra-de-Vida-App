@@ -6,12 +6,10 @@ class CommunityScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Column(
-          children: [
-            Text("Página de Comunidad"),
-          ],
-        ),
+      body: Column(
+        children: [
+          Text("Página de Comunidad"),
+        ],
       ),
     );
   }

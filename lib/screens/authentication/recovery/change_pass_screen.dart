@@ -1,7 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class ChangePassScreen extends StatefulWidget {
@@ -198,7 +197,7 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                   borderRadius: BorderRadius.circular(30),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.25),
+                                      color: Colors.black.withValues(alpha: 0.25),
                                       offset: const Offset(0, 4),
                                       blurRadius: 4,
                                     ),

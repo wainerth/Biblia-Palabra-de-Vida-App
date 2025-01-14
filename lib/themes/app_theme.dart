@@ -44,9 +44,8 @@ class AppTheme {
       primaryColor: primaryColor,
       scaffoldBackgroundColor: primaryBackgroundColor,
       textTheme: TextTheme(
-        bodyLarge: TextStyle(color: primaryTextColor),
-        bodyMedium: TextStyle(color: secondaryTextColor)
-      ),
+          bodyLarge: TextStyle(color: primaryTextColor),
+          bodyMedium: TextStyle(color: secondaryTextColor)),
       colorScheme: ColorScheme.light(
         primary: primaryColor,
         secondary: secondaryColor,
@@ -85,3 +84,4 @@ const List<AppTheme> themes = [
   ),
   // Otros temas...
 ];
+

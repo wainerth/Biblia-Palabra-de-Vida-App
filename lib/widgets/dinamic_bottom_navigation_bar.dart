@@ -8,11 +8,11 @@ class DynamicBottomNavigationBar extends StatelessWidget {
   final Function(int) onTap;
 
   const DynamicBottomNavigationBar({
-    Key? key,
+    super.key,
     required this.items,
     required this.selectedIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

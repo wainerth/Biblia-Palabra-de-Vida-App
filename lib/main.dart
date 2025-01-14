@@ -66,8 +66,11 @@ class _MyAppState extends State<MyApp> {
       supportedLocales: const [
         Locale('es', 'ES'), // Español (España)
       ],
-      home: _buildHomeScreen(),
+      home: SafeArea(
+        child: _buildHomeScreen(),
+      ),
       routes: routes,
+      onGenerateRoute: generateRoute,
     );
   }
 

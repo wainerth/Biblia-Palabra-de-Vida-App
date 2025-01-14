@@ -1,6 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -37,12 +37,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     'Perú'
   ];
 
-  var maskFormatterTel = new MaskTextInputFormatter(
+  var maskFormatterTel = MaskTextInputFormatter(
     mask: '###-##-##',
     filter: {"#": RegExp(r'[0-9]')},
     type: MaskAutoCompletionType.lazy,
   );
-  var maskFormatterEmail = new MaskTextInputFormatter(
+  var maskFormatterEmail = MaskTextInputFormatter(
     mask: '******@******.com',
     filter: {"*": RegExp(r'[a-zA-Z0-9]')},
     type: MaskAutoCompletionType.lazy,
@@ -68,7 +68,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // Método para registrar al usuario
   void _register() {
     if (_formKey.currentState?.validate() ?? false) {
-      print("Registro completado");
+      if (kDebugMode) {
+        print("Registro completado");
+      }
     }
   }
 
@@ -400,7 +402,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   borderRadius: BorderRadius.circular(30),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.25),
+                                      color: Colors.black.withValues(alpha:  0.25),
                                       offset: const Offset(0, 4),
                                       blurRadius: 4,
                                     ),

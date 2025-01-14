@@ -14,8 +14,7 @@ class StartStatusWidget extends StatelessWidget {
     final starSize = 30.0; // Adjust star size as needed
     final starSpacing = (containerWidth - (3 * starSize)) / 3;
     return Center(
-      child: Container(
-        // decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+      child: SizedBox(
         height: 50.0,
         child: Stack(
           children: [

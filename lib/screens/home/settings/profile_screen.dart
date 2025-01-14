@@ -1,414 +1,371 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:io';
 
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/audio_player_widget.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/button_theme_widget.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-     final cardList = [
-      // Replace with your actual asset paths and route names
-      {
-        'label': 'Aventura',
-        'img': '/aventura.png',
-        'route': '/introAventurePage',
-      },
-      {
-        'label': 'La Biblia',
-        'img': '/biblia.png',
-        'route': '/bibliaPage',
-      },
-      {
-        'label': 'Comunidad',
-        'img': '/comunidad.png',
-        'route': '/communityPage',
-      },
-    ];
-
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 26.0),
-            _buildListCardSection(context, cardList),
-            SizedBox(
-              height: 12.0,
-            ),
-            _buildPositionSection(context),
-            SizedBox(
-              height: 12.0,
-            ),
-            _buildProverbsSection(context),
-            SizedBox(
-              height: 12.0,
-            ),
-            _buildStoriesSection(context),
-            SizedBox(
-              height: 12.0,
-            ),
-            _buildGridViewSection(context),
-             SizedBox(
-              height: 22.0,
-            ),
-            Container(
-              constraints: BoxConstraints(minHeight: 60.0),
-               margin: const EdgeInsets.symmetric(horizontal: 10.0),
-               padding: EdgeInsets.symmetric(horizontal: 26.0),
-              decoration: BoxDecoration(
-                color: Color(0XFF5C9EDB),
-                borderRadius: BorderRadius.circular(12.0)
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Libreria Cristiana",style: StylesApp(context).textStyleBody7,),
-                  Image.asset('books.png',width: 72.0,)
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildListCardSection(
-      BuildContext context, List<Map<String, String>> cards) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: cards.map((card) => _buildCard(context, card)).toList(),
-      ),
-    );
-  }
-
-  Widget _buildCard(BuildContext context, Map<String, String> card) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context , card['route']!),
-        child: Column(
-          children: [
-            Container(
-              width: 90.0,
-              height: 90.0,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100.0),
-                image: DecorationImage(
-                  image: AssetImage(card['img']!),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8.0),
-            Text(
-              card['label']!,
-              textAlign: TextAlign.center,
-              style: StylesApp(context).textStyleBody4.copyWith(
-                    color: const Color(0xFFFD8C43),
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  _buildStoriesSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          "Cuentos para reflexionar",
-          style: StylesApp(context)
-              .textStyleBody5
-              .copyWith(color: Color(0xFFFE8D43)),
-        ),
-        AudioPlayerWidget(pathUrl: "reflexion2.mp3")
-      ],
-    );
-  }
-
-  _buildGridViewSection(BuildContext context) {
-    return Wrap(
-      spacing: 0.0,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
-          child: CardOptionsWidget(
-            imageBackground: "/promesas.png",
-            labelCard: "Promesas",
-            gradientColors:[Color(0XFFA731EC), Color(0XFF620188)]
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 4.0, bottom: 15.0),
-          child: CardOptionsWidget(
-            imageBackground: "/predicas.png",
-            labelCard: "Prédicas",
-gradientColors:[Color(0XFF1FEFEC), Color(0XFF0159A7)]
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
-          child: CardOptionsWidget(
-            imageBackground: "/games.png",
-            labelCard: "Juegos",
-            gradientColors:[Color(0XFF3531F3), Color(0XFF040681)]
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 4.0, bottom: 15.0),
-          child: CardOptionsWidget(
-            imageBackground: "/ranking.png",
-            labelCard: "Ranking",
-            gradientColors:[Color(0XFF58AC5F).withValues(alpha: 65), Color(0XFF2F6624).withValues(alpha: 63)]
-          ),
-        )
-      ],
-    );
-  }
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class CardOptionsWidget extends StatelessWidget {
-  final String imageBackground;
-  final String labelCard;
-  final List<Color> gradientColors;
-  const CardOptionsWidget({
-    super.key,
-    required this.imageBackground,
-    required this.labelCard, required this.gradientColors,
-  });
+class _ProfileScreenState extends State<ProfileScreen> {
+  String avatarImg = 'assets/avatar.png';
+
+  Future<void> _selectImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        if (kDebugMode) {
+          print(pickedFile.path);
+        }
+        avatarImg = pickedFile.path;
+      }
+    });
+  }
+
+  ImageProvider _getImageProvider() {
+    if (avatarImg.startsWith('assets/')) {
+      return AssetImage(avatarImg);
+    } else {
+      return FileImage(File(avatarImg));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        constraints: BoxConstraints(minHeight: 70.0, maxWidth: 170.0),
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: gradientColors,
-          ),
-          borderRadius: BorderRadius.circular(15.0),
-        ),
-        child: Stack(
-          children: [
-            Center(
-              child: Image.asset(
-                imageBackground,
-                fit: BoxFit.cover,
-                height: 69,
-              ),
-            ),
-            Positioned.fill(
-              // Center the text horizontally and vertically within the Stack
-              // top: 0,
-              // left: 0,
-              // right: 0,
-              // bottom: 0,
-              child: Center(
-                child: Text(
-                  labelCard,
-                  textAlign: TextAlign.center,
-                  style: StylesApp(context).textStyleBody7,
-                ),
-              ),
-            ),
-          ],
-        ));
-  }
-}
-
-_buildProverbsSection(BuildContext context) {
-  return Container(
-    decoration: BoxDecoration(
-      color: const Color(0xFF12CBC4),
-      borderRadius: BorderRadius.circular(8.0),
-    ),
-    // constraints: BoxConstraints( minHeight: 130.0),
-    margin: const EdgeInsets.symmetric(horizontal: 10.0),
-    width: MediaQuery.of(context).size.width,
-    padding:
-        const EdgeInsets.only(left: 7.0, right: 7.0, top: 6.0, bottom: 6.0),
-    child: Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 45.0),
-              child: Text(
-                "Proverbios 3:4",
-                style: StylesApp(context).textStyleBody7.copyWith(
-                      color: Colors.white,
-                    ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Row(
-                spacing: 10.0,
-                children: [
-                  Icon(
-                    Icons.copy,
-                    color: Colors.white,
-                    size: 16.0,
-                  ),
-                  Icon(
-                    Icons.share,
-                    color: Colors.white,
-                    size: 16.0,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          constraints: BoxConstraints(minHeight: 96.0),
+    List<ModelData> progressData = [
+      ModelData(label: "Registro", value: "01/07/2024"),
+      ModelData(label: "Racha", value: "120 días"),
+      ModelData(label: "Energía", value: "545"),
+      ModelData(label: "Cursos Completados", value: "4"),
+    ];
+    List<ModelData> personalData = [
+      ModelData(label: "", value: "Robinson Manuel Garces Rodriguez"),
+      ModelData(label: "Sexo", value: "Masculino"),
+      ModelData(label: "Fecha nac", value: "01/07/1980"),
+      ModelData(label: "", value: "Bautizado"),
+    ];
+    List<ModelData> contactDetails = [
+      ModelData(label: "", value: "robinsongarces@gmail.com"),
+      ModelData(label: "Tel.:", value: "+598-9514056"),
+    ];
+    List<ModelData> locationData = [
+      ModelData(label: "País", value: "Uruguay"),
+      ModelData(label: "Ciudad", value: "Montevideo"),
+      ModelData(label: "Iglesia", value: "Palabra de Vida"),
+    ];
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
           width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                  child: Text(
-                    "Y hallarás gracia y buena opinión En los ojos de Dios y de los hombres.",
-                    style: StylesApp(context)
-                        .textStyleBody5
-                        .copyWith(color: Colors.black, fontSize: 14.sp),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        )
-      ],
-    ),
-  );
-}
-
-_buildPositionSection(BuildContext context) {
-  return Container(
-    decoration: BoxDecoration(
-      color: const Color(0xFF12CBC4),
-      borderRadius: BorderRadius.circular(8.0),
-    ),
-    margin: const EdgeInsets.symmetric(horizontal: 10.0),
-    width: MediaQuery.of(context).size.width,
-    padding: const EdgeInsets.only(left: 20.0, top: 6.0, bottom: 6.0),
-    child: Column(
-      children: [
-        Stack(
-          children: [
-            Column(
+          decoration: BoxDecoration(color: Color(0XFF12CBC4)),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        Container(
-                          width: 59.0,
-                          child: CircleAvatar(
-                            radius: 30.0,
-                            backgroundImage: const AssetImage('/avatar.png'),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      constraints: BoxConstraints(maxWidth: 153, minHeight: 20),
-                      width: 153,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFC7AA34),
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: Center(
-                        child: Text(
-                          textAlign: TextAlign.center,
-                          "Soldado de Cristo",
-                          style: StylesApp(context)
-                              .textStyleBody6
-                              .copyWith(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    Image.asset('/kawaii_fire.png'),
-                    SizedBox(
-                      width: 20,
-                    )
-                  ],
+                _headerDetails(),
+                SizedBox(
+                  height: 23.0,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Center(
-                      child: Text(
-                        "Robinson",
-                        style: StylesApp(context)
-                            .textStyleBody6
-                            .copyWith(color: Colors.white),
-                      ),
-                    ),
-                    Center(
-                      child: Text(
-                        "Const: 300 dias",
-                        style: StylesApp(context)
-                            .textStyleBody6
-                            .copyWith(color: Colors.white),
-                      ),
-                    ),
-                    Center(
-                      child: Text(
-                        " 9999 Lms.",
-                        style: StylesApp(context)
-                            .textStyleBody6
-                            .copyWith(color: Colors.white),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 20,
-                    )
-                  ],
+                CardColumnWidget(
+                  iconRight: "assets/Flag.png",
+                  data: progressData,
+                  iconLeft: Icons.trending_up,
+                  highlightLabel: true,
+                  route: "/detailsProgressPage",
+                ),
+                SizedBox(
+                  height: 16,
+                ),
+                CardColumnWidget(
+                  iconRight: "assets/User.png",
+                  data: personalData,
+                  iconLeft: Icons.edit,
+                ),
+                SizedBox(
+                  height: 16,
+                ),
+                CardColumnWidget(
+                  iconRight: "assets/Link.png",
+                  data: contactDetails,
+                  iconLeft: Icons.edit,
+                ),
+                SizedBox(
+                  height: 16,
+                ),
+                CardColumnWidget(
+                  iconRight: "assets/Map_pin.png",
+                  data: locationData,
+                  iconLeft: Icons.edit,
+                  divider: false,
+                ),
+                SizedBox(
+                  height: 35.0,
+                ),
+                ButtonThemeWidget(
+                  onPressed: (){
+                    Navigator.popAndPushNamed(context,'/layoutPage');
+                  },
+                  text: "Volver",
+                  buttonStyle: StylesApp(context).btnWidgetSmall,
+                  textStyle: StylesApp(context).textStyleBody7,
+                  width: 239.0,
+                  height: 40.0,
+                ),
+                SizedBox(
+                  height: 40,
                 )
               ],
             ),
-            Positioned(
-              right: 0,
-              top: -8,
-              child: Container(
-                width: 40.0,
-                height: 30.0,
+          ),
+        ),
+      ),
+    );
+  }
+
+  _headerDetails() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: const AssetImage("assets/elipsisTop.png"),
+          fit: BoxFit.cover,
+          alignment: Alignment.bottomCenter,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 10,
+            left: 15,
+            child: Container(
+                height: 35.0,
+                width: 35.0,
+                decoration: BoxDecoration(
+                    color: Color(0XFFFD8C43),
+                    borderRadius: BorderRadius.circular(35.0)),
                 child: IconButton(
-                  onPressed: (){
-                    Navigator.pushNamed(context,'/detailProfilePage');
-                  },
-                  icon: Icon(
-                    Icons.fast_forward_outlined,
+                    constraints: BoxConstraints(maxHeight: 35.0),
+                    padding: EdgeInsets.all(0),
+                    iconSize: 35.0,
                     color: Colors.white,
-                    size: 30.0,
+                    onPressed: () {
+                      Navigator.pushNamed(context, "/layoutPage");
+                    },
+                    icon: Icon(
+                      Icons.arrow_back,
+                      size: 35.0,
+                    ))),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 10.0,
+              ),
+              GestureDetector(
+                onTap: _selectImage,
+                child: Center(
+                  child: SizedBox(
+                    child: Stack(
+                      children: [
+                        Container(
+                          constraints:
+                              BoxConstraints(maxWidth: 160, minHeight: 160),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(160),
+                              border: Border.all(
+                                  width: 6.0, color: Color(0XFF12CBC4))),
+                          child: Image(
+                            image: _getImageProvider(),
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 10.0,
+                          right: 0,
+                          child: Container(
+                            width: 40.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                                color: Color(0XFF12CBC4),
+                                borderRadius: BorderRadius.circular(40)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(
+                                Icons.camera_alt_outlined,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+              Text(
+                "Robinson",
+                style: StylesApp(context).textStyleTitleOrange,
+              ),
+              SizedBox(
+                height: 10.0,
+              )
+            ],
+          ),
+          Positioned(
+              top: 10,
+              right: 10,
+              child: Column(
+                children: [
+                  Image.asset("assets/kawaii_fire.png"),
+                  Text(
+                    "1000",
+                    style: StylesApp(context)
+                        .textStyleBody4
+                        .copyWith(color: Color(0XFFFD8C43)),
+                  )
+                ],
+              ))
+        ],
+      ),
+    );
+  }
+}
+
+class CardColumnWidget extends StatelessWidget {
+  final String iconRight;
+  final IconData iconLeft;
+  final List data;
+  final bool highlightLabel;
+  final bool divider;
+  final String? route;
+  const CardColumnWidget(
+      {super.key,
+      required this.iconRight,
+      required this.iconLeft,
+      this.divider = true,
+      required this.data,
+      this.highlightLabel = false,
+      this.route});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 18.0, top: 10, bottom: 16),
+          child: Stack(
+            children: [
+              Row(
+                spacing: 10.0,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        iconRight,
+                        width: 40.0,
+                        color: Colors.white,
+                      )
+                    ],
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (var i = 0; i < data.length; i++) ...[
+                          Text.rich(
+                            style: StylesApp(context).textStyleBodyWhite4,
+                            TextSpan(
+                              children: [
+                                if (data[i].label.isNotEmpty)
+                                  TextSpan(text: "${data[i].label}: "),
+                                TextSpan(
+                                  text: data[i].value,
+                                  style: StylesApp(context)
+                                      .textStyleBodyWhite4
+                                      .copyWith(
+                                        color: (highlightLabel &&
+                                                (i == 1 || i == 2))
+                                            ? Colors.orange
+                                            : Colors.white,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ]
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                top: 0,
+                right: 2,
+                child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(40),
+                      color: Colors.orange,
+                    ),
+                    child: IconButton(
+                        padding: EdgeInsets.all(0),
+                        constraints: BoxConstraints(maxWidth: 40),
+                        iconSize: 30,
+                        onPressed: () {
+                          if(route != null){
+                            Navigator.popAndPushNamed(context, route!);
+                          } else {
+                            if (kDebugMode) {
+                              print("Mostramos modal");
+                            }
+                          }
+
+                        },
+                        icon: Icon(
+                          iconLeft,
+                          color: Colors.white,
+                        ))),
+              ),
+            ],
+          ),
         ),
+        if (divider)
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 5.0),
+            height: 2.0,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white, // Co
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black
+                      .withValues(alpha: 0.25), // Color de la sombra
+                  spreadRadius: 2, // Extensión de la sombra
+                  blurRadius: 5, // Difuminado de la sombra
+                  offset: Offset(0, 3), // Desplazamiento de la sombra
+                ),
+              ],
+            ),
+          ),
       ],
-    ),
-  );
+    );
+  }
 }

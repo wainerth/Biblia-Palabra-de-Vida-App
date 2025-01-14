@@ -10,6 +10,7 @@ class ButtonThemeWidget extends StatelessWidget {
   final bool showIcon;
   final IconData icon;
   final Color colorIcon;
+  final bool textCenter;
   const ButtonThemeWidget({
     super.key,
     this.onPressed,
@@ -20,7 +21,8 @@ class ButtonThemeWidget extends StatelessWidget {
     this.height = 27,
     this.showIcon = false,
     this.icon = Icons.arrow_back,
-    this.colorIcon = Colors.black
+    this.colorIcon = Colors.black,
+    this.textCenter = false
   });
 
   @override
@@ -32,7 +34,7 @@ class ButtonThemeWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withValues(alpha: 0.25),
             offset: const Offset(0, 4),
             blurRadius: 4,
           ),
@@ -43,6 +45,7 @@ class ButtonThemeWidget extends StatelessWidget {
         style: buttonStyle,
         child:text != null ? Text(
           text!,
+          textAlign: textCenter ? TextAlign.center : TextAlign.start,
           style: textStyle,
         ): Icon(icon, color: colorIcon,),
       ),

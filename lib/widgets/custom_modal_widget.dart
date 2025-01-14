@@ -1,6 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 
 class CustomModalWidget extends StatelessWidget {
   final String title;
@@ -79,7 +78,7 @@ class CustomModalWidget extends StatelessWidget {
                           Expanded(
                             child: Text(
                               softWrap: true,
-                              "Introduccion nuevo testamento",
+                              "Introducción nuevo testamento",
                               style: StylesApp(context)
                                   .textStyleBody4
                                   .copyWith(color: Colors.white),
@@ -102,7 +101,7 @@ class CustomModalWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10), // Bordes redondeados
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
                     offset: Offset(0, 3), // Sombra

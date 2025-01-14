@@ -18,12 +18,14 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            HeaderWidget(),
-            _buildIntroSlide(context),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              HeaderWidget(),
+              _buildIntroSlide(context),
+            ],
+          ),
         ),
       ),
     );
@@ -32,7 +34,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   _buildIntroSlide(BuildContext context) {
     return Stack(
       children: [
-        Container(
+        SizedBox(
           height: MediaQuery.of(context).size.height - 90.0,
           child: PageView(
             controller: _controller,
@@ -51,10 +53,10 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
               });
             },
             children: [
-              _buildPage(context, "/introAventureOne.png"),
-              _buildPage(context, "/introAventureTwo.png"),
-              _buildPage(context, "/introAventureThree.png"),
-              _buildPage(context, "/introAventureFour.png"),
+              _buildPage(context, "assets/introAventureOne.png"),
+              _buildPage(context, "assets/introAventureTwo.png"),
+              _buildPage(context, "assets/introAventureThree.png"),
+              _buildPage(context, "assets/introAventureFour.png"),
             ],
           ),
         ),
@@ -89,12 +91,9 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   }
 
   _buildPage(BuildContext context, String imageUrl) {
-    return Container(
-      // padding: EdgeInsets.symmetric(horizontal: 4.0),
-      child: Image.asset(
-        imageUrl,
-        fit: BoxFit.fill,
-      ),
+    return Image.asset(
+      imageUrl,
+      fit: BoxFit.fill,
     );
   }
 

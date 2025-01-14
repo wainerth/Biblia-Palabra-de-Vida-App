@@ -6,12 +6,10 @@ class BibleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Column(
-          children: [
-            Text("Página de La biblia"),
-          ],
-        ),
+      body: Column(
+        children: [
+          Text("Página de La biblia"),
+        ],
       ),
     );
   }

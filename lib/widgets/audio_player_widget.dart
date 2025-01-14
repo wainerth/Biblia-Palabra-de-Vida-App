@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -49,10 +50,14 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   Future<void> _downloadFile(url) async {
     try {
       // Obtener la dirección del directorio de documentos
-      final directory = await getApplicationDocumentsDirectory();
+      final directory = await getDownloadsDirectory();
+      
+      if (kDebugMode) {
+        print(directory);
+      }
 
       // Crear la ruta del archivo de destino
-      final filePath = '${directory.path}/audio.mp3';
+      final filePath = '${directory?.path ?? ''}/audio.mp3';
 
       // Descargar el archivo
       final response = await http.get(Uri.parse(url));
@@ -65,7 +70,9 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       );
     } catch (e) {
       // Manejar errores
-      print('Error al descargar el archivo: $e');
+      if (kDebugMode) {
+        print('Error al descargar el archivo: $e');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al descargar')),
       );
@@ -74,28 +81,26 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10.0),
       padding: EdgeInsets.all(0),
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8.0),
-        image: DecorationImage(
-          opacity: 0.3,
-          image: AssetImage("/background_player.jpg"),
-          fit: BoxFit.cover,
-        ),
-        color: Colors.black.withValues(alpha: 90.0)
-      ),
+          borderRadius: BorderRadius.circular(8.0),
+          image: DecorationImage(
+            opacity: 0.3,
+            image: AssetImage("assets/background_player.jpg"),
+            fit: BoxFit.cover,
+          ),
+          color: Colors.black.withValues(alpha: 90.0)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             child: IconButton(
               padding: EdgeInsets.all(0),
-              constraints: BoxConstraints(
-                minHeight: 24.0
-              ),
+              constraints: BoxConstraints(minHeight: 24.0),
               color: Colors.white,
               onPressed: () {
                 setState(() {
@@ -138,10 +143,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           ),
           // IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
           IconButton(
-             padding: EdgeInsets.all(0),
-              constraints: BoxConstraints(
-                minHeight: 24.0
-              ),
+            padding: EdgeInsets.all(0),
+            constraints: BoxConstraints(minHeight: 24.0),
             color: Colors.white,
             onPressed: () {
               showModalBottomSheet(
@@ -150,11 +153,24 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ListTile(
-                        leading: Icon(Icons.volume_up),
-                        title: StatefulBuilder(
-                          builder: (context, setState) {
-                            return Slider(
+                     StatefulBuilder(builder: (context, setState) {
+                          return ListTile(
+                            leading: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  if (volume > 0) {
+                                    volume = 0;
+                                  } else {
+                                    volume = 0.5; // Default volume level
+                                  }
+                                  player.setVolume(volume);
+                                });
+                              },
+                              icon: Icon(volume > 0
+                                  ? Icons.volume_up
+                                  : Icons.volume_off),
+                            ),
+                            title: Slider(
                               value: volume,
                               onChanged: (newVolume) {
                                 setState(() => volume = newVolume);
@@ -162,9 +178,9 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                               },
                               min: 0.0,
                               max: 1.0,
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        }
                       ),
                       ListTile(
                         leading: Icon(Icons.download),

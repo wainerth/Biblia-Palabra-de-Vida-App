@@ -153,6 +153,21 @@ class StylesApp {
       return 16.sp;
     }
   }
+
+  double get fontSizeBody17 {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return 17.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 17.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 17.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 17.sp;
+    } else {
+      return 16.sp;
+    }
+  }
+
   double get fontSizeBody14 {
     if (screenWidth <= SizeScreensApp().sm) {
       return 14.sp;
@@ -223,49 +238,63 @@ class StylesApp {
     }
   }
 
-  TextStyle get textWithGradient => GoogleFonts.getFont(
-        "Erica One",
+  TextStyle get textWithGradient => TextStyle(
+        fontFamily: "Erica One",
         fontSize: fontSizeTitle1,
         fontStyle: FontStyle.normal,
         decoration: TextDecoration.none,
       );
 
-  TextStyle get textStyleTitle => GoogleFonts.getFont('Alfa Slab One',
-      fontSize: fontSizeTitle, fontWeight: FontWeight.normal);
-  TextStyle get textStyleLevelNumber => GoogleFonts.getFont('Alfa Slab One',
-      fontSize: fontSizeTitle1, fontWeight: FontWeight.normal);
+  TextStyle get textStyleTitle => TextStyle(
+      fontFamily: 'Alfa Slab One',
+      fontSize: fontSizeTitle,
+      fontWeight: FontWeight.normal);
+  TextStyle get textStyleLevelNumber => TextStyle(
+      fontFamily: 'Alfa Slab One',
+      fontSize: fontSizeTitle1,
+      fontWeight: FontWeight.normal);
 
-  TextStyle get textStyNameNumber => GoogleFonts.getFont('Alfa Slab One',
-      fontSize: fontSizeBody3, fontWeight: FontWeight.normal);
-  TextStyle get textStyCalendar => GoogleFonts.getFont('Alfa Slab One',
+  TextStyle get textStyNameNumber => TextStyle(
+      fontFamily: 'Alfa Slab One',
+      fontSize: fontSizeBody3,
+      fontWeight: FontWeight.normal);
+  TextStyle get textStyCalendar => TextStyle(
+      fontFamily: 'Alfa Slab One',
       fontSize: fontSizeBody3,
       fontWeight: FontWeight.normal,
       color: Color(0XFF12CBC4));
-  TextStyle get textStyCalendarWhite => GoogleFonts.getFont('Alfa Slab One',
+  TextStyle get textStyCalendarWhite => TextStyle(
+      fontFamily: 'Alfa Slab One',
       fontSize: fontSizeBody3,
       fontWeight: FontWeight.normal,
       color: Color(0XFFFFFFFF));
 
-  TextStyle get textStyCompleteLevelTitle =>
-      GoogleFonts.getFont('Alfa Slab One',
-          fontSize: fontSizeTitle1, fontWeight: FontWeight.normal);
-  TextStyle get textStyCompleteLevelBody => GoogleFonts.getFont('Alfa Slab One',
-      fontSize: fontSizeBody3, fontWeight: FontWeight.normal);
+  TextStyle get textStyCompleteLevelTitle => TextStyle(
+      fontFamily: 'Alfa Slab One',
+      fontSize: fontSizeTitle1,
+      fontWeight: FontWeight.normal);
+  TextStyle get textStyCompleteLevelBody => TextStyle(
+      fontFamily: 'Alfa Slab One',
+      fontSize: fontSizeBody3,
+      fontWeight: FontWeight.normal);
 
-  TextStyle get textStyleTitleBlue => GoogleFonts.getFont('Alfa Slab One',
+  TextStyle get textStyleTitleBlue => TextStyle(
+      fontFamily: 'Alfa Slab One',
       fontSize: fontSizeTitle1,
       fontWeight: FontWeight.normal,
       color: const Color(0xFF12CBC4));
-  TextStyle get textStyleTitleOrange => GoogleFonts.getFont('Alfa Slab One',
+  TextStyle get textStyleTitleOrange => TextStyle(
+      fontFamily: 'Alfa Slab One',
       fontSize: fontSizeSubTitle,
       fontWeight: FontWeight.normal,
       color: const Color(0xFFFD8C43));
-  TextStyle get textStyleTitleWithe => GoogleFonts.getFont('Alfa Slab One',
+  TextStyle get textStyleTitleWithe => TextStyle(
+      fontFamily: 'Alfa Slab One',
       fontSize: fontSizeSubTitle,
       fontWeight: FontWeight.normal,
       color: const Color(0xFFFFFFFF));
-  TextStyle get textStyleTitleWithe24 => GoogleFonts.getFont(
-        'Alfa Slab One',
+  TextStyle get textStyleTitleWithe24 => TextStyle(
+        fontFamily: 'Alfa Slab One',
         fontSize: fontSizeBody24,
         fontWeight: FontWeight.normal,
         color: const Color(0xFFFFFFFF),
@@ -284,56 +313,67 @@ class StylesApp {
 
   TextStyle get textStyleBody3 =>
       TextStyle(fontFamily: "Erica One", fontSize: fontSizeBody2);
-  TextStyle get textStyleBody4 => GoogleFonts.getFont(
-        "Aclonica",
+  TextStyle get textStyleBody4 => TextStyle(
+        fontFamily: "Aclonica",
         fontSize: fontSizeBody3,
         color: const Color(0XFF000000),
       );
-  TextStyle get textStyleBodyWhite4 => GoogleFonts.getFont(
-        "Aclonica",
+
+  TextStyle get textStyleBodyWhite4 => TextStyle(
+        fontFamily: "Aclonica",
         fontSize: fontSizeBody3,
         color: const Color(0XFFFFFFFF),
       );
 
-  TextStyle get textStyleBody5 => GoogleFonts.getFont(
-        "Aclonica",
-        fontSize: fontSizeBody4,
+  TextStyle get textStyleBody5 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody3,
         color: const Color(0XFFFFF5F5),
       );
-  TextStyle get textStyleBody6 => GoogleFonts.getFont(
-        "Aclonica",
+  TextStyle get textStyleBody6 => TextStyle(
+        fontFamily: "Aclonica",
         fontSize: fontSizeBody6,
         color: const Color(0XFFFFF5F5),
       );
 
-  TextStyle get textStyleBody7 => GoogleFonts.getFont(
-        "Aclonica",
+  TextStyle get textStyleBody7 => TextStyle(
+        fontFamily: "Aclonica",
         fontSize: fontSizeBody2,
         color: const Color(0XFFFFF5F5),
       );
-  TextStyle get textStyleBody8 => GoogleFonts.getFont(
-        "Aclonica",
+  TextStyle get textStyleBody8 => TextStyle(
+        fontFamily: "Aclonica",
         fontSize: fontSizeBody18,
         color: const Color(0XFFFFF5F5),
       );
-  TextStyle get textStyleBody10 => GoogleFonts.getFont(
-        "Aclonica",
+  TextStyle get textStyleBody16 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody6,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBody17 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody17,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBody10 => TextStyle(
+        fontFamily: "Aclonica",
         fontSize: fontSizeBody5,
         color: const Color(0XFFFFF5F5),
       );
-  TextStyle get textStyleBody14 => GoogleFonts.getFont(
-        "Aclonica",
+  TextStyle get textStyleBody14 => TextStyle(
+        fontFamily: "Aclonica",
         fontSize: fontSizeBody14,
         color: const Color(0XFFFFF5F5),
       );
-  TextStyle get chipLevels => GoogleFonts.getFont(
-        "Aclonica",
+  TextStyle get chipLevels => TextStyle(
+        fontFamily: "Aclonica",
         fontSize: 14.0,
         color: const Color(0XFF000000),
       );
 
-  TextStyle get buttonTextStyle => GoogleFonts.getFont(
-        "Aclonica",
+  TextStyle get buttonTextStyle => TextStyle(
+        fontFamily: "Aclonica",
         fontSize: fontSizeBtn,
       );
 
@@ -467,15 +507,22 @@ class StylesApp {
       contentPadding:
           const EdgeInsets.symmetric(vertical: 5.88, horizontal: 5));
 
-  TextStyle get hintStyle => GoogleFonts.getFont(
-        "Aclonica",
+  TextStyle get hintStyle => TextStyle(
+        fontFamily: "Aclonica",
         color: const Color(0XFF746F6F),
         fontSize: fontSizeBody3,
         height: 1.1,
         fontWeight: FontWeight.w400,
       );
-  TextStyle get labelStyle => GoogleFonts.getFont("Aclonica",
-      fontSize: fontSizeBody3, color: const Color(0XFF746F6F));
+  TextStyle get textStyleHintText => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody3,
+        color: const Color(0XFF746F6F),
+      );
+  TextStyle get labelStyle => TextStyle(
+      fontFamily: "Aclonica",
+      fontSize: fontSizeBody3,
+      color: const Color(0XFF746F6F));
 
   BoxFit get fitImage {
     if (screenWidth <= SizeScreensApp().sm) {

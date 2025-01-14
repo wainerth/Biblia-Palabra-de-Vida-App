@@ -24,7 +24,7 @@ class HeadWidget extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: const AssetImage("/elipsisTop.png"),
+              image: const AssetImage("assets/elipsisTop.png"),
               fit: StylesApp(context).fitImage,
             ),
           ),
@@ -56,7 +56,7 @@ class HeadWidget extends StatelessWidget {
             top: 107,
             left: -12,
             child: Image.asset(
-              '/start.png',
+              'assets/start.png',
               height: 90,
               fit: BoxFit.fill,
             ),
@@ -66,7 +66,7 @@ class HeadWidget extends StatelessWidget {
             top: 20,
             right: -12,
             child: Image.asset(
-              '/start.png',
+              'assets/start.png',
               height: 90,
               fit: BoxFit.fill,
             ),

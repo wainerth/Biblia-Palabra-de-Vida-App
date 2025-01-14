@@ -1,7 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class RecoverPassScreen extends StatefulWidget {
@@ -97,14 +96,12 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                           child: Column(
                             children: [
                               if (_currentStep == 0) ...[
-                                Container(
-                                  child: Center(
-                                    child: Text(
-                                        textAlign: TextAlign.center,
-                                        "Ingrese su correo electrónico para buscar tu cuenta",
-                                        style:
-                                            StylesApp(context).textStyleBody5),
-                                  ),
+                                Center(
+                                  child: Text(
+                                      textAlign: TextAlign.center,
+                                      "Ingrese su correo electrónico para buscar tu cuenta",
+                                      style:
+                                          StylesApp(context).textStyleBody5),
                                 ),
                                 const SizedBox(
                                   height: 32.0,
@@ -134,14 +131,12 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   ),
                                 ),
                               ] else if (_currentStep == 1) ...[
-                                Container(
-                                  child: Center(
-                                    child: Text(
-                                        textAlign: TextAlign.center,
-                                        "Se ha enviado un código de recuperación  a su dirección de correo electrónico",
-                                        style:
-                                            StylesApp(context).textStyleBody5),
-                                  ),
+                                Center(
+                                  child: Text(
+                                      textAlign: TextAlign.center,
+                                      "Se ha enviado un código de recuperación  a su dirección de correo electrónico",
+                                      style:
+                                          StylesApp(context).textStyleBody5),
                                 ),
                                 const SizedBox(
                                   height: 33.0,
@@ -240,7 +235,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   borderRadius: BorderRadius.circular(30),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.25),
+                                      color: Colors.black.withValues(alpha:  0.25),
                                       offset: const Offset(0, 4),
                                       blurRadius: 4,
                                     ),

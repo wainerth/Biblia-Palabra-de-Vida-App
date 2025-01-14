@@ -7,7 +7,7 @@ class BackgroundImages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 150,
+      height: 130,
       child: Stack(
         children: [
           if (backImages.length > 1)

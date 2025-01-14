@@ -19,7 +19,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
         color: Color(0XFFFD8C43),
         borderRadius: BorderRadius.circular(8.0),
       ),
-      padding: EdgeInsets.all(0.0),
+      padding: EdgeInsets.symmetric(horizontal:  0.0, vertical: 5.0),
       child: Row(
         spacing: 0,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -32,12 +32,12 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               children: [
                 Center(
                   child: SizedBox(
-                    height: 61.0,
-                    width: 61.0,
+                    height: 50.0,
+                    width: 50.0,
                     child: CircleAvatar(
-                      radius: 61,
+                      radius: 50,
                       backgroundImage: AssetImage(
-                        "/avatar.png",
+                        "assets/avatar.png",
                       ),
                     ),
                   ),
@@ -45,7 +45,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                 Center(
                   child: Text(
                     "Robinson",
-                    style: StylesApp(context).textStyleBody5,
+                    style: StylesApp(context).textStyleBody14,
                   ),
                 )
               ],
@@ -55,16 +55,17 @@ class _HeaderWidgetState extends State<HeaderWidget> {
             flex: 3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text.rich(
                   textAlign: TextAlign.left,
-                  style: StylesApp(context).textStyleBody8,
+                  style: StylesApp(context).textStyleBody17,
                   TextSpan(
                     children: [TextSpan(text: "Exp:"), TextSpan(text: "571")],
                   ),
                 ),
                 Text.rich(
-                  style: StylesApp(context).textStyleBody8,
+                  style: StylesApp(context).textStyleBody17,
                   TextSpan(
                     children: [
                       TextSpan(text: "Racha:"),
@@ -79,8 +80,9 @@ class _HeaderWidgetState extends State<HeaderWidget> {
             flex: 1,
             child: Column(
               spacing: 0,
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
@@ -96,16 +98,17 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   ],
                 ),
                 IconButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/detailProfilePage');
-                    },
-                    padding: EdgeInsets.all(0),
-                    iconSize: 20.0,
-                    icon: Icon(
-                      size: 30.0,
-                      Icons.fast_forward_sharp,
-                      color: Colors.white,
-                    ))
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/detailProfilePage');
+                  },
+                  padding: EdgeInsets.all(0),
+                  iconSize: 20.0,
+                  icon: Icon(
+                    size: 30.0,
+                    Icons.fast_forward_sharp,
+                    color: Colors.white,
+                  ),
+                )
               ],
             ),
           )

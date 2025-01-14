@@ -1,6 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,7 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Container(
+        child: SizedBox(
           height: MediaQuery.sizeOf(context).height,
           width: MediaQuery.sizeOf(context).width,
           child: SingleChildScrollView(
@@ -79,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(30),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.25),
+                                        color: Colors.black.withValues(alpha:  0.25),
                                         offset: const Offset(0, 4),
                                         blurRadius: 4,
                                       ),
@@ -106,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       const Text("Iniciar con "),
                                       SizedBox(
                                         width: 26.0,
-                                        child: Image.asset("/google-icon.png"),
+                                        child: Image.asset("assets/google-icon.png"),
                                       ),
                                     ],
                                   ),

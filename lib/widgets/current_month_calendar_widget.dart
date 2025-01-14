@@ -81,7 +81,7 @@ class _CurrentMonthCalendarWidgetState
                         width: double.infinity,
                         height: double.infinity,
                         child: Image.asset(
-                          "/fire_rachaActive.png",
+                          "assets/fire_rachaActive.png",
                           fit: BoxFit.fitHeight,
                           height: 50,
                           width: 50,
@@ -102,7 +102,7 @@ class _CurrentMonthCalendarWidgetState
                         width: double.infinity,
                         height: double.infinity,
                         child: Image.asset(
-                          "/fire_rachaInactive.png",
+                          "assets/fire_rachaInactive.png",
                           fit: BoxFit.fitHeight,
                           height: 50,
                           width: 50,

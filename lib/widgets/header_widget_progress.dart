@@ -13,7 +13,7 @@ class HeaderWidgetProgress extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: const AssetImage("/elipsisTopColor.png"),
+          image: const AssetImage("assets/elipsisTopColor.png"),
           fit: BoxFit.cover,
           alignment: Alignment.bottomCenter,
         ),
@@ -61,7 +61,7 @@ class HeaderWidgetProgress extends StatelessWidget {
                             border: Border.all(
                                 width: 6.0, color: Color(0XFFFFFFFF))),
                         child: Image.asset(
-                          "/avatar.png",
+                          "assets/avatar.png",
                           fit: BoxFit.fill,
                         ),
                       )
@@ -85,12 +85,12 @@ class HeaderWidgetProgress extends StatelessWidget {
               child: Column(
                 children: [
                   Image.asset(
-                    "/kawaii_fire.png",
+                    "assets/kawaii_fire.png",
                     height: calculateHeight(score),
                     fit: BoxFit.contain,
                   ),
                   Text(
-                    "${score}",
+                    "$score",
                     style: StylesApp(context)
                         .textStyleBody4
                         .copyWith(color: Color(0XFFFD8C43)),
@@ -108,7 +108,7 @@ class HeaderWidgetProgress extends StatelessWidget {
     double maxPossibleHeight = score / 1000 * 112;
 
     if (score >= 1000) {
-      return 112; // Alto fijo cuando el puntaje es mayor o igual a 1000
+      return 112; // Alto fijo cuando los puntos son mayores o iguales a 1000
     } else {
       double width = ((maxPossibleHeight * 100)) / 112;
 

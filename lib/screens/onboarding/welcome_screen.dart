@@ -1,5 +1,4 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -19,79 +18,125 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   bool _isLastPage = false;
 
   Future<void> _setIntroSeen() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('hasSeenIntro', true);
+    final pref = await SharedPreferences.getInstance();
+    await pref.setBool('hasSeenIntro', true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height,
-            child: PageView(
-              controller: _controller,
-              onPageChanged: (index) {
-                setState(() => _isLastPage = index == 4);
-              },
-              children: [
-                _buildPage(
-                  image: '',
-                  backImages: ['/start.png', '/nube.png'],
-                  title: 'PALABRA\n de\n Vida',
-                  subTitle: "¡La Biblia!",
-                  description: 'La palabra de Dios cambiará tu vida.',
-                ),
-                _buildPage(
-                  image: '/jesusImage.png',
-                  subTitle: "¡Aventúrate en la historia sagrada!",
-                  description:
-                      'Explora los relatos bíblicos a través de historias.',
-                ),
-                _buildPage(
-                  image: '/LionImage.png',
-                  subTitle: "¡Conoce el libro\n más leído del mundo!",
-                  description:
-                      'Escudriña la palabra en sus diferentes versiones.',
-                ),
-                _buildPage(
-                  image: '/angelImage.png',
-                  subTitle: "¡Enriquece tu fe con\n la Biblia!",
-                  description:
-                      'Realiza un viaje por la Biblia logrando metas diarias.',
-                ),
-                const EndIntroScreen(),
-              ],
-            ),
-          ),
-          if (!_isLastPage)
-            Positioned(
-              bottom: 16,
-              left: 16,
-              child: _buildSkipButton(context),
-            ),
-          Positioned(
-            bottom: 16,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: SmoothPageIndicator(
-                controller: _controller,
-                count: 5,
-                effect: const WormEffect(
-                  activeDotColor: Colors.blue,
-                  dotColor: Colors.grey,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              flex: 4,
+              child: SizedBox(
+                height: MediaQuery.sizeOf(context).height,
+                child: PageView(
+                  controller: _controller,
+                  onPageChanged: (index) {
+                    setState(() => _isLastPage = index == 4);
+                  },
+                  children: [
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Column(
+                          children: [
+                            // Text(
+                            // 'Width: ${constraints.maxWidth}, Height: ${constraints}'),
+                            _buildPage(
+                              image: '',
+                              backImages: ['assets/start.png', 'assets/nube.png'],
+                              title: 'PALABRA\n de\n Vida',
+                              subTitle: "¡La Biblia!",
+                              description: 'La palabra de Dios cambiará tu vida.',
+                              constraints: constraints,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Column(
+                          children: [
+                            // Text(
+                            // 'Width: ${constraints.maxWidth}, Height: ${constraints}'),
+                            _buildPage(
+                              image: 'assets/jesusImage.png',
+                              subTitle: "¡Aventúrate en la historia sagrada!",
+                              description:
+                                  'Explora los relatos bíblicos a través de historias.',
+                              constraints: constraints,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Column(
+                          children: [
+                            // Text(
+                            // 'Width: ${constraints.maxWidth}, Height: ${constraints}'),
+                            _buildPage(
+                              image: 'assets/LionImage.png',
+                              subTitle: "¡Conoce el libro\n más leído del mundo!",
+                              description:
+                                  'Escudriña la palabra en sus diferentes versiones.',
+                              constraints: constraints,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Column(
+                          children: [
+                            // Text(
+                            // 'Width: ${constraints.maxWidth}, Height: ${constraints}'),
+                            _buildPage(
+                              image: 'assets/angelImage.png',
+                              subTitle: "¡Enriquece tu fe con\n la Biblia!",
+                              description:
+                                  'Realiza un viaje por la Biblia logrando metas diarias.',
+                              constraints: constraints,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const EndIntroScreen(),
+                  ],
                 ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: _buildNextButton(context),
-          ),
-        ],
+            Expanded(
+              flex: 0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric( horizontal: 8.0),
+                child: Row(
+                  mainAxisAlignment:  MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (!_isLastPage) _buildSkipButton(context),
+                    Center(
+                      child: SmoothPageIndicator(
+                        controller: _controller,
+                        count: 5,
+                        effect: const WormEffect(
+                          activeDotColor: Colors.blue,
+                          dotColor: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    _buildNextButton(context),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -101,17 +146,28 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     List<String> backImages = const [],
     String title = '',
     String subTitle = '',
+    required BoxConstraints constraints,
     required String description,
   }) {
     return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.min,
+      child: Stack(
         children: [
           if (backImages.isNotEmpty) _buildBackgroundImages(backImages),
-      
-          if(!backImages.isNotEmpty) const SizedBox(height: 130),
-          _buildContent(image, title, subTitle, description),
+          if (image.isNotEmpty)
+            Image.asset(
+              image,
+              width: MediaQuery.sizeOf(context).width,
+              // height: 285.0,
+              alignment: Alignment.topCenter,
+              fit: BoxFit.cover,
+            ),
+          _buildContent(
+            image,
+            title,
+            subTitle,
+            description,
+            constraints,
+          ),
         ],
       ),
     );
@@ -146,31 +202,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  Widget _buildContent(
-      String image, String title, String subTitle, String description) {
+  Widget _buildContent(String image, String title, String subTitle,
+      String description, BoxConstraints constraints) {
     final fontBody =
         GoogleFonts.alegreyaSansSc(fontSize: 32, color: Colors.white);
 
-    return Container(
-      constraints: BoxConstraints(
-        minHeight: StylesApp(context).minHeightContentPage,
-      ),
+    return SizedBox(
+      height: constraints.maxHeight,
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // Text(MediaQuery.sizeOf(context).height.toString()),
-          if (image.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 28.0),
-              child: Image.asset(image,
-                  width: MediaQuery.sizeOf(context).width,
-                  height: 400.0,
-                  alignment: Alignment.topCenter,
-                  fit: BoxFit.contain),
-            ),
-          if (title.isNotEmpty)
+          // Text((MediaQuery.sizeOf(context).height * 0.10).toString()),
+
+          if (title.isNotEmpty) ...{
+            // SizedBox(height: 150.0,),
             Center(
               child: TextWithGradient(
                 text: title,
@@ -179,6 +226,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     .copyWith(fontSize: StylesApp(context).fontSizeTitle),
               ),
             ),
+            SizedBox(
+              height: 150.0,
+            )
+          },
           // if (image.isEmpty) const SizedBox(height: 78),
           _buildDescriptionBox(subTitle, description,
               StylesApp(context).textStyleTitle, fontBody),
@@ -191,17 +242,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       TextStyle fontTitle, TextStyle fontBody) {
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 200),
+      // constraints: const BoxConstraints(minHeight: 200),
       decoration: BoxDecoration(
         image: DecorationImage(
-            image: const AssetImage("/backgroundBox.png"),
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter),
+          image: const AssetImage("assets/backgroundBox.png"),
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const SizedBox(height: 23.0),
+          const SizedBox(height: 35.0),
           if (subTitle.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -255,7 +307,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget _buildNextButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        if (_controller.page == 3) {
+        if (_controller.page! > 3) {
           _setIntroSeen();
           Navigator.pushNamed(context, '/homePage');
         } else {

@@ -1,3 +1,7 @@
+export 'package:biblia_palabra_de_vida_app/widgets/head_screen_not_avatar.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/custom_bottom_navigation_bar_widget.dart';
+
 export 'package:biblia_palabra_de_vida_app/widgets/current_month_calendar_widget.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/header_widget_progress.dart';
@@ -18,3 +22,4 @@ export 'package:biblia_palabra_de_vida_app/widgets/Background_images.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/head_widget.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/text_with_gradient.dart';
+

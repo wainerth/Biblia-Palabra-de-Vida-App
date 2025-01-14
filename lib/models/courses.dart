@@ -21,7 +21,7 @@ class CourseModel {
       churchId: json['churchId'] as int?,
       color: json['color'] as String,
       id: json['id'] as String,
-      img: json['img'] != null ?json['img'] : null,
+      img: json['img'],
       status: json['status'] as int,
       title: json['title'] as String,
     );
@@ -32,10 +32,8 @@ class CourseModel {
     data['churchId'] = churchId;
     data['color'] = color;
     data['id'] = id;
-    if (img != null) {
-      data['img'] = img;
-    }
-    data['status'] = status;
+    data['img'] = img;
+      data['status'] = status;
     data['title'] = title;
     return data;
   }

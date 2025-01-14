@@ -10,148 +10,150 @@ class ProgressDetailScreen extends StatefulWidget {
 
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   List achievements = [
-    {"title": "Creyente", "img": "/creyente.png"},
-    {"title": "Bautizado", "img": "/bautizado.png"},
-    {"title": "Discipulado 1", "img": "/dicipulado1.png"},
-    {"title": "Discipulado 2", "img": "/dicipulado2.png"},
-    {"title": "Creyente", "img": "/creyente.png"},
-    {"title": "Bautizado", "img": "/bautizado.png"},
+    {"title": "Creyente", "img": "assets/creyente.png"},
+    {"title": "Bautizado", "img": "assets/bautizado.png"},
+    {"title": "Discipulado 1", "img": "assets/dicipulado1.png"},
+    {"title": "Discipulado 2", "img": "assets/dicipulado2.png"},
+    {"title": "Creyente", "img": "assets/creyente.png"},
+    {"title": "Bautizado", "img": "assets/bautizado.png"},
   ];
   List awards = [
-    {"img": "/premios/sardica.png", "character": "Rubén", "level": "Sardica"},
-    {"img": "/premios/topacio.png", "character": "Simeon", "level": "Topacio"},
+    {"img": "assets/premios/sardica.png", "character": "Rubén", "level": "Sardica"},
+    {"img": "assets/premios/topacio.png", "character": "Simeon", "level": "Topacio"},
     {
-      "img": "/premios/carbunclo.png",
+      "img": "assets/premios/carbunclo.png",
       "character": "Levi",
       "level": "Carbunclo"
     },
     {
-      "img": "/premios/esmeralda.png",
+      "img": "assets/premios/esmeralda.png",
       "character": "Judá",
       "level": "Esmeralda"
     },
-    {"img": "/premios/zafiro.png", "character": "Dan", "level": "Zafiro"},
+    {"img": "assets/premios/zafiro.png", "character": "Dan", "level": "Zafiro"},
     {
-      "img": "/premios/diamante.png",
+      "img": "assets/premios/diamante.png",
       "character": "Neftali",
       "level": "Diamante"
     },
     {
-      "img": "/premios/rubi-jacinto.png",
+      "img": "assets/premios/rubi-jacinto.png",
       "character": "Gab",
       "level": "Rubí-Jacinto"
     },
-    {"img": "/premios/agata.png", "character": "Aser", "level": "Ágata"},
+    {"img": "assets/premios/agata.png", "character": "Aser", "level": "Ágata"},
     {
-      "img": "/premios/amatista.png",
+      "img": "assets/premios/amatista.png",
       "character": "Isacar",
       "level": "Amatista"
     },
-    {"img": "/premios/berilio.png", "character": "Zabulón", "level": "Berilio"},
-    {"img": "/premios/onice.png", "character": "José", "level": "Ónice"},
-    {"img": "/premios/jaspe.png", "character": "Benjamín", "level": "Jaspe"},
+    {"img": "assets/premios/berilio.png", "character": "Zabulón", "level": "Berilio"},
+    {"img": "assets/premios/onice.png", "character": "José", "level": "Ónice"},
+    {"img": "assets/premios/jaspe.png", "character": "Benjamín", "level": "Jaspe"},
   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            HeaderWidgetProgress(),
-            SizedBox(
-              height: 4.0,
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 7.0),
-              padding: EdgeInsets.symmetric(horizontal: 11.0, vertical: 6),
-              width: double.infinity,
-              constraints: BoxConstraints(minHeight: 80.0),
-              decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(8.0)),
-              child: Column(
-                children: [
-                  Row(
-                    spacing: 10,
-                    children: [
-                      Expanded(
-                        flex: 0,
-                        child: SizedBox(
-                          width: 40.0,
-                          child: Image.asset(
-                            "/Flag.png",
-                            color: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              HeaderWidgetProgress(),
+              SizedBox(
+                height: 4.0,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 7.0),
+                padding: EdgeInsets.symmetric(horizontal: 11.0, vertical: 6),
+                width: double.infinity,
+                constraints: BoxConstraints(minHeight: 80.0),
+                decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(8.0)),
+                child: Column(
+                  children: [
+                    Row(
+                      spacing: 10,
+                      children: [
+                        Expanded(
+                          flex: 0,
+                          child: SizedBox(
+                            width: 40.0,
+                            child: Image.asset(
+                              "assets/Flag.png",
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text.rich(
-                              TextSpan(
-                                style: StylesApp(context).textStyleBody6,
-                                children: [
-                                  TextSpan(text: "Registro: "),
-                                  TextSpan(text: "01/07/2024"),
-                                ],
-                              ),
-                            ),
-                            Text.rich(
-                              TextSpan(
-                                style: StylesApp(context).textStyleBody6,
-                                children: [
-                                  TextSpan(text: "Racha: "),
-                                  TextSpan(text: "0 días"),
-                                ],
-                              ),
-                            ),
-                            Text.rich(
-                              TextSpan(
-                                style: StylesApp(context).textStyleBody6,
-                                children: [
-                                  TextSpan(text: "Energía: "),
-                                  TextSpan(text: "200"),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: 5.0,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Color(0XFFC7AA34),
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Text.rich(
-                        TextSpan(
-                            style: StylesApp(context).chipLevels,
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              TextSpan(text: "Soldado de cristo "),
-                              TextSpan(text: "600pts"),
-                            ]),
+                              Text.rich(
+                                TextSpan(
+                                  style: StylesApp(context).textStyleBody6,
+                                  children: [
+                                    TextSpan(text: "Registro: "),
+                                    TextSpan(text: "01/07/2024"),
+                                  ],
+                                ),
+                              ),
+                              Text.rich(
+                                TextSpan(
+                                  style: StylesApp(context).textStyleBody6,
+                                  children: [
+                                    TextSpan(text: "Racha: "),
+                                    TextSpan(text: "0 días"),
+                                  ],
+                                ),
+                              ),
+                              Text.rich(
+                                TextSpan(
+                                  style: StylesApp(context).textStyleBody6,
+                                  children: [
+                                    TextSpan(text: "Energía: "),
+                                    TextSpan(text: "200"),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Color(0XFFC7AA34),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Text.rich(
+                          TextSpan(
+                              style: StylesApp(context).chipLevels,
+                              children: [
+                                TextSpan(text: "Soldado de cristo "),
+                                TextSpan(text: "600pts"),
+                              ]),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            CurrentMonthCalendarWidget(),
-            _buildAchievements(context),
-            SizedBox(
-              height: 8.0,
-            ),
-            _buildCollections(context)
-          ],
+              CurrentMonthCalendarWidget(),
+              _buildAchievements(context),
+              SizedBox(
+                height: 8.0,
+              ),
+              _buildCollections(context)
+            ],
+          ),
         ),
       ),
     );
@@ -327,7 +329,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   }
 
   Widget _buildAchievements(BuildContext context) {
-    ScrollController _scrollController = ScrollController();
+    ScrollController scrollController = ScrollController();
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 7.0),
@@ -347,17 +349,17 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               borderRadius: BorderRadius.circular(8.0),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.25),
+                    color: Colors.black.withValues(alpha: 0.25),
                     offset: Offset(0, 4),
                     blurRadius: 5)
               ],
             ),
             child: Scrollbar(
-              controller: _scrollController,
+              controller: scrollController,
               thumbVisibility: true,
               thickness: 4.0,
               child: ListView.builder(
-                controller: _scrollController,
+                controller: scrollController,
                 scrollDirection: Axis.horizontal, // Dirección horizontal
                 itemCount: achievements.length, // Número de elementos
                 itemBuilder: (BuildContext context, int index) {
