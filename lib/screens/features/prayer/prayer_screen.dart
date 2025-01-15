@@ -65,6 +65,9 @@ class _PrayerScreenState extends State<PrayerScreen> {
                   height: 52.0,
                   buttonStyle: StylesApp(context).btnWidgetSmall,
                   textCenter: true,
+                  onPressed: (){
+                    Navigator.popAndPushNamed(context, "/listRequestPage");
+                  },
                 ),
                 SizedBox(
                   height: 84.0,

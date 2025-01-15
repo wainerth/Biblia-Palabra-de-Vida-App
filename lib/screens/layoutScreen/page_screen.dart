@@ -22,6 +22,10 @@ class _PageScreenState extends State<PageScreen> {
   ];
 
   void _onItemTapped(int index) {
+    if(index.toString() == 1.toString()){
+        Navigator.pushNamed(context, '/prayerPage');
+        return;
+    }
     setState(() {
       _selectedIndex = index;
     });

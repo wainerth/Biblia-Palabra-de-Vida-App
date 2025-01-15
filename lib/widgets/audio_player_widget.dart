@@ -10,7 +10,13 @@ import 'package:http/http.dart' as http;
 
 class AudioPlayerWidget extends StatefulWidget {
   final String pathUrl;
-  const AudioPlayerWidget({super.key, required this.pathUrl});
+  final bool showImage;
+  final bool showAction;
+  const AudioPlayerWidget(
+      {super.key,
+      required this.pathUrl,
+      this.showImage = true,
+      this.showAction = true});
 
   @override
   AudioPlayerWidgetState createState() => AudioPlayerWidgetState();
@@ -51,7 +57,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     try {
       // Obtener la dirección del directorio de documentos
       final directory = await getDownloadsDirectory();
-      
+
       if (kDebugMode) {
         print(directory);
       }
@@ -81,19 +87,21 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10.0),
       padding: EdgeInsets.all(0),
       width: double.infinity,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.0),
-          image: DecorationImage(
-            opacity: 0.3,
-            image: AssetImage("assets/background_player.jpg"),
-            fit: BoxFit.cover,
-          ),
-          color: Colors.black.withValues(alpha: 90.0)),
+        borderRadius: BorderRadius.circular(8.0),
+        image: widget.showImage
+            ? DecorationImage(
+                opacity: 0.3,
+                image: AssetImage("assets/background_player.jpg"),
+                fit: BoxFit.cover,
+              )
+            : null,
+        color: widget.showImage ? Colors.black.withOpacity(0.9) : Colors.green,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -153,35 +161,34 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                     StatefulBuilder(builder: (context, setState) {
-                          return ListTile(
-                            leading: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  if (volume > 0) {
-                                    volume = 0;
-                                  } else {
-                                    volume = 0.5; // Default volume level
-                                  }
-                                  player.setVolume(volume);
-                                });
-                              },
-                              icon: Icon(volume > 0
-                                  ? Icons.volume_up
-                                  : Icons.volume_off),
-                            ),
-                            title: Slider(
-                              value: volume,
-                              onChanged: (newVolume) {
-                                setState(() => volume = newVolume);
+                      StatefulBuilder(builder: (context, setState) {
+                        return ListTile(
+                          leading: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (volume > 0) {
+                                  volume = 0;
+                                } else {
+                                  volume = 0.5; // Default volume level
+                                }
                                 player.setVolume(volume);
-                              },
-                              min: 0.0,
-                              max: 1.0,
-                            ),
-                          );
-                        }
-                      ),
+                              });
+                            },
+                            icon: Icon(volume > 0
+                                ? Icons.volume_up
+                                : Icons.volume_off),
+                          ),
+                          title: Slider(
+                            value: volume,
+                            onChanged: (newVolume) {
+                              setState(() => volume = newVolume);
+                              player.setVolume(volume);
+                            },
+                            min: 0.0,
+                            max: 1.0,
+                          ),
+                        );
+                      }),
                       ListTile(
                         leading: Icon(Icons.download),
                         title: Text('Download'),

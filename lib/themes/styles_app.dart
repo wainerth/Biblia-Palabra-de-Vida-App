@@ -153,6 +153,19 @@ class StylesApp {
       return 16.sp;
     }
   }
+  double get fontSizeBody15 {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return 15.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 15.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 15.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 16.sp;
+    } else {
+      return 16.sp;
+    }
+  }
 
   double get fontSizeBody17 {
     if (screenWidth <= SizeScreensApp().sm) {
@@ -187,6 +200,19 @@ class StylesApp {
       return 18.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
       return 18.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 22.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 22.sp;
+    } else {
+      return 16.sp;
+    }
+  }
+  double get fontSizeBody20 {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return 20.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 20.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 22.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
@@ -279,20 +305,29 @@ class StylesApp {
       fontWeight: FontWeight.normal);
 
   TextStyle get textStyleTitleBlue => TextStyle(
-      fontFamily: 'Alfa Slab One',
-      fontSize: fontSizeTitle1,
-      fontWeight: FontWeight.normal,
-      color: const Color(0xFF12CBC4));
+        fontFamily: 'Alfa Slab One',
+        fontSize: fontSizeTitle1,
+        fontWeight: FontWeight.normal,
+        color: const Color(0xFF12CBC4),
+      );
   TextStyle get textStyleTitleOrange => TextStyle(
-      fontFamily: 'Alfa Slab One',
-      fontSize: fontSizeSubTitle,
-      fontWeight: FontWeight.normal,
-      color: const Color(0xFFFD8C43));
+        fontFamily: 'Alfa Slab One',
+        fontSize: fontSizeSubTitle,
+        fontWeight: FontWeight.normal,
+        color: const Color(0xFFFD8C43),
+      );
+  TextStyle get textStyleTitleRed => TextStyle(
+        fontFamily: 'Alfa Slab One',
+        fontSize: fontSizeSubTitle,
+        fontWeight: FontWeight.normal,
+        color: const Color(0xFFBF0000),
+      );
   TextStyle get textStyleTitleWithe => TextStyle(
-      fontFamily: 'Alfa Slab One',
-      fontSize: fontSizeSubTitle,
-      fontWeight: FontWeight.normal,
-      color: const Color(0xFFFFFFFF));
+        fontFamily: 'Alfa Slab One',
+        fontSize: fontSizeSubTitle,
+        fontWeight: FontWeight.normal,
+        color: const Color(0xFFFFFFFF),
+      );
   TextStyle get textStyleTitleWithe24 => TextStyle(
         fontFamily: 'Alfa Slab One',
         fontSize: fontSizeBody24,
@@ -351,9 +386,24 @@ class StylesApp {
         fontSize: fontSizeBody6,
         color: const Color(0XFFFFF5F5),
       );
+  TextStyle get textStyleBody15 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody15,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBodyOrange15 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody15,
+        color: const Color(0XFFFD8C43),
+      );
   TextStyle get textStyleBody17 => TextStyle(
         fontFamily: "Aclonica",
         fontSize: fontSizeBody17,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBody20 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody20,
         color: const Color(0XFFFFF5F5),
       );
   TextStyle get textStyleBody10 => TextStyle(
@@ -365,6 +415,11 @@ class StylesApp {
         fontFamily: "Aclonica",
         fontSize: fontSizeBody14,
         color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBody2_14 => TextStyle(
+        fontFamily: "Alfa Slab One",
+        fontSize: fontSizeBody14,
+        color: const Color(0xFFFD8C43),
       );
   TextStyle get chipLevels => TextStyle(
         fontFamily: "Aclonica",

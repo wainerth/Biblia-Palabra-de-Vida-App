@@ -10,4 +10,5 @@ class StyleColor {
   static const Color galaxyPurple = Color(0xFFA9A2EA);
   static const Color starlightBlue = Color(0xFFAEA9E3);
   static const Color twilightBlue = Color(0xFFB7B3E9);
+  static const Color turquoise = Color(0xFF12CBC4);
 }

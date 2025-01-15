@@ -18,6 +18,10 @@ final Map<String, WidgetBuilder> routes = {
   '/profilePage': (BuildContext context) => ProfileScreen(),
   '/workspacePage':(BuildContext context)=> WorkspaceScreen() ,
   '/detailsProgressPage': (BuildContext context) => ProgressDetailScreen(),
+  '/prayerPage': (BuildContext context) => PrayerScreen(),
+  '/listRequestPage': (BuildContext context) => ListRequestScreen(),
+  '/detailPrayerPage': (BuildContext context) => DetailRequestScreen(),
+    
 };
 
 Route<dynamic> generateRoute(RouteSettings settings) {
