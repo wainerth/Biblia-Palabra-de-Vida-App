@@ -1,9 +1,11 @@
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'dart:convert';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -20,25 +22,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _prefixNumberController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController(text: "");
+  final TextEditingController _lastNameController =
+      TextEditingController(text: "");
+  final TextEditingController _prefixNumberController = TextEditingController(
+      text: Intl.defaultLocale == 'es_UY' ? '+598' : '+54');
+  final TextEditingController _phoneNumberController =
+      TextEditingController(text: "");
   DateTime? _selectedDate;
-  final TextEditingController _dateController = TextEditingController();
-  bool _obscureText = true;
-  String _selectedCountry = 'Selecciona tu país';
-  final List<String> countries = [
-    'Selecciona tu país',
-    'Argentina',
-    'Brasil',
-    'Uruguay',
-    'Chile',
-    'Perú'
-  ];
-
+  final TextEditingController _dateController = TextEditingController(text: "");
+  bool _obscureTextPass = true;
+  bool _obscureTextRepeat = true;
+  ModelData? _selectedData;
+  Country? _selectedCountry;
+  late List<Country> countries;
+  late List<ModelData> dropDownList;
   var maskFormatterTel = MaskTextInputFormatter(
-    mask: '###-##-##',
+    mask: '### ###-##-##',
     filter: {"#": RegExp(r'[0-9]')},
     type: MaskAutoCompletionType.lazy,
   );
@@ -74,6 +74,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  @override
+  void initState() {
+    loadCountry();
+    super.initState();
+  }
+
+  Future<void> loadCountry() async {
+    final String response =
+        await rootBundle.loadString('assets/json/countries.json');
+    final data = await json.decode(response);
+
+    setState(() {
+      countries = (data as List).map((i) => Country.fromJson(i)).toList();
+      dropDownList = countries
+          .map(
+              (country) => ModelData(value: country.id, label: country.country))
+          .cast<ModelData>()
+          .toList();
+    });
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     // final Locale locale = Localizations.localeOf(context);
     final DateFormat formatter = DateFormat.yMd('es_ES'); //locale.languageCode;
@@ -82,10 +103,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: now,
-        firstDate: DateTime(2000),
+        firstDate: DateTime(1951),
         lastDate: now,
-        locale: const Locale('es', 'ES') // locale
-        );
+        locale: const Locale('es', 'ES'), // locale
+        builder: (BuildContext context, Widget? child) {
+          return Theme(
+            data: ThemeData.light().copyWith(
+              primaryColor: const Color(0Xff12CBC4),
+
+              colorScheme: ColorScheme.light(
+                  primary: const Color(
+                      0Xff12CBC4)), // Color del texto del encabezado
+              buttonTheme: const ButtonThemeData(
+                  textTheme:
+                      ButtonTextTheme.primary), // Color del texto del botón
+            ),
+            child: child!,
+          );
+        });
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
@@ -103,7 +138,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           height: MediaQuery.sizeOf(context).height,
           width: MediaQuery.sizeOf(context).width,
           decoration: BoxDecoration(
-            color:_currentStep == 0 ?Colors.white  : Color(0Xff12CBC4),
+            color: _currentStep == 0 ? Colors.white : Color(0Xff12CBC4),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -117,9 +152,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       HeadWidget(
                         showLeftStar: _currentStep == 0,
                         showRightStar: _currentStep != 0,
-                        title: "¡La Biblia\n  Palabra de\n Vida!",
+                        title: "¡La Biblia\n  Palabra De\n Vida!",
                         subtitle: "Registro",
-                        heightContent: 329,
                       ),
                       const SizedBox(
                         height: 42,
@@ -133,8 +167,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             children: [
                               if (_currentStep == 0) ...[
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _userIdController,
                                     keyboardType: TextInputType.number,
@@ -159,16 +197,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   height: 23.0,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _emailController,
                                     keyboardType: TextInputType.emailAddress,
-                                    // inputFormatters: [maskFormatterEmail],
                                     decoration: StylesApp(context)
                                         .inputDecorationStyle
                                         .copyWith(
-                                          // labelText: "Correo electrónico",
                                           hintText: "Correo electrónico",
                                         ),
                                     validator: (value) {
@@ -188,11 +228,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   height: 23.0,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _passwordController,
-                                    obscureText: _obscureText,
+                                    obscureText: _obscureTextPass,
                                     textAlignVertical: TextAlignVertical.center,
                                     decoration: StylesApp(context)
                                         .inputDecorationStyle
@@ -202,13 +246,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             iconSize: 20,
                                             padding: const EdgeInsets.all(0),
                                             icon: Icon(
-                                              _obscureText
+                                              _obscureTextPass
                                                   ? Icons.visibility
                                                   : Icons.visibility_off,
                                             ),
                                             onPressed: () {
                                               setState(() {
-                                                _obscureText = !_obscureText;
+                                                _obscureTextPass = !_obscureTextPass;
                                               });
                                             },
                                           ),
@@ -225,11 +269,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   height: 23.0,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _confirmPasswordController,
-                                    obscureText: _obscureText,
+                                    obscureText: _obscureTextRepeat,
                                     textAlignVertical: TextAlignVertical.center,
                                     decoration: StylesApp(context)
                                         .inputDecorationStyle
@@ -240,13 +288,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             iconSize: 20,
                                             padding: const EdgeInsets.all(0),
                                             icon: Icon(
-                                              _obscureText
+                                              _obscureTextRepeat
                                                   ? Icons.visibility
                                                   : Icons.visibility_off,
                                             ),
                                             onPressed: () {
                                               setState(() {
-                                                _obscureText = !_obscureText;
+                                                _obscureTextRepeat = !_obscureTextRepeat;
                                               });
                                             },
                                           ),
@@ -261,8 +309,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ] else if (_currentStep == 1) ...[
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _nameController,
                                     decoration: StylesApp(context)
@@ -280,8 +332,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   height: 23.0,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _lastNameController,
                                     decoration: StylesApp(context)
@@ -299,8 +355,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   height: 23.0,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _dateController,
                                     readOnly: true,
@@ -324,106 +384,105 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   height: 23.0,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
-                                  child: DropdownButtonFormField(
-                                    value: _selectedCountry,
-                                    items: countries.map((String country) {
-                                      return DropdownMenuItem(
-                                        value: country,
-                                        child: Text(country),
-                                      );
-                                    }).toList(),
-                                    onChanged: (String? newValue) {
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
+                                  child: CustomDropdownWidget<Country>(
+                                    hintText: "Seleccione un país",
+                                    items: dropDownList,
+                                    onChanged: (ModelData? newValue) {
                                       setState(() {
-                                        _selectedCountry = newValue!;
+                                        print(newValue);
+                                        _selectedData = newValue;
+                                        _selectedCountry = countries.firstWhere(
+                                            (country) =>
+                                                country.id == newValue!.value);
+                                        _prefixNumberController.text =
+                                            _selectedCountry!.countryCode;
                                       });
                                     },
-                                    decoration:
-                                        StylesApp(context).inputDecorationStyle,
+                                    selectedItem: _selectedData,
                                   ),
                                 ),
                                 const SizedBox(
                                   height: 23.0,
                                 ),
-                                Row(
-                                  children: [
-                                    // Campo del código del país
-                                    Flexible(
-                                      flex: 2,
-                                      child: TextFormField(
-                                        controller: _prefixNumberController,
-                                        initialValue:
-                                            "+598", // Código inicial del país
-                                        enabled:
-                                            false, // Deshabilitado para que no pueda ser editado
-                                        decoration: StylesApp(context)
-                                            .inputDecorationStyle
-                                            .copyWith(
-                                              filled: true,
-                                            ),
-                                        style: const TextStyle(fontSize: 16),
+                                Container(
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      // Campo del código del país
+                                      Flexible(
+                                        flex: 2,
+                                        child: TextFormField(
+                                          controller: _prefixNumberController,
+                                          enabled:
+                                              false, // Deshabilitado para que no pueda ser editado
+                                          decoration: StylesApp(context)
+                                              .inputDecorationStyle
+                                              .copyWith(
+                                                filled: true,
+                                              ),
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                        width:
-                                            10), // Espaciado entre los campos
-                                    // Campo del número de teléfono
-                                    Flexible(
-                                      flex: 8,
-                                      child: TextFormField(
-                                        controller: _phoneNumberController,
-                                        keyboardType: TextInputType.phone,
-                                        inputFormatters: [
-                                          maskFormatterTel, // Permite solo números
-                                        ],
-                                        decoration: StylesApp(context)
-                                            .inputDecorationStyle
-                                            .copyWith(
-                                              hintText: "Número de teléfono",
-                                            ),
-                                        style: const TextStyle(fontSize: 16),
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return "Por favor, ingresa tu número de teléfono.";
-                                          }
-                                          return null;
-                                        },
+                                      const SizedBox(
+                                          width:
+                                              10), // Espaciado entre los campos
+                                      // Campo del número de teléfono
+                                      Flexible(
+                                        flex: 8,
+                                        child: TextFormField(
+                                          controller: _phoneNumberController,
+                                          keyboardType: TextInputType.phone,
+                                          inputFormatters: [
+                                            maskFormatterTel, // Permite solo números
+                                          ],
+                                          decoration: StylesApp(context)
+                                              .inputDecorationStyle
+                                              .copyWith(
+                                                hintText: "Número de teléfono",
+                                              ),
+                                          style: const TextStyle(fontSize: 16),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return "Por favor, ingresa tu número de teléfono.";
+                                            }
+                                            return null;
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                               const SizedBox(
                                 height: 23,
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha:  0.25),
-                                      offset: const Offset(0, 4),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                                child: TextButton(
-                                  onPressed: () {
-                                    if (_currentStep == 0) {
-                                      _nextStep();
-                                    } else {
-                                      _register();
-                                    }
-                                  },
-                                  style: StylesApp(context).btnSecondarySmall,
-                                  child: Text(
-                                    _currentStep == 0
-                                        ? "Continuar"
-                                        : "Registrar",
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ),
+                              ButtonThemeWidget(
+                                onPressed: () {
+                                  if (_currentStep == 0) {
+                                    _nextStep();
+                                  } else {
+                                    _register();
+                                  }
+                                },
+                                text: _currentStep == 0
+                                    ? "Continuar"
+                                    : "Registrar",
+                                buttonStyle:
+                                    StylesApp(context).btnSecondarySmall,
+                                width: StylesApp(context).btnHeight.width,
+                                height: StylesApp(context).btnHeight.height,
                               ),
                               const SizedBox(
                                 height: 41,

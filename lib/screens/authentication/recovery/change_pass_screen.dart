@@ -18,7 +18,9 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  bool _obscureText = true;
+  bool _obscureTextCurrentPass = true;
+  bool _obscureTextNewPass = true;
+  bool _obscureTextRepeat = true;
 
   var maskFormatterTel = MaskTextInputFormatter(
     mask: '+# (###) ###-##-##',
@@ -77,9 +79,8 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                       const HeadWidget(
                         showLeftStar: true,
                         showRightStar: false,
-                        title: "¡La Biblia\n  Palabra de\n Vida!",
+                        title: "¡La Biblia\n  Palabra De\n Vida!",
                         subtitle: "Cambiar\n contraseña",
-                        heightContent: 380,
                       ),
                       const SizedBox(
                         height: 53.0,
@@ -87,7 +88,8 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                       Form(
                         key: _formKey,
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 29.0, right: 29.0),
+                          padding:
+                              const EdgeInsets.only(left: 29.0, right: 29.0),
                           child: Column(
                             children: [
                               Container(
@@ -95,20 +97,20 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                     const BoxConstraints(minWidth: 160.0),
                                 child: TextFormField(
                                   controller: _currentPasswordController,
-                                  obscureText: _obscureText,
+                                  obscureText: _obscureTextCurrentPass,
                                   decoration: StylesApp(context)
                                       .inputDecorationStyle
                                       .copyWith(
                                         hintText: "Contraseña actual",
                                         suffixIcon: IconButton(
                                           icon: Icon(
-                                            _obscureText
+                                            _obscureTextCurrentPass
                                                 ? Icons.visibility
                                                 : Icons.visibility_off,
                                           ),
                                           onPressed: () {
                                             setState(() {
-                                              _obscureText = !_obscureText;
+                                              _obscureTextCurrentPass = !_obscureTextCurrentPass;
                                             });
                                           },
                                         ),
@@ -129,20 +131,20 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                     const BoxConstraints(minWidth: 160.0),
                                 child: TextFormField(
                                   controller: _passwordController,
-                                  obscureText: _obscureText,
+                                  obscureText: _obscureTextNewPass,
                                   decoration: StylesApp(context)
                                       .inputDecorationStyle
                                       .copyWith(
                                         hintText: "Contraseña",
                                         suffixIcon: IconButton(
                                           icon: Icon(
-                                            _obscureText
+                                            _obscureTextNewPass
                                                 ? Icons.visibility
                                                 : Icons.visibility_off,
                                           ),
                                           onPressed: () {
                                             setState(() {
-                                              _obscureText = !_obscureText;
+                                              _obscureTextNewPass = !_obscureTextNewPass;
                                             });
                                           },
                                         ),
@@ -163,20 +165,20 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                     const BoxConstraints(minWidth: 160.0),
                                 child: TextFormField(
                                   controller: _confirmPasswordController,
-                                  obscureText: _obscureText,
+                                  obscureText: _obscureTextRepeat,
                                   decoration: StylesApp(context)
                                       .inputDecorationStyle
                                       .copyWith(
                                         hintText: "Confirmar Contraseña",
                                         suffixIcon: IconButton(
                                           icon: Icon(
-                                            _obscureText
+                                            _obscureTextRepeat
                                                 ? Icons.visibility
                                                 : Icons.visibility_off,
                                           ),
                                           onPressed: () {
                                             setState(() {
-                                              _obscureText = !_obscureText;
+                                              _obscureTextRepeat = !_obscureTextRepeat;
                                             });
                                           },
                                         ),
@@ -192,33 +194,23 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                               const SizedBox(
                                 height: 80,
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.25),
-                                      offset: const Offset(0, 4),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                                child: TextButton(
-                                  onPressed: () {
-                                    if (_currentStep == 0) {
-                                      _nextStep();
-                                    } else {
-                                      _register();
-                                    }
-                                  },
-                                  style: StylesApp(context).btnSecondarySmall,
-                                  child: Text(
-                                    _currentStep == 0
-                                        ? "Continuar"
-                                        : "Restablecer",
-                                  ),
-                                ),
+                              ButtonThemeWidget(
+                                text: _currentStep == 0
+                                    ? "Continuar"
+                                    : "Restablecer",
+                                onPressed: () {
+                                  if (_currentStep == 0) {
+                                    _nextStep();
+                                  } else {
+                                    _register();
+                                  }
+                                },
+                                buttonStyle:
+                                    StylesApp(context).btnSecondarySmall,
+                                width: StylesApp(context).btnHeight.width,
+                                height: StylesApp(context).btnHeight.height,
                               ),
+                              
                               const SizedBox(
                                 height: 44,
                               ),
@@ -232,7 +224,7 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                 Column(
                   children: [
                     Container(
-                      constraints: const BoxConstraints(minHeight: 180),
+                      // constraints: const BoxConstraints(minHeight: 180),
                       decoration: const BoxDecoration(
                         color: Colors.white,
                       ),

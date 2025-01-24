@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,12 +30,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         const HeadWidget(
                           showLeftStar: true,
                           showRightStar: true,
-                          title: "¡La Biblia\n  Palabra de\n Vida!",
+                          title: "¡La Biblia\n  Palabra De\n Vida!",
                           subtitle: "Login",
-                          heightContent: 287,
                         ),
                         const SizedBox(
-                          height: 51,
+                          height: 40,
                         ),
                         Form(
                           key: _formKey,
@@ -47,21 +47,24 @@ class _LoginScreenState extends State<LoginScreen> {
                                   constraints:
                                       const BoxConstraints(minWidth: 160.0),
                                   child: TextFormField(
+                                    cursorHeight: 16.sp,
+                                    style: StylesApp(context).textStyleHintText,
                                     decoration: StylesApp(context)
                                         .inputDecorationStyle
                                         .copyWith(
-                                          // labelText: "Correo electrónico",
                                           hintText: "Correo electrónico",
                                         ),
                                   ),
                                 ),
                                 const SizedBox(
-                                  height: 30,
+                                  height: 25,
                                 ),
                                 Container(
                                   constraints:
                                       const BoxConstraints(minWidth: 160.0),
                                   child: TextFormField(
+                                    cursorHeight: 16.sp,
+                                    style: StylesApp(context).textStyleHintText,
                                     decoration: StylesApp(context)
                                         .inputDecorationStyle
                                         .copyWith(
@@ -71,44 +74,33 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 const SizedBox(
-                                  height: 64,
+                                  height: 54,
                                 ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha:  0.25),
-                                        offset: const Offset(0, 4),
-                                        blurRadius: 4,
-                                      ),
-                                    ],
-                                  ),
-                                  child: TextButton(
-                                    onPressed: () {
-                                      
-                                      Navigator.pushNamed(context, '/layoutPage');
-                                    },
-                                    style: StylesApp(context).btnSecondarySmall,
-                                    child: const Text("Iniciar sesión"),
-                                  ),
+                                ButtonThemeWidget(
+                                  text: "Iniciar sesión",
+                                  image: "assets/google-icon.png",
+                                  buttonStyle:
+                                      StylesApp(context).btnSecondarySmall,
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/layoutPage');
+                                  },
+                                  width: StylesApp(context).btnHeight.width,
+                                  height: StylesApp(context).btnHeight.height,
                                 ),
                                 const SizedBox(
                                   height: 44,
                                 ),
-                                TextButton(
-                                  onPressed: () {},
-                                  style: StylesApp(context).btnTransparentSmall,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Text("Iniciar con "),
-                                      SizedBox(
-                                        width: 26.0,
-                                        child: Image.asset("assets/google-icon.png"),
-                                      ),
-                                    ],
-                                  ),
+                                ButtonThemeWidget(
+                                  textWithImage: true,
+                                  image: "assets/google-icon.png",
+                                  text: "Iniciar con",
+                                  buttonStyle:
+                                      StylesApp(context).btnTransparentSmall,
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/layoutPage');
+                                  },
+                                  width: StylesApp(context).btnHeight.width,
+                                  height: StylesApp(context).btnHeight.height,
                                 ),
                                 const SizedBox(
                                   height: 48,

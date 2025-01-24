@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class HeadWidget extends StatelessWidget {
   final String title;
   final String subtitle;
-  final double heightContent;
   final bool showLeftStar;
   final bool showRightStar;
 
@@ -14,7 +13,6 @@ class HeadWidget extends StatelessWidget {
     required this.subtitle,
     required this.showLeftStar,
     required this.showRightStar,
-    this.heightContent = 269,
   });
 
   @override
@@ -25,7 +23,8 @@ class HeadWidget extends StatelessWidget {
           decoration: BoxDecoration(
             image: DecorationImage(
               image: const AssetImage("assets/elipsisTop.png"),
-              fit: StylesApp(context).fitImage,
+              fit: BoxFit.cover,
+              alignment: Alignment.bottomCenter
             ),
           ),
           width: double.infinity,
@@ -46,14 +45,14 @@ class HeadWidget extends StatelessWidget {
                 style: StylesApp(context).textStyleTitleOrange,
               ),
               const SizedBox(
-                height: 41,
+                height: 30,
               )
             ],
           ),
         ),
         if (showLeftStar)
           Positioned(
-            top: 107,
+            top: 90,
             left: -12,
             child: Image.asset(
               'assets/start.png',

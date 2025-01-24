@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,11 +13,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        // decoration: BoxDecoration(
-        //         color: Colors.amber
-
-        //       ),
+      body: SizedBox(
         height: MediaQuery.sizeOf(context).height,
         child: Stack(
           children: [
@@ -36,23 +33,25 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(
                             height: 45,
                           ),
-                          Container(
-                            constraints: const BoxConstraints(
-                                maxHeight: 304, minHeight: 304),
-                            child: Image.asset(
-                              "assets/bibleLogo.png",
-                              fit: BoxFit.cover,
+                          Center(
+                            child: Container(
+                              constraints:  BoxConstraints(
+                                  maxHeight: StylesApp(context).sizeImgLogin.height, minHeight:StylesApp(context).sizeImgLogin.height),
+                              child: Image.asset(
+                                "assets/bibleLogo.png",
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  // const SizedBox(
-                  //   height: 21,
-                  // ),
+                  const SizedBox(
+                    height: 40.0,
+                  ),
                   TextWithGradient(
-                    text: "REGISTRA UNA CUENTA GRATIS",
+                    text: "REGISTRA UNA\n CUENTA GRATIS",
                     font: StylesApp(context).textWithGradient,
                   ),
                   const SizedBox(
@@ -62,58 +61,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: double.infinity,
                     child: Column(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.25),
-                                offset: const Offset(0, 4),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/registerPage');
-                            },
-                            style: StylesApp(context).btnPrimary,
-                            child: const Text("Crea una cuenta"),
-                          ),
+                        ButtonThemeWidget(
+                          text: "Crea un cuenta",
+                          buttonStyle: StylesApp(context).btnPrimary,
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/registerPage');
+                          },
+                          width: StylesApp(context).btnHeight.width,
+                          height: StylesApp(context).btnHeight.height,
                         ),
                         const SizedBox(
                           height: 28,
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.25),
-                                offset: const Offset(0, 4),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                          child: TextButton(
-                            onPressed: () {
+                          ButtonThemeWidget(
+                          text: "Iniciar Sesión",
+                          buttonStyle: StylesApp(context).btnSecondary,
+                          onPressed: () {
                               Navigator.pushNamed(context, '/loginPage');
-                            },
-                            style: StylesApp(context).btnSecondary,
-                            child: const Text("Iniciar Sesión"),
-                          ),
+                          },
+                          width: StylesApp(context).btnHeight.width,
+                          height: StylesApp(context).btnHeight.height,
                         ),
                       ],
                     ),
                   ),
-                  // const SizedBox(
-                  //   height: 67.0,
-                  // ),
+                  const SizedBox(
+                    height: 10.0,
+                  ),
                 ],
               ),
             ),
             Positioned(
-              bottom: 8,
+              bottom: 10,
               left: 16,
               child: Align(
                 alignment: Alignment.bottomRight,
@@ -130,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.pushNamed(context, '/introPage');
                         },
                         style: ElevatedButton.styleFrom(
+                          
                           backgroundColor:
                               Colors.transparent, // Transparent background
                           shape: RoundedRectangleBorder(
@@ -140,9 +120,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Ver intro',
-                          style: TextStyle(color: Colors.white),
+                          style: StylesApp(context).textStyleBody5,
                         ),
                       ),
                     );

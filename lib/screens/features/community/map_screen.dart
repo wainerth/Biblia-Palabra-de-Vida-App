@@ -4,7 +4,6 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 
 class MapScreen extends StatefulWidget {
-
   const MapScreen({super.key});
 
   @override
@@ -21,11 +20,11 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+
     scrollController = ScrollController();
   }
 
   // int _selectedIndex = 0;
-  
 
   // void _onItemTapped(int index) {
   //   setState(() {
@@ -38,6 +37,17 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final course = CourseModel(
+      color: "3ae4e4",
+      id: "1",
+      status: 1,
+      title: "Antiguo Testamento",
+      img: Img(urlImg: "assets/newTestament.png"),
+      introduction:
+          "¿Alguna vez te has preguntado sobre los inicios del mundo y las historias épicas de héroes antiguos? El Antiguo Testamento es como una caja del tesoro llena de relatos asombrosos y enseñanzas que han impactado a millones de personas a lo largo de los siglos. Desde la creación del universo hasta las aventuras de personajes como Moisés, David y Salomón, estos \nlibros te llevan en un viaje fascinante a través de la historia, la fe y la moral. Encontrarás milagros impresionantes, batallas épicas y sabiduría atemporal. Es un lugar donde los sueños, las promesas y las luchas de la humanidad cobran vida, ofreciendo valiosas lecciones que resuenan incluso en el mundo moderno.\n",
+      sectionCount: 27,
+      sectionCompleted: 27,
+    );
     List<Level> levels = List<Level>.from([
       {
         "id": "1",
@@ -45,7 +55,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": true,
         "color": "3ae4e4",
         "section": {"sectionName": "Genesis"},
-        "img": "assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 150.0
       },
       {
@@ -54,7 +64,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": true,
         "color": "2eade4",
         "section": {"sectionName": "Genesis"},
-        "img": "",
+        "img": {"urlImg": ""},
         "score": 80.0
       },
       {
@@ -63,7 +73,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": true,
         "color": "2958e4",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 45.0
       },
       {
@@ -72,7 +82,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": true,
         "color": "2225c2",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 20.0
       },
       {
@@ -81,7 +91,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": true,
         "color": "7142e9",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -90,7 +100,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "8c31d6",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -99,7 +109,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "8a12a8",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -108,7 +118,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "d835d8",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -117,7 +127,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "fd30db",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -126,7 +136,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "f72989",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -135,7 +145,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "f7295c",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -144,7 +154,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "e93131",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -153,7 +163,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "3ae4e4",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -162,7 +172,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "2eade4",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -171,7 +181,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "2958e4",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -180,7 +190,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "2225c2",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -189,7 +199,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "7142e9",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -198,7 +208,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "8c31d6",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -207,7 +217,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "8a12a8",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -216,7 +226,7 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "d835d8",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       },
       {
@@ -225,11 +235,23 @@ class _MapScreenState extends State<MapScreen> {
         "unLockLevel": false,
         "color": "fd30db",
         "section": {"sectionName": "Genesis"},
-        "img":"assets/level.png",
+        "img": {"urlImg": "assets/level.png"},
         "score": 0.0
       }
     ].map((levelJson) => Level.fromJson(levelJson)).toList());
-    int i = 0;
+    Stage stage = Stage(
+        id: "1",
+        sectionName: "Genesis",
+        introduction:
+            "¿Te gustaría conocer el origen de todo lo que existe, desde el universo hasta la humanidad? En Génesis encontrarás relatos fascinantes sobre la creación, el diluvio, la torre de Babel, la llamada de Abraham, el sacrificio de Isaac, la traición de Jacob, el sueño de José, y mucho más. También se demuestra el carácter de Dios, su amor, su justicia, su fidelidad y su poder. Este es solo el comienzo de grandes historias que continúan en el resto de la Biblia y que te motiva a ser parte de ella. Te invito a leerlo y a descubrir cómo Dios te habla a través de su palabra, ¿Estás listo?",
+        unLockSection: true,
+        orderCard: 1,
+        color: "3ae4e4",
+        img: Img(urlImg: "assets/assetStories.png"),
+        levelCount: 12,
+        levelCompleted: 0,
+        status: 1);
+    // int i = 0;
     List coordATop = [0.02, 0.25, 0.48, 0.75];
 
     List coordALeft = [0.17, 0.50, 0.70, 0.65];
@@ -250,239 +272,360 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Color(0XFF12CBC4),
-          ),
-          height: MediaQuery.sizeOf(context).height,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              spacing: 0,
-              children: [
-                SizedBox(
-                  height: MediaQuery.sizeOf(context).height,
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: gruposDeNiveles
-                        .length, // Dividimos por 4 para obtener el número de grupos de niveles
-                    itemBuilder: (context, index) {
-                      List<Level> grupo = gruposDeNiveles[index];
-                      String image =
-                          index % 2 == 0 ? imagePaths[0] : imagePaths[1];
-                      return Column(
-                        children: [
-                          if (index == 0)
-                            _buildHeader(
-                                context, scrollController, gruposDeNiveles),
-                          Stack(
-                            alignment: Alignment.topCenter,
+        child: OrientationBuilder(
+          builder: (BuildContext context, Orientation orientation) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Color(0XFF12CBC4),
+              ),
+              height: MediaQuery.sizeOf(context).height,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  spacing: 0,
+                  children: [
+                    HeadScoreWidget(
+                      onRoute: () {
+                        Navigator.popAndPushNamed(context, '/profilePage');
+                      },
+                    ),
+                    HeaderMapWidget(
+                      title: '${course.title}',
+                      subtitleStage: '${stage.sectionName}',
+                      indexStage: 1, //stage.id,
+                      onRouteBack: () {
+                        Navigator.popAndPushNamed(context, '/layoutPage1');
+                      },
+                      onShowInfoCourse: () {
+                        showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return CustomModalWidget(
+                              title: course.title,
+                              content: course.introduction,
+                              buttonText: 'Aceptar',
+                              id: course.id,
+                              showSubtitle: false,
+                              itemCount: 0,
+                              itemsCompleted: 0,
+                            );
+                          },
+                        );
+                      },
+                      onShowInfoStage: () {
+                        showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return CustomModalWidget(
+                              title: stage.sectionName,
+                              content: stage.introduction,
+                              buttonText: 'Aceptar',
+                              id: stage.id,
+                              itemCount: stage.levelCount,
+                              itemsCompleted: stage.levelCompleted,
+                            );
+                          },
+                        );
+                      },
+                      onScroller: () {
+                        if (kDebugMode) {
+                          print(levels);
+                        }
+                        final int lastUnlockedIndex =
+                            gruposDeNiveles.lastIndexWhere(
+                          (grupo) =>
+                              grupo.any((level) => level.unLockLevel == false),
+                        );
+                        String? lastLockedId = gruposDeNiveles.reversed
+                            .expand((grupo) =>
+                                grupo.reversed) // Recorremos desde el final
+                            .lastWhere((level) => level.unLockLevel == false,
+                                orElse: () => Level(
+                                    id: '',
+                                    name: '',
+                                    unLockLevel: false,
+                                    color: '',
+                                    section: Section(sectionName: ''),
+                                    img: Img(urlImg: ''),
+                                    score: 0))
+                            .id;
+
+                        if (lastUnlockedIndex != -1) {
+                          scrollController.animateTo(
+                            int.parse(lastLockedId) *
+                                100, // Ajusta según el tamaño del nivel
+                            duration: Duration(seconds: 1),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
+                    ),
+                    SizedBox(
+                      height: MediaQuery.sizeOf(context).height,
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: gruposDeNiveles
+                            .length, // Dividimos por 4 para obtener el número de grupos de niveles
+                        itemBuilder: (context, index) {
+                          List<Level> grupo = gruposDeNiveles[index];
+                          String image =
+                              index % 2 == 0 ? imagePaths[0] : imagePaths[1];
+                          return Column(
                             children: [
-                              Container(
-                                constraints: BoxConstraints(
-                                    minHeight: MediaQuery.sizeOf(context).height),
-                                child: Image.asset(
-                                  image,
-                                  width: double.infinity,
-                                  height:
-                                      708, //MediaQuery.sizeOf(context).height,
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                              for (i = 0; i < grupo.length; i++) ...{
-                                Positioned(
-                                  key: Key(grupo[i].id),
-                                  top: index % 2 == 0
-                                      ? StylesApp(context)
-                                          .positionedLevels(coordATop[i])
-                                          .dy
-                                      : StylesApp(context)
-                                          .positionedLevels(coordBTop[i])
-                                          .dy, // Ajusta la posición vertical
-                                  left: index % 2 == 0
-                                      ? StylesApp(context)
-                                          .positionedLevels(coordALeft[i])
-                                          .dx
-                                      : StylesApp(context)
-                                          .positionedLevels(coordBLeft[i])
-                                          .dx,
-                                  child: Container(
-                                    // decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                              // if (index == 0) ...{
+
+                              // },
+                              Stack(
+                                alignment: Alignment.topCenter,
+                                children: [
+                                  Container(
                                     constraints: BoxConstraints(
-                                      maxWidth: StylesApp(context)
-                                          .sizeContainerLevel
-                                          .width,
+                                        minHeight:
+                                            MediaQuery.sizeOf(context).height),
+                                    child: Image.asset(
+                                      image,
+                                      width: double.infinity,
+                                      height:
+                                          708, //MediaQuery.sizeOf(context).height,
+                                      fit: BoxFit.fitHeight,
                                     ),
-                                    child: Stack(
-                                      children: [
-                                        Center(
-                                          child: _starStatus(
-                                              context,
-                                              grupo[i].score,
-                                              StylesApp(context)
-                                                  .sizeContainerLevel
-                                                  .width),
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              height: 30,
-                                            ),
-                                            Center(
-                                              child: Stack(
+                                  ),
+                                  for (var i = 0; i < grupo.length; i++) ...{
+                                    Positioned(
+                                      key: Key(grupo[i].id),
+                                      top: index % 2 == 0
+                                          ? StylesApp(context)
+                                              .positionedLevels(coordATop[i])
+                                              .dy
+                                          : StylesApp(context)
+                                              .positionedLevels(coordBTop[i])
+                                              .dy, // Ajusta la posición vertical
+                                      left: index % 2 == 0
+                                          ? StylesApp(context)
+                                              .positionedLevels(coordALeft[i])
+                                              .dx
+                                          : StylesApp(context)
+                                              .positionedLevels(coordBLeft[i])
+                                              .dx,
+                                      child: GestureDetector(
+                                        key: Key("${index}-${i}"),
+                                        onTap: grupo[i].unLockLevel == false
+                                            ? null
+                                            : () {
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  '/historyPage',
+                                                  arguments: {
+                                                    'levelId': grupo[i].id
+                                                  },
+                                                );
+                                              },
+                                        child: Container(
+                                          // decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                                          constraints: BoxConstraints(
+                                            maxWidth: StylesApp(context)
+                                                .sizeContainerLevel
+                                                .width,
+                                          ),
+                                          child: Stack(
+                                            children: [
+                                              Center(
+                                                child: _starStatus(
+                                                    context,
+                                                    grupo[i].score,
+                                                    StylesApp(context)
+                                                        .sizeContainerLevel
+                                                        .width),
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
                                                 children: [
-                                                  Container(
-                                                    width: StylesApp(context)
-                                                        .sizeContainer
-                                                        .width, // Ajusta el tamaño según tus necesidades
-                                                    height: StylesApp(context)
-                                                        .sizeContainer
-                                                        .height,
-                                                    decoration: BoxDecoration(
-                                                        color: Color(int.tryParse(
-                                                                '0xFF${grupo[i].color}') ??
-                                                            0XFF000000),
-                                                        shape: BoxShape.circle,
-                                                        border: Border.all(
-                                                          color: Color.fromARGB(
-                                                            100, // Opacidad: 50%
-                                                            int.parse(
-                                                                '0xFF${grupo[i].color}'
-                                                                    .substring(2),
-                                                                radix: 16),
-                                                            int.parse(
-                                                                '0xFF${grupo[i].color}'
-                                                                    .substring(
-                                                                        4, 6),
-                                                                radix: 16),
-                                                            int.parse(
-                                                                '0xFF${grupo[i].color}'
-                                                                    .substring(6),
-                                                                radix: 16),
-                                                          ),
-                                                          width: 1,
-                                                        ),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                              color: Colors.black
-                                                                  .withValues(
-                                                                      alpha: 0.5),
-                                                              offset:
-                                                                  Offset(0, 8),
-                                                              blurStyle:
-                                                                  BlurStyle.outer)
-                                                        ]),
-                                                    child: Center(
-                                                        child: _buildItemLevel(
-                                                            context, grupo[i])),
+                                                  SizedBox(
+                                                    height: 30,
                                                   ),
-                                                  if (grupo[i].unLockLevel ==
-                                                      false)
-                                                    Positioned.fill(
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          shape: BoxShape.circle,
-                                                          color: const Color(
-                                                                  0xFFA9B8BE)
-                                                              .withValues(
-                                                                  alpha:
-                                                                      0.9), // Ajusta la opacidad
+                                                  Center(
+                                                    child: Stack(
+                                                      children: [
+                                                        Container(
+                                                          width: StylesApp(
+                                                                  context)
+                                                              .sizeContainer
+                                                              .width, // Ajusta el tamaño según tus necesidades
+                                                          height:
+                                                              StylesApp(context)
+                                                                  .sizeContainer
+                                                                  .height,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Color(int
+                                                                          .tryParse(
+                                                                              '0xFF${grupo[i].color}') ??
+                                                                      0XFF000000),
+                                                                  shape: BoxShape
+                                                                      .circle,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Color
+                                                                        .fromARGB(
+                                                                      100, // Opacidad: 50%
+                                                                      int.parse(
+                                                                          '0xFF${grupo[i].color}'.substring(
+                                                                              2),
+                                                                          radix:
+                                                                              16),
+                                                                      int.parse(
+                                                                          '0xFF${grupo[i].color}'.substring(
+                                                                              4,
+                                                                              6),
+                                                                          radix:
+                                                                              16),
+                                                                      int.parse(
+                                                                          '0xFF${grupo[i].color}'.substring(
+                                                                              6),
+                                                                          radix:
+                                                                              16),
+                                                                    ),
+                                                                    width: 1,
+                                                                  ),
+                                                                  boxShadow: [
+                                                                BoxShadow(
+                                                                    color: Colors
+                                                                        .black
+                                                                        .withValues(
+                                                                            alpha:
+                                                                                0.5),
+                                                                    offset:
+                                                                        Offset(
+                                                                            0,
+                                                                            8),
+                                                                    blurStyle:
+                                                                        BlurStyle
+                                                                            .outer)
+                                                              ]),
+                                                          child: Center(
+                                                              child:
+                                                                  _buildItemLevel(
+                                                                      context,
+                                                                      grupo[
+                                                                          i])),
                                                         ),
-                                                        width: StylesApp(context)
-                                                            .sizeContainer
-                                                            .width,
-        
-                                                        // color: Colors.black.withOpacity(
-                                                        //     0.5), // Ajusta la opacidad
-                                                      ),
+                                                        if (grupo[i]
+                                                                .unLockLevel ==
+                                                            false)
+                                                          Positioned.fill(
+                                                            child: Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                                color: const Color(
+                                                                        0xFFA9B8BE)
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.9), // Ajusta la opacidad
+                                                              ),
+                                                              width: StylesApp(
+                                                                      context)
+                                                                  .sizeContainer
+                                                                  .width,
+
+                                                              // color: Colors.black.withOpacity(
+                                                              //     0.5), // Ajusta la opacidad
+                                                            ),
+                                                          ),
+                                                      ],
                                                     ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  Text(
+                                                    textAlign: TextAlign.center,
+                                                    "${grupo[i].id} ${grupo[i].name}",
+                                                    style: StylesApp(context)
+                                                        .textStyNameNumber
+                                                        .copyWith(
+                                                          color: Colors.white,
+                                                        ),
+                                                  ),
                                                 ],
                                               ),
-                                            ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  },
+                                  if (index == gruposDeNiveles.length - 1)
+                                    Container(
+                                      height: 349,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                "assets/Felicitaciones.png"),
+                                            fit: StylesApp(context).fitImage),
+                                      ),
+                                      child: Center(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
                                             SizedBox(
-                                              height: 10,
+                                              height: 60,
                                             ),
                                             Text(
                                               textAlign: TextAlign.center,
-                                              "${grupo[i].id} ${grupo[i].name}",
+                                              'Felicidades',
                                               style: StylesApp(context)
-                                                  .textStyNameNumber
+                                                  .textStyCompleteLevelTitle
                                                   .copyWith(
-                                                    color: Colors.white,
+                                                    color: Color(0XFF12CBC4),
+                                                  ),
+                                            ),
+                                            SizedBox(
+                                              height: 7,
+                                            ),
+                                            Text(
+                                              textAlign: TextAlign.center,
+                                              'Culminaste la Etapa 1/27',
+                                              style: StylesApp(context)
+                                                  .textStyCompleteLevelBody
+                                                  .copyWith(
+                                                    color: Color(0XFF12CBC4),
+                                                  ),
+                                            ),
+                                            SizedBox(
+                                              height: 17,
+                                            ),
+                                            Text(
+                                              textAlign: TextAlign.center,
+                                              'Introducción al Antiguo\n  Testamento',
+                                              style: StylesApp(context)
+                                                  .textStyCompleteLevelBody
+                                                  .copyWith(
+                                                    color: Color(0XFF12CBC4),
                                                   ),
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              },
-                              if (index == gruposDeNiveles.length - 1)
-                                Container(
-                                  height: 349,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                        image: AssetImage("assets/Felicitaciones.png"),
-                                        fit: StylesApp(context).fitImage),
-                                  ),
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        SizedBox(
-                                          height: 60,
-                                        ),
-                                        Text(
-                                          textAlign: TextAlign.center,
-                                          'Felicidades',
-                                          style: StylesApp(context)
-                                              .textStyCompleteLevelTitle
-                                              .copyWith(
-                                                color: Color(0XFF12CBC4),
-                                              ),
-                                        ),
-                                        SizedBox(
-                                          height: 7,
-                                        ),
-                                        Text(
-                                          textAlign: TextAlign.center,
-                                          'Culminaste la Etapa 1/27',
-                                          style: StylesApp(context)
-                                              .textStyCompleteLevelBody
-                                              .copyWith(
-                                                color: Color(0XFF12CBC4),
-                                              ),
-                                        ),
-                                        SizedBox(
-                                          height: 17,
-                                        ),
-                                        Text(
-                                          textAlign: TextAlign.center,
-                                          'Introducción al Antiguo\n  Testamento',
-                                          style: StylesApp(context)
-                                              .textStyCompleteLevelBody
-                                              .copyWith(
-                                                color: Color(0XFF12CBC4),
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
+                                      ),
+                                    )
+                                ],
+                              ),
                             ],
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
       // bottomNavigationBar: CustomBottomNavigationBarWidget(
@@ -509,150 +652,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 }
 
-_buildHeader(
-    BuildContext context, ScrollController scroll, List<List<Level>> levels) {
-  return Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Container(
-        decoration: BoxDecoration(
-          color: Color(0XFF739EC7),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              onPressed: () {
-                Navigator.popAndPushNamed(context, '/layoutPage1');
-              },
-              icon: Icon(Icons.cancel_outlined),
-              color: Colors.white,
-            ),
-            Center(
-              child: Text(
-                textAlign: TextAlign.center,
-                'Antiguo Testamento',
-                style: StylesApp(context).textStyleBody4.copyWith(
-                      color: Colors.white,
-                    ),
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return CustomModalWidget(
-                      title: 'Conoce el nuevo testamento',
-                      content:
-                          'Este sesión tiene como objetivo hacer una introducción del nuevo testamento, identificar los libros que lo componen y brindar información de entorno cronológico geopolítico de los hechos.',
-                      buttonText: 'Aceptar',
-                    );
-                  },
-                );
-              },
-              color: Colors.white,
-              icon: Icon(Icons.info_outline),
-            ),
-          ],
-        ),
-      ),
-      Container(
-        constraints: BoxConstraints(
-          minHeight: 79,
-        ),
-        decoration: BoxDecoration(
-          color: Color(0XFF7688C2),
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-        ),
-        margin: EdgeInsets.only(left: 6.0, right: 6.0, top: 6.0),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 18.0, left: 12.0, right: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 0.0,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Text(
-                    'Etapa 1',
-                    style: StylesApp(context).textStyleBody4.copyWith(
-                          color: Colors.white,
-                        ),
-                  ),
-                  SizedBox(
-                    height: 30.0,
-                    child: IconButton(
-                      padding: EdgeInsets.all(0.0),
-                      // iconSize: 20.0,
-                      onPressed: () {},
-                      icon: Icon(Icons.chat_bubble),
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Text(
-                    'Los Evangelio de Mateo',
-                    style: StylesApp(context).textStyleBody4.copyWith(
-                          color: Colors.white,
-                        ),
-                  ),
-                  SizedBox(
-                    height: 30.0,
-                    child: IconButton(
-                      padding: EdgeInsets.all(0.0),
-                      onPressed: () {
-                        if (kDebugMode) {
-                          print(levels);
-                        }
-                        final int lastUnlockedIndex = levels.lastIndexWhere(
-                          (grupo) =>
-                              grupo.any((level) => level.unLockLevel == false),
-                        );
-                        String? lastLockedId = levels.reversed
-                            .expand((grupo) =>
-                                grupo.reversed) // Recorremos desde el final
-                            .lastWhere((level) => level.unLockLevel == false,
-                                orElse: () => Level(
-                                    id: '',
-                                    name: '',
-                                    unLockLevel: false,
-                                    color: '',
-                                    section: Section(sectionName: ''),
-                                    img: '',
-                                    score: 0))
-                            .id;
-
-                        if (lastUnlockedIndex != -1) {
-                          scroll.animateTo(
-                            int.parse(lastLockedId) *
-                                100, // Ajusta según el tamaño del nivel
-                            duration: Duration(seconds: 1),
-                            curve: Curves.easeInOut,
-                          );
-                        }
-                      },
-                      icon: Icon(Icons.arrow_downward),
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-      )
-    ],
-  );
-}
 
 _starStatus(BuildContext context, double unLockLevel, double containerWidth) {
   final double starSize = 30.0; // Adjust star size as needed
@@ -703,7 +702,7 @@ _starStatus(BuildContext context, double unLockLevel, double containerWidth) {
             ),
             Positioned(
               top: 0,
-              left: starSpacing + starSize + starSpacing,
+              left: starSpacing + starSize,
               child: Image.asset(
                 "assets/star_disabled.png",
                 width: starSize,
@@ -728,9 +727,9 @@ _starStatus(BuildContext context, double unLockLevel, double containerWidth) {
 }
 
 _buildItemLevel(BuildContext context, Level grupo) {
-  if (grupo.img.isNotEmpty) {
+  if (grupo.img.urlImg.isNotEmpty) {
     return Image.asset(
-      grupo.img,
+      grupo.img.urlImg,
       // width: StylesApp(context).sizeImage.width,
       // height: StylesApp(context).sizeImage.height,
       fit: StylesApp(context).fitImage,

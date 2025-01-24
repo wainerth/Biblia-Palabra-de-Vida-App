@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class IntroAventureScreen extends StatefulWidget {
@@ -10,10 +11,9 @@ class IntroAventureScreen extends StatefulWidget {
 }
 
 class _IntroAventureScreenState extends State<IntroAventureScreen> {
-   final PageController _controller = PageController();
+  final PageController _controller = PageController();
   bool _isLastPage = false;
   bool hasSeenIntro = true;
-
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +62,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
         ),
         if (!_isLastPage)
           Positioned(
-            top: 0,
+            top: 10,
             right: 16,
             child: _buildSkipButton(context),
           ),
@@ -91,9 +91,18 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   }
 
   _buildPage(BuildContext context, String imageUrl) {
-    return Image.asset(
-      imageUrl,
-      fit: BoxFit.fill,
+    return OrientationBuilder(
+      builder: (BuildContext context, Orientation orientation) {
+        return Container(
+          height: MediaQuery.of(context).size.height,
+          child: Image.asset(
+            imageUrl,
+            fit: orientation == Orientation.landscape
+                ? BoxFit.contain
+                : BoxFit.fill,
+          ),
+        );
+      },
     );
   }
 
@@ -106,15 +115,19 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
         });
       },
       style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.all(8.sp),
         backgroundColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           side: const BorderSide(color: Colors.transparent),
           borderRadius: BorderRadius.circular(10),
         ),
       ),
-      child: const Text(
+      child: Text(
         'Omitir el Intro',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16.sp,
+        ),
       ),
     );
   }
@@ -125,7 +138,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
         if (_isLastPage) {
           setState(() {
             hasSeenIntro = false;
-             Navigator.pushNamed(context, '/layoutPage1');
+            Navigator.pushNamed(context, '/layoutPage1');
           });
         } else {
           if (_controller.page! >= 2) {
@@ -141,6 +154,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
         }
       },
       style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.all(8.sp),
         backgroundColor: _isLastPage ? Color(0XFF006AFF) : Colors.transparent,
         shape: RoundedRectangleBorder(
           side: const BorderSide(color: Colors.transparent),
@@ -152,7 +166,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
               "Iniciar Aventura",
               style: StylesApp(context).textStyleBody7,
             )
-          : const Icon(Icons.arrow_forward, color: Colors.white),
+          :  Icon(Icons.arrow_forward, color: Colors.white, size: 25.sp,),
     );
   }
 }

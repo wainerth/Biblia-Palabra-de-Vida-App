@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class Level {
   final String id;
@@ -5,29 +6,30 @@ class Level {
   final bool unLockLevel;
   final String color;
   final Section section;
-  final String img;
+  Img img;
   final double score;
+  final String? status;
 
-  Level({
-    required this.id,
-    required this.name,
-    required this.unLockLevel,
-    required this.color,
-    required this.section,
-    required this.img,
-    this.score = 0.0,
-  });
+  Level(
+      {required this.id,
+      required this.name,
+      required this.unLockLevel,
+      required this.color,
+      required this.section,
+      required this.img,
+      this.score = 0.0,
+      this.status = ''});
 
   factory Level.fromJson(Map<String, dynamic> json) {
     return Level(
-      id: json['id'],
-      name: json['name'],
-      unLockLevel: json['unLockLevel'],
-      color: json['color'],
-      section: Section.fromJson(json['section']),
-      img:json['img'],
-      score: json['score'],
-    );
+        id: json['id'],
+        name: json['name'],
+        unLockLevel: json['unLockLevel'],
+        color: json['color'],
+        section: Section.fromJson(json['section']),
+        img: Img.fromJson(json['img']),
+        score: json['score'],
+        status: json["status"]);
   }
 }
 
@@ -41,16 +43,6 @@ class Section {
   }
 }
 
-// class ImageView {
-//   final String urlImg;
-
-//   ImageView({required this.urlImg});
-
-//   factory ImageView.fromJson(Map<String, dynamic> json) {
-//     return  json['urlImg'];
-//   }
-// }
-
 class LevelResponse {
   final List<Level> getAllLevelsBySectionId;
 
@@ -59,7 +51,8 @@ class LevelResponse {
   factory LevelResponse.fromJson(Map<String, dynamic> json) {
     return LevelResponse(
       getAllLevelsBySectionId: List<Level>.from(
-        json['getAllLevelsBySectionId'].map((levelJson) => Level.fromJson(levelJson)),
+        json['getAllLevelsBySectionId']
+            .map((levelJson) => Level.fromJson(levelJson)),
       ),
     );
   }

@@ -3,6 +3,14 @@
 
 
 
+
+
+export 'package:biblia_palabra_de_vida_app/screens/features/preach/video_player_screen.dart';
+
+export 'package:biblia_palabra_de_vida_app/screens/features/preach/preach_screen.dart';
+
+export 'package:biblia_palabra_de_vida_app/screens/features/community/question_screen_draggable.dart';
+
 export 'package:biblia_palabra_de_vida_app/screens/authentication/login/login_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/authentication/signup/register_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/authentication/recovery/recover_pass_screen.dart';
@@ -28,8 +36,11 @@ export 'package:biblia_palabra_de_vida_app/screens/features/audio/audio_screen.d
 export 'package:biblia_palabra_de_vida_app/screens/features/favorite/favorite_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/community/community_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/community/map_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/community/history_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/community/question_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/adventure/aventure_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/adventure/online_challenge_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/adventure/detail_course_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/ranking/ranking_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/news/news_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/doubt/doubt_screen.dart';
@@ -48,4 +59,3 @@ export 'package:biblia_palabra_de_vida_app/screens/features/prayer/detail_reques
 
 //404
 export 'package:biblia_palabra_de_vida_app/screens/404/unknown_screen.dart';
-

@@ -10,6 +10,10 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems() {
       label: 'Inicio',
     ),
     const BottomNavigationBarItem(
+      icon: Icon(Icons.book_outlined,size: 40.0,),
+      label: 'Biblia',
+    ),
+    const BottomNavigationBarItem(
       icon: Icon(Icons.church,size: 40.0,),
       label: 'Oración',
     ),
@@ -20,10 +24,6 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems() {
     const BottomNavigationBarItem(
       icon: Icon(Icons.favorite,size: 40.0,),
       label: 'Ofrendas',
-    ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.headphones,size: 40.0,),
-      label: 'Contacto',
     ),
     const BottomNavigationBarItem(
       icon: Icon(Icons.settings,size: 40.0,),

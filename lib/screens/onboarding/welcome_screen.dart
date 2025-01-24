@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -83,7 +85,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               image: 'assets/LionImage.png',
                               subTitle: "¡Conoce el libro\n más leído del mundo!",
                               description:
-                                  'Escudriña la palabra en sus diferentes versiones.',
+                                  'Escudriña la palabra\n en sus diferentes versiones.',
                               constraints: constraints,
                             ),
                           ],
@@ -120,6 +122,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   mainAxisAlignment:  MainAxisAlignment.spaceBetween,
                   children: [
                     if (!_isLastPage) _buildSkipButton(context),
+                    if(_isLastPage) SizedBox(width: 40,),
                     Center(
                       child: SmoothPageIndicator(
                         controller: _controller,
@@ -204,8 +207,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   Widget _buildContent(String image, String title, String subTitle,
       String description, BoxConstraints constraints) {
-    final fontBody =
-        GoogleFonts.alegreyaSansSc(fontSize: 32, color: Colors.white);
+
 
     return SizedBox(
       height: constraints.maxHeight,
@@ -231,18 +233,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             )
           },
           // if (image.isEmpty) const SizedBox(height: 78),
-          _buildDescriptionBox(subTitle, description,
-              StylesApp(context).textStyleTitle, fontBody),
+          _buildDescriptionBox(context, subTitle, description,
+              StylesApp(context).textStyleTitle, StylesApp(context).textStyleTitleAlegra),
         ],
       ),
     );
   }
 
-  Widget _buildDescriptionBox(String subTitle, String description,
+  Widget _buildDescriptionBox(BuildContext context, String subTitle, String description,
       TextStyle fontTitle, TextStyle fontBody) {
     return Container(
       width: double.infinity,
-      // constraints: const BoxConstraints(minHeight: 200),
       decoration: BoxDecoration(
         image: DecorationImage(
           image: const AssetImage("assets/backgroundBox.png"),
@@ -253,7 +254,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const SizedBox(height: 35.0),
+          SizedBox(
+            height: StylesApp(context).heightSpacing1),
           if (subTitle.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -267,8 +269,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
           Container(
-            width: 329,
-            height: 151,
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8,
+                minHeight: 151.0
+            ),
+            // width: 329,
+            // height: 151,
             margin: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
               color: const Color(0xFFFD8C43),
@@ -297,9 +303,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           borderRadius: BorderRadius.circular(10),
         ),
       ),
-      child: const Text(
+      child: Text(
         'Omitir',
-        style: TextStyle(color: Colors.white),
+        style: StylesApp(context).textStyleBody6.copyWith(color: Colors.white),
       ),
     );
   }
@@ -324,7 +330,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           borderRadius: BorderRadius.circular(10),
         ),
       ),
-      child: const Icon(Icons.arrow_forward, color: Colors.white),
+      child: Icon(Icons.arrow_forward, color: Colors.white, size: StylesApp(context).sizeBtn,),
     );
   }
 }

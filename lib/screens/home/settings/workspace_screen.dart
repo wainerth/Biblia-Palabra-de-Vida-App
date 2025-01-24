@@ -1,11 +1,56 @@
-import 'package:flutter/material.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/audio_player_widget.dart';
+import 'package:share_plus/share_plus.dart';
 
-class WorkspaceScreen extends StatelessWidget {
+class WorkspaceScreen extends StatefulWidget {
   const WorkspaceScreen({super.key});
+
+  @override
+  State<WorkspaceScreen> createState() => _WorkspaceScreenState();
+}
+
+class _WorkspaceScreenState extends State<WorkspaceScreen> {
+  List<ButtonData> buttonsData = [
+    ButtonData(
+        id: "1",
+        name: "La liebre y la tortuga",
+        urlAudio: "assets/audio/liebre_tortuga.mp3"),
+    ButtonData(
+        id: "2", name: "El labrador", urlAudio: "assets/audio/labrador.mp3"),
+    ButtonData(
+        id: "3", name: "El Navegante", urlAudio: "assets/audio/navegante.mp3"),
+    ButtonData(
+        id: "4",
+        name: "El explorador",
+        urlAudio: "assets/audio/explorador.mp3"),
+    ButtonData(
+        id: "5", name: "Los Hermanos", urlAudio: "assets/audio/hermanos.mp3"),
+    ButtonData(
+        id: "6",
+        name: "La Casa Vieja",
+        urlAudio: "assets/audio/casa_vieja.mp3"),
+    ButtonData(
+        id: "7", name: "Los Artistas", urlAudio: "assets/audio/artistas.mp3"),
+    ButtonData(id: "8", name: "La cuenta", urlAudio: "assets/audio/cuenta.mp3"),
+    ButtonData(
+        id: "9",
+        name: "Tres es mejor que dos",
+        urlAudio: "assets/audio/tres_es_mejor.mp3"),
+    ButtonData(
+        id: "10",
+        name: "Saltamontes",
+        urlAudio: "assets/audio/saltamontes.mp3"),
+    ButtonData(
+        id: "11", name: "La Hormiga", urlAudio: "assets/audio/hormiga.mp3"),
+  ];
+  onSearch(value) {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +101,7 @@ class WorkspaceScreen extends StatelessWidget {
                 height: 22.0,
               ),
               Container(
-                constraints: BoxConstraints(minHeight: 60.0),
+                constraints: BoxConstraints(minHeight: 60.sp),
                 margin: const EdgeInsets.symmetric(horizontal: 10.0),
                 padding: EdgeInsets.symmetric(horizontal: 26.0),
                 decoration: BoxDecoration(
@@ -72,10 +117,13 @@ class WorkspaceScreen extends StatelessWidget {
                     ),
                     Image.asset(
                       'assets/books.png',
-                      width: 72.0,
+                      width: 72.sp,
                     )
                   ],
                 ),
+              ),
+              SizedBox(
+                height: kBottomNavigationBarHeight-30,
               )
             ],
           ),
@@ -102,8 +150,8 @@ class WorkspaceScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: 90.0,
-              height: 90.0,
+              width: StylesApp(context).sizeContainerCard.width,
+              height: StylesApp(context).sizeContainerCard.height,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(100.0),
@@ -131,13 +179,39 @@ class WorkspaceScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          "Cuentos para reflexionar",
-          style: StylesApp(context)
-              .textStyleBody5
-              .copyWith(color: Color(0xFFFE8D43)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Cuentos para reflexionar",
+              style: StylesApp(context)
+                  .textStyleBody5
+                  .copyWith(color: Color(0xFFFE8D43)),
+            ),
+            IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return ModalTalesWidget(data: buttonsData);
+                  },
+                );
+              },
+              icon: Icon(
+                Icons.add_circle_outline_sharp,
+                color: StyleColor.orange,
+                size: 20.sp,
+              ),
+            )
+          ],
         ),
-        AudioPlayerWidget(pathUrl: "reflexion2.mp3")
+        AudioPlayerWidget(
+          showImage: false,
+          inactiveColor: StyleColor.orange,
+          backgroundColor: Colors.white,
+          controlsColor: StyleColor.turquoise,
+          pathUrl: "reflexion2.mp3",
+        ),
       ],
     );
   }
@@ -148,37 +222,49 @@ class WorkspaceScreen extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
-          child: CardOptionsWidget(
-              imageBackground: "assets/promesas.png",
-              labelCard: "Promesas",
-              gradientColors: [Color(0XFFA731EC), Color(0XFF620188)]),
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/introAventurePage'),
+            child: CardOptionsWidget(
+                imageBackground: "assets/ranking.png",
+                labelCard: "Aventura",
+                gradientColors: [Color(0XFFA731EC), Color(0XFF620188)]),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(left: 4.0, bottom: 15.0),
-          child: CardOptionsWidget(
-              imageBackground: "assets/predicas.png",
-              labelCard: "Prédicas",
-              gradientColors: [
-                Color(0XFF1FEFEC),
-                Color(0XFF0159A7),
-              ]),
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/preachPage'),
+            child: CardOptionsWidget(
+                imageBackground: "assets/predicas.png",
+                labelCard: "Prédicas",
+                gradientColors: [
+                  Color(0XFF1FEFEC),
+                  Color(0XFF0159A7),
+                ]),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
-          child: CardOptionsWidget(
-              imageBackground: "assets/games.png",
-              labelCard: "Juegos",
-              gradientColors: [Color(0XFF3531F3), Color(0XFF040681)]),
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/introAventurePage'),
+            child: CardOptionsWidget(
+                imageBackground: "assets/games.png",
+                labelCard: "Juegos",
+                gradientColors: [Color(0XFF3531F3), Color(0XFF040681)]),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(left: 4.0, bottom: 15.0),
-          child: CardOptionsWidget(
-              imageBackground: "assets/ranking.png",
-              labelCard: "Ranking",
-              gradientColors: [
-                Color(0XFF58AC5F),
-                Color(0XFF2F6624),
-              ]),
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/introAventurePage'),
+            child: CardOptionsWidget(
+                imageBackground: "assets/promesas.png",
+                labelCard: "Promesas",
+                gradientColors: [
+                  Color(0XFF58AC5F),
+                  Color(0XFF2F6624),
+                ]),
+          ),
         )
       ],
     );
@@ -199,7 +285,7 @@ class CardOptionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        constraints: BoxConstraints(minHeight: 70.0, maxWidth: 170.0),
+        constraints: BoxConstraints(minHeight: 70.0.sp, maxWidth: 170.0.sp),
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -219,11 +305,6 @@ class CardOptionsWidget extends StatelessWidget {
               ),
             ),
             Positioned.fill(
-              // Center the text horizontally and vertically within the Stack
-              // top: 0,
-              // left: 0,
-              // right: 0,
-              // bottom: 0,
               child: Center(
                 child: Text(
                   labelCard,
@@ -243,44 +324,77 @@ _buildProverbsSection(BuildContext context) {
       color: const Color(0xFF12CBC4),
       borderRadius: BorderRadius.circular(8.0),
     ),
-    // constraints: BoxConstraints( minHeight: 130.0),
     margin: const EdgeInsets.symmetric(horizontal: 10.0),
     width: MediaQuery.of(context).size.width,
     padding:
         const EdgeInsets.only(left: 7.0, right: 7.0, top: 6.0, bottom: 6.0),
     child: Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 45.0),
-              child: Text(
-                "Proverbios 3:4",
-                style: StylesApp(context).textStyleBody7.copyWith(
-                      color: Colors.white,
-                    ),
+        SizedBox(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 45.0),
+                child: Text(
+                  "Proverbios 3:4",
+                  style: StylesApp(context).textStyleBody7.copyWith(
+                        color: Colors.white,
+                      ),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Row(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 spacing: 10.0,
                 children: [
-                  Icon(
-                    Icons.copy,
-                    color: Colors.white,
-                    size: 16.0,
+                  Center(
+                    child: SizedBox(
+                      width: 16.sp,
+                      height: 16.sp,
+                      child: IconButton(
+                        padding: EdgeInsets.all(0),
+                        icon: Icon(
+                          Icons.copy,
+                          color: Colors.white,
+                          size: 16.sp,
+                        ),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(
+                              text:
+                                  "Proverbios 3:4\n Y hallarás gracia y buena opinión En los ojos de Dios y de los hombres."));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Proverbio copiado al portapapeles')),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                  Icon(
-                    Icons.share,
-                    color: Colors.white,
-                    size: 16.0,
+                  SizedBox(
+                     width: 16.sp,
+                    height: 16.sp,
+                    child: IconButton(
+                      padding: EdgeInsets.all(0),
+                      icon: Icon(
+                        Icons.share,
+                        color: Colors.white,
+                        size: 16.sp,
+                      ),
+                      onPressed: () async {
+                        await Share.share(
+                          "Proverbios 3:4\nY hallarás gracia y buena opinión En los ojos de Dios y de los hombres.",
+                          subject: "Proverbio del día",
+                        );
+                      },
+                    ),
                   ),
+                  SizedBox(width: 8,)
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         Container(
           decoration: BoxDecoration(
@@ -332,39 +446,69 @@ _buildPositionSection(BuildContext context) {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: 59.0,
-                          child: CircleAvatar(
-                            radius: 30.0,
-                            backgroundImage:
-                                const AssetImage('assets/avatar.png'),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      constraints: BoxConstraints(maxWidth: 153, minHeight: 20),
-                      width: 153,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFC7AA34),
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
+                    Expanded(
+                      flex: 1,
                       child: Center(
-                        child: Text(
-                          textAlign: TextAlign.center,
-                          "Soldado de Cristo",
-                          style: StylesApp(context)
-                              .textStyleBody6
-                              .copyWith(color: Colors.white),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              width:
+                                  StylesApp(context).sizeContainerAvatar.width,
+                              child: CircleAvatar(
+                                radius: StylesApp(context).radiusAvatar,
+                                backgroundImage:
+                                    const AssetImage('assets/avatar.png'),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    Image.asset('assets/kawaii_fire.png'),
-                    SizedBox(
-                      width: 20,
-                    )
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        children: [
+                          Container(
+                            constraints: BoxConstraints(
+                                maxWidth: StylesApp(context).sizeTextPosition,
+                                minHeight: 20),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFC7AA34),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Center(
+                              child: Text(
+                                textAlign: TextAlign.center,
+                                "Soldado de Cristo",
+                                style: StylesApp(context)
+                                    .textStyleBody6
+                                    .copyWith(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: StylesApp(context).sizeContainerAvatar.width,
+                            child: Image.asset(
+                              'assets/kawaii_fire.png',
+                              alignment: Alignment.center,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // SizedBox(
+                    //   width: 20,
+                    // )
                   ],
                 ),
                 Row(
@@ -380,6 +524,7 @@ _buildPositionSection(BuildContext context) {
                     ),
                     Center(
                       child: Text(
+                        textAlign: TextAlign.center,
                         "Const: 300 Dias",
                         style: StylesApp(context)
                             .textStyleBody6
@@ -394,19 +539,19 @@ _buildPositionSection(BuildContext context) {
                             .copyWith(color: Colors.white),
                       ),
                     ),
-                    SizedBox(
-                      width: 20,
-                    )
+                    // SizedBox(
+                    //   width: 20,
+                    // )
                   ],
                 )
               ],
             ),
             Positioned(
               right: 0,
-              top: -8,
+              top: -15,
               child: SizedBox(
-                width: 40.0,
-                height: 30.0,
+                width: 40.0.sp,
+                height: 30.0.sp,
                 child: IconButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/profilePage');

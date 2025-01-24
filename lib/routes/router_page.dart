@@ -21,7 +21,11 @@ final Map<String, WidgetBuilder> routes = {
   '/prayerPage': (BuildContext context) => PrayerScreen(),
   '/listRequestPage': (BuildContext context) => ListRequestScreen(),
   '/detailPrayerPage': (BuildContext context) => DetailRequestScreen(),
-    
+  '/detailCoursePage': (BuildContext context) => DetailCourseScreen(),
+  '/historyPage': (BuildContext context) => HistoryScreen(),
+  '/questionPage': (BuildContext context) => QuestionScreen(),
+  '/questionDraggablePage': (BuildContext context) => QuestionScreenDraggable(),
+  '/preachPage': (BuildContext context) => PreachScreen()
 };
 
 Route<dynamic> generateRoute(RouteSettings settings) {

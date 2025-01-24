@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProgressDetailScreen extends StatefulWidget {
   const ProgressDetailScreen({super.key});
@@ -342,8 +343,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             style: StylesApp(context).textStyCalendar,
           ),
           Container(
-            constraints: BoxConstraints(minHeight: 84, maxWidth: 360.0),
-            height: 100,
+            constraints: BoxConstraints(minHeight: 84,),
+            height: 100.sp,
             decoration: BoxDecoration(
               color: Color(0XFFFFF2C2),
               borderRadius: BorderRadius.circular(8.0),

@@ -22,7 +22,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 48.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 60.sp;
+      return 40.sp;
     } else {
       return 16.sp;
     }
@@ -30,13 +30,29 @@ class StylesApp {
 
   double get fontSizeTitle1 {
     if (screenWidth <= SizeScreensApp().sm) {
+      return 22.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 22.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 22.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 16.sp;
+    } else {
+      return 16.sp;
+    }
+  }
+
+  double get fontSizeTitle2 {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return 28.sp;
+    } else if (screenWidth <= SizeScreensApp().sm) {
       return 28.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 32.sp;
+      return 30.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 32.sp;
+      return 30.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 32.sp;
+      return 30.sp;
     } else {
       return 16.sp;
     }
@@ -44,13 +60,13 @@ class StylesApp {
 
   double get fontSizeSubTitle {
     if (screenWidth <= SizeScreensApp().sm) {
-      return 25.sp;
+      return 24.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 35.sp;
+      return 24.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 35.sp;
+      return 24.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 48.sp;
+      return 16.sp;
     } else {
       return 16.sp;
     }
@@ -72,13 +88,13 @@ class StylesApp {
 
   double get fontSizeBody2 {
     if (screenWidth <= SizeScreensApp().sm) {
-      return 20.sp;
+      return 18.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 32.sp;
+      return 18.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 40.sp;
+      return 18.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 40.sp;
+      return 18.sp;
     } else {
       return 16.sp;
     }
@@ -86,15 +102,15 @@ class StylesApp {
 
   double get fontSizeBody3 {
     if (screenWidth <= SizeScreensApp().sm) {
-      return 16.sp;
+      return 14.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 16.sp;
+      return 14.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 16.sp;
+      return 10.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 16.sp;
+      return 10.sp;
     } else {
-      return 16.sp;
+      return 14.sp;
     }
   }
 
@@ -126,6 +142,20 @@ class StylesApp {
     }
   }
 
+  double get fontSizeBody32 {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return 32.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 32.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 32.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 32.sp;
+    } else {
+      return 16.sp;
+    }
+  }
+
   double get fontSizeBody5 {
     if (screenWidth <= SizeScreensApp().sm) {
       return 10.sp;
@@ -134,13 +164,13 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 10.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 16.sp;
+      return 10.sp;
     } else {
       return 16.sp;
     }
   }
 
-  double get fontSizeBody6 {
+  double get fontSizeBody12 {
     if (screenWidth <= SizeScreensApp().sm) {
       return 12.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
@@ -148,11 +178,12 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 12.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 16.sp;
+      return 12.sp;
     } else {
       return 16.sp;
     }
   }
+
   double get fontSizeBody15 {
     if (screenWidth <= SizeScreensApp().sm) {
       return 15.sp;
@@ -162,6 +193,20 @@ class StylesApp {
       return 15.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return 16.sp;
+    } else {
+      return 16.sp;
+    }
+  }
+
+  double get fontSizeBody16 {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return 12.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 12.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 12.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 12.sp;
     } else {
       return 16.sp;
     }
@@ -201,13 +246,14 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return 18.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 22.sp;
+      return 18.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 22.sp;
+      return 18.sp;
     } else {
       return 16.sp;
     }
   }
+
   double get fontSizeBody20 {
     if (screenWidth <= SizeScreensApp().sm) {
       return 20.sp;
@@ -228,11 +274,11 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return 16.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 16.sp;
+      return 14.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 20.sp;
+      return 14.sp;
     } else {
-      return 16.sp;
+      return 14.sp;
     }
   }
 
@@ -251,7 +297,9 @@ class StylesApp {
   }
 
   Size get btnSizeSmall {
-    if (screenWidth <= SizeScreensApp().sm) {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(239.0.sp, 41.0.sp);
+    } else if (screenWidth <= SizeScreensApp().sm) {
       return Size(239.0.sp, 41.0.sp);
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(239.0.sp, 41.0.sp);
@@ -275,6 +323,13 @@ class StylesApp {
       fontFamily: 'Alfa Slab One',
       fontSize: fontSizeTitle,
       fontWeight: FontWeight.normal);
+
+  TextStyle get textStyleTitleAlegra => TextStyle(
+        fontFamily: 'Alegreya Sans SC',
+        fontSize: fontSizeTitle2,
+        color: Colors.white,
+        fontWeight: FontWeight.normal,
+      );
   TextStyle get textStyleLevelNumber => TextStyle(
       fontFamily: 'Alfa Slab One',
       fontSize: fontSizeTitle1,
@@ -289,6 +344,12 @@ class StylesApp {
       fontSize: fontSizeBody3,
       fontWeight: FontWeight.normal,
       color: Color(0XFF12CBC4));
+  TextStyle get textStyleCongratulation => TextStyle(
+        fontFamily: 'Alfa Slab One',
+        fontSize: fontSizeBody32,
+        fontWeight: FontWeight.normal,
+        color: Color(0XFF12CBC4),
+      );
   TextStyle get textStyCalendarWhite => TextStyle(
       fontFamily: 'Alfa Slab One',
       fontSize: fontSizeBody3,
@@ -328,6 +389,12 @@ class StylesApp {
         fontWeight: FontWeight.normal,
         color: const Color(0xFFFFFFFF),
       );
+  TextStyle get textStyleWithe20 => TextStyle(
+        fontFamily: 'Alfa Slab One',
+        fontSize: fontSizeBody20,
+        fontWeight: FontWeight.normal,
+        color: const Color(0xFFFFFFFF),
+      );
   TextStyle get textStyleTitleWithe24 => TextStyle(
         fontFamily: 'Alfa Slab One',
         fontSize: fontSizeBody24,
@@ -352,6 +419,12 @@ class StylesApp {
         fontFamily: "Aclonica",
         fontSize: fontSizeBody3,
         color: const Color(0XFF000000),
+        fontWeight: FontWeight.w400
+      );
+  TextStyle get textStyleBodyAso20 => TextStyle(
+        fontFamily: "Alfa Slab One",
+        fontSize: fontSizeBody3,
+        color: const Color(0XFF000000),
       );
 
   TextStyle get textStyleBodyWhite4 => TextStyle(
@@ -367,7 +440,7 @@ class StylesApp {
       );
   TextStyle get textStyleBody6 => TextStyle(
         fontFamily: "Aclonica",
-        fontSize: fontSizeBody6,
+        fontSize: fontSizeBody12,
         color: const Color(0XFFFFF5F5),
       );
 
@@ -376,14 +449,19 @@ class StylesApp {
         fontSize: fontSizeBody2,
         color: const Color(0XFFFFF5F5),
       );
-  TextStyle get textStyleBody8 => TextStyle(
+  TextStyle get textStyleBody18 => TextStyle(
         fontFamily: "Aclonica",
         fontSize: fontSizeBody18,
         color: const Color(0XFFFFF5F5),
       );
+  TextStyle get textStyleBody12 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody12,
+        color: const Color(0XFFFFF5F5),
+      );
   TextStyle get textStyleBody16 => TextStyle(
         fontFamily: "Aclonica",
-        fontSize: fontSizeBody6,
+        fontSize: fontSizeBody16,
         color: const Color(0XFFFFF5F5),
       );
   TextStyle get textStyleBody15 => TextStyle(
@@ -404,6 +482,16 @@ class StylesApp {
   TextStyle get textStyleBody20 => TextStyle(
         fontFamily: "Aclonica",
         fontSize: fontSizeBody20,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBody32 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody32,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBodyAso32 => TextStyle(
+        fontFamily: "Alfa Slab One",
+        fontSize: fontSizeBody32,
         color: const Color(0XFFFFF5F5),
       );
   TextStyle get textStyleBody10 => TextStyle(
@@ -434,11 +522,13 @@ class StylesApp {
 
   ButtonStyle get btnPrimary => ButtonStyle(
         padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
         ),
-        shape: WidgetStateProperty.all(RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // Radio del borde
-        )),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // Radio del borde
+          ),
+        ),
         minimumSize: WidgetStateProperty.all(btnSize),
         maximumSize: WidgetStateProperty.all(btnSize),
         foregroundColor:
@@ -450,7 +540,7 @@ class StylesApp {
 
   ButtonStyle get btnSecondary => ButtonStyle(
         padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
         ),
         shape: WidgetStateProperty.all(RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10), // Radio del borde
@@ -532,7 +622,7 @@ class StylesApp {
       );
   ButtonStyle get btnTransparentSmall => ButtonStyle(
         padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 11.5, horizontal: 20),
+          const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
         ),
         shape: WidgetStateProperty.all(RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10), // Radio del borde
@@ -559,20 +649,21 @@ class StylesApp {
       focusedBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.black),
       ),
-      contentPadding:
-          const EdgeInsets.symmetric(vertical: 5.88, horizontal: 5));
+      constraints: BoxConstraints(minHeight: 40.sp),
+      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5));
 
   TextStyle get hintStyle => TextStyle(
         fontFamily: "Aclonica",
         color: const Color(0XFF746F6F),
         fontSize: fontSizeBody3,
-        height: 1.1,
+        // height: 1.1,
         fontWeight: FontWeight.w400,
       );
   TextStyle get textStyleHintText => TextStyle(
-        fontFamily: "Aclonica",
-        fontSize: fontSizeBody3,
-        color: const Color(0XFF746F6F),
+      fontFamily: "Aclonica",
+      fontSize: fontSizeBody3,
+      color: const Color(0XFF746F6F),
+      // height: 1.sp
       );
   TextStyle get labelStyle => TextStyle(
       fontFamily: "Aclonica",
@@ -590,6 +681,61 @@ class StylesApp {
       return BoxFit.fill;
     } else {
       return BoxFit.fill;
+    }
+  }
+
+  Size get sizeTextFormField {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(223.0, 43.0); 
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return Size(MediaQuery.sizeOf(context).width,
+          43.0);
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return Size(223.0, 43.0); 
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return Size(MediaQuery.sizeOf(context).width * 0.6,
+          60.0); 
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return Size(MediaQuery.sizeOf(context).width * 0.6,
+          70.0);
+    } else {
+      return Size(MediaQuery.sizeOf(context).width * 0.6,
+          60.0); 
+    }
+  }
+  Size get btnHeight {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(223.0, 43.0); 
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return Size(MediaQuery.sizeOf(context).width,
+          43.0);
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return Size(223.0, 43.0); 
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return Size(MediaQuery.sizeOf(context).width * 0.6,
+          60.0); 
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return Size(MediaQuery.sizeOf(context).width * 0.6,
+          70.0);
+    } else {
+      return Size(MediaQuery.sizeOf(context).width * 0.6,
+          60.0); 
+    }
+  }
+
+  Size get sizeImgLogin {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(220.0, 229.0); // Ajustar estos valores según tus necesidades
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return Size(220.0, 229.0); // Ajustar estos valores según tus necesidades
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return Size(304.0, 304.0); // Ajustar estos valores según tus necesidades
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return Size(200, 200.0); // Ajustar estos valores según tus necesidades
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return Size(200.0, 200.0); // Ajustar estos valores según tus necesidades
+    } else {
+      return Size(304, 304.0); // Ajustar estos valores según tus necesidades
     }
   }
 
@@ -635,6 +781,20 @@ class StylesApp {
     }
   }
 
+  Size get sizeContainerCard {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return Size(90.0, 90.0);
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return Size(90.0, 90.0);
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return Size(120.0, 120.0);
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return Size(130.0, 132.0);
+    } else {
+      return Size(90.0, 90.0);
+    }
+  }
+
   double get minHeightContentPage {
     if (screenWidth <= SizeScreensApp().xsm) {
       return MediaQuery.of(context).size.height - 130;
@@ -648,6 +808,52 @@ class StylesApp {
       return MediaQuery.of(context).size.height;
     } else {
       return MediaQuery.of(context).size.height;
+    }
+  }
+
+  Size get sizeContainerAvatar {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return Size(59.0, 59.0);
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return Size(59.0, 59.0);
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return Size(200.0, 200.0);
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return Size(150.0, 250.0);
+    } else {
+      return Size(59.0, 59.0);
+    }
+  }
+
+  double get radiusAvatar {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return 30.0;
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return 30.0;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 30.0;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 100.0;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 100.0;
+    } else {
+      return 30.0;
+    }
+  }
+
+  double get sizeTextPosition {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return 153.0;
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return 153.0;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 153.0;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 300.0;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 400.0;
+    } else {
+      return 153.0;
     }
   }
 
@@ -667,10 +873,40 @@ class StylesApp {
     }
   }
 
+  double get sizeBtn {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return 20.sp;
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return 20.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 20.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 20.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 20.sp;
+    } else {
+      return 20.sp;
+    }
+  }
+
   Offset positionedLevels(double percentage) {
     // if (screenWidth <= SizeScreensApp().sm) {
     return Offset(screenWidth * percentage,
         MediaQuery.sizeOf(context).height * percentage);
+  }
+
+  double get heightSpacing1 {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return 45.0;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 45.0;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 45.0;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 75.0;
+    } else {
+      return 20.0;
+    }
   }
 }
 

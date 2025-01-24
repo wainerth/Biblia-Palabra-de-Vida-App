@@ -5,6 +5,7 @@ import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/button_theme_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -66,6 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SafeArea(
         child: Container(
           width: double.infinity,
+          height: double.infinity,
           decoration: BoxDecoration(color: Color(0XFF12CBC4)),
           child: SingleChildScrollView(
             child: Column(
@@ -147,22 +149,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
             top: 10,
             left: 15,
             child: Container(
-                height: 35.0,
-                width: 35.0,
+                height: 35.sp,
+                width: 35.sp,
                 decoration: BoxDecoration(
                     color: Color(0XFFFD8C43),
-                    borderRadius: BorderRadius.circular(35.0)),
+                    borderRadius: BorderRadius.circular(35.sp)),
                 child: IconButton(
                     constraints: BoxConstraints(maxHeight: 35.0),
                     padding: EdgeInsets.all(0),
-                    iconSize: 35.0,
+                    iconSize: 35.sp,
                     color: Colors.white,
                     onPressed: () {
-                      Navigator.pushNamed(context, "/layoutPage");
+                      // Navigator.pushNamed(context, "/layoutPage");
+                      Navigator.pop(context);
                     },
                     icon: Icon(
                       Icons.arrow_back,
-                      size: 35.0,
+                      size: 35.sp,
                     ))),
           ),
           Column(
@@ -185,10 +188,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               borderRadius: BorderRadius.circular(160),
                               border: Border.all(
                                   width: 6.0, color: Color(0XFF12CBC4))),
-                          child: Image(
-                            image: _getImageProvider(),
-                            fit: BoxFit.fill,
-                          ),
+                            child: ClipOval(
+                            child: Image(
+                              image: _getImageProvider(),
+                              fit: BoxFit.cover,
+                              height: 160,
+                              width: 160,
+                              alignment: Alignment.topCenter,
+                            ),
+                            ),
                         ),
                         Positioned(
                           bottom: 10.0,
@@ -277,7 +285,7 @@ class CardColumnWidget extends StatelessWidget {
                     children: [
                       Image.asset(
                         iconRight,
-                        width: 40.0,
+                        width: 40.sp,
                         color: Colors.white,
                       )
                     ],
@@ -319,16 +327,16 @@ class CardColumnWidget extends StatelessWidget {
                 top: 0,
                 right: 2,
                 child: Container(
-                    width: 40,
-                    height: 40,
+                    width: 40.sp,
+                    height: 40.sp,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
+                      borderRadius: BorderRadius.circular(40.sp),
                       color: Colors.orange,
                     ),
                     child: IconButton(
                         padding: EdgeInsets.all(0),
-                        constraints: BoxConstraints(maxWidth: 40),
-                        iconSize: 30,
+                        constraints: BoxConstraints(maxWidth: 40.sp),
+                        iconSize: 30.sp,
                         onPressed: () {
                           if(route != null){
                             Navigator.popAndPushNamed(context, route!);

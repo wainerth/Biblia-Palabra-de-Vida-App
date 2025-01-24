@@ -8,7 +8,7 @@ class HeaderWidgetProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double score = 200;
+    double score = (200);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -90,7 +90,7 @@ class HeaderWidgetProgress extends StatelessWidget {
                     fit: BoxFit.contain,
                   ),
                   Text(
-                    "$score",
+                    score.floorToDouble().toStringAsFixed(0),
                     style: StylesApp(context)
                         .textStyleBody4
                         .copyWith(color: Color(0XFFFD8C43)),

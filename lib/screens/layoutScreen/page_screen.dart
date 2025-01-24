@@ -14,21 +14,33 @@ class _PageScreenState extends State<PageScreen> {
   int _selectedIndex = 0;
   final List<Widget> _screens = [
     WorkspaceScreen(),
+    BibleScreen(),
     PrayerScreen(),
     AudioScreen(),
     OfferingsScreen(),
-    ContactScreen(),
+    // ContactScreen(),
     ConfigScreen(),
   ];
 
   void _onItemTapped(int index) {
-    if(index.toString() == 1.toString()){
-        Navigator.pushNamed(context, '/prayerPage');
-        return;
+    if (index.toString() == 2.toString()) {
+      Navigator.pushNamed(context, '/prayerPage');
+      return;
     }
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final Object? args = ModalRoute.of(context)!.settings.arguments;
+    if (args != null) {
+      setState(() {
+        _selectedIndex = (args as Map<String, dynamic>)["selectedIndex"];
+      });
+    }
   }
 
   @override
@@ -47,18 +59,6 @@ class _PageScreenState extends State<PageScreen> {
             currentIndex: _selectedIndex,
             onTap: _onItemTapped)
 
-        //  BottomNavigationBar(
-        //   type: BottomNavigationBarType.fixed,
-        //   showUnselectedLabels: true,
-        //   backgroundColor: Color(0XFF7D7878),
-        //   selectedItemColor: Color(0XFF12CBC4),
-        //   unselectedItemColor: Colors.white,
-        //   selectedLabelStyle: StylesApp(context).textStyleBody10,
-        //   unselectedLabelStyle:StylesApp(context).textStyleBody10 ,
-        //   items: getBottomNavigationBarItems(),
-        //   currentIndex: _selectedIndex,
-        //   onTap: _onItemTapped,
-        // ),
         );
   }
 }

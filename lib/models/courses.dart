@@ -1,40 +1,54 @@
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+
 class CourseModel {
-  final int? churchId;
-  final String color;
   final String id;
-  final String img;
-  final int status;
   final String title;
+  final String color;
+  final int status;
+  final int? churchId;
+  Img img;
+  final String introduction;
+  final int sectionCount;
+  final int sectionCompleted;
 
   CourseModel({
-    this.churchId,
-    required this.color,
     required this.id,
-    this.img = '',
-    required this.status,
     required this.title,
-    
+    required this.color,
+    required this.status,
+    this.churchId,
+    required this.img,
+    required this.introduction,
+    required this.sectionCount,
+    required this.sectionCompleted,
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
     return CourseModel(
-      churchId: json['churchId'] as int?,
-      color: json['color'] as String,
       id: json['id'] as String,
-      img: json['img'],
-      status: json['status'] as int,
       title: json['title'] as String,
+      color: json['color'] as String,
+      status: json['status'] as int,
+      churchId: json['churchId'] as int?,
+      img: Img.fromJson(json['img']),
+      introduction: json['introduction'],
+      sectionCount: json['sectionCount'],
+      sectionCompleted: json['sectionCompleted'],
     );
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['churchId'] = churchId;
-    data['color'] = color;
     data['id'] = id;
-    data['img'] = img;
-      data['status'] = status;
     data['title'] = title;
+    data['color'] = color;
+    data['status'] = status;
+    data['churchId'] = churchId;
+    data['img'] = img.toJson();
+    data['introduction'];
+    data['sectionCount'];
+    data['sectionCompleted'];
     return data;
   }
 }
+

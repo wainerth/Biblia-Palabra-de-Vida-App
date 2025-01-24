@@ -19,7 +19,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  bool _obscureText = true;
+  bool _obscureTextPass = true;
+  bool _obscureTextRepeat = true;
 
   var maskFormatterTel = MaskTextInputFormatter(
     mask: '+# (###) ###-##-##',
@@ -81,9 +82,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                       const HeadWidget(
                         showLeftStar: false,
                         showRightStar: true,
-                        title: "¡La Biblia\n  Palabra de\n Vida!",
+                        title: "¡La Biblia\n  Palabra De\n Vida!",
                         subtitle: "Recuperar\n Contraseña",
-                        heightContent: 409,
                       ),
                       const SizedBox(
                         height: 46.0,
@@ -98,17 +98,21 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                               if (_currentStep == 0) ...[
                                 Center(
                                   child: Text(
-                                      textAlign: TextAlign.center,
-                                      "Ingrese su correo electrónico para buscar tu cuenta",
-                                      style:
-                                          StylesApp(context).textStyleBody5),
+                                    textAlign: TextAlign.center,
+                                    "Ingrese su correo electrónico para buscar tu cuenta",
+                                    style: StylesApp(context).textStyleBody5,
+                                  ),
                                 ),
                                 const SizedBox(
                                   height: 32.0,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _emailController,
                                     keyboardType: TextInputType.emailAddress,
@@ -135,15 +139,18 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   child: Text(
                                       textAlign: TextAlign.center,
                                       "Se ha enviado un código de recuperación  a su dirección de correo electrónico",
-                                      style:
-                                          StylesApp(context).textStyleBody5),
+                                      style: StylesApp(context).textStyleBody5),
                                 ),
                                 const SizedBox(
                                   height: 33.0,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: __recoveryCodeController,
                                     decoration: StylesApp(context)
@@ -162,24 +169,28 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   height: 23,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _passwordController,
-                                    obscureText: _obscureText,
+                                    obscureText: _obscureTextPass,
                                     decoration: StylesApp(context)
                                         .inputDecorationStyle
                                         .copyWith(
                                           hintText: "Contraseña",
                                           suffixIcon: IconButton(
                                             icon: Icon(
-                                              _obscureText
+                                              _obscureTextPass
                                                   ? Icons.visibility
                                                   : Icons.visibility_off,
                                             ),
                                             onPressed: () {
                                               setState(() {
-                                                _obscureText = !_obscureText;
+                                                _obscureTextPass = !_obscureTextPass;
                                               });
                                             },
                                           ),
@@ -196,24 +207,28 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   height: 23,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  constraints: BoxConstraints(
+                                    minWidth: 160.0,
+                                    maxWidth: StylesApp(context)
+                                        .sizeTextFormField
+                                        .width,
+                                  ),
                                   child: TextFormField(
                                     controller: _confirmPasswordController,
-                                    obscureText: _obscureText,
+                                    obscureText: _obscureTextRepeat,
                                     decoration: StylesApp(context)
                                         .inputDecorationStyle
                                         .copyWith(
                                           hintText: "Confirmar Contraseña",
                                           suffixIcon: IconButton(
                                             icon: Icon(
-                                              _obscureText
+                                              _obscureTextRepeat
                                                   ? Icons.visibility
                                                   : Icons.visibility_off,
                                             ),
                                             onPressed: () {
                                               setState(() {
-                                                _obscureText = !_obscureText;
+                                                _obscureTextRepeat = !_obscureTextRepeat;
                                               });
                                             },
                                           ),
@@ -230,34 +245,23 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                               const SizedBox(
                                 height: 33,
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha:  0.25),
-                                      offset: const Offset(0, 4),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                                child: TextButton(
-                                  onPressed: () {
-                                    if (_currentStep == 0) {
-                                      _nextStep();
-                                    } else {
-                                      _register();
-                                      Navigator.pushNamed(
-                                          context, '/changePasswordPage');
-                                    }
-                                  },
-                                  style: StylesApp(context).btnSecondarySmall,
-                                  child: Text(
-                                    _currentStep == 0
-                                        ? "Continuar"
-                                        : "Restablecer",
-                                  ),
-                                ),
+                              ButtonThemeWidget(
+                                text: _currentStep == 0
+                                    ? "Continuar"
+                                    : "Restablecer",
+                                onPressed: () {
+                                  if (_currentStep == 0) {
+                                    _nextStep();
+                                  } else {
+                                    _register();
+                                    Navigator.pushNamed(
+                                        context, '/changePasswordPage');
+                                  }
+                                },
+                                buttonStyle:
+                                    StylesApp(context).btnSecondarySmall,
+                                width: StylesApp(context).btnHeight.width,
+                                height: StylesApp(context).btnHeight.height,
                               ),
                               const SizedBox(
                                 height: 44,

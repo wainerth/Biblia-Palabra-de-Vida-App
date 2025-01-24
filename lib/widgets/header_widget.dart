@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HeaderWidget extends StatefulWidget {
   const HeaderWidget({
@@ -88,10 +89,10 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   children: [
                     Text(
                       "3",
-                      style: StylesApp(context).textStyleBody8,
+                      style: StylesApp(context).textStyleBody18,
                     ),
                     Icon(
-                      size: 21.0,
+                      size: 21.sp,
                       Icons.star,
                       color: Colors.white,
                     )
@@ -99,12 +100,12 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                 ),
                 IconButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/detailProfilePage');
+                    Navigator.pushNamed(context, '/profilePage');
                   },
                   padding: EdgeInsets.all(0),
-                  iconSize: 20.0,
+                  iconSize: 20.sp,
                   icon: Icon(
-                    size: 30.0,
+                    size: 30.sp,
                     Icons.fast_forward_sharp,
                     color: Colors.white,
                   ),

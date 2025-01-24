@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ButtonThemeWidget extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -9,8 +10,11 @@ class ButtonThemeWidget extends StatelessWidget {
   final double height;
   final bool showIcon;
   final IconData icon;
+  final bool textWithImage;
+  final String image;
   final Color colorIcon;
   final bool textCenter;
+
   const ButtonThemeWidget({
     super.key,
     this.onPressed,
@@ -22,8 +26,10 @@ class ButtonThemeWidget extends StatelessWidget {
     this.showIcon = false,
     this.icon = Icons.arrow_back,
     this.colorIcon = Colors.black,
-    this.textCenter = false
-  });
+    this.textCenter = false,
+    this.textWithImage = false,
+    this.image = ''
+  }) : assert(!textWithImage || text != null, 'Text is required when textWithImage is true');
 
   @override
   Widget build(BuildContext context) {
@@ -34,21 +40,45 @@ class ButtonThemeWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
+            color: Colors.black.withOpacity(0.25),
             offset: const Offset(0, 4),
             blurRadius: 4,
           ),
         ],
       ),
-      child: TextButton(
-        onPressed: onPressed,
-        style: buttonStyle,
-        child:text != null ? Text(
-          text!,
-          textAlign: textCenter ? TextAlign.center : TextAlign.start,
-          style: textStyle,
-        ): Icon(icon, color: colorIcon,),
-      ),
+      child: textWithImage
+          ? TextButton(
+              onPressed: onPressed,
+              style: buttonStyle,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    text!,
+                    textAlign: textCenter ? TextAlign.center : TextAlign.start,
+                    style: textStyle,
+                  ),
+                  SizedBox(
+                    width: 26.0,
+                    child: Image.asset(image),
+                  ),
+                ],
+              ))
+          : TextButton(
+              onPressed: onPressed,
+              style: buttonStyle,
+              child: text != null
+                  ? Text(
+                      text!,
+                      textAlign:
+                          textCenter ? TextAlign.center : TextAlign.start,
+                      style: textStyle,
+                    )
+                  : Icon(
+                      icon,
+                      color: colorIcon,
+                    ),
+            ),
     );
   }
 }

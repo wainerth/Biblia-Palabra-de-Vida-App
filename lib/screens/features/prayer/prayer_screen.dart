@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PrayerScreen extends StatefulWidget {
   const PrayerScreen({super.key});
@@ -57,12 +58,12 @@ class _PrayerScreenState extends State<PrayerScreen> {
                   },
                 ),
                 SizedBox(
-                  height: 7.0,
+                  height: 7.sp,
                 ),
                 ButtonThemeWidget(
                   text: "Ver respuestas de tus Pedidos de oración",
-                  width: 264.0,
-                  height: 52.0,
+                  width: 264.sp,
+                  height: 52.sp,
                   buttonStyle: StylesApp(context).btnWidgetSmall,
                   textCenter: true,
                   onPressed: (){
@@ -97,12 +98,12 @@ class _PrayerScreenState extends State<PrayerScreen> {
             buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                   backgroundColor: WidgetStatePropertyAll(generateColor(index)),
                 ),
-            width: 285.0,
-            height: 35.0,
+            width: 285.sp,
+            height: 35.sp,
             onPressed: () => goToRequest(requestTypes[index]),
           ),
           SizedBox(
-            height: 8.0,
+            height: 8.sp,
           )
         }
       ],
