@@ -416,11 +416,10 @@ class StylesApp {
   TextStyle get textStyleBody3 =>
       TextStyle(fontFamily: "Erica One", fontSize: fontSizeBody2);
   TextStyle get textStyleBody4 => TextStyle(
-        fontFamily: "Aclonica",
-        fontSize: fontSizeBody3,
-        color: const Color(0XFF000000),
-        fontWeight: FontWeight.w400
-      );
+      fontFamily: "Aclonica",
+      fontSize: fontSizeBody3,
+      color: const Color(0XFF000000),
+      fontWeight: FontWeight.w400);
   TextStyle get textStyleBodyAso20 => TextStyle(
         fontFamily: "Alfa Slab One",
         fontSize: fontSizeBody3,
@@ -660,10 +659,10 @@ class StylesApp {
         fontWeight: FontWeight.w400,
       );
   TextStyle get textStyleHintText => TextStyle(
-      fontFamily: "Aclonica",
-      fontSize: fontSizeBody3,
-      color: const Color(0XFF746F6F),
-      // height: 1.sp
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody3,
+        color: const Color(0XFF746F6F),
+        // height: 1.sp
       );
   TextStyle get labelStyle => TextStyle(
       fontFamily: "Aclonica",
@@ -672,6 +671,8 @@ class StylesApp {
 
   BoxFit get fitImage {
     if (screenWidth <= SizeScreensApp().sm) {
+      return BoxFit.fitHeight;
+    } else if (screenWidth <= SizeScreensApp().sm) {
       return BoxFit.fitHeight;
     } else if (screenWidth <= SizeScreensApp().md) {
       return BoxFit.fitHeight;
@@ -686,103 +687,106 @@ class StylesApp {
 
   Size get sizeTextFormField {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(223.0, 43.0); 
+      return Size(223.0, 43.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(MediaQuery.sizeOf(context).width,
-          43.0);
+      return Size(MediaQuery.sizeOf(context).width, 43.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(223.0, 43.0); 
+      return Size(223.0, 43.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(MediaQuery.sizeOf(context).width * 0.6,
-          60.0); 
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 60.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(MediaQuery.sizeOf(context).width * 0.6,
-          70.0);
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 70.0);
     } else {
-      return Size(MediaQuery.sizeOf(context).width * 0.6,
-          60.0); 
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 60.0);
     }
   }
+
   Size get btnHeight {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(223.0, 43.0); 
+      return Size(223.0, 43.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(MediaQuery.sizeOf(context).width,
-          43.0);
+      return Size(MediaQuery.sizeOf(context).width, 43.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(223.0, 43.0); 
+      return Size(MediaQuery.sizeOf(context).width * 0.7, 43.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(MediaQuery.sizeOf(context).width * 0.6,
-          60.0); 
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 60.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(MediaQuery.sizeOf(context).width * 0.6,
-          70.0);
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 70.0);
     } else {
-      return Size(MediaQuery.sizeOf(context).width * 0.6,
-          60.0); 
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 60.0);
     }
   }
 
   Size get sizeImgLogin {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(220.0, 229.0); // Ajustar estos valores según tus necesidades
+      return Size(220.0, 229.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(220.0, 229.0); // Ajustar estos valores según tus necesidades
+      return Size(220.0, 229.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(304.0, 304.0); // Ajustar estos valores según tus necesidades
+      return Size(304.0, 304.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(200, 200.0); // Ajustar estos valores según tus necesidades
+      return Size(200, 200.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(200.0, 200.0); // Ajustar estos valores según tus necesidades
+      return Size(200.0, 200.0);
     } else {
-      return Size(304, 304.0); // Ajustar estos valores según tus necesidades
+      return Size(304, 304.0);
     }
   }
 
   Size get sizeContainer {
-    if (screenWidth <= SizeScreensApp().sm) {
-      return Size(72.0, 72.0); // Ajustar estos valores según tus necesidades
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(72.0, 72.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(90.0, 90.0); // Ajustar estos valores según tus necesidades
+      return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(90, 90.0); // Ajustar estos valores según tus necesidades
+      return Size(90, 90.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(90.0, 90.0); // Ajustar estos valores según tus necesidades
+      return Size(90.0, 90.0);
     } else {
-      return Size(100.0, 100.0); // Ajustar estos valores según tus necesidades
+      return Size(100.0, 100.0);
     }
   }
 
   Size get sizeContainerSub {
-    if (screenWidth <= SizeScreensApp().sm) {
-      return Size(52.0, 52.0); // Ajustar estos valores según tus necesidades
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(52.0, 52.0);
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return Size(52.0, 52.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(70.0, 70.0); // Ajustar estos valores según tus necesidades
+      return Size(70.0, 70.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(70, 70.0); // Ajustar estos valores según tus necesidades
+      return Size(70, 70.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(80.0, 80.0); // Ajustar estos valores según tus necesidades
+      return Size(80.0, 80.0);
     } else {
-      return Size(90.0, 90.0); // Ajustar estos valores según tus necesidades
+      return Size(90.0, 90.0);
     }
   }
 
   Size get sizeContainerLevel {
-    if (screenWidth <= SizeScreensApp().sm) {
-      return Size(120.0, 102.0); // Ajustar estos valores según tus necesidades
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(120.0, 102.0);
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return Size(120.0, 102.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(150.0, 102.0); // Ajustar estos valores según tus necesidades
+      return Size(150.0, 102.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(150.0, 102.0); // Ajustar estos valores según tus necesidades
+      return Size(150.0, 102.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(190.0, 102.0); // Ajustar estos valores según tus necesidades
+      return Size(190.0, 102.0);
     } else {
-      return Size(250.0, 102.0); // Ajustar estos valores según tus necesidades
+      return Size(250.0, 102.0);
     }
   }
 
   Size get sizeContainerCard {
-    if (screenWidth <= SizeScreensApp().sm) {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(90.0, 90.0);
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return Size(90.0, 90.0);
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return Size(90.0, 90.0);
+    } else if (screenWidth <= SizeScreensApp().sm) {
       return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(90.0, 90.0);
@@ -812,7 +816,9 @@ class StylesApp {
   }
 
   Size get sizeContainerAvatar {
-    if (screenWidth <= SizeScreensApp().sm) {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(59.0, 59.0);
+    } else if (screenWidth <= SizeScreensApp().sm) {
       return Size(59.0, 59.0);
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(59.0, 59.0);

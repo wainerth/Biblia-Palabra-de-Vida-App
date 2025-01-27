@@ -84,6 +84,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
               SizedBox(
                 height: 12.0,
               ),
+              // Text("Width: ${MediaQuery.sizeOf(context).width}"),
+              // Text("Height: ${MediaQuery.sizeOf(context).height}"),
               _buildPositionSection(context),
               SizedBox(
                 height: 12.0,
@@ -123,7 +125,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                 ),
               ),
               SizedBox(
-                height: kBottomNavigationBarHeight-30,
+                height: kBottomNavigationBarHeight-40,
               )
             ],
           ),
