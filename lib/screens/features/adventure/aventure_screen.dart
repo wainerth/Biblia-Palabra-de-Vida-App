@@ -112,7 +112,7 @@ class _AventureScreenState extends State<AventureScreen> {
                     ),
                     if (index == courses.length - 1) ...{
                       SizedBox(
-                        height: 160.0,
+                        height: kBottomNavigationBarHeight +30 ,
                       )
                     }
                   ],

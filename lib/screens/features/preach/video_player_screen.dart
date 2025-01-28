@@ -3,6 +3,7 @@ import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:video_player/video_player.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final DataPreach data;
@@ -19,14 +20,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   void initState() {
     super.initState();
     String? videoId = YoutubePlayer.convertUrlToId(widget.data.urlVideo);
-    _controller = YoutubePlayerController(
-      initialVideoId: videoId!, // Reemplaza con el ID de tu video
-      flags: const YoutubePlayerFlags(
-        autoPlay: false,
-        mute: false,
-        controlsVisibleAtStart: true,
-      ),
-    );
+    if (videoId != null) {
+      _controller = YoutubePlayerController(
+        initialVideoId: videoId!, // Reemplaza con el ID de tu video
+        flags: const YoutubePlayerFlags(
+          autoPlay: false,
+          mute: false,
+          controlsVisibleAtStart: true,
+        ),
+      );
+    }
   }
 
   @override
@@ -60,13 +63,24 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   decoration:
                       BoxDecoration(borderRadius: BorderRadius.circular(8)),
                   constraints: BoxConstraints(minHeight: 213),
+                  // height: 213,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: YoutubePlayer(
-                      controller: _controller,
-                      showVideoProgressIndicator: true,
-                      progressIndicatorColor: Colors.orange,
-                    ),
+                    child: widget.data.urlVideo.contains('youtube.com') ||
+                            widget.data.urlVideo.contains('youtu.be')
+                        ? YoutubePlayer(
+                          controller: _controller,
+                          showVideoProgressIndicator: true,
+                          progressIndicatorColor: Colors.orange,
+                          onReady: () {
+                            // _controller.addListener(() {
+                            // if (_controller.value.isReady && !_controller.value.isPlaying) {
+                            //   _controller.play();
+                            // }
+                            // });
+                          },
+                          )
+                        : playerNoYoutube(data: widget.data),
                   ),
                 ),
               ),
@@ -201,4 +215,125 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       ),
     );
   }
+}
+
+class CustomVideoPlayer extends StatefulWidget {
+  final String url;
+  const CustomVideoPlayer({Key? key, required this.url}) : super(key: key);
+
+  @override
+  _CustomVideoPlayerState createState() => _CustomVideoPlayerState();
+}
+
+class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
+  late VideoPlayerController _videoController;
+  bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _videoController = VideoPlayerController.network(
+      widget.url,
+      videoPlayerOptions: VideoPlayerOptions(
+        allowBackgroundPlayback: true
+      )
+    )
+      // _videoController = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..initialize().then((_) {
+        setState(() {});
+      });
+    //  _initializeVideoPlayerFuture = _videoController.initialize();
+    _videoController.addListener(() {
+      setState(() {
+        _isPlaying = _videoController.value.isPlaying;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _videoController.value.isInitialized
+        ? Column(
+            children: [
+              AspectRatio(
+                aspectRatio: 16 / 16,
+                child: VideoPlayer(_videoController),
+              ),
+              VideoProgressIndicator(_videoController, allowScrubbing: true),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _isPlaying ? Icons.pause : Icons.play_arrow,
+                      color: StyleColor.turquoise,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPlaying
+                            ? _videoController.pause()
+                            : _videoController.play();
+                        _isPlaying = !_isPlaying;
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.fast_rewind, color: StyleColor.turquoise,),
+                    onPressed: () {
+                      _videoController.seekTo(
+                        _videoController.value.position - Duration(seconds: 10),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.fast_forward, color: StyleColor.turquoise,),
+                    onPressed: () {
+                      _videoController.seekTo(
+                        _videoController.value.position + Duration(seconds: 10),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      _videoController.value.volume == 0
+                          ? Icons.volume_off
+                          : Icons.volume_up,
+                          color: StyleColor.turquoise,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _videoController.setVolume(
+                          _videoController.value.volume == 0 ? 1.0 : 0.0,
+                        );
+                      });
+                    },
+                  ),
+                  Slider(
+                    value: _videoController.value.volume,
+                    min: 0.0,
+                    max: 1.0,
+                    onChanged: (value) {
+                      setState(() {
+                        _videoController.setVolume(value);
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
+          )
+        : Center(
+            child: CircularProgressIndicator(),
+          );
+  }
+}
+
+Widget playerNoYoutube({required DataPreach data}) {
+  return CustomVideoPlayer(url: data.urlVideo);
 }

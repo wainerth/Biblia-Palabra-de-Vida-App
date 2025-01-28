@@ -679,7 +679,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
             .map((item) => BottomNavigationBarItem(
                   icon: Icon(
                     item.icon,
-                    size: 40.0,
+                    size: StylesApp(context).sizeIconBottomBar,
                   ),
                   label: item.title,
                 ))
@@ -880,7 +880,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
               ),
               if (index == stages.length - 1) ...{
                         SizedBox(
-                        height: kBottomNavigationBarHeight,
+                        height: kBottomNavigationBarHeight -30,
                         )
                     }
             ],

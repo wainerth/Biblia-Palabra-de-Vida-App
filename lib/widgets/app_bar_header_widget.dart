@@ -26,6 +26,7 @@ class AppBarHeaderWidget extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(color: backColor),
       child: Stack(
+        alignment: Alignment.center,
         children: [
           Positioned(
             top: 0,

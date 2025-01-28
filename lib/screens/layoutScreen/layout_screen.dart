@@ -38,7 +38,7 @@ class _LayoutScreenState extends State<LayoutScreen> {
             .map((item) => BottomNavigationBarItem(
                   icon: Icon(
                     item.icon,
-                    size: 40.0,
+                    size: StylesApp(context).sizeIconBottomBar,
                   ),
                   label: item.title,
                 ))

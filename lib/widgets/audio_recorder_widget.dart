@@ -202,38 +202,56 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
           mainAxisSize: MainAxisSize.max,
           children: [
             Expanded(
-                flex: 0,
-                child: _isRecording
+              flex: 0,
+              child: _isRecording
                   ? AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                      scale: _animation.value,
-                      child: child,
-                      );
-                    },
-                    child: IconButton(
-                      iconSize: 35.sp,
-                      onPressed: () {},
-                      icon: Icon(
-                      Icons.mic,
-                      color: Colors.white,
+                      animation: _animation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _animation.value,
+                          child: child,
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.greenAccent,
+                            border: Border.all(
+                              color: Colors.greenAccent,
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(100)),
+                        child: IconButton(
+                          iconSize: 30.sp,
+                          onPressed:null,
+                          icon: Icon(
+                            Icons.mic,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                          color: Colors.greenAccent,
+                          border: Border.all(
+                            color: Colors.greenAccent,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(100)),
+                      child: IconButton(
+                        iconSize: 35.sp,
+                        onPressed: startRecording,
+                        icon: Icon(
+                          Icons.mic,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
-                    )
-                  : IconButton(
-                    iconSize: 35.sp,
-                    onPressed: startRecording,
-                    icon: Icon(
-                      Icons.mic,
-                      color: Colors.black,
-                    ),
-                    ),
-                ),
+            ),
             SizedBox(
               width: 10,
             ),
-            if (!_isRecording) ...{
+            if (!_isRecording && _audioPath != null) ...{
               Expanded(
                 flex: 2,
                 child: Container(
@@ -297,7 +315,7 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
                   ),
                 ),
               )
-            } else ...{
+            } else if (_isRecording) ...{
               Expanded(
                 flex: 2,
                 child: Container(

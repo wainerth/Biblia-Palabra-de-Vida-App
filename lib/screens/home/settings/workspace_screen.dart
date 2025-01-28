@@ -103,7 +103,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                 height: 22.0,
               ),
               Container(
-                constraints: BoxConstraints(minHeight: 60.sp),
+                // constraints: BoxConstraints(minHeight: 60.sp),
                 margin: const EdgeInsets.symmetric(horizontal: 10.0),
                 padding: EdgeInsets.symmetric(horizontal: 26.0),
                 decoration: BoxDecoration(
@@ -117,9 +117,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                       "Librería Cristiana",
                       style: StylesApp(context).textStyleBody7,
                     ),
-                    Image.asset(
-                      'assets/books.png',
-                      width: 72.sp,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(
+                        'assets/books.png',
+                        width: 52.sp,
+                      ),
                     )
                   ],
                 ),
@@ -156,7 +159,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
               height: StylesApp(context).sizeContainerCard.height,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100.0),
+                borderRadius: BorderRadius.circular(StylesApp(context).sizeContainerCard.width),
                 image: DecorationImage(
                   image: AssetImage(card['img']!),
                   fit: BoxFit.cover,
@@ -287,7 +290,9 @@ class CardOptionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        constraints: BoxConstraints(minHeight: 70.0.sp, maxWidth: 170.0.sp),
+        constraints: BoxConstraints(
+          minHeight: 40.0.sp,
+           maxWidth: 170.0.sp),
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -303,7 +308,7 @@ class CardOptionsWidget extends StatelessWidget {
               child: Image.asset(
                 imageBackground,
                 fit: BoxFit.cover,
-                height: 69,
+                height: 50,
               ),
             ),
             Positioned.fill(
@@ -403,7 +408,7 @@ _buildProverbsSection(BuildContext context) {
             color: const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(8.0),
           ),
-          constraints: BoxConstraints(minHeight: 96.0),
+          // constraints: BoxConstraints(minHeight: 96.0),
           width: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -533,23 +538,24 @@ _buildPositionSection(BuildContext context) {
                             .copyWith(color: Colors.white),
                       ),
                     ),
-                    Center(
-                      child: Text(
-                        " 9999 Lms.",
-                        style: StylesApp(context)
-                            .textStyleBody6
-                            .copyWith(color: Colors.white),
+                    Padding(
+                      padding: const EdgeInsets.only(right:  8.0),
+                      child: Center(
+                        child: Text(
+                          " 9999 Lms.",
+                          style: StylesApp(context)
+                              .textStyleBody6
+                              .copyWith(color: Colors.white),
+                        ),
                       ),
                     ),
-                    // SizedBox(
-                    //   width: 20,
-                    // )
+                  
                   ],
                 )
               ],
             ),
             Positioned(
-              right: 0,
+              right: -3,
               top: -15,
               child: SizedBox(
                 width: 40.0.sp,

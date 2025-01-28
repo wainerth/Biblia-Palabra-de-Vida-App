@@ -1,32 +1,33 @@
 import 'package:biblia_palabra_de_vida_app/models/bottom_nav_item.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
+import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:flutter/material.dart';
 
 
-List<BottomNavigationBarItem> getBottomNavigationBarItems() {
+List<BottomNavigationBarItem> getBottomNavigationBarItems(BuildContext context) {
   return [
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.home_outlined,size: 40.0,),
+     BottomNavigationBarItem(
+      icon: Icon(Icons.home_outlined,size: StylesApp(context).sizeIconBottomBar,),
       label: 'Inicio',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.book_outlined,size: 40.0,),
+     BottomNavigationBarItem(
+      icon: Icon(Icons.book_outlined,size: StylesApp(context).sizeIconBottomBar,),
       label: 'Biblia',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.church,size: 40.0,),
+     BottomNavigationBarItem(
+      icon: Icon(Icons.church,size: StylesApp(context).sizeIconBottomBar,),
       label: 'Oración',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.audiotrack,size: 40.0,),
+     BottomNavigationBarItem(
+      icon: Icon(Icons.audiotrack,size: StylesApp(context).sizeIconBottomBar,),
       label: 'Música',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.favorite,size: 40.0,),
+     BottomNavigationBarItem(
+      icon: Icon(Icons.favorite,size: StylesApp(context).sizeIconBottomBar,),
       label: 'Ofrendas',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.settings,size: 40.0,),
+     BottomNavigationBarItem(
+      icon: Icon(Icons.settings,size: StylesApp(context).sizeIconBottomBar,),
       label: 'Settings',
     ),
   ];

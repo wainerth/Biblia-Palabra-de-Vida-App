@@ -54,14 +54,15 @@ class _PreachScreenState extends State<PreachScreen> {
       title: 'Dios pone un valle',
       author: 'Pr. Fabian',
       date: '13/01/2025',
-      urlVideo: 'https://youtu.be/1ASoPx-r_Xo?list=PL27339DE7B0837012',
+      urlVideo: 'https://cdn.pixabay.com/video/2025/01/07/251262_large.mp4',
     ),
     DataPreach(
       id: '3',
       title: 'Pon tus manos en el arado',
       author: 'Pr. Robinson Graces y Vanessa Castro',
       date: '13/01/2025',
-      urlVideo: 'https://youtu.be/1ASoPx-r_Xo?list=PL27339DE7B0837012',
+      urlVideo:
+          'https://videos.pexels.com/video-files/20000940/20000940-hd_1080_1920_30fps.mp4',
     ),
     DataPreach(
       id: '5',
@@ -164,7 +165,8 @@ class _PreachScreenState extends State<PreachScreen> {
                 : e.title);
     }
   }
-void _onItemTapped(int index) {
+
+  void _onItemTapped(int index) {
     if (index.toString() == 2.toString()) {
       Navigator.pushNamed(context, '/prayerPage');
       return;
@@ -173,7 +175,7 @@ void _onItemTapped(int index) {
       _selectedIndex = index;
     });
   }
-  
+
   @override
   void initState() {
     groupByMonthYear();
@@ -408,8 +410,14 @@ void _onItemTapped(int index) {
                                         author: preach.author,
                                         date: preach.date,
                                         iconFavorite: Icon(
-                                          Icons.favorite,
-                                          color: Colors.red,
+                                          favorites.any((element) =>
+                                                  element.id == preach.id)
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          color: favorites.any((element) =>
+                                                  element.id == preach.id)
+                                              ? Colors.red
+                                              : Colors.grey,
                                         ),
                                         onPressed: () {
                                           setState(() {
@@ -430,17 +438,31 @@ void _onItemTapped(int index) {
                         children: [
                           Expanded(
                             child: ListView.builder(
-                              itemCount: favorites.length,
+                              itemCount: groupedPreaches.length,
                               itemBuilder: (context, index) {
-                                var preach = favorites[index];
-
+                                List<String> dates =
+                                    groupedPreaches.keys.toList();
+                                var items = groupedPreaches[dates[index]]!
+                                    .where((preach) => favorites.any(
+                                        (element) => element.id == preach.id));
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0, vertical: 8.0),
-                                      child: MessageCard(
+                                    if (items.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0, vertical: 8.0),
+                                        child: Text(
+                                          dates[index],
+                                          style: StylesApp(context)
+                                              .textStyleBody14
+                                              .copyWith(
+                                                color: StyleColor.turquoise,
+                                              ),
+                                        ),
+                                      ),
+                                    ...items.map((preach) {
+                                      return MessageCard(
                                         id: preach.id,
                                         imageUrl:
                                             "https://static.vecteezy.com/system/resources/thumbnails/035/158/342/small_2x/loop-background-neon-retro-wave-80s-style-video.jpg",
@@ -452,8 +474,8 @@ void _onItemTapped(int index) {
                                           Icons.favorite,
                                           color: Colors.red,
                                         ),
-                                      ),
-                                    ),
+                                      );
+                                    }),
                                   ],
                                 );
                               },
@@ -476,13 +498,12 @@ void _onItemTapped(int index) {
         //     unselectedItemColor: Colors.white,
         //     selectedLabelStyle: StylesApp(context).textStyleBody10,
         //     unselectedLabelStyle: StylesApp(context).textStyleBody10,
-        //     items: getBottomNavigationBarItems(),
+        //     items: getBottomNavigationBarItems(context),
         //     currentIndex: _selectedIndex,
-            // onTap: _onItemTapped)
+        // onTap: _onItemTapped)
       ),
     );
   }
-
 }
 
 class MessageCard extends StatefulWidget {

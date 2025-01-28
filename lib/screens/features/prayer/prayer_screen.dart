@@ -90,24 +90,51 @@ class _PrayerScreenState extends State<PrayerScreen> {
   }
 
   _buildButtonActions(BuildContext context) {
-    return Column(
-      children: [
-        for (var index = 0; index < requestTypes.length; index++) ...{
+    var isWideScreen = MediaQuery.of(context).size.width > 600;
+    return isWideScreen
+      ? Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10.sp,
+            mainAxisSpacing: 10.sp,
+            childAspectRatio: 3,
+          ),
+          itemCount: requestTypes.length,
+          itemBuilder: (context, index) {
+            return ButtonThemeWidget(
+            text: requestTypes[index]["label"],
+            buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                backgroundColor: WidgetStatePropertyAll(generateColor(index)),
+              ),
+            width: 285.sp,
+            height: 30,
+            onPressed: () => goToRequest(requestTypes[index]),
+            );
+          },
+          ),
+      )
+      : Column(
+        children: [
+          for (var index = 0; index < requestTypes.length; index++) ...{
           ButtonThemeWidget(
             text: requestTypes[index]["label"],
             buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                  backgroundColor: WidgetStatePropertyAll(generateColor(index)),
-                ),
+              backgroundColor: WidgetStatePropertyAll(generateColor(index)),
+              ),
             width: 285.sp,
-            height: 35.sp,
+            height: StylesApp(context).btnHeight.height,
             onPressed: () => goToRequest(requestTypes[index]),
           ),
           SizedBox(
             height: 8.sp,
           )
-        }
-      ],
-    );
+          }
+        ],
+        );
   }
 }
 

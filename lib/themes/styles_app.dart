@@ -87,10 +87,12 @@ class StylesApp {
   }
 
   double get fontSizeBody2 {
-    if (screenWidth <= SizeScreensApp().sm) {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return 18.sp;
+    } else if (screenWidth <= SizeScreensApp().sm) {
       return 18.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 18.sp;
+      return 16.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 18.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
@@ -156,7 +158,7 @@ class StylesApp {
     }
   }
 
-  double get fontSizeBody5 {
+  double get fontSizeBody10 {
     if (screenWidth <= SizeScreensApp().sm) {
       return 10.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
@@ -244,7 +246,7 @@ class StylesApp {
     if (screenWidth <= SizeScreensApp().sm) {
       return 18.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 18.sp;
+      return 16.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 18.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
@@ -272,7 +274,7 @@ class StylesApp {
     if (screenWidth <= SizeScreensApp().sm) {
       return 16.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 16.sp;
+      return 14.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 14.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
@@ -304,9 +306,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(239.0.sp, 41.0.sp);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(double.infinity, 41.0.sp);
+      return Size(double.infinity, 41.sp);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(double.infinity, 80.0.sp);
+      return Size(double.infinity, 41.sp);
     } else {
       return Size(700.0.sp, 80.0.sp);
     }
@@ -495,7 +497,7 @@ class StylesApp {
       );
   TextStyle get textStyleBody10 => TextStyle(
         fontFamily: "Aclonica",
-        fontSize: fontSizeBody5,
+        fontSize: fontSizeBody10,
         color: const Color(0XFFFFF5F5),
       );
   TextStyle get textStyleBody14 => TextStyle(
@@ -555,7 +557,7 @@ class StylesApp {
       );
   ButtonStyle get btnSecondarySmall => ButtonStyle(
         padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 11.5, horizontal: 20),
+          const EdgeInsets.symmetric( horizontal: 20),
         ),
         shape: WidgetStateProperty.all(RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10), // Radio del borde
@@ -703,13 +705,13 @@ class StylesApp {
 
   Size get btnHeight {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(223.0, 43.0);
+      return Size(223.0, 35.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
       return Size(MediaQuery.sizeOf(context).width, 43.0);
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(MediaQuery.sizeOf(context).width * 0.7, 43.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(MediaQuery.sizeOf(context).width * 0.6, 60.0);
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 30.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return Size(MediaQuery.sizeOf(context).width * 0.6, 70.0);
     } else {
@@ -781,13 +783,13 @@ class StylesApp {
 
   Size get sizeContainerCard {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(90.0, 90.0);
+      return Size(80.0, 80.0);
+    } else if (screenWidth <= SizeScreensApp().xsm) {
+      return Size(80.0, 80.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(90.0, 90.0);
+      return Size(80.0, 80.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(90.0, 90.0);
-    } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(90.0, 90.0);
+      return Size(80.0, 80.0);
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
@@ -817,13 +819,13 @@ class StylesApp {
 
   Size get sizeContainerAvatar {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(59.0, 59.0);
+      return Size(39.0, 39.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(59.0, 59.0);
+      return Size(39.0, 39.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(59.0, 59.0);
+      return Size(39.0, 59.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(200.0, 200.0);
+      return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return Size(150.0, 250.0);
     } else {
@@ -833,15 +835,15 @@ class StylesApp {
 
   double get radiusAvatar {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return 30.0;
+      return 25.0;
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return 30.0;
+      return 25.0;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 30.0;
+      return 25.0;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 100.0;
+      return 40.0;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 100.0;
+      return 80.0;
     } else {
       return 30.0;
     }
@@ -880,6 +882,21 @@ class StylesApp {
   }
 
   double get sizeBtn {
+    if (screenWidth <= SizeScreensApp().xsm) {
+      return 20.sp;
+    } else if (screenWidth <= SizeScreensApp().sm) {
+      return 20.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 20.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 20.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 20.sp;
+    } else {
+      return 20.sp;
+    }
+  }
+  double get sizeIconBottomBar {
     if (screenWidth <= SizeScreensApp().xsm) {
       return 20.sp;
     } else if (screenWidth <= SizeScreensApp().sm) {

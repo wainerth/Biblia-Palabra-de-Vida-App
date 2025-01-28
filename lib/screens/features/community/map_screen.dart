@@ -2,6 +2,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -252,9 +253,9 @@ class _MapScreenState extends State<MapScreen> {
         levelCompleted: 0,
         status: 1);
     // int i = 0;
-    List coordATop = [0.02, 0.25, 0.48, 0.75];
+    List coordATop = [0.00, 0.25, 0.48, 0.75];
 
-    List coordALeft = [0.17, 0.50, 0.70, 0.65];
+    List coordALeft = [0.17, 0.50, 0.65, 0.65];
 
     List coordBTop = [0.0, 0.25, 0.50, 0.75];
     List coordBLeft = [0.30, 0.17, 0.05, 0.05];
@@ -388,9 +389,8 @@ class _MapScreenState extends State<MapScreen> {
                                     child: Image.asset(
                                       image,
                                       width: double.infinity,
-                                      height:
-                                          708, //MediaQuery.sizeOf(context).height,
-                                      fit: BoxFit.fitHeight,
+                                      height: MediaQuery.sizeOf(context).height,
+                                      fit: BoxFit.fill,
                                     ),
                                   ),
                                   for (var i = 0; i < grupo.length; i++) ...{
@@ -433,12 +433,13 @@ class _MapScreenState extends State<MapScreen> {
                                           child: Stack(
                                             children: [
                                               Center(
-                                                child: _starStatus(
-                                                    context,
-                                                    grupo[i].score,
-                                                    StylesApp(context)
-                                                        .sizeContainerLevel
-                                                        .width),
+                                                child: StarStatusWidget(
+                                                  containerWidth:
+                                                      StylesApp(context)
+                                                          .sizeContainerLevel
+                                                          .width,
+                                                  unLockLevel: grupo[i].score,
+                                                ),
                                               ),
                                               Column(
                                                 crossAxisAlignment:
@@ -461,15 +462,26 @@ class _MapScreenState extends State<MapScreen> {
                                                                   .height,
                                                           decoration:
                                                               BoxDecoration(
-                                                                  color: Color(int
-                                                                          .tryParse(
+                                                                  color: Color(grupo[i]
+                                                                              .score >
+                                                                          0
+                                                                      ? getColorItem(grupo[
+                                                                              i]
+                                                                          .score)
+                                                                      : int.tryParse(
                                                                               '0xFF${grupo[i].color}') ??
-                                                                      0XFF000000),
+                                                                          0XFF000000),
                                                                   shape: BoxShape
                                                                       .circle,
                                                                   border: Border
                                                                       .all(
-                                                                    color: Color
+                                                                    color:grupo[i]
+                                                                              .score >
+                                                                          0
+                                                                      ? Color(getColorItem(grupo[
+                                                                              i]
+                                                                          .score))
+                                                                      : Color
                                                                         .fromARGB(
                                                                       100, // Opacidad: 50%
                                                                       int.parse(
@@ -493,9 +505,12 @@ class _MapScreenState extends State<MapScreen> {
                                                                   ),
                                                                   boxShadow: [
                                                                 BoxShadow(
-                                                                    color: Colors
-                                                                        .black
-                                                                        .withValues(
+                                                                    color: grupo[i].score >
+                                                                            0
+                                                                        ? Color(getColorShadow(grupo[i].score)).withValues(
+                                                                            alpha:
+                                                                                0.5)
+                                                                        : Colors.black.withValues(
                                                                             alpha:
                                                                                 0.5),
                                                                     offset:
@@ -650,12 +665,31 @@ class _MapScreenState extends State<MapScreen> {
       // ),
     );
   }
+
+  int getColorShadow(double score) {
+    if (score > 100) {
+      return 0XFFBE9D27;
+    } else if (score > 50 && score < 99) {
+      return 0XFFA5A7A1;
+    } else {
+      return 0XFFD5886B;
+    }
+  }
+
+  int getColorItem(double score) {
+    if (score > 100) {
+      return 0XFFFCD859;
+    } else if (score > 50 && score < 99) {
+      return 0XFFE4E0E0;
+    } else {
+      return 0XFFD5886B;
+    }
+  }
 }
 
-
 _starStatus(BuildContext context, double unLockLevel, double containerWidth) {
-  final double starSize = 30.0; // Adjust star size as needed
-  final double starSpacing = (containerWidth - (3.0 * starSize)) / 3.0;
+  final double starSize = 30.sp; // Adjust star size as needed
+  final double starSpacing = (containerWidth - (3.sp * starSize)) / 3.sp;
 
   return Center(
     child: SizedBox(
@@ -728,11 +762,28 @@ _starStatus(BuildContext context, double unLockLevel, double containerWidth) {
 
 _buildItemLevel(BuildContext context, Level grupo) {
   if (grupo.img.urlImg.isNotEmpty) {
-    return Image.asset(
-      grupo.img.urlImg,
-      // width: StylesApp(context).sizeImage.width,
-      // height: StylesApp(context).sizeImage.height,
-      fit: StylesApp(context).fitImage,
+    return Container(
+          width: StylesApp(context)
+          .sizeContainerSub
+          .width, // Ajusta el tamaño según tus necesidades
+      height: StylesApp(context).sizeContainerSub.height,
+      decoration:  BoxDecoration(
+        color: grupo.score > 0
+            ? Color(getColorInner(grupo.score))
+            : Color.fromARGB(
+                100,
+                int.parse('0xFF${grupo.color}'.substring(2), radix: 16),
+                int.parse('0xFF${grupo.color}'.substring(4, 6), radix: 16),
+                int.parse('0xFF${grupo.color}'.substring(6), radix: 16),
+              ),
+        shape: BoxShape.circle,
+      ),
+      child: Image.asset(
+        grupo.img.urlImg,
+        // width: StylesApp(context).sizeImage.width,
+        // height: StylesApp(context).sizeImage.height,
+        fit: StylesApp(context).fitImage,
+      ),
     );
   } else {
     return Container(
@@ -742,12 +793,14 @@ _buildItemLevel(BuildContext context, Level grupo) {
       height: StylesApp(context).sizeContainerSub.height,
       padding: EdgeInsets.all(0.0),
       decoration: BoxDecoration(
-        color: Color.fromARGB(
-          100, // Opacidad: 50%
-          int.parse('0xFF${grupo.color}'.substring(2), radix: 16),
-          int.parse('0xFF${grupo.color}'.substring(4, 6), radix: 16),
-          int.parse('0xFF${grupo.color}'.substring(6), radix: 16),
-        ),
+        color: grupo.score > 0
+            ? Color(getColorInner(grupo.score))
+            : Color.fromARGB(
+                100,
+                int.parse('0xFF${grupo.color}'.substring(2), radix: 16),
+                int.parse('0xFF${grupo.color}'.substring(4, 6), radix: 16),
+                int.parse('0xFF${grupo.color}'.substring(6), radix: 16),
+              ),
         shape: BoxShape.circle,
       ),
       child: Center(
@@ -767,12 +820,22 @@ _buildItemLevel(BuildContext context, Level grupo) {
             Text(
               "paso",
               style: StylesApp(context).textStyleLevelNumber.copyWith(
-                  fontSize: StylesApp(context).fontSizeBody5,
+                  fontSize: StylesApp(context).fontSizeBody10,
                   color: Colors.white),
             )
           ],
         ),
       ),
     );
+  }
+}
+
+int getColorInner(double score) {
+  if (score > 100) {
+    return 0XFFDDAC17;
+  } else if (score > 50 && score < 99) {
+    return 0XFFA5A7A1;
+  } else {
+    return 0XFFB05E3C;
   }
 }

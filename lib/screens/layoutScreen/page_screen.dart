@@ -55,7 +55,7 @@ class _PageScreenState extends State<PageScreen> {
             unselectedItemColor: Colors.white,
             selectedLabelStyle: StylesApp(context).textStyleBody10,
             unselectedLabelStyle: StylesApp(context).textStyleBody10,
-            items: getBottomNavigationBarItems(),
+            items: getBottomNavigationBarItems(context),
             currentIndex: _selectedIndex,
             onTap: _onItemTapped)
 
