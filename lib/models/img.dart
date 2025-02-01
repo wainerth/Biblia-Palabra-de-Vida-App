@@ -4,7 +4,6 @@ class Img {
   Img({required this.urlImg});
 
   factory Img.fromJson(Map<String, dynamic> json) {
-    print("a");
     return Img(
       urlImg: json['urlImg'],
     );

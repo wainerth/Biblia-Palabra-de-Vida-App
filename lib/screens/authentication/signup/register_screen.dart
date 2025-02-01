@@ -395,7 +395,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     items: dropDownList,
                                     onChanged: (ModelData? newValue) {
                                       setState(() {
-                                        print(newValue);
                                         _selectedData = newValue;
                                         _selectedCountry = countries.firstWhere(
                                             (country) =>

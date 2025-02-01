@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 final Map<String, WidgetBuilder> routes = {
@@ -16,7 +17,7 @@ final Map<String, WidgetBuilder> routes = {
   '/bibliaPage': (BuildContext context) => BibleScreen(),
   '/communityPage': (BuildContext context) => CommunityScreen(),
   '/profilePage': (BuildContext context) => ProfileScreen(),
-  '/workspacePage':(BuildContext context)=> WorkspaceScreen() ,
+  '/workspacePage':(BuildContext context)=>  AuthGuard(child: WorkspaceScreen()) ,
   '/detailsProgressPage': (BuildContext context) => ProgressDetailScreen(),
   '/prayerPage': (BuildContext context) => PrayerScreen(),
   '/listRequestPage': (BuildContext context) => ListRequestScreen(),

@@ -336,7 +336,7 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
 
     return Scaffold(
       body: SafeArea(
-        child: Container(
+        child: SizedBox(
           height: MediaQuery.sizeOf(context).height,
           child: SingleChildScrollView(
             child: Column(
@@ -519,7 +519,7 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
                   ButtonThemeWidget(
                     text: "Verificar",
                     buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                          backgroundColor: MaterialStateProperty.all(
+                          backgroundColor: WidgetStatePropertyAll(
                             orderedAnswers.length < countList
                                 ? Color(0XFFC4C4C4)
                                 : Color(0XFFF27728),
@@ -914,7 +914,7 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
                       ),
                       Text(
                         textAlign: TextAlign.center,
-                        'Haz ganado\n ${score} LMs de energía',
+                        'Haz ganado\n $score LMs de energía',
                         style: StylesApp(context).textStyleWithe20,
                       ),
                     },
@@ -947,7 +947,7 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
                     fit: BoxFit.contain,
                   ),
                   Text(
-                    "${score} lms",
+                    "$score lms",
                     style: StylesApp(context)
                         .textStyleBody20
                         .copyWith(color: Color(0XFFFD8C43)),

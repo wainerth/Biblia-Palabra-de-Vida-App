@@ -1,10 +1,13 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class WorkspaceScreen extends StatefulWidget {
@@ -15,6 +18,30 @@ class WorkspaceScreen extends StatefulWidget {
 }
 
 class _WorkspaceScreenState extends State<WorkspaceScreen> {
+  LoginUser? dataUser;
+  late final  catalogueProvider;
+  
+
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   final authProvider = Provider.of<AuthenticationProvider>(context);
+  //   authProvider.loadUserData().then((userData) {
+  //     setState(() {
+  //       dataUser = userData;
+  //     });
+  //   });
+  // }
+  @override
+  void initState() {
+    super.initState();
+    _initializeCatalogues();
+  }
+void _initializeCatalogues() async {
+     catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
+     catalogueProvider.init();
+}
+
   List<ButtonData> buttonsData = [
     ButtonData(
         id: "1",
@@ -54,6 +81,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+     final authProvider = Provider.of<AuthenticationProvider>(context);
+     dataUser = authProvider.currentUser;
     final cardList = [
       // Replace with your actual asset paths and route names
       {
@@ -84,9 +113,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
               SizedBox(
                 height: 12.0,
               ),
-              // Text("Width: ${MediaQuery.sizeOf(context).width}"),
-              // Text("Height: ${MediaQuery.sizeOf(context).height}"),
-              _buildPositionSection(context),
+              _buildPositionSection(context, dataUser),
               SizedBox(
                 height: 12.0,
               ),
@@ -128,7 +155,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                 ),
               ),
               SizedBox(
-                height: kBottomNavigationBarHeight-40,
+                height: kBottomNavigationBarHeight - 40,
               )
             ],
           ),
@@ -159,7 +186,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
               height: StylesApp(context).sizeContainerCard.height,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(StylesApp(context).sizeContainerCard.width),
+                borderRadius: BorderRadius.circular(
+                    StylesApp(context).sizeContainerCard.width),
                 image: DecorationImage(
                   image: AssetImage(card['img']!),
                   fit: BoxFit.cover,
@@ -291,8 +319,8 @@ class CardOptionsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         constraints: BoxConstraints(
-          minHeight: 40.0.sp,
-           maxWidth: 170.0.sp),
+            minHeight: MediaQuery.sizeOf(context).width > 400 ? 70.sp : 40.sp,
+            maxWidth: 170.0.sp),
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -373,14 +401,15 @@ _buildProverbsSection(BuildContext context) {
                                   "Proverbios 3:4\n Y hallarás gracia y buena opinión En los ojos de Dios y de los hombres."));
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content: Text('Proverbio copiado al portapapeles')),
+                                content:
+                                    Text('Proverbio copiado al portapapeles')),
                           );
                         },
                       ),
                     ),
                   ),
                   SizedBox(
-                     width: 16.sp,
+                    width: 16.sp,
                     height: 16.sp,
                     child: IconButton(
                       padding: EdgeInsets.all(0),
@@ -397,7 +426,9 @@ _buildProverbsSection(BuildContext context) {
                       },
                     ),
                   ),
-                  SizedBox(width: 8,)
+                  SizedBox(
+                    width: 8,
+                  )
                 ],
               ),
             ],
@@ -408,7 +439,9 @@ _buildProverbsSection(BuildContext context) {
             color: const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(8.0),
           ),
-          // constraints: BoxConstraints(minHeight: 96.0),
+          constraints: MediaQuery.of(context).size.width > 400
+              ? BoxConstraints(minHeight: 96.0)
+              : BoxConstraints(),
           width: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -433,7 +466,7 @@ _buildProverbsSection(BuildContext context) {
   );
 }
 
-_buildPositionSection(BuildContext context) {
+_buildPositionSection(BuildContext context, userData) {
   return Container(
     decoration: BoxDecoration(
       color: const Color(0xFF12CBC4),
@@ -441,7 +474,7 @@ _buildPositionSection(BuildContext context) {
     ),
     margin: const EdgeInsets.symmetric(horizontal: 10.0),
     width: MediaQuery.of(context).size.width,
-    padding: const EdgeInsets.only(left: 20.0, top: 6.0, bottom: 6.0),
+    padding: const EdgeInsets.only(left: 5.0,right: 5.0, top: 6.0, bottom: 6.0),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -463,8 +496,9 @@ _buildPositionSection(BuildContext context) {
                                   StylesApp(context).sizeContainerAvatar.width,
                               child: CircleAvatar(
                                 radius: StylesApp(context).radiusAvatar,
-                                backgroundImage:
-                                    const AssetImage('assets/avatar.png'),
+                                backgroundImage: NetworkImage(
+                                    (userData != null && userData.imgProfileUser != '')  ? GraphQLConfig.urlServidor + userData.imgProfileUser :
+                                        'assets/no-image.jpg'),
                               ),
                             ),
                           ],
@@ -521,25 +555,31 @@ _buildPositionSection(BuildContext context) {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Center(
-                      child: Text(
-                        "Robinson",
-                        style: StylesApp(context)
-                            .textStyleBody6
-                            .copyWith(color: Colors.white),
+                    Expanded(
+                      flex: 1,
+                      child: Center(
+                        child: Text(
+                          "Robinson",
+                          style: StylesApp(context)
+                              .textStyleBody6
+                              .copyWith(color: Colors.white),
+                        ),
                       ),
                     ),
-                    Center(
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        "Const: 300 Dias",
-                        style: StylesApp(context)
-                            .textStyleBody6
-                            .copyWith(color: Colors.white),
+                    Expanded(
+                      flex: 2,
+                      child: Center(
+                        child: Text(
+                          textAlign: TextAlign.center,
+                          "Const: 300 Dias",
+                          style: StylesApp(context)
+                              .textStyleBody6
+                              .copyWith(color: Colors.white),
+                        ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right:  8.0),
+                    Expanded(
+                      flex: 1,
                       child: Center(
                         child: Text(
                           " 9999 Lms.",
@@ -549,7 +589,6 @@ _buildPositionSection(BuildContext context) {
                         ),
                       ),
                     ),
-                  
                   ],
                 )
               ],

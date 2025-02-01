@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 

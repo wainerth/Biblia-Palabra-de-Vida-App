@@ -107,7 +107,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             offset: Offset(0, 4),
             blurRadius: 4,
             color: Colors.black
-                .withOpacity(0.25), // Negro con 25% de transparencia
+                .withValues(alpha: 0.25), // Negro con 25% de transparencia
           ),
         ],
         image: widget.showImage
@@ -118,7 +118,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               )
             : null,
         color: widget.showImage
-            ? Colors.black.withOpacity(0.9)
+            ? Colors.black.withValues(alpha: 0.9)
             : widget.backgroundColor,
       ),
       child: Row(

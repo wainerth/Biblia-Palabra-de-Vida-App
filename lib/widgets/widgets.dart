@@ -1,3 +1,9 @@
+export 'package:biblia_palabra_de_vida_app/widgets/profile_header.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/loading_indicator.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/authguard/auth_guard.dart';
+
 export 'package:biblia_palabra_de_vida_app/widgets/video_player_widget.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/app_bar_header_widget.dart';
@@ -26,7 +32,7 @@ export 'package:biblia_palabra_de_vida_app/widgets/header_widget_progress.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/header_widget.dart';
 
-export 'package:biblia_palabra_de_vida_app/widgets/dinamic_bottom_navigation_bar.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/dynamic_bottom_navigation_bar.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/custom_modal_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/button_theme_widget.dart';

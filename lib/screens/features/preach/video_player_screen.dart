@@ -22,7 +22,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     String? videoId = YoutubePlayer.convertUrlToId(widget.data.urlVideo);
     if (videoId != null) {
       _controller = YoutubePlayerController(
-        initialVideoId: videoId!, // Reemplaza con el ID de tu video
+        initialVideoId: videoId, // Reemplaza con el ID de tu video
         flags: const YoutubePlayerFlags(
           autoPlay: false,
           mute: false,
@@ -116,7 +116,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  "${widget.data.date}",
+                                  widget.data.date,
                                   style: StylesApp(context)
                                       .textStyleBody12
                                       .copyWith(color: Colors.black),
@@ -219,13 +219,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
 class CustomVideoPlayer extends StatefulWidget {
   final String url;
-  const CustomVideoPlayer({Key? key, required this.url}) : super(key: key);
+  const CustomVideoPlayer({super.key, required this.url});
 
   @override
-  _CustomVideoPlayerState createState() => _CustomVideoPlayerState();
+  CustomVideoPlayerState createState() => CustomVideoPlayerState();
 }
 
-class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
+class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   late VideoPlayerController _videoController;
   bool _isPlaying = false;
 

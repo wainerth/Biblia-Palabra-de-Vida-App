@@ -1,12 +1,12 @@
-import 'dart:io';
-
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/button_theme_widget.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,6 +17,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String avatarImg = 'assets/avatar.png';
+  LoginUser? dataUser;
 
   Future<void> _selectImage() async {
     final picker = ImagePicker();
@@ -32,37 +33,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  ImageProvider _getImageProvider() {
-    if (avatarImg.startsWith('assets/')) {
-      return AssetImage(avatarImg);
-    } else {
-      return FileImage(File(avatarImg));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthenticationProvider>(context);
+    dataUser = authProvider.currentUser;
+
     List<ModelData> progressData = [
-      ModelData(label: "Registro", value: "01/07/2024"),
-      ModelData(label: "Racha", value: "120 días"),
-      ModelData(label: "Energía", value: "545"),
+      ModelData(
+        label: "Registro",
+        value: getFormatedDate(int.parse(dataUser!.createdAt)),
+      ),
+      ModelData(label: "Racha", value: "${dataUser!.streakDaysCount} días"),
+      ModelData(label: "Energía", value: "${dataUser!.expTotalUser}"),
       ModelData(label: "Cursos Completados", value: "4"),
     ];
     List<ModelData> personalData = [
-      ModelData(label: "", value: "Robinson Manuel Garces Rodriguez"),
+      ModelData(label: "Nombre", value: dataUser!.name, showLabel: false),
       ModelData(label: "Sexo", value: "Masculino"),
       ModelData(label: "Fecha nac", value: "01/07/1980"),
-      ModelData(label: "", value: "Bautizado"),
+      ModelData(label: "Bautizo", value: "Bautizado", showLabel: false),
     ];
     List<ModelData> contactDetails = [
-      ModelData(label: "", value: "robinsongarces@gmail.com"),
-      ModelData(label: "Tel.:", value: "+598-9514056"),
+      ModelData(
+          label: "Email", value: "robinsongarces@gmail.com", showLabel: false),
+      ModelData(label: "Tel.:", value: "+58 4267406377"),
     ];
     List<ModelData> locationData = [
       ModelData(label: "País", value: "Uruguay"),
       ModelData(label: "Ciudad", value: "Montevideo"),
       ModelData(label: "Iglesia", value: "Palabra de Vida"),
     ];
+
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -73,7 +74,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                _headerDetails(),
+                // _headerDetails(),
+                ProfileHeader(
+                  avatarImg: dataUser!.imgProfileUser,
+                  onSelectImage: _selectImage,
+                ),
                 SizedBox(
                   height: 23.0,
                 ),
@@ -113,8 +118,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 35.0,
                 ),
                 ButtonThemeWidget(
-                  onPressed: (){
-                    Navigator.popAndPushNamed(context,'/layoutPage');
+                  onPressed: () {
+                    Navigator.popAndPushNamed(context, '/layoutPage');
                   },
                   text: "Volver",
                   buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -132,128 +137,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
-  _headerDetails() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: const AssetImage("assets/elipsisTop.png"),
-          fit: BoxFit.cover,
-          alignment: Alignment.bottomCenter,
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 10,
-            left: 15,
-            child: Container(
-                height: 35.sp,
-                width: 35.sp,
-                decoration: BoxDecoration(
-                    color: Color(0XFFFD8C43),
-                    borderRadius: BorderRadius.circular(35.sp)),
-                child: IconButton(
-                    constraints: BoxConstraints(maxHeight: 35.0),
-                    padding: EdgeInsets.all(0),
-                    iconSize: 35.sp,
-                    color: Colors.white,
-                    onPressed: () {
-                      // Navigator.pushNamed(context, "/layoutPage");
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(
-                      Icons.arrow_back,
-                      size: 35.sp,
-                    ))),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: 10.0,
-              ),
-              GestureDetector(
-                onTap: _selectImage,
-                child: Center(
-                  child: SizedBox(
-                    child: Stack(
-                      children: [
-                        Container(
-                          constraints:
-                              BoxConstraints(maxWidth: 160, minHeight: 160),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(160),
-                              border: Border.all(
-                                  width: 6.0, color: Color(0XFF12CBC4))),
-                            child: ClipOval(
-                            child: Image(
-                              image: _getImageProvider(),
-                              fit: BoxFit.cover,
-                              height: 160,
-                              width: 160,
-                              alignment: Alignment.topCenter,
-                            ),
-                            ),
-                        ),
-                        Positioned(
-                          bottom: 10.0,
-                          right: 0,
-                          child: Container(
-                            width: 40.0,
-                            height: 40.0,
-                            decoration: BoxDecoration(
-                                color: Color(0XFF12CBC4),
-                                borderRadius: BorderRadius.circular(40)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Icon(
-                                Icons.camera_alt_outlined,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Text(
-                "Robinson",
-                style: StylesApp(context).textStyleTitleOrange,
-              ),
-              SizedBox(
-                height: 10.0,
-              )
-            ],
-          ),
-          Positioned(
-              top: 10,
-              right: 10,
-              child: Column(
-                children: [
-                  Image.asset("assets/kawaii_fire.png"),
-                  Text(
-                    "1000",
-                    style: StylesApp(context)
-                        .textStyleBody4
-                        .copyWith(color: Color(0XFFFD8C43)),
-                  )
-                ],
-              ))
-        ],
-      ),
-    );
-  }
 }
 
 class CardColumnWidget extends StatelessWidget {
   final String iconRight;
   final IconData iconLeft;
-  final List data;
+  final List<ModelData> data;
   final bool highlightLabel;
   final bool divider;
   final String? route;
@@ -302,7 +191,8 @@ class CardColumnWidget extends StatelessWidget {
                             TextSpan(
                               children: [
                                 if (data[i].label.isNotEmpty)
-                                  TextSpan(text: "${data[i].label}: "),
+                                  if (data[i].showLabel)
+                                    TextSpan(text: "${data[i].label}: "),
                                 TextSpan(
                                   text: data[i].value,
                                   style: StylesApp(context)
@@ -327,30 +217,35 @@ class CardColumnWidget extends StatelessWidget {
                 top: 0,
                 right: 2,
                 child: Container(
-                    width: 40.sp,
-                    height: 40.sp,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40.sp),
-                      color: Colors.orange,
+                  width: 40.sp,
+                  height: 40.sp,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40.sp),
+                    color: Colors.orange,
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.all(0),
+                    constraints: BoxConstraints(maxWidth: 40.sp),
+                    iconSize: 30.sp,
+                    onPressed: () {
+                      if (route != null) {
+                        Navigator.popAndPushNamed(context, route!);
+                      } else {
+                        showDialog(
+                            useSafeArea: true,
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) {
+                              return EditDetailDialog(data: data);
+                            });
+                      }
+                    },
+                    icon: Icon(
+                      iconLeft,
+                      color: Colors.white,
                     ),
-                    child: IconButton(
-                        padding: EdgeInsets.all(0),
-                        constraints: BoxConstraints(maxWidth: 40.sp),
-                        iconSize: 30.sp,
-                        onPressed: () {
-                          if(route != null){
-                            Navigator.popAndPushNamed(context, route!);
-                          } else {
-                            if (kDebugMode) {
-                              print("Mostramos modal");
-                            }
-                          }
-
-                        },
-                        icon: Icon(
-                          iconLeft,
-                          color: Colors.white,
-                        ))),
+                  ),
+                ),
               ),
             ],
           ),
@@ -373,6 +268,301 @@ class CardColumnWidget extends StatelessWidget {
               ],
             ),
           ),
+      ],
+    );
+  }
+}
+
+class EditDetailDialog extends StatefulWidget {
+  final List<ModelData> data;
+  const EditDetailDialog({super.key, required this.data});
+
+  @override
+  State<EditDetailDialog> createState() => _editDetailDialog();
+}
+
+class _editDetailDialog extends State<EditDetailDialog> {
+  @override
+  Widget build(BuildContext context) {
+    final catalogueProvider =
+        Provider.of<CatalogueProvider>(context, listen: false);
+
+    final List<ModelData> dropDownList = catalogueProvider.allCountries
+        .map((country) => ModelData(value: country.id, label: country.country))
+        .cast<ModelData>()
+        .toList();
+    final List<ModelData> prefixCode = catalogueProvider.allCountries
+        .map((country) =>
+            ModelData(value: country.id, label: country.countryCode))
+        .cast<ModelData>()
+        .toList();
+    List<ModelData> optionsSex = [
+      ModelData(value: 'masculino', label: 'Masculino'),
+      ModelData(value: 'femenino', label: 'Femenino'),
+      ModelData(
+          value: 'otro',
+          label: 'Otro'), // Opción adicional para personas no binarias
+      ModelData(
+          value: 'desconocido',
+          label: 'Desconocido'), // Opción para cuando no se conoce el sexo
+    ];
+    return Dialog(
+      alignment: Alignment.bottomCenter,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero, // Elimina las esquinas redondeadas
+      ),
+      insetPadding: EdgeInsets.only(top: 50),
+      backgroundColor: Colors.white,
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Container(
+              color: StyleColor.turquoise,
+              width: double.infinity,
+              height: MediaQuery.sizeOf(context).height * 0.6,
+              child: Column(
+                children: [
+                  HeadScreenNotAvatar(
+                    title: "Edición de Datos",
+                    onRoute: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 15),
+                      padding: EdgeInsets.all(15),
+                      color: Colors.white,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: ListView.builder(
+                              itemCount: widget.data.length,
+                              itemBuilder: (context, index) {
+                                final item = widget.data[index];
+                                return Column(
+                                  children: [
+                                    _buildField(
+                                        item,
+                                        dropDownList,
+                                        prefixCode,
+                                        optionsSex,
+                                        catalogueProvider.allCountries),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            flex: 0,
+                            child: ButtonThemeWidget(
+                              buttonStyle: StylesApp(context).btnWidgetSmall,
+                              text: 'Guardar',
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 40,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildField(
+      ModelData item,
+      List<ModelData> dropDownList,
+      List<ModelData> listPrefixCode,
+      List<ModelData> optionsSex,
+      List<Country> listCatalogue) {
+    final FocusNode _focusNode = FocusNode();
+    String phoneNumber = '';
+    ModelData? _selectedData;
+    ModelData? _selectedDataSex;
+    String? bautizado;
+    var _selectedCountry = null;
+    var _selectedCountryCode = null;
+
+    final TextEditingController _phoneNumberController =
+        TextEditingController();
+    final TextEditingController _textEditController =
+        TextEditingController(text: item.value);
+
+    if (item.label == 'Tel.:') {
+      _phoneNumberController.text = '';
+      phoneNumber = maskFormatterTel
+          .maskText(item.value.isNotEmpty ? item.value.split(' ')[1] : '');
+
+      _selectedCountryCode = item.value.isNotEmpty
+          ? listPrefixCode.firstWhere(
+              (element) => element.label == item.value.split(' ')[0])
+          : null;
+      return Row(
+        spacing: 10,
+        children: [
+          Expanded(
+            flex: 1,
+            child: Container(
+              child: CustomDropdownWidget<Country>(
+                hintText: "código",
+                items: listPrefixCode,
+                onChanged: (ModelData? newValue) {
+                  setState(() {
+                    _selectedCountryCode = newValue;
+                  });
+                },
+                selectedItem: _selectedCountryCode,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: TextFormField(
+              // controller: _phoneNumberController,
+              initialValue: phoneNumber,
+              focusNode: _focusNode,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                maskFormatterTel, // Permite solo números
+              ],
+              onFieldSubmitted: (value) {
+                _phoneNumberController.text =
+                    value.replaceAll(RegExp(r'[^\d]+'), '');
+              },
+              onChanged: (value) {
+                _phoneNumberController.text =
+                    value.replaceAll(RegExp(r'[^\d]+'), '');
+              },
+              decoration: StylesApp(context).inputDecorationStyle.copyWith(
+                    hintText: "Número de teléfono",
+                  ),
+              style: const TextStyle(fontSize: 16),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Por favor, ingresa tu número de teléfono.";
+                }
+                return null;
+              },
+            ),
+          )
+        ],
+      );
+    } else if (item.label == 'Sexo') {
+      return Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        child: CustomDropdownWidget<SexModel>(
+          hintText: "Seleccione Sexo",
+          items: optionsSex,
+          onChanged: (ModelData? newValue) {
+            setState(() {
+              _selectedDataSex = newValue;
+            });
+          },
+          selectedItem: _selectedDataSex,
+        ),
+      );
+    } else if (item.label == 'Bautizo') {
+      bautizado = item.value;
+      return BautizadoRadioButton(
+        isBautizado: bautizado == 'Bautizado',
+        onChanged: (bool? value) {
+          setState(() {
+            bautizado = "No Bautizado";
+          });
+        },
+      );
+    } else if (item.label == 'País') {
+      return Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        child: CustomDropdownWidget<Country>(
+          hintText: "Seleccione un país",
+          items: dropDownList,
+          onChanged: (ModelData? newValue) {
+            setState(() {
+              _selectedData = newValue;
+              _selectedCountry = listCatalogue
+                  .firstWhere((country) => country.id == newValue!.value);
+            });
+          },
+          selectedItem: _selectedData,
+        ),
+      );
+    } else {
+      return TextFormField(
+        controller: _textEditController,
+        decoration: StylesApp(context).inputDecorationStyle.copyWith(
+              hintText: item.label,
+            ),
+      );
+    }
+  }
+}
+
+class BautizadoRadioButton extends StatefulWidget {
+  final bool isBautizado;
+  final Function(bool?)? onChanged;
+  const BautizadoRadioButton(
+      {super.key, required this.isBautizado, this.onChanged});
+
+  @override
+  State<BautizadoRadioButton> createState() => _BautizadoRadioButtonState();
+}
+
+class _BautizadoRadioButtonState extends State<BautizadoRadioButton> {
+  // Variable para almacenar la opción seleccionada
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Text(
+          '¿Está bautizado?',
+          style:
+              StylesApp(context).textStyleBody16.copyWith(color: Colors.black),
+        ), // Etiqueta para el grupo de RadioButtons
+        Radio<bool>(
+          value: true, // Valor para la opción "Sí"
+          activeColor: StyleColor.turquoise,
+          groupValue:
+              widget.isBautizado, // Grupo al que pertenece este RadioButton
+          onChanged: widget.onChanged,
+        ),
+        Text('Sí',
+            style: StylesApp(context)
+                .textStyleBody16
+                .copyWith(color: Colors.black)), // Etiqueta para la opción "Sí"
+        Radio<bool>(
+          value: false, // Valor para la opción "No"
+          activeColor: StyleColor.turquoise,
+          groupValue:
+              widget.isBautizado, // Grupo al que pertenece este RadioButton
+          onChanged: widget.onChanged,
+        ),
+        Text('No',
+            style: StylesApp(context)
+                .textStyleBody16
+                .copyWith(color: Colors.black)), // Etiqueta para la opción "No"
       ],
     );
   }

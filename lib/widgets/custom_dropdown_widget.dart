@@ -18,18 +18,34 @@ class CustomDropdownWidget<T> extends StatefulWidget {
   });
 
   @override
-  State<CustomDropdownWidget<T>> createState() => _CustomDropdownWidgetState<T>();
+  State<CustomDropdownWidget<T>> createState() =>
+      _CustomDropdownWidgetState<T>();
 }
 
 class _CustomDropdownWidgetState<T> extends State<CustomDropdownWidget<T>> {
   @override
   Widget build(BuildContext context) {
     // List<ModelData> dropDownList = widget.items;
+ // Agrega este logging para verificar duplicados:
+    Set<ModelData> elementosUnicos = Set<ModelData>();
+    List<ModelData> duplicados = [];
+    for (ModelData elemento in widget.items) {
+      if (elementosUnicos.contains(elemento)) {
+        duplicados.add(elemento);
+        print("Duplicado encontrado: ${elemento.toString()}"); // O imprime propiedades relevantes de ModelData
+      } else {
+        elementosUnicos.add(elemento);
+      }
+    }
 
+    if (duplicados.isNotEmpty) {
+      print("Duplicados encontrados: ${duplicados.length}");
+      // Considera lanzar una excepción aquí en modo debug para detener la ejecución e investigar.
+      // throw Exception("¡Elementos ModelData duplicados detectados!");
+    }
     return widget.items.isEmpty
         ? CircularProgressIndicator()
         : DropdownButtonFormField<ModelData>(
-            value: widget.selectedItem,
             hint: Text(
               widget.hintText,
               style: StylesApp(context).textStyleHintText,
@@ -51,6 +67,7 @@ class _CustomDropdownWidgetState<T> extends State<CustomDropdownWidget<T>> {
             onChanged: widget.onChanged,
             decoration: StylesApp(context).inputDecorationStyle,
             isExpanded: true,
+            value: widget.selectedItem,
           );
   }
 }

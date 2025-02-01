@@ -19,11 +19,11 @@ class CustomModalWidget extends StatelessWidget {
       required this.id,
       required this.itemCount,
       required this.itemsCompleted,
-      bool this.showSubtitle = true});
+      this.showSubtitle = true});
 
   @override
   Widget build(BuildContext context) {
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController scrollController = ScrollController();
 
     return Dialog(
       insetPadding:
@@ -78,7 +78,7 @@ class CustomModalWidget extends StatelessWidget {
                                         borderRadius:
                                             BorderRadius.circular(28)),
                                     child: Text(
-                                      "Etapa ${id}",
+                                      "Etapa $id",
                                       style: StylesApp(context).textStyleBody4,
                                     )),
                                 Container(
@@ -89,7 +89,7 @@ class CustomModalWidget extends StatelessWidget {
                                         borderRadius:
                                             BorderRadius.circular(28)),
                                     child: Text(
-                                        "${itemsCompleted} / ${itemCount}",
+                                        "$itemsCompleted / $itemCount",
                                         style:
                                             StylesApp(context).textStyleBody4)),
                               ],
@@ -142,11 +142,11 @@ class CustomModalWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                   child: Scrollbar(
-                    controller: _scrollController,
+                    controller: scrollController,
                     thumbVisibility: true,
                     thickness: 6.0,
                     child: SingleChildScrollView(
-                      controller: _scrollController,
+                      controller: scrollController,
                       child: Column(
                         children: [
                           

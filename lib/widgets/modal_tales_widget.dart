@@ -2,6 +2,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ModalTalesWidget extends StatefulWidget {
@@ -86,11 +87,15 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                 },
                 displayStringForOption: (ButtonData option) => option.name,
                 onSelected: (ButtonData selection) {
-                  print('You just selected ${selection.name}');
+                  if (kDebugMode) {
+                    print('You just selected ${selection.name}');
+                  }
                   setState(() {
                     taleSelected = selection;
                   });
-                  print(taleSelected!.name);
+                  if (kDebugMode) {
+                    print(taleSelected!.name);
+                  }
                 },
                 fieldViewBuilder: (BuildContext context,
                     TextEditingController textEditingController,
@@ -112,7 +117,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                         borderSide: BorderSide(
-                          color: Colors.black.withOpacity(0.15),
+                          color: Colors.black.withValues(alpha: 0.15),
                         ),
                       ),
                     ),
@@ -190,7 +195,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                     offset: Offset(0, -4),
                     blurRadius: 4,
                     color: Colors.black
-                        .withOpacity(0.25), // Negro con 25% de transparencia
+                        .withValues(alpha: 0.25), // Negro con 25% de transparencia
                   ),
                 ],
               ),

@@ -13,7 +13,7 @@ class QuestionScreen extends StatefulWidget {
 class _QuestionScreenState extends State<QuestionScreen> {
   int currentIndex = 0;
   bool showError = false;
-  bool SuggestionSelected = false;
+  bool suggestionSelected = false;
   var selectedOption;
   late Question currentQuestion;
   List currentAnswers = [];
@@ -291,12 +291,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
     bool isCorrect = currentAnswers[index].isCorrect;
     if (!isCorrect) {
       setState(() {
-        SuggestionSelected = true;
+        suggestionSelected = true;
       });
     } else {
       setState(() {
         score += 30;
-        SuggestionSelected = false;
+        suggestionSelected = false;
       });
     }
     ScaffoldMessenger.of(context).showSnackBar(
@@ -330,7 +330,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     _showDialog(context);
                   }
                   _isAnswerSelected = false;
-                  SuggestionSelected = false;
+                  suggestionSelected = false;
                   _selectedAnswerIndex = -1;
                 });
               },
@@ -357,7 +357,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       //     }
       //   }
       //   _isAnswerSelected = false;
-      //   SuggestionSelected = false;
+      //   suggestionSelected = false;
       //   _selectedAnswerIndex = -1;
       // });
     });
@@ -372,7 +372,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
     return Scaffold(
       body: SafeArea(
-        child: Container(
+        child: SizedBox(
           height: MediaQuery.sizeOf(context).height,
           child: Column(
             children: [
@@ -452,7 +452,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           margin: EdgeInsets.only(bottom: 27.0),
                           constraints: BoxConstraints(minHeight: 48.0),
                           decoration: BoxDecoration(
-                            color: SuggestionSelected && answer.isCorrect
+                            color: suggestionSelected && answer.isCorrect
                                 ? Colors.green
                                 : _isAnswerSelected
                                     ? StyleColor.turquoise
@@ -624,7 +624,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       ),
                       Text(
                         textAlign: TextAlign.center,
-                        'Haz ganado\n ${score} LMs de energía',
+                        'Haz ganado\n $score LMs de energía',
                         style: StylesApp(context).textStyleWithe20,
                       ),
                     },

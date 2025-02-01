@@ -1,5 +1,4 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/models/stages.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -605,7 +604,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
         child: OrientationBuilder(
           builder: (BuildContext context, Orientation orientation) {
             return SingleChildScrollView(
-              child: Container(
+              child: SizedBox(
                 height: orientation == Orientation.portrait
                     ? MediaQuery.sizeOf(context).height -60
                     : MediaQuery.sizeOf(context).width -
@@ -841,7 +840,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                     Positioned(
                       top: 0,
                       right: 0,
-                      child: Container(
+                      child: SizedBox(
                         width: 28.sp,
                         height: 28.sp,
                         child: IconButton(

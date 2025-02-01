@@ -8,14 +8,16 @@ import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
+        ChangeNotifierProvider(create: (_) => CatalogueProvider()),
       ],
       child: ScreenUtilInit(
-        designSize: const Size(360, 690), // Tamaño base del diseño
+        designSize: const Size(360, 690), // size base of design        
         builder: (context, child) {
           WidgetsFlutterBinding.ensureInitialized();
 

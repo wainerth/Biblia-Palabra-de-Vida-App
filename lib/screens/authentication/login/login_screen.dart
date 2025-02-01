@@ -1,6 +1,14 @@
+import 'dart:convert';
+
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io' as uio;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,8 +19,14 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TextEditingController textEmail = TextEditingController();
+  TextEditingController textPass = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    final authProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+
     return Scaffold(
       body: SafeArea(
         child: SizedBox(
@@ -47,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   constraints:
                                       const BoxConstraints(minWidth: 160.0),
                                   child: TextFormField(
+                                    controller: textEmail,
                                     cursorHeight: 16.sp,
                                     style: StylesApp(context).textStyleHintText,
                                     decoration: StylesApp(context)
@@ -63,6 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   constraints:
                                       const BoxConstraints(minWidth: 160.0),
                                   child: TextFormField(
+                                    controller: textPass,
                                     cursorHeight: 16.sp,
                                     style: StylesApp(context).textStyleHintText,
                                     decoration: StylesApp(context)
@@ -78,11 +94,45 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 ButtonThemeWidget(
                                   text: "Iniciar sesión",
-                                  image: "assets/google-icon.png",
                                   buttonStyle:
                                       StylesApp(context).btnSecondarySmall,
-                                  onPressed: () {
-                                    Navigator.pushNamed(context, '/layoutPage');
+                                  onPressed: () async {
+                                    if (!_formKey.currentState!.validate()) {
+                                      return;
+                                    }
+                                    // LoadingService().showLoading(context);
+
+                                    final user = await authProvider.loginUser(
+                                        textEmail.text, textPass.text);
+                                    if (kDebugMode) {
+                                      print(user);
+                                    }
+
+                                    if (user.error != null) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text("Error"),
+                                            content: Text(user.error),
+                                            actions: [
+                                              TextButton(
+                                                child: const Text("OK"),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      // LoadingService().hideLoading();
+                                    } else {
+                                     
+                                      // LoadingService().hideLoading();
+                                      Navigator.pushNamed(
+                                          context, '/layoutPage');
+                                    }
                                   },
                                   width: StylesApp(context).btnHeight.width,
                                   height: StylesApp(context).btnHeight.height,
@@ -96,8 +146,53 @@ class _LoginScreenState extends State<LoginScreen> {
                                   text: "Iniciar con",
                                   buttonStyle:
                                       StylesApp(context).btnTransparentSmall,
-                                  onPressed: () {
-                                    Navigator.pushNamed(context, '/layoutPage');
+                                  onPressed: () async {
+                                    if (uio.Platform.isAndroid ||
+                                        uio.Platform.isIOS) {
+                                    LoadingService().showLoading(context);
+                                    final user =
+                                        await authProvider.loginWithGoogle();
+                                    if (kDebugMode) {
+                                      print(user);
+                                    }
+
+                                    if (user.error != null) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text("Error"),
+                                            content: Text(user.error!),
+                                            actions: [
+                                              TextButton(
+                                                child: const Text("OK"),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      LoadingService().hideLoading();
+                                    } else {
+                                      SharedPreferences prefs =
+                                          await SharedPreferences.getInstance();
+
+                                      await prefs.setString(
+                                          'userData', jsonEncode(user.data));
+
+                                      await prefs.setString('userToken',
+                                          user.data["userJwtToken"]["token"]);
+                                      LoadingService().hideLoading();
+                                      Navigator.pushNamed(
+                                          context, '/layoutPage');
+                                    }
+                                    } else {
+                                      // Manejar el caso para otras plataformas si es necesario
+                                      print(
+                                          'Google Sign-In no es compatible con esta plataforma.');
+                                    }
                                   },
                                   width: StylesApp(context).btnHeight.width,
                                   height: StylesApp(context).btnHeight.height,

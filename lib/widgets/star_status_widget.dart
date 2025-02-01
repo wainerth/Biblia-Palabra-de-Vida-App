@@ -18,7 +18,7 @@ class _StarStatusWidgetState extends State<StarStatusWidget> {
   @override
   Widget build(BuildContext context) {
     final starSize = 30.sp;
-    return Container(
+    return SizedBox(
       width:  widget.containerWidth,
       child: Center(
         child: SizedBox(

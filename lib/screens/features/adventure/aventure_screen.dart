@@ -55,7 +55,7 @@ class _AventureScreenState extends State<AventureScreen> {
         color: "9579B9",
         id: "4",
         status: 1,
-        title: "Discipulado 2 Guiado por el Espiritu Santo",
+        title: "Discipulado 2 Guiado por el Espíritu Santo",
         img: Img(urlImg: "assets/imagen2.png"),
         introduction:
             "¿Alguna vez te has preguntado sobre los inicios del mundo y las historias épicas de héroes antiguos? El Antiguo Testamento es como una caja del tesoro llena de relatos asombrosos y enseñanzas que han impactado a millones de personas a lo largo de los siglos. Desde la creación del universo hasta las aventuras de personajes como Moisés, David y Salomón, estos \nlibros te llevan en un viaje fascinante a través de la historia, la fe y la moral. Encontrarás milagros impresionantes, batallas épicas y sabiduría atemporal. Es un lugar donde los sueños, las promesas y las luchas de la humanidad cobran vida, ofreciendo valiosas lecciones que resuenan incluso en el mundo moderno.\n",
@@ -96,7 +96,7 @@ class _AventureScreenState extends State<AventureScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Container(
+          SizedBox(
             height: MediaQuery.sizeOf(context).height - 30,
             child: ListView.builder(
               padding: EdgeInsets.only(bottom: 40.0),

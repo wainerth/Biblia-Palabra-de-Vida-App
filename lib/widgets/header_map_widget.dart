@@ -110,7 +110,7 @@ class HeaderMapWidget extends StatelessWidget {
                       child: IconButton(
                         padding: EdgeInsets.all(0.0),
                         onPressed: onScroller,
-                        icon: Icon(Icons.arrow_downward),
+                        icon: Icon(Icons.location_on_outlined),
                         color: Colors.white,
                       ),
                     ),

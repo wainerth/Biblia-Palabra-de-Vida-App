@@ -13,7 +13,6 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   final PageController _controllerPage = PageController();
-  final ScrollController _scrollController = ScrollController();
   late ScrollController scrollController;
   double fontSizeText = 16.sp;
   double isPage = 0;

@@ -99,7 +99,7 @@ import 'package:video_player/video_player.dart';
                                 child: Align(
                                   alignment: Alignment.centerRight,
                                   child: Text(
-                                    "${widget.data.date}",
+                                    widget.data.date,
                                     style: StylesApp(context).textStyleBody12.copyWith(color: Colors.black),
                                   ),
                                 ),

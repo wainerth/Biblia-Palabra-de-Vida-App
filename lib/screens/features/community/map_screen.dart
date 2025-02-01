@@ -2,7 +2,6 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -292,8 +291,8 @@ class _MapScreenState extends State<MapScreen> {
                       },
                     ),
                     HeaderMapWidget(
-                      title: '${course.title}',
-                      subtitleStage: '${stage.sectionName}',
+                      title: course.title,
+                      subtitleStage: stage.sectionName,
                       indexStage: 1, //stage.id,
                       onRouteBack: () {
                         Navigator.popAndPushNamed(context, '/layoutPage1');
@@ -376,9 +375,7 @@ class _MapScreenState extends State<MapScreen> {
                               index % 2 == 0 ? imagePaths[0] : imagePaths[1];
                           return Column(
                             children: [
-                              // if (index == 0) ...{
-
-                              // },
+                             
                               Stack(
                                 alignment: Alignment.topCenter,
                                 children: [
@@ -411,7 +408,7 @@ class _MapScreenState extends State<MapScreen> {
                                               .positionedLevels(coordBLeft[i])
                                               .dx,
                                       child: GestureDetector(
-                                        key: Key("${index}-${i}"),
+                                        key: Key("$index-$i"),
                                         onTap: grupo[i].unLockLevel == false
                                             ? null
                                             : () {
@@ -685,79 +682,6 @@ class _MapScreenState extends State<MapScreen> {
       return 0XFFD5886B;
     }
   }
-}
-
-_starStatus(BuildContext context, double unLockLevel, double containerWidth) {
-  final double starSize = 30.sp; // Adjust star size as needed
-  final double starSpacing = (containerWidth - (3.sp * starSize)) / 3.sp;
-
-  return Center(
-    child: SizedBox(
-      height: 50.0,
-      child: Stack(
-        children: [
-          if (unLockLevel > 99.0) ...[
-            Positioned(
-              top: starSpacing,
-              left: 0.0,
-              child: Image.asset(
-                "assets/star_complete.png",
-                width: starSize,
-                height: starSize,
-              ),
-            ),
-            Positioned(
-              top: 0,
-              left: starSpacing + starSize + starSpacing,
-              child: Image.asset(
-                "assets/star_complete.png",
-                width: starSize,
-                height: starSize,
-              ),
-            ),
-            Positioned(
-              top: starSpacing,
-              left: starSpacing + (2 * starSize) + (2 * starSpacing),
-              child: Image.asset(
-                "assets/star_complete.png",
-                width: starSize,
-                height: starSize,
-              ),
-            ),
-          ] else if (unLockLevel > 50.0) ...[
-            Positioned(
-              top: starSpacing,
-              left: 0.0,
-              child: Image.asset(
-                "assets/star_disabled.png",
-                width: starSize,
-                height: starSize,
-              ),
-            ),
-            Positioned(
-              top: 0,
-              left: starSpacing + starSize,
-              child: Image.asset(
-                "assets/star_disabled.png",
-                width: starSize,
-                height: starSize,
-              ),
-            ),
-          ] else if (unLockLevel > 0.0) ...[
-            Positioned(
-              top: starSpacing,
-              left: 0.0,
-              child: Image.asset(
-                "assets/star_incomplete.png",
-                width: starSize,
-                height: starSize,
-              ),
-            ),
-          ],
-        ],
-      ),
-    ),
-  );
 }
 
 _buildItemLevel(BuildContext context, Level grupo) {

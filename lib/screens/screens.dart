@@ -1,10 +1,6 @@
 
 //Authentication
 
-
-
-
-
 export 'package:biblia_palabra_de_vida_app/screens/features/preach/video_player_screen.dart';
 
 export 'package:biblia_palabra_de_vida_app/screens/features/preach/preach_screen.dart';
