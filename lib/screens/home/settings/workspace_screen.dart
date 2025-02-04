@@ -19,8 +19,7 @@ class WorkspaceScreen extends StatefulWidget {
 
 class _WorkspaceScreenState extends State<WorkspaceScreen> {
   LoginUser? dataUser;
-  late final  catalogueProvider;
-  
+  late final catalogueProvider;
 
   // @override
   // void didChangeDependencies() {
@@ -37,10 +36,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     super.initState();
     _initializeCatalogues();
   }
-void _initializeCatalogues() async {
-     catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
-     catalogueProvider.init();
-}
+
+  void _initializeCatalogues() async {
+    catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
+    catalogueProvider.init();
+  }
 
   List<ButtonData> buttonsData = [
     ButtonData(
@@ -81,8 +81,8 @@ void _initializeCatalogues() async {
 
   @override
   Widget build(BuildContext context) {
-     final authProvider = Provider.of<AuthenticationProvider>(context);
-     dataUser = authProvider.currentUser;
+    final authProvider = Provider.of<AuthenticationProvider>(context);
+    dataUser = authProvider.currentUser;
     final cardList = [
       // Replace with your actual asset paths and route names
       {
@@ -474,7 +474,8 @@ _buildPositionSection(BuildContext context, userData) {
     ),
     margin: const EdgeInsets.symmetric(horizontal: 10.0),
     width: MediaQuery.of(context).size.width,
-    padding: const EdgeInsets.only(left: 5.0,right: 5.0, top: 6.0, bottom: 6.0),
+    padding:
+        const EdgeInsets.only(left: 5.0, right: 5.0, top: 6.0, bottom: 6.0),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -496,9 +497,14 @@ _buildPositionSection(BuildContext context, userData) {
                                   StylesApp(context).sizeContainerAvatar.width,
                               child: CircleAvatar(
                                 radius: StylesApp(context).radiusAvatar,
-                                backgroundImage: NetworkImage(
-                                    (userData != null && userData.imgProfileUser != '')  ? GraphQLConfig.urlServidor + userData.imgProfileUser :
-                                        'assets/no-image.jpg'),
+                                backgroundImage: NetworkImage((userData !=
+                                            null &&
+                                        userData.imgProfileUser != '')
+                                    ? userData.imgProfileUser.startsWith("/")
+                                        ? GraphQLConfig.urlServidor +
+                                            userData.imgProfileUser
+                                        : userData.imgProfileUser
+                                    : 'assets/no-image.jpg'),
                               ),
                             ),
                           ],

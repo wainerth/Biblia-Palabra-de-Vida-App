@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CatalogueProvider extends ChangeNotifier {
   late GraphQLClient _client;
   late List<Country> allCountries;
+  late List<Church> allChurches;
   
   CatalogueProvider() {
     init();
@@ -73,9 +74,41 @@ class CatalogueProvider extends ChangeNotifier {
   }
 
   Future<void> _loadChurches() async {
-    // Lógica para cargar la lista de iglesias
-    // Ejemplo:
-    // final iglesias = await _obtenerIglesiasDesdeArchivoJson();
-    // ...
+    
+ final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userToken = prefs.getString('userToken');
+    _client = createClient(authToken: userToken);
+
+    QueryOptions options = QueryOptions(
+      operationName: "GetAllChurches",
+      document: gql(r'''
+      query GetAllChurches {
+          getAllChurches {
+            id
+            name
+          }
+        }
+      '''),
+      fetchPolicy: FetchPolicy.noCache,
+    );
+    try {
+      final QueryResult result = await _client.query(options);
+      if (result.hasException) {
+        throw Exception('Failed to obtain Churches');
+      }
+
+      final data = result.data;
+      if (data == null || data['getAllChurches'] == null) {
+        throw Exception('Failed to obtain Churches');
+      }
+
+      allChurches = (data['getAllChurches'] as List)
+          .map((i) => Church.fromJson(i))
+          .toList();
+
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to obtain Churches $e');
+    }
   }
 }

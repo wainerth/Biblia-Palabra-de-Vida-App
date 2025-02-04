@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
@@ -39,3 +40,19 @@ String getFormatedDate(int dateTimeMiliseconds) {
     filter: {"*": RegExp(r'[a-zA-Z0-9]')},
     type: MaskAutoCompletionType.lazy,
   );
+
+
+  getIsBaptized(value) {
+
+    return value ? "Bautizado" : "No Bautizado";
+  }
+
+  getChurchActive(churches) {
+    if (churches.isNotEmpty){
+      var church = churches.firstWhere((UserChurch element) => 
+      element.status );
+      return church.name;
+    } else {
+      return null;
+    }
+  }

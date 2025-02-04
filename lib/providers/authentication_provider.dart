@@ -118,13 +118,20 @@ class AuthenticationProvider extends ChangeNotifier {
                       name # nombre y apellido
                       expTotalUser #energia
                       imgProfileUser
+                      phoneNumber
                       country {
                         id
                         country
                         country_code
                       }
                       favoriteVerseId # si asigna versiculo favorito
-                      notifications #
+                      notifications # notification user
+                        lastName 
+                        birthday
+                        identifier #cédula
+                        gender
+                        isBaptized
+                        currentLeagueId #future ligue in ranking
                       createdAt # fecha registro
                       achievementsReachedCount #contador de logros
                       streakDaysCount # contador de dias 
@@ -137,6 +144,7 @@ class AuthenticationProvider extends ChangeNotifier {
                         rolId
                         userChurch {
                         churchId
+                        status
                           churchRelation {
                             name
                           }
@@ -186,9 +194,7 @@ class AuthenticationProvider extends ChangeNotifier {
           serverClientId:
               "214929717096-c669jpm1gb9q87cribgbknuteemuj8st.apps.googleusercontent.com",
           forceCodeForRefreshToken: true,
-          scopes: ["email"]
-          //"214929717096-6eovhusc4ondcp2e71r5ggvktruq9rp7.apps.googleusercontent.com",
-          );
+          scopes: ["email"]);
     }
     try {
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
@@ -235,18 +241,36 @@ class AuthenticationProvider extends ChangeNotifier {
         throw Exception(result.exception.toString());
       }
 
-      final responseData = ResponseData.fromQueryResult(result);
+      final data = result.data;
+      if (data == null || data['signUpGoogle'] == null) {
+        return ResponseData(
+          data: null,
+          error: 'Login failed: No data returned',
+        );
+      }
+      var dto = removeTypename(data['signUpGoogle']);
+      // consultamos ProfileServices
+      _client = createClient(authToken: dto["userJwtToken"]["token"]);
+      ResponseData profile = await getProfileUser(dto["id"]);
+      if (profile.error != null) {
+        return ResponseData(
+          data: null,
+          error: profile.error,
+        );
+      }
 
+      // almacenamos en local storage
       SharedPreferences prefs = await SharedPreferences.getInstance();
       //  almacenamos la data
-      var user = responseData.data["signUpGoogle"];
-      await prefs.setString('userData', jsonEncode(user));
+      currentUser = LoginUser.fromJson(profile.data);
+      print(currentUser);
+      await prefs.setString('userData', jsonEncode(currentUser!.toJson()));
 
-      await prefs.setString('userToken', user["userJwtToken"]["token"]);
-
+      await prefs.setString('userToken', dto["userJwtToken"]["token"]);
+  
       return ResponseData(
-        data: responseData.data["signUpGoogle"],
-        error: responseData.error,
+        data: dto,
+        error: null,
       );
     } catch (e) {
       return ResponseData(data: null, error: "Google sign-in failed: $e");

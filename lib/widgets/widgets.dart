@@ -1,3 +1,5 @@
+export 'package:biblia_palabra_de_vida_app/widgets/date_picker_form_field.dart';
+
 export 'package:biblia_palabra_de_vida_app/widgets/profile_header.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/loading_indicator.dart';
@@ -49,3 +51,5 @@ export 'package:biblia_palabra_de_vida_app/widgets/text_with_gradient.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/card_aventure_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/audio_player_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/head_score_widget.dart';
+
+

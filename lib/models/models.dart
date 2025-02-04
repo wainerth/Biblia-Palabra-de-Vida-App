@@ -1,3 +1,5 @@
+export 'package:biblia_palabra_de_vida_app/models/church.dart';
+
 export 'package:biblia_palabra_de_vida_app/models/response_data.dart';
 
 export 'package:biblia_palabra_de_vida_app/models/login_user.dart';

@@ -43,25 +43,28 @@ class ChurchRelation {
 }
 
 class UserChurch {
-  final String churchId;
-  final String churchName;
-
+  final String id;
+  final String name;
+  final bool status;
   UserChurch({
-    required this.churchId,
-    required this.churchName,
+    required this.id,
+    required this.name,
+    required this.status
   });
 
   factory UserChurch.fromJson(Map<String, dynamic> json) {
     var churchName = ChurchRelation.fromJson(json['churchRelation']);
     return UserChurch(
-      churchId: json['churchId'],
-      churchName: churchName.name,
+      id: json['churchId'],
+      name: churchName.name,
+      status: json['status'] > 0 ? true : false,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'churchId': churchId,
-        'churchName': churchName,
+        'id': id,
+        'name': name,
+        'status':status
       };
 }
 
@@ -100,24 +103,30 @@ class User {
     );
   }
 
-   Map<String, dynamic> toJson() => {
-    'id': id,
-    'username': username,
-    'email': email,
-    'lastLogin': lastLogin,
-    'rolId': rolId,
-    'userChurch': userChurch.map((e) => e.toJson()).toList(),
-  };
-
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'username': username,
+        'email': email,
+        'lastLogin': lastLogin,
+        'rolId': rolId,
+        'userChurch': userChurch.map((e) => e.toJson()).toList(),
+      };
 }
 
 class LoginUser {
   final String name;
+  final String? lastName;
   final int expTotalUser;
   final String imgProfileUser;
-  final CountryUser country;
+  final String? phoneNumber;
+  final CountryUser? country;
   final String favoriteVerseId;
   final bool notifications;
+  final String? birthday;
+  final String? identifier; //cédula
+  final String? gender; // example M o F
+  final bool? isBaptized;
+  final String? currentLeagueId; //future ligue in ranking
   final String createdAt;
   final int achievementsReachedCount;
   final int streakDaysCount;
@@ -128,6 +137,7 @@ class LoginUser {
     required this.name,
     required this.expTotalUser,
     required this.imgProfileUser,
+    this.phoneNumber,
     required this.country,
     required this.favoriteVerseId,
     required this.notifications,
@@ -136,38 +146,58 @@ class LoginUser {
     required this.streakDaysCount,
     required this.preachingsCreatedCount,
     required this.user,
+    this.lastName,
+    this.birthday,
+    this.identifier,
+    this.gender,
+    this.isBaptized,
+    this.currentLeagueId,
   });
 
   factory LoginUser.fromJson(Map<String, dynamic> json) {
-    var user = User.fromJson(json['user']);
 
     return LoginUser(
+      identifier: json['identifier'],
       name: json['name'],
+      lastName: json['lastName'] ?? '',
+      gender: json['gender'] ?? '',
+      birthday: json['birthday'] ?? '',
+      isBaptized: json['isBaptized'] ?? false,
       expTotalUser: json['expTotalUser'],
       imgProfileUser: json['imgProfileUser'],
-      country: CountryUser.fromJson(json['country']),
+      phoneNumber: json['phoneNumber'] ?? '',
+      country: json['country'] != null
+          ? CountryUser.fromJson(json['country'])
+          : null, // CountryUser.fromJson(json['country']),
       favoriteVerseId: json['favoriteVerseId'].toString(),
       notifications: json['notifications'] ?? false,
       createdAt: json['createdAt'],
       achievementsReachedCount: json['achievementsReachedCount'],
       streakDaysCount: json['streakDaysCount'],
       preachingsCreatedCount: json['preachingsCreatedCount'],
+      currentLeagueId: json['currentLeagueId'],
       user: User.fromJson(json['user']),
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'name': name,
-    'expTotalUser': expTotalUser,
-    'imgProfileUser': imgProfileUser,
-    'country': country.toJson(),
-    'favoriteVerseId': favoriteVerseId,
-    'notifications': notifications,
-    'createdAt': createdAt,
-    'achievementsReachedCount': achievementsReachedCount,
-    'streakDaysCount': streakDaysCount,
-    'preachingsCreatedCount': preachingsCreatedCount,
-    'user': user.toJson(),
-  };
-  
+        'identifier': identifier,
+        'name': name,
+        'lastName': lastName,
+        'gender': gender,
+        'birthday': birthday,
+        'isBaptized': isBaptized,
+        'expTotalUser': expTotalUser,
+        'imgProfileUser': imgProfileUser,
+        'phoneNumber': phoneNumber,
+        'country': country?.toJson(),
+        'favoriteVerseId': favoriteVerseId,
+        'notifications': notifications,
+        'createdAt': createdAt,
+        'achievementsReachedCount': achievementsReachedCount,
+        'streakDaysCount': streakDaysCount,
+        'preachingsCreatedCount': preachingsCreatedCount,
+        'currentLeagueId': currentLeagueId,
+        'user': user.toJson(),
+      };
 }

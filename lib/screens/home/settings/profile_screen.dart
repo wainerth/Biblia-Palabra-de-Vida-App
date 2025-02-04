@@ -6,6 +6,7 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -49,19 +50,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ];
     List<ModelData> personalData = [
       ModelData(label: "Nombre", value: dataUser!.name, showLabel: false),
-      ModelData(label: "Sexo", value: "Masculino"),
-      ModelData(label: "Fecha nac", value: "01/07/1980"),
-      ModelData(label: "Bautizo", value: "Bautizado", showLabel: false),
+      ModelData(label: "Sexo", value: "${dataUser!.gender}"),
+      ModelData(label: "Fecha nac", value: "${dataUser!.birthday}"),
+      ModelData(
+          label: "Bautizo",value: getIsBaptized(dataUser!.isBaptized ?? false),showLabel: false),
     ];
     List<ModelData> contactDetails = [
-      ModelData(
-          label: "Email", value: "robinsongarces@gmail.com", showLabel: false),
-      ModelData(label: "Tel.:", value: "+58 4267406377"),
+      ModelData(label: "Email", value: dataUser!.user.email, showLabel: false),
+      ModelData(label: "Tel.:", value: dataUser!.phoneNumber ?? ''),
     ];
     List<ModelData> locationData = [
-      ModelData(label: "País", value: "Uruguay"),
+      ModelData(label: "País", value: dataUser!.country?.country ?? ''),
       ModelData(label: "Ciudad", value: "Montevideo"),
-      ModelData(label: "Iglesia", value: "Palabra de Vida"),
+      ModelData(label: "Iglesia", value: getChurchActive( dataUser!.user.userChurch) != null ? getChurchActive( dataUser!.user.userChurch).name : '')
     ];
 
     return Scaffold(
@@ -194,7 +195,7 @@ class CardColumnWidget extends StatelessWidget {
                                   if (data[i].showLabel)
                                     TextSpan(text: "${data[i].label}: "),
                                 TextSpan(
-                                  text: data[i].value,
+                                  text: data[i].value.isNotEmpty ? data[i].value : 'no registra',
                                   style: StylesApp(context)
                                       .textStyleBodyWhite4
                                       .copyWith(
@@ -236,7 +237,16 @@ class CardColumnWidget extends StatelessWidget {
                             context: context,
                             barrierDismissible: false,
                             builder: (context) {
-                              return EditDetailDialog(data: data);
+                              return EditDetailDialog(
+                                data: data,
+                                onSave: (List<ModelData> dta) {
+                                  print(dta.length);
+                                  Navigator.pop(context);
+                                  // setState(() {
+                                  // personalData = updatedData; // O llama a un método del provider
+                                  // });
+                                },
+                              );
                             });
                       }
                     },
@@ -275,13 +285,35 @@ class CardColumnWidget extends StatelessWidget {
 
 class EditDetailDialog extends StatefulWidget {
   final List<ModelData> data;
-  const EditDetailDialog({super.key, required this.data});
+  final Function(List<ModelData>) onSave;
+  const EditDetailDialog({super.key, required this.data, required this.onSave});
 
   @override
   State<EditDetailDialog> createState() => _editDetailDialog();
 }
 
 class _editDetailDialog extends State<EditDetailDialog> {
+  late List<ModelData> _editingData;
+  final List<TextEditingController> _controllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _editingData = List.from(widget.data);
+    for (var item in _editingData) {
+      _controllers.add(TextEditingController(text: item.value));
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final catalogueProvider =
@@ -296,9 +328,14 @@ class _editDetailDialog extends State<EditDetailDialog> {
             ModelData(value: country.id, label: country.countryCode))
         .cast<ModelData>()
         .toList();
+
+    final List<ModelData> listChurches = catalogueProvider.allChurches
+        .map((church) => ModelData(value: church.id, label: church.name))
+        .cast<ModelData>()
+        .toList();
     List<ModelData> optionsSex = [
-      ModelData(value: 'masculino', label: 'Masculino'),
-      ModelData(value: 'femenino', label: 'Femenino'),
+      ModelData(value: 'M', label: 'Masculino'),
+      ModelData(value: 'F', label: 'Femenino'),
       ModelData(
           value: 'otro',
           label: 'Otro'), // Opción adicional para personas no binarias
@@ -342,21 +379,18 @@ class _editDetailDialog extends State<EditDetailDialog> {
                           Expanded(
                             flex: 2,
                             child: ListView.builder(
-                              itemCount: widget.data.length,
+                              itemCount: _editingData.length,
                               itemBuilder: (context, index) {
-                                final item = widget.data[index];
-                                return Column(
-                                  children: [
-                                    _buildField(
-                                        item,
-                                        dropDownList,
-                                        prefixCode,
-                                        optionsSex,
-                                        catalogueProvider.allCountries),
-                                    SizedBox(
-                                      height: 15,
-                                    ),
-                                  ],
+                                final item = _editingData[index];
+                                return _buildField(
+                                  item,
+                                  index, // Pasa el índice
+                                  dropDownList,
+                                  prefixCode,
+                                  optionsSex,
+                                  listChurches,
+                                  catalogueProvider.allChurches,
+                                  catalogueProvider.allCountries,
                                 );
                               },
                             ),
@@ -366,6 +400,9 @@ class _editDetailDialog extends State<EditDetailDialog> {
                             child: ButtonThemeWidget(
                               buttonStyle: StylesApp(context).btnWidgetSmall,
                               text: 'Guardar',
+                              onPressed: () {
+                                widget.onSave(_editingData);
+                              },
                             ),
                           )
                         ],
@@ -384,34 +421,17 @@ class _editDetailDialog extends State<EditDetailDialog> {
     );
   }
 
+  //Method buildField
   Widget _buildField(
       ModelData item,
+      int index,
       List<ModelData> dropDownList,
       List<ModelData> listPrefixCode,
       List<ModelData> optionsSex,
+      List<ModelData> optionsChurches,
+      List<Church> listChurches,
       List<Country> listCatalogue) {
-    final FocusNode _focusNode = FocusNode();
-    String phoneNumber = '';
-    ModelData? _selectedData;
-    ModelData? _selectedDataSex;
-    String? bautizado;
-    var _selectedCountry = null;
-    var _selectedCountryCode = null;
-
-    final TextEditingController _phoneNumberController =
-        TextEditingController();
-    final TextEditingController _textEditController =
-        TextEditingController(text: item.value);
-
     if (item.label == 'Tel.:') {
-      _phoneNumberController.text = '';
-      phoneNumber = maskFormatterTel
-          .maskText(item.value.isNotEmpty ? item.value.split(' ')[1] : '');
-
-      _selectedCountryCode = item.value.isNotEmpty
-          ? listPrefixCode.firstWhere(
-              (element) => element.label == item.value.split(' ')[0])
-          : null;
       return Row(
         spacing: 10,
         children: [
@@ -423,41 +443,44 @@ class _editDetailDialog extends State<EditDetailDialog> {
                 items: listPrefixCode,
                 onChanged: (ModelData? newValue) {
                   setState(() {
-                    _selectedCountryCode = newValue;
+                    _editingData[index] = ModelData(
+                      label: _editingData[index].label,
+                      value:
+                          '${newValue?.label} ${_editingData[index].value.split(' ')[1]}',
+                      showLabel: _editingData[index].showLabel,
+                    );
                   });
                 },
-                selectedItem: _selectedCountryCode,
+                selectedItem: item.value.isNotEmpty
+                    ? listPrefixCode.firstWhere(
+                        (element) => element.label == item.value.split(' ')[0])
+                    : null,
               ),
             ),
           ),
           Expanded(
             flex: 2,
             child: TextFormField(
-              // controller: _phoneNumberController,
-              initialValue: phoneNumber,
-              focusNode: _focusNode,
+              controller: _controllers[index],
               keyboardType: TextInputType.phone,
               inputFormatters: [
                 maskFormatterTel, // Permite solo números
               ],
-              onFieldSubmitted: (value) {
-                _phoneNumberController.text =
-                    value.replaceAll(RegExp(r'[^\d]+'), '');
-              },
               onChanged: (value) {
-                _phoneNumberController.text =
-                    value.replaceAll(RegExp(r'[^\d]+'), '');
+                _controllers[index].text = value;
+                _editingData[index] = ModelData(
+                  label: _editingData[index].label,
+                  value:
+                      '${_editingData[index].value.split(' ')[0]} ${_controllers[index].text.replaceAll(RegExp(r'[^\d]+'), '')}',
+                  showLabel: _editingData[index].showLabel,
+                );
               },
               decoration: StylesApp(context).inputDecorationStyle.copyWith(
                     hintText: "Número de teléfono",
                   ),
-              style: const TextStyle(fontSize: 16),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Por favor, ingresa tu número de teléfono.";
-                }
-                return null;
-              },
+              style: StylesApp(context)
+                  .textStyleBody16
+                  .copyWith(color: Colors.black),
             ),
           )
         ],
@@ -473,19 +496,38 @@ class _editDetailDialog extends State<EditDetailDialog> {
           items: optionsSex,
           onChanged: (ModelData? newValue) {
             setState(() {
-              _selectedDataSex = newValue;
+              _editingData[index] = ModelData(
+                label: _editingData[index].label,
+                value: newValue!.value,
+                showLabel: _editingData[index].showLabel,
+              );
             });
           },
-          selectedItem: _selectedDataSex,
+          selectedItem: item.value.isNotEmpty ? optionsSex.firstWhere(
+              (element) => element.value == item.value.toLowerCase()): null,
         ),
       );
+    } else if (item.label == 'Fecha nac') {
+      return DatePickerFormField(
+        initialDate:item.value.isNotEmpty ? DateFormat("dd/MM/yyyy").parse(item.value) : DateTime.now(),
+        onChanged: (value) {
+          _editingData[index] = ModelData(
+            label: _editingData[index].label,
+            value: value,
+            showLabel: _editingData[index].showLabel,
+          );
+        },
+      );
     } else if (item.label == 'Bautizo') {
-      bautizado = item.value;
       return BautizadoRadioButton(
-        isBautizado: bautizado == 'Bautizado',
+        isBautizado: item.value == 'Bautizado',
         onChanged: (bool? value) {
           setState(() {
-            bautizado = "No Bautizado";
+            _editingData[index] = ModelData(
+              label: _editingData[index].label,
+              value: value! ? "Bautizado" : "No Bautizado",
+              showLabel: _editingData[index].showLabel,
+            );
           });
         },
       );
@@ -500,20 +542,56 @@ class _editDetailDialog extends State<EditDetailDialog> {
           items: dropDownList,
           onChanged: (ModelData? newValue) {
             setState(() {
-              _selectedData = newValue;
-              _selectedCountry = listCatalogue
-                  .firstWhere((country) => country.id == newValue!.value);
+              _editingData[index] = ModelData(
+                label: _editingData[index].label,
+                value: newValue!.label,
+                showLabel: _editingData[index].showLabel,
+              );
             });
           },
-          selectedItem: _selectedData,
+          selectedItem: item.value.isNotEmpty
+              ? dropDownList
+                  .firstWhere((element) => element.label == item.value)
+              : null,
+        ),
+      );
+    } else if (item.label == 'Iglesia') {
+      return Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        child: CustomDropdownWidget<Church>(
+          hintText: "Seleccione una Iglesia",
+          items: optionsChurches,
+          onChanged: (ModelData? newValue) {
+            setState(() {
+              _editingData[index] = ModelData(
+                label: _editingData[index].label,
+                value: newValue!.label,
+                showLabel: _editingData[index].showLabel,
+              );
+            });
+          },
+          selectedItem: item.value.isNotEmpty
+              ? optionsChurches
+                  .firstWhere((element) => element.label == item.value)
+              : null,
         ),
       );
     } else {
       return TextFormField(
-        controller: _textEditController,
+        controller: _controllers[index],
         decoration: StylesApp(context).inputDecorationStyle.copyWith(
               hintText: item.label,
             ),
+        onChanged: (value) {
+          _editingData[index] = ModelData(
+            label: _editingData[index].label,
+            value: value,
+            showLabel: _editingData[index].showLabel,
+          );
+        },
       );
     }
   }
