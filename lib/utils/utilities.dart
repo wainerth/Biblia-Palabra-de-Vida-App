@@ -25,34 +25,36 @@ Map<String, dynamic> removeTypename(values) {
 
 String getFormatedDate(int dateTimeMiliseconds) {
   DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(dateTimeMiliseconds);
- String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
+  String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
   // Formatear la fecha como dd/mm/aaaa
   return formattedDate;
 }
 
-  var maskFormatterTel = MaskTextInputFormatter(
-    mask: '### ###-##-##',
-    filter: {"#": RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
-  var maskFormatterEmail = MaskTextInputFormatter(
-    mask: '******@******.com',
-    filter: {"*": RegExp(r'[a-zA-Z0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
+var maskFormatterTel = MaskTextInputFormatter(
+  mask: '### ###-##-##',
+  filter: {"#": RegExp(r'[0-9]')},
+  type: MaskAutoCompletionType.lazy,
+);
+var maskFormatterEmail = MaskTextInputFormatter(
+  mask: '******@******.com',
+  filter: {"*": RegExp(r'[a-zA-Z0-9]')},
+  type: MaskAutoCompletionType.lazy,
+);
 
+getIsBaptized(value) {
+  return value ? "Bautizado" : "No Bautizado";
+}
 
-  getIsBaptized(value) {
-
-    return value ? "Bautizado" : "No Bautizado";
-  }
-
-  getChurchActive(churches) {
-    if (churches.isNotEmpty){
-      var church = churches.firstWhere((UserChurch element) => 
-      element.status );
-      return church.name;
+UserChurch? getChurchActive(churches) {
+  if (churches.isNotEmpty) {
+    var church = churches.firstWhere((UserChurch element) => 
+    element.status);
+    if (church != null) {
+      return church;
     } else {
       return null;
     }
+  } else {
+    return null;
   }
+}

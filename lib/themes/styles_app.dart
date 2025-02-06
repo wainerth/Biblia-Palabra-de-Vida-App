@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -556,7 +557,7 @@ class StylesApp {
       );
   ButtonStyle get btnSecondarySmall => ButtonStyle(
         padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric( horizontal: 20),
+          const EdgeInsets.symmetric(horizontal: 20),
         ),
         shape: WidgetStateProperty.all(RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10), // Radio del borde
@@ -639,18 +640,39 @@ class StylesApp {
       );
 
   InputDecoration get inputDecorationStyle => InputDecoration(
-      labelStyle: labelStyle,
-      hintStyle: hintStyle,
-      fillColor: Colors.white,
-      filled: true,
-      enabledBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.black),
-      ),
-      focusedBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.black),
-      ),
-      constraints: BoxConstraints(minHeight: 40.sp),
-      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5));
+        labelStyle: labelStyle,
+        hintStyle: hintStyle,
+        fillColor: Colors.white,
+        filled: true,
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.black),
+        ),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.black),
+        ),
+        constraints: BoxConstraints(minHeight: 40.sp),
+        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+      );
+  InputDecoration get inputDecorationOutlineStyle => InputDecoration(
+        labelStyle: labelStyle,
+        hintStyle: hintStyle,
+        fillColor: Colors.white,
+        filled: true,
+        contentPadding: EdgeInsets.symmetric(horizontal: 8),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(width: 2.0)
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.black),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: StyleColor.electricViolet),
+        ),
+        constraints: BoxConstraints(minHeight: 40.sp),
+      );
 
   TextStyle get hintStyle => TextStyle(
         fontFamily: "Aclonica",
@@ -895,6 +917,7 @@ class StylesApp {
       return 20.sp;
     }
   }
+
   double get sizeIconBottomBar {
     if (screenWidth <= SizeScreensApp().xsm) {
       return 20.sp;

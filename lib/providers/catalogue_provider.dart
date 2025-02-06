@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ class CatalogueProvider extends ChangeNotifier {
   late GraphQLClient _client;
   late List<Country> allCountries;
   late List<Church> allChurches;
+  late List<League> allLeagues;
   
   CatalogueProvider() {
     init();
@@ -17,13 +19,14 @@ class CatalogueProvider extends ChangeNotifier {
     await _loadSex();
     await _loadVersions();
     await _loadChurches();
+    await _loadLeagues();
   }
 
   Future<void> _loadCountries() async {
     // Lógica para cargar la lista de países
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userToken = prefs.getString('userToken');
-    _client = createClient(authToken: userToken);
+    _client = createClient();
 
     QueryOptions options = QueryOptions(
       operationName: "GetAllCountries",
@@ -109,6 +112,52 @@ class CatalogueProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       throw Exception('Failed to obtain Churches $e');
+    }
+  }
+
+  Future<void> _loadLeagues() async {
+    
+ final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userToken = prefs.getString('userToken');
+    _client = createClient(authToken: userToken);
+
+    QueryOptions options = QueryOptions(
+      operationName: "GetAllLeagues",
+      document: gql(r'''
+     query GetAllLeagues {
+          getAllLeagues {
+            id
+            name
+            minMembers
+            maxMembers
+            status
+            img {
+              urlImg
+            }
+          }
+        }
+      '''),
+      fetchPolicy: FetchPolicy.noCache,
+    );
+    try {
+      final QueryResult result = await _client.query(options);
+      if (result.hasException) {
+        throw Exception('Failed to obtain leagues');
+      }
+
+      final data = result.data;
+      if (data == null || data['getAllLeagues'] == null) {
+        throw Exception('Failed to obtain leagues');
+      }
+
+      allLeagues = (data['getAllLeagues'] as List)
+          .map((i) => 
+          League.fromJson(removeTypename(i)))
+          .toList();
+
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to obtain leagues $e');
     }
   }
 }

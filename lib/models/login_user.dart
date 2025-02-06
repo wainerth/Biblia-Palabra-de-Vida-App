@@ -1,3 +1,5 @@
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+
 class CountryUser {
   final String id;
   final String country;
@@ -46,11 +48,7 @@ class UserChurch {
   final String id;
   final String name;
   final bool status;
-  UserChurch({
-    required this.id,
-    required this.name,
-    required this.status
-  });
+  UserChurch({required this.id, required this.name, required this.status});
 
   factory UserChurch.fromJson(Map<String, dynamic> json) {
     var churchName = ChurchRelation.fromJson(json['churchRelation']);
@@ -61,11 +59,7 @@ class UserChurch {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'status':status
-      };
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'status': status};
 }
 
 class User {
@@ -132,6 +126,8 @@ class LoginUser {
   final int streakDaysCount;
   final int preachingsCreatedCount;
   final User user;
+  final List<UserAchievement>? achievement;
+  final UserRanking? league;
 
   LoginUser({
     required this.name,
@@ -146,6 +142,8 @@ class LoginUser {
     required this.streakDaysCount,
     required this.preachingsCreatedCount,
     required this.user,
+    required this.achievement,
+    required this.league,
     this.lastName,
     this.birthday,
     this.identifier,
@@ -154,8 +152,41 @@ class LoginUser {
     this.currentLeagueId,
   });
 
-  factory LoginUser.fromJson(Map<String, dynamic> json) {
+  LoginUser copyWith({
+    String? name,
+    String? email,
+    String? imgProfileUser,
+  }) {
+    return LoginUser(
+        name: name ?? this.name,
+        imgProfileUser: imgProfileUser ?? this.imgProfileUser,
+        expTotalUser: expTotalUser,
+        country: country,
+        phoneNumber: phoneNumber,
+        favoriteVerseId: '',
+        notifications: notifications,
+        createdAt: '',
+        achievementsReachedCount: achievementsReachedCount,
+        streakDaysCount: streakDaysCount,
+        preachingsCreatedCount: preachingsCreatedCount,
+        user: user,
+        achievement: achievement,
+        league: league,
+        lastName: lastName,
+        birthday: birthday,
+        identifier: identifier,
+        gender: gender,
+        isBaptized: isBaptized,
+        currentLeagueId: currentLeagueId);
+  }
 
+  factory LoginUser.fromJson(Map<String, dynamic> json) {
+    List<UserAchievement> achievement = [];
+    if (json['achievement'] != null) {
+      achievement = (json['achievement'] as List)
+          .map((i) => UserAchievement.fromJson(i))
+          .toList();
+    }
     return LoginUser(
       identifier: json['identifier'],
       name: json['name'],
@@ -177,6 +208,8 @@ class LoginUser {
       preachingsCreatedCount: json['preachingsCreatedCount'],
       currentLeagueId: json['currentLeagueId'],
       user: User.fromJson(json['user']),
+      achievement: achievement,
+      league: json['league'] != null ? UserRanking.fromJson(json['league']) : null,
     );
   }
 
@@ -199,5 +232,7 @@ class LoginUser {
         'preachingsCreatedCount': preachingsCreatedCount,
         'currentLeagueId': currentLeagueId,
         'user': user.toJson(),
+        'achievement': achievement,
+        'league' : league,
       };
 }

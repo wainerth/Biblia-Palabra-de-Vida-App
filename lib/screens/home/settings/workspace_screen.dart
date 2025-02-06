@@ -81,8 +81,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthenticationProvider>(context);
-    dataUser = authProvider.currentUser;
+    final userProvider = Provider.of<UserProvider>(context);
+    dataUser = userProvider.currentUser;
     final cardList = [
       // Replace with your actual asset paths and route names
       {
@@ -500,10 +500,7 @@ _buildPositionSection(BuildContext context, userData) {
                                 backgroundImage: NetworkImage((userData !=
                                             null &&
                                         userData.imgProfileUser != '')
-                                    ? userData.imgProfileUser.startsWith("/")
-                                        ? GraphQLConfig.urlServidor +
-                                            userData.imgProfileUser
-                                        : userData.imgProfileUser
+                                    ?  "${GraphQLConfig.urlServidor}${userData.imgProfileUser}"
                                     : 'assets/no-image.jpg'),
                               ),
                             ),
@@ -527,7 +524,7 @@ _buildPositionSection(BuildContext context, userData) {
                             child: Center(
                               child: Text(
                                 textAlign: TextAlign.center,
-                                "Soldado de Cristo",
+                                "${userData.league != null ? userData.league.leagueName : ''}",
                                 style: StylesApp(context)
                                     .textStyleBody6
                                     .copyWith(color: Colors.white),
@@ -565,7 +562,7 @@ _buildPositionSection(BuildContext context, userData) {
                       flex: 1,
                       child: Center(
                         child: Text(
-                          "Robinson",
+                          userData!.user.username,
                           style: StylesApp(context)
                               .textStyleBody6
                               .copyWith(color: Colors.white),
@@ -577,7 +574,7 @@ _buildPositionSection(BuildContext context, userData) {
                       child: Center(
                         child: Text(
                           textAlign: TextAlign.center,
-                          "Const: 300 Dias",
+                          "Const: ${userData.streakDaysCount} Dias",
                           style: StylesApp(context)
                               .textStyleBody6
                               .copyWith(color: Colors.white),
@@ -588,7 +585,7 @@ _buildPositionSection(BuildContext context, userData) {
                       flex: 1,
                       child: Center(
                         child: Text(
-                          " 9999 Lms.",
+                          " ${userData.expTotalUser} Lms.",
                           style: StylesApp(context)
                               .textStyleBody6
                               .copyWith(color: Colors.white),

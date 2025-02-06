@@ -117,7 +117,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                     controller: _emailController,
                                     keyboardType: TextInputType.emailAddress,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
                                           hintText: "Correo electrónico",
                                         ),
@@ -154,7 +154,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   child: TextFormField(
                                     controller: __recoveryCodeController,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
                                             hintText: "Código de recuperación"),
                                     validator: (value) {
@@ -179,7 +179,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                     controller: _passwordController,
                                     obscureText: _obscureTextPass,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
                                           hintText: "Contraseña",
                                           suffixIcon: IconButton(
@@ -217,7 +217,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                     controller: _confirmPasswordController,
                                     obscureText: _obscureTextRepeat,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
                                           hintText: "Confirmar Contraseña",
                                           suffixIcon: IconButton(

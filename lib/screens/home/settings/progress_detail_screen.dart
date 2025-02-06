@@ -1,6 +1,11 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class ProgressDetailScreen extends StatefulWidget {
   const ProgressDetailScreen({super.key});
@@ -10,17 +15,25 @@ class ProgressDetailScreen extends StatefulWidget {
 }
 
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
-  List achievements = [
-    {"title": "Creyente", "img": "assets/creyente.png"},
-    {"title": "Bautizado", "img": "assets/bautizado.png"},
-    {"title": "Discipulado 1", "img": "assets/dicipulado1.png"},
-    {"title": "Discipulado 2", "img": "assets/dicipulado2.png"},
-    {"title": "Creyente", "img": "assets/creyente.png"},
-    {"title": "Bautizado", "img": "assets/bautizado.png"},
-  ];
+  List<UserAchievement>? achievements = [];
+  //   {"title": "Creyente", "img": "assets/creyente.png"},
+  //   {"title": "Bautizado", "img": "assets/bautizado.png"},
+  //   {"title": "Discipulado 1", "img": "assets/dicipulado1.png"},
+  //   {"title": "Discipulado 2", "img": "assets/dicipulado2.png"},
+  //   {"title": "Creyente", "img": "assets/creyente.png"},
+  //   {"title": "Bautizado", "img": "assets/bautizado.png"},
+  // ];
   List awards = [
-    {"img": "assets/premios/sardica.png", "character": "Rubén", "level": "Sardica"},
-    {"img": "assets/premios/topacio.png", "character": "Simeon", "level": "Topacio"},
+    {
+      "img": "assets/premios/sardica.png",
+      "character": "Rubén",
+      "level": "Sardica"
+    },
+    {
+      "img": "assets/premios/topacio.png",
+      "character": "Simeon",
+      "level": "Topacio"
+    },
     {
       "img": "assets/premios/carbunclo.png",
       "character": "Levi",
@@ -48,12 +61,23 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
       "character": "Isacar",
       "level": "Amatista"
     },
-    {"img": "assets/premios/berilio.png", "character": "Zabulón", "level": "Berilio"},
+    {
+      "img": "assets/premios/berilio.png",
+      "character": "Zabulón",
+      "level": "Berilio"
+    },
     {"img": "assets/premios/onice.png", "character": "José", "level": "Ónice"},
-    {"img": "assets/premios/jaspe.png", "character": "Benjamín", "level": "Jaspe"},
+    {
+      "img": "assets/premios/jaspe.png",
+      "character": "Benjamín",
+      "level": "Jaspe"
+    },
   ];
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final LoginUser? userData = userProvider.currentUser;
+    achievements = userData?.achievement;
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -97,7 +121,11 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                   style: StylesApp(context).textStyleBody6,
                                   children: [
                                     TextSpan(text: "Registro: "),
-                                    TextSpan(text: "01/07/2024"),
+                                    TextSpan(
+                                        text: userData!.createdAt.isNotEmpty
+                                            ? getFormatedDate(
+                                                int.parse(userData!.createdAt))
+                                            : ""),
                                   ],
                                 ),
                               ),
@@ -106,7 +134,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                   style: StylesApp(context).textStyleBody6,
                                   children: [
                                     TextSpan(text: "Racha: "),
-                                    TextSpan(text: "0 días"),
+                                    TextSpan(
+                                        text:
+                                            "${userData.streakDaysCount} días"),
                                   ],
                                 ),
                               ),
@@ -115,7 +145,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                   style: StylesApp(context).textStyleBody6,
                                   children: [
                                     TextSpan(text: "Energía: "),
-                                    TextSpan(text: "200"),
+                                    TextSpan(text: "${userData.expTotalUser}"),
                                   ],
                                 ),
                               ),
@@ -138,8 +168,12 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                           TextSpan(
                               style: StylesApp(context).chipLevels,
                               children: [
-                                TextSpan(text: "Soldado de cristo "),
-                                TextSpan(text: "600pts"),
+                                TextSpan(
+                                    text:
+                                        "${userData.league != null ? userData.league?.leagueName : ''} "),
+                                TextSpan(
+                                    text:
+                                        "${userData.league != null ? userData.league?.currentPoints : '0'}"),
                               ]),
                         ),
                       ),
@@ -343,7 +377,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             style: StylesApp(context).textStyCalendar,
           ),
           Container(
-            constraints: BoxConstraints(minHeight: 84,),
+            constraints: BoxConstraints(
+              minHeight: 84,
+            ),
             height: 100.sp,
             decoration: BoxDecoration(
               color: Color(0XFFFFF2C2),
@@ -362,7 +398,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               child: ListView.builder(
                 controller: scrollController,
                 scrollDirection: Axis.horizontal, // Dirección horizontal
-                itemCount: achievements.length, // Número de elementos
+                itemCount: achievements!.length, // Número de elementos
                 itemBuilder: (BuildContext context, int index) {
                   return Row(
                     children: [
@@ -394,9 +430,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                     Radius.circular(8),
                                   ),
                                   image: DecorationImage(
-                                    image: AssetImage(
-                                      achievements[index]["img"],
-                                    ),
+                                    image: NetworkImage( '${GraphQLConfig.urlServidor}${achievements![index].img.urlImg}',
+                                        ),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -405,7 +440,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                 child: Center(
                                   child: Text(
                                     softWrap: true,
-                                    '${achievements[index]["title"]}',
+                                    '${achievements?[index].title}',
                                     style: StylesApp(context).textStyleBody10,
                                   ),
                                 ),
@@ -514,8 +549,12 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                        textAlign: TextAlign.center,
-                        "Puedes canjear  esta gema por 200Lsm de energía", style: StylesApp(context).textStyleBody14.copyWith(color: Colors.black),),
+                      textAlign: TextAlign.center,
+                      "Puedes canjear  esta gema por 200Lsm de energía",
+                      style: StylesApp(context)
+                          .textStyleBody14
+                          .copyWith(color: Colors.black),
+                    ),
                     SizedBox(
                       height: 7.0,
                     ),

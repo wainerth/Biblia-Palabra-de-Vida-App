@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class ProfileHeader extends StatefulWidget {
   final String avatarImg;
@@ -20,15 +22,14 @@ class ProfileHeader extends StatefulWidget {
 }
 
 class _ProfileHeaderState extends State<ProfileHeader> {
+  
   ImageProvider _getImageProvider() {
     if (widget.avatarImg.isEmpty) {
       return AssetImage('assets/no-image.jpg');
     } else {
       if (widget.avatarImg.isNotEmpty) {
-        return NetworkImage(widget.avatarImg.startsWith("/")
-            ? GraphQLConfig.urlServidor +
-                widget.avatarImg
-            : widget.avatarImg, );
+        return NetworkImage( GraphQLConfig.urlServidor +
+                widget.avatarImg, );
       } else {
         return FileImage(File(widget.avatarImg));
       }
@@ -37,6 +38,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
 
   @override
   Widget build(BuildContext context) {
+     final userProvider = Provider.of<UserProvider>(context);
+    final dataUser = userProvider.currentUser;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -124,7 +127,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 ),
               ),
               Text(
-                "Robinson",
+                dataUser!.user.username,
                 style: StylesApp(context).textStyleTitleOrange,
               ),
               SizedBox(
@@ -139,7 +142,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 children: [
                   Image.asset("assets/kawaii_fire.png"),
                   Text(
-                    "1000",
+                    "${dataUser.expTotalUser}",
                     style: StylesApp(context)
                         .textStyleBody4
                         .copyWith(color: Color(0XFFFD8C43)),

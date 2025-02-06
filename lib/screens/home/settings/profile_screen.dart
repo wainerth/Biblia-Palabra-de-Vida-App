@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -8,6 +11,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:mime/mime.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,25 +28,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      if (pickedFile != null) {
-        if (kDebugMode) {
-          print(pickedFile.path);
-        }
-        avatarImg = pickedFile.path;
+    if (pickedFile != null) {
+      final imageFile = File(pickedFile.path);
+      final fileSizeInBytes = imageFile.lengthSync();
+      final fileSizeInMegabytes = fileSizeInBytes / (1024 * 1024);
+      if (kDebugMode) {
+        print(pickedFile.path);
       }
-    });
+      if (fileSizeInMegabytes <= 5) {
+        List<int> imageBytes = await imageFile.readAsBytes();
+
+        String _base64Image = base64Encode(imageBytes);
+
+        final mimeType = lookupMimeType(imageFile.path); // Obtiene el tipo MIME
+
+        if (mimeType != null) {
+          String dataUrl = "data:$mimeType;base64,$_base64Image";
+          print(dataUrl); // Imprime la Data URL para pegarla en el navegador
+        } else {
+          print("No se pudo determinar el tipo MIME de la imagen.");
+        }
+        setState(() {
+          avatarImg = pickedFile.path;
+        });
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.updateAvatarUser(dataUser!.user.id, _base64Image);
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Imagen muy grande'),
+              content: Text(
+                  'La imagen seleccionada excede el tamaño máximo de 5MB.'),
+              actions: [
+                TextButton(
+                  child: Text('Aceptar'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthenticationProvider>(context);
-    dataUser = authProvider.currentUser;
+    final userProvider = Provider.of<UserProvider>(context);
+    dataUser = userProvider.currentUser;
 
     List<ModelData> progressData = [
       ModelData(
         label: "Registro",
-        value: getFormatedDate(int.parse(dataUser!.createdAt)),
+        value: dataUser!.createdAt.isNotEmpty
+            ? getFormatedDate(int.parse(dataUser!.createdAt))
+            : "",
       ),
       ModelData(label: "Racha", value: "${dataUser!.streakDaysCount} días"),
       ModelData(label: "Energía", value: "${dataUser!.expTotalUser}"),
@@ -50,19 +92,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ];
     List<ModelData> personalData = [
       ModelData(label: "Nombre", value: dataUser!.name, showLabel: false),
+      ModelData(
+          label: "Apellido", value: "${dataUser?.lastName}", showLabel: false),
       ModelData(label: "Sexo", value: "${dataUser!.gender}"),
       ModelData(label: "Fecha nac", value: "${dataUser!.birthday}"),
       ModelData(
-          label: "Bautizo",value: getIsBaptized(dataUser!.isBaptized ?? false),showLabel: false),
+          label: "Bautizo",
+          value: getIsBaptized(dataUser!.isBaptized ?? false),
+          showLabel: false),
     ];
     List<ModelData> contactDetails = [
       ModelData(label: "Email", value: dataUser!.user.email, showLabel: false),
-      ModelData(label: "Tel.:", value: dataUser!.phoneNumber ?? ''),
+      ModelData(label: "Tel.", value: dataUser!.phoneNumber ?? ''),
     ];
     List<ModelData> locationData = [
       ModelData(label: "País", value: dataUser!.country?.country ?? ''),
       ModelData(label: "Ciudad", value: "Montevideo"),
-      ModelData(label: "Iglesia", value: getChurchActive( dataUser!.user.userChurch) != null ? getChurchActive( dataUser!.user.userChurch).name : '')
+      ModelData(
+          label: "Iglesia",
+          value: getChurchActive(dataUser!.user.userChurch) != null
+              ? getChurchActive(dataUser!.user.userChurch)!.name
+              : '')
     ];
 
     return Scaffold(
@@ -187,27 +237,30 @@ class CardColumnWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         for (var i = 0; i < data.length; i++) ...[
-                          Text.rich(
-                            style: StylesApp(context).textStyleBodyWhite4,
-                            TextSpan(
-                              children: [
-                                if (data[i].label.isNotEmpty)
-                                  if (data[i].showLabel)
-                                    TextSpan(text: "${data[i].label}: "),
-                                TextSpan(
-                                  text: data[i].value.isNotEmpty ? data[i].value : 'no registra',
-                                  style: StylesApp(context)
-                                      .textStyleBodyWhite4
-                                      .copyWith(
-                                        color: (highlightLabel &&
-                                                (i == 1 || i == 2))
-                                            ? Colors.orange
-                                            : Colors.white,
-                                      ),
-                                ),
-                              ],
+                          if (data[i].showLabel || data[i].value.isNotEmpty)
+                            Text.rich(
+                              style: StylesApp(context).textStyleBodyWhite4,
+                              TextSpan(
+                                children: [
+                                  if (data[i].label.isNotEmpty)
+                                    if (data[i].showLabel)
+                                      TextSpan(text: "${data[i].label}: "),
+                                  TextSpan(
+                                    text: data[i].value.isNotEmpty
+                                        ? data[i].value
+                                        : '',
+                                    style: StylesApp(context)
+                                        .textStyleBodyWhite4
+                                        .copyWith(
+                                          color: (highlightLabel &&
+                                                  (i == 1 || i == 2))
+                                              ? Colors.orange
+                                              : Colors.white,
+                                        ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
                         ]
                       ],
                     ),
@@ -242,9 +295,10 @@ class CardColumnWidget extends StatelessWidget {
                                 onSave: (List<ModelData> dta) {
                                   print(dta.length);
                                   Navigator.pop(context);
-                                  // setState(() {
-                                  // personalData = updatedData; // O llama a un método del provider
-                                  // });
+                                  // servicio de actualización
+
+                                  final userProvider = Provider.of<UserProvider>(context);
+                                  userProvider.updateProfile(dta);
                                 },
                               );
                             });
@@ -334,14 +388,8 @@ class _editDetailDialog extends State<EditDetailDialog> {
         .cast<ModelData>()
         .toList();
     List<ModelData> optionsSex = [
-      ModelData(value: 'M', label: 'Masculino'),
-      ModelData(value: 'F', label: 'Femenino'),
-      ModelData(
-          value: 'otro',
-          label: 'Otro'), // Opción adicional para personas no binarias
-      ModelData(
-          value: 'desconocido',
-          label: 'Desconocido'), // Opción para cuando no se conoce el sexo
+      ModelData(value: 'm', label: 'Masculino'),
+      ModelData(value: 'f', label: 'Femenino')
     ];
     return Dialog(
       alignment: Alignment.bottomCenter,
@@ -382,15 +430,22 @@ class _editDetailDialog extends State<EditDetailDialog> {
                               itemCount: _editingData.length,
                               itemBuilder: (context, index) {
                                 final item = _editingData[index];
-                                return _buildField(
-                                  item,
-                                  index, // Pasa el índice
-                                  dropDownList,
-                                  prefixCode,
-                                  optionsSex,
-                                  listChurches,
-                                  catalogueProvider.allChurches,
-                                  catalogueProvider.allCountries,
+                                return Column(
+                                  children: [
+                                    _buildField(
+                                      item,
+                                      index, // Pasa el índice
+                                      dropDownList,
+                                      prefixCode,
+                                      optionsSex,
+                                      listChurches,
+                                      catalogueProvider.allChurches,
+                                      catalogueProvider.allCountries,
+                                    ),
+                                    SizedBox(
+                                      height: 12.0,
+                                    )
+                                  ],
                                 );
                               },
                             ),
@@ -400,6 +455,8 @@ class _editDetailDialog extends State<EditDetailDialog> {
                             child: ButtonThemeWidget(
                               buttonStyle: StylesApp(context).btnWidgetSmall,
                               text: 'Guardar',
+                              // width: 239.0,
+                              height: 40.0,
                               onPressed: () {
                                 widget.onSave(_editingData);
                               },
@@ -431,7 +488,7 @@ class _editDetailDialog extends State<EditDetailDialog> {
       List<ModelData> optionsChurches,
       List<Church> listChurches,
       List<Country> listCatalogue) {
-    if (item.label == 'Tel.:') {
+    if (item.label == 'Tel.') {
       return Row(
         spacing: 10,
         children: [
@@ -475,9 +532,10 @@ class _editDetailDialog extends State<EditDetailDialog> {
                   showLabel: _editingData[index].showLabel,
                 );
               },
-              decoration: StylesApp(context).inputDecorationStyle.copyWith(
-                    hintText: "Número de teléfono",
-                  ),
+              decoration:
+                  StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                        hintText: "Número de teléfono",
+                      ),
               style: StylesApp(context)
                   .textStyleBody16
                   .copyWith(color: Colors.black),
@@ -503,13 +561,17 @@ class _editDetailDialog extends State<EditDetailDialog> {
               );
             });
           },
-          selectedItem: item.value.isNotEmpty ? optionsSex.firstWhere(
-              (element) => element.value == item.value.toLowerCase()): null,
+          selectedItem: item.value.isNotEmpty
+              ? optionsSex.firstWhere(
+                  (element) => element.value == item.value.toLowerCase())
+              : null,
         ),
       );
     } else if (item.label == 'Fecha nac') {
       return DatePickerFormField(
-        initialDate:item.value.isNotEmpty ? DateFormat("dd/MM/yyyy").parse(item.value) : DateTime.now(),
+        initialDate: item.value.isNotEmpty
+            ? DateFormat("dd/MM/yyyy").parse(item.value)
+            : DateTime.now().subtract(Duration(days: 15 * 365)),
         onChanged: (value) {
           _editingData[index] = ModelData(
             label: _editingData[index].label,
@@ -581,8 +643,9 @@ class _editDetailDialog extends State<EditDetailDialog> {
       );
     } else {
       return TextFormField(
+        readOnly: item.label == 'Email',
         controller: _controllers[index],
-        decoration: StylesApp(context).inputDecorationStyle.copyWith(
+        decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
               hintText: item.label,
             ),
         onChanged: (value) {

@@ -181,7 +181,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           .digitsOnly, // Permite solo números
                                     ],
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
                                           hintText: "Identificador de usuario",
                                         ),
@@ -207,7 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     controller: _emailController,
                                     keyboardType: TextInputType.emailAddress,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
                                           hintText: "Correo electrónico",
                                         ),
@@ -239,7 +239,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     obscureText: _obscureTextPass,
                                     textAlignVertical: TextAlignVertical.center,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
                                           hintText: "Contraseña",
                                           suffixIcon: IconButton(
@@ -280,7 +280,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     obscureText: _obscureTextRepeat,
                                     textAlignVertical: TextAlignVertical.center,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
                                           hintText: "Confirmar Contraseña",
                                           suffixIcon: IconButton(
@@ -318,7 +318,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   child: TextFormField(
                                     controller: _nameController,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(hintText: "Nombre"),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -341,7 +341,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   child: TextFormField(
                                     controller: _lastNameController,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(hintText: "Apellido"),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -366,7 +366,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     readOnly: true,
                                     onTap: () => _selectDate(context),
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
                                           hintText: "Fecha de nacimiento",
                                           suffixIcon:
@@ -426,7 +426,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           enabled:
                                               false, // Deshabilitado para que no pueda ser editado
                                           decoration: StylesApp(context)
-                                              .inputDecorationStyle
+                                              .inputDecorationOutlineStyle
                                               .copyWith(
                                                 filled: true,
                                               ),
@@ -446,7 +446,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             maskFormatterTel, // Permite solo números
                                           ],
                                           decoration: StylesApp(context)
-                                              .inputDecorationStyle
+                                              .inputDecorationOutlineStyle
                                               .copyWith(
                                                 hintText: "Número de teléfono",
                                               ),

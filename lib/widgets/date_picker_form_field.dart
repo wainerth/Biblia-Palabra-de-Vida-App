@@ -19,14 +19,16 @@ class _DatePickerFormFieldState extends State<DatePickerFormField> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.initialDate; // Inicializa _selectedDate con initialDate
+    _selectedDate =
+        widget.initialDate; // Inicializa _selectedDate con initialDate
     if (_selectedDate != null) {
-      _dateController.text = DateFormat.yMd('es_ES').format(_selectedDate!);
+      final DateFormat formatter = DateFormat('dd/MM/yyyy');
+      _dateController.text = formatter.format(_selectedDate!);
     }
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateFormat formatter = DateFormat.yMd('es_ES');
+    final DateFormat formatter = DateFormat('dd/MM/yyyy');
     final DateTime now = DateTime.now();
 
     final DateTime? picked = await showDatePicker(
@@ -64,17 +66,15 @@ class _DatePickerFormFieldState extends State<DatePickerFormField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: _dateController,
-      style: StylesApp(context).textStyleBody16.copyWith(
-        color: Colors.black
-      ),
+      style: StylesApp(context).textStyleBody16.copyWith(color: Colors.black),
       readOnly: true,
       onTap: () => _selectDate(context),
       onChanged: widget.onChanged,
-      decoration: InputDecoration(
-        hintText: "Fecha de nacimiento",
-        suffixIcon: const Icon(Icons.calendar_today),
-        border: const OutlineInputBorder(),
-      ),
+      decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
+            hintText: "Fecha de nacimiento",
+            suffixIcon: const Icon(Icons.calendar_today),
+            // border: const OutlineInputBorder(),
+          ),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return "La Fecha de nacimiento es obligatoria";

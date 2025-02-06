@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -7,7 +6,6 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io' as uio;
 
 class LoginScreen extends StatefulWidget {
@@ -21,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController textEmail = TextEditingController();
   TextEditingController textPass = TextEditingController();
+  bool _obscureTextPass = true;
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +64,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     cursorHeight: 16.sp,
                                     style: StylesApp(context).textStyleHintText,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
-                                          hintText: "Correo electrónico",
+                                          hintText:
+                                              "usuario o Correo electrónico",
                                         ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "usuario o Correo electrónico es obligatoria";
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ),
                                 const SizedBox(
@@ -79,14 +85,56 @@ class _LoginScreenState extends State<LoginScreen> {
                                       const BoxConstraints(minWidth: 160.0),
                                   child: TextFormField(
                                     controller: textPass,
+
                                     cursorHeight: 16.sp,
+                                    obscureText: _obscureTextPass,
+                                    textAlignVertical: TextAlignVertical.center,
+                                    // decoration: StylesApp(context)
+                                    //     .inputDecorationOutlineStyle
+                                    //     .copyWith(
+                                    // hintText: "Contraseña",
+                                    // suffixIcon: IconButton(
+                                    //   iconSize: 20,
+                                    //   padding: const EdgeInsets.all(0),
+                                    //   icon: Icon(
+                                    //     _obscureTextPass
+                                    //         ? Icons.visibility
+                                    //         : Icons.visibility_off,
+                                    //   ),
+                                    //   onPressed: () {
+                                    //     setState(() {
+                                    //       _obscureTextPass = !_obscureTextPass;
+                                    //     });
+                                    //   },
+                                    // ),
+                                    //     ),
                                     style: StylesApp(context).textStyleHintText,
                                     decoration: StylesApp(context)
-                                        .inputDecorationStyle
+                                        .inputDecorationOutlineStyle
                                         .copyWith(
-                                          // labelText: "Contraseña",
                                           hintText: "Contraseña",
+                                          suffixIcon: IconButton(
+                                            iconSize: 20,
+                                            padding: const EdgeInsets.all(0),
+                                            icon: Icon(
+                                              _obscureTextPass
+                                                  ? Icons.visibility
+                                                  : Icons.visibility_off,
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _obscureTextPass =
+                                                    !_obscureTextPass;
+                                              });
+                                            },
+                                          ),
                                         ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "La contraseña es obligatoria";
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ),
                                 const SizedBox(
@@ -100,10 +148,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     if (!_formKey.currentState!.validate()) {
                                       return;
                                     }
-                                    // LoadingService().showLoading(context);
+                                    LoadingService().showLoading(context);
 
                                     final user = await authProvider.loginUser(
-                                        textEmail.text, textPass.text);
+                                        context, textEmail.text, textPass.text);
                                     if (kDebugMode) {
                                       print(user);
                                     }
@@ -126,10 +174,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                           );
                                         },
                                       );
-                                      // LoadingService().hideLoading();
+                                      LoadingService().hideLoading();
                                     } else {
-                                     
-                                      // LoadingService().hideLoading();
+                                      LoadingService().hideLoading();
                                       Navigator.pushNamed(
                                           context, '/layoutPage');
                                     }
@@ -149,45 +196,37 @@ class _LoginScreenState extends State<LoginScreen> {
                                   onPressed: () async {
                                     if (uio.Platform.isAndroid ||
                                         uio.Platform.isIOS) {
-                                    LoadingService().showLoading(context);
-                                    final user =
-                                        await authProvider.loginWithGoogle();
-                                    if (kDebugMode) {
-                                      print(user);
-                                    }
+                                      LoadingService().showLoading(context);
+                                      final user = await authProvider
+                                          .loginWithGoogle(context);
+                                      if (kDebugMode) {
+                                        print(user);
+                                      }
 
-                                    if (user.error != null) {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: const Text("Error"),
-                                            content: Text(user.error!),
-                                            actions: [
-                                              TextButton(
-                                                child: const Text("OK"),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                      LoadingService().hideLoading();
-                                    } else {
-                                      SharedPreferences prefs =
-                                          await SharedPreferences.getInstance();
-
-                                      await prefs.setString(
-                                          'userData', jsonEncode(user.data));
-
-                                      await prefs.setString('userToken',
-                                          user.data["userJwtToken"]["token"]);
-                                      LoadingService().hideLoading();
-                                      Navigator.pushNamed(
-                                          context, '/layoutPage');
-                                    }
+                                      if (user.error != null) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text("Error"),
+                                              content: Text(user.error!),
+                                              actions: [
+                                                TextButton(
+                                                  child: const Text("OK"),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                        LoadingService().hideLoading();
+                                      } else {
+                                        LoadingService().hideLoading();
+                                        Navigator.pushNamed(
+                                            context, '/layoutPage');
+                                      }
                                     } else {
                                       // Manejar el caso para otras plataformas si es necesario
                                       print(

@@ -1,289 +1,160 @@
 import 'dart:convert';
 
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:universal_io/io.dart';
 
 class AuthenticationProvider extends ChangeNotifier {
-  late GraphQLClient _client;
+  final CatalogueProvider _catalogueProvider;
+  final BuildContext context;
   bool isAuthenticated = false;
-  LoginUser? currentUser;
+  // LoginUser? currentUser;
 
-  AuthenticationProvider() {
-    checkAuthentication();
-    _initClient();
+  AuthenticationProvider(this.context, this._catalogueProvider) {
+    checkAuthentication(context);
   }
 
-  _initClient() {
-    _client = createClient();
-  }
-
-  Future<void> checkAuthentication() async {
+  Future<void> checkAuthentication(context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userToken = prefs.getString('userToken');
     String? userDataString = prefs.getString('userData');
-    print(userToken);
+    if (kDebugMode) {
+      print(userToken);
+    }
     if (userToken != null && userDataString != null) {
-      _client = createClient(authToken: userToken);
       isAuthenticated = true;
-      currentUser = LoginUser.fromJson(jsonDecode(userDataString));
+      Provider.of<UserProvider>(context, listen: false)
+          .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
     } else {
       isAuthenticated = false;
-      currentUser = null;
+      Provider.of<UserProvider>(context, listen: false).setUser(null);
     }
     notifyListeners();
   }
 
   ///Creamos método para inicio de sesión
-  Future loginUser(String email, String password) async {
-    _client = createClient();
-    var responseData = null;
+  Future loginUser(BuildContext context, String email, String password) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    // llamamos query de login
+    final userResponse = await login(email, password);
+    var error = userResponse.error;
+    if (error != null) {
+      return ResponseData(data: null, error: error);
+    }
+    final userId = userResponse.data["id"];
+    final token = userResponse.data["userJwtToken"]["token"];
+    await prefs.setString("userToken", token);
 
-    final MutationOptions options = MutationOptions(
-      operationName: 'LoginUser',
-      document: gql(r'''
-        mutation LoginUser($input: LoginInput!) {
-          loginUser(input: $input) {
-            id
-            userJwtToken {
-              token
-            }
-          }
-        }
-      '''),
-      variables: <String, dynamic>{
-        "input": {"username": "Leonardog", "password": "123456"}
-      },
-      fetchPolicy: FetchPolicy.noCache,
+    // consultamos perfil del usuario
+    final userProfile = await getProfileUser(token, userId);
+    error = userProfile.error;
+    if (error != null) {
+      return ResponseData(data: null, error: error);
+    }
+
+    // llamamos a achievement
+    final userAchievement = await getAchievement(token, userId);
+    error = userAchievement.error;
+    if (userAchievement.error != null) {
+      return ResponseData(data: null, error: error);
+    }
+    userProfile.data['achievement'] = userAchievement.data;
+    // consultamos la liga
+    if (userProfile.data["currentLeagueId"] == null) {
+      userProfile.data["currentLeagueId"] = "0";
+    }
+    League? league = _catalogueProvider.allLeagues.firstWhere(
+      (element) => element.id == userProfile.data["currentLeagueId"],
+      orElse: () => League(
+          id: "-1",
+          name: "",
+          minMembers: 0,
+          maxMembers: 0,
+          status: "0",
+          img: ImageDetails(urlImg: "")),
     );
 
-    try {
-      final QueryResult result = await _client.mutate(options);
-      if (result.hasException) {
-        return ResponseData.fromQueryResult(result);
-      }
-
-      final data = result.data;
-      if (data == null || data['loginUser'] == null) {
-        return ResponseData(
-          data: null,
-          error: 'Login failed: No data returned',
-        );
-      }
-      var dto = removeTypename(data['loginUser']);
-
-      // consultamos ProfileServices
-      _client = createClient(authToken: dto["userJwtToken"]["token"]);
-      ResponseData profile = await getProfileUser(dto["id"]);
-      if (profile.error != null) {
-        return ResponseData(
-          data: null,
-          error: profile.error,
-        );
-      }
-
-      // almacenamos en local storage
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      //  almacenamos la data
-      currentUser = LoginUser.fromJson(profile.data);
-      print(currentUser);
-      await prefs.setString('userData', jsonEncode(currentUser!.toJson()));
-
-      await prefs.setString('userToken', dto["userJwtToken"]["token"]);
-
-// retornamos data
-      return ResponseData(
-        data: dto,
-        error: null,
-      );
-    } catch (e) {
-      return ResponseData(
-        data: null,
-        error: 'Connection error: $e',
-      );
+    // buscamos miembro
+    final dataMemberResponse = await getDataMember(token, userId);
+    error = dataMemberResponse.error;
+    if (error != null) {
+      return ResponseData(data: null, error: error);
     }
+    final userRanking = dataMemberResponse.data;
+    userRanking["leagueId"] = league.id;
+    userRanking['leagueName'] = league.name;
+
+    if (league.id != "-1") {
+      userProfile.data["league"] = userRanking;
+    }
+    Provider.of<UserProvider>(context, listen: false)
+        .setUser(LoginUser.fromJson(userProfile.data));
+
+    return ResponseData(data: userProfile, error: error);
   }
 
-  Future<ResponseData> getProfileUser(idUser) async {
-    final QueryOptions options = QueryOptions(
-      operationName: 'GetOneProfileByUserId',
-      document: gql(r'''
-                  query GetOneProfileByUserId($userId: ID) {
-                    getOneProfileByUserId(userId: $userId) {
-                      name # nombre y apellido
-                      expTotalUser #energia
-                      imgProfileUser
-                      phoneNumber
-                      country {
-                        id
-                        country
-                        country_code
-                      }
-                      favoriteVerseId # si asigna versiculo favorito
-                      notifications # notification user
-                        lastName 
-                        birthday
-                        identifier #cédula
-                        gender
-                        isBaptized
-                        currentLeagueId #future ligue in ranking
-                      createdAt # fecha registro
-                      achievementsReachedCount #contador de logros
-                      streakDaysCount # contador de dias 
-                      preachingsCreatedCount # cantidad de predicas
-                      user {
-                        id
-                        username
-                        email
-                        lastLogin
-                        rolId
-                        userChurch {
-                        churchId
-                        status
-                          churchRelation {
-                            name
-                          }
-                        }
-                      }
-                    }
-                  }
+  Future<ResponseData> loginWithGoogle(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userResponse = await loginGoogle();
+    var error = userResponse.error;
+    if (error != null) {
+      return ResponseData(data: null, error: error);
+    }
+    final userId = userResponse.data["id"];
+    final token = userResponse.data["userJwtToken"]["token"];
+    await prefs.setString("userToken", token);
+    // consultamos perfil del usuario
+    final userProfile = await getProfileUser(token, userId);
+    error = userProfile.error;
+    if (error != null) {
+      return ResponseData(data: null, error: error);
+    }
 
-'''),
-      variables: <String, dynamic>{"userId": idUser},
-      fetchPolicy: FetchPolicy.noCache,
+    // llamamos a achievement
+    final userAchievement = await getAchievement(token, userId);
+    error = userAchievement.error;
+    if (userAchievement.error != null) {
+      return ResponseData(data: null, error: error);
+    }
+    userProfile.data['achievement'] = userAchievement.data;
+    // consultamos la liga
+    if (userProfile.data["currentLeagueId"] == null) {
+      userProfile.data["currentLeagueId"] = "0";
+    }
+    League? league = _catalogueProvider.allLeagues.firstWhere(
+      (element) => element.id == userProfile.data["currentLeagueId"],
+      orElse: () => League(
+          id: "-1",
+          name: "",
+          minMembers: 0,
+          maxMembers: 0,
+          status: "0",
+          img: ImageDetails(urlImg: "")),
     );
 
-    try {
-      final QueryResult result = await _client.query(options);
-      if (result.hasException) {
-        return ResponseData.fromQueryResult(result);
-      }
-
-      final data = result.data;
-      if (data == null || data['getOneProfileByUserId'] == null) {
-        return ResponseData(
-          data: null,
-          error: 'Profile User failed: No data returned',
-        );
-      }
-      return ResponseData(
-        data: removeTypename(data['getOneProfileByUserId']),
-        error: null,
-      );
-    } catch (e) {
-      return ResponseData(
-        data: null,
-        error: 'Connection error: $e',
-      );
+    // buscamos miembro
+    final dataMemberResponse = await getDataMember(token, userId);
+    error = dataMemberResponse.error;
+    if (error != null) {
+      return ResponseData(data: null, error: error);
     }
-  }
+    final userRanking = dataMemberResponse.data;
+    userRanking["leagueId"] = league.id;
+    userRanking['leagueName'] = league.name;
 
-  Future<ResponseData> loginWithGoogle() async {
-    _client = createClient();
-
-    final GoogleSignIn googleSignIn;
-    if (kIsWeb || Platform.isAndroid) {
-      googleSignIn = GoogleSignIn();
-    } else {
-      googleSignIn = GoogleSignIn(
-          serverClientId:
-              "214929717096-c669jpm1gb9q87cribgbknuteemuj8st.apps.googleusercontent.com",
-          forceCodeForRefreshToken: true,
-          scopes: ["email"]);
+    if (league.id != "-1") {
+      userProfile.data["league"] = userRanking;
     }
-    try {
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        return ResponseData(
-          data: null,
-          error: 'User canceled the sign-in',
-        );
-      }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final String? accessToken = googleAuth.accessToken;
+    Provider.of<UserProvider>(context, listen: false)
+        .setUser(LoginUser.fromJson(userProfile.data));
 
-      if (accessToken == null) {
-        throw Exception('Failed to obtain Google tokens');
-      }
-
-      final MutationOptions options = MutationOptions(
-        operationName: 'SignUpGoogle',
-        document: gql(r'''
-        mutation SignUpGoogle($accessToken: String!) {
-          signUpGoogle(accessToken: $accessToken) {
-                id
-                email
-                username
-                password
-                rolId
-                imgProfileUser
-                userJwtToken {
-                  token
-                }
-          }
-        }
-      '''),
-        variables: <String, dynamic>{
-          'accessToken': accessToken,
-        },
-        fetchPolicy: FetchPolicy.noCache,
-      );
-
-      final QueryResult result = await _client.mutate(options);
-      if (result.hasException) {
-        throw Exception(result.exception.toString());
-      }
-
-      final data = result.data;
-      if (data == null || data['signUpGoogle'] == null) {
-        return ResponseData(
-          data: null,
-          error: 'Login failed: No data returned',
-        );
-      }
-      var dto = removeTypename(data['signUpGoogle']);
-      // consultamos ProfileServices
-      _client = createClient(authToken: dto["userJwtToken"]["token"]);
-      ResponseData profile = await getProfileUser(dto["id"]);
-      if (profile.error != null) {
-        return ResponseData(
-          data: null,
-          error: profile.error,
-        );
-      }
-
-      // almacenamos en local storage
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      //  almacenamos la data
-      currentUser = LoginUser.fromJson(profile.data);
-      print(currentUser);
-      await prefs.setString('userData', jsonEncode(currentUser!.toJson()));
-
-      await prefs.setString('userToken', dto["userJwtToken"]["token"]);
-  
-      return ResponseData(
-        data: dto,
-        error: null,
-      );
-    } catch (e) {
-      return ResponseData(data: null, error: "Google sign-in failed: $e");
-    }
-  }
-
-  loadUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userDataString = prefs.getString('userData');
-
-    if (userDataString != null) {
-      return LoginUser.fromJson(jsonDecode(userDataString));
-    }
+    return ResponseData(data: userProfile, error: error);
   }
 
   // Future<Map<String, dynamic>> registerUser(

@@ -26,3 +26,6 @@ export 'package:biblia_palabra_de_vida_app/models/img.dart';
 
 export 'package:biblia_palabra_de_vida_app/models/history.dart';
 export 'package:biblia_palabra_de_vida_app/models/sex_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/user_achievement.dart';
+export 'package:biblia_palabra_de_vida_app/models/league.dart';
+export 'package:biblia_palabra_de_vida_app/models/user_ranking.dart';

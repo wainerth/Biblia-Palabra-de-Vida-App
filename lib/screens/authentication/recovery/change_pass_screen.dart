@@ -99,7 +99,7 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                   controller: _currentPasswordController,
                                   obscureText: _obscureTextCurrentPass,
                                   decoration: StylesApp(context)
-                                      .inputDecorationStyle
+                                      .inputDecorationOutlineStyle
                                       .copyWith(
                                         hintText: "Contraseña actual",
                                         suffixIcon: IconButton(
@@ -133,7 +133,7 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                   controller: _passwordController,
                                   obscureText: _obscureTextNewPass,
                                   decoration: StylesApp(context)
-                                      .inputDecorationStyle
+                                      .inputDecorationOutlineStyle
                                       .copyWith(
                                         hintText: "Contraseña",
                                         suffixIcon: IconButton(
@@ -167,7 +167,7 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                   controller: _confirmPasswordController,
                                   obscureText: _obscureTextRepeat,
                                   decoration: StylesApp(context)
-                                      .inputDecorationStyle
+                                      .inputDecorationOutlineStyle
                                       .copyWith(
                                         hintText: "Confirmar Contraseña",
                                         suffixIcon: IconButton(

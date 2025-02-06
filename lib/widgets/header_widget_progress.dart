@@ -1,5 +1,9 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class HeaderWidgetProgress extends StatelessWidget {
   const HeaderWidgetProgress({
@@ -8,7 +12,8 @@ class HeaderWidgetProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double score = (200);
+    final userProvider = Provider.of<UserProvider>(context);
+    final LoginUser? userData = userProvider.currentUser;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -53,24 +58,35 @@ class HeaderWidgetProgress extends StatelessWidget {
                   child: Stack(
                     children: [
                       Container(
-                        constraints:
-                            BoxConstraints(maxWidth: 115.0, minHeight: 115.0),
+                        constraints: BoxConstraints(
+                            maxWidth: 115.0,
+                            minHeight: 115.0,
+                            maxHeight: 115.0),
                         width: double.infinity,
+                        height: double.infinity,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(115.0),
                             border: Border.all(
                                 width: 6.0, color: Color(0XFFFFFFFF))),
-                        child: Image.asset(
-                          "assets/avatar.png",
-                          fit: BoxFit.fill,
+                        child: ClipOval(
+                          child: Image.network(
+                            userData!.imgProfileUser.isNotEmpty
+                                ? GraphQLConfig.urlServidor +
+                                    userData.imgProfileUser
+                                : 'assets/no-image.jpg',
+                            fit: BoxFit.fill,
+                            errorBuilder: (context, object, stackTrace) {
+                              return Image.asset('assets/no-image.jpg');
+                            },
+                          ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
               ),
               Text(
-                "Robinson",
+                userData!.user.username,
                 style: StylesApp(context).textStyleTitleWithe24,
               ),
               SizedBox(
@@ -86,11 +102,12 @@ class HeaderWidgetProgress extends StatelessWidget {
                 children: [
                   Image.asset(
                     "assets/kawaii_fire.png",
-                    height: calculateHeight(score),
+                    height: calculateHeight(
+                        double.parse("${userData.expTotalUser}")),
                     fit: BoxFit.contain,
                   ),
                   Text(
-                    score.floorToDouble().toStringAsFixed(0),
+                    userData.expTotalUser.floorToDouble().toStringAsFixed(0),
                     style: StylesApp(context)
                         .textStyleBody4
                         .copyWith(color: Color(0XFFFD8C43)),

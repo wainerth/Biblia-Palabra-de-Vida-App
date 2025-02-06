@@ -65,7 +65,7 @@ class _CustomDropdownWidgetState<T> extends State<CustomDropdownWidget<T>> {
               return null;
             },
             onChanged: widget.onChanged,
-            decoration: StylesApp(context).inputDecorationStyle,
+            decoration: StylesApp(context).inputDecorationOutlineStyle,
             isExpanded: true,
             value: widget.selectedItem,
           );
