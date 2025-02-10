@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
-import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql.dart';
 import 'package:flutter/material.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
@@ -88,11 +90,130 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  Future<ResponseData> updateProfile(data) async {
-    //lógica para actualizar datos
-    _user = _user?.copyWith(
-        imgProfileUser: data["updateImageProfile"]["imgProfileUser"]);
-    return ResponseData(data: null, error: null);
+  Future<ResponseData> updateProfile(UserProfile data) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userToken = prefs.getString('userToken');
+      final response = await updateUserProfile(userToken, data);
+      if (response.error != null) {
+        return ResponseData(data: null, error: null);
+      }
+      _user = _user?.copyWith(
+          name: data.dataProfiles.name,
+          lastname: data.dataProfiles.lastname,
+          city: data.dataProfiles.city,
+          gender: data.dataProfiles.gender,
+          birthdate: data.dataProfiles.birthdate,
+          identifier: data.dataProfiles.identifier,
+          phoneNumber: data.dataProfiles.phoneNumber,
+          country: data.dataProfiles.country,
+          isBaptized: data.dataProfiles.isBaptized);
+      setUser(_user);
+      return ResponseData(data: response.data, error: null);
+    } catch (e) {
+      print(
+          "Error Update profile : $e"); // Print the error for debugging.  Crucial!
+
+      // More specific error handling if needed:
+      if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    }
   }
 
+  Future updateUserChurch(userId, churchId, churches) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userToken = prefs.getString('userToken');
+      final response = await updateChurchUser(userToken, userId, churchId);
+      if (response.error != null) {
+        return ResponseData(data: null, error: null);
+      }
+      var current = currentUser!.user;
+      if (current.userChurch.isEmpty) {
+        // add church
+        final findChurch = churches.firstWhere((ch) => ch.id == churchId);
+        List<UserChurch> newChurch = [];
+        newChurch.add(UserChurch(
+            id: findChurch.id, name: findChurch!.name, status: true));
+        current = current.copyWith(userChurch: newChurch);
+      } else {
+        // search churches and set value status in false and church selected en true
+        List<UserChurch> newChurch = List.from(current.userChurch);
+        for (int i = 0; i < newChurch.length; i++) {
+          newChurch[i] = newChurch[i].copyWith(status: false);
+        }
+
+        bool iglesiaEncontrada =
+            false; // Variable para controlar si la iglesia ya existe
+
+        // 2. Buscar la iglesia y actualizar su estado o agregarla
+        for (int i = 0; i < newChurch.length; i++) {
+          if (newChurch[i].id == churchId) {
+            newChurch[i] =
+                newChurch[i].copyWith(status: true); // Actualizar el estado
+            iglesiaEncontrada = true;
+            break; // Salir del bucle, ya se encontró la iglesia
+          }
+        }
+
+        if (!iglesiaEncontrada) {
+          final findChurch = churches.firstWhere((ch) => ch.id == churchId);
+          // La iglesia no existe, agregarla a la lista
+          newChurch.add(UserChurch(
+              id: findChurch.id,
+              name: findChurch.name,
+              status: true)); // Agregar nueva iglesia
+        }
+        current = current.copyWith(userChurch: newChurch);
+      }
+
+      _user = _user?.copyWith(
+          name: _user?.name,
+          lastname: _user?.lastname,
+          city: _user?.city,
+          gender: _user?.gender,
+          birthdate: _user?.birthdate,
+          identifier: _user?.identifier,
+          phoneNumber: _user?.phoneNumber,
+          country: _user?.country,
+          isBaptized: _user?.isBaptized,
+          createdAt: _user?.createdAt,
+          achievementsReachedCount: _user?.achievementsReachedCount,
+          favoriteVerseId: _user?.favoriteVerseId,
+          notifications: _user?.notifications,
+          preachingsCreatedCount: _user?.preachingsCreatedCount,
+          streakDaysCount: _user?.streakDaysCount,
+          user: current);
+      setUser(_user);
+      return ResponseData(data: response.data, error: null);
+    } catch (e) {
+      print(
+          "Error during update church: $e"); // Print the error for debugging.  Crucial!
+
+      // More specific error handling if needed:
+      if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    }
+  }
 }

@@ -1,7 +1,12 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -11,19 +16,61 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  late final userProvider;
+  late final course;
+  List<Level> levels = [];
+  List<List<Level>> gruposDeNiveles = [];
   late ScrollController scrollController;
   // int _selectedIndex = 0;
   final List<String> imagePaths = [
     'assets/mapa1.png',
     'assets/mapa2.png',
   ];
+  bool isLoading = true;
+  String? errorMessage;
+
   @override
   void initState() {
     super.initState();
 
     scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generateData(context);
+    });
   }
 
+  Future<void> _generateData(BuildContext context) async {
+    LoadingService().showLoading(context);
+
+    try {
+      setState(() {
+        course = ModalRoute.of(context)!.settings.arguments as CourseModel;
+      });
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final LoginUser? userData = userProvider.currentUser;
+
+      final result = await loadLevelsByCourse(userData?.user.id, "1");
+
+      if (result.error != null) {
+        errorMessage = result.error;
+      } else {
+        setState(() {
+          levels = result.data
+              .map((level) => Level.fromJson(removeTypename(level)))
+              .cast<Level>()
+              .toList();
+          gruposDeNiveles = chunked(levels, 4);
+        });
+      }
+    } catch (e) {
+      errorMessage = "An error occurred: $e";
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
   // int _selectedIndex = 0;
 
   // void _onItemTapped(int index) {
@@ -34,211 +81,17 @@ class _MapScreenState extends State<MapScreen> {
   //     }
   //   });
   // }
+  List<List<T>> chunked<T>(List<T> list, int chunkSize) {
+    List<List<T>> chunks = [];
+    for (var i = 0; i < list.length; i += chunkSize) {
+      chunks.add(list.sublist(
+          i, i + chunkSize > list.length ? list.length : i + chunkSize));
+    }
+    return chunks;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final course = CourseModel(
-      color: "3ae4e4",
-      id: "1",
-      status: 1,
-      title: "Antiguo Testamento",
-      img: Img(urlImg: "assets/newTestament.png"),
-      introduction:
-          "¿Alguna vez te has preguntado sobre los inicios del mundo y las historias épicas de héroes antiguos? El Antiguo Testamento es como una caja del tesoro llena de relatos asombrosos y enseñanzas que han impactado a millones de personas a lo largo de los siglos. Desde la creación del universo hasta las aventuras de personajes como Moisés, David y Salomón, estos \nlibros te llevan en un viaje fascinante a través de la historia, la fe y la moral. Encontrarás milagros impresionantes, batallas épicas y sabiduría atemporal. Es un lugar donde los sueños, las promesas y las luchas de la humanidad cobran vida, ofreciendo valiosas lecciones que resuenan incluso en el mundo moderno.\n",
-      sectionCount: 27,
-      sectionCompleted: 27,
-    );
-    List<Level> levels = List<Level>.from([
-      {
-        "id": "1",
-        "name": "La Creación",
-        "unLockLevel": true,
-        "color": "3ae4e4",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 150.0
-      },
-      {
-        "id": "2",
-        "name": "Un Jardín",
-        "unLockLevel": true,
-        "color": "2eade4",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": ""},
-        "score": 80.0
-      },
-      {
-        "id": "3",
-        "name": "Hermanos",
-        "unLockLevel": true,
-        "color": "2958e4",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 45.0
-      },
-      {
-        "id": "4",
-        "name": "El Arca",
-        "unLockLevel": true,
-        "color": "2225c2",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 20.0
-      },
-      {
-        "id": "5",
-        "name": "Torre de Babel",
-        "unLockLevel": true,
-        "color": "7142e9",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "6",
-        "name": "Abram",
-        "unLockLevel": false,
-        "color": "8c31d6",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "7",
-        "name": "Destrucción",
-        "unLockLevel": false,
-        "color": "8a12a8",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "8",
-        "name": "Sacrificio",
-        "unLockLevel": false,
-        "color": "d835d8",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "9",
-        "name": "Esposa",
-        "unLockLevel": false,
-        "color": "fd30db",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "10",
-        "name": "Gemelos",
-        "unLockLevel": false,
-        "color": "f72989",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "11",
-        "name": "Huida",
-        "unLockLevel": false,
-        "color": "f7295c",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "12",
-        "name": "Viaje a Harán",
-        "unLockLevel": false,
-        "color": "e93131",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "13",
-        "name": "Trato con Laban",
-        "unLockLevel": false,
-        "color": "3ae4e4",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "14",
-        "name": "Combate Divino",
-        "unLockLevel": false,
-        "color": "2eade4",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "15",
-        "name": "Venganza",
-        "unLockLevel": false,
-        "color": "2958e4",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "16",
-        "name": "Hijo Favorito",
-        "unLockLevel": false,
-        "color": "2225c2",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "17",
-        "name": "Prisionero",
-        "unLockLevel": false,
-        "color": "7142e9",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "18",
-        "name": "Interpretador\n de Sueños",
-        "unLockLevel": false,
-        "color": "8c31d6",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "19",
-        "name": "Gobernador de Egipto",
-        "unLockLevel": false,
-        "color": "8a12a8",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "20",
-        "name": "Prueba de Hermanos",
-        "unLockLevel": false,
-        "color": "d835d8",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      },
-      {
-        "id": "21",
-        "name": "Reencuentro",
-        "unLockLevel": false,
-        "color": "fd30db",
-        "section": {"sectionName": "Genesis"},
-        "img": {"urlImg": "assets/level.png"},
-        "score": 0.0
-      }
-    ].map((levelJson) => Level.fromJson(levelJson)).toList());
     Stage stage = Stage(
         id: "1",
         sectionName: "Genesis",
@@ -249,7 +102,7 @@ class _MapScreenState extends State<MapScreen> {
         color: "3ae4e4",
         img: Img(urlImg: "assets/assetStories.png"),
         levelCount: 12,
-        levelCompleted: 0,
+        levelCompletedCount: 0,
         status: 1);
     // int i = 0;
     List coordATop = [0.00, 0.25, 0.48, 0.75];
@@ -258,17 +111,6 @@ class _MapScreenState extends State<MapScreen> {
 
     List coordBTop = [0.0, 0.25, 0.50, 0.75];
     List coordBLeft = [0.30, 0.17, 0.05, 0.05];
-
-    List<List<T>> chunked<T>(List<T> list, int chunkSize) {
-      List<List<T>> chunks = [];
-      for (var i = 0; i < list.length; i += chunkSize) {
-        chunks.add(list.sublist(
-            i, i + chunkSize > list.length ? list.length : i + chunkSize));
-      }
-      return chunks;
-    }
-
-    List<List<Level>> gruposDeNiveles = chunked(levels, 4);
 
     return Scaffold(
       body: SafeArea(
@@ -283,6 +125,9 @@ class _MapScreenState extends State<MapScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: errorMessage != null
+                      ? CrossAxisAlignment.center
+                      : CrossAxisAlignment.start,
                   spacing: 0,
                   children: [
                     HeadScoreWidget(
@@ -290,349 +135,359 @@ class _MapScreenState extends State<MapScreen> {
                         Navigator.popAndPushNamed(context, '/profilePage');
                       },
                     ),
-                    HeaderMapWidget(
-                      title: course.title,
-                      subtitleStage: stage.sectionName,
-                      indexStage: 1, //stage.id,
-                      onRouteBack: () {
-                        Navigator.popAndPushNamed(context, '/layoutPage1');
-                      },
-                      onShowInfoCourse: () {
-                        showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return CustomModalWidget(
-                              title: course.title,
-                              content: course.introduction,
-                              buttonText: 'Aceptar',
-                              id: course.id,
-                              showSubtitle: false,
-                              itemCount: 0,
-                              itemsCompleted: 0,
+                    if (isLoading) ...{
+                      Container()
+                    } else ...{
+                      if (errorMessage != null) ...{
+                        BuildErrorWidget(
+                          errorMessage: errorMessage!,
+                          onRetry: () async => _generateData(context),
+                          onBack: () => Navigator.pop(context),
+                        )
+                      } else ...{
+                        HeaderMapWidget(
+                          title: course.title,
+                          subtitleStage: stage.sectionName,
+                          indexStage: 1, //stage.id,
+                          onRouteBack: () {
+                            Navigator.popAndPushNamed(context, '/layoutPage1');
+                          },
+                          onShowInfoCourse: () {
+                            showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CustomModalWidget(
+                                  title: course.title,
+                                  content: course.introduction,
+                                  buttonText: 'Aceptar',
+                                  id: course.id,
+                                  showSubtitle: false,
+                                  itemCount: 0,
+                                  itemsCompleted: 0,
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                      onShowInfoStage: () {
-                        showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return CustomModalWidget(
-                              title: stage.sectionName,
-                              content: stage.introduction,
-                              buttonText: 'Aceptar',
-                              id: stage.id,
-                              itemCount: stage.levelCount,
-                              itemsCompleted: stage.levelCompleted,
+                          onShowInfoStage: () {
+                            showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CustomModalWidget(
+                                  title: stage.sectionName,
+                                  content: stage.introduction,
+                                  buttonText: 'Aceptar',
+                                  id: stage.id,
+                                  itemCount: stage.levelCount,
+                                  itemsCompleted: stage.levelCompletedCount,
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                      onScroller: () {
-                        if (kDebugMode) {
-                          print(levels);
-                        }
-                        final int lastUnlockedIndex =
-                            gruposDeNiveles.lastIndexWhere(
-                          (grupo) =>
-                              grupo.any((level) => level.unLockLevel == false),
-                        );
-                        String? lastLockedId = gruposDeNiveles.reversed
-                            .expand((grupo) =>
-                                grupo.reversed) // Recorremos desde el final
-                            .lastWhere((level) => level.unLockLevel == false,
-                                orElse: () => Level(
-                                    id: '',
-                                    name: '',
-                                    unLockLevel: false,
-                                    color: '',
-                                    section: Section(sectionName: ''),
-                                    img: Img(urlImg: ''),
-                                    score: 0))
-                            .id;
+                          onScroller: () {
+                            if (kDebugMode) {
+                              print(levels);
+                            }
+                            final int lastUnlockedIndex =
+                                gruposDeNiveles.lastIndexWhere(
+                              (grupo) => grupo
+                                  .any((level) => level.unLockLevel == false),
+                            );
+                            String? lastLockedId = gruposDeNiveles.reversed
+                                .expand((grupo) =>
+                                    grupo.reversed) // Recorremos desde el final
+                                .lastWhere(
+                                    (level) => level.unLockLevel == false,
+                                    orElse: () => Level(
+                                        id: '',
+                                        name: '',
+                                        unLockLevel: false,
+                                        color: '',
+                                        section: Section(sectionName: ''),
+                                        img: Img(urlImg: ''),
+                                        score: 0))
+                                .id;
 
-                        if (lastUnlockedIndex != -1) {
-                          scrollController.animateTo(
-                            int.parse(lastLockedId) *
-                                100, // Ajusta según el tamaño del nivel
-                            duration: Duration(seconds: 1),
-                            curve: Curves.easeInOut,
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(
-                      height: MediaQuery.sizeOf(context).height,
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: gruposDeNiveles
-                            .length, // Dividimos por 4 para obtener el número de grupos de niveles
-                        itemBuilder: (context, index) {
-                          List<Level> grupo = gruposDeNiveles[index];
-                          String image =
-                              index % 2 == 0 ? imagePaths[0] : imagePaths[1];
-                          return Column(
-                            children: [
-                             
-                              Stack(
-                                alignment: Alignment.topCenter,
+                            if (lastUnlockedIndex != -1) {
+                              scrollController.animateTo(
+                                int.parse(lastLockedId) *
+                                    100, // Ajusta según el tamaño del nivel
+                                duration: Duration(seconds: 1),
+                                curve: Curves.easeInOut,
+                              );
+                            }
+                          },
+                        ),
+                        SizedBox(
+                          height: MediaQuery.sizeOf(context).height,
+                          child: ListView.builder(
+                            controller: scrollController,
+                            itemCount: gruposDeNiveles
+                                .length, // Dividimos por 4 para obtener el número de grupos de niveles
+                            itemBuilder: (context, index) {
+                              List<Level> grupo = gruposDeNiveles[index];
+                              String image = index % 2 == 0
+                                  ? imagePaths[0]
+                                  : imagePaths[1];
+                              return Column(
                                 children: [
-                                  Container(
-                                    constraints: BoxConstraints(
-                                        minHeight:
-                                            MediaQuery.sizeOf(context).height),
-                                    child: Image.asset(
-                                      image,
-                                      width: double.infinity,
-                                      height: MediaQuery.sizeOf(context).height,
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                  for (var i = 0; i < grupo.length; i++) ...{
-                                    Positioned(
-                                      key: Key(grupo[i].id),
-                                      top: index % 2 == 0
-                                          ? StylesApp(context)
-                                              .positionedLevels(coordATop[i])
-                                              .dy
-                                          : StylesApp(context)
-                                              .positionedLevels(coordBTop[i])
-                                              .dy, // Ajusta la posición vertical
-                                      left: index % 2 == 0
-                                          ? StylesApp(context)
-                                              .positionedLevels(coordALeft[i])
-                                              .dx
-                                          : StylesApp(context)
-                                              .positionedLevels(coordBLeft[i])
-                                              .dx,
-                                      child: GestureDetector(
-                                        key: Key("$index-$i"),
-                                        onTap: grupo[i].unLockLevel == false
-                                            ? null
-                                            : () {
-                                                Navigator.pushNamed(
-                                                  context,
-                                                  '/historyPage',
-                                                  arguments: {
-                                                    'levelId': grupo[i].id
+                                  Stack(
+                                    alignment: Alignment.topCenter,
+                                    children: [
+                                      Container(
+                                        constraints: BoxConstraints(
+                                            minHeight:
+                                                MediaQuery.sizeOf(context)
+                                                    .height),
+                                        child: Image.asset(
+                                          image,
+                                          width: double.infinity,
+                                          height:
+                                              MediaQuery.sizeOf(context).height,
+                                          fit: BoxFit.fill,
+                                        ),
+                                      ),
+                                      for (var i = 0;
+                                          i < grupo.length;
+                                          i++) ...{
+                                        Positioned(
+                                          key: Key(grupo[i].id),
+                                          top: index % 2 == 0
+                                              ? StylesApp(context)
+                                                  .positionedLevels(
+                                                      coordATop[i])
+                                                  .dy
+                                              : StylesApp(context)
+                                                  .positionedLevels(
+                                                      coordBTop[i])
+                                                  .dy, // Ajusta la posición vertical
+                                          left: index % 2 == 0
+                                              ? StylesApp(context)
+                                                  .positionedLevels(
+                                                      coordALeft[i])
+                                                  .dx
+                                              : StylesApp(context)
+                                                  .positionedLevels(
+                                                      coordBLeft[i])
+                                                  .dx,
+                                          child: GestureDetector(
+                                            key: Key("$index-$i"),
+                                            onTap: grupo[i].unLockLevel == false
+                                                ? null
+                                                : () {
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      '/historyPage',
+                                                      arguments: {
+                                                        'levelId': grupo[i].id
+                                                      },
+                                                    );
                                                   },
-                                                );
-                                              },
-                                        child: Container(
-                                          // decoration: BoxDecoration(border: Border.all(color: Colors.white)),
-                                          constraints: BoxConstraints(
-                                            maxWidth: StylesApp(context)
-                                                .sizeContainerLevel
-                                                .width,
-                                          ),
-                                          child: Stack(
-                                            children: [
-                                              Center(
-                                                child: StarStatusWidget(
-                                                  containerWidth:
-                                                      StylesApp(context)
+                                            child: Container(
+                                              // decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                                              constraints: BoxConstraints(
+                                                maxWidth: StylesApp(context)
+                                                    .sizeContainerLevel
+                                                    .width,
+                                              ),
+                                              child: Stack(
+                                                children: [
+                                                  Center(
+                                                    child: StarStatusWidget(
+                                                      containerWidth: StylesApp(
+                                                              context)
                                                           .sizeContainerLevel
                                                           .width,
-                                                  unLockLevel: grupo[i].score,
-                                                ),
-                                              ),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  SizedBox(
-                                                    height: 30,
+                                                      unLockLevel:
+                                                          grupo[i].score,
+                                                    ),
                                                   ),
-                                                  Center(
-                                                    child: Stack(
-                                                      children: [
-                                                        Container(
-                                                          width: StylesApp(
-                                                                  context)
-                                                              .sizeContainer
-                                                              .width, // Ajusta el tamaño según tus necesidades
-                                                          height:
-                                                              StylesApp(context)
-                                                                  .sizeContainer
-                                                                  .height,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                                  color: Color(grupo[i]
-                                                                              .score >
-                                                                          0
-                                                                      ? getColorItem(grupo[
-                                                                              i]
-                                                                          .score)
-                                                                      : int.tryParse(
-                                                                              '0xFF${grupo[i].color}') ??
-                                                                          0XFF000000),
-                                                                  shape: BoxShape
-                                                                      .circle,
-                                                                  border: Border
-                                                                      .all(
-                                                                    color:grupo[i]
-                                                                              .score >
-                                                                          0
-                                                                      ? Color(getColorItem(grupo[
-                                                                              i]
-                                                                          .score))
-                                                                      : Color
-                                                                        .fromARGB(
-                                                                      100, // Opacidad: 50%
-                                                                      int.parse(
-                                                                          '0xFF${grupo[i].color}'.substring(
-                                                                              2),
-                                                                          radix:
-                                                                              16),
-                                                                      int.parse(
-                                                                          '0xFF${grupo[i].color}'.substring(
-                                                                              4,
-                                                                              6),
-                                                                          radix:
-                                                                              16),
-                                                                      int.parse(
-                                                                          '0xFF${grupo[i].color}'.substring(
-                                                                              6),
-                                                                          radix:
-                                                                              16),
-                                                                    ),
-                                                                    width: 1,
-                                                                  ),
-                                                                  boxShadow: [
-                                                                BoxShadow(
-                                                                    color: grupo[i].score >
-                                                                            0
-                                                                        ? Color(getColorShadow(grupo[i].score)).withValues(
-                                                                            alpha:
-                                                                                0.5)
-                                                                        : Colors.black.withValues(
-                                                                            alpha:
-                                                                                0.5),
-                                                                    offset:
-                                                                        Offset(
-                                                                            0,
-                                                                            8),
-                                                                    blurStyle:
-                                                                        BlurStyle
-                                                                            .outer)
-                                                              ]),
-                                                          child: Center(
-                                                              child:
-                                                                  _buildItemLevel(
-                                                                      context,
-                                                                      grupo[
-                                                                          i])),
-                                                        ),
-                                                        if (grupo[i]
-                                                                .unLockLevel ==
-                                                            false)
-                                                          Positioned.fill(
-                                                            child: Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                shape: BoxShape
-                                                                    .circle,
-                                                                color: const Color(
-                                                                        0xFFA9B8BE)
-                                                                    .withValues(
-                                                                        alpha:
-                                                                            0.9), // Ajusta la opacidad
-                                                              ),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      SizedBox(
+                                                        height: 30,
+                                                      ),
+                                                      Center(
+                                                        child: Stack(
+                                                          children: [
+                                                            Container(
                                                               width: StylesApp(
                                                                       context)
                                                                   .sizeContainer
-                                                                  .width,
-
-                                                              // color: Colors.black.withOpacity(
-                                                              //     0.5), // Ajusta la opacidad
+                                                                  .width, // Ajusta el tamaño según tus necesidades
+                                                              height: StylesApp(
+                                                                      context)
+                                                                  .sizeContainer
+                                                                  .height,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                      color: Color(grupo[i].score >
+                                                                              0
+                                                                          ? getColorItem(grupo[i]
+                                                                              .score)
+                                                                          : int.tryParse('0xFF${grupo[i].color}') ??
+                                                                              0XFF000000),
+                                                                      shape: BoxShape
+                                                                          .circle,
+                                                                      border:
+                                                                          Border
+                                                                              .all(
+                                                                        color: grupo[i].score >
+                                                                                0
+                                                                            ? Color(getColorItem(grupo[i].score))
+                                                                            : Color.fromARGB(
+                                                                                100, // Opacidad: 50%
+                                                                                int.parse('0xFF${grupo[i].color}'.substring(2), radix: 16),
+                                                                                int.parse('0xFF${grupo[i].color}'.substring(4, 6), radix: 16),
+                                                                                int.parse('0xFF${grupo[i].color}'.substring(6), radix: 16),
+                                                                              ),
+                                                                        width:
+                                                                            1,
+                                                                      ),
+                                                                      boxShadow: [
+                                                                    BoxShadow(
+                                                                        color: grupo[i].score >
+                                                                                0
+                                                                            ? Color(getColorShadow(grupo[i].score)).withValues(
+                                                                                alpha:
+                                                                                    0.5)
+                                                                            : Colors.black.withValues(
+                                                                                alpha:
+                                                                                    0.5),
+                                                                        offset: Offset(
+                                                                            0,
+                                                                            8),
+                                                                        blurStyle:
+                                                                            BlurStyle.outer)
+                                                                  ]),
+                                                              child: Center(
+                                                                  child: _buildItemLevel(
+                                                                      context,
+                                                                      grupo[
+                                                                          i])),
                                                             ),
-                                                          ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Text(
-                                                    textAlign: TextAlign.center,
-                                                    "${grupo[i].id} ${grupo[i].name}",
-                                                    style: StylesApp(context)
-                                                        .textStyNameNumber
-                                                        .copyWith(
-                                                          color: Colors.white,
+                                                            if (grupo[i]
+                                                                    .unLockLevel ==
+                                                                false)
+                                                              Positioned.fill(
+                                                                child:
+                                                                    Container(
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    shape: BoxShape
+                                                                        .circle,
+                                                                    color: const Color(
+                                                                            0xFFA9B8BE)
+                                                                        .withValues(
+                                                                            alpha:
+                                                                                0.9), // Ajusta la opacidad
+                                                                  ),
+                                                                  width: StylesApp(
+                                                                          context)
+                                                                      .sizeContainer
+                                                                      .width,
+
+                                                                  // color: Colors.black.withOpacity(
+                                                                  //     0.5), // Ajusta la opacidad
+                                                                ),
+                                                              ),
+                                                          ],
                                                         ),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Text(
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        "${grupo[i].id} ${grupo[i].name}",
+                                                        style: StylesApp(
+                                                                context)
+                                                            .textStyNameNumber
+                                                            .copyWith(
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ],
                                               ),
-                                            ],
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  },
-                                  if (index == gruposDeNiveles.length - 1)
-                                    Container(
-                                      height: 349,
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            image: AssetImage(
-                                                "assets/Felicitaciones.png"),
-                                            fit: StylesApp(context).fitImage),
-                                      ),
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              height: 60,
+                                      },
+                                      if (index == gruposDeNiveles.length - 1)
+                                        Container(
+                                          height: 349,
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                                image: AssetImage(
+                                                    "assets/Felicitaciones.png"),
+                                                fit: StylesApp(context)
+                                                    .fitImage),
+                                          ),
+                                          child: Center(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                SizedBox(
+                                                  height: 60,
+                                                ),
+                                                Text(
+                                                  textAlign: TextAlign.center,
+                                                  'Felicidades',
+                                                  style: StylesApp(context)
+                                                      .textStyCompleteLevelTitle
+                                                      .copyWith(
+                                                        color:
+                                                            Color(0XFF12CBC4),
+                                                      ),
+                                                ),
+                                                SizedBox(
+                                                  height: 7,
+                                                ),
+                                                Text(
+                                                  textAlign: TextAlign.center,
+                                                  'Culminaste la Etapa 1/27',
+                                                  style: StylesApp(context)
+                                                      .textStyCompleteLevelBody
+                                                      .copyWith(
+                                                        color:
+                                                            Color(0XFF12CBC4),
+                                                      ),
+                                                ),
+                                                SizedBox(
+                                                  height: 17,
+                                                ),
+                                                Text(
+                                                  textAlign: TextAlign.center,
+                                                  'Introducción al Antiguo\n  Testamento',
+                                                  style: StylesApp(context)
+                                                      .textStyCompleteLevelBody
+                                                      .copyWith(
+                                                        color:
+                                                            Color(0XFF12CBC4),
+                                                      ),
+                                                ),
+                                              ],
                                             ),
-                                            Text(
-                                              textAlign: TextAlign.center,
-                                              'Felicidades',
-                                              style: StylesApp(context)
-                                                  .textStyCompleteLevelTitle
-                                                  .copyWith(
-                                                    color: Color(0XFF12CBC4),
-                                                  ),
-                                            ),
-                                            SizedBox(
-                                              height: 7,
-                                            ),
-                                            Text(
-                                              textAlign: TextAlign.center,
-                                              'Culminaste la Etapa 1/27',
-                                              style: StylesApp(context)
-                                                  .textStyCompleteLevelBody
-                                                  .copyWith(
-                                                    color: Color(0XFF12CBC4),
-                                                  ),
-                                            ),
-                                            SizedBox(
-                                              height: 17,
-                                            ),
-                                            Text(
-                                              textAlign: TextAlign.center,
-                                              'Introducción al Antiguo\n  Testamento',
-                                              style: StylesApp(context)
-                                                  .textStyCompleteLevelBody
-                                                  .copyWith(
-                                                    color: Color(0XFF12CBC4),
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
+                                          ),
+                                        )
+                                    ],
+                                  ),
                                 ],
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
+                              );
+                            },
+                          ),
+                        ),
+                      }
+                    }
                   ],
                 ),
               ),
@@ -687,11 +542,11 @@ class _MapScreenState extends State<MapScreen> {
 _buildItemLevel(BuildContext context, Level grupo) {
   if (grupo.img.urlImg.isNotEmpty) {
     return Container(
-          width: StylesApp(context)
+      width: StylesApp(context)
           .sizeContainerSub
           .width, // Ajusta el tamaño según tus necesidades
       height: StylesApp(context).sizeContainerSub.height,
-      decoration:  BoxDecoration(
+      decoration: BoxDecoration(
         color: grupo.score > 0
             ? Color(getColorInner(grupo.score))
             : Color.fromARGB(
@@ -702,8 +557,9 @@ _buildItemLevel(BuildContext context, Level grupo) {
               ),
         shape: BoxShape.circle,
       ),
+        //  "${GraphQLConfig.urlServidor}${grupo.img.urlImg}",
       child: Image.asset(
-        grupo.img.urlImg,
+        "assets/level.png",
         // width: StylesApp(context).sizeImage.width,
         // height: StylesApp(context).sizeImage.height,
         fit: StylesApp(context).fitImage,

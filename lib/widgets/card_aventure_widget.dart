@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -6,9 +7,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class CardAventureWidget extends StatelessWidget {
   final CourseModel course;
   final void Function() onTap;
+  final void Function() goToMap;
   const CardAventureWidget({
     super.key,
-    required this.course, required this.onTap,
+    required this.course, required this.onTap, required this.goToMap,
   });
 
   @override
@@ -58,7 +60,7 @@ class CardAventureWidget extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(100.0),
                                     image: DecorationImage(
-                                      image: AssetImage(course.img.urlImg),
+                                      image: NetworkImage (GraphQLConfig.urlServidor + course.img.urlImg),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -73,7 +75,7 @@ class CardAventureWidget extends StatelessWidget {
                                             BorderRadius.circular(28.0),
                                         color: Color(0XFFFDE754)),
                                     child: Text(
-                                      "${course.sectionCompleted} / ${course.sectionCount}",
+                                      "${course.sectionCompletedCount} / ${course.sectionCount}",
                                       textAlign: TextAlign.center,
                                       style: StylesApp(context).chipLevels,
                                     ),
@@ -117,9 +119,7 @@ class CardAventureWidget extends StatelessWidget {
                 bottom: 6,
                 right: 0,
                 child: ButtonThemeWidget(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/mapPage');
-                  },
+                  onPressed: goToMap,
                   textStyle: StylesApp(context)
                       .chipLevels
                       .copyWith(color: Colors.white),

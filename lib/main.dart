@@ -14,8 +14,8 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider<CatalogueProvider>(create: (_) => CatalogueProvider()),
-        ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider(context, context.read<CatalogueProvider>())),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
+        ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider(context, context.read<CatalogueProvider>())),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690), // size base of design        

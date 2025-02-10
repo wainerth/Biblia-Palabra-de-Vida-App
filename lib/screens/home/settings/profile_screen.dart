@@ -5,6 +5,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -35,15 +36,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (kDebugMode) {
         print(pickedFile.path);
       }
+      String dataUrl = '';
       if (fileSizeInMegabytes <= 5) {
         List<int> imageBytes = await imageFile.readAsBytes();
 
         String _base64Image = base64Encode(imageBytes);
-
+        verificarBase64(_base64Image);
         final mimeType = lookupMimeType(imageFile.path); // Obtiene el tipo MIME
 
         if (mimeType != null) {
-          String dataUrl = "data:$mimeType;base64,$_base64Image";
+          dataUrl = "data:$mimeType;base64,$_base64Image";
+     
           print(dataUrl); // Imprime la Data URL para pegarla en el navegador
         } else {
           print("No se pudo determinar el tipo MIME de la imagen.");
@@ -52,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           avatarImg = pickedFile.path;
         });
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        userProvider.updateAvatarUser(dataUser!.user.id, _base64Image);
+        userProvider.updateAvatarUser(dataUser!.user.id, dataUrl);
       } else {
         showDialog(
           context: context,
@@ -76,6 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final catalogueProvider = Provider.of<CatalogueProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
 
@@ -86,33 +90,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? getFormatedDate(int.parse(dataUser!.createdAt))
             : "",
       ),
-      ModelData(label: "Racha", value: "${dataUser!.streakDaysCount} días"),
-      ModelData(label: "Energía", value: "${dataUser!.expTotalUser}"),
+      ModelData(
+          label: "Racha",
+          value: "${dataUser!.streakDaysCount} días",
+          clave: "streakDaysCount"),
+      ModelData(
+          label: "Energía",
+          value: "${dataUser!.expTotalUser}",
+          clave: "expTotalUser"),
       ModelData(label: "Cursos Completados", value: "4"),
     ];
     List<ModelData> personalData = [
-      ModelData(label: "Nombre", value: dataUser!.name, showLabel: false),
       ModelData(
-          label: "Apellido", value: "${dataUser?.lastName}", showLabel: false),
-      ModelData(label: "Sexo", value: "${dataUser!.gender}"),
-      ModelData(label: "Fecha nac", value: "${dataUser!.birthday}"),
+          label: "Nombre",
+          value: dataUser!.name,
+          showLabel: false,
+          clave: "name"),
+      ModelData(
+          label: "Apellido",
+          value: "${dataUser?.lastname}",
+          showLabel: false,
+          clave: "lastname"),
+      ModelData(label: "Sexo", value: "${dataUser!.gender}", clave: "gender"),
+      ModelData(
+        label: "Fecha nac",
+        value: "${dataUser!.birthdate}",
+        clave: "birthdate",
+      ),
       ModelData(
           label: "Bautizo",
-          value: getIsBaptized(dataUser!.isBaptized ?? false),
-          showLabel: false),
+          value: getIsBaptized(
+            dataUser!.isBaptized ?? false,
+          ),
+          showLabel: false,
+          clave: "isBaptized"),
     ];
     List<ModelData> contactDetails = [
-      ModelData(label: "Email", value: dataUser!.user.email, showLabel: false),
-      ModelData(label: "Tel.", value: dataUser!.phoneNumber ?? ''),
+      ModelData(
+        label: "Email",
+        value: dataUser!.user.email,
+        showLabel: false,
+      ),
+      ModelData(
+          label: "Tel.",
+          value: dataUser!.phoneNumber ?? '',
+          clave: "phoneNumber"),
     ];
     List<ModelData> locationData = [
-      ModelData(label: "País", value: dataUser!.country?.country ?? ''),
-      ModelData(label: "Ciudad", value: "Montevideo"),
       ModelData(
-          label: "Iglesia",
-          value: getChurchActive(dataUser!.user.userChurch) != null
-              ? getChurchActive(dataUser!.user.userChurch)!.name
-              : '')
+          label: "País",
+          value: dataUser!.country?.country ?? '',
+          clave: "country"),
+      ModelData(
+        label: "Ciudad",
+        value: dataUser!.city ?? '',
+        clave: "city",
+      ),
+      ModelData(
+        label: "Iglesia",
+        clave: 'church',
+        value: getChurchActive(dataUser!.user.userChurch) != null
+            ? getChurchActive(dataUser!.user.userChurch)!.name
+            : '',
+      )
     ];
 
     return Scaffold(
@@ -187,6 +227,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  bool verificarBase64(String cadenaBase64) {
+    // 1. Verificar la longitud
+    if (cadenaBase64.length % 4 != 0) {
+      print("La cadena Base64 es incompleta (longitud incorrecta).");
+      return false;
+    }
+
+    // 2. Verificar caracteres de relleno
+    if (cadenaBase64.contains("=")) {
+      int indicePrimerRelleno = cadenaBase64.indexOf("=");
+      if (indicePrimerRelleno != cadenaBase64.length - 1 &&
+          indicePrimerRelleno != cadenaBase64.length - 2) {
+        print("La cadena Base64 es inválida (relleno en medio).");
+        return false;
+      }
+    }
+
+    // 3. Intentar decodificar
+    try {
+      base64Decode(cadenaBase64); // Intenta decodificar
+    } catch (error) {
+      print("La cadena Base64 es inválida (error de decodificación): $error");
+      return false;
+    }
+
+    print("La cadena Base64 parece válida.");
+    return true;
   }
 }
 
@@ -292,13 +361,55 @@ class CardColumnWidget extends StatelessWidget {
                             builder: (context) {
                               return EditDetailDialog(
                                 data: data,
-                                onSave: (List<ModelData> dta) {
-                                  print(dta.length);
-                                  Navigator.pop(context);
+                                onSave: (List<ModelData> dta) async {
+                                  LoadingService().showLoading(context);
+                                  final userProvider =
+                                      Provider.of<UserProvider>(context,
+                                          listen: false);
+                                  final catalogueProvider =
+                                      Provider.of<CatalogueProvider>(context,
+                                          listen: false);
+                                  final user = userProvider.currentUser;
                                   // servicio de actualización
+                                  final dataToSend = UpdateDataProfile(
+                                    identifier: user?.identifier ?? '',
+                                    name: user?.name ?? '',
+                                    lastname: user?.lastname ?? '',
+                                    birthdate: user?.birthdate ?? '',
+                                    city: '',
+                                    country: user?.country != null
+                                        ? user!.country
+                                        : null,
+                                    gender: user?.gender ?? '',
+                                    isBaptized: user?.isBaptized,
+                                    phoneNumber: user?.phoneNumber ?? '',
+                                    church: user!.user.userChurch.isNotEmpty
+                                        ? user.user.userChurch.firstWhere(
+                                            (ch) => ch.status == true,
+                                          )
+                                        : null,
+                                  );
+                                  final UserProfile dataEnviar = UserProfile(
+                                      userId: user.user.id,
+                                      dataProfiles: updateFromModelData(
+                                          dataToSend,
+                                          dta,
+                                          catalogueProvider.allCountries,
+                                          catalogueProvider.allChurches));
 
-                                  final userProvider = Provider.of<UserProvider>(context);
-                                  userProvider.updateProfile(dta);
+                                  await userProvider.updateProfile(dataEnviar).then((value) async {
+
+                                  if (dataEnviar.dataProfiles.church != null) {
+                                    await userProvider.updateUserChurch(
+                                        user.user.id,
+                                        dataEnviar.dataProfiles.church!.id,
+                                        catalogueProvider.allChurches);
+                                  }
+                                  });
+
+
+                                  Navigator.pop(context);
+                                  LoadingService().hideLoading();
                                 },
                               );
                             });
@@ -335,6 +446,72 @@ class CardColumnWidget extends StatelessWidget {
       ],
     );
   }
+
+  UpdateDataProfile updateFromModelData(UpdateDataProfile dataToSend,
+      List<ModelData> data, List<Country> countries, List<Church> churches) {
+    var datos = dataToSend;
+
+    var nuevosDatos = {};
+    for (var item in data) {
+      switch (item.clave) {
+        case 'lastname':
+          nuevosDatos["lastname"] = item.value as String?;
+          break;
+        case 'name':
+          nuevosDatos["name"] = item.value as String?;
+          break;
+        case 'birthdate':
+          nuevosDatos["birthdate"] = item.value as String?;
+          break;
+        case 'identifier':
+          nuevosDatos["identifier"] = item.value as String?;
+          break;
+        case 'phoneNumber':
+          nuevosDatos["phoneNumber"] = item.value as String?;
+          break;
+        case 'country':
+          if (item.value.isNotEmpty) {
+            Country? cont = countries
+                .firstWhere((country) => country.country == item.value);
+            nuevosDatos["country"] = cont;
+          } else {
+            nuevosDatos["country"] = null;
+          }
+
+          break;
+        case 'city':
+          nuevosDatos["city"] = item.value as String?;
+          break;
+        case 'gender':
+          nuevosDatos["gender"] = item.value as String?;
+          break;
+        case 'isBaptized':
+          nuevosDatos["isBaptized"] = item.value == 'Bautizado' ? true : false;
+          break;
+        case 'church':
+          var church =
+              churches.firstWhere((church) => church.name == item.value);
+          nuevosDatos["church"] = UserChurch(
+              id: church.id, name: church.name, status: church.status);
+          break;
+      }
+
+      datos = datos.copyWith(
+        name: nuevosDatos["name"] ?? datos.name,
+        lastname: nuevosDatos["lastname"] ?? datos.lastname,
+        birthdate: nuevosDatos["birthdate"] ?? datos.birthdate,
+        identifier: nuevosDatos["identifier"] ?? datos.identifier,
+        phoneNumber: nuevosDatos["phoneNumber"] ?? datos.phoneNumber,
+        country: nuevosDatos["country"] ?? datos.country,
+        city: nuevosDatos["city"] ?? datos.city,
+        gender: nuevosDatos["gender"] ?? datos.gender,
+        isBaptized: nuevosDatos["isBaptized"] ?? datos.isBaptized,
+        church: nuevosDatos["church"] ?? datos.church,
+      );
+    }
+    print(datos);
+    return datos;
+  }
 }
 
 class EditDetailDialog extends StatefulWidget {
@@ -355,7 +532,12 @@ class _editDetailDialog extends State<EditDetailDialog> {
     super.initState();
     _editingData = List.from(widget.data);
     for (var item in _editingData) {
-      _controllers.add(TextEditingController(text: item.value));
+      if (item.label == 'Tel.') {
+        _controllers.add(TextEditingController(
+            text: item.value.isNotEmpty ? item.value.split(' ')[1] : ''));
+      } else {
+        _controllers.add(TextEditingController(text: item.value));
+      }
     }
   }
 
@@ -502,6 +684,7 @@ class _editDetailDialog extends State<EditDetailDialog> {
                   setState(() {
                     _editingData[index] = ModelData(
                       label: _editingData[index].label,
+                      clave: _editingData[index].clave,
                       value:
                           '${newValue?.label} ${_editingData[index].value.split(' ')[1]}',
                       showLabel: _editingData[index].showLabel,
@@ -527,6 +710,7 @@ class _editDetailDialog extends State<EditDetailDialog> {
                 _controllers[index].text = value;
                 _editingData[index] = ModelData(
                   label: _editingData[index].label,
+                  clave: _editingData[index].clave,
                   value:
                       '${_editingData[index].value.split(' ')[0]} ${_controllers[index].text.replaceAll(RegExp(r'[^\d]+'), '')}',
                   showLabel: _editingData[index].showLabel,
@@ -557,6 +741,7 @@ class _editDetailDialog extends State<EditDetailDialog> {
               _editingData[index] = ModelData(
                 label: _editingData[index].label,
                 value: newValue!.value,
+                clave: _editingData[index].clave,
                 showLabel: _editingData[index].showLabel,
               );
             });
@@ -573,9 +758,11 @@ class _editDetailDialog extends State<EditDetailDialog> {
             ? DateFormat("dd/MM/yyyy").parse(item.value)
             : DateTime.now().subtract(Duration(days: 15 * 365)),
         onChanged: (value) {
+          print(value);
           _editingData[index] = ModelData(
             label: _editingData[index].label,
             value: value,
+            clave: _editingData[index].clave,
             showLabel: _editingData[index].showLabel,
           );
         },
@@ -588,6 +775,7 @@ class _editDetailDialog extends State<EditDetailDialog> {
             _editingData[index] = ModelData(
               label: _editingData[index].label,
               value: value! ? "Bautizado" : "No Bautizado",
+              clave: _editingData[index].clave,
               showLabel: _editingData[index].showLabel,
             );
           });
@@ -607,6 +795,7 @@ class _editDetailDialog extends State<EditDetailDialog> {
               _editingData[index] = ModelData(
                 label: _editingData[index].label,
                 value: newValue!.label,
+                clave: _editingData[index].clave,
                 showLabel: _editingData[index].showLabel,
               );
             });
@@ -631,6 +820,7 @@ class _editDetailDialog extends State<EditDetailDialog> {
               _editingData[index] = ModelData(
                 label: _editingData[index].label,
                 value: newValue!.label,
+                clave: _editingData[index].clave,
                 showLabel: _editingData[index].showLabel,
               );
             });
@@ -652,6 +842,7 @@ class _editDetailDialog extends State<EditDetailDialog> {
           _editingData[index] = ModelData(
             label: _editingData[index].label,
             value: value,
+            clave: _editingData[index].clave,
             showLabel: _editingData[index].showLabel,
           );
         },

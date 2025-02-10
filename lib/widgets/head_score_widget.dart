@@ -1,6 +1,9 @@
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class HeadScoreWidget extends StatefulWidget {
   final Function() onRoute;
@@ -16,6 +19,8 @@ class HeadScoreWidget extends StatefulWidget {
 class _HeadScoreWidgetState extends State<HeadScoreWidget> {
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final LoginUser? userData = userProvider.currentUser;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 9.0),
       decoration: BoxDecoration(
@@ -29,7 +34,7 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
               style: StylesApp(context).textStyleBody18,
               children: [
                 TextSpan(text: "Exp: "),
-                TextSpan(text: "500"),
+                TextSpan(text: "${userData!.expTotalUser}"),
               ],
             ),
           ),
@@ -38,7 +43,7 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
               style: StylesApp(context).textStyleBody18,
               children: [
                 TextSpan(text: "Racha: "),
-                TextSpan(text: "0 días"),
+                TextSpan(text: "${userData.streakDaysCount} días"),
               ],
             ),
           ),

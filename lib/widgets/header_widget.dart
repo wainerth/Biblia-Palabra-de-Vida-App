@@ -1,6 +1,10 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/models/login_user.dart';
+import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class HeaderWidget extends StatefulWidget {
   const HeaderWidget({
@@ -14,6 +18,9 @@ class HeaderWidget extends StatefulWidget {
 class _HeaderWidgetState extends State<HeaderWidget> {
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final LoginUser? userData = userProvider.currentUser;
+
     return Container(
       constraints: BoxConstraints(minHeight: 90.0),
       decoration: BoxDecoration(
@@ -37,15 +44,15 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     width: 50.0,
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundImage: AssetImage(
-                        "assets/avatar.png",
+                      backgroundImage: NetworkImage (
+                        "${GraphQLConfig.urlServidor}${userData?.imgProfileUser}",
                       ),
                     ),
                   ),
                 ),
                 Center(
                   child: Text(
-                    "Robinson",
+                    "${userData?.user.username}",
                     style: StylesApp(context).textStyleBody14,
                   ),
                 )
@@ -62,7 +69,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   textAlign: TextAlign.left,
                   style: StylesApp(context).textStyleBody17,
                   TextSpan(
-                    children: [TextSpan(text: "Exp:"), TextSpan(text: "571")],
+                    children: [TextSpan(text: "Exp:"), TextSpan(text: "${userData!.expTotalUser}")],
                   ),
                 ),
                 Text.rich(
@@ -70,7 +77,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   TextSpan(
                     children: [
                       TextSpan(text: "Racha:"),
-                      TextSpan(text: "0 días")
+                      TextSpan(text: "${userData.streakDaysCount} días")
                     ],
                   ),
                 )

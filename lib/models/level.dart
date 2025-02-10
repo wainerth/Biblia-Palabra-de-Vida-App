@@ -8,7 +8,7 @@ class Level {
   final Section section;
   Img img;
   final double score;
-  final String? status;
+  final int status;
 
   Level(
       {required this.id,
@@ -18,7 +18,7 @@ class Level {
       required this.section,
       required this.img,
       this.score = 0.0,
-      this.status = ''});
+      this.status = 0});
 
   factory Level.fromJson(Map<String, dynamic> json) {
     return Level(
@@ -28,7 +28,7 @@ class Level {
         color: json['color'],
         section: Section.fromJson(json['section']),
         img: Img.fromJson(json['img']),
-        score: json['score'],
+        score: json['score'] ?? 0,
         status: json["status"]);
   }
 }

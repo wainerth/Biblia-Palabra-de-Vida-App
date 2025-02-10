@@ -12,7 +12,7 @@ class Stage {
   String? churchId;
   int status;
   int levelCount;
-  int levelCompleted;
+  int levelCompletedCount;
 
   Stage({
     required this.id,
@@ -25,7 +25,7 @@ class Stage {
     required this.img,
     this.churchId,
     required this.levelCount,
-    required this.levelCompleted,
+    required this.levelCompletedCount,
     required this.status,
   });
 
@@ -41,7 +41,7 @@ class Stage {
       img: Img.fromJson(json['img']),
       churchId: json['churchId'],
       levelCount: json["levelCount"],
-      levelCompleted: json["levelCompleted"],
+      levelCompletedCount: json["levelCompletedCount"],
       status: json['status'],
     );
   }
@@ -58,7 +58,7 @@ class Stage {
     data['img'] = img.toJson();
     data['churchId'] = churchId;
     data['levelCount'] = levelCount;
-    data['levelCompleted'] = levelCompleted;
+    data['levelCompletedCount'] = levelCompletedCount;
     data['status'] = status;
     return data;
   }

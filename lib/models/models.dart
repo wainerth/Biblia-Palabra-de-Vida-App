@@ -1,3 +1,5 @@
+export 'package:biblia_palabra_de_vida_app/models/update_data_profile.dart';
+
 export 'package:biblia_palabra_de_vida_app/models/church.dart';
 
 export 'package:biblia_palabra_de_vida_app/models/response_data.dart';
@@ -29,3 +31,4 @@ export 'package:biblia_palabra_de_vida_app/models/sex_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/user_achievement.dart';
 export 'package:biblia_palabra_de_vida_app/models/league.dart';
 export 'package:biblia_palabra_de_vida_app/models/user_ranking.dart';
+

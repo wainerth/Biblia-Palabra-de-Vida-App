@@ -28,7 +28,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       color: "3ae4e4",
       img: Img(urlImg: "assets/assetStories.png"),
       levelCount: 12,
-      levelCompleted: 0,
+      levelCompletedCount: 0,
       status: 1);
   Level level = Level(
     id: "1",

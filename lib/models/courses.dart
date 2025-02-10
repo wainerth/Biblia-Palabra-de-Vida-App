@@ -9,7 +9,7 @@ class CourseModel {
   Img img;
   final String introduction;
   final int sectionCount;
-  final int sectionCompleted;
+  final int sectionCompletedCount;
 
   CourseModel({
     required this.id,
@@ -20,7 +20,7 @@ class CourseModel {
     required this.img,
     required this.introduction,
     required this.sectionCount,
-    required this.sectionCompleted,
+    required this.sectionCompletedCount,
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
@@ -33,7 +33,7 @@ class CourseModel {
       img: Img.fromJson(json['img']),
       introduction: json['introduction'],
       sectionCount: json['sectionCount'],
-      sectionCompleted: json['sectionCompleted'],
+      sectionCompletedCount: json['sectionCompletedCount'],
     );
   }
 
@@ -47,7 +47,7 @@ class CourseModel {
     data['img'] = img.toJson();
     data['introduction'];
     data['sectionCount'];
-    data['sectionCompleted'];
+    data['sectionCompletedCount'];
     return data;
   }
 }

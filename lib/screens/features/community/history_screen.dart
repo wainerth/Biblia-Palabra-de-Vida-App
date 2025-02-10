@@ -36,7 +36,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       color: "3ae4e4",
       img: Img(urlImg: "assets/assetStories.png"),
       levelCount: 12,
-      levelCompleted: 0,
+      levelCompletedCount: 0,
       status: 1);
 
   List<History> stories = [

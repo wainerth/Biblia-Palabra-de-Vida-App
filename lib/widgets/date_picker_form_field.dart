@@ -23,7 +23,9 @@ class _DatePickerFormFieldState extends State<DatePickerFormField> {
         widget.initialDate; // Inicializa _selectedDate con initialDate
     if (_selectedDate != null) {
       final DateFormat formatter = DateFormat('dd/MM/yyyy');
-      _dateController.text = formatter.format(_selectedDate!);
+      setState(() {
+        _dateController.text = formatter.format(_selectedDate!);
+      });
     }
   }
 

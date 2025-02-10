@@ -51,5 +51,6 @@ export 'package:biblia_palabra_de_vida_app/widgets/text_with_gradient.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/card_aventure_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/audio_player_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/head_score_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/build_error_widget.dart';
 
 

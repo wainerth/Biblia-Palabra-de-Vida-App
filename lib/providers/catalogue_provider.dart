@@ -10,6 +10,7 @@ class CatalogueProvider extends ChangeNotifier {
   late List<Country> allCountries;
   late List<Church> allChurches;
   late List<League> allLeagues;
+  late List<CourseModel> allCourses;
   
   CatalogueProvider() {
     init();
@@ -26,7 +27,7 @@ class CatalogueProvider extends ChangeNotifier {
     // Lógica para cargar la lista de países
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userToken = prefs.getString('userToken');
-    _client = createClient();
+    _client = createClient(authToken: userToken);
 
     QueryOptions options = QueryOptions(
       operationName: "GetAllCountries",
@@ -160,4 +161,5 @@ class CatalogueProvider extends ChangeNotifier {
       throw Exception('Failed to obtain leagues $e');
     }
   }
+  
 }

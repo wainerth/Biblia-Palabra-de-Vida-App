@@ -1,4 +1,7 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class AventureScreen extends StatefulWidget {
@@ -9,71 +12,42 @@ class AventureScreen extends StatefulWidget {
 }
 
 class _AventureScreenState extends State<AventureScreen> {
+  late final userProvider;
+  bool isLoading = true;
+  String? errorMessage;
+
   List<CourseModel> courses = [];
   @override
   void initState() {
-    _generateData();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generateData(context);
+    });
   }
 
-  void _generateData() {
-    courses = [
-      CourseModel(
-        color: "3ae4e4",
-        id: "1",
-        status: 1,
-        title: "Antiguo Testamento",
-        img: Img(urlImg: "assets/newTestament.png"),
-        introduction:
-            "¿Alguna vez te has preguntado sobre los inicios del mundo y las historias épicas de héroes antiguos? El Antiguo Testamento es como una caja del tesoro llena de relatos asombrosos y enseñanzas que han impactado a millones de personas a lo largo de los siglos. Desde la creación del universo hasta las aventuras de personajes como Moisés, David y Salomón, estos \nlibros te llevan en un viaje fascinante a través de la historia, la fe y la moral. Encontrarás milagros impresionantes, batallas épicas y sabiduría atemporal. Es un lugar donde los sueños, las promesas y las luchas de la humanidad cobran vida, ofreciendo valiosas lecciones que resuenan incluso en el mundo moderno.\n",
-        sectionCount: 27,
-        sectionCompleted: 27,
-      ),
-      CourseModel(
-        color: "2eade4",
-        id: "2",
-        status: 1,
-        title: "Nuevo Testamento",
-        img: Img(urlImg: "assets/newTestament.png"),
-        introduction:
-            "¿Alguna vez te has preguntado sobre los inicios del mundo y las historias épicas de héroes antiguos? El Antiguo Testamento es como una caja del tesoro llena de relatos asombrosos y enseñanzas que han impactado a millones de personas a lo largo de los siglos. Desde la creación del universo hasta las aventuras de personajes como Moisés, David y Salomón, estos \nlibros te llevan en un viaje fascinante a través de la historia, la fe y la moral. Encontrarás milagros impresionantes, batallas épicas y sabiduría atemporal. Es un lugar donde los sueños, las promesas y las luchas de la humanidad cobran vida, ofreciendo valiosas lecciones que resuenan incluso en el mundo moderno.\n",
-        sectionCount: 27,
-        sectionCompleted: 5,
-      ),
-      CourseModel(
-        color: "B184EA",
-        id: "3",
-        status: 1,
-        title: "Discipulado caminando con Cristo",
-        img: Img(urlImg: "assets/aventura.png"),
-        introduction:
-            "¿Alguna vez te has preguntado sobre los inicios del mundo y las historias épicas de héroes antiguos? El Antiguo Testamento es como una caja del tesoro llena de relatos asombrosos y enseñanzas que han impactado a millones de personas a lo largo de los siglos. Desde la creación del universo hasta las aventuras de personajes como Moisés, David y Salomón, estos \nlibros te llevan en un viaje fascinante a través de la historia, la fe y la moral. Encontrarás milagros impresionantes, batallas épicas y sabiduría atemporal. Es un lugar donde los sueños, las promesas y las luchas de la humanidad cobran vida, ofreciendo valiosas lecciones que resuenan incluso en el mundo moderno.\n",
-        sectionCount: 27,
-        sectionCompleted: 0,
-      ),
-      CourseModel(
-        color: "9579B9",
-        id: "4",
-        status: 1,
-        title: "Discipulado 2 Guiado por el Espíritu Santo",
-        img: Img(urlImg: "assets/imagen2.png"),
-        introduction:
-            "¿Alguna vez te has preguntado sobre los inicios del mundo y las historias épicas de héroes antiguos? El Antiguo Testamento es como una caja del tesoro llena de relatos asombrosos y enseñanzas que han impactado a millones de personas a lo largo de los siglos. Desde la creación del universo hasta las aventuras de personajes como Moisés, David y Salomón, estos \nlibros te llevan en un viaje fascinante a través de la historia, la fe y la moral. Encontrarás milagros impresionantes, batallas épicas y sabiduría atemporal. Es un lugar donde los sueños, las promesas y las luchas de la humanidad cobran vida, ofreciendo valiosas lecciones que resuenan incluso en el mundo moderno.\n",
-        sectionCount: 27,
-        sectionCompleted: 0,
-      ),
-      CourseModel(
-        color: "64E8FC",
-        id: "5",
-        status: 1,
-        title: "Armas de los Guerreros En Cristo",
-        img: Img(urlImg: "assets/imagen3.png"),
-        introduction:
-            "¿Alguna vez te has preguntado sobre los inicios del mundo y las historias épicas de héroes antiguos? El Antiguo Testamento es como una caja del tesoro llena de relatos asombrosos y enseñanzas que han impactado a millones de personas a lo largo de los siglos. Desde la creación del universo hasta las aventuras de personajes como Moisés, David y Salomón, estos \nlibros te llevan en un viaje fascinante a través de la historia, la fe y la moral. Encontrarás milagros impresionantes, batallas épicas y sabiduría atemporal. Es un lugar donde los sueños, las promesas y las luchas de la humanidad cobran vida, ofreciendo valiosas lecciones que resuenan incluso en el mundo moderno.\n",
-        sectionCount: 27,
-        sectionCompleted: 0,
-      ),
-    ];
+  Future<void> _generateData(BuildContext context) async {
+    LoadingService().showLoading(context);
+
+    try {
+      final result = await loadCoursesByUserAndChurch(null, null);
+      if (result.error != null) {
+        errorMessage = result.error;
+      } else {
+        setState(() {
+          courses = result.data
+              .map((course) => CourseModel.fromJson(removeTypename(course)))
+              .cast<CourseModel>()
+              .toList();
+        });
+      }
+    } catch (e) {
+      errorMessage = "An error occurred: $e";
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -84,7 +58,16 @@ class _AventureScreenState extends State<AventureScreen> {
           child: Column(
             children: [
               HeaderWidget(),
-              listViewCardAventure(),
+              isLoading
+                ? Container()
+                : errorMessage != null
+                  ? Center(child: BuildErrorWidget(
+                    
+                    errorMessage: errorMessage!,
+                    onRetry: () async => _generateData(context) ,
+                    onBack: ()=> Navigator.pop(context),
+                    ),)
+                  : listViewCardAventure(),
             ],
           ),
         ),
@@ -107,12 +90,17 @@ class _AventureScreenState extends State<AventureScreen> {
                     CardAventureWidget(
                       course: courses[index],
                       onTap: () {
-                        Navigator.popAndPushNamed(context, '/detailCoursePage');
+                        Navigator.popAndPushNamed(context, '/detailCoursePage',
+                            arguments: courses[index]);
+                      },
+                      goToMap: (){
+                        Navigator.pushNamed(context, '/mapPage',
+                        arguments:courses[index] );
                       },
                     ),
                     if (index == courses.length - 1) ...{
                       SizedBox(
-                        height: kBottomNavigationBarHeight +30 ,
+                        height: kBottomNavigationBarHeight + 30,
                       )
                     }
                   ],

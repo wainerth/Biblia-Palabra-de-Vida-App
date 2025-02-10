@@ -44,6 +44,9 @@ var maskFormatterEmail = MaskTextInputFormatter(
 getIsBaptized(value) {
   return value ? "Bautizado" : "No Bautizado";
 }
+getGender(){
+  
+}
 
 UserChurch? getChurchActive(churches) {
   if (churches.isNotEmpty) {
@@ -58,3 +61,4 @@ UserChurch? getChurchActive(churches) {
     return null;
   }
 }
+
