@@ -16,13 +16,15 @@ class Question {
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
+    // List<Answer> listAnswer = json['answers'].map((answer) =>  Answer.fromJson(answer) );
     return Question(
       id: json['id'],
       question: json['question'],
       difficulty: json['difficulty'],
       level: LevelQuestion.fromJson(json['level']),
       status: json['status'],
-      answers: (json['answers'] as List).map((e) => Answer.fromJson(e)).toList(),
+      answers: (json['answers'] as List).map((e) =>
+       Answer.fromJson(e)).toList(),
     );
   }
 }
@@ -42,8 +44,7 @@ class Answer {
   final String answer;
   final bool isCorrect;
   final String questionId;
-  final int scoreForAnswer;
-  final int orderInAnswer;
+  final int? orderInAnswer;
   String? option;
   final int status;
 
@@ -52,7 +53,6 @@ class Answer {
     required this.answer,
     required this.isCorrect,
     required this.questionId,
-    required this.scoreForAnswer,
     this.orderInAnswer = 0,
     required this.status,
     this.option = '',
@@ -64,8 +64,7 @@ class Answer {
       answer: json['answer'],
       isCorrect: json['isCorrect'],
       questionId: json['questionId'],
-      scoreForAnswer: json['scoreForAnswer'],
-      orderInAnswer: json['orderInAnswer'],
+      orderInAnswer: json['orderInAnswer'] ?? 0,
       status: json['status'],
       option: json['option'] ?? '',
     );

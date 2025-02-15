@@ -96,205 +96,212 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10.0),
-      padding: EdgeInsets.all(0),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadow: [
-          BoxShadow(
-            offset: Offset(0, 4),
-            blurRadius: 4,
-            color: Colors.black
-                .withValues(alpha: 0.25), // Negro con 25% de transparencia
-          ),
-        ],
-        image: widget.showImage
-            ? DecorationImage(
-                opacity: 0.3,
-                image: AssetImage("assets/background_player.jpg"),
-                fit: BoxFit.cover,
-              )
-            : null,
-        color: widget.showImage
-            ? Colors.black.withValues(alpha: 0.9)
-            : widget.backgroundColor,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            flex: 0,
-            child: IconButton(
-              padding: EdgeInsets.all(0),
-              constraints: BoxConstraints(minHeight: 24.sp),
-              color: widget.controlsColor,
-              onPressed: widget.pathUrl.isEmpty ? null : () {
-                setState(() {
-                  _isPlaying = !_isPlaying;
-                });
-                if (_isPlaying) {
-                  _play();
-                } else {
-                  player.pause();
-                }
-              },
-              icon: Icon(
-                _isPlaying ? Icons.pause : Icons.play_arrow,
-                size: 25.sp,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 10.0),
+        padding: EdgeInsets.all(0),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [
+            BoxShadow(
+              offset: Offset(0, 4),
+              blurRadius: 4,
+              color: Colors.black
+                  .withValues(alpha: 0.25), // Negro con 25% de transparencia
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text.rich(
-              style: TextStyle(color: widget.actionColor,fontSize: 12.sp),
-              TextSpan(
-                text: _position != null
-                    ? '${_positionText.substring(3)} / ${_durationText.substring(3)}'
-                    : _duration != null
-                        ? _durationText
-                        : '0:00 / 0:00',
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Slider(
-              thumbColor: widget.controlsColor,
-              activeColor: widget.controlsColor,
-              inactiveColor: widget.inactiveColor,
-              onChanged: (value) {
-                final duration = _duration;
-                if (duration == null) return;
-                final position = value * duration.inMilliseconds;
-                player.seek(Duration(milliseconds: position.round()));
-              },
-              value: (_position != null &&
-                      _duration != null &&
-                      _position!.inMilliseconds > 0 &&
-                      _position!.inMilliseconds < _duration!.inMilliseconds)
-                  ? _position!.inMilliseconds / _duration!.inMilliseconds
-                  : 0.0,
-            ),
-          ),
-          Expanded(
-            flex: 0,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 30.0,
-                  padding: EdgeInsets.all(0),
-                  child: IconButton(
-                    iconSize: 24.0,
-                    padding: EdgeInsets.all(0),
-                    constraints: BoxConstraints(minHeight: 24.0),
-                    onPressed: () {
-                      setState(() {
-                        if (volume > 0) {
-                          volume = 0;
+          ],
+          image: widget.showImage
+              ? DecorationImage(
+                  opacity: 0.3,
+                  image: AssetImage("assets/background_player.jpg"),
+                  fit: BoxFit.cover,
+                )
+              : null,
+          color: widget.showImage
+              ? Colors.black.withValues(alpha: 0.9)
+              :   widget.backgroundColor,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              flex: 0,
+              child: IconButton(
+                padding: EdgeInsets.all(0),
+                constraints: BoxConstraints(minHeight: 24.sp),
+                color: widget.controlsColor,
+                onPressed: widget.pathUrl.isEmpty
+                    ? null
+                    : () {
+                        setState(() {
+                          _isPlaying = !_isPlaying;
+                        });
+                        if (_isPlaying) {
+                          _play();
                         } else {
-                          volume = 0.5; // Default volume level
+                          player.pause();
                         }
-                        player.setVolume(volume);
-                      });
-                    },
-                    icon: Icon(
-                      volume > 0 ? Icons.volume_up : Icons.volume_off,
-                      color: widget.controlsColor,
-                      size: 25.sp,
-                    ),
-                  ),
+                      },
+                icon: Icon(
+                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                  size: 25.sp,
                 ),
-                Container(
-                  padding: EdgeInsets.all(0),
-                  width: 30.sp,
-                  child: IconButton(
-                    padding: EdgeInsets.all(0),
-                    iconSize: 25.sp,
-                    constraints: BoxConstraints(minHeight: 25.sp),
-                    color: widget.actionColor,
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              StatefulBuilder(builder: (context, setState) {
-                                return ListTile(
-                                  leading: IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        if (volume > 0) {
-                                          volume = 0;
-                                        } else {
-                                          volume = 0.5; // Default volume level
-                                        }
-                                        player.setVolume(volume);
-                                      });
-                                    },
-                                    icon: Icon(volume > 0
-                                        ? Icons.volume_up
-                                        : Icons.volume_off),
-                                  ),
-                                  title: Slider(
-                                    value: volume,
-                                    onChanged: (newVolume) {
-                                      setState(() => volume = newVolume);
-                                      player.setVolume(volume);
-                                    },
-                                    min: 0.0,
-                                    max: 1.0,
-                                  ),
-                                );
-                              }),
-                              ListTile(
-                                leading: Icon(Icons.download),
-                                title: Text('Download'),
-                                onTap: () async {
-                                  _downloadFile(widget.pathUrl);
-                                },
-                              ),
-                              ListTile(
-                                leading: Icon(Icons.share),
-                                title: Text('Share'),
-                                onTap: () async {
-                                  final directory =
-                                      await getApplicationDocumentsDirectory();
-                                  final filePath =
-                                      '${directory.path}/${widget.pathUrl}';
-                                  final file = File(filePath);
-                                  if (await file.exists()) {
-                                    // Use the share package to share the file
-                                    Share.shareXFiles([XFile(filePath)],
-                                        text: '¡Mira este audio!');
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              'Archivo de audio no encontrado')),
-                                    );
-                                  }
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.more_vert,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              flex: 2,
+              child: Text.rich(
+                style: TextStyle(color: widget.actionColor, fontSize: 12.sp),
+                TextSpan(
+                  text: _position != null
+                      ? '${_positionText.substring(3)} / ${_durationText.substring(3)}'
+                      : _duration != null
+                          ? _durationText
+                          : '0:00 / 0:00',
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Slider(
+                thumbColor: widget.controlsColor,
+                activeColor: widget.controlsColor,
+                inactiveColor: widget.inactiveColor,
+                onChanged: (value) {
+                  final duration = _duration;
+                  if (duration == null) return;
+                  final position = value * duration.inMilliseconds;
+                  player.seek(Duration(milliseconds: position.round()));
+                },
+                value: (_position != null &&
+                        _duration != null &&
+                        _position!.inMilliseconds > 0 &&
+                        _position!.inMilliseconds < _duration!.inMilliseconds)
+                    ? _position!.inMilliseconds / _duration!.inMilliseconds
+                    : 0.0,
+              ),
+            ),
+            Expanded(
+              flex: 0,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 30.0,
+                    padding: EdgeInsets.all(0),
+                    child: IconButton(
+                      iconSize: 24.0,
+                      padding: EdgeInsets.all(0),
+                      constraints: BoxConstraints(minHeight: 24.0),
+                      onPressed: () {
+                        setState(() {
+                          if (volume > 0) {
+                            volume = 0;
+                          } else {
+                            volume = 0.5; // Default volume level
+                          }
+                          player.setVolume(volume);
+                        });
+                      },
+                      icon: Icon(
+                        volume > 0 ? Icons.volume_up : Icons.volume_off,
+                        color: widget.controlsColor,
+                        size: 25.sp,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(0),
+                    width: 30.sp,
+                    child: IconButton(
+                      padding: EdgeInsets.all(0),
+                      iconSize: 25.sp,
+                      constraints: BoxConstraints(minHeight: 25.sp),
+                      color: widget.actionColor,
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                StatefulBuilder(builder: (context, setState) {
+                                  return ListTile(
+                                    leading: IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          if (volume > 0) {
+                                            volume = 0;
+                                          } else {
+                                            volume =
+                                                0.5; // Default volume level
+                                          }
+                                          player.setVolume(volume);
+                                        });
+                                      },
+                                      icon: Icon(volume > 0
+                                          ? Icons.volume_up
+                                          : Icons.volume_off),
+                                    ),
+                                    title: Slider(
+                                      value: volume,
+                                      onChanged: (newVolume) {
+                                        setState(() => volume = newVolume);
+                                        player.setVolume(volume);
+                                      },
+                                      min: 0.0,
+                                      max: 1.0,
+                                    ),
+                                  );
+                                }),
+                                ListTile(
+                                  leading: Icon(Icons.download),
+                                  title: Text('Download'),
+                                  onTap: () async {
+                                    _downloadFile(widget.pathUrl);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: Icon(Icons.share),
+                                  title: Text('Share'),
+                                  onTap: () async {
+                                    final directory =
+                                        await getApplicationDocumentsDirectory();
+                                    final filePath =
+                                        '${directory.path}/${widget.pathUrl}';
+                                    final file = File(filePath);
+                                    if (await file.exists()) {
+                                      // Use the share package to share the file
+                                      Share.shareXFiles([XFile(filePath)],
+                                          text: '¡Mira este audio!');
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Archivo de audio no encontrado')),
+                                      );
+                                    }
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.more_vert,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

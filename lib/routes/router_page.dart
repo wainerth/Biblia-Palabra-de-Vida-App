@@ -25,8 +25,9 @@ final Map<String, WidgetBuilder> routes = {
   '/detailCoursePage': (BuildContext context) => DetailCourseScreen(),
   '/historyPage': (BuildContext context) => HistoryScreen(),
   '/questionPage': (BuildContext context) => QuestionScreen(),
-  '/questionDraggablePage': (BuildContext context) => QuestionScreenDraggable(),
-  '/preachPage': (BuildContext context) => PreachScreen()
+  // '/questionDraggablePage': (BuildContext context) => QuestionScreenDraggable(),
+  '/preachPage': (BuildContext context) => PreachScreen(),
+  '/settingPage': (BuildContext context) => AuthGuard(child: SettingsScreen())
 };
 
 Route<dynamic> generateRoute(RouteSettings settings) {

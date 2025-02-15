@@ -316,7 +316,7 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
           Offset(100 + i * 50, 200);
     }
     currentPositions = Map.from(initialPositions);
-    orderedAnswers = List.generate(countList, (index) => Answer(id: "", answer: "", isCorrect: false, questionId: "", scoreForAnswer: 0, orderInAnswer: 0, status: 0));
+    orderedAnswers = List.generate(countList, (index) => Answer(id: "", answer: "", isCorrect: false, questionId: "", orderInAnswer: 0, status: 0));
   }
 
   bool _searchExistedOrdered(id) {

@@ -1,0 +1,100 @@
+class LevelProgressUser {
+  final String id;
+  final int score;
+  final Message message;
+  final bool newRecord;
+  final InfoUser user;
+  final int failedAttempts;
+  final int scoreLastAttempt;
+  final bool completed;
+  final LevelUser level;
+  final bool status;
+
+  LevelProgressUser({
+    required this.id,
+    required this.score,
+    required this.message,
+    required this.newRecord,
+    required this.user,
+    required this.failedAttempts,
+    required this.scoreLastAttempt,
+    required this.completed,
+    required this.level,
+    required this.status,
+  });
+
+  factory LevelProgressUser.fromJson(Map<String, dynamic> json) {
+    return LevelProgressUser(
+      id: json['id'],
+      score: json['score'],
+      message: Message.fromJson(json['message']),
+      newRecord: json['newRecord'],
+      user: InfoUser.fromJson(json['user']),
+      failedAttempts: json['failedAttempts'],
+      scoreLastAttempt: json['scoreLastAttempt'],
+      completed: json['completed'],
+      level: LevelUser.fromJson(json['level']),
+      status: json['status'] > 0 ? true : false,
+    );
+  }
+}
+
+class Message {
+  final String resultDescription;
+  final String resultTitle;
+  final String difficulty;
+
+  Message({
+    required this.resultDescription,
+    required this.resultTitle,
+    required this.difficulty,
+  });
+
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      resultDescription: json['resultDescription'],
+      resultTitle: json['resultTitle'],
+      difficulty: json['difficulty'],
+    );
+  }
+}
+
+class InfoUser {
+  final String username;
+  final int rolId;
+  final String id;
+
+  InfoUser({
+    required this.username,
+    required this.rolId,
+    required this.id,
+  });
+
+  factory InfoUser.fromJson(Map<String, dynamic> json) {
+    return InfoUser(
+      username: json['username'],
+      rolId: json['rolId'],
+      id: json['id'],
+    );
+  }
+}
+
+class LevelUser {
+  final int levelNumber;
+  final String id;
+  final String name;
+
+  LevelUser({
+    required this.levelNumber,
+    required this.id,
+    required this.name,
+  });
+
+  factory LevelUser.fromJson(Map<String, dynamic> json) {
+    return LevelUser(
+      levelNumber: json['levelNumber'],
+      id: json['id'],
+      name: json['name'],
+    );
+  }
+}

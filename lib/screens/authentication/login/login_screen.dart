@@ -1,6 +1,6 @@
-
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
@@ -157,23 +157,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     }
 
                                     if (user.error != null) {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: const Text("Error"),
-                                            content: Text(user.error),
-                                            actions: [
-                                              TextButton(
-                                                child: const Text("OK"),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
+                                      await showCustomDialog(context,
+                                          message: user.error!,
+                                          dialogType: DialogType.error);
                                       LoadingService().hideLoading();
                                     } else {
                                       LoadingService().hideLoading();
@@ -204,23 +190,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       }
 
                                       if (user.error != null) {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: const Text("Error"),
-                                              content: Text(user.error!),
-                                              actions: [
-                                                TextButton(
-                                                  child: const Text("OK"),
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
+                                        await showCustomDialog(context,
+                                            message: user.error!,
+                                            dialogType: DialogType.error);
+
                                         LoadingService().hideLoading();
                                       } else {
                                         LoadingService().hideLoading();

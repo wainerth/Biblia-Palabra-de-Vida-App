@@ -28,7 +28,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(BuildContext context) 
     ),
      BottomNavigationBarItem(
       icon: Icon(Icons.settings,size: StylesApp(context).sizeIconBottomBar,),
-      label: 'Settings',
+      label: 'Configuración',
     ),
   ];
 }

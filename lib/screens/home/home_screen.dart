@@ -1,5 +1,7 @@
+import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,6 +11,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+   @override
+  void initState() {
+    super.initState();
+    _initializeCatalogues();
+  }
+
+  void _initializeCatalogues() async {
+    final catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
+    catalogueProvider.initialize();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

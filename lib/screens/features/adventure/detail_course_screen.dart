@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
@@ -19,8 +19,10 @@ class DetailCourseScreen extends StatefulWidget {
 class _DetailCorseScreenState extends State<DetailCourseScreen> {
   late final course;
   List<Stage> stages = [];
+  bool loadAventure = false;
   bool isLoading = true;
   String? errorMessage;
+  LastProgressUser? progressUser;
 
   @override
   void initState() {
@@ -39,7 +41,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
       });
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final LoginUser? userData = userProvider.currentUser;
-
+      progressUser = userProvider.progressUser;
       final result = await loadStageByCourse(userData?.user.id, course.id);
       if (result.error != null) {
         errorMessage = result.error;
@@ -150,28 +152,74 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
     return Expanded(
       child: Column(
         children: [
-          CardAventureWidget(
-            goToMap: () {
-              Navigator.pushNamed(context, '/mapPage');
-            },
-            onTap: () {
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder: (BuildContext context) {
-                  return CustomModalWidget(
-                    title: course.title,
-                    content: course.introduction,
-                    buttonText: 'Aceptar',
-                    id: course.id,
-                    showSubtitle: false,
-                    itemCount: 0,
-                    itemsCompleted: 0,
+          Stack(
+            children: [
+              CardAventureWidget(
+                loadingAction: loadAventure,
+                goToMap: () async {
+                  setState(() {
+                    loadAventure = true;
+                  });
+                  // consulto si el usuario tiene algún progreso para este curso?
+                  final userProvider =
+                      Provider.of<UserProvider>(context, listen: false);
+                  progressUser = await userProvider.getProgressUser(
+                      userProvider.currentUser?.user.id, course.id);
+                  if (progressUser != null) {
+                    Navigator.pushNamed(context, '/mapPage', arguments: {
+                      'courseId': course.id,
+                      'sectionId': progressUser!.sectionId
+                    });
+                  } else {
+                    if (stages.first.levelCount > 0) {
+                      Navigator.pushNamed(context, '/mapPage', arguments: {
+                        'courseId': course.id,
+                        'sectionId': stages.first.id
+                      });
+                    } else {
+                      await showCustomDialog(context,
+                          message: "¡Este curso no esta Disponible!",
+                          dialogType: DialogType.info);
+                    }
+                    setState(() {
+                      loadAventure = false;
+                    });
+                  }
+                },
+                onTap: () {
+                  showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CustomModalWidget(
+                        title: course.title,
+                        content: course.introduction,
+                        buttonText: 'Aceptar',
+                        id: course.id,
+                        showSubtitle: false,
+                        itemCount: 0,
+                        itemsCompleted: 0,
+                      );
+                    },
                   );
                 },
-              );
-            },
-            course: course,
+                course: course,
+              ),
+              if (loadAventure)
+                Positioned(
+                  right: 20,
+                  bottom: 20,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator.adaptive(
+                      strokeWidth: 4.0,
+                      strokeAlign: BorderSide.strokeAlignInside,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+            ],
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 10.0),
@@ -297,7 +345,10 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                               : () {
                                                   Navigator.pushNamed(
                                                       context, '/mapPage',
-                                                      arguments: course);
+                                                      arguments: {
+                                                        'courseId': course.id,
+                                                        'sectionId': stage.id
+                                                      });
                                                 },
                                       textStyle:
                                           StylesApp(context).textStyleBody14,
@@ -327,8 +378,10 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                       ButtonThemeWidget(
                                         onPressed: () {
                                           Navigator.pushNamed(
-                                              context, '/mapPage',
-                                              arguments: course);
+                                              context, '/mapPage', arguments: {
+                                            'courseId': course.id,
+                                            'sectionId': stage.id
+                                          });
                                         },
                                         textStyle:
                                             StylesApp(context).textStyleBody14,

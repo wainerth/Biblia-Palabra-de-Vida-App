@@ -103,7 +103,7 @@ class _HeaderNotDetailsStageWidgetState
                                 buttonText: 'Aceptar',
                                 id: widget.details.id,
                                 itemCount: widget.details.levelCount,
-                                itemsCompleted: widget.details.levelCompleted,
+                                itemsCompleted:  widget.details.levelCompletedCount,
                               );
                             },
                           );

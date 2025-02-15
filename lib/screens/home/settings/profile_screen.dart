@@ -10,7 +10,6 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:mime/mime.dart';
 
@@ -28,7 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _selectImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
+ 
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
       final fileSizeInBytes = imageFile.lengthSync();
@@ -40,16 +39,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (fileSizeInMegabytes <= 5) {
         List<int> imageBytes = await imageFile.readAsBytes();
 
-        String _base64Image = base64Encode(imageBytes);
-        verificarBase64(_base64Image);
+        String base64Image = base64Encode(imageBytes);
+        verificarBase64(base64Image);
         final mimeType = lookupMimeType(imageFile.path); // Obtiene el tipo MIME
 
         if (mimeType != null) {
-          dataUrl = "data:$mimeType;base64,$_base64Image";
+          dataUrl = "data:$mimeType;base64,$base64Image";
      
-          print(dataUrl); // Imprime la Data URL para pegarla en el navegador
+          if (kDebugMode) {
+            print(dataUrl);
+          } // Imprime la Data URL para pegarla en el navegador
         } else {
-          print("No se pudo determinar el tipo MIME de la imagen.");
+          if (kDebugMode) {
+            print("No se pudo determinar el tipo MIME de la imagen.");
+          }
         }
         setState(() {
           avatarImg = pickedFile.path;
@@ -79,10 +82,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final catalogueProvider = Provider.of<CatalogueProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
+List<ModelData> optionsSex = [
+      ModelData(value: 'm', label: 'Masculino'),
+      ModelData(value: 'f', label: 'Femenino')
+    ];
 
+    final String userGender = (dataUser!.gender != null && dataUser!.gender!.isNotEmpty) ?  optionsSex.firstWhere((sex)=> 
+    sex.value == dataUser!.gender).label : '';
     List<ModelData> progressData = [
       ModelData(
         label: "Registro",
@@ -111,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           value: "${dataUser?.lastname}",
           showLabel: false,
           clave: "lastname"),
-      ModelData(label: "Sexo", value: "${dataUser!.gender}", clave: "gender"),
+      ModelData(label: "Sexo", value: "${userGender}", clave: "gender"),
       ModelData(
         label: "Fecha nac",
         value: "${dataUser!.birthdate}",
@@ -232,7 +240,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool verificarBase64(String cadenaBase64) {
     // 1. Verificar la longitud
     if (cadenaBase64.length % 4 != 0) {
-      print("La cadena Base64 es incompleta (longitud incorrecta).");
+      if (kDebugMode) {
+        print("La cadena Base64 es incompleta (longitud incorrecta).");
+      }
       return false;
     }
 
@@ -241,7 +251,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       int indicePrimerRelleno = cadenaBase64.indexOf("=");
       if (indicePrimerRelleno != cadenaBase64.length - 1 &&
           indicePrimerRelleno != cadenaBase64.length - 2) {
-        print("La cadena Base64 es inválida (relleno en medio).");
+        if (kDebugMode) {
+          print("La cadena Base64 es inválida (relleno en medio).");
+        }
         return false;
       }
     }
@@ -250,11 +262,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       base64Decode(cadenaBase64); // Intenta decodificar
     } catch (error) {
-      print("La cadena Base64 es inválida (error de decodificación): $error");
+      if (kDebugMode) {
+        print("La cadena Base64 es inválida (error de decodificación): $error");
+      }
       return false;
     }
 
-    print("La cadena Base64 parece válida.");
+    if (kDebugMode) {
+      print("La cadena Base64 parece válida.");
+    }
     return true;
   }
 }
@@ -359,7 +375,7 @@ class CardColumnWidget extends StatelessWidget {
                             context: context,
                             barrierDismissible: false,
                             builder: (context) {
-                              return EditDetailDialog(
+                              return EditDetailDialogWidget(
                                 data: data,
                                 onSave: (List<ModelData> dta) async {
                                   LoadingService().showLoading(context);
@@ -447,455 +463,4 @@ class CardColumnWidget extends StatelessWidget {
     );
   }
 
-  UpdateDataProfile updateFromModelData(UpdateDataProfile dataToSend,
-      List<ModelData> data, List<Country> countries, List<Church> churches) {
-    var datos = dataToSend;
-
-    var nuevosDatos = {};
-    for (var item in data) {
-      switch (item.clave) {
-        case 'lastname':
-          nuevosDatos["lastname"] = item.value as String?;
-          break;
-        case 'name':
-          nuevosDatos["name"] = item.value as String?;
-          break;
-        case 'birthdate':
-          nuevosDatos["birthdate"] = item.value as String?;
-          break;
-        case 'identifier':
-          nuevosDatos["identifier"] = item.value as String?;
-          break;
-        case 'phoneNumber':
-          nuevosDatos["phoneNumber"] = item.value as String?;
-          break;
-        case 'country':
-          if (item.value.isNotEmpty) {
-            Country? cont = countries
-                .firstWhere((country) => country.country == item.value);
-            nuevosDatos["country"] = cont;
-          } else {
-            nuevosDatos["country"] = null;
-          }
-
-          break;
-        case 'city':
-          nuevosDatos["city"] = item.value as String?;
-          break;
-        case 'gender':
-          nuevosDatos["gender"] = item.value as String?;
-          break;
-        case 'isBaptized':
-          nuevosDatos["isBaptized"] = item.value == 'Bautizado' ? true : false;
-          break;
-        case 'church':
-          var church =
-              churches.firstWhere((church) => church.name == item.value);
-          nuevosDatos["church"] = UserChurch(
-              id: church.id, name: church.name, status: church.status);
-          break;
-      }
-
-      datos = datos.copyWith(
-        name: nuevosDatos["name"] ?? datos.name,
-        lastname: nuevosDatos["lastname"] ?? datos.lastname,
-        birthdate: nuevosDatos["birthdate"] ?? datos.birthdate,
-        identifier: nuevosDatos["identifier"] ?? datos.identifier,
-        phoneNumber: nuevosDatos["phoneNumber"] ?? datos.phoneNumber,
-        country: nuevosDatos["country"] ?? datos.country,
-        city: nuevosDatos["city"] ?? datos.city,
-        gender: nuevosDatos["gender"] ?? datos.gender,
-        isBaptized: nuevosDatos["isBaptized"] ?? datos.isBaptized,
-        church: nuevosDatos["church"] ?? datos.church,
-      );
-    }
-    print(datos);
-    return datos;
-  }
-}
-
-class EditDetailDialog extends StatefulWidget {
-  final List<ModelData> data;
-  final Function(List<ModelData>) onSave;
-  const EditDetailDialog({super.key, required this.data, required this.onSave});
-
-  @override
-  State<EditDetailDialog> createState() => _editDetailDialog();
-}
-
-class _editDetailDialog extends State<EditDetailDialog> {
-  late List<ModelData> _editingData;
-  final List<TextEditingController> _controllers = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _editingData = List.from(widget.data);
-    for (var item in _editingData) {
-      if (item.label == 'Tel.') {
-        _controllers.add(TextEditingController(
-            text: item.value.isNotEmpty ? item.value.split(' ')[1] : ''));
-      } else {
-        _controllers.add(TextEditingController(text: item.value));
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final catalogueProvider =
-        Provider.of<CatalogueProvider>(context, listen: false);
-
-    final List<ModelData> dropDownList = catalogueProvider.allCountries
-        .map((country) => ModelData(value: country.id, label: country.country))
-        .cast<ModelData>()
-        .toList();
-    final List<ModelData> prefixCode = catalogueProvider.allCountries
-        .map((country) =>
-            ModelData(value: country.id, label: country.countryCode))
-        .cast<ModelData>()
-        .toList();
-
-    final List<ModelData> listChurches = catalogueProvider.allChurches
-        .map((church) => ModelData(value: church.id, label: church.name))
-        .cast<ModelData>()
-        .toList();
-    List<ModelData> optionsSex = [
-      ModelData(value: 'm', label: 'Masculino'),
-      ModelData(value: 'f', label: 'Femenino')
-    ];
-    return Dialog(
-      alignment: Alignment.bottomCenter,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero, // Elimina las esquinas redondeadas
-      ),
-      insetPadding: EdgeInsets.only(top: 50),
-      backgroundColor: Colors.white,
-      child: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Container(
-              color: StyleColor.turquoise,
-              width: double.infinity,
-              height: MediaQuery.sizeOf(context).height * 0.6,
-              child: Column(
-                children: [
-                  HeadScreenNotAvatar(
-                    title: "Edición de Datos",
-                    onRoute: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 15),
-                      padding: EdgeInsets.all(15),
-                      color: Colors.white,
-                      child: Column(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: ListView.builder(
-                              itemCount: _editingData.length,
-                              itemBuilder: (context, index) {
-                                final item = _editingData[index];
-                                return Column(
-                                  children: [
-                                    _buildField(
-                                      item,
-                                      index, // Pasa el índice
-                                      dropDownList,
-                                      prefixCode,
-                                      optionsSex,
-                                      listChurches,
-                                      catalogueProvider.allChurches,
-                                      catalogueProvider.allCountries,
-                                    ),
-                                    SizedBox(
-                                      height: 12.0,
-                                    )
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            flex: 0,
-                            child: ButtonThemeWidget(
-                              buttonStyle: StylesApp(context).btnWidgetSmall,
-                              text: 'Guardar',
-                              // width: 239.0,
-                              height: 40.0,
-                              onPressed: () {
-                                widget.onSave(_editingData);
-                              },
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 40,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //Method buildField
-  Widget _buildField(
-      ModelData item,
-      int index,
-      List<ModelData> dropDownList,
-      List<ModelData> listPrefixCode,
-      List<ModelData> optionsSex,
-      List<ModelData> optionsChurches,
-      List<Church> listChurches,
-      List<Country> listCatalogue) {
-    if (item.label == 'Tel.') {
-      return Row(
-        spacing: 10,
-        children: [
-          Expanded(
-            flex: 1,
-            child: Container(
-              child: CustomDropdownWidget<Country>(
-                hintText: "código",
-                items: listPrefixCode,
-                onChanged: (ModelData? newValue) {
-                  setState(() {
-                    _editingData[index] = ModelData(
-                      label: _editingData[index].label,
-                      clave: _editingData[index].clave,
-                      value:
-                          '${newValue?.label} ${_editingData[index].value.split(' ')[1]}',
-                      showLabel: _editingData[index].showLabel,
-                    );
-                  });
-                },
-                selectedItem: item.value.isNotEmpty
-                    ? listPrefixCode.firstWhere(
-                        (element) => element.label == item.value.split(' ')[0])
-                    : null,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: TextFormField(
-              controller: _controllers[index],
-              keyboardType: TextInputType.phone,
-              inputFormatters: [
-                maskFormatterTel, // Permite solo números
-              ],
-              onChanged: (value) {
-                _controllers[index].text = value;
-                _editingData[index] = ModelData(
-                  label: _editingData[index].label,
-                  clave: _editingData[index].clave,
-                  value:
-                      '${_editingData[index].value.split(' ')[0]} ${_controllers[index].text.replaceAll(RegExp(r'[^\d]+'), '')}',
-                  showLabel: _editingData[index].showLabel,
-                );
-              },
-              decoration:
-                  StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                        hintText: "Número de teléfono",
-                      ),
-              style: StylesApp(context)
-                  .textStyleBody16
-                  .copyWith(color: Colors.black),
-            ),
-          )
-        ],
-      );
-    } else if (item.label == 'Sexo') {
-      return Container(
-        constraints: BoxConstraints(
-          minWidth: 160.0,
-          maxWidth: StylesApp(context).sizeTextFormField.width,
-        ),
-        child: CustomDropdownWidget<SexModel>(
-          hintText: "Seleccione Sexo",
-          items: optionsSex,
-          onChanged: (ModelData? newValue) {
-            setState(() {
-              _editingData[index] = ModelData(
-                label: _editingData[index].label,
-                value: newValue!.value,
-                clave: _editingData[index].clave,
-                showLabel: _editingData[index].showLabel,
-              );
-            });
-          },
-          selectedItem: item.value.isNotEmpty
-              ? optionsSex.firstWhere(
-                  (element) => element.value == item.value.toLowerCase())
-              : null,
-        ),
-      );
-    } else if (item.label == 'Fecha nac') {
-      return DatePickerFormField(
-        initialDate: item.value.isNotEmpty
-            ? DateFormat("dd/MM/yyyy").parse(item.value)
-            : DateTime.now().subtract(Duration(days: 15 * 365)),
-        onChanged: (value) {
-          print(value);
-          _editingData[index] = ModelData(
-            label: _editingData[index].label,
-            value: value,
-            clave: _editingData[index].clave,
-            showLabel: _editingData[index].showLabel,
-          );
-        },
-      );
-    } else if (item.label == 'Bautizo') {
-      return BautizadoRadioButton(
-        isBautizado: item.value == 'Bautizado',
-        onChanged: (bool? value) {
-          setState(() {
-            _editingData[index] = ModelData(
-              label: _editingData[index].label,
-              value: value! ? "Bautizado" : "No Bautizado",
-              clave: _editingData[index].clave,
-              showLabel: _editingData[index].showLabel,
-            );
-          });
-        },
-      );
-    } else if (item.label == 'País') {
-      return Container(
-        constraints: BoxConstraints(
-          minWidth: 160.0,
-          maxWidth: StylesApp(context).sizeTextFormField.width,
-        ),
-        child: CustomDropdownWidget<Country>(
-          hintText: "Seleccione un país",
-          items: dropDownList,
-          onChanged: (ModelData? newValue) {
-            setState(() {
-              _editingData[index] = ModelData(
-                label: _editingData[index].label,
-                value: newValue!.label,
-                clave: _editingData[index].clave,
-                showLabel: _editingData[index].showLabel,
-              );
-            });
-          },
-          selectedItem: item.value.isNotEmpty
-              ? dropDownList
-                  .firstWhere((element) => element.label == item.value)
-              : null,
-        ),
-      );
-    } else if (item.label == 'Iglesia') {
-      return Container(
-        constraints: BoxConstraints(
-          minWidth: 160.0,
-          maxWidth: StylesApp(context).sizeTextFormField.width,
-        ),
-        child: CustomDropdownWidget<Church>(
-          hintText: "Seleccione una Iglesia",
-          items: optionsChurches,
-          onChanged: (ModelData? newValue) {
-            setState(() {
-              _editingData[index] = ModelData(
-                label: _editingData[index].label,
-                value: newValue!.label,
-                clave: _editingData[index].clave,
-                showLabel: _editingData[index].showLabel,
-              );
-            });
-          },
-          selectedItem: item.value.isNotEmpty
-              ? optionsChurches
-                  .firstWhere((element) => element.label == item.value)
-              : null,
-        ),
-      );
-    } else {
-      return TextFormField(
-        readOnly: item.label == 'Email',
-        controller: _controllers[index],
-        decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-              hintText: item.label,
-            ),
-        onChanged: (value) {
-          _editingData[index] = ModelData(
-            label: _editingData[index].label,
-            value: value,
-            clave: _editingData[index].clave,
-            showLabel: _editingData[index].showLabel,
-          );
-        },
-      );
-    }
-  }
-}
-
-class BautizadoRadioButton extends StatefulWidget {
-  final bool isBautizado;
-  final Function(bool?)? onChanged;
-  const BautizadoRadioButton(
-      {super.key, required this.isBautizado, this.onChanged});
-
-  @override
-  State<BautizadoRadioButton> createState() => _BautizadoRadioButtonState();
-}
-
-class _BautizadoRadioButtonState extends State<BautizadoRadioButton> {
-  // Variable para almacenar la opción seleccionada
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Text(
-          '¿Está bautizado?',
-          style:
-              StylesApp(context).textStyleBody16.copyWith(color: Colors.black),
-        ), // Etiqueta para el grupo de RadioButtons
-        Radio<bool>(
-          value: true, // Valor para la opción "Sí"
-          activeColor: StyleColor.turquoise,
-          groupValue:
-              widget.isBautizado, // Grupo al que pertenece este RadioButton
-          onChanged: widget.onChanged,
-        ),
-        Text('Sí',
-            style: StylesApp(context)
-                .textStyleBody16
-                .copyWith(color: Colors.black)), // Etiqueta para la opción "Sí"
-        Radio<bool>(
-          value: false, // Valor para la opción "No"
-          activeColor: StyleColor.turquoise,
-          groupValue:
-              widget.isBautizado, // Grupo al que pertenece este RadioButton
-          onChanged: widget.onChanged,
-        ),
-        Text('No',
-            style: StylesApp(context)
-                .textStyleBody16
-                .copyWith(color: Colors.black)), // Etiqueta para la opción "No"
-      ],
-    );
-  }
 }

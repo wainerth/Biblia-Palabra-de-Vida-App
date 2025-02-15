@@ -124,7 +124,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                     TextSpan(
                                         text: userData!.createdAt.isNotEmpty
                                             ? getFormatedDate(
-                                                int.parse(userData!.createdAt))
+                                                int.parse(userData.createdAt))
                                             : ""),
                                   ],
                                 ),
@@ -410,7 +410,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                           borderRadius: BorderRadius.circular(8.0),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withOpacity(0.25),
+                                color: Colors.black.withValues(alpha: 0.25),
                                 offset: Offset(0, 4),
                                 blurRadius: 5)
                           ],

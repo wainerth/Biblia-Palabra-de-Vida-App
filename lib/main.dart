@@ -8,17 +8,19 @@ import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider<CatalogueProvider>(create: (_) => CatalogueProvider()),
+        ChangeNotifierProvider<CatalogueProvider>(
+            create: (_) => CatalogueProvider()),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
-        ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider(context, context.read<CatalogueProvider>())),
+        ChangeNotifierProvider<AuthenticationProvider>(
+            create: (context) => AuthenticationProvider(
+                context, context.read<CatalogueProvider>())),
       ],
       child: ScreenUtilInit(
-        designSize: const Size(360, 690), // size base of design        
+        designSize: const Size(360, 690), // size base of design
         builder: (context, child) {
           WidgetsFlutterBinding.ensureInitialized();
 
@@ -50,7 +52,15 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       // print("esperando asignación");
       _hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
+      // Carga el token DESPUÉS de obtener _hasSeenIntro
+      _loadTokenAndInitializeAuth(prefs);
     });
+  }
+
+  Future<void> _loadTokenAndInitializeAuth(SharedPreferences prefs) async {
+    final authProvider = context.read<AuthenticationProvider>();
+    await authProvider
+        .checkAuthentication(context); // Nueva función en el provider
   }
 
   @override
@@ -86,8 +96,15 @@ class _MyAppState extends State<MyApp> {
         ),
       );
     }
-
-    // Decidir la pantalla inicial con base en el valor de _hasSeenIntro.
-    return _hasSeenIntro! ? const HomeScreen() : const WelcomeScreen();
+      if (_hasSeenIntro!) { 
+        final authProvider = context.read<AuthenticationProvider>();
+        if (authProvider.token != null) { 
+          return PageScreen(); 
+        } else {
+          return const HomeScreen();
+        }
+      } else {
+        return const WelcomeScreen();
+      }
   }
 }

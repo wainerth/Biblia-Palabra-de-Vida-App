@@ -36,12 +36,12 @@ class Stage {
       introduction: json['introduction'],
       unLockSection: json['unLockSection'],
       countCards: json['countCards'],
-      orderCard: json['orderCard'],
+      orderCard: json['orderCard'] ?? 0,
       color: json['color'],
       img: Img.fromJson(json['img']),
       churchId: json['churchId'],
-      levelCount: json["levelCount"],
-      levelCompletedCount: json["levelCompletedCount"],
+      levelCount: json["levelCount"] ?? 0,
+      levelCompletedCount: json["levelCompletedCount"] ?? 0,
       status: json['status'],
     );
   }

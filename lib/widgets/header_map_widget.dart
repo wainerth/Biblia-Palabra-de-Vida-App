@@ -51,7 +51,7 @@ class HeaderMapWidget extends StatelessWidget {
                 onPressed: onShowInfoCourse,
                 color: Colors.white,
                 icon: Icon(
-                  Icons.info_outline,
+                  Icons.add_circle_outline_outlined ,
                   size: 25.sp,
                 ),
               ),

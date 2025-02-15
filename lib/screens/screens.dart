@@ -1,11 +1,12 @@
 
 //Authentication
 
+
 export 'package:biblia_palabra_de_vida_app/screens/features/preach/video_player_screen.dart';
 
 export 'package:biblia_palabra_de_vida_app/screens/features/preach/preach_screen.dart';
 
-export 'package:biblia_palabra_de_vida_app/screens/features/community/question_screen_draggable.dart';
+// export 'package:biblia_palabra_de_vida_app/screens/features/community/question_screen_draggable.dart';
 
 export 'package:biblia_palabra_de_vida_app/screens/authentication/login/login_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/authentication/signup/register_screen.dart';
@@ -21,9 +22,10 @@ export 'package:biblia_palabra_de_vida_app/screens/onboarding/end_intro_screen.d
 export 'package:biblia_palabra_de_vida_app/screens/home/home_screen.dart';
 
 //settings
+// export 'package:biblia_palabra_de_vida_app/screens/features/setting/setting_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/home/settings/workspace_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/home/settings/profile_screen.dart';
-export 'package:biblia_palabra_de_vida_app/screens/home/settings/config_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/home/settings/settings_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/home/settings/progress_detail_screen.dart';
 
 //Features
@@ -55,3 +57,5 @@ export 'package:biblia_palabra_de_vida_app/screens/features/prayer/detail_reques
 
 //404
 export 'package:biblia_palabra_de_vida_app/screens/404/unknown_screen.dart';
+
+

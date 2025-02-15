@@ -3,11 +3,11 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 // import 'package:http/io_client.dart';
 // import 'dart:io';
 import 'graphql_config.dart';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
 
 GraphQLClient createClient({String? authToken}) {
-    http.Client httpClient;
-  final HttpLink _httpLink = HttpLink(
+    // http.Client httpClient;
+  final HttpLink httpLink = HttpLink(
     GraphQLConfig.baseUrl,
     // httpClient: kIsWeb ? httpClient = http.Client() : IOClient(
     //   HttpClient()
@@ -16,15 +16,15 @@ GraphQLClient createClient({String? authToken}) {
     // ),
   );
 
-  final AuthLink _authLink = AuthLink(
+  final AuthLink authLink = AuthLink(
     getToken: () async =>  authToken ?? GraphQLConfig.authToken,
   );
 
-  final Link _link = _authLink.concat(_httpLink);
+  final Link link = authLink.concat(httpLink);
 
   return GraphQLClient(
     cache: GraphQLCache(store: InMemoryStore()),
-    link: _link,
+    link: link,
     defaultPolicies: DefaultPolicies(
       query: Policies(
         fetch: FetchPolicy.noCache,

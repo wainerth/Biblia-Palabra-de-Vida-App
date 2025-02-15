@@ -1,3 +1,23 @@
+
+export 'package:biblia_palabra_de_vida_app/widgets/ordering_question_draggable_widget.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/selection_question_widget.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/player_youtube_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/player_no_youtube.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/custom_dialog.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/radio_button_widget.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/user_info_step.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/personal_info_step.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/edit_detail_dialog_widget.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/bautizado_radio_button.dart';
+
 export 'package:biblia_palabra_de_vida_app/widgets/date_picker_form_field.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/profile_header.dart';
@@ -15,6 +35,8 @@ export 'package:biblia_palabra_de_vida_app/widgets/header_map_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/audio_recorder_widget.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/custom_dropdown_widget.dart';
+
+export 'package:biblia_palabra_de_vida_app/widgets/custom_dropdown_bottom_widget.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/header_not_details_stage_widget.dart';
 
@@ -52,5 +74,5 @@ export 'package:biblia_palabra_de_vida_app/widgets/card_aventure_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/audio_player_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/head_score_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/build_error_widget.dart';
-
+export 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 

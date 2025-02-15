@@ -1,0 +1,268 @@
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:intl/intl.dart';
+
+class PersonalInfoStep extends StatefulWidget {
+  final TextEditingController nameController;
+  final TextEditingController lastNameController;
+  final TextEditingController dateController;
+  final String gender;
+  final bool isBaptized;
+  final DateTime? selectedDate;
+  final ValueChanged<DateTime?> onDateSelected;
+  final List<ModelData> dropDownList;
+  final ModelData? selectedData;
+  final Country? selectedCountry;
+  final ValueChanged<ModelData?> onCountrySelected;
+  final TextEditingController prefixNumberController;
+  final TextEditingController phoneNumberController;
+  final void Function(String?)? onChangeGender;
+  final void Function(bool?)? onChangeBaptized;
+
+  const PersonalInfoStep({
+    Key? key,
+    required this.nameController,
+    required this.lastNameController,
+    required this.dateController,
+    required this.gender,
+    required this.isBaptized,
+    required this.selectedDate,
+    required this.onDateSelected,
+    required this.dropDownList,
+    required this.selectedData,
+    required this.selectedCountry,
+    required this.onCountrySelected,
+    required this.prefixNumberController,
+    required this.phoneNumberController,
+    this.onChangeGender,
+    this.onChangeBaptized,
+  }) : super(key: key);
+
+  @override
+  State<PersonalInfoStep> createState() => _PersonalInfoStepState();
+}
+
+class _PersonalInfoStepState extends State<PersonalInfoStep> {
+  Future<void> _selectDate(BuildContext context) async {
+    final DateFormat formatter = DateFormat.yMd('es_ES');
+    final DateTime now = DateTime.now();
+
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: widget.selectedDate ?? now,
+        firstDate: DateTime(1951),
+        lastDate: now,
+        locale: const Locale('es', 'ES'),
+        builder: (BuildContext context, Widget? child) {
+          return Theme(
+            data: ThemeData.light().copyWith(
+              primaryColor: const Color(0Xff12CBC4),
+              colorScheme: ColorScheme.light(primary: const Color(0Xff12CBC4)),
+              buttonTheme:
+                  const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+            ),
+            child: child!,
+          );
+        });
+    if (picked != null && picked != widget.selectedDate) {
+      widget.onDateSelected(picked);
+      widget.dateController.text = formatter.format(picked);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        child: TextFormField(
+          controller: widget.nameController,
+          decoration: StylesApp(context)
+              .inputDecorationOutlineStyle
+              .copyWith(hintText: "Nombre"),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return "El Nombre es obligatorio";
+            }
+            return null;
+          },
+        ),
+      ),
+      const SizedBox(
+        height: 23.0,
+      ),
+      Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        child: TextFormField(
+          controller: widget.lastNameController,
+          decoration: StylesApp(context)
+              .inputDecorationOutlineStyle
+              .copyWith(hintText: "Apellido"),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return "El Apellido es obligatorio";
+            }
+            return null;
+          },
+        ),
+      ),
+      const SizedBox(
+        height: 23.0,
+      ),
+      Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.black),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8)),
+        child: RadioButtonWidget<String>(
+            label: "Género:",
+            value: widget.gender,
+            onChanged: (newValue) => widget.onChangeGender!(newValue),
+            options: [
+              RadioButtonOption(value: "m", label: "Masculino"),
+              RadioButtonOption(value: "f", label: "Femenino")
+            ]),
+      ),
+      const SizedBox(
+        height: 23.0,
+      ),
+      Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        child: 
+        DatePickerFormField(
+        initialDate: DateTime.now().subtract(Duration(days: 15 * 365)),
+        onChanged: (value) {
+          widget.dateController.text = value;
+        },
+      )
+        // TextFormField(
+        //   controller: widget.dateController,
+        //   readOnly: true,
+        //   onTap: () => _selectDate(context),
+        //   decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
+        //         hintText: "Fecha de nacimiento",
+        //         suffixIcon: const Icon(Icons.calendar_today),
+        //       ),
+        //   validator: (value) {
+        //     if (value == null || value.isEmpty) {
+        //       return "La Fecha de nacimiento es obligatoria";
+        //     }
+        //     return null;
+        //   },
+        // ),
+      ),
+      const SizedBox(
+        height: 23.0,
+      ),
+      Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.black),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8)),
+        child: RadioButtonWidget<bool>(
+            // Ejemplo con opciones de tipo String
+            label: "Bautizado:",
+            value: widget.isBaptized,
+            onChanged: (newValue) => widget.onChangeBaptized!(newValue!),
+            options: [
+              RadioButtonOption(value: true, label: "Si"),
+              RadioButtonOption(value: false, label: "No")
+            ]),
+      ),
+      const SizedBox(
+        height: 23.0,
+      ),
+      Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        child: CustomDropdownBottomWidget<Country>(
+          hintText: "Seleccione un país",
+          items: widget.dropDownList,
+          onChanged: widget.onCountrySelected,
+          selectedItem: widget.selectedData,
+        ),
+      ),
+      const SizedBox(
+        height: 23.0,
+      ),
+      Container(
+        constraints: BoxConstraints(
+          minWidth: 160.0,
+          maxWidth: StylesApp(context).sizeTextFormField.width,
+        ),
+        child: Row(
+          children: [
+            // Campo del código del país
+            Flexible(
+              flex: 2,
+              child: TextFormField(
+                controller: widget.prefixNumberController,
+                enabled: false, // Deshabilitado para que no pueda ser editado
+                decoration:
+                    StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                          filled: true,
+                        ),
+                style: const TextStyle(fontSize: 16),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Por favor, ingresa tu número de teléfono.";
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 10), // Espaciado entre los campos
+            // Campo del número de teléfono
+            Flexible(
+              flex: 8,
+              child: TextFormField(
+                controller: widget.phoneNumberController,
+                keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  maskFormatterTel, // Permite solo números
+                ],
+                decoration:
+                    StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                          hintText: "Número de teléfono",
+                        ),
+                style: const TextStyle(fontSize: 16),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Por favor, ingresa tu número de teléfono.";
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(
+        height: 41,
+      ),
+    ]);
+  }
+}

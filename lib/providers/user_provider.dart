@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:flutter/material.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
@@ -12,8 +13,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserProvider extends ChangeNotifier {
   late GraphQLClient _client;
   LoginUser? _user;
-
+  LastProgressUser? _progressUser;
   LoginUser? get currentUser => _user;
+
+  LastProgressUser? get progressUser => _progressUser;
 
   UserProvider() {
     _initializeClient();
@@ -28,7 +31,15 @@ class UserProvider extends ChangeNotifier {
   void setUser(LoginUser? user) {
     _user = user;
     // actualizamos localStorage
-    updateStorage(_user);
+    if (_user != null) {
+      updateStorage(_user);
+    }
+    notifyListeners();
+  }
+
+  void setProgressUser(LastProgressUser? progress) {
+    _progressUser = progress;
+    // actualizamos localStorage
     notifyListeners();
   }
 
@@ -215,5 +226,23 @@ class UserProvider extends ChangeNotifier {
             error: "An unexpected error occurred: $e"); // Generic error
       }
     }
+  }
+
+  Future<LastProgressUser?> getProgressUser(userId, courseId) async {
+    LastProgressUser? userProgress;
+    final progress = await getLastProgressUser(userId, courseId);
+    if (progress.error != null) {
+      print(progress.error);
+      userProgress = progress.data;
+    }
+
+    if (progress.data['data'] != null) {
+      userProgress = LastProgressUser.fromMap(progress.data['data']);
+    } else {
+      userProgress = null;
+    }
+
+    setProgressUser(userProgress);
+    return userProgress;
   }
 }

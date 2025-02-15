@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
@@ -20,7 +21,7 @@ class WorkspaceScreen extends StatefulWidget {
 class _WorkspaceScreenState extends State<WorkspaceScreen> {
   LoginUser? dataUser;
   late final catalogueProvider;
-
+  LastProgressUser? progressUser = null;
   // @override
   // void didChangeDependencies() {
   //   super.didChangeDependencies();
@@ -34,12 +35,23 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeCatalogues();
+    // _initializeCatalogues();
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    final userProvider = Provider.of<UserProvider>(context,
+        listen:
+            false); // listen: false para evitar reconstrucciones innecesarias
+    dataUser = userProvider.currentUser;
+    progressUser = await userProvider.getProgressUser(
+        dataUser?.user.id, null); // Espera el resultado del Future
+    setState(() {}); // Fuerza una reconstrucción para mostrar los datos
   }
 
   void _initializeCatalogues() async {
     catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
-    catalogueProvider.init();
+    catalogueProvider._initialize();
   }
 
   List<ButtonData> buttonsData = [
@@ -178,7 +190,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, card['route']!),
+        onTap: () async {
+          if (progressUser != null) {
+            Navigator.pushNamed(context, '/mapPage', arguments: {
+              'courseId': progressUser!.courseId,
+              'sectionId': progressUser!.sectionId
+            });
+          } else {
+            Navigator.pushNamed(context, card['route']!);
+          }
+        },
         child: Column(
           children: [
             Container(
@@ -500,7 +521,7 @@ _buildPositionSection(BuildContext context, userData) {
                                 backgroundImage: NetworkImage((userData !=
                                             null &&
                                         userData.imgProfileUser != '')
-                                    ?  "${GraphQLConfig.urlServidor}${userData.imgProfileUser}"
+                                    ? "${GraphQLConfig.urlServidor}${userData.imgProfileUser}"
                                     : 'assets/no-image.jpg'),
                               ),
                             ),
@@ -524,7 +545,7 @@ _buildPositionSection(BuildContext context, userData) {
                             child: Center(
                               child: Text(
                                 textAlign: TextAlign.center,
-                                "${userData.league != null ? userData.league.leagueName : ''}",
+                                "${userData?.league != null ? userData.league.leagueName : ''}",
                                 style: StylesApp(context)
                                     .textStyleBody6
                                     .copyWith(color: Colors.white),

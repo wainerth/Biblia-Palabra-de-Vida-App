@@ -13,7 +13,7 @@ class ButtonThemeWidget extends StatelessWidget {
   final String image;
   final Color colorIcon;
   final bool textCenter;
-
+  final bool loading;
   const ButtonThemeWidget({
     super.key,
     this.onPressed,
@@ -27,7 +27,8 @@ class ButtonThemeWidget extends StatelessWidget {
     this.colorIcon = Colors.black,
     this.textCenter = false,
     this.textWithImage = false,
-    this.image = ''
+    this.image = '',
+    this.loading = false
   }) : assert(!textWithImage || text != null, 'Text is required when textWithImage is true');
 
   @override
@@ -64,7 +65,7 @@ class ButtonThemeWidget extends StatelessWidget {
                 ],
               ))
           : TextButton(
-              onPressed: onPressed,
+              onPressed: loading ? null : onPressed,
               style: buttonStyle,
               child: text != null
                   ? Text(

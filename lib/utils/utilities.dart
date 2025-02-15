@@ -1,4 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
@@ -44,14 +46,12 @@ var maskFormatterEmail = MaskTextInputFormatter(
 getIsBaptized(value) {
   return value ? "Bautizado" : "No Bautizado";
 }
-getGender(){
-  
-}
+
+getGender() {}
 
 UserChurch? getChurchActive(churches) {
   if (churches.isNotEmpty) {
-    var church = churches.firstWhere((UserChurch element) => 
-    element.status);
+    var church = churches.firstWhere((UserChurch element) => element.status);
     if (church != null) {
       return church;
     } else {
@@ -62,3 +62,77 @@ UserChurch? getChurchActive(churches) {
   }
 }
 
+UpdateDataProfile updateFromModelData(UpdateDataProfile dataToSend,
+    List<ModelData> data, List<Country> countries, List<Church> churches) {
+  var datos = dataToSend;
+
+  var nuevosDatos = {};
+  for (var item in data) {
+    switch (item.clave) {
+      case 'lastname':
+        nuevosDatos["lastname"] = item.value as String?;
+        break;
+      case 'name':
+        nuevosDatos["name"] = item.value as String?;
+        break;
+      case 'birthdate':
+        nuevosDatos["birthdate"] = item.value as String?;
+        break;
+      case 'identifier':
+        nuevosDatos["identifier"] = item.value as String?;
+        break;
+      case 'phoneNumber':
+        nuevosDatos["phoneNumber"] = item.value as String?;
+        break;
+      case 'country':
+        if (item.value.isNotEmpty) {
+          Country? cont =
+              countries.firstWhere((country) => country.country == item.value);
+          nuevosDatos["country"] = cont;
+        } else {
+          nuevosDatos["country"] = null;
+        }
+
+        break;
+      case 'city':
+        nuevosDatos["city"] = item.value as String?;
+        break;
+      case 'gender':
+        nuevosDatos["gender"] = item.value as String?;
+        break;
+      case 'isBaptized':
+        nuevosDatos["isBaptized"] = item.value == 'Bautizado' ? true : false;
+        break;
+      case 'church':
+        var church = churches.firstWhere((church) => church.name == item.value);
+        nuevosDatos["church"] =
+            UserChurch(id: church.id, name: church.name, status: church.status);
+        break;
+    }
+
+    datos = datos.copyWith(
+      name: nuevosDatos["name"] ?? datos.name,
+      lastname: nuevosDatos["lastname"] ?? datos.lastname,
+      birthdate: nuevosDatos["birthdate"] ?? datos.birthdate,
+      identifier: nuevosDatos["identifier"] ?? datos.identifier,
+      phoneNumber: nuevosDatos["phoneNumber"] ?? datos.phoneNumber,
+      country: nuevosDatos["country"] ?? datos.country,
+      city: nuevosDatos["city"] ?? datos.city,
+      gender: nuevosDatos["gender"] ?? datos.gender,
+      isBaptized: nuevosDatos["isBaptized"] ?? datos.isBaptized,
+      church: nuevosDatos["church"] ?? datos.church,
+    );
+  }
+  print(datos);
+  return datos;
+}
+
+Future<void> showCustomDialog(BuildContext context,
+    {required String message, required DialogType dialogType}) async {
+  await showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CustomDialog(message: message, dialogType: dialogType);
+    },
+  );
+}

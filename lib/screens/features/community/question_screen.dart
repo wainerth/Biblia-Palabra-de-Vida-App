@@ -1,7 +1,11 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
@@ -11,294 +15,129 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
+  static const MAX_SCORE = 150;
+  static const MEDIUM_SCORE = 100;
+  static const LOOW_SCORE = 50;
+  LoginUser? userData;
   int currentIndex = 0;
   bool showError = false;
   bool suggestionSelected = false;
   var selectedOption;
+  bool isLoading = true;
+  String? errorMessage;
+  Stage? stage;
+  Level? level;
   late Question currentQuestion;
   List currentAnswers = [];
 
-  Stage stage = Stage(
-      id: "1",
-      sectionName: "Genesis",
-      introduction:
-          "¿Te gustaría conocer el origen de todo lo que existe, desde el universo hasta la humanidad? En Génesis encontrarás relatos fascinantes sobre la creación, el diluvio, la torre de Babel, la llamada de Abraham, el sacrificio de Isaac, la traición de Jacob, el sueño de José, y mucho más. También se demuestra el carácter de Dios, su amor, su justicia, su fidelidad y su poder. Este es solo el comienzo de grandes historias que continúan en el resto de la Biblia y que te motiva a ser parte de ella. Te invito a leerlo y a descubrir cómo Dios te habla a través de su palabra, ¿Estás listo?",
-      unLockSection: true,
-      orderCard: 1,
-      color: "3ae4e4",
-      img: Img(urlImg: "assets/assetStories.png"),
-      levelCount: 12,
-      levelCompletedCount: 0,
-      status: 1);
-  Level level = Level(
-    id: "1",
-    name: "La creación",
-    unLockLevel: true,
-    color: "3ae4e4",
-    section: Section(sectionName: "Genesis"),
-    img: Img(urlImg: "assets/level.png"),
-  );
-
-  // Question By level
-  List<Question> questions = [
-    {
-      "id": "2",
-      "question": "¿Qué hizo Dios en el primer día de la creación?",
-      "difficulty": "I",
-      "level": {"levelNumber": 1},
-      "status": 1,
-      "answers": [
-        {
-          "id": "8",
-          "answer": "Creó las plantas y los árboles",
-          "isCorrect": false,
-          "questionId": "2",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 2,
-          "status": 1
-        },
-        {
-          "id": "6",
-          "answer": "Creó la luz y la separó de la oscuridad",
-          "isCorrect": true,
-          "questionId": "2",
-          "scoreForAnswer": 7,
-          "orderInAnswer": 4,
-          "status": 1
-        },
-        {
-          "id": "5",
-          "answer": "Creó el cielo y la tierra",
-          "isCorrect": false,
-          "questionId": "2",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 1,
-          "status": 1
-        },
-        {
-          "id": "7",
-          "answer": "Creó el sol, la luna y las estrellas",
-          "isCorrect": false,
-          "questionId": "2",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 3,
-          "status": 1
-        }
-      ]
-    },
-    {
-      "id": "5",
-      "question":
-          "¿Qué tipo de vida creó Dios en el quinto día de su creación?",
-      "difficulty": "I",
-      "level": {"levelNumber": 1},
-      "status": 1,
-      "answers": [
-        {
-          "id": "19",
-          "answer": "Plantas, arbustos y árboles",
-          "isCorrect": false,
-          "questionId": "5",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 4,
-          "status": 1
-        },
-        {
-          "id": "20",
-          "answer": "Ángeles y demonios",
-          "isCorrect": false,
-          "questionId": "5",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 1,
-          "status": 1
-        },
-        {
-          "id": "17",
-          "answer": "Especies marinas y aves",
-          "isCorrect": true,
-          "questionId": "5",
-          "scoreForAnswer": 7,
-          "orderInAnswer": 3,
-          "status": 1
-        },
-        {
-          "id": "18",
-          "answer": "Animales terrestres y humanos",
-          "isCorrect": false,
-          "questionId": "5",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 2,
-          "status": 1
-        }
-      ]
-    },
-    {
-      "id": "3",
-      "question":
-          "¿Qué nombre le dio Dios a la expansión que separó las aguas en el segundo día? ",
-      "difficulty": "D",
-      "level": {"levelNumber": 1},
-      "status": 1,
-      "answers": [
-        {
-          "id": "12",
-          "answer": "Nube",
-          "isCorrect": false,
-          "questionId": "3",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 1,
-          "status": 1
-        },
-        {
-          "id": "9",
-          "answer": "Mar",
-          "isCorrect": false,
-          "questionId": "3",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 2,
-          "status": 1
-        },
-        {
-          "id": "10",
-          "answer": "Aire",
-          "isCorrect": false,
-          "questionId": "3",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 3,
-          "status": 1
-        },
-        {
-          "id": "11",
-          "answer": "Cielo",
-          "isCorrect": true,
-          "questionId": "3",
-          "scoreForAnswer": 8,
-          "orderInAnswer": 4,
-          "status": 1
-        }
-      ]
-    },
-    {
-      "id": "4",
-      "question":
-          "¿Qué hizo Dios en el séptimo día después de terminar su obra? ",
-      "difficulty": "F",
-      "level": {"levelNumber": 1},
-      "status": 1,
-      "answers": [
-        {
-          "id": "14",
-          "answer": "Se puso a jugar con sus criaturas",
-          "isCorrect": false,
-          "questionId": "4",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 1,
-          "status": 1
-        },
-        {
-          "id": "13",
-          "answer": "Se fue a otro planeta",
-          "isCorrect": false,
-          "questionId": "4",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 2,
-          "status": 1
-        },
-        {
-          "id": "15",
-          "answer": "Descansó y santificó el día",
-          "isCorrect": true,
-          "questionId": "4",
-          "scoreForAnswer": 6,
-          "orderInAnswer": 3,
-          "status": 1
-        },
-        {
-          "id": "16",
-          "answer": "Se arrepintió de lo que había hecho",
-          "isCorrect": false,
-          "questionId": "4",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 4,
-          "status": 1
-        }
-      ]
-    },
-    {
-      "id": "1",
-      "question":
-          "¿Qué día de la creación Dios hizo al hombre a su imagen y semejanza?",
-      "difficulty": "F",
-      "level": {"levelNumber": 1},
-      "status": 1,
-      "answers": [
-        {
-          "id": "3",
-          "answer": "El quinto",
-          "isCorrect": false,
-          "questionId": "1",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 1,
-          "status": 1
-        },
-        {
-          "id": "1",
-          "answer": "El primero",
-          "isCorrect": false,
-          "questionId": "1",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 2,
-          "status": 1
-        },
-        {
-          "id": "2",
-          "answer": "El tercero",
-          "isCorrect": false,
-          "questionId": "1",
-          "scoreForAnswer": 0,
-          "orderInAnswer": 3,
-          "status": 1
-        },
-        {
-          "id": "4",
-          "answer": "El sexto",
-          "isCorrect": true,
-          "questionId": "1",
-          "scoreForAnswer": 6,
-          "orderInAnswer": 4,
-          "status": 1
-        }
-      ]
-    }
-  ].map((questionJson) => Question.fromJson(questionJson)).toList();
+  List<Question> questions = [];
   final options = [
     {"option": "A", "color": "A8A1E7"},
     {"option": "B", "color": "C3F0F9"},
     {"option": "C", "color": "E1D8D8"},
     {"option": "D", "color": "A8B9F1"}
   ];
+  int failedAttempts = 0;
   double score = 0;
   bool _isAnswerSelected = false;
   int _selectedAnswerIndex = -1;
+  bool isOrdering = false;
+  List<UserResponses>? responses = [];
   String imgBack = "";
+
+//draggable variables
+  bool orderedCompleted = false;
+  List<Answer> orderedAnswers = [];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generateData(context);
+    });
+  }
+
+  Future<void> _generateData(BuildContext context) async {
+    LoadingService().showLoading(context);
+
+    final Map<String, dynamic>? args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    if (args != null) {
+      try {
+        final String levelId = args['levelId'];
+        final String sectionId = args['sectionId'];
+        setState(() {});
+
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        // obtenemos sección
+        final ResponseData stageResponse = await loadStageById(levelId);
+
+        if (stageResponse.error != null) {
+          errorMessage = stageResponse.error;
+        }
+        stage = Stage.fromJson(stageResponse.data);
+        // obtenemos el nivel
+        final levelResponse = await loadOneLevel(levelId);
+
+        if (levelResponse.error != null) {
+          errorMessage = levelResponse.error;
+        }
+        level = Level.fromJson(levelResponse.data);
+
+        // obtenemos las preguntas
+        final ResponseData questionResponse =
+            await loadQuestionByStory(levelId);
+
+        if (questionResponse.error != null) {
+          errorMessage = questionResponse.error;
+        }
+        setState(() {
+          questions = questionResponse.data
+              .map((question) => Question.fromJson(removeTypename(question)))
+              .cast<Question>()
+              .toList();
+
+          currentQuestion = questions[currentIndex];
+          currentAnswers = questions[currentIndex].answers;
+          for (int i = 0; i < currentAnswers.length; i++) {
+            currentAnswers[i].option = options[i]["option"];
+          }
+        });
+      } catch (e) {
+        errorMessage = "An error occurred: $e";
+      } finally {
+        LoadingService().hideLoading();
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   void _answerSelected(BuildContext context, int index) {
     setState(() {
       _isAnswerSelected = true;
       _selectedAnswerIndex = index;
     });
-
     bool isCorrect = currentAnswers[index].isCorrect;
+    responses!.add(UserResponses(
+      answerId: currentAnswers[index].id,
+      questionId: currentQuestion.id,
+      userId: userData!.user.id,
+    ));
+
     if (!isCorrect) {
       setState(() {
         suggestionSelected = true;
+
+        failedAttempts += 1;
       });
     } else {
       setState(() {
-        score += 30;
         suggestionSelected = false;
       });
     }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: Duration(hours: 24),
@@ -319,20 +158,57 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ],
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                setState(() {
-                  if (currentIndex < questions.length - 1) {
+                // setState(() async {
+                if (currentIndex < questions.length - 1) {
+                  setState(() {
                     currentIndex++;
                     currentQuestion = questions[currentIndex];
                     currentAnswers = currentQuestion.answers;
-                  } else {
-                    _showDialog(context);
+                  });
+                } else {
+                  //llamamos servicio de respuestas
+                  print("paso por aquí");
+                  final ResponseData responseSendResponses =
+                      await sendResponsesUser(responses!);
+                  if (responseSendResponses.error != null) {
+                    await showCustomDialog(context,
+                        message: responseSendResponses.error!,
+                        dialogType: DialogType.error);
                   }
+                  // lamamos al servicios que nos registra el score
+                  final ResponseData sendScoreResponse = await sendScoreUser(
+                      userData!.user.id, level!.id, failedAttempts);
+                  if (sendScoreResponse.error != null) {
+                    await showCustomDialog(context,
+                        message: sendScoreResponse.error!,
+                        dialogType: DialogType.error);
+                  }
+                  bool isLastLevel = sendScoreResponse.data['isLastLevel'];
+                  if (isLastLevel) {
+                    // mostrar modal de seccion completada
+                  } else {
+                    // consultamos ultimo progreso en el nivel
+                    final ResponseData progressLevelResponse =
+                        await lastLevelProgressUser(
+                            userData!.user.id, level!.id);
+                    if (progressLevelResponse.error != null) {
+                      await showCustomDialog(context,
+                          message: progressLevelResponse.error!,
+                          dialogType: DialogType.error);
+                    }
+                    final data =
+                        LevelProgressUser.fromJson(progressLevelResponse.data);
+                    _showDialog(context, data);
+                  }
+                }
+                setState(() {
                   _isAnswerSelected = false;
                   suggestionSelected = false;
                   _selectedAnswerIndex = -1;
                 });
+                // });
               },
               child: Text(
                 'Siguiente',
@@ -363,192 +239,222 @@ class _QuestionScreenState extends State<QuestionScreen> {
     });
   }
 
+  void verifyOrdered(BuildContext context, int index) {
+    bool isCorrectOrder = true;
+    for (int i = 0; i < orderedAnswers.length; i++) {
+      if (orderedAnswers[i].orderInAnswer != i + 1) {
+        isCorrectOrder = false;
+        break;
+      }
+    }
+
+    if (isCorrectOrder) {
+      score += 30;
+      showError = false;
+    } else {
+      showError = true;
+    }
+    setState(() {
+      orderedCompleted = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    currentQuestion = questions[currentIndex];
-    currentAnswers = questions[currentIndex].answers;
-    for (int i = 0; i < currentAnswers.length; i++) {
-      currentAnswers[i].option = options[i]["option"];
-    }
+    userData = Provider.of<UserProvider>(context, listen: false).currentUser;
     return Scaffold(
       body: SafeArea(
         child: SizedBox(
           height: MediaQuery.sizeOf(context).height,
           child: Column(
             children: [
-              Column(
-                children: [
-                  HeaderNotDetailsStageWidget(
-                    title: "Conoce el Antiguo Testamento",
-                    stage: stage.id,
-                    subtitle: stage.sectionName,
-                    details: stage,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                    width: double.infinity,
-                    height: 25.0,
-                    decoration: BoxDecoration(
-                        color: StyleColor.orange,
-                        borderRadius: BorderRadius.circular(8.0)),
-                    child: Text(
-                      "Paso 1 ${level.name}",
-                      style: StylesApp(context).textStyleBody5,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 19.0,
-                  ),
-                  Container(
-                    constraints: BoxConstraints(minHeight: 68.0),
-                    margin: EdgeInsets.symmetric(horizontal: 6.0),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 11.0, vertical: 15.0),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Color(0XFFFFBB00),
-                      borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withValues(alpha: .25),
-                            offset: Offset(0.0, 4.0),
-                            blurStyle: BlurStyle.outer,
-                            blurRadius: 4.0)
-                      ],
-                    ),
-                    child: Text(
-                      currentQuestion.question,
-                      style: StylesApp(context)
-                          .textStyleBody12
-                          .copyWith(color: Colors.black),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 38.0,
-                  ),
-                ],
-              ),
-              // we show  question and answer
-              Expanded(
-                flex: 3,
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0),
-                  child: ListView.builder(
-                    itemCount: currentQuestion.answers.length,
-                    itemBuilder: (context, int index) {
-                      currentAnswers = currentQuestion.answers;
-                      final answer = currentAnswers[index];
-                      return GestureDetector(
-                        onTap: _isAnswerSelected
-                            ? null
-                            : () {
-                                _answerSelected(context, index);
-                              },
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 27.0),
-                          constraints: BoxConstraints(minHeight: 48.0),
-                          decoration: BoxDecoration(
-                            color: suggestionSelected && answer.isCorrect
-                                ? Colors.green
-                                : _isAnswerSelected
-                                    ? StyleColor.turquoise
-                                        .withValues(alpha: 0.30)
-                                    : StyleColor.turquoise,
-                            borderRadius: BorderRadius.circular(8.0),
-                            border: _selectedAnswerIndex == index &&
-                                    !answer.isCorrect
-                                ? Border.all(
-                                    color: Colors.redAccent, width: 3.0)
-                                : null,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.25),
-                                offset: Offset(0.0, 4.0),
-                                blurStyle: BlurStyle.inner,
-                                blurRadius: 4.0,
-                              )
-                            ],
-                          ),
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  flex: 0,
-                                  child: Container(
-                                    width: 32.0,
-                                    height: 32.0,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(32.0),
-                                      color: Color(
-                                        int.parse(
-                                            '0xFF${options[index]["color"]}'),
-                                      ),
-                                    ),
-                                    child: Center(
-                                        child: Text(
-                                      currentQuestion.answers[index].option!,
-                                      style: StylesApp(context)
-                                          .textStyleBody12
-                                          .copyWith(color: Colors.black),
-                                    )),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: Text(
-                                      textAlign: TextAlign.center,
-                                      currentQuestion.answers[index].answer,
-                                      style: StylesApp(context).textStyleBody12,
-                                    ),
-                                  ),
-                                ), // Display the answer text
-                              ],
-                            ),
-                          ),
+              if (isLoading) ...{
+                Container()
+              } else ...{
+                if (errorMessage != null) ...{
+                  BuildErrorWidget(
+                    errorMessage: errorMessage!,
+                    onRetry: () async => _generateData(context),
+                    onBack: () => Navigator.pop(context),
+                  )
+                } else ...{
+                  Column(
+                    children: <Widget>[
+                      HeaderNotDetailsStageWidget(
+                        title: "Conoce el Antiguo Testamento",
+                        stage: stage!.id,
+                        subtitle: stage!.sectionName,
+                        details: stage,
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      Container(
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                        width: double.infinity,
+                        height: 25.0,
+                        decoration: BoxDecoration(
+                            color: StyleColor.orange,
+                            borderRadius: BorderRadius.circular(8.0)),
+                        child: Text(
+                          "Paso 1 ${level!.name}",
+                          style: StylesApp(context).textStyleBody5,
                         ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 47.0,
-              ),
-              Expanded(
-                flex: 1,
-                child: Center(
-                  child: Container(
-                    constraints: BoxConstraints(maxWidth: 278.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          "${currentIndex + 1}/${currentAnswers.length}",
+                      ),
+                      SizedBox(
+                        height: 19.0,
+                      ),
+                      Container(
+                        constraints: BoxConstraints(minHeight: 68.0),
+                        margin: EdgeInsets.symmetric(horizontal: 6.0),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 11.0, vertical: 15.0),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color(0XFFFFBB00),
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withValues(alpha: .25),
+                                offset: Offset(0.0, 4.0),
+                                blurStyle: BlurStyle.outer,
+                                blurRadius: 4.0)
+                          ],
+                        ),
+                        child: Text(
+                          currentQuestion.question,
                           style: StylesApp(context)
                               .textStyleBody12
                               .copyWith(color: Colors.black),
                         ),
-                        LinearProgressIndicator(
-                          borderRadius: BorderRadius.circular(6.0),
-                          minHeight: 14.0,
-                          value: currentIndex / (currentAnswers.length - 1),
-                          backgroundColor: Color(0xFFC4C4C4),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0XFFF27728),
+                      ),
+                      SizedBox(
+                        height: 38.0,
+                      ),
+                    ],
+                  ),
+                  // we show  question and answer or ordering
+                  Expanded(
+                    flex: isOrdering ? 3 : 2,
+                    child: Column(
+                      children: [
+                        if (!isOrdering) ...{
+                          OrderingQuestionDraggableWidget(
+                            orderedCompleted: orderedCompleted,
+                            orderedAnswers: orderedAnswers,
+                            currentQuestion: currentQuestion,
+                            options: options,
+                            answerSelected: (context, index) {
+                              verifyOrdered(context, index);
+                            },
+                            showError: showError,
+                            onContinue: () async {
+                              if (currentIndex < questions.length - 1) {
+                                setState(() {
+                                  currentIndex++;
+                                  orderedCompleted = false;
+                                  currentQuestion = questions[currentIndex];
+                                  orderedAnswers.clear();
+                                });
+                              } else {
+                                //llamamos servicio de respuestas
+                                print("paso por aquí");
+                                final ResponseData responseSendResponses =
+                                    await sendResponsesUser(responses!);
+                                if (responseSendResponses.error != null) {
+                                  await showCustomDialog(context,
+                                      message: responseSendResponses.error!,
+                                      dialogType: DialogType.error);
+                                }
+                                // lamamos al servicios que nos registra el score
+                                final ResponseData sendScoreResponse =
+                                    await sendScoreUser(userData!.user.id,
+                                        level!.id, failedAttempts);
+                                if (sendScoreResponse.error != null) {
+                                  await showCustomDialog(context,
+                                      message: sendScoreResponse.error!,
+                                      dialogType: DialogType.error);
+                                }
+                                bool isLastLevel =
+                                    sendScoreResponse.data['isLastLevel'];
+                                if (isLastLevel) {
+                                  // mostrar modal de seccion completada
+                                } else {
+                                  // consultamos ultimo progreso en el nivel
+                                  final ResponseData progressLevelResponse =
+                                      await lastLevelProgressUser(
+                                          userData!.user.id, level!.id);
+                                  if (progressLevelResponse.error != null) {
+                                    await showCustomDialog(context,
+                                        message: progressLevelResponse.error!,
+                                        dialogType: DialogType.error);
+                                  }
+                                  final data = LevelProgressUser.fromJson(
+                                      progressLevelResponse.data);
+                                  _showDialog(context, data);
+                                }
+                              }
+                              setState(() {
+                                _isAnswerSelected = false;
+                                suggestionSelected = false;
+                                _selectedAnswerIndex = -1;
+                              });
+                            },
+                          )
+                        } else ...{
+                          Expanded(
+                            flex: 3,
+                            child: SelectionQuestionWidget(
+                              currentQuestion: currentQuestion,
+                              options: options,
+                              answerSelected: (context, index) {
+                                _answerSelected(context, index);
+                              },
+                            ),
                           ),
+                        },
+                        SizedBox(
+                          height: 47.0,
                         ),
                       ],
                     ),
                   ),
-                ),
-              ),
+                  Expanded(
+                    flex: isOrdering ? 1 : 0,
+                    child: Center(
+                      child: Container(
+                        constraints: BoxConstraints(maxWidth: 278.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              "${currentIndex + 1}/${currentAnswers.length}",
+                              style: StylesApp(context)
+                                  .textStyleBody12
+                                  .copyWith(color: Colors.black),
+                            ),
+                            LinearProgressIndicator(
+                              borderRadius: BorderRadius.circular(6.0),
+                              minHeight: 14.0,
+                              value: currentIndex / (currentAnswers.length - 1),
+                              backgroundColor: Color(0xFFC4C4C4),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0XFFF27728),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (!isOrdering)
+                    SizedBox(
+                      height: 20,
+                    )
+                },
+              },
             ],
           ),
         ),
@@ -556,16 +462,16 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  _showDialog(BuildContext context) {
-    if (score > 100) {
+  _showDialog(BuildContext context, LevelProgressUser data) {
+    if (data.score > MEDIUM_SCORE) {
       setState(() {
         imgBack = "assets/boxStartFull.png";
       });
-    } else if (score < 100 && score > 50) {
+    } else if (data.score < MEDIUM_SCORE && data.score > LOOW_SCORE) {
       setState(() {
         imgBack = "assets/boxStartMedium.png";
       });
-    } else if (score < 50 && score > 0) {
+    } else if (data.score < LOOW_SCORE && data.score > 0) {
       setState(() {
         imgBack = "assets/boxStartLow.png";
       });
@@ -599,11 +505,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
-                      height: score > 0 ? 100 : 33.0,
+                      height: data.score > 0 ? 100 : 33.0,
                     ),
                     Text(
                       textAlign: TextAlign.center,
-                      score > 0 ? 'Felicitaciones' : "Ya casi lo\n logras! ",
+                      data.message.resultTitle,
+                      // data['score'] > 0 ? 'Felicitaciones' : "Ya casi lo\n logras! ",
                       style: StylesApp(context)
                           .textStyleCongratulation
                           .copyWith(color: Colors.white),
@@ -614,8 +521,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     Text(
                       textAlign: TextAlign.center,
                       score > 0
-                          ? 'Culminaste el Paso ${level.id}'
-                          : "Intenta nuevamente el\n Paso ${level.id} para avanzar",
+                          ? 'Culminaste el Paso ${data.level.id}'
+                          : "Intenta nuevamente el\n Paso ${data.level.id} para avanzar",
                       style: StylesApp(context).textStyleWithe20,
                     ),
                     if (score > 0) ...{
@@ -624,7 +531,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       ),
                       Text(
                         textAlign: TextAlign.center,
-                        'Haz ganado\n $score LMs de energía',
+                        'Haz ganado\n ${data.score} LMs de energía',
                         style: StylesApp(context).textStyleWithe20,
                       ),
                     },
@@ -637,7 +544,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (score < 100 && score >= 0) ...{
+                  if (score < MEDIUM_SCORE && score >= LOOW_SCORE) ...{
                     SizedBox(
                       height: 23.0,
                     ),
@@ -688,7 +595,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     double maxPossibleHeight = score / 1000 * 112;
 
-    if (score >= 150) {
+    if (score >= MAX_SCORE) {
       return 112; // Alto fijo cuando los puntos son mayores o iguales a 1000
     } else {
       double width = ((maxPossibleHeight * 100)) / 112;
@@ -697,3 +604,5 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 }
+
+// widget de selección

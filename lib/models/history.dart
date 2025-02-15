@@ -9,6 +9,7 @@ class History {
   final Img img;
   final int status;
   final String? audioUrl;
+  final String? videoUrl;
 
   History({
     required this.id,
@@ -19,6 +20,7 @@ class History {
     required this.img,
     required this.status,
     this.audioUrl,
+    this.videoUrl,
   });
 
   factory History.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class History {
       img: Img.fromJson(json['img']),
       status: json['status'],
       audioUrl: json['audioUrl'],
+      videoUrl: json['videoUrl'],
     );
   }
 }
@@ -39,13 +42,11 @@ class IntermediateLevel {
   final int levelNumber;
   final bool unLockLevel;
   final int? countLevelNumber;
-  final int scoreForLevel;
 
   IntermediateLevel({
     required this.levelNumber,
     required this.unLockLevel,
     this.countLevelNumber,
-    required this.scoreForLevel,
   });
 
   factory IntermediateLevel.fromJson(Map<String, dynamic> json) {
@@ -53,7 +54,6 @@ class IntermediateLevel {
       levelNumber: json['levelNumber'],
       unLockLevel: json['unLockLevel'],
       countLevelNumber: json['countLevelNumber'],
-      scoreForLevel: json['scoreForLevel'],
     );
   }
 }

@@ -18,8 +18,7 @@ class _PageScreenState extends State<PageScreen> {
     PrayerScreen(),
     AudioScreen(),
     OfferingsScreen(),
-    // ContactScreen(),
-    ConfigScreen(),
+    SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {

@@ -6,11 +6,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CardAventureWidget extends StatelessWidget {
   final CourseModel course;
+  final bool loadingAction;
   final void Function() onTap;
   final void Function() goToMap;
   const CardAventureWidget({
     super.key,
     required this.course, required this.onTap, required this.goToMap,
+    this.loadingAction = false
   });
 
   @override
@@ -119,6 +121,7 @@ class CardAventureWidget extends StatelessWidget {
                 bottom: 6,
                 right: 0,
                 child: ButtonThemeWidget(
+                  loading: loadingAction,
                   onPressed: goToMap,
                   textStyle: StylesApp(context)
                       .chipLevels

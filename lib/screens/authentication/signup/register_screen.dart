@@ -1,11 +1,14 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
+import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'dart:convert';
+
+import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,10 +18,12 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  late final Provider catalogueProvider;
   int _currentStep = 0; // Controla el paso actual
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -33,20 +38,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _dateController = TextEditingController(text: "");
   bool _obscureTextPass = true;
   bool _obscureTextRepeat = true;
+  String setGender = '';
+  bool setIsBaptized = false;
   ModelData? _selectedData;
   Country? _selectedCountry;
   late List<Country> countries;
   late List<ModelData> dropDownList;
-  var maskFormatterTel = MaskTextInputFormatter(
-    mask: '### ###-##-##',
-    filter: {"#": RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
-  var maskFormatterEmail = MaskTextInputFormatter(
-    mask: '******@******.com',
-    filter: {"*": RegExp(r'[a-zA-Z0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
 
   // Método para validar campos obligatorios
   bool _validateStep() {
@@ -66,68 +63,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Método para registrar al usuario
-  void _register() {
-    if (_formKey.currentState?.validate() ?? false) {
-      if (kDebugMode) {
-        print("Registro completado");
-      }
-    }
-  }
 
   @override
   void initState() {
-    loadCountry();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadCountry(context);
+    });
   }
 
-  Future<void> loadCountry() async {
-    final String response =
-        await rootBundle.loadString('assets/json/countries.json');
-    final data = await json.decode(response);
+  Future<void> loadCountry(context) async {
+    final catalogueProvider =
+        Provider.of<CatalogueProvider>(context, listen: false);
 
     setState(() {
-      countries = (data as List).map((i) => Country.fromJson(i)).toList();
+      countries = (catalogueProvider.allCountries as List)
+          .map((i) => Country.fromJson(i.toJson()))
+          .toList();
       dropDownList = countries
           .map(
               (country) => ModelData(value: country.id, label: country.country))
           .cast<ModelData>()
           .toList();
     });
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    // final Locale locale = Localizations.localeOf(context);
-    final DateFormat formatter = DateFormat.yMd('es_ES'); //locale.languageCode;
-    final DateTime now = DateTime.now();
-
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: now,
-        firstDate: DateTime(1951),
-        lastDate: now,
-        locale: const Locale('es', 'ES'), // locale
-        builder: (BuildContext context, Widget? child) {
-          return Theme(
-            data: ThemeData.light().copyWith(
-              primaryColor: const Color(0Xff12CBC4),
-
-              colorScheme: ColorScheme.light(
-                  primary: const Color(
-                      0Xff12CBC4)), // Color del texto del encabezado
-              buttonTheme: const ButtonThemeData(
-                  textTheme:
-                      ButtonTextTheme.primary), // Color del texto del botón
-            ),
-            child: child!,
-          );
-        });
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _dateController.text = formatter
-            .format(picked); // DateFormat('dd/MM/yyyy').format(picked);
-      });
-    }
   }
 
   @override
@@ -166,313 +124,109 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Column(
                             children: [
                               if (_currentStep == 0) ...[
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
-                                  child: TextFormField(
-                                    controller: _userIdController,
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter
-                                          .digitsOnly, // Permite solo números
-                                    ],
-                                    decoration: StylesApp(context)
-                                        .inputDecorationOutlineStyle
-                                        .copyWith(
-                                          hintText: "Identificador de usuario",
-                                        ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "El identificador es obligatorio";
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 23.0,
-                                ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
-                                  child: TextFormField(
-                                    controller: _emailController,
-                                    keyboardType: TextInputType.emailAddress,
-                                    decoration: StylesApp(context)
-                                        .inputDecorationOutlineStyle
-                                        .copyWith(
-                                          hintText: "Correo electrónico",
-                                        ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "El correo es obligatorio";
-                                      }
-                                      final RegExp emailRegExp = RegExp(
-                                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+(.[a-zA-Z]+)?$");
-                                      if (!emailRegExp.hasMatch(value)) {
-                                        return 'Ingrese un correo electrónico válido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 23.0,
-                                ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
-                                  child: TextFormField(
-                                    controller: _passwordController,
-                                    obscureText: _obscureTextPass,
-                                    textAlignVertical: TextAlignVertical.center,
-                                    decoration: StylesApp(context)
-                                        .inputDecorationOutlineStyle
-                                        .copyWith(
-                                          hintText: "Contraseña",
-                                          suffixIcon: IconButton(
-                                            iconSize: 20,
-                                            padding: const EdgeInsets.all(0),
-                                            icon: Icon(
-                                              _obscureTextPass
-                                                  ? Icons.visibility
-                                                  : Icons.visibility_off,
-                                            ),
-                                            onPressed: () {
-                                              setState(() {
-                                                _obscureTextPass = !_obscureTextPass;
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "La contraseña es obligatoria";
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 23.0,
-                                ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
-                                  child: TextFormField(
-                                    controller: _confirmPasswordController,
-                                    obscureText: _obscureTextRepeat,
-                                    textAlignVertical: TextAlignVertical.center,
-                                    decoration: StylesApp(context)
-                                        .inputDecorationOutlineStyle
-                                        .copyWith(
-                                          hintText: "Confirmar Contraseña",
-                                          suffixIcon: IconButton(
-                                            alignment: Alignment.center,
-                                            iconSize: 20,
-                                            padding: const EdgeInsets.all(0),
-                                            icon: Icon(
-                                              _obscureTextRepeat
-                                                  ? Icons.visibility
-                                                  : Icons.visibility_off,
-                                            ),
-                                            onPressed: () {
-                                              setState(() {
-                                                _obscureTextRepeat = !_obscureTextRepeat;
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                    validator: (value) {
-                                      if (value != _passwordController.text) {
-                                        return "Las contraseñas no coinciden";
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
+                                UserInfoStep(
+                                  userIdController: _userIdController,
+                                  emailController: _emailController,
+                                  passwordController: _passwordController,
+                                  confirmPasswordController:
+                                      _confirmPasswordController,
+                                  obscureTextPass: _obscureTextPass,
+                                  obscureTextRepeat: _obscureTextRepeat,
+                                  onObscureTextPassChanged: (value) =>
+                                      setState(() => _obscureTextPass = value),
+                                  onObscureTextRepeatChanged: (value) =>
+                                      setState(
+                                          () => _obscureTextRepeat = value),
+                                  userNameController: _userNameController,
+                                )
                               ] else if (_currentStep == 1) ...[
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
-                                  child: TextFormField(
-                                    controller: _nameController,
-                                    decoration: StylesApp(context)
-                                        .inputDecorationOutlineStyle
-                                        .copyWith(hintText: "Nombre"),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "El Nombre es obligatorio";
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 23.0,
-                                ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
-                                  child: TextFormField(
-                                    controller: _lastNameController,
-                                    decoration: StylesApp(context)
-                                        .inputDecorationOutlineStyle
-                                        .copyWith(hintText: "Apellido"),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "El Apellido es obligatorio";
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 23.0,
-                                ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
-                                  child: TextFormField(
-                                    controller: _dateController,
-                                    readOnly: true,
-                                    onTap: () => _selectDate(context),
-                                    decoration: StylesApp(context)
-                                        .inputDecorationOutlineStyle
-                                        .copyWith(
-                                          hintText: "Fecha de nacimiento",
-                                          suffixIcon:
-                                              const Icon(Icons.calendar_today),
-                                        ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "La Fecha de nacimiento es obligatoria";
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 23.0,
-                                ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
-                                  child: CustomDropdownWidget<Country>(
-                                    hintText: "Seleccione un país",
-                                    items: dropDownList,
-                                    onChanged: (ModelData? newValue) {
-                                      setState(() {
-                                        _selectedData = newValue;
-                                        _selectedCountry = countries.firstWhere(
-                                            (country) =>
-                                                country.id == newValue!.value);
-                                        _prefixNumberController.text =
-                                            _selectedCountry!.countryCode;
-                                      });
-                                    },
-                                    selectedItem: _selectedData,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 23.0,
-                                ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      // Campo del código del país
-                                      Flexible(
-                                        flex: 2,
-                                        child: TextFormField(
-                                          controller: _prefixNumberController,
-                                          enabled:
-                                              false, // Deshabilitado para que no pueda ser editado
-                                          decoration: StylesApp(context)
-                                              .inputDecorationOutlineStyle
-                                              .copyWith(
-                                                filled: true,
-                                              ),
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                          width:
-                                              10), // Espaciado entre los campos
-                                      // Campo del número de teléfono
-                                      Flexible(
-                                        flex: 8,
-                                        child: TextFormField(
-                                          controller: _phoneNumberController,
-                                          keyboardType: TextInputType.phone,
-                                          inputFormatters: [
-                                            maskFormatterTel, // Permite solo números
-                                          ],
-                                          decoration: StylesApp(context)
-                                              .inputDecorationOutlineStyle
-                                              .copyWith(
-                                                hintText: "Número de teléfono",
-                                              ),
-                                          style: const TextStyle(fontSize: 16),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return "Por favor, ingresa tu número de teléfono.";
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                PersonalInfoStep(
+                                  nameController: _nameController,
+                                  lastNameController: _lastNameController,
+                                  dateController: _dateController,
+                                  selectedDate: _selectedDate,
+                                  onDateSelected: (picked) =>
+                                      setState(() => _selectedDate = picked),
+                                  dropDownList: dropDownList,
+                                  selectedData: _selectedData,
+                                  selectedCountry: _selectedCountry,
+                                  onCountrySelected: (newValue) {
+                                    setState(() {
+                                      _selectedData = newValue;
+                                      _selectedCountry = countries.firstWhere(
+                                          (country) =>
+                                              country.id == newValue!.value);
+                                      _prefixNumberController.text =
+                                          _selectedCountry!.countryCode;
+                                    });
+                                  },
+                                  prefixNumberController:
+                                      _prefixNumberController,
+                                  phoneNumberController: _phoneNumberController,
+                                  gender: setGender,
+                                  onChangeGender: (newValue) {
+                                    setState(() {
+                                      setGender = newValue!;
+                                    });
+                                  },
+                                  isBaptized: setIsBaptized,
+                                  onChangeBaptized: (baptized) {
+                                    setState(() {
+                                      setIsBaptized = baptized!;
+                                    });
+                                  },
                                 ),
                               ],
                               const SizedBox(
                                 height: 23,
                               ),
                               ButtonThemeWidget(
-                                onPressed: () {
+                                onPressed: () async {
                                   if (_currentStep == 0) {
                                     _nextStep();
                                   } else {
-                                    _register();
+                                    final bool validate =
+                                        _formKey.currentState?.validate() ??
+                                            false;
+                                    if (!validate) {
+                                      return;
+                                    }
+                                    LoadingService().showLoading(context);
+                                    final authenticationProvider =
+                                        Provider.of<AuthenticationProvider>(
+                                            context,
+                                            listen: false);
+                                    // final SignupInput data;
+                                    final dataToRegister = SignupInput(
+                                        name: _nameController.text,
+                                        lastname: _lastNameController.text,
+                                        email: _emailController.text,
+                                        birthdate: _dateController.text,
+                                        // city: _cityController ,
+                                        countryCode:
+                                            _selectedCountry?.countryCode,
+                                        countryId: _selectedCountry?.id,
+                                        identifier: _userIdController.text,
+                                        password: _passwordController.text,
+                                        phoneNumber:
+                                            _phoneNumberController.text.replaceAll(RegExp(r'[^\d]+'), ''),
+                                        username: _userNameController.text,
+                                        isBaptized: setIsBaptized,
+                                        gender: setGender);
+
+                                    final ResponseData response =
+                                        await authenticationProvider
+                                            .registerUser(dataToRegister);
+
+                                    if (response.error != null) {
+                                      await showCustomDialog(
+                                          context,
+                                          message: response.error!,
+                                          dialogType: DialogType.error);
+                                    } else {
+                                      Navigator.popAndPushNamed(context, '/layoutPage');
+                                    }
+                                    LoadingService().hideLoading();
                                   }
                                 },
                                 text: _currentStep == 0
@@ -557,3 +311,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
+
+// // Step Widgets

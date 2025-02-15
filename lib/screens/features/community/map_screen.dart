@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -17,7 +17,8 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late final userProvider;
-  late final course;
+  CourseModel? course= null;
+  Stage? stage = null;
   List<Level> levels = [];
   List<List<Level>> gruposDeNiveles = [];
   late ScrollController scrollController;
@@ -42,33 +43,54 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _generateData(BuildContext context) async {
     LoadingService().showLoading(context);
 
-    try {
-      setState(() {
-        course = ModalRoute.of(context)!.settings.arguments as CourseModel;
-      });
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final LoginUser? userData = userProvider.currentUser;
+    final Map<String, dynamic>? args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      try {
+        final String courseId = args['courseId'];
+        final String sectionId = args['sectionId'];
 
-      final result = await loadLevelsByCourse(userData?.user.id, "1");
+        setState(() {});
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        final LoginUser? userData = userProvider.currentUser;
+        // obtenemos curso
+        final ResponseData courseResponse =
+            await loadOneCourse(courseId);
+        if (courseResponse.error != null) {
+          errorMessage = courseResponse.error;
+        }
+      course = CourseModel.fromJson(courseResponse.data);
+        // obtenemos sección
+        final ResponseData stageResponse =
+            await loadStageById(sectionId);
 
-      if (result.error != null) {
-        errorMessage = result.error;
-      } else {
+        if (stageResponse.error != null) {
+          errorMessage = stageResponse.error;
+        }
+stage = Stage.fromJson(stageResponse.data);
+        // obtenemos los niveles
+        final result = await loadLevelsByCourse(
+            userData?.user.id, sectionId);
+
+        if (result.error != null) {
+          errorMessage = result.error;
+        } else {
+          setState(() {
+            levels = result.data
+                .map((level) => Level.fromJson(removeTypename(level)))
+                .cast<Level>()
+                .toList();
+            gruposDeNiveles = chunked(levels, 4);
+          });
+        }
+      } catch (e) {
+        errorMessage = "An error occurred: $e";
+      } finally {
+        LoadingService().hideLoading();
         setState(() {
-          levels = result.data
-              .map((level) => Level.fromJson(removeTypename(level)))
-              .cast<Level>()
-              .toList();
-          gruposDeNiveles = chunked(levels, 4);
+          isLoading = false;
         });
       }
-    } catch (e) {
-      errorMessage = "An error occurred: $e";
-    } finally {
-      LoadingService().hideLoading();
-      setState(() {
-        isLoading = false;
-      });
     }
   }
   // int _selectedIndex = 0;
@@ -92,19 +114,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Stage stage = Stage(
-        id: "1",
-        sectionName: "Genesis",
-        introduction:
-            "¿Te gustaría conocer el origen de todo lo que existe, desde el universo hasta la humanidad? En Génesis encontrarás relatos fascinantes sobre la creación, el diluvio, la torre de Babel, la llamada de Abraham, el sacrificio de Isaac, la traición de Jacob, el sueño de José, y mucho más. También se demuestra el carácter de Dios, su amor, su justicia, su fidelidad y su poder. Este es solo el comienzo de grandes historias que continúan en el resto de la Biblia y que te motiva a ser parte de ella. Te invito a leerlo y a descubrir cómo Dios te habla a través de su palabra, ¿Estás listo?",
-        unLockSection: true,
-        orderCard: 1,
-        color: "3ae4e4",
-        img: Img(urlImg: "assets/assetStories.png"),
-        levelCount: 12,
-        levelCompletedCount: 0,
-        status: 1);
-    // int i = 0;
     List coordATop = [0.00, 0.25, 0.48, 0.75];
 
     List coordALeft = [0.17, 0.50, 0.65, 0.65];
@@ -146,28 +155,16 @@ class _MapScreenState extends State<MapScreen> {
                         )
                       } else ...{
                         HeaderMapWidget(
-                          title: course.title,
-                          subtitleStage: stage.sectionName,
+                          title: course!.title,
+                          subtitleStage: stage!.sectionName,
                           indexStage: 1, //stage.id,
                           onRouteBack: () {
                             Navigator.popAndPushNamed(context, '/layoutPage1');
                           },
                           onShowInfoCourse: () {
-                            showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return CustomModalWidget(
-                                  title: course.title,
-                                  content: course.introduction,
-                                  buttonText: 'Aceptar',
-                                  id: course.id,
-                                  showSubtitle: false,
-                                  itemCount: 0,
-                                  itemsCompleted: 0,
-                                );
-                              },
-                            );
+                            Navigator.popAndPushNamed(
+                                context, '/detailCoursePage',
+                                arguments: course);
                           },
                           onShowInfoStage: () {
                             showDialog(
@@ -175,12 +172,12 @@ class _MapScreenState extends State<MapScreen> {
                               context: context,
                               builder: (BuildContext context) {
                                 return CustomModalWidget(
-                                  title: stage.sectionName,
-                                  content: stage.introduction,
+                                  title: stage!.sectionName,
+                                  content: stage!.introduction,
                                   buttonText: 'Aceptar',
-                                  id: stage.id,
-                                  itemCount: stage.levelCount,
-                                  itemsCompleted: stage.levelCompletedCount,
+                                  id: stage!.id,
+                                  itemCount: stage!.levelCount,
+                                  itemsCompleted: stage!.levelCompletedCount,
                                 );
                               },
                             );
@@ -280,7 +277,8 @@ class _MapScreenState extends State<MapScreen> {
                                                       context,
                                                       '/historyPage',
                                                       arguments: {
-                                                        'levelId': grupo[i].id
+                                                        'levelId': grupo[i].id,
+                                                        'sectionId':stage!.id
                                                       },
                                                     );
                                                   },
@@ -557,7 +555,7 @@ _buildItemLevel(BuildContext context, Level grupo) {
               ),
         shape: BoxShape.circle,
       ),
-        //  "${GraphQLConfig.urlServidor}${grupo.img.urlImg}",
+      //  "${GraphQLConfig.urlServidor}${grupo.img.urlImg}",
       child: Image.asset(
         "assets/level.png",
         // width: StylesApp(context).sizeImage.width,

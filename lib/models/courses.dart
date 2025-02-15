@@ -32,8 +32,8 @@ class CourseModel {
       churchId: json['churchId'] as int?,
       img: Img.fromJson(json['img']),
       introduction: json['introduction'],
-      sectionCount: json['sectionCount'],
-      sectionCompletedCount: json['sectionCompletedCount'],
+      sectionCount: json['sectionCount'] ?? 0,
+      sectionCompletedCount: json['sectionCompletedCount'] ?? 0,
     );
   }
 

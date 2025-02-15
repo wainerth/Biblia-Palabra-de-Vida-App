@@ -520,6 +520,10 @@ class StylesApp {
         fontFamily: "Aclonica",
         fontSize: fontSizeBtn,
       );
+  TextStyle get textStyleSmallBlack => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBtn,
+      );
 
   ButtonStyle get btnPrimary => ButtonStyle(
         padding: WidgetStateProperty.all(
