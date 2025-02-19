@@ -2,11 +2,11 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class StarStatusWidget extends StatefulWidget {
-  final double unLockLevel;
+  final int levelScore;
   final double containerWidth;
   const StarStatusWidget({
     super.key,
-    required this.unLockLevel,
+    required this.levelScore,
     required this.containerWidth,
   });
 
@@ -25,7 +25,7 @@ class _StarStatusWidgetState extends State<StarStatusWidget> {
           height: 50.0,
           child: Stack(
             children: [
-              if (widget.unLockLevel > 99) ...[
+              if (widget.levelScore > 100) ...[
                
                 Positioned(
                   top: 10,
@@ -61,7 +61,7 @@ class _StarStatusWidgetState extends State<StarStatusWidget> {
                     height: starSize,
                   ),
                 ),
-              ] else if (widget.unLockLevel > 50) ...[
+              ] else if (widget.levelScore > 50) ...[
                 Positioned(
                   top: 10,
                   left: 0.0,
@@ -82,7 +82,7 @@ class _StarStatusWidgetState extends State<StarStatusWidget> {
                     height: starSize,
                   ),
                 ),
-              ] else if (widget.unLockLevel > 0) ...[
+              ] else if (widget.levelScore > 0) ...[
                 Positioned(
                   top: 10,
                   left: 0.0,

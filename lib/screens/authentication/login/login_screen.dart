@@ -148,6 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     if (!_formKey.currentState!.validate()) {
                                       return;
                                     }
+
                                     LoadingService().showLoading(context);
 
                                     final user = await authProvider.loginUser(
@@ -157,10 +158,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     }
 
                                     if (user.error != null) {
+                                      LoadingService().hideLoading();
                                       await showCustomDialog(context,
                                           message: user.error!,
                                           dialogType: DialogType.error);
-                                      LoadingService().hideLoading();
                                     } else {
                                       LoadingService().hideLoading();
                                       Navigator.pushNamed(
@@ -180,31 +181,32 @@ class _LoginScreenState extends State<LoginScreen> {
                                   buttonStyle:
                                       StylesApp(context).btnTransparentSmall,
                                   onPressed: () async {
-                                    if (uio.Platform.isAndroid ||
-                                        uio.Platform.isIOS) {
-                                      LoadingService().showLoading(context);
-                                      final user = await authProvider
-                                          .loginWithGoogle(context);
-                                      if (kDebugMode) {
-                                        print(user);
-                                      }
+                                    print("estoy en iniciar sesion con google");
 
-                                      if (user.error != null) {
-                                        await showCustomDialog(context,
-                                            message: user.error!,
-                                            dialogType: DialogType.error);
-
-                                        LoadingService().hideLoading();
-                                      } else {
-                                        LoadingService().hideLoading();
-                                        Navigator.pushNamed(
-                                            context, '/layoutPage');
-                                      }
-                                    } else {
-                                      // Manejar el caso para otras plataformas si es necesario
-                                      print(
-                                          'Google Sign-In no es compatible con esta plataforma.');
+                                    // if (uio.Platform.isAndroid ||
+                                    //     uio.Platform.isIOS) {
+                                    LoadingService().showLoading(context);
+                                    final user = await authProvider
+                                        .loginWithGoogle(context);
+                                    if (kDebugMode) {
+                                      print(user);
                                     }
+
+                                    if (user.error != null) {
+                                      LoadingService().hideLoading();
+                                      await showCustomDialog(context,
+                                          message: user.error!,
+                                          dialogType: DialogType.error);
+                                    } else {
+                                      LoadingService().hideLoading();
+                                      Navigator.pushNamed(
+                                          context, '/layoutPage');
+                                    }
+                                    // } else {
+                                    //   // Manejar el caso para otras plataformas si es necesario
+                                    //   print(
+                                    //       'Google Sign-In no es compatible con esta plataforma.');
+                                    // }
                                   },
                                   width: StylesApp(context).btnHeight.width,
                                   height: StylesApp(context).btnHeight.height,

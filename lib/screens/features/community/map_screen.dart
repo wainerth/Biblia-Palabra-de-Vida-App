@@ -17,7 +17,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late final userProvider;
-  CourseModel? course= null;
+  CourseModel? course = null;
   Stage? stage = null;
   List<Level> levels = [];
   List<List<Level>> gruposDeNiveles = [];
@@ -42,7 +42,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _generateData(BuildContext context) async {
     LoadingService().showLoading(context);
-
+    errorMessage = null;
     final Map<String, dynamic>? args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (args != null) {
@@ -54,23 +54,20 @@ class _MapScreenState extends State<MapScreen> {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         final LoginUser? userData = userProvider.currentUser;
         // obtenemos curso
-        final ResponseData courseResponse =
-            await loadOneCourse(courseId);
+        final ResponseData courseResponse = await loadOneCourse(courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
         }
-      course = CourseModel.fromJson(courseResponse.data);
+        course = CourseModel.fromJson(courseResponse.data);
         // obtenemos sección
-        final ResponseData stageResponse =
-            await loadStageById(sectionId);
+        final ResponseData stageResponse = await loadStageById(sectionId);
 
         if (stageResponse.error != null) {
           errorMessage = stageResponse.error;
         }
-stage = Stage.fromJson(stageResponse.data);
+        stage = Stage.fromJson(stageResponse.data);
         // obtenemos los niveles
-        final result = await loadLevelsByCourse(
-            userData?.user.id, sectionId);
+        final result = await loadLevelsByCourse(userData?.user.id, sectionId);
 
         if (result.error != null) {
           errorMessage = result.error;
@@ -197,13 +194,15 @@ stage = Stage.fromJson(stageResponse.data);
                                 .lastWhere(
                                     (level) => level.unLockLevel == false,
                                     orElse: () => Level(
-                                        id: '',
-                                        name: '',
-                                        unLockLevel: false,
-                                        color: '',
-                                        section: Section(sectionName: ''),
-                                        img: Img(urlImg: ''),
-                                        score: 0))
+                                          id: '',
+                                          name: '',
+                                          unLockLevel: false,
+                                          color: '',
+                                          section: Section(sectionName: ''),
+                                          img: Img(urlImg: ''),
+                                          score: 0,
+                                          levelScore: 0,
+                                        ))
                                 .id;
 
                             if (lastUnlockedIndex != -1) {
@@ -273,12 +272,14 @@ stage = Stage.fromJson(stageResponse.data);
                                             onTap: grupo[i].unLockLevel == false
                                                 ? null
                                                 : () {
+                                                    //aaaa
                                                     Navigator.pushNamed(
                                                       context,
                                                       '/historyPage',
                                                       arguments: {
+                                                        'courseId': course?.id,
                                                         'levelId': grupo[i].id,
-                                                        'sectionId':stage!.id
+                                                        'sectionId': stage!.id
                                                       },
                                                     );
                                                   },
@@ -297,8 +298,8 @@ stage = Stage.fromJson(stageResponse.data);
                                                               context)
                                                           .sizeContainerLevel
                                                           .width,
-                                                      unLockLevel:
-                                                          grupo[i].score,
+                                                      levelScore:
+                                                          grupo[i].levelScore,
                                                     ),
                                                   ),
                                                   Column(
@@ -323,10 +324,10 @@ stage = Stage.fromJson(stageResponse.data);
                                                                   .height,
                                                               decoration:
                                                                   BoxDecoration(
-                                                                      color: Color(grupo[i].score >
+                                                                      color: Color(grupo[i].levelScore >
                                                                               0
                                                                           ? getColorItem(grupo[i]
-                                                                              .score)
+                                                                              .levelScore)
                                                                           : int.tryParse('0xFF${grupo[i].color}') ??
                                                                               0XFF000000),
                                                                       shape: BoxShape
@@ -334,9 +335,9 @@ stage = Stage.fromJson(stageResponse.data);
                                                                       border:
                                                                           Border
                                                                               .all(
-                                                                        color: grupo[i].score >
+                                                                        color: grupo[i].levelScore >
                                                                                 0
-                                                                            ? Color(getColorItem(grupo[i].score))
+                                                                            ? Color(getColorItem(grupo[i].levelScore))
                                                                             : Color.fromARGB(
                                                                                 100, // Opacidad: 50%
                                                                                 int.parse('0xFF${grupo[i].color}'.substring(2), radix: 16),
@@ -348,9 +349,9 @@ stage = Stage.fromJson(stageResponse.data);
                                                                       ),
                                                                       boxShadow: [
                                                                     BoxShadow(
-                                                                        color: grupo[i].score >
+                                                                        color: grupo[i].levelScore >
                                                                                 0
-                                                                            ? Color(getColorShadow(grupo[i].score)).withValues(
+                                                                            ? Color(getColorShadow(grupo[i].levelScore)).withValues(
                                                                                 alpha:
                                                                                     0.5)
                                                                             : Colors.black.withValues(
@@ -419,64 +420,64 @@ stage = Stage.fromJson(stageResponse.data);
                                           ),
                                         ),
                                       },
-                                      if (index == gruposDeNiveles.length - 1)
-                                        Container(
-                                          height: 349,
-                                          decoration: BoxDecoration(
-                                            image: DecorationImage(
-                                                image: AssetImage(
-                                                    "assets/Felicitaciones.png"),
-                                                fit: StylesApp(context)
-                                                    .fitImage),
-                                          ),
-                                          child: Center(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SizedBox(
-                                                  height: 60,
-                                                ),
-                                                Text(
-                                                  textAlign: TextAlign.center,
-                                                  'Felicidades',
-                                                  style: StylesApp(context)
-                                                      .textStyCompleteLevelTitle
-                                                      .copyWith(
-                                                        color:
-                                                            Color(0XFF12CBC4),
-                                                      ),
-                                                ),
-                                                SizedBox(
-                                                  height: 7,
-                                                ),
-                                                Text(
-                                                  textAlign: TextAlign.center,
-                                                  'Culminaste la Etapa 1/27',
-                                                  style: StylesApp(context)
-                                                      .textStyCompleteLevelBody
-                                                      .copyWith(
-                                                        color:
-                                                            Color(0XFF12CBC4),
-                                                      ),
-                                                ),
-                                                SizedBox(
-                                                  height: 17,
-                                                ),
-                                                Text(
-                                                  textAlign: TextAlign.center,
-                                                  'Introducción al Antiguo\n  Testamento',
-                                                  style: StylesApp(context)
-                                                      .textStyCompleteLevelBody
-                                                      .copyWith(
-                                                        color:
-                                                            Color(0XFF12CBC4),
-                                                      ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        )
+                                      // if (index == gruposDeNiveles.length - 1)
+                                      //   Container(
+                                      //     height: 349,
+                                      //     decoration: BoxDecoration(
+                                      //       image: DecorationImage(
+                                      //           image: AssetImage(
+                                      //               "assets/Felicitaciones.png"),
+                                      //           fit: StylesApp(context)
+                                      //               .fitImage),
+                                      //     ),
+                                      //     child: Center(
+                                      //       child: Column(
+                                      //         mainAxisAlignment:
+                                      //             MainAxisAlignment.center,
+                                      //         children: [
+                                      //           SizedBox(
+                                      //             height: 60,
+                                      //           ),
+                                      //           Text(
+                                      //             textAlign: TextAlign.center,
+                                      //             'Felicidades',
+                                      //             style: StylesApp(context)
+                                      //                 .textStyCompleteLevelTitle
+                                      //                 .copyWith(
+                                      //                   color:
+                                      //                       Color(0XFF12CBC4),
+                                      //                 ),
+                                      //           ),
+                                      //           SizedBox(
+                                      //             height: 7,
+                                      //           ),
+                                      //           Text(
+                                      //             textAlign: TextAlign.center,
+                                      //             'Culminaste la Etapa 1/27',
+                                      //             style: StylesApp(context)
+                                      //                 .textStyCompleteLevelBody
+                                      //                 .copyWith(
+                                      //                   color:
+                                      //                       Color(0XFF12CBC4),
+                                      //                 ),
+                                      //           ),
+                                      //           SizedBox(
+                                      //             height: 17,
+                                      //           ),
+                                      //           Text(
+                                      //             textAlign: TextAlign.center,
+                                      //             'Introducción al Antiguo\n  Testamento',
+                                      //             style: StylesApp(context)
+                                      //                 .textStyCompleteLevelBody
+                                      //                 .copyWith(
+                                      //                   color:
+                                      //                       Color(0XFF12CBC4),
+                                      //                 ),
+                                      //           ),
+                                      //         ],
+                                      //       ),
+                                      //     ),
+                                      //   )
                                     ],
                                   ),
                                 ],
@@ -516,20 +517,20 @@ stage = Stage.fromJson(stageResponse.data);
     );
   }
 
-  int getColorShadow(double score) {
+  int getColorShadow(int score) {
     if (score > 100) {
       return 0XFFBE9D27;
-    } else if (score > 50 && score < 99) {
+    } else if (score > 50 && score <= 100) {
       return 0XFFA5A7A1;
     } else {
       return 0XFFD5886B;
     }
   }
 
-  int getColorItem(double score) {
+  int getColorItem(int score) {
     if (score > 100) {
       return 0XFFFCD859;
-    } else if (score > 50 && score < 99) {
+    } else if (score > 50 && score <= 100) {
       return 0XFFE4E0E0;
     } else {
       return 0XFFD5886B;
@@ -545,8 +546,8 @@ _buildItemLevel(BuildContext context, Level grupo) {
           .width, // Ajusta el tamaño según tus necesidades
       height: StylesApp(context).sizeContainerSub.height,
       decoration: BoxDecoration(
-        color: grupo.score > 0
-            ? Color(getColorInner(grupo.score))
+        color: grupo.levelScore > 0
+            ? Color(getColorInner(grupo.levelScore))
             : Color.fromARGB(
                 100,
                 int.parse('0xFF${grupo.color}'.substring(2), radix: 16),
@@ -571,8 +572,8 @@ _buildItemLevel(BuildContext context, Level grupo) {
       height: StylesApp(context).sizeContainerSub.height,
       padding: EdgeInsets.all(0.0),
       decoration: BoxDecoration(
-        color: grupo.score > 0
-            ? Color(getColorInner(grupo.score))
+        color: grupo.levelScore > 0
+            ? Color(getColorInner(grupo.levelScore))
             : Color.fromARGB(
                 100,
                 int.parse('0xFF${grupo.color}'.substring(2), radix: 16),
@@ -608,10 +609,10 @@ _buildItemLevel(BuildContext context, Level grupo) {
   }
 }
 
-int getColorInner(double score) {
+int getColorInner(int score) {
   if (score > 100) {
     return 0XFFDDAC17;
-  } else if (score > 50 && score < 99) {
+  } else if (score >= 50 && score <= 100) {
     return 0XFFA5A7A1;
   } else {
     return 0XFFB05E3C;

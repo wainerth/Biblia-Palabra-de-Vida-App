@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -73,6 +75,10 @@ Future<ResponseData> getProfileUser(token, idUser) async {
       data: removeTypename(data['getOneProfileByUserId']),
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get One Profile By User Id Timeout de conexión $e');
   } catch (e) {
     return ResponseData(
       data: null,
@@ -81,8 +87,10 @@ Future<ResponseData> getProfileUser(token, idUser) async {
   }
 }
 
-Future<ResponseData> getAchievement(token, userId) async {
-  final GraphQLClient _client = createClient(authToken: token);
+Future<ResponseData> getAchievement(userId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+  final GraphQLClient _client = createClient(authToken: userToken);
   final QueryOptions options = QueryOptions(
     operationName: "GetUserAchievement",
     document: gql(r'''
@@ -123,6 +131,10 @@ Future<ResponseData> getAchievement(token, userId) async {
       data: data['getUserAchievement'],
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get User Achievement Timeout de conexión $e');
   } catch (e) {
     return ResponseData(
       data: null,
@@ -167,6 +179,10 @@ Future getDataMember(token, userId) async {
 
     return ResponseData(
         data: removeTypename(data['getMemberByUserId']), error: null);
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get Member By Id Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -220,6 +236,10 @@ Future loadCoursesByUserAndChurch(userId, churchId) async {
       data: data['getAllCourses'],
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get all Courses Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -272,6 +292,10 @@ Future loadOneCourse(courseId) async {
       data: data['getOneCourse'],
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get One Course Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -328,6 +352,10 @@ Future loadStageById(sectionId) async {
       data: data['getSectionById'],
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get Section By Id Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -382,6 +410,10 @@ Future loadStageByCourse(userId, courseId) async {
       data: data['getSections'],
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get Sections Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -401,6 +433,7 @@ Future loadLevelsByCourse(userId, sectionId) async {
             id
             name
             levelNumber
+            levelScore
             countLevelNumber
             unLockLevel
             color
@@ -435,6 +468,11 @@ Future loadLevelsByCourse(userId, sectionId) async {
       data: data['getAllLevelsBySectionId'],
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null,
+        error: 'Get All Levels By Section Id Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -454,6 +492,7 @@ Future loadOneLevel(levelId) async {
             id
             name
             levelNumber
+            levelScore
             countLevelNumber
             unLockLevel
             color
@@ -490,6 +529,10 @@ Future loadOneLevel(levelId) async {
       data: data['getLevelById'],
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get Level Id Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -556,6 +599,10 @@ Future loadStoriesByLevel(String levelId) async {
       data: data['getStoryByLevelId'],
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get Story Level Id Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -624,6 +671,10 @@ Future loadQuestionByStory(levelId) async {
       data: data['getQuestionsByLevelId'],
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get Question By Level Id Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -673,6 +724,10 @@ Future getLastProgressUser(userId, courseId) async {
       data: removeTypename(data['getLastProgressUser']),
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get last progress User Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }
@@ -738,6 +793,10 @@ Future lastLevelProgressUser(userId, levelId) async {
       data: removeTypename(data['getProgressLevelUser']),
       error: null,
     );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get progress Level User Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }

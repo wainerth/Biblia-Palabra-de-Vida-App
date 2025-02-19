@@ -44,6 +44,7 @@ class _CustomDropdownBottomWidgetState<T>
       onTap: () {
       FocusScope.of(context).unfocus();
         showModalBottomSheet(
+          backgroundColor: Colors.white,
           context: context,
           builder: (BuildContext context) {
             return StatefulBuilder(
@@ -56,7 +57,7 @@ class _CustomDropdownBottomWidgetState<T>
                     children: [
                       SizedBox(height: 10),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8.0),
                         child: TextFormField(
                           // controller: searchTextController,Z
                           style: StylesApp(context).textStyleSmallBlack,
@@ -123,7 +124,7 @@ class _CustomDropdownBottomWidgetState<T>
         .toList();
 
     return Container(
-      height: MediaQuery.sizeOf(context).height * 0.5,
+      height: MediaQuery.sizeOf(context).height * 0.4,
       child: ListView.builder(
         shrinkWrap:
             true, // Importante para que el ListView no intente expandirse infinitamente

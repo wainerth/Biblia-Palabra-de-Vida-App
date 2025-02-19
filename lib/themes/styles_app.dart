@@ -272,7 +272,7 @@ class StylesApp {
 
   double get fontSizeBtn {
     if (screenWidth <= SizeScreensApp().sm) {
-      return 16.sp;
+      return 14.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
       return 14.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
@@ -714,11 +714,11 @@ class StylesApp {
 
   Size get sizeTextFormField {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(223.0, 43.0);
+      return Size(MediaQuery.sizeOf(context).width, 43.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
       return Size(MediaQuery.sizeOf(context).width, 43.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(223.0, 43.0);
+      return Size(MediaQuery.sizeOf(context).width, 43.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
       return Size(MediaQuery.sizeOf(context).width * 0.6, 60.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {

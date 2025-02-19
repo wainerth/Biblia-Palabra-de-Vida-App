@@ -208,8 +208,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         countryId: _selectedCountry?.id,
                                         identifier: _userIdController.text,
                                         password: _passwordController.text,
-                                        phoneNumber:
-                                            _phoneNumberController.text.replaceAll(RegExp(r'[^\d]+'), ''),
+                                        phoneNumber: _phoneNumberController.text
+                                            .replaceAll(RegExp(r'[^\d]+'), ''),
                                         username: _userNameController.text,
                                         isBaptized: setIsBaptized,
                                         gender: setGender);
@@ -219,12 +219,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             .registerUser(dataToRegister);
 
                                     if (response.error != null) {
-                                      await showCustomDialog(
-                                          context,
+                                      LoadingService().hideLoading();
+                                      await showCustomDialog(context,
                                           message: response.error!,
                                           dialogType: DialogType.error);
                                     } else {
-                                      Navigator.popAndPushNamed(context, '/layoutPage');
+                                      Navigator.popAndPushNamed(
+                                          context, '/layoutPage');
                                     }
                                     LoadingService().hideLoading();
                                   }

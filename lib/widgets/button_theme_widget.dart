@@ -14,22 +14,23 @@ class ButtonThemeWidget extends StatelessWidget {
   final Color colorIcon;
   final bool textCenter;
   final bool loading;
-  const ButtonThemeWidget({
-    super.key,
-    this.onPressed,
-    this.text,
-    this.textStyle,
-    this.buttonStyle,
-    this.width = 150,
-    this.height = 27,
-    this.showIcon = false,
-    this.icon = Icons.arrow_back,
-    this.colorIcon = Colors.black,
-    this.textCenter = false,
-    this.textWithImage = false,
-    this.image = '',
-    this.loading = false
-  }) : assert(!textWithImage || text != null, 'Text is required when textWithImage is true');
+  const ButtonThemeWidget(
+      {super.key,
+      this.onPressed,
+      this.text,
+      this.textStyle,
+      this.buttonStyle,
+      this.width = 150,
+      this.height = 27,
+      this.showIcon = false,
+      this.icon = Icons.arrow_back,
+      this.colorIcon = Colors.black,
+      this.textCenter = false,
+      this.textWithImage = false,
+      this.image = '',
+      this.loading = false})
+      : assert(!textWithImage || text != null,
+            'Text is required when textWithImage is true');
 
   @override
   Widget build(BuildContext context) {
@@ -68,17 +69,31 @@ class ButtonThemeWidget extends StatelessWidget {
               onPressed: loading ? null : onPressed,
               style: buttonStyle,
               child: text != null
-                  ? Text(
-                      text!,
-                      textAlign:
-                          textCenter ? TextAlign.center : TextAlign.start,
-                      style: textStyle,
+                  ? Row(
+                      children: [
+                        Expanded(
+                            flex: 1,
+                            child: Center(
+                              child: Text(
+                                text!,
+                                textAlign: textCenter
+                                    ? TextAlign.center
+                                    : TextAlign.left,
+                                style: textStyle,
+                              ),
+                            )),
+                        if (showIcon) ...[
+                          Expanded(
+                            flex: 0,
+                            child: Icon(
+                              icon,
+                              color: colorIcon,
+                            ),
+                          )
+                        ]
+                      ],
                     )
-                  : Icon(
-                      icon,
-                      color: colorIcon,
-                    ),
-            ),
+                  : Icon(icon)),
     );
   }
 }

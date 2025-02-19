@@ -22,16 +22,34 @@ class LevelProgressUser {
     required this.level,
     required this.status,
   });
+  LevelProgressUser copyWith({
+    int? score,
+    int? scoreLastAttempt,
+    bool? newRecord
+  }) {
+    return LevelProgressUser(
+      id: id,
+      score: score ?? this.score,
+      message: message,
+      newRecord: newRecord ?? this.newRecord,
+      user: user,
+      failedAttempts: failedAttempts,
+      scoreLastAttempt: scoreLastAttempt ?? this.scoreLastAttempt,
+      completed: completed,
+      level: level,
+      status: status,
+    );
+  }
 
   factory LevelProgressUser.fromJson(Map<String, dynamic> json) {
     return LevelProgressUser(
       id: json['id'],
-      score: json['score'],
+      score: json['score'] ?? 0,
       message: Message.fromJson(json['message']),
       newRecord: json['newRecord'],
       user: InfoUser.fromJson(json['user']),
       failedAttempts: json['failedAttempts'],
-      scoreLastAttempt: json['scoreLastAttempt'],
+      scoreLastAttempt: json['scoreLastAttempt'] ?? 0,
       completed: json['completed'],
       level: LevelUser.fromJson(json['level']),
       status: json['status'] > 0 ? true : false,

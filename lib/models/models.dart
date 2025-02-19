@@ -1,3 +1,5 @@
+export 'package:biblia_palabra_de_vida_app/models/send_score_model.dart';
+
 export 'package:biblia_palabra_de_vida_app/models/level_progress_user.dart';
 
 export 'package:biblia_palabra_de_vida_app/models/signup_input.dart';

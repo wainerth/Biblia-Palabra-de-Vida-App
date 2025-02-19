@@ -156,11 +156,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                       "Librería Cristiana",
                       style: StylesApp(context).textStyleBody7,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Image.asset(
-                        'assets/books.png',
-                        width: 52.sp,
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.pushNamed(context, '/soonPage');
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.asset(
+                          'assets/books.png',
+                          width: 52.sp,
+                        ),
                       ),
                     )
                   ],
@@ -191,7 +196,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: GestureDetector(
         onTap: () async {
-          if (progressUser != null) {
+          if (progressUser != null && card['label'] == 'Aventura') {
             Navigator.pushNamed(context, '/mapPage', arguments: {
               'courseId': progressUser!.courseId,
               'sectionId': progressUser!.sectionId
@@ -277,7 +282,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
         Padding(
           padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
           child: GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/introAventurePage'),
+            onTap: () {
+              if (progressUser != null) {
+                Navigator.pushNamed(context, '/mapPage', arguments: {
+                  'courseId': progressUser!.courseId,
+                  'sectionId': progressUser!.sectionId
+                });
+              } else {
+                Navigator.pushNamed(context, '/introAventurePage');
+              }
+            },
             child: CardOptionsWidget(
                 imageBackground: "assets/ranking.png",
                 labelCard: "Aventura",
@@ -300,7 +314,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
         Padding(
           padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
           child: GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/introAventurePage'),
+            onTap: () => Navigator.pushNamed(context, '/playPage'),
             child: CardOptionsWidget(
                 imageBackground: "assets/games.png",
                 labelCard: "Juegos",
@@ -310,7 +324,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
         Padding(
           padding: const EdgeInsets.only(left: 4.0, bottom: 15.0),
           child: GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/introAventurePage'),
+            onTap: () => Navigator.pushNamed(context, '/promisePage'),
             child: CardOptionsWidget(
                 imageBackground: "assets/promesas.png",
                 labelCard: "Promesas",

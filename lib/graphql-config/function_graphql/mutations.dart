@@ -30,6 +30,7 @@ Future login(email, password) async {
   );
   try {
     final QueryResult result = await _client.mutate(options);
+    print(result.hasException);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -56,8 +57,16 @@ Future<ResponseData> loginGoogle() async {
   final GraphQLClient _client = createClient();
 
   final GoogleSignIn googleSignIn;
-  if (kIsWeb || Platform.isAndroid) {
+  if (Platform.isAndroid) {
     googleSignIn = GoogleSignIn();
+  } else if(kIsWeb){
+
+    googleSignIn = GoogleSignIn(
+        clientId:
+            "823422522259-lsaj5empb8t54pims7m727krgrcfu6lf.apps.googleusercontent.com",
+        forceCodeForRefreshToken: true,
+        scopes: ["email"]);
+
   } else {
     googleSignIn = GoogleSignIn(
         serverClientId:

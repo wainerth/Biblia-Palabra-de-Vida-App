@@ -39,7 +39,7 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
     unLockLevel: true,
     color: "3ae4e4",
     section: Section(sectionName: "Genesis"),
-    img: Img(urlImg: "assets/level.png"),
+    img: Img(urlImg: "assets/level.png"), levelScore: 0,
   );
 
   // Question By level

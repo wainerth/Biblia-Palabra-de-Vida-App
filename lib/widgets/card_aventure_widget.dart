@@ -44,7 +44,7 @@ class CardAventureWidget extends StatelessWidget {
                             Center(
                               child: StarStatusWidget(
                                 containerWidth: 79,
-                                unLockLevel: 100.0,
+                                levelScore: 100,
                               ),
                             ),
                             

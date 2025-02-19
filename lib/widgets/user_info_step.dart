@@ -135,6 +135,9 @@ class _UserInfoStepState extends State<UserInfoStep> {
               if (value == null || value.isEmpty) {
                 return "La contraseña es obligatoria";
               }
+              if (value.length <6){
+                return "la contraseña debe contener al menos 6 caracteres";
+              }
               return null;
             },
           ),

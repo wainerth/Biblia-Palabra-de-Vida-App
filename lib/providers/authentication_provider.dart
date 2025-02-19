@@ -96,7 +96,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }
 
     // llamamos a achievement
-    final userAchievement = await getAchievement(token, userId);
+    final userAchievement = await getAchievement( userId);
     error = userAchievement.error;
     if (userAchievement.error != null) {
       return ResponseData(data: null, error: error);

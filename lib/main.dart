@@ -16,8 +16,8 @@ void main() {
             create: (_) => CatalogueProvider()),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
         ChangeNotifierProvider<AuthenticationProvider>(
-            create: (context) => AuthenticationProvider(
-                context, context.read<CatalogueProvider>())),
+          create: (context) => AuthenticationProvider(context, context.read<CatalogueProvider>()),
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690), // size base of design
@@ -96,15 +96,15 @@ class _MyAppState extends State<MyApp> {
         ),
       );
     }
-      if (_hasSeenIntro!) { 
-        final authProvider = context.read<AuthenticationProvider>();
-        if (authProvider.token != null) { 
-          return PageScreen(); 
-        } else {
-          return const HomeScreen();
-        }
+    if (_hasSeenIntro!) {
+      final authProvider = context.read<AuthenticationProvider>();
+      if (authProvider.token != null) {
+        return PageScreen();
       } else {
-        return const WelcomeScreen();
+        return const HomeScreen();
       }
+    } else {
+      return const WelcomeScreen();
+    }
   }
 }

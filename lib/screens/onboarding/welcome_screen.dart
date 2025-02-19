@@ -48,9 +48,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             _buildPage(
                               image: '',
                               backImages: ['assets/start.png', 'assets/nube.png'],
-                              title: 'PALABRA\n de\n Vida',
+                              title: 'palabra\n de\n Vida',
                               subTitle: "¡La Biblia!",
-                              description: 'La palabra de Dios cambiará tu vida.',
+                              description: 'la palabra de dios cambiará tu vida.',
                               constraints: constraints,
                             ),
                           ],

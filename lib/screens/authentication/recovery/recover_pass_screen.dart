@@ -262,6 +262,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                           await authProvider.forgotUserPassword(
                                               _emailController.text);
                                       if (response.error != null) {
+                                        LoadingService().hideLoading();
                                         await showCustomDialog(context,
                                             message: response.error!,
                                             dialogType: DialogType.error);

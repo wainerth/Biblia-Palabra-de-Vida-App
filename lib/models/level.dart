@@ -4,6 +4,8 @@ class Level {
   final String id;
   final String name;
   final bool unLockLevel;
+  final int levelNumber;
+  final int levelScore;
   final String color;
   final Section section;
   Img img;
@@ -17,6 +19,8 @@ class Level {
       required this.color,
       required this.section,
       required this.img,
+      required this.levelScore,
+      this.levelNumber = 0,
       this.score = 0.0,
       this.status = 0});
 
@@ -29,7 +33,10 @@ class Level {
         section: Section.fromJson(json['section']),
         img: Img.fromJson(json['img']),
         score: json['score'] ?? 0,
-        status: json["status"]);
+        status: json["status"], 
+        levelScore:json['levelScore'] ?? 0,
+        levelNumber:json['levelNumber']
+        );
   }
 }
 
@@ -43,17 +50,3 @@ class Section {
   }
 }
 
-class LevelResponse {
-  final List<Level> getAllLevelsBySectionId;
-
-  LevelResponse({required this.getAllLevelsBySectionId});
-
-  factory LevelResponse.fromJson(Map<String, dynamic> json) {
-    return LevelResponse(
-      getAllLevelsBySectionId: List<Level>.from(
-        json['getAllLevelsBySectionId']
-            .map((levelJson) => Level.fromJson(levelJson)),
-      ),
-    );
-  }
-}

@@ -22,12 +22,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<History> stories = [];
   bool isLoading = true;
   String? errorMessage;
+  CourseModel? course;
   Level? level;
   Stage? stage;
   bool _isPlayingAudio = false;
   bool _isPlayingVideo = false;
   int _selectedButtonIndex = 1;
-
+  String levelId = '';
+  String sectionId = '';
+  String courseId = '';
   @override
   void initState() {
     super.initState();
@@ -37,6 +40,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _generateData(BuildContext context) async {
+    errorMessage = null;
     LoadingService().showLoading(context);
 
     final Map<String, dynamic>? args =
@@ -44,11 +48,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (args != null) {
       try {
-        final String levelId = args['levelId'];
-        final String sectionId = args['sectionId'];
+        levelId = args['levelId'];
+        sectionId = args['sectionId'];
+        courseId = args['courseId'];
         setState(() {});
 
         final userProvider = Provider.of<UserProvider>(context, listen: false);
+        final ResponseData responseCourse = await loadOneCourse(courseId);
+        if (responseCourse.error != null) {
+          errorMessage = responseCourse.error;
+        }
+        course = CourseModel.fromJson(removeTypename(responseCourse.data));
+
         // obtenemos sección
         final ResponseData stageResponse = await loadStageById(sectionId);
 
@@ -62,7 +73,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         if (levelResponse.error != null) {
           errorMessage = levelResponse.error;
         }
-        level = Level.fromJson(levelResponse.data);
+        level = Level.fromJson(removeTypename(levelResponse.data));
 
         // obtenemos las historias
         final ResponseData historyResponse = await loadStoriesByLevel(levelId);
@@ -104,7 +115,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 )
               } else ...{
                 HeaderNotDetailsStageWidget(
-                  title: "Conoce el Antiguo Testamento",
+                  title: "Conoce el ${course?.title}",
                   stage: stage!.id,
                   subtitle: stage!.sectionName,
                   details: stage,
@@ -278,10 +289,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     } else {
                                       Navigator.popAndPushNamed(
                                         context,
-                                        "/questionDraggablePage",
+                                        "/questionPage",
                                         arguments: {
-                                          "levelId": level!.id,
-                                          "sectionId": stage!.id
+                                          'courseId': courseId,
+                                          "levelId": levelId,
+                                          "sectionId": sectionId
                                         },
                                       );
                                     }
@@ -306,57 +318,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             padding: EdgeInsets.all(0),
                             iconSize: 25.0,
                             onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) {
-                                  return Container(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Row(
-                                      spacing: 5,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: ButtonThemeWidget(
-                                            buttonStyle: StylesApp(context)
-                                                .btnWidgetSmall,
-                                            onPressed: () {
-                                              Navigator.popAndPushNamed(
-                                                context,
-                                                "/questionDraggablePage",
-                                                arguments: {
-                                                  "levelId": level!.id,
-                                                  "sectionId": stage!.id
-                                                },
-                                              );
-                                            },
-                                            text: "ordenamiento",
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: ButtonThemeWidget(
-                                            buttonStyle: StylesApp(context)
-                                                .btnWidgetSmall,
-                                            onPressed: () {
-                                              Navigator.popAndPushNamed(
-                                                context,
-                                                "/questionPage",
-                                                arguments: {
-                                                  "levelId": level!.id,
-                                                  "sectionId": stage!.id
-                                                },
-                                              );
-                                            },
-                                            text: "responder Pregunta",
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
+                              Navigator.popAndPushNamed(
+                                context,
+                                "/questionPage",
+                                arguments: {
+                                  'courseId': courseId,
+                                  "levelId": levelId,
+                                  "sectionId": sectionId
                                 },
                               );
-
-                              // saltar a las preguntas
                             },
                             icon: Icon(
                               Icons.skip_next_outlined,
@@ -387,13 +357,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Column(
         children: [
           Container(
-            constraints: BoxConstraints(minHeight: 226.0),
+            width: double.infinity,
+            constraints: BoxConstraints(minHeight: 226.0, maxHeight: 226.0),
             child: Stack(
               // Usamos un Stack para superponer los botones a la imagen
               children: [
                 Image.network(
                   GraphQLConfig.urlServidor + story.img.urlImg,
-                  fit: BoxFit.cover, // Ajusta la imagen al contenedor
+                  width: double.infinity,
+                  fit: BoxFit.fill,
+                  errorBuilder: (BuildContext context, Object error,
+                      StackTrace? stackTrace) {
+                    return Image.asset(
+                      'assets/placeholder.png',
+                      width: double.infinity,
+                      fit: BoxFit.fill,
+                    ); // Imagen de marcador de posición
+                  }, // Ajusta la imagen al contenedor
                 ),
                 if (_isPlayingAudio) // Mostrar reproductor de audio
                   Positioned(
