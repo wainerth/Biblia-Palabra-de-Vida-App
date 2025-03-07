@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -22,6 +23,7 @@ class _MapScreenState extends State<MapScreen> {
   List<Level> levels = [];
   List<List<Level>> gruposDeNiveles = [];
   late ScrollController scrollController;
+
   // int _selectedIndex = 0;
   final List<String> imagePaths = [
     'assets/mapa1.png',
@@ -38,6 +40,38 @@ class _MapScreenState extends State<MapScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generateData(context);
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  onScrollPosition() {
+    final int lastUnlockedIndex = gruposDeNiveles.lastIndexWhere(
+      (grupo) => grupo.any((level) => level.unLockLevel == true),
+    );
+    if (lastUnlockedIndex != -1) {
+      String? lastLockedId = gruposDeNiveles[lastUnlockedIndex]
+          .lastWhere((level) => level.unLockLevel == true,
+              orElse: () => Level(
+                    id: '',
+                    name: '',
+                    unLockLevel: false,
+                    color: '',
+                    section: Section(sectionName: ''),
+                    img: Img(urlImg: ''),
+                    score: 0,
+                    levelScore: 0,
+                  ))
+          .id;
+
+      scrollController.animateTo(
+        int.parse(lastLockedId) * 190, // Ajusta según el tamaño del nivel
+        duration: Duration(seconds: 2),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   Future<void> _generateData(BuildContext context) async {
@@ -87,6 +121,7 @@ class _MapScreenState extends State<MapScreen> {
         setState(() {
           isLoading = false;
         });
+        // onScrollPosition();
       }
     }
   }
@@ -152,69 +187,35 @@ class _MapScreenState extends State<MapScreen> {
                         )
                       } else ...{
                         HeaderMapWidget(
-                          title: course!.title,
-                          subtitleStage: stage!.sectionName,
-                          indexStage: 1, //stage.id,
-                          onRouteBack: () {
-                            Navigator.popAndPushNamed(context, '/layoutPage1');
-                          },
-                          onShowInfoCourse: () {
-                            Navigator.popAndPushNamed(
-                                context, '/detailCoursePage',
-                                arguments: course);
-                          },
-                          onShowInfoStage: () {
-                            showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return CustomModalWidget(
-                                  title: stage!.sectionName,
-                                  content: stage!.introduction,
-                                  buttonText: 'Aceptar',
-                                  id: stage!.id,
-                                  itemCount: stage!.levelCount,
-                                  itemsCompleted: stage!.levelCompletedCount,
-                                );
-                              },
-                            );
-                          },
-                          onScroller: () {
-                            if (kDebugMode) {
-                              print(levels);
-                            }
-                            final int lastUnlockedIndex =
-                                gruposDeNiveles.lastIndexWhere(
-                              (grupo) => grupo
-                                  .any((level) => level.unLockLevel == false),
-                            );
-                            String? lastLockedId = gruposDeNiveles.reversed
-                                .expand((grupo) =>
-                                    grupo.reversed) // Recorremos desde el final
-                                .lastWhere(
-                                    (level) => level.unLockLevel == false,
-                                    orElse: () => Level(
-                                          id: '',
-                                          name: '',
-                                          unLockLevel: false,
-                                          color: '',
-                                          section: Section(sectionName: ''),
-                                          img: Img(urlImg: ''),
-                                          score: 0,
-                                          levelScore: 0,
-                                        ))
-                                .id;
-
-                            if (lastUnlockedIndex != -1) {
-                              scrollController.animateTo(
-                                int.parse(lastLockedId) *
-                                    100, // Ajusta según el tamaño del nivel
-                                duration: Duration(seconds: 1),
-                                curve: Curves.easeInOut,
+                            title: course!.title,
+                            subtitleStage: stage!.sectionName,
+                            indexStage: 1, //stage.id,
+                            onRouteBack: () {
+                              Navigator.popAndPushNamed(
+                                  context, '/layoutPage1');
+                            },
+                            onShowInfoCourse: () {
+                              Navigator.popAndPushNamed(
+                                  context, '/detailCoursePage',
+                                  arguments: course);
+                            },
+                            onShowInfoStage: () {
+                              showDialog(
+                                barrierDismissible: false,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CustomModalWidget(
+                                    title: stage!.sectionName,
+                                    content: stage!.introduction,
+                                    buttonText: 'Aceptar',
+                                    id: stage!.id,
+                                    itemCount: stage!.levelCount,
+                                    itemsCompleted: stage!.levelCompletedCount,
+                                  );
+                                },
                               );
-                            }
-                          },
-                        ),
+                            },
+                            onScroller: onScrollPosition),
                         SizedBox(
                           height: MediaQuery.sizeOf(context).height,
                           child: ListView.builder(
@@ -557,10 +558,12 @@ _buildItemLevel(BuildContext context, Level grupo) {
         shape: BoxShape.circle,
       ),
       //  "${GraphQLConfig.urlServidor}${grupo.img.urlImg}",
-      child: Image.asset(
-        "assets/level.png",
-        // width: StylesApp(context).sizeImage.width,
-        // height: StylesApp(context).sizeImage.height,
+      child: Image.network(
+        "${GraphQLConfig.urlServidor}${grupo.img.urlImg}",
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset("assets/level.png",
+              fit: StylesApp(context).fitImage);
+        },
         fit: StylesApp(context).fitImage,
       ),
     );

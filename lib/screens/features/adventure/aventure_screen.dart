@@ -32,7 +32,10 @@ class _AventureScreenState extends State<AventureScreen> {
 
   Future<void> _generateData(BuildContext context) async {
     LoadingService().showLoading(context);
-
+    setState(() {
+      errorMessage= null;
+      
+    });
     try {
       final result = await loadCoursesByUserAndChurch(null, null);
       if (result.error != null) {

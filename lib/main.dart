@@ -50,17 +50,16 @@ class _MyAppState extends State<MyApp> {
   Future<void> _loadDataPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      // print("esperando asignación");
       _hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
-      // Carga el token DESPUÉS de obtener _hasSeenIntro
+      //  load after the get token and initialize the authentication
       _loadTokenAndInitializeAuth(prefs);
     });
   }
-
+// function to load the token and initialize the authentication
   Future<void> _loadTokenAndInitializeAuth(SharedPreferences prefs) async {
     final authProvider = context.read<AuthenticationProvider>();
     await authProvider
-        .checkAuthentication(context); // Nueva función en el provider
+        .checkAuthentication(context); 
   }
 
   @override
@@ -77,7 +76,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('es', 'ES'), // Español (España)
+        Locale('es', 'ES'), // Spanish (España)
       ],
       home: SafeArea(
         child: _buildHomeScreen(),
@@ -88,7 +87,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildHomeScreen() {
-    // Mostrar indicador de carga mientras _hasSeenIntro es null.
+    // if the value is null, show a loading spinner
     if (_hasSeenIntro == null) {
       return const Scaffold(
         body: Center(

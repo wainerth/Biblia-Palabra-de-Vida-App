@@ -365,7 +365,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 Image.network(
                   GraphQLConfig.urlServidor + story.img.urlImg,
                   width: double.infinity,
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                   errorBuilder: (BuildContext context, Object error,
                       StackTrace? stackTrace) {
                     return Image.asset(

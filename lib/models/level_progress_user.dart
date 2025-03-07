@@ -1,6 +1,7 @@
 class LevelProgressUser {
   final String id;
   final int score;
+  final int energy;
   final Message message;
   final bool newRecord;
   final InfoUser user;
@@ -13,6 +14,7 @@ class LevelProgressUser {
   LevelProgressUser({
     required this.id,
     required this.score,
+    required this.energy,
     required this.message,
     required this.newRecord,
     required this.user,
@@ -30,6 +32,7 @@ class LevelProgressUser {
     return LevelProgressUser(
       id: id,
       score: score ?? this.score,
+      energy: energy ?? this.energy,
       message: message,
       newRecord: newRecord ?? this.newRecord,
       user: user,
@@ -45,6 +48,7 @@ class LevelProgressUser {
     return LevelProgressUser(
       id: json['id'],
       score: json['score'] ?? 0,
+      energy: json['energy'] ?? 0,
       message: Message.fromJson(json['message']),
       newRecord: json['newRecord'],
       user: InfoUser.fromJson(json['user']),

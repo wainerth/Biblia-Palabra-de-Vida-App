@@ -111,6 +111,7 @@ class LoginUser {
   final String name;
   final String? lastname;
   final int expTotalUser;
+  final int energyPoints;
   final String imgProfileUser;
   final String? phoneNumber;
   final Country? country;
@@ -133,6 +134,7 @@ class LoginUser {
   LoginUser({
     required this.name,
     required this.expTotalUser,
+    required this.energyPoints,
     required this.imgProfileUser,
     this.phoneNumber,
     required this.country,
@@ -158,6 +160,8 @@ class LoginUser {
       {String? name,
       String? lastname,
       String? gender,
+      int? expTotalUser,
+      int? energyPoints,
       String? city,
       String? email,
       String? imgProfileUser,
@@ -178,7 +182,8 @@ class LoginUser {
         lastname: lastname,
         city: city,
         imgProfileUser: imgProfileUser ?? this.imgProfileUser,
-        expTotalUser: expTotalUser,
+        expTotalUser: expTotalUser ?? this.expTotalUser ,
+        energyPoints: energyPoints ?? this.energyPoints,
         country: country,
         phoneNumber: phoneNumber,
         favoriteVerseId: favoriteVerseId ?? '',
@@ -212,6 +217,7 @@ class LoginUser {
       birthdate: json['birthdate'] ?? '',
       isBaptized: json['isBaptized'] ?? false,
       expTotalUser: json['expTotalUser'],
+      energyPoints: json['energyPoints'] ?? 0,
       imgProfileUser: json['imgProfileUser'],
       phoneNumber: json['phoneNumber'] ?? '',
       country:
@@ -239,6 +245,7 @@ class LoginUser {
         'birthdate': birthdate,
         'isBaptized': isBaptized,
         'expTotalUser': expTotalUser,
+        'energyPoints': energyPoints,
         'imgProfileUser': imgProfileUser,
         'phoneNumber': phoneNumber,
         'country': country?.toJson(),

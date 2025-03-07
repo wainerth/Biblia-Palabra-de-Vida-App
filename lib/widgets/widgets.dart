@@ -1,4 +1,6 @@
 
+export 'package:biblia_palabra_de_vida_app/widgets/reward_widget.dart';
+
 export 'package:biblia_palabra_de_vida_app/widgets/ordering_question_draggable_widget.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/selection_question_widget.dart';
@@ -75,4 +77,5 @@ export 'package:biblia_palabra_de_vida_app/widgets/audio_player_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/head_score_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/build_error_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/card_option_widget.dart';
 

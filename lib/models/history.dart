@@ -32,8 +32,8 @@ class History {
       level: IntermediateLevel.fromJson(json['level']),
       img: Img.fromJson(json['img']),
       status: json['status'],
-      audioUrl: json['audioUrl'],
-      videoUrl: json['videoUrl'],
+      audioUrl: json['audioUrl'] ?? '',
+      videoUrl: json['videoUrl'] ?? '',
     );
   }
 }

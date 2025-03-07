@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/models/response_data.dart';
@@ -473,7 +475,7 @@ Future<ResponseData> sendResponsesUser(List responses) async {
   }
 }
 
-Future<ResponseData> sendScoreUser(userId, levelId, failedIntents) async {
+Future<ResponseData> sendScoreUser(userId, courseId, levelId, failedIntents) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -482,15 +484,19 @@ Future<ResponseData> sendScoreUser(userId, levelId, failedIntents) async {
   MutationOptions mutateGql = MutationOptions(
     operationName: "SendScore",
     document: gql(r'''
-      mutation SendScore($userId: ID, $levelId: ID, $failedAttempts: Int) {
-        sendScore(userId: $userId, levelId: $levelId, failedAttempts: $failedAttempts) {
+      mutation SendScore($courseId: ID, $levelId: ID, $failedAttempts: Int, $userId: ID) {
+        sendScore(courseId: $courseId, levelId: $levelId, failedAttempts: $failedAttempts, userId: $userId) {
           isLastLevel
-          achievementUnlocked
+          isLastStage
+          prizeWon
+          titleUnlocked
+          rewardObtained
         }
       }
       '''),
     variables: <String, dynamic>{
       "userId": userId,
+      "courseId": courseId,
       "levelId": levelId,
       "failedAttempts": failedIntents
     },
@@ -514,6 +520,57 @@ Future<ResponseData> sendScoreUser(userId, levelId, failedIntents) async {
       data: data['sendScore'],
       error: null,
     );
+  }  on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Send score Timeout de conexión $e');
+  } catch (e) {
+    return ResponseData(data: null, error: "connection error $e");
+  }
+}
+
+/// unlocked next section
+Future<ResponseData> unlockedNextSection(userId, sectionId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "UnlockNextSection",
+    document: gql(r'''
+      mutation UnlockNextSection($userId: ID, $sectionId: ID) {
+        unlockNextSection(userId: $userId, sectionId: $sectionId)
+      }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "sectionId": sectionId
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['unlockNextSection'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'unlock Next Section failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['unlockNextSection'],
+      error: null,
+    );
+  }  on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'unlock Next Section Timeout de conexión $e');
   } catch (e) {
     return ResponseData(data: null, error: "connection error $e");
   }

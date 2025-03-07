@@ -19,13 +19,13 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              HeaderWidget(),
-              _buildIntroSlide(context),
-            ],
-          ),
+        child: Column(
+          children: [
+            HeaderWidget(),
+             Expanded( // Use Expanded to fill the remaining space
+              child: _buildIntroSlide(context),
+            ),
+          ],
         ),
       ),
     );
@@ -35,7 +35,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
     return Stack(
       children: [
         SizedBox(
-          height: MediaQuery.of(context).size.height - 90.0,
+          height: MediaQuery.of(context).size.height,
           child: PageView(
             controller: _controller,
             onPageChanged: (index) {

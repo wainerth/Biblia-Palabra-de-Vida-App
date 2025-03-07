@@ -15,7 +15,8 @@ Future<ResponseData> getProfileUser(token, idUser) async {
                     getOneProfileByUserId(userId: $userId) {
                       name # nombre y apellido
                       lastname
-                      expTotalUser #energia
+                      expTotalUser # puntos no disminuye
+                      energyPoints #energía del usuario esta disminuye
                       imgProfileUser
                       phoneNumber
                        city
@@ -135,6 +136,117 @@ Future<ResponseData> getAchievement(userId) async {
     print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Get User Achievement Timeout de conexión $e');
+  } catch (e) {
+    return ResponseData(
+      data: null,
+      error: 'Connection error: $e',
+    );
+  }
+}
+
+Future<ResponseData> getPrizeWon(userId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+  final GraphQLClient _client = createClient(authToken: userToken);
+  final QueryOptions options = QueryOptions(
+    operationName: "getPrizeByCourse",
+    document: gql(r'''
+    query getPrizeByCourse($courseId: ID) {
+     getPrizeByCourse {
+        id
+        courseId
+        biblicalName
+        typeStone
+        description
+        img {
+          urlImg
+        }
+        exchangeValue
+        unLockPrize
+        status
+      }
+    }
+    '''),
+    variables: <String, dynamic>{"userId": userId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['getUserAchievement'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Achievement failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getUserAchievement'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get User Achievement Timeout de conexión $e');
+  } catch (e) {
+    return ResponseData(
+      data: null,
+      error: 'Connection error: $e',
+    );
+  }
+}
+Future<ResponseData> getRewardObtained(sectionId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+  final GraphQLClient _client = createClient(authToken: userToken);
+  final QueryOptions options = QueryOptions(
+    operationName: "GetOneRewardBySection",
+    document: gql(r'''
+    query GetOneRewardBySection($sectionId: ID) {
+      getOneRewardBySection(sectionId: $sectionId) {
+        id
+        sectionId
+        title
+        description
+        img {
+          urlImg
+        }
+        earnedExperience
+        earnedEnergy
+        unLockReward
+        status
+      }
+      }
+    '''),
+    variables: <String, dynamic>{"sectionId": sectionId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['getOneRewardBySection'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Reward failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getOneRewardBySection'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Get One reward Timeout de conexión $e');
   } catch (e) {
     return ResponseData(
       data: null,
@@ -436,6 +548,7 @@ Future loadLevelsByCourse(userId, sectionId) async {
             levelScore
             countLevelNumber
             unLockLevel
+            
             color
             section {
               sectionName
@@ -746,6 +859,7 @@ Future lastLevelProgressUser(userId, levelId) async {
       getProgressLevelUser(userId: $userId, levelId: $levelId) {
         id
         score
+        energy
         message {
           resultDescription
           resultTitle

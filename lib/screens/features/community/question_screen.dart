@@ -31,9 +31,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
   Stage? stage;
   Level? level;
   UserAchievement? achievement;
+  UserAchievement? prize;
+  Reward? reward;
   LevelProgressUser? levelProgress;
-  SendScoreModel? sendScore =
-      SendScoreModel(isLastLevel: false, achievementUnlocked: false);
+  SendScoreModel? sendScore = SendScoreModel(
+      isLastLevel: false,
+      titleUnlocked: false,
+      isLastStage: false,
+      rewardObtained: false,
+      prizeWon: false);
   Question currentQuestion = Question(
     id: "",
     question: "",
@@ -61,11 +67,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
   bool showAchievementUnlocked = false; // para mostrar Logro desbloqueado
   bool showLastStageCompleted =
       false; // para mostrar mensaje de culminación de etapa
+  bool showRewardObtained = false; // si obtuvo recompensa
   bool isOrdering = false;
   bool _selectionCompleted = false;
   bool _isAnswerSelected = false;
   bool isLastStage = false;
-
+  bool showReview = false;
+  int bestScore = 0;
   String imgBack = "";
   String courseId = "";
   String levelId = "";
@@ -280,6 +288,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           levelProgress = LevelProgressUser(
               id: "",
               score: 0,
+              energy: 0,
               message: Message(
                   resultDescription: "", resultTitle: "", difficulty: ""),
               newRecord: false,
@@ -305,7 +314,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
         // lamamos al servicios que nos registra el score
         final ResponseData sendScoreResponse = await sendScoreUser(
             userData != null ? userData!.user.id : '',
-            level != null ? level!.id : '',
+            courseId,
+            levelId,
             failedAttempts);
         if (sendScoreResponse.error != null) {
           LoadingService().hideLoading();
@@ -313,12 +323,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
               message: sendScoreResponse.error!, dialogType: DialogType.error);
           return;
         }
-        sendScore = SendScoreModel.fromJson(sendScoreResponse.data);
-        // si se desbloqueo un logro buscamos el logro
-        if (sendScore!.achievementUnlocked) {
+        sendScore =
+            SendScoreModel.fromJson(removeTypename(sendScoreResponse.data));
+        // si se desbloqueo un titulo buscamos el logro
+        if (sendScore!.titleUnlocked) {
           final responseAchievement = await getAchievement(userData!.user.id);
 
           if (responseAchievement.error != null) {
+            // si desbloqueo un titulo
             LoadingService().hideLoading();
             await showCustomDialog(context,
                 message: responseAchievement.error!,
@@ -333,6 +345,33 @@ class _QuestionScreenState extends State<QuestionScreen> {
             achievement = achievements.isNotEmpty ? achievements.last : null;
           }
         }
+        // si obtuvo un premio
+        if (sendScore!.prizeWon) {
+          final responsePrizeWon = await getPrizeWon(userData!.user.id);
+        }
+        // si obtuvo una recompensa
+        if (sendScore!.isLastLevel) {
+          final responseRewardObtained =
+              await getRewardObtained(userData!.user.id);
+          if (responseRewardObtained.error != null) {
+            LoadingService().hideLoading();
+            await showCustomDialog(context,
+                message: responseRewardObtained.error!,
+                dialogType: DialogType.error);
+            return;
+          }
+          reward = Reward.fromJson(removeTypename(responseRewardObtained.data));
+          // desbloquear la proxima sección
+          // final responseUnlockSection = await unlockedNextSection(userData!.user.id, sectionId);
+          // if (responseUnlockSection.error != null) {
+          //    LoadingService().hideLoading();
+          //   await showCustomDialog(context,
+          //       message: responseRewardObtained.error!,
+          //       dialogType: DialogType.error);
+          //   return;
+          // }
+        }
+
         // consultamos ultimo progreso en el nivel
         final ResponseData progressLevelResponse = await lastLevelProgressUser(
             userData != null ? userData!.user.id : '',
@@ -345,10 +384,35 @@ class _QuestionScreenState extends State<QuestionScreen> {
           return;
         }
         levelProgress = LevelProgressUser.fromJson(progressLevelResponse.data);
+
+        // actualizamos energía y experiencia en el perfil del usuario
+        int experience = 0;
+        int energy = 0;
+        // si no ha obtenido todos los puntos
+        print("es nuevo record : ${levelProgress!.newRecord}");
+
         if (levelProgress!.newRecord) {
-          levelProgress!.copyWith(
-              score: (levelProgress!.score - levelProgress!.scoreLastAttempt));
+          experience = levelProgress!.score > levelProgress!.scoreLastAttempt
+              ? levelProgress!.score - levelProgress!.scoreLastAttempt
+              : 0;
+          energy = (experience / 10).toInt();
+        } else {
+          experience = 0; //levelProgress!.score;
+          energy = 0; // (experience / 10).toInt();
+          setState(() {
+            bestScore = levelProgress!.scoreLastAttempt;
+            showReview = true;
+          });
         }
+
+        setState(() {
+          userData = userData!.copyWith(
+              expTotalUser: userData!.expTotalUser + experience,
+              energyPoints: userData!.energyPoints + energy);
+        });
+
+        print('${userData!.expTotalUser}  ${userData!.energyPoints}');
+        Provider.of<UserProvider>(context, listen: false).setUser(userData);
 
         // habilitamos mostrar paso completado
         setState(() {
@@ -461,6 +525,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         child: _buildActivityCompleted(context, levelProgress!),
                       )
                     },
+                   
                     if (showAchievementUnlocked) ...{
                       Expanded(
                         child: _buildAchievementUnloked(context),
@@ -472,6 +537,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       Expanded(
                           child: _buildLastStage(
                               context) //_buildLastLevel(context),
+                          ),
+                    },
+                    if (showRewardObtained) ...{
+                      Expanded(
+                          child: RewardWidget() //_buildLastLevel(context),
                           ),
                     },
                   },
@@ -633,14 +703,23 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       : "Intenta nuevamente el\n Paso ${data.level.id} para avanzar",
                   style: StylesApp(context).textStyleWithe20,
                 ),
-                if (data.score > 0) ...{
+                if (data.score > 0 && !showReview) ...{
                   SizedBox(
                     height: 15.0,
                   ),
                   Text(
                     textAlign: TextAlign.center,
-                    'Haz ganado\n ${data.score} LMs de energía',
+                    'Haz ganado\n ${data.energy} LMs de energía',
                     style: StylesApp(context).textStyleWithe20,
+                  ),
+                } else ...{
+                  Text(
+                    textAlign: TextAlign.center,
+                    "En toda labor hay fruto.",
+                    style: StylesApp(context).textStyleBodyAso20.copyWith(
+                          color: Colors.white,
+                          letterSpacing: data.score > 0 ? 0.0 : 1,
+                        ),
                   ),
                 },
                 SizedBox(
@@ -665,15 +744,25 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       letterSpacing: data.score > 0 ? 0.0 : 1,
                     ),
               ),
-              if (data.score > 0)
+              if (showReview) ...{
+                Text(
+                  textAlign: TextAlign.center,
+                  "Mejor puntaje : ${bestScore}",
+                  style: StylesApp(context).textStyleBodyAso20.copyWith(
+                        color: Color(0XFFFD8C43),
+                        letterSpacing: data.score > 0 ? 0.0 : 1,
+                      ),
+                ),
+              },
+              if (data.score > 0 && !showReview)
                 Image.asset(
                   "assets/kawaii_fire.png",
                   height: calculateHeight(score),
                   fit: BoxFit.contain,
                 ),
-              if (data.score > 0) ...{
+              if (data.score > 0 && !showReview) ...{
                 Text(
-                  "${data.score.toStringAsFixed(0)} lms",
+                  "${data.energy.toStringAsFixed(0)} lms",
                   style: StylesApp(context)
                       .textStyleBody20
                       .copyWith(color: Color(0XFFFD8C43)),
@@ -688,7 +777,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 height: 32.0,
                 buttonStyle: StylesApp(context).btnWidgetSmall,
                 onPressed: () {
-                  if (sendScore!.achievementUnlocked) {
+                  if (sendScore!.titleUnlocked) {
                     setState(() {
                       showStepCompleted = false;
                       showAchievementUnlocked = true;
@@ -714,6 +803,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
+  /// dialog si obtuvo titulo
   _buildAchievementUnloked(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
@@ -866,6 +956,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
+  /// sección de nivel completado
   _buildLastLevel(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -1081,15 +1172,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
               ],
             ),
-            // ButtonThemeWidget(
-            //   showIcon: true,
-            //   icon: Icons.share,
-            //   width: 208,
-            //   height: 32,
-            //   colorIcon: Colors.white,
-            //   buttonStyle: StylesApp(context).btnPrimary,
-            //   text: "Compartir logro",
-            // ),
             SizedBox(height: 43),
           ],
         ),
