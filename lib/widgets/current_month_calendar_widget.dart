@@ -1,5 +1,10 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class CurrentMonthCalendarWidget extends StatefulWidget {
   const CurrentMonthCalendarWidget({super.key});
@@ -11,23 +16,86 @@ class CurrentMonthCalendarWidget extends StatefulWidget {
 
 class _CurrentMonthCalendarWidgetState
     extends State<CurrentMonthCalendarWidget> {
+   String? errorMessage;
+  DateCalendar? dayProtectedStreak;
+  late DateTime displayedMonth; // Mueve displayedMonth aquí
+  late DateTime registrationDate;
+  late DateTime lastDate;
+  int daysInMonth = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    DateTime now = DateTime.now();
+    DateTime currentDate = DateTime(now.year, now.month);
+    registrationDate = DateTime(2023, 7, 1); // Fecha de registro
+    lastDate = registrationDate.add(Duration(days: 365 * 5));
+
+    if (currentDate.isBefore(registrationDate)) {
+      displayedMonth = registrationDate;
+    } else {
+      displayedMonth = currentDate;
+    }
+      daysInMonth =
+            DateTime(displayedMonth.year, displayedMonth.month + 1, 0).day;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generateData(context);
+    });
+  }
+
+  Future<void> _generateData(BuildContext context) async {
+    LoadingService().showLoading(context);
+    DateTime now = DateTime.now();
+    try {
+      setState(() {});
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final LoginUser? userData = userProvider.currentUser;
+      final responseStreakCalendar =
+          await streaksCalendar(userData!.user.id, now.month);
+      if (responseStreakCalendar.error != null) {
+        errorMessage = responseStreakCalendar.error;
+      }
+      setState(() {
+        dayProtectedStreak =
+            DateCalendar.fromJson(removeTypename(responseStreakCalendar.data));
+      });
+      // dayProtectedStreak = responseStreakCalendar.data["protectedStreak"];
+    } catch (e) {
+    } finally {
+      LoadingService().hideLoading();
+    }
+  }
+
+  loadStreak(month) async {
+    dayProtectedStreak = null;
+    LoadingService().showLoading(context);
+    try {
+      setState(() {});
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final LoginUser? userData = userProvider.currentUser;
+      final responseStreakCalendar =
+          await streaksCalendar(userData!.user.id, month);
+      if (responseStreakCalendar.error != null) {
+        errorMessage = responseStreakCalendar.error;
+      }
+      setState(() {
+        dayProtectedStreak =
+            DateCalendar.fromJson(removeTypename(responseStreakCalendar.data));
+      });
+      // dayProtectedStreak = responseStreakCalendar.data["protectedStreak"];
+    } catch (e) {
+      print(e);
+    } finally {
+      LoadingService().hideLoading();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     DateTime registrationDate = DateTime(2023, 7, 1); // Fecha de registro
     DateTime now = DateTime.now();
     DateTime currentDate = DateTime(now.year, now.month);
-    DateTime displayedMonth = currentDate;
     DateTime lastDate = registrationDate.add(Duration(days: 365 * 5));
-    List datesWithImage = [
-      DateTime(2025, 01, 01),
-      DateTime(2025, 01, 04),
-      DateTime(2025, 01, 05),
-      DateTime(2025, 01, 06),
-      DateTime(2025, 01, 07),
-      DateTime(2025, 01, 08),
-      DateTime(2025, 01, 10),
-      DateTime(2025, 01, 11),
-    ];
 
     if (currentDate.isBefore(registrationDate)) {
       currentDate = registrationDate;
@@ -35,27 +103,30 @@ class _CurrentMonthCalendarWidgetState
 
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
-        void previousMonth() {
+        void previousMonth() async {
           if (displayedMonth.isAfter(registrationDate)) {
             setState(() {
               displayedMonth =
                   DateTime(displayedMonth.year, displayedMonth.month - 1);
             });
           }
+          await loadStreak(displayedMonth.month);
         }
 
-        void nextMonth() {
+        void nextMonth() async {
           if (displayedMonth
               .isBefore(registrationDate.add(Duration(days: 365 * 5)))) {
             setState(() {
               displayedMonth =
                   DateTime(displayedMonth.year, displayedMonth.month + 1);
+              print(displayedMonth.month);
+              // loadStreak(displayedMonth.month);
             });
+            await loadStreak(displayedMonth.month);
           }
         }
 
-        int daysInMonth =
-            DateTime(displayedMonth.year, displayedMonth.month + 1, 0).day;
+      
         List<Widget> dayWidgets = [];
 
         for (int i = 1; i <= daysInMonth; i++) {
@@ -70,45 +141,47 @@ class _CurrentMonthCalendarWidgetState
               ),
               child: Stack(
                 children: [
-                  if (datesWithImage.contains(DateTime(
-                      displayedMonth.year, displayedMonth.month, i))) ...{
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: Image.asset(
-                          "assets/fire_rachaActive.png",
-                          fit: BoxFit.fitHeight,
-                          height: 50,
-                          width: 50,
+                  if (dayProtectedStreak != null) ...{
+                    if (dayProtectedStreak!.playDay.contains(DateTime(
+                        displayedMonth.year, displayedMonth.month, i))) ...{
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: double.infinity,
+                          child: Image.asset(
+                            "assets/fire_rachaActive.png",
+                            fit: BoxFit.fitHeight,
+                            height: 50,
+                            width: 50,
+                          ),
                         ),
-                      ),
-                    )
-                  } else if (DateTime(
-                              displayedMonth.year, displayedMonth.month, i)
-                          .isAfter(datesWithImage.first) &&
-                      DateTime(displayedMonth.year, displayedMonth.month, i)
-                          .isBefore(datesWithImage.last)) ...{
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: Image.asset(
-                          "assets/fire_rachaInactive.png",
-                          fit: BoxFit.fitHeight,
-                          height: 50,
-                          width: 50,
+                      )
+                    } ,
+                    
+                    if (dayProtectedStreak!.protectedStreak.contains(
+                        DateTime(
+                            displayedMonth.year, displayedMonth.month, i))) ...{
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: double.infinity,
+                          child: Image.asset(
+                            "assets/fire_rachaInactive.png",
+                            fit: BoxFit.fitHeight,
+                            height: 50,
+                            width: 50,
+                          ),
                         ),
-                      ),
-                    )
+                      )
+                    },
                   },
                   Center(
                     child: Text(

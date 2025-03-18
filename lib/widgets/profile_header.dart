@@ -28,8 +28,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       return AssetImage('assets/no-image.jpg');
     } else {
       if (widget.avatarImg.isNotEmpty) {
-        return NetworkImage( GraphQLConfig.urlServidor +
-                widget.avatarImg, );
+        return NetworkImage(widget.avatarImg, );
       } else {
         return FileImage(File(widget.avatarImg));
       }

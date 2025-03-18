@@ -96,12 +96,12 @@ class AuthenticationProvider extends ChangeNotifier {
     }
 
     // llamamos a achievement
-    final userAchievement = await getAchievement( userId);
-    error = userAchievement.error;
-    if (userAchievement.error != null) {
+    final UserTitle = await getUserTitle( userId);
+    error = UserTitle.error;
+    if (UserTitle.error != null) {
       return ResponseData(data: null, error: error);
     }
-    userProfile.data['achievement'] = userAchievement.data;
+    userProfile.data['title'] = UserTitle.data;
     // consultamos la liga
     if (userProfile.data["currentLeagueId"] == null) {
       userProfile.data["currentLeagueId"] = "0";

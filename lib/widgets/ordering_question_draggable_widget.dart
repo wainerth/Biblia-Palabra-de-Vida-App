@@ -26,7 +26,8 @@ class OrderingQuestionDraggableWidget extends StatefulWidget {
       _OrderingQuestionDraggableStateWidget();
 }
 
-class _OrderingQuestionDraggableStateWidget extends State<OrderingQuestionDraggableWidget> {
+class _OrderingQuestionDraggableStateWidget
+    extends State<OrderingQuestionDraggableWidget> {
   int countList = 0;
   int currentIndex = 0;
   List currentAnswers = [];
@@ -384,7 +385,7 @@ class _OrderingQuestionDraggableStateWidget extends State<OrderingQuestionDragga
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
                                   textAlign: TextAlign.center,
-                                  "El orden correcto de los\n hechos es el nacimiento,\n visita de los reyes\n magos, amenaza de\n herodes e ida a Egipto,\n regreso de Egipto a\n Nazaret",
+                                  getCorrectOrderString(),
                                   style: StylesApp(context)
                                       .textStyleBodyAso20
                                       .copyWith(
@@ -417,5 +418,16 @@ class _OrderingQuestionDraggableStateWidget extends State<OrderingQuestionDragga
         },
       ],
     );
+  }
+
+  String getCorrectOrderString() {
+    List<Answer> sortedAnswers =
+        List.from(widget.orderedAnswers); // Crea una copia de la lista
+    sortedAnswers.sort((a, b) => a.correctOrder!.compareTo(b!.correctOrder as num));
+
+    String orderedText =
+        sortedAnswers.map((answer) => answer.answer).join(', ');
+
+    return "El orden correcto de los hechos es \n$orderedText";
   }
 }

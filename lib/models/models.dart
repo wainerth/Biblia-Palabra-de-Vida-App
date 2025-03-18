@@ -42,3 +42,9 @@ export 'package:biblia_palabra_de_vida_app/models/user_ranking.dart';
 export 'package:biblia_palabra_de_vida_app/models/radio_button_option.dart';
 export 'package:biblia_palabra_de_vida_app/models/last_progress_user.dart';
 export 'package:biblia_palabra_de_vida_app/models/user_responses.dart';
+export 'package:biblia_palabra_de_vida_app/models/title_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/prize_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/date_calendar.dart';
+export 'package:biblia_palabra_de_vida_app/models/user_title.dart';
+
+

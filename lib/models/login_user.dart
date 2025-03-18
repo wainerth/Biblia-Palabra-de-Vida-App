@@ -128,7 +128,7 @@ class LoginUser {
   final int streakDaysCount;
   final int preachingsCreatedCount;
   final User user;
-  final List<UserAchievement>? achievement;
+  final List<UserTitle>? title;
   final UserRanking? league;
 
   LoginUser({
@@ -145,7 +145,7 @@ class LoginUser {
     required this.streakDaysCount,
     required this.preachingsCreatedCount,
     required this.user,
-    required this.achievement,
+    required this.title,
     required this.league,
     this.lastname,
     this.birthdate,
@@ -193,7 +193,7 @@ class LoginUser {
         streakDaysCount: streakDaysCount ?? 0,
         preachingsCreatedCount: preachingsCreatedCount ?? 0,
         user: user ?? this.user,
-        achievement: achievement,
+        title: title,
         league: league,
         birthdate: birthdate,
         identifier: identifier,
@@ -203,10 +203,10 @@ class LoginUser {
   }
 
   factory LoginUser.fromJson(Map<String, dynamic> json) {
-    List<UserAchievement> achievement = [];
-    if (json['achievement'] != null) {
-      achievement = (json['achievement'] as List)
-          .map((i) => UserAchievement.fromJson(i))
+    List<UserTitle> title = [];
+    if (json['title'] != null) {
+      title = (json['title'] as List)
+          .map((i) => UserTitle.fromJson(i))
           .toList();
     }
     return LoginUser(
@@ -231,7 +231,7 @@ class LoginUser {
       preachingsCreatedCount: json['preachingsCreatedCount'],
       currentLeagueId: json['currentLeagueId'],
       user: User.fromJson(json['user']),
-      achievement: achievement,
+      title: title,
       league:
           json['league'] != null ? UserRanking.fromJson(json['league']) : null,
     );
@@ -258,7 +258,7 @@ class LoginUser {
         'preachingsCreatedCount': preachingsCreatedCount,
         'currentLeagueId': currentLeagueId,
         'user': user.toJson(),
-        'achievement': achievement,
+        'title': title,
         'league': league,
       };
 }

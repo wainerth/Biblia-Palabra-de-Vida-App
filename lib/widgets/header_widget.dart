@@ -45,7 +45,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     child: CircleAvatar(
                       radius: 50,
                       backgroundImage: NetworkImage (
-                        "${GraphQLConfig.urlServidor}${userData?.imgProfileUser}",
+                        "${userData?.imgProfileUser}",
                       ),
                     ),
                   ),

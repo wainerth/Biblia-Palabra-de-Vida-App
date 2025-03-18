@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -17,6 +18,7 @@ class CardAventureWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const maxScore = 150;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 9.0, vertical: 6.0),
       margin: EdgeInsets.symmetric(horizontal: 9.0, vertical: 5.0),
@@ -42,9 +44,9 @@ class CardAventureWidget extends StatelessWidget {
                         Stack(
                           children: [
                             Center(
-                              child: StarStatusWidget(
+                                child: StarStatusWidget(
                                 containerWidth: 79,
-                                levelScore: 100,
+                                levelScore: obtainedStar(maxScore, course.sectionCompletedCount, course.sectionCount) ,
                               ),
                             ),
                             
@@ -136,4 +138,5 @@ class CardAventureWidget extends StatelessWidget {
       ),
     );
   }
+
 }

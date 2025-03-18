@@ -244,7 +244,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
           selectedItem: item.value.isNotEmpty
               ? optionsSex.firstWhere(
                   (element) => 
-                  element.label.toLowerCase() == item.value.toLowerCase())
+                  element.value.toLowerCase() == item.value.toLowerCase())
               : null,
         ),
       );
@@ -302,12 +302,13 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
           minWidth: 160.0,
           maxWidth: StylesApp(context).sizeTextFormField.width,
         ),
-        child: CustomDropdownWidget<Country>(
+        child: 
+        CustomDropdownBottomWidget(
           hintText: "Seleccione un país",
           items: dropDownList,
           onChanged: (ModelData? newValue) {
             setState(() {
-              _editingData[index] = ModelData(
+               _editingData[index] = ModelData(
                 label: _editingData[index].label,
                 value: newValue!.label,
                 clave: _editingData[index].clave,
@@ -320,6 +321,25 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
                   .firstWhere((element) => element.label == item.value)
               : null,
         ),
+        
+        // CustomDropdownWidget<Country>(
+        //   hintText: "Seleccione un país",
+        //   items: dropDownList,
+        //   onChanged: (ModelData? newValue) {
+        //     setState(() {
+        //       _editingData[index] = ModelData(
+        //         label: _editingData[index].label,
+        //         value: newValue!.label,
+        //         clave: _editingData[index].clave,
+        //         showLabel: _editingData[index].showLabel,
+        //       );
+        //     });
+        //   },
+        //   selectedItem: item.value.isNotEmpty
+        //       ? dropDownList
+        //           .firstWhere((element) => element.label == item.value)
+        //       : null,
+        // ),
       );
     } else if (item.label == 'Iglesia') {
       return Container(

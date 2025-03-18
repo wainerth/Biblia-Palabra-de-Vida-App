@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CatalogueProvider extends ChangeNotifier {
   late GraphQLClient _client;
+  late Map<String, dynamic> allConfig;
   List<Country> allCountries = []; // Inicializa las listas
   List<Church> allChurches = [];
   List<League> allLeagues = [];
@@ -23,6 +24,7 @@ class CatalogueProvider extends ChangeNotifier {
 
   Future<void> initialize() async {
     _client = createClient();
+    await getConfigurations();
     await _loadCountries();
 
     await _loadSex();
@@ -34,6 +36,39 @@ class CatalogueProvider extends ChangeNotifier {
     await _loadLeagues();
   }
 
+  Future<void> getConfigurations() async {
+
+    QueryOptions options =  QueryOptions(
+      operationName: "GetConfigurations",
+      document: gql(r'''
+        query GetConfigurations {
+      getConfigurations
+    }
+      '''),
+      fetchPolicy: FetchPolicy.noCache,
+    );
+
+    try {
+      final QueryResult result = await _client.query(options);
+
+      if (result.hasException) {
+        throw Exception('Failed to obtain getConfigurations');
+      }
+
+      final data = result.data;
+
+      if (data == null || data['getConfigurations'] == null) {
+        throw Exception('Failed to obtain getConfigurations');
+      }
+
+      allConfig = Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
+      print(allConfig);
+      
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to obtain getConfigurations $e');
+    }
+  }
   Future<void> _loadCountries() async {
 
     QueryOptions options = QueryOptions(

@@ -228,21 +228,20 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  Future<LastProgressUser?> getProgressUser(userId, courseId) async {
+  Future<ResponseData?> getProgressUser(userId, courseId) async {
     LastProgressUser? userProgress;
     final progress = await getLastProgressUser(userId, courseId);
     if (progress.error != null) {
-      print(progress.error);
-      userProgress = progress.data;
+      return ResponseData(error: progress.error, data: null);
     }
 
-    if (progress.data['data'] != null) {
-      userProgress = LastProgressUser.fromMap(progress.data['data']);
+    if (progress.data == null || progress.data['data'] == null) {
+      return ResponseData(
+          error: "get last progress user level: No data result", data: null);
     } else {
-      userProgress = null;
+      userProgress = LastProgressUser.fromMap(progress.data['data']);
+      setProgressUser(userProgress);
+      return ResponseData(error: null, data: userProgress);
     }
-
-    setProgressUser(userProgress);
-    return userProgress;
   }
 }

@@ -1,9 +1,6 @@
-// import 'package:flutter/foundation.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/time_out_link.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-// import 'package:http/io_client.dart';
-// import 'dart:io';
 import 'graphql_config.dart';
-// import 'package:http/http.dart' as http;
 
 GraphQLClient createClient({String? authToken}) {
     // http.Client httpClient;
@@ -19,8 +16,8 @@ GraphQLClient createClient({String? authToken}) {
   final AuthLink authLink = AuthLink(
     getToken: () async =>  authToken ?? GraphQLConfig.authToken,
   );
-
-  final Link link = authLink.concat(httpLink);
+// TimeoutLink(httpLink, timeout: Duration(seconds: 10)); /
+  final Link link = TimeoutLink(authLink.concat(httpLink),timeout: Duration(seconds: 20));
 
   return GraphQLClient(
     cache: GraphQLCache(store: InMemoryStore()),

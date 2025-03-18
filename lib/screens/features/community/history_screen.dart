@@ -40,7 +40,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _generateData(BuildContext context) async {
-    errorMessage = null;
+    setState(() {
+      errorMessage = null;
+    });
     LoadingService().showLoading(context);
 
     final Map<String, dynamic>? args =
@@ -54,7 +56,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         setState(() {});
 
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        final ResponseData responseCourse = await loadOneCourse(courseId);
+        final LoginUser? userData = userProvider.currentUser;
+        final ResponseData responseCourse =
+            await loadOneCourse(userData!.user.id, courseId);
         if (responseCourse.error != null) {
           errorMessage = responseCourse.error;
         }
@@ -116,8 +120,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               } else ...{
                 HeaderNotDetailsStageWidget(
                   title: "Conoce el ${course?.title}",
-                  stage: stage!.id,
-                  subtitle: stage!.sectionName,
+                  stage: stage != null ? stage!.id : '',
+                  subtitle: stage != null ? stage!.sectionName : '',
                   details: stage,
                   onPressed: () {
                     Navigator.pop(context);
@@ -131,7 +135,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       color: StyleColor.orange,
                       borderRadius: BorderRadius.circular(8.0)),
                   child: Text(
-                    "Paso ${(isPage + 1).floorToDouble().toStringAsFixed(0)} ${level!.name}",
+                    "Paso ${(isPage + 1).floorToDouble().toStringAsFixed(0)} ${level != null ? level!.name : ''}",
                     style: StylesApp(context).textStyleBody5,
                   ),
                 ),

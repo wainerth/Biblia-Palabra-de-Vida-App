@@ -4,6 +4,7 @@ class Question {
   final String difficulty;
   final LevelQuestion level;
   final int status;
+  final bool isOrdering;
   final List<Answer> answers;
 
   Question({
@@ -13,6 +14,7 @@ class Question {
     required this.level,
     required this.status,
     required this.answers,
+    required this.isOrdering,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
@@ -24,7 +26,8 @@ class Question {
       level: LevelQuestion.fromJson(json['level']),
       status: json['status'],
       answers: (json['answers'] as List).map((e) =>
-       Answer.fromJson(e)).toList(),
+       Answer.fromJson(e)).toList(), 
+      isOrdering: json['isOrdering'],
     );
   }
 }
@@ -45,6 +48,7 @@ class Answer {
   final bool isCorrect;
   final String questionId;
   final int? orderInAnswer;
+  final int? correctOrder;
   String? option;
   final int status;
 
@@ -54,6 +58,7 @@ class Answer {
     required this.isCorrect,
     required this.questionId,
     this.orderInAnswer = 0,
+    this.correctOrder = 0,
     required this.status,
     this.option = '',
   });
@@ -65,6 +70,7 @@ class Answer {
       isCorrect: json['isCorrect'],
       questionId: json['questionId'],
       orderInAnswer: json['orderInAnswer'] ?? 0,
+      correctOrder: json['correctOrder'] ?? 0,
       status: json['status'],
       option: json['option'] ?? '',
     );

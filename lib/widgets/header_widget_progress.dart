@@ -1,9 +1,11 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:provider/provider.dart';
 
 class HeaderWidgetProgress extends StatelessWidget {
   const HeaderWidgetProgress({
@@ -69,18 +71,27 @@ class HeaderWidgetProgress extends StatelessWidget {
                             border: Border.all(
                                 width: 6.0, color: Color(0XFFFFFFFF))),
                         child: ClipOval(
-                          child: Image.network(
-                            userData!.imgProfileUser.isNotEmpty
-                                ? GraphQLConfig.urlServidor +
-                                    userData.imgProfileUser
-                                : 'assets/no-image.jpg',
-                            fit: BoxFit.fill,
-                            errorBuilder: (context, object, stackTrace) {
-                              return Image.asset('assets/no-image.jpg');
-                            },
+                            child: CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                              imageUrl: userData!.imgProfileUser.isNotEmpty
+                              ? userData.imgProfileUser
+                              : 'assets/no-image.jpg',
+                              placeholder:(context, url ) => Image.asset('assets/no-image.jpg'),
+                              errorWidget:(context, url , error) => Image.asset('assets/no-image.jpg')
+                            ),
                           ),
+                          
+                          // Image.network(
+                          //   userData!.imgProfileUser.isNotEmpty
+                          //       ? userData.imgProfileUser
+                          //       : 'assets/no-image.jpg',
+                          //   fit: BoxFit.fill,
+                          //   errorBuilder: (context, object, stackTrace) {
+                          //     return Image.asset('assets/no-image.jpg');
+                          //   },
+                          // ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -95,7 +106,7 @@ class HeaderWidgetProgress extends StatelessWidget {
             ],
           ),
           Positioned(
-              top: 30,
+              top: userData.expTotalUser >= 1000 ? 0 : 30,
               bottom: 0,
               right: 15,
               child: Column(
@@ -125,7 +136,7 @@ class HeaderWidgetProgress extends StatelessWidget {
     double maxPossibleHeight = score / 1000 * 112;
 
     if (score >= 1000) {
-      return 112; // Alto fijo cuando los puntos son mayores o iguales a 1000
+      return 100; // Alto fijo cuando los puntos son mayores o iguales a 1000
     } else {
       double width = ((maxPossibleHeight * 100)) / 112;
 

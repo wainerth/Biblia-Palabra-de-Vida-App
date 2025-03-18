@@ -3,11 +3,16 @@ import 'dart:math';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 import 'package:simple_animations/simple_animations.dart' as animation;
 
 
 class RewardWidget extends StatefulWidget {
+
+  final rewardInfo;
+  final void Function()? onPressed;
+  const RewardWidget({super.key, this.rewardInfo, this.onPressed});
+
+
   @override
   _RewardWidgetState createState() => _RewardWidgetState();
 }
@@ -45,58 +50,54 @@ class _RewardWidgetState extends State<RewardWidget>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Icono de recompensa
-                Icon(
-                  Icons.star,
-                  size: 100,
-                  color: Colors.yellow,
+                Image.asset(
+                  'assets/rewardObtained.gif',
+                  width: 200,
+                  // height: 100,
                 ),
-
                 SizedBox(height: 20),
-
-                // Mensaje de recompensa
-                Text(
-                  '¡Recompensa Obtenida!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    "${widget.rewardInfo != null ? widget.rewardInfo.title : ''}",
+                    softWrap: true,
+                    style:StylesApp(context).textStyleBody20.copyWith(
+                      color: Colors.white
+                    ),
                   ),
                 ),
 
                 SizedBox(height: 10),
 
-                Text(
-                  '¡Has ganado un premio!',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    widget.rewardInfo != null ? widget.rewardInfo.description : '',
+                    style:StylesApp(context).textStyleBody16.copyWith(
+                      color: Colors.white
+                    ) ,
                   ),
                 ),
+                SizedBox(height: 30,),
+                Text.rich(
+                  textAlign: TextAlign.center,
+                  style: StylesApp(context).textStyleBody18.copyWith(
+                    color: Colors.white
+                  ) ,
+                  TextSpan(children: [
+                    TextSpan(text: "${widget.rewardInfo != null ? widget.rewardInfo.earnedExperience : 0} Exp.  "),
+                    TextSpan(text: "${widget.rewardInfo != null ? widget.rewardInfo.earnedEnergy: 0} LMS"),
+                  ])
+                ),
+                SizedBox(height: 30,),
                   ButtonThemeWidget(
                 text: "Continuar",
                 width: 132.0,
                 height: 32.0,
                 buttonStyle: StylesApp(context).btnWidgetSmall,
-                onPressed: () {
-                  // if (sendScore!.titleUnlocked) {
-                  //   setState(() {
-                  //     showStepCompleted = false;
-                  //     showAchievementUnlocked = true;
-                  //   });
-                  // } else if (sendScore!.isLastLevel) {
-                  //   setState(() {
-                  //     showStepCompleted = false;
-                  //     showAchievementUnlocked = false;
-                  //     showLastStageCompleted = true;
-                  //   });
-                  // } else {
-                  //   Navigator.popAndPushNamed(context, '/mapPage', arguments: {
-                  //     'courseId': courseId,
-                  //     'sectionId': sectionId
-                  //   });
-                  // }
-                },
+                onPressed: widget.onPressed,
               )
               ],
             ),

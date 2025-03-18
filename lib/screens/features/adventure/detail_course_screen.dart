@@ -36,12 +36,18 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
     LoadingService().showLoading(context);
 
     try {
-      setState(() {
-        course = ModalRoute.of(context)!.settings.arguments as CourseModel;
-      });
       final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final courseId = ModalRoute.of(context)!.settings.arguments as String;
       final LoginUser? userData = userProvider.currentUser;
+      errorMessage = null; 
       progressUser = userProvider.progressUser;
+
+      // obtenemos curso
+      final ResponseData courseResponse = await loadOneCourse(userData!.user.id, courseId);
+      if (courseResponse.error != null) {
+        errorMessage = courseResponse.error;
+      }
+      course = CourseModel.fromJson(courseResponse.data);
       final result = await loadStageByCourse(userData?.user.id, course.id);
       if (result.error != null) {
         errorMessage = result.error;
@@ -73,7 +79,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
         _selectedIndex = index;
         if (_selectedIndex == 0) {
           Navigator.pushNamed(context, '/layoutPage');
-        } else {
+        } else if(_selectedIndex != 1){
           _selectedIndex = index;
           Navigator.pushNamed(
             context,
@@ -163,8 +169,14 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                   // consulto si el usuario tiene algún progreso para este curso?
                   final userProvider =
                       Provider.of<UserProvider>(context, listen: false);
-                  progressUser = await userProvider.getProgressUser(
+                  final progressResponse = await userProvider.getProgressUser(
                       userProvider.currentUser?.user.id, course.id);
+                  if (progressResponse!.error != null) {
+                    await showCustomDialog(context,
+                        message: progressResponse.error!,
+                        dialogType: DialogType.error);
+                  }
+                  progressUser = progressResponse.data;
                   if (progressUser != null) {
                     Navigator.pushNamed(context, '/mapPage', arguments: {
                       'courseId': course.id,

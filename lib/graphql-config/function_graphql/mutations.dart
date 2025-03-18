@@ -48,10 +48,22 @@ Future login(email, password) async {
       error: null,
     );
   } catch (e) {
-    return ResponseData(
-      data: null,
-      error: 'Connection error: $e',
-    );
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(
+    //   data: null,
+    //   error: 'Connection error: $e',
+    // );
   }
 }
 
@@ -166,7 +178,7 @@ Future updateUserProfile(token, UserProfile data) async {
           "gender": data.dataProfiles.gender!.isEmpty
               ? null
               : data.dataProfiles.gender,
-          "isBaptized": data.dataProfiles.isBaptized.toString()
+          "isBaptized": data.dataProfiles.isBaptized
         }
       },
       fetchPolicy: FetchPolicy.noCache);
@@ -186,7 +198,19 @@ Future updateUserProfile(token, UserProfile data) async {
     }
     return ResponseData(data: data['updateDataProfileUsers'], error: null);
   } catch (e) {
-    ResponseData(data: null, error: "connection error $e");
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // ResponseData(data: null, error: "connection error $e");
   }
 }
 
@@ -222,7 +246,20 @@ Future updateChurchUser(token, userId, churchId) async {
       data: data['updateChurchUser'],
       error: null,
     );
-  } catch (e) {}
+  } catch (e) {
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+  }
 }
 
 Future register(dataToRegister) async {
@@ -285,10 +322,22 @@ Future register(dataToRegister) async {
       error: null,
     );
   } catch (e) {
-    return ResponseData(
-      data: null,
-      error: 'Connection error: $e',
-    );
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(
+    //   data: null,
+    //   error: 'Connection error: $e',
+    // );
   }
 }
 
@@ -325,10 +374,22 @@ Future<ResponseData> forgotPassword(email) async {
       error: null,
     );
   } catch (e) {
-    return ResponseData(
-      data: null,
-      error: 'Connection error: $e',
-    );
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(
+    //   data: null,
+    //   error: 'Connection error: $e',
+    // );
   }
 }
 
@@ -375,10 +436,22 @@ Future verifyPinPassword(email, code) async {
       error: null,
     );
   } catch (e) {
-    return ResponseData(
-      data: null,
-      error: 'Connection error: $e',
-    );
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(
+    //   data: null,
+    //   error: 'Connection error: $e',
+    // );
   }
 }
 
@@ -423,10 +496,22 @@ Future resetPassword(email, password) async {
       error: null,
     );
   } catch (e) {
-    return ResponseData(
-      data: null,
-      error: 'Connection error: $e',
-    );
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(
+    //   data: null,
+    //   error: 'Connection error: $e',
+    // );
   }
 }
 
@@ -471,7 +556,19 @@ Future<ResponseData> sendResponsesUser(List responses) async {
       error: null,
     );
   } catch (e) {
-    return ResponseData(data: null, error: "connection error $e");
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(data: null, error: "connection error $e");
   }
 }
 
@@ -486,11 +583,11 @@ Future<ResponseData> sendScoreUser(userId, courseId, levelId, failedIntents) asy
     document: gql(r'''
       mutation SendScore($courseId: ID, $levelId: ID, $failedAttempts: Int, $userId: ID) {
         sendScore(courseId: $courseId, levelId: $levelId, failedAttempts: $failedAttempts, userId: $userId) {
-          isLastLevel
-          isLastStage
-          prizeWon
-          titleUnlocked
-          rewardObtained
+          isLastLevel #es ultimo nivel se la sección
+          isLastStage #es ultima etapa del curso
+          #prizeWon #premio ganado
+          #titleUnlocked #titulo ganado
+          rewardObtained #recompensa ganada
         }
       }
       '''),
@@ -525,7 +622,19 @@ Future<ResponseData> sendScoreUser(userId, courseId, levelId, failedIntents) asy
     return ResponseData(
         data: null, error: 'Send score Timeout de conexión $e');
   } catch (e) {
-    return ResponseData(data: null, error: "connection error $e");
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(data: null, error: "connection error $e");
   }
 }
 
@@ -540,7 +649,10 @@ Future<ResponseData> unlockedNextSection(userId, sectionId) async {
     operationName: "UnlockNextSection",
     document: gql(r'''
       mutation UnlockNextSection($userId: ID, $sectionId: ID) {
-        unlockNextSection(userId: $userId, sectionId: $sectionId)
+        unlockNextSection(userId: $userId, sectionId: $sectionId){
+        successful
+        nextSectionId
+        }
       }
       '''),
     variables: <String, dynamic>{
@@ -572,6 +684,215 @@ Future<ResponseData> unlockedNextSection(userId, sectionId) async {
     return ResponseData(
         data: null, error: 'unlock Next Section Timeout de conexión $e');
   } catch (e) {
-    return ResponseData(data: null, error: "connection error $e");
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(data: null, error: "connection error $e");
+  }
+}
+/// unlocked next section
+Future<ResponseData> applyRewardToUser(userId, rewardId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+   operationName: "ApplyRewardToProfile",
+    document: gql(r'''
+        mutation ApplyRewardToProfile($userId: ID, $rewardId: ID) {
+          applyRewardToProfile(userId: $userId, rewardId: $rewardId) {
+            earnedEnergy
+            earnedExperience
+          }
+        }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "rewardId": rewardId 
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['applyRewardToProfile'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'apply Reward To user failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['applyRewardToProfile'],
+      error: null,
+    );
+  }  on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'apply Reward To user Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(data: null, error: "connection error $e");
+  }
+}
+Future<ResponseData> setTitleObtained(userId, courseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+   operationName: "SetTitleToUser",
+    document: gql(r'''
+        mutation SetTitleToUser($userId: ID, $courseId: ID) {
+          setTitleToUser(userId: $userId, courseId: $courseId) {
+            id
+            courseId
+            description
+            img {
+              urlImg
+            }
+            unLockTitle
+            status
+          }
+        }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "courseId": courseId 
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['SetTitleToUser'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'set Title for user failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['SetTitleToUser'],
+      error: null,
+    );
+  }  on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'set Title for user Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(data: null, error: "connection error $e");
+  }
+}
+
+Future<ResponseData> setPrizeObtained(userId, courseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+   operationName: "SetPrizeToUser",
+    document: gql(r'''
+        mutation SetPrizeToUser($userId: ID, $courseId: ID) {
+        setPrizeToUser(userId: $userId, courseId: $courseId) {
+          id
+          courseId
+          biblicalName
+          typeStone
+          description
+          img {
+            urlImg
+          }
+          exchangeValue
+          unLockPrize
+          status
+          }
+        }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "courseId": courseId 
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['setPrizeToUser'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'set Prize for user failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['setPrizeToUser'],
+      error: null,
+    );
+  }  on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'set Prize for user Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
+    // return ResponseData(data: null, error: "connection error $e");
   }
 }

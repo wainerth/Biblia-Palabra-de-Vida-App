@@ -15,14 +15,7 @@ class ProgressDetailScreen extends StatefulWidget {
 }
 
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
-  List<UserAchievement>? achievements = [];
-  //   {"title": "Creyente", "img": "assets/creyente.png"},
-  //   {"title": "Bautizado", "img": "assets/bautizado.png"},
-  //   {"title": "Discipulado 1", "img": "assets/dicipulado1.png"},
-  //   {"title": "Discipulado 2", "img": "assets/dicipulado2.png"},
-  //   {"title": "Creyente", "img": "assets/creyente.png"},
-  //   {"title": "Bautizado", "img": "assets/bautizado.png"},
-  // ];
+  List<UserTitle>? titles = [];
   List awards = [
     {
       "img": "assets/premios/sardica.png",
@@ -73,11 +66,12 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
       "level": "Jaspe"
     },
   ];
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final LoginUser? userData = userProvider.currentUser;
-    achievements = userData?.achievement;
+    titles = userData?.title;
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -145,7 +139,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                   style: StylesApp(context).textStyleBody6,
                                   children: [
                                     TextSpan(text: "Energía: "),
-                                    TextSpan(text: "${userData.expTotalUser}"),
+                                    TextSpan(text: "${userData.energyPoints}"),
                                   ],
                                 ),
                               ),
@@ -398,7 +392,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               child: ListView.builder(
                 controller: scrollController,
                 scrollDirection: Axis.horizontal, // Dirección horizontal
-                itemCount: achievements!.length, // Número de elementos
+                itemCount: titles!.length, // Número de elementos
                 itemBuilder: (BuildContext context, int index) {
                   return Row(
                     children: [
@@ -430,7 +424,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                     Radius.circular(8),
                                   ),
                                   image: DecorationImage(
-                                    image: NetworkImage( '${GraphQLConfig.urlServidor}${achievements![index].img.urlImg}',
+                                    image: NetworkImage( '${GraphQLConfig.urlServidor}${titles![index].img.urlImg}',
                                         ),
                                     fit: BoxFit.cover,
                                   ),
@@ -440,7 +434,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                 child: Center(
                                   child: Text(
                                     softWrap: true,
-                                    '${achievements?[index].title}',
+                                    '${titles?[index].title}',
                                     style: StylesApp(context).textStyleBody10,
                                   ),
                                 ),

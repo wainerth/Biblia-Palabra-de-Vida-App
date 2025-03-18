@@ -1,3 +1,6 @@
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
@@ -6,8 +9,6 @@ import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
@@ -17,9 +18,9 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
-  static const MAX_SCORE = 150;
-  static const MEDIUM_SCORE = 100;
-  static const LOW_SCORE = 50;
+  int MAX_SCORE = 0;
+  int MEDIUM_SCORE = 0;
+  int LOW_SCORE = 0;
   final options = [
     {"option": "A", "color": "A8A1E7"},
     {"option": "B", "color": "C3F0F9"},
@@ -28,29 +29,33 @@ class _QuestionScreenState extends State<QuestionScreen> {
   ];
 
   LoginUser? userData;
+  late Map<String, dynamic> config;
+  CourseModel? course;
   Stage? stage;
   Level? level;
   UserAchievement? achievement;
-  UserAchievement? prize;
+  TitleModel? title;
+  PrizeModel? prize;
   Reward? reward;
   LevelProgressUser? levelProgress;
   SendScoreModel? sendScore = SendScoreModel(
-      isLastLevel: false,
-      titleUnlocked: false,
-      isLastStage: false,
-      rewardObtained: false,
-      prizeWon: false);
-  Question currentQuestion = Question(
-    id: "",
-    question: "",
-    difficulty: "",
-    level: LevelQuestion(
-      levelNumber: 0,
-    ),
-    status: 0,
-    answers: [],
+    isLastLevel: false,
+    // titleUnlocked: false,
+    isLastStage: false,
+    rewardObtained: false,
+    // prizeWon: false
   );
-  ResponseData? responseSend;
+  Question currentQuestion = Question(
+      id: "",
+      question: "",
+      difficulty: "",
+      level: LevelQuestion(
+        levelNumber: 0,
+      ),
+      status: 0,
+      answers: [],
+      isOrdering: false);
+  // ResponseData? responseSend;
 
   List currentAnswers = [];
   List<Question> questions = [];
@@ -64,11 +69,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
       false; // para controlar si las preguntas fueron respondidas
   bool showStepCompleted =
       false; // para mostrar mensaje de culminación de nivel
-  bool showAchievementUnlocked = false; // para mostrar Logro desbloqueado
+  bool showTitleObtained = false; // para mostrar titulo desbloqueado
+  bool showPrizeWon = false; // para mostrar Premio desbloqueado
   bool showLastStageCompleted =
       false; // para mostrar mensaje de culminación de etapa
   bool showRewardObtained = false; // si obtuvo recompensa
-  bool isOrdering = false;
   bool _selectionCompleted = false;
   bool _isAnswerSelected = false;
   bool isLastStage = false;
@@ -78,6 +83,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   String courseId = "";
   String levelId = "";
   String sectionId = "";
+  String nextSectionId = "";
   String? errorMessage;
 
   int currentIndex = 0;
@@ -119,6 +125,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
         setState(() {});
 
         final userProvider = Provider.of<UserProvider>(context, listen: false);
+        final LoginUser? userData = userProvider.currentUser;
+
+        // obtenemos curso
+        final ResponseData courseResponse = await loadOneCourse(
+            userData != null ? userData!.user.id : null, courseId);
+        if (courseResponse.error != null) {
+          errorMessage = courseResponse.error;
+        }
+        course = CourseModel.fromJson(courseResponse.data);
         // obtenemos sección
         final ResponseData stageResponse = await loadStageById(levelId);
 
@@ -251,16 +266,21 @@ class _QuestionScreenState extends State<QuestionScreen> {
   void verifyOrdered(BuildContext context, int index) {
     bool isCorrectOrder = true;
     for (int i = 0; i < orderedAnswers.length; i++) {
-      if (orderedAnswers[i].orderInAnswer != i + 1) {
+      if (orderedAnswers[i].correctOrder != i + 1) {
         isCorrectOrder = false;
         break;
       }
     }
 
     if (isCorrectOrder) {
-      showError = false;
+      setState(() {
+        showError = false;
+      });
     } else {
-      failedAttempts += 1;
+      setState(() {
+        showError = true;
+        failedAttempts += 1;
+      });
     }
     setState(() {
       orderedCompleted = true;
@@ -304,13 +324,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
       } else {
         LoadingService().showLoading(context);
         //llamamos servicio  registrar las respuestas enviadas
-        responseSend = await sendResponsesUser(responses!);
-        if (responseSend?.error != null) {
-          LoadingService().hideLoading();
-          await showCustomDialog(context,
-              message: responseSend!.error!, dialogType: DialogType.error);
-          return;
-        }
+        // responseSend = await sendResponsesUser(responses!);
+        // if (responseSend?.error != null) {
+        //   LoadingService().hideLoading();
+        //   await showCustomDialog(context,
+        //       message: responseSend!.error!, dialogType: DialogType.error);
+        //   return;
+        // }
         // lamamos al servicios que nos registra el score
         final ResponseData sendScoreResponse = await sendScoreUser(
             userData != null ? userData!.user.id : '',
@@ -325,54 +345,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
         }
         sendScore =
             SendScoreModel.fromJson(removeTypename(sendScoreResponse.data));
-        // si se desbloqueo un titulo buscamos el logro
-        if (sendScore!.titleUnlocked) {
-          final responseAchievement = await getAchievement(userData!.user.id);
 
-          if (responseAchievement.error != null) {
-            // si desbloqueo un titulo
-            LoadingService().hideLoading();
-            await showCustomDialog(context,
-                message: responseAchievement.error!,
-                dialogType: DialogType.error);
-            return;
-          } else {
-            final List<UserAchievement> achievements = responseAchievement.data
-                .map((achievement) =>
-                    UserAchievement.fromJson(removeTypename(achievement)))
-                .cast<UserAchievement>()
-                .toList();
-            achievement = achievements.isNotEmpty ? achievements.last : null;
-          }
-        }
-        // si obtuvo un premio
-        if (sendScore!.prizeWon) {
-          final responsePrizeWon = await getPrizeWon(userData!.user.id);
-        }
-        // si obtuvo una recompensa
-        if (sendScore!.isLastLevel) {
-          final responseRewardObtained =
-              await getRewardObtained(userData!.user.id);
-          if (responseRewardObtained.error != null) {
-            LoadingService().hideLoading();
-            await showCustomDialog(context,
-                message: responseRewardObtained.error!,
-                dialogType: DialogType.error);
-            return;
-          }
-          reward = Reward.fromJson(removeTypename(responseRewardObtained.data));
-          // desbloquear la proxima sección
-          // final responseUnlockSection = await unlockedNextSection(userData!.user.id, sectionId);
-          // if (responseUnlockSection.error != null) {
-          //    LoadingService().hideLoading();
-          //   await showCustomDialog(context,
-          //       message: responseRewardObtained.error!,
-          //       dialogType: DialogType.error);
-          //   return;
-          // }
-        }
-
-        // consultamos ultimo progreso en el nivel
+        // consultamos ultimo progreso en el nivel correspondiente para obtener experiencia acumulada y energía acumulada
         final ResponseData progressLevelResponse = await lastLevelProgressUser(
             userData != null ? userData!.user.id : '',
             level != null ? level!.id : '');
@@ -389,22 +363,21 @@ class _QuestionScreenState extends State<QuestionScreen> {
         int experience = 0;
         int energy = 0;
         // si no ha obtenido todos los puntos
-        print("es nuevo record : ${levelProgress!.newRecord}");
-
+        // print("es nuevo record : ${levelProgress!.newRecord}");
         if (levelProgress!.newRecord) {
           experience = levelProgress!.score > levelProgress!.scoreLastAttempt
               ? levelProgress!.score - levelProgress!.scoreLastAttempt
               : 0;
           energy = (experience / 10).toInt();
         } else {
-          experience = 0; //levelProgress!.score;
-          energy = 0; // (experience / 10).toInt();
+          experience = 0;
+          energy = 0;
           setState(() {
             bestScore = levelProgress!.scoreLastAttempt;
             showReview = true;
           });
         }
-
+        // actualizar variable local de los datos del perfil
         setState(() {
           userData = userData!.copyWith(
               expTotalUser: userData!.expTotalUser + experience,
@@ -414,14 +387,40 @@ class _QuestionScreenState extends State<QuestionScreen> {
         print('${userData!.expTotalUser}  ${userData!.energyPoints}');
         Provider.of<UserProvider>(context, listen: false).setUser(userData);
 
+        // si es el ultimo nivel
+        if (sendScore!.isLastLevel) {
+          // si Obtuvo una recompensa
+          if (sendScore!.rewardObtained) {
+            await loadRewardForUser();
+          }
+          // desbloquear la proxima sección
+          final responseUnlockSection =
+              await unlockedNextSection(userData!.user.id, sectionId);
+          if (responseUnlockSection.error != null) {
+            LoadingService().hideLoading();
+            await showCustomDialog(context,
+                message: responseUnlockSection.error!,
+                dialogType: DialogType.error);
+            return;
+          }
+          nextSectionId = responseUnlockSection.data["nextSectionId"];
+        }
+
+        // si es la ultima etapa del curso
+        if (sendScore!.isLastStage) {
+          // si se desbloqueo un titulo buscamos el Titulo
+
+          await loadTitleForUser();
+
+          // si obtuvo un premio
+
+          await loadPrizeForUser();
+        }
+        LoadingService().hideLoading();
         // habilitamos mostrar paso completado
         setState(() {
           activityIsCompleted = true; // para ocultar las preguntas
           showStepCompleted = true; // mostramos mensaje de paso completado
-        });
-        // _showDialog(context, levelProgress!, sendScore?.isLastLevel);
-        LoadingService().hideLoading();
-        setState(() {
           orderedCompleted = false;
           _selectionCompleted = false;
           failedAttempts = 0;
@@ -430,15 +429,68 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
     setState(() {
       _isAnswerSelected = false;
-
       _suggestionSelected = false;
       _selectedAnswerIndex = -1;
     });
   }
 
+  loadTitleForUser() async {
+    final responseAchievement = await getAchievement(userData!.user.id);
+
+    if (responseAchievement.error != null) {
+      // si desbloqueo un titulo
+      LoadingService().hideLoading();
+      await showCustomDialog(context,
+          message: responseAchievement.error!, dialogType: DialogType.error);
+      return;
+    } else {
+      title = TitleModel.fromJson(removeTypename(responseAchievement.data));
+    }
+  }
+
+  loadPrizeForUser() async {
+    final responsePrizeWon =
+        await setPrizeObtained(userData!.user.id, courseId);
+    if (responsePrizeWon.error != null) {
+      // si desbloqueo un titulo
+      LoadingService().hideLoading();
+      await showCustomDialog(context,
+          message: responsePrizeWon.error!, dialogType: DialogType.error);
+      return;
+    }
+
+    prize = PrizeModel.fromJson(removeTypename(responsePrizeWon.data));
+  }
+
+  loadRewardForUser() async {
+    final responseRewardObtained = await getRewardObtained(sectionId);
+    if (responseRewardObtained.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(context,
+          message: responseRewardObtained.error!, dialogType: DialogType.error);
+      return;
+    }
+    reward = Reward.fromJson(removeTypename(responseRewardObtained.data));
+  }
+
+  updateLocalProfile(data) {
+    final int experience = data['earnedExperience'];
+    final int energy = data['earnedEnergy'];
+    setState(() {
+      userData = userData!.copyWith(
+          expTotalUser: userData!.expTotalUser + experience,
+          energyPoints: userData!.energyPoints + energy);
+    });
+    Provider.of<UserProvider>(context, listen: false).setUser(userData);
+  }
+
   @override
   Widget build(BuildContext context) {
     userData = Provider.of<UserProvider>(context, listen: false).currentUser;
+    config = Provider.of<CatalogueProvider>(context, listen: false).allConfig;
+    MAX_SCORE = config["highScore"];
+    MEDIUM_SCORE = config["mediumScore"];
+    LOW_SCORE = config["lowScore"];
     return Scaffold(
       body: SafeArea(
         child: SizedBox(
@@ -458,7 +510,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   Column(
                     children: <Widget>[
                       HeaderNotDetailsStageWidget(
-                        title: "Conoce el Antiguo Testamento",
+                        title:
+                            "Conoce el ${course != null ? course!.title : ''}",
                         stage: stage != null ? stage!.id : '',
                         subtitle: stage != null ? stage!.sectionName : '',
                         details: stage,
@@ -468,7 +521,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       ),
                     ],
                   ),
-                  if (!showAchievementUnlocked && !showLastStageCompleted) ...{
+                  if (!showTitleObtained && !showLastStageCompleted) ...{
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                       padding: EdgeInsets.symmetric(horizontal: 9, vertical: 4),
@@ -520,29 +573,69 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         child: _buildBody(context),
                       )
                   } else ...{
+                    // si completo nivel
                     if (showStepCompleted) ...{
                       Expanded(
                         child: _buildActivityCompleted(context, levelProgress!),
                       )
                     },
-                   
-                    if (showAchievementUnlocked) ...{
+                    // si obtiene recompensa por completar sección
+                    if (showRewardObtained) ...{
+                      Expanded(
+                        child: RewardWidget(
+                          rewardInfo: reward,
+                          onPressed: () async {
+                            LoadingService().showLoading(context);
+                            // aplico recompensa a usuario
+                            final responseApply = await applyRewardToUser(
+                                userData!.user.id, reward?.id);
+                            if (responseApply.error != null) {
+                              LoadingService().hideLoading();
+                              await showCustomDialog(context,
+                                  message: responseApply.error!,
+                                  dialogType: DialogType.error);
+                              return;
+                            }
+                            // actualizo datos local de perfil de usuario
+                            updateLocalProfile(responseApply.data);
+                            LoadingService().hideLoading();
+
+                            // si es la ultima sección del curso
+                            if (sendScore!.isLastStage) {
+                              setState(() {
+                                showStepCompleted = false;
+                                showTitleObtained = false;
+                                showRewardObtained = false;
+                                showLastStageCompleted = true;
+                              });
+                            } else {
+                              Navigator.popAndPushNamed(context, '/mapPage',
+                                  arguments: {
+                                    'courseId': courseId,
+                                    'sectionId': '$nextSectionId'
+                                  });
+                            }
+                          },
+                        ),
+                      ),
+                    },
+                    // si es la ultima sección del curso
+                    if (showLastStageCompleted) ...{
+                      Expanded(
+                        child: _buildLastStage(context),
+                      ),
+                    },
+                    //si tiene premio por el curso
+                    if (showPrizeWon) ...{
+                      Expanded(
+                        child: _buildPrizeWon(context),
+                      )
+                    },
+                    //si tiene Titulo por el curso
+                    if (showTitleObtained) ...{
                       Expanded(
                         child: _buildAchievementUnloked(context),
                       )
-                    },
-                    //si es el ultimo nivel  y si es la ultima etapa!
-
-                    if (showLastStageCompleted) ...{
-                      Expanded(
-                          child: _buildLastStage(
-                              context) //_buildLastLevel(context),
-                          ),
-                    },
-                    if (showRewardObtained) ...{
-                      Expanded(
-                          child: RewardWidget() //_buildLastLevel(context),
-                          ),
                     },
                   },
                 },
@@ -572,10 +665,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
     return Column(
       children: [
         Expanded(
-          flex: !isOrdering ? 3 : 2,
+          flex: !currentQuestion.isOrdering ? 3 : 2,
           child: Column(
             children: [
-              if (isOrdering) ...{
+              if (currentQuestion.isOrdering) ...{
                 OrderingQuestionDraggableWidget(
                   orderedCompleted: orderedCompleted,
                   orderedAnswers: orderedAnswers,
@@ -613,7 +706,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           ),
         ),
         Expanded(
-          flex: !isOrdering ? 1 : 0,
+          flex: !currentQuestion.isOrdering ? 1 : 0,
           child: Center(
             child: Container(
               constraints: BoxConstraints(maxWidth: 278.0),
@@ -639,7 +732,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
           ),
         ),
-        if (isOrdering)
+        if (currentQuestion.isOrdering)
           SizedBox(
             height: 20,
           )
@@ -647,6 +740,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
+  // esta parte es para mostrar nivel Completado
   _buildActivityCompleted(BuildContext context, data) {
     if (data.score > MEDIUM_SCORE) {
       setState(() {
@@ -699,8 +793,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 Text(
                   textAlign: TextAlign.center,
                   data.score > 0
-                      ? 'Culminaste el Paso ${data.level.id}'
-                      : "Intenta nuevamente el\n Paso ${data.level.id} para avanzar",
+                      ? 'Culminaste el Paso ${data.level.levelNumber}'
+                      : "Intenta nuevamente el\n Paso ${data.level.levelNumber} para avanzar",
                   style: StylesApp(context).textStyleWithe20,
                 ),
                 if (data.score > 0 && !showReview) ...{
@@ -777,16 +871,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 height: 32.0,
                 buttonStyle: StylesApp(context).btnWidgetSmall,
                 onPressed: () {
-                  if (sendScore!.titleUnlocked) {
+                  // mostrar si hay recompensa
+                  if (sendScore!.isLastLevel && sendScore!.rewardObtained && reward != null) {
                     setState(() {
                       showStepCompleted = false;
-                      showAchievementUnlocked = true;
-                    });
-                  } else if (sendScore!.isLastLevel) {
-                    setState(() {
-                      showStepCompleted = false;
-                      showAchievementUnlocked = false;
-                      showLastStageCompleted = true;
+                      showTitleObtained = false;
+                      showRewardObtained = true;
                     });
                   } else {
                     Navigator.popAndPushNamed(context, '/mapPage', arguments: {
@@ -803,161 +893,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  /// dialog si obtuvo titulo
-  _buildAchievementUnloked(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage('assets/boxOrange.png'),
-                      fit: BoxFit.fill,
-                      alignment: Alignment.topCenter)),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 27,
-                  ),
-                  Text(
-                    textAlign: TextAlign.center,
-                    "Haz obtenido\n el titulo de\n ${achievement?.title}!",
-                    style: StylesApp(context)
-                        .textStyleCongratulation
-                        .copyWith(color: Colors.white),
-                  ),
-                  SizedBox(
-                    height: 29,
-                  ),
-                  // Text(
-                  //   textAlign: TextAlign.center,
-                  //   'Haz ganado un zafiro para\n tu coleccion',
-                  //   style: StylesApp(context).textStyleBody20,
-                  // ),
-                  // SizedBox(
-                  //   height: 29,
-                  // ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 29,
-            ),
-            Container(
-              width: 190,
-              // height: 175,
-              decoration: BoxDecoration(
-                  color: Color(0XFFC7AA34),
-                  // border: Border.all(width: 15, color: StyleColor.orange),
-                  borderRadius: BorderRadius.circular(8)),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Image.network(
-                      GraphQLConfig.urlServidor + achievement!.img.urlImg,
-                      height: 80,
-                    ),
-                    Text(
-                      achievement?.title ?? "",
-                      style: StylesApp(context).textStyleBody12,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 29,
-            ),
-            ButtonThemeWidget(
-              width: 245,
-              height: 32,
-              buttonStyle: StylesApp(context).btnPrimary,
-              text: "Descargar certificado",
-              onPressed: () {},
-            ),
-            SizedBox(
-              height: 29,
-            ),
-            ButtonThemeWidget(
-              showIcon: true,
-              icon: Icons.share,
-              width: 245,
-              height: 32,
-              colorIcon: Colors.white,
-              buttonStyle: StylesApp(context).btnPrimary,
-              text: "Compartir logro",
-              onPressed: () async {
-                await Share.share(
-                  "¡He obtenido el titulo de ${achievement?.title}!",
-                  subject: "¡Felicita a ${userData!.user.username}! ",
-                );
-              },
-            ),
-            SizedBox(
-              height: 29,
-            ),
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  flex: 0,
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        "assets/kawaii_fire.png",
-                        height: calculateHeight(550),
-                        fit: BoxFit.contain,
-                      ),
-                      Text(
-                        "550 lms",
-                        style: StylesApp(context)
-                            .textStyleBody16
-                            .copyWith(color: StyleColor.orange),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 48,
-                ),
-                Center(
-                  child: ButtonThemeWidget(
-                    text: "Continuar",
-                    width: 132,
-                    height: 32,
-                    buttonStyle: StylesApp(context).btnWidgetSmall,
-                    onPressed: () {
-                      if (sendScore!.isLastLevel) {
-                        setState(() {
-                          showAchievementUnlocked = false;
-                          showLastStageCompleted = true;
-                        });
-                      } else {
-                        Navigator.popAndPushNamed(context, '/mapPage',
-                            arguments: {
-                              'courseId': courseId,
-                              'sectionId': sectionId
-                            });
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 43),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// sección de nivel completado
-  _buildLastLevel(BuildContext context) {
+  // sección de Sección o etapa completada
+  _buildLastStage(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20),
@@ -1026,10 +963,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
             height: 32,
             buttonStyle: StylesApp(context).btnWidgetSmall,
             onPressed: () {
-              if (sendScore!.isLastLevel) {
+              //si obtuvo premio
+              if (prize != null) {
                 setState(() {
-                  showAchievementUnlocked = false;
-                  showLastStageCompleted = true;
+                  showTitleObtained = false;
+                  showLastStageCompleted = false;
+                  showPrizeWon = true;
                 });
               } else {
                 Navigator.popAndPushNamed(context, '/mapPage',
@@ -1042,7 +981,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  _buildLastStage(BuildContext context) {
+  // premio Obtenido
+  _buildPrizeWon(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,
@@ -1162,11 +1102,153 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     height: 32,
                     buttonStyle: StylesApp(context).btnWidgetSmall,
                     onPressed: () {
-                      Navigator.popAndPushNamed(context, '/mapPage',
-                          arguments: {
-                            'courseId': courseId,
-                            'sectionId': sectionId
-                          });
+                      //si obtuvo Premio
+                      if (title != null) {
+                        setState(() {
+                          showStepCompleted = false;
+                          showRewardObtained = false;
+                          showLastStageCompleted = false;
+                          showPrizeWon = false;
+                          showTitleObtained = true;
+                        });
+                      } else {
+                        // hacemos route a aventura screen
+                        Navigator.popAndPushNamed(context, '/aventurePage');
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 43),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // esta parte es para mostrar titulo obtenido
+  _buildAchievementUnloked(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('assets/boxOrange.png'),
+                      fit: BoxFit.fill,
+                      alignment: Alignment.topCenter)),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 27,
+                  ),
+                  Text(
+                    textAlign: TextAlign.center,
+                    "Haz obtenido\n el titulo de\n ${title?.title}!",
+                    style: StylesApp(context)
+                        .textStyleCongratulation
+                        .copyWith(color: Colors.white),
+                  ),
+                  SizedBox(
+                    height: 29,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 29,
+            ),
+            Container(
+              width: 190,
+              // height: 175,
+              decoration: BoxDecoration(
+                  color: Color(0XFFC7AA34),
+                  // border: Border.all(width: 15, color: StyleColor.orange),
+                  borderRadius: BorderRadius.circular(8)),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Image.network(
+                      GraphQLConfig.urlServidor + title!.img.urlImg,
+                      height: 80,
+                    ),
+                    Text(
+                      title?.title ?? "",
+                      style: StylesApp(context).textStyleBody12,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 29,
+            ),
+            ButtonThemeWidget(
+              width: 245,
+              height: 32,
+              buttonStyle: StylesApp(context).btnPrimary,
+              text: "Descargar certificado",
+              onPressed: () {},
+            ),
+            SizedBox(
+              height: 29,
+            ),
+            ButtonThemeWidget(
+              showIcon: true,
+              icon: Icons.share,
+              width: 245,
+              height: 32,
+              colorIcon: Colors.white,
+              buttonStyle: StylesApp(context).btnPrimary,
+              text: "Compartir logro",
+              onPressed: () async {
+                await Share.share(
+                  "¡He obtenido el titulo de ${title?.title}!",
+                  subject: "¡Felicita a ${userData!.user.username}! ",
+                );
+              },
+            ),
+            SizedBox(
+              height: 29,
+            ),
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
+                  flex: 0,
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        "assets/kawaii_fire.png",
+                        height: calculateHeight(550),
+                        fit: BoxFit.contain,
+                      ),
+                      Text(
+                        "550 lms",
+                        style: StylesApp(context)
+                            .textStyleBody16
+                            .copyWith(color: StyleColor.orange),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 48,
+                ),
+                Center(
+                  child: ButtonThemeWidget(
+                    text: "Continuar",
+                    width: 132,
+                    height: 32,
+                    buttonStyle: StylesApp(context).btnWidgetSmall,
+                    onPressed: () {
+                      Navigator.popAndPushNamed(context, '/aventurePage');
                     },
                   ),
                 ),

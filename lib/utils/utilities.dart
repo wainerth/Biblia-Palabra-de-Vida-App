@@ -136,3 +136,11 @@ Future<void> showCustomDialog(BuildContext context,
     },
   );
 }
+
+  obtainedStar(int maxScore, int sectionCompleted, int sectionCount) {
+
+    final score = maxScore / sectionCount;
+
+    return (score * sectionCompleted).toInt();
+
+  }

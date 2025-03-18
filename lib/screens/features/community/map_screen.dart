@@ -76,7 +76,10 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _generateData(BuildContext context) async {
     LoadingService().showLoading(context);
-    errorMessage = null;
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
     final Map<String, dynamic>? args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (args != null) {
@@ -88,7 +91,8 @@ class _MapScreenState extends State<MapScreen> {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         final LoginUser? userData = userProvider.currentUser;
         // obtenemos curso
-        final ResponseData courseResponse = await loadOneCourse(courseId);
+        final ResponseData courseResponse =
+            await loadOneCourse( userData != null ? userData!.user.id : null, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
         }
@@ -189,7 +193,7 @@ class _MapScreenState extends State<MapScreen> {
                         HeaderMapWidget(
                             title: course!.title,
                             subtitleStage: stage!.sectionName,
-                            indexStage: 1, //stage.id,
+                            indexStage: stage!.orderCard,
                             onRouteBack: () {
                               Navigator.popAndPushNamed(
                                   context, '/layoutPage1');
@@ -197,7 +201,7 @@ class _MapScreenState extends State<MapScreen> {
                             onShowInfoCourse: () {
                               Navigator.popAndPushNamed(
                                   context, '/detailCoursePage',
-                                  arguments: course);
+                                  arguments: course!.id);
                             },
                             onShowInfoStage: () {
                               showDialog(
@@ -404,7 +408,7 @@ class _MapScreenState extends State<MapScreen> {
                                                       Text(
                                                         textAlign:
                                                             TextAlign.center,
-                                                        "${grupo[i].id} ${grupo[i].name}",
+                                                        "${grupo[i].levelNumber} ${grupo[i].name}",
                                                         style: StylesApp(
                                                                 context)
                                                             .textStyNameNumber
@@ -593,7 +597,7 @@ _buildItemLevel(BuildContext context, Level grupo) {
           children: [
             Text(
               textAlign: TextAlign.center,
-              grupo.id,
+              "${grupo.levelNumber}",
               style: StylesApp(context).textStyleLevelNumber.copyWith(
                     height: 1,
                     color: Colors.white,

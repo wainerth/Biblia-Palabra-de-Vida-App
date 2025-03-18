@@ -33,8 +33,7 @@ class _AventureScreenState extends State<AventureScreen> {
   Future<void> _generateData(BuildContext context) async {
     LoadingService().showLoading(context);
     setState(() {
-      errorMessage= null;
-      
+      errorMessage = null;
     });
     try {
       final result = await loadCoursesByUserAndChurch(null, null);
@@ -108,7 +107,7 @@ class _AventureScreenState extends State<AventureScreen> {
                         onTap: () {
                           Navigator.popAndPushNamed(
                               context, '/detailCoursePage',
-                              arguments: courses[index]);
+                              arguments: courses[index].id);
                         },
                         goToMap: () async {
                           setState(() {
@@ -117,8 +116,15 @@ class _AventureScreenState extends State<AventureScreen> {
                           // consulto si el usuario tiene algún progreso para este curso?
                           final userProvider =
                               Provider.of<UserProvider>(context, listen: false);
-                          progressUser = await userProvider.getProgressUser(
-                              dataUser?.user.id, courses[index].id);
+                          final progressResponse =
+                              await userProvider.getProgressUser(
+                                  dataUser?.user.id, courses[index].id);
+                          if (progressResponse!.error != null) {
+                            await showCustomDialog(context,
+                                message: progressResponse.error!,
+                                dialogType: DialogType.error);
+                          }
+                          progressUser = progressResponse.data;
                           if (progressUser != null) {
                             Navigator.pushNamed(context, '/mapPage',
                                 arguments: {

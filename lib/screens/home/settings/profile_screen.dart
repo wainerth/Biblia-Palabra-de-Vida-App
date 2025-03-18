@@ -26,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _selectImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
- 
+
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
       final fileSizeInBytes = imageFile.lengthSync();
@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         if (mimeType != null) {
           dataUrl = "data:$mimeType;base64,$base64Image";
-     
+
           if (kDebugMode) {
             print(dataUrl);
           } // Imprime la Data URL para pegarla en el navegador
@@ -83,13 +83,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
-List<ModelData> optionsSex = [
+    List<ModelData> optionsSex = [
       ModelData(value: 'm', label: 'Masculino'),
       ModelData(value: 'f', label: 'Femenino')
     ];
 
-    final String userGender = (dataUser!.gender != null && dataUser!.gender!.isNotEmpty) ?  optionsSex.firstWhere((sex)=> 
-    sex.value == dataUser!.gender).label : '';
+    final String userGender = (dataUser!.gender != null &&
+            dataUser!.gender!.isNotEmpty)
+        ? optionsSex.firstWhere((sex) => sex.value == dataUser!.gender).label
+        : '';
     List<ModelData> progressData = [
       ModelData(
         label: "Registro",
@@ -118,7 +120,11 @@ List<ModelData> optionsSex = [
           value: "${dataUser?.lastname}",
           showLabel: false,
           clave: "lastname"),
-      ModelData(label: "Sexo", value: "${userGender}", clave: "gender"),
+      ModelData(
+        label: "Sexo",
+        value: "${userGender}",
+        clave: "gender",
+      ),
       ModelData(
         label: "Fecha nac",
         value: "${dataUser!.birthdate}",
@@ -412,16 +418,17 @@ class CardColumnWidget extends StatelessWidget {
                                           catalogueProvider.allCountries,
                                           catalogueProvider.allChurches));
 
-                                  await userProvider.updateProfile(dataEnviar).then((value) async {
-
-                                  if (dataEnviar.dataProfiles.church != null) {
-                                    await userProvider.updateUserChurch(
-                                        user.user.id,
-                                        dataEnviar.dataProfiles.church!.id,
-                                        catalogueProvider.allChurches);
-                                  }
+                                  await userProvider
+                                      .updateProfile(dataEnviar)
+                                      .then((value) async {
+                                    if (dataEnviar.dataProfiles.church !=
+                                        null) {
+                                      await userProvider.updateUserChurch(
+                                          user.user.id,
+                                          dataEnviar.dataProfiles.church!.id,
+                                          catalogueProvider.allChurches);
+                                    }
                                   });
-
 
                                   Navigator.pop(context);
                                   LoadingService().hideLoading();
@@ -461,5 +468,4 @@ class CardColumnWidget extends StatelessWidget {
       ],
     );
   }
-
 }

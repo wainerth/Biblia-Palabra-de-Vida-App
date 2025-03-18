@@ -103,7 +103,7 @@ class _CustomDropdownBottomWidgetState<T>
           ),
           decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
             
-                hintText: "País",
+                hintText: widget.hintText,
                 suffixIcon: const Icon(Icons.arrow_drop_down),
               ),
           controller: TextEditingController(

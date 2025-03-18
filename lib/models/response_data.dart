@@ -8,10 +8,22 @@ class ResponseData {
 
   factory ResponseData.fromQueryResult(QueryResult result) {
     String? errorMessage;
-    if (result.exception != null &&
-        result.exception!.graphqlErrors.isNotEmpty) {
+    if (result.exception?.linkException != null) {
+       errorMessage = result.exception!.linkException.toString();
+      // Aquí puedes manejar el error de enlace, mostrar un mensaje al usuario, etc.
+    } else if (result.exception!.graphqlErrors.isNotEmpty) {
       errorMessage = result.exception!.graphqlErrors.first.message;
+      // Aquí puedes manejar los errores devueltos por el servidor GraphQL.
+    } else {
+      errorMessage = result.exception.toString();
     }
+    // if (result.exception != null) {
+    //   if (result.exception!.graphqlErrors.isNotEmpty) {
+    //     errorMessage = result.exception!.graphqlErrors.first.message;
+    //   } else if (result.exception!.linkException != null) {
+    //     errorMessage = result.exception!.linkException.toString();
+    //   }
+    // }
     return ResponseData(
       data: _removeTypename(result.data),
       error: errorMessage,

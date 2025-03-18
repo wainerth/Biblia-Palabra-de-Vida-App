@@ -1,4 +1,3 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -21,30 +20,30 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   LoginUser? dataUser;
   late final catalogueProvider;
   LastProgressUser? progressUser = null;
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   final authProvider = Provider.of<AuthenticationProvider>(context);
-  //   authProvider.loadUserData().then((userData) {
-  //     setState(() {
-  //       dataUser = userData;
-  //     });
-  //   });
-  // }
+
   @override
   void initState() {
     super.initState();
-    // _initializeCatalogues();
-    _loadProgress();
   }
 
-  Future<void> _loadProgress() async {
+  Future<void> _loadProgress(BuildContext context) async {
+    LoadingService().showLoading(context);
     final userProvider = Provider.of<UserProvider>(context,
         listen:
             false); // listen: false para evitar reconstrucciones innecesarias
     dataUser = userProvider.currentUser;
-    progressUser = await userProvider.getProgressUser(
-        dataUser?.user.id, null); // Espera el resultado del Future
+    final progressResponse =
+        await userProvider.getProgressUser(dataUser?.user.id, null);
+    if (progressResponse!.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(
+        context,
+        message: progressResponse.error!,
+        dialogType: DialogType.error,
+      );
+      return;
+    }
+    progressUser = progressResponse.data;
     setState(() {}); // Fuerza una reconstrucción para mostrar los datos
   }
 
@@ -152,7 +151,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                       style: StylesApp(context).textStyleBody7,
                     ),
                     GestureDetector(
-                      onTap: (){
+                      onTap: () {
                         Navigator.pushNamed(context, '/soonPage');
                       },
                       child: Padding(
@@ -191,6 +190,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: GestureDetector(
         onTap: () async {
+          await _loadProgress(context);
           if (progressUser != null && card['label'] == 'Aventura') {
             Navigator.pushNamed(context, '/mapPage', arguments: {
               'courseId': progressUser!.courseId,
@@ -277,7 +277,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
         Padding(
           padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
           child: GestureDetector(
-            onTap: () {
+            onTap: () async {
+              await _loadProgress(context);
               if (progressUser != null) {
                 Navigator.pushNamed(context, '/mapPage', arguments: {
                   'courseId': progressUser!.courseId,
@@ -333,8 +334,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     );
   }
 }
-
-
 
 _buildProverbsSection(BuildContext context) {
   return Container(
@@ -480,11 +479,11 @@ _buildPositionSection(BuildContext context, userData) {
                                   StylesApp(context).sizeContainerAvatar.width,
                               child: CircleAvatar(
                                 radius: StylesApp(context).radiusAvatar,
-                                backgroundImage: NetworkImage((userData !=
-                                            null &&
-                                        userData.imgProfileUser != '')
-                                    ? "${GraphQLConfig.urlServidor}${userData.imgProfileUser}"
-                                    : 'assets/no-image.jpg'),
+                                backgroundImage: NetworkImage(
+                                    (userData != null &&
+                                            userData.imgProfileUser != '')
+                                        ? "${userData.imgProfileUser}"
+                                        : 'assets/no-image.jpg'),
                               ),
                             ),
                           ],
