@@ -1,9 +1,11 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:provider/provider.dart';
@@ -44,6 +46,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
       return;
     }
     progressUser = progressResponse.data;
+    LoadingService().hideLoading();
     setState(() {}); // Fuerza una reconstrucción para mostrar los datos
   }
 
@@ -474,17 +477,23 @@ _buildPositionSection(BuildContext context, userData) {
                       child: Center(
                         child: Column(
                           children: [
-                            SizedBox(
+                            Container(
+                               
+                        // width: double.infinity,
+                        height:StylesApp(context).sizeContainerAvatar.height,
                               width:
                                   StylesApp(context).sizeContainerAvatar.width,
-                              child: CircleAvatar(
-                                radius: StylesApp(context).radiusAvatar,
-                                backgroundImage: NetworkImage(
-                                    (userData != null &&
-                                            userData.imgProfileUser != '')
-                                        ? "${userData.imgProfileUser}"
-                                        : 'assets/no-image.jpg'),
-                              ),
+                              child: ClipOval(
+                            child: CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                              imageUrl: userData!.imgProfileUser.isNotEmpty
+                              ? GraphQLConfig.urlServidor+ userData.imgProfileUser + '?timestamp=${DateTime.now().millisecondsSinceEpoch}'
+                              : 'assets/no-image.jpg',
+                              placeholder:(context, url ) => Image.asset('assets/no-image.jpg'),
+                              errorWidget:(context, url , error) => Image.asset('assets/no-image.jpg')
+                            ),
+                          ),
                             ),
                           ],
                         ),

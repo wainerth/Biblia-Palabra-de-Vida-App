@@ -32,13 +32,32 @@ class _AventureScreenState extends State<AventureScreen> {
 
   Future<void> _generateData(BuildContext context) async {
     LoadingService().showLoading(context);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+    dataUser = userProvider.currentUser;
     setState(() {
       errorMessage = null;
     });
     try {
-      final result = await loadCoursesByUserAndChurch(null, null);
+      final result = await loadCoursesByUserAndChurch(dataUser!.user.id, dataUser!.user.userChurch.isNotEmpty ? dataUser!.user.userChurch.first.id : null);
       if (result.error != null) {
-        errorMessage = result.error;
+        LoadingService().hideLoading();
+        if (result.error.contains("Información")) {
+          await showCustomDialogWithAction(context,
+              message: result.error!,
+              dialogType: DialogTypeAction.info,
+              buttonOk: 'Volver',
+              actionCallbackOk: () {
+                 Navigator.popAndPushNamed(context, '/workspacePage');
+              },
+              showAction: true,
+              textButton: 'Afiliar a una Iglesia?',
+              actionCallback: () {
+                Navigator.popAndPushNamed(context, '/profilePage');
+              });
+          errorMessage = result.error;
+        } else {
+          errorMessage = result.error;
+        }
       } else {
         setState(() {
           courses = result.data

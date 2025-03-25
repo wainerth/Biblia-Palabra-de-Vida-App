@@ -27,8 +27,8 @@ final Map<String, WidgetBuilder> routes = {
   '/questionPage': (BuildContext context) => QuestionScreen(),
   '/soonPage': (BuildContext context) => SoonScreen(),
   '/preachPage': (BuildContext context) => PreachScreen(),
-  '/promisePage': (BuildContext context) => PromisesScreen(),
-  '/playPage': (BuildContext context) => PlayScreen(),
+  '/promisePage': (BuildContext context) => SoonScreen(), //PromisesScreen(),
+  '/playPage': (BuildContext context) => SoonScreen(), // PlayScreen(),
   '/settingPage': (BuildContext context) => AuthGuard(child: SettingsScreen())
 };
 

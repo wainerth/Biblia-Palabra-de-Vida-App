@@ -871,8 +871,14 @@ Future loadStoriesByLevel(String levelId) async {
           name
           id
         }
+        audio {
+          url
+        }
         img {
           urlImg
+        }
+        video {
+          url
         }
         status
         audioUrl
@@ -1156,20 +1162,27 @@ Future lastLevelProgressUser(userId, levelId) async {
   }
 }
 
-Future ejecutarServicio(id) async {
+Future getLeagueMembers(leagueId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
   final GraphQLClient _client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
-    operationName: "PruebaService",
+    operationName: "GetLeagueMembers",
     document: gql(r'''
-          query PruebaService($pruebaServiceId: ID) {
-          pruebaService(id: $pruebaServiceId)
+          query GetLeagueMembers($leagueId: ID!) {
+          getLeagueMembers(leagueId: $leagueId) {
+            userId
+            currentPoints
+            position
+            promoted
+            username
+            profilePicture
+          }
         }
       '''),
-    variables: <String, dynamic>{"id": id},
+    variables: <String, dynamic>{"leagueId": leagueId},
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
@@ -1179,21 +1192,21 @@ Future ejecutarServicio(id) async {
     }
 
     final data = result.data;
-    if (data == null || data['pruebaService'] == null) {
+    if (data == null || data['getLeagueMembers'] == null) {
       return ResponseData(
         data: null,
-        error: 'get last progress level user failed: No data returned',
+        error: 'get League Members failed: No data returned',
       );
     }
 
     return ResponseData(
-      data: removeTypename(data['pruebaService']),
+      data: removeTypename(data['getLeagueMembers']),
       error: null,
     );
   } on TimeoutException catch (e) {
     print('Timeout: $e');
     return ResponseData(
-        data: null, error: 'Get progress Level User Timeout de conexión $e');
+        data: null, error: 'get League Members Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

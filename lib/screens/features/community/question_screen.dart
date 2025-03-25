@@ -9,6 +9,7 @@ import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
@@ -432,6 +433,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
       _suggestionSelected = false;
       _selectedAnswerIndex = -1;
     });
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userToken = prefs.getString('userToken');
+    await Provider.of<AuthenticationProvider>(context, listen: false)
+        .loadProfileUser(userData!.user.id, userToken);
   }
 
   loadTitleForUser() async {
@@ -872,7 +877,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 buttonStyle: StylesApp(context).btnWidgetSmall,
                 onPressed: () {
                   // mostrar si hay recompensa
-                  if (sendScore!.isLastLevel && sendScore!.rewardObtained && reward != null) {
+                  if (sendScore!.isLastLevel &&
+                      sendScore!.rewardObtained &&
+                      reward != null) {
                     setState(() {
                       showStepCompleted = false;
                       showTitleObtained = false;

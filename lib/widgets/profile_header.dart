@@ -1,9 +1,9 @@
-import 'dart:io';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
@@ -22,22 +22,36 @@ class ProfileHeader extends StatefulWidget {
 }
 
 class _ProfileHeaderState extends State<ProfileHeader> {
-  
   ImageProvider _getImageProvider() {
     if (widget.avatarImg.isEmpty) {
       return AssetImage('assets/no-image.jpg');
     } else {
-      if (widget.avatarImg.isNotEmpty) {
-        return NetworkImage(widget.avatarImg, );
-      } else {
-        return FileImage(File(widget.avatarImg));
-      }
+        setState(() {});
+        return NetworkImage(
+         GraphQLConfig.urlServidor+ widget.avatarImg + '?timestamp=${DateTime.now().millisecondsSinceEpoch}',
+        );
+
     }
   }
+  // String _getImageProvider() {
+  //   if (widget.avatarImg.isEmpty) {
+  //     return 'assets/no-image.jpg';
+  //   } else {
+  //     setState(() {});
+  //     return widget.avatarImg + '?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+  //   }
+  // }
+
+  // @override
+  // void didChangeDependencies() async {
+  //   super.didChangeDependencies();
+  //   await CachedNetworkImage.evictFromCache(widget.avatarImg);
+  //   setState(() {});
+  // }
 
   @override
   Widget build(BuildContext context) {
-     final userProvider = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
     final dataUser = userProvider.currentUser;
     return Container(
       width: double.infinity,
@@ -100,6 +114,15 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               width: 160,
                               alignment: Alignment.topCenter,
                             ),
+                            // CachedNetworkImage(
+                            //     imageUrl: _getImageProvider(),
+                            //     fit: BoxFit.cover,
+                            //     height: 160,
+                            //     width: 160,
+                            //     placeholder: (context, url) =>
+                            //         Image.asset('assets/no-image.jpg'),
+                            //     errorWidget: (context, url, error) =>
+                            //         Image.asset('assets/no-image.jpg')),
                           ),
                         ),
                         Positioned(
@@ -141,7 +164,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 children: [
                   Image.asset("assets/kawaii_fire.png"),
                   Text(
-                    "${dataUser.expTotalUser}",
+                    "${dataUser.energyPoints}",
                     style: StylesApp(context)
                         .textStyleBody4
                         .copyWith(color: Color(0XFFFD8C43)),

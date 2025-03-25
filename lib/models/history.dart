@@ -7,9 +7,9 @@ class History {
   final int orderCard;
   final IntermediateLevel level;
   final Img img;
+  final Audio? audio;
+  final Video? video;
   final int status;
-  final String? audioUrl;
-  final String? videoUrl;
 
   History({
     required this.id,
@@ -18,9 +18,9 @@ class History {
     required this.orderCard,
     required this.level,
     required this.img,
-    required this.status,
-    this.audioUrl,
-    this.videoUrl,
+    required this.audio,
+    required this.video,
+    required this.status
   });
 
   factory History.fromJson(Map<String, dynamic> json) {
@@ -31,9 +31,9 @@ class History {
       orderCard: json['orderCard'],
       level: IntermediateLevel.fromJson(json['level']),
       img: Img.fromJson(json['img']),
-      status: json['status'],
-      audioUrl: json['audioUrl'] ?? '',
-      videoUrl: json['videoUrl'] ?? '',
+      audio:json['audio'] != null ? Audio.fromJson(json['audio']) : null,
+      video:json['video'] != null ? Video.fromJson(json['video']) : null,
+      status: json['status']
     );
   }
 }

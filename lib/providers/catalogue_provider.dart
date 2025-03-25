@@ -24,7 +24,6 @@ class CatalogueProvider extends ChangeNotifier {
 
   Future<void> initialize() async {
     _client = createClient();
-    await getConfigurations();
     await _loadCountries();
 
     await _loadSex();
@@ -34,41 +33,10 @@ class CatalogueProvider extends ChangeNotifier {
     await _loadChurches();
 
     await _loadLeagues();
+    await _getConfigurations();
   }
 
-  Future<void> getConfigurations() async {
 
-    QueryOptions options =  QueryOptions(
-      operationName: "GetConfigurations",
-      document: gql(r'''
-        query GetConfigurations {
-      getConfigurations
-    }
-      '''),
-      fetchPolicy: FetchPolicy.noCache,
-    );
-
-    try {
-      final QueryResult result = await _client.query(options);
-
-      if (result.hasException) {
-        throw Exception('Failed to obtain getConfigurations');
-      }
-
-      final data = result.data;
-
-      if (data == null || data['getConfigurations'] == null) {
-        throw Exception('Failed to obtain getConfigurations');
-      }
-
-      allConfig = Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
-      print(allConfig);
-      
-      notifyListeners();
-    } catch (e) {
-      throw Exception('Failed to obtain getConfigurations $e');
-    }
-  }
   Future<void> _loadCountries() async {
 
     QueryOptions options = QueryOptions(
@@ -95,7 +63,7 @@ class CatalogueProvider extends ChangeNotifier {
       final data = result.data;
 
       if (data == null || data['getAllCountries'] == null) {
-        throw Exception('Failed to obtain Countries');
+        throw Exception('obtain Countries no data');
       }
 
       allCountries = (data['getAllCountries'] as List)
@@ -152,7 +120,7 @@ class CatalogueProvider extends ChangeNotifier {
       final data = result.data;
 
       if (data == null || data['getAllChurches'] == null) {
-        throw Exception('Failed to obtain Churches');
+        throw Exception('obtain Churches no data');
       }
 
       allChurches = (data['getAllChurches'] as List)
@@ -175,6 +143,7 @@ class CatalogueProvider extends ChangeNotifier {
             name
             minMembers
             maxMembers
+            color
             status
             img {
               urlImg
@@ -195,7 +164,7 @@ class CatalogueProvider extends ChangeNotifier {
       final data = result.data;
 
       if (data == null || data['getAllLeagues'] == null) {
-        throw Exception('Failed to obtain leagues');
+        throw Exception('obtain leagues no data');
       }
 
       allLeagues = (data['getAllLeagues'] as List)
@@ -205,6 +174,40 @@ class CatalogueProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       throw Exception('Failed to obtain leagues $e');
+    }
+  }
+
+  Future<void> _getConfigurations() async {
+
+    QueryOptions options =  QueryOptions(
+      operationName: "GetConfigurations",
+      document: gql(r'''
+        query GetConfigurations {
+      getConfigurations
+    }
+      '''),
+      fetchPolicy: FetchPolicy.noCache,
+    );
+
+    try {
+      final QueryResult result = await _client.query(options);
+
+      if (result.hasException) {
+        throw Exception('Failed to obtain getConfigurations');
+      }
+
+      final data = result.data;
+
+      if (data == null || data['getConfigurations'] == null) {
+        throw Exception('Failed to obtain getConfigurations');
+      }
+
+      allConfig = Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
+      print(allConfig);
+      
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to obtain getConfigurations $e');
     }
   }
 } 

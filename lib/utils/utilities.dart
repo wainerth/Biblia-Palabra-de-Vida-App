@@ -137,10 +137,36 @@ Future<void> showCustomDialog(BuildContext context,
   );
 }
 
-  obtainedStar(int maxScore, int sectionCompleted, int sectionCount) {
+Future<void> showCustomDialogWithAction(BuildContext context,
+    {required String message,
+    required DialogTypeAction dialogType,
+    required String buttonOk,
+    String textButton = '',
+    bool showAction = false,
+    void Function()? actionCallbackOk,
+    void Function()? actionCallback}) async {
+  await showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CustomDialogWithAction(
+        message: message,
+        dialogType: dialogType,
+        buttonOk: buttonOk,
+        CallbackActionOk: actionCallbackOk,
+        showAction: showAction,
+        actionCallback: actionCallback,
+        textButtonAction: textButton,
+      );
+    },
+  );
+}
 
-    final score = maxScore / sectionCount;
-
-    return (score * sectionCompleted).toInt();
+obtainedStar(int maxScore, int sectionCompleted, int sectionCount) {
+  if(sectionCount >0){
+  final score = maxScore / sectionCount;
+  return (score * sectionCompleted).toInt();
 
   }
+  return 0;
+
+}

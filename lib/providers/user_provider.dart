@@ -51,6 +51,9 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<ResponseData> updateAvatarUser(String userId, String toBase64) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userToken = prefs.getString('userToken');
+      final GraphQLClient _client = createClient(authToken: userToken);
     if (userId.isEmpty || toBase64.isEmpty) {
       return ResponseData(
         data: null,
@@ -90,14 +93,24 @@ class UserProvider extends ChangeNotifier {
       // Actualiza la imagen del usuario si la mutación fue exitosa
       _user = _user?.copyWith(
           imgProfileUser: data["updateImageProfile"]["imgProfileUser"]);
+      setUser(_user);
       notifyListeners();
 
       return ResponseData(data: data, error: null);
     } catch (e) {
-      return ResponseData(
-        data: null,
-        error: 'Connection error: $e',
-      );
+      if (e is TimeoutException) {
+        return ResponseData(data: null, error: "Request timed out");
+      } else if (e is SocketException) {
+        return ResponseData(data: null, error: "No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+
+        return ResponseData(data: null, error: "Invalid data format");
+      } else {
+        return ResponseData(
+            data: null,
+            error: "An unexpected error occurred: $e"); // Generic error
+      }
     }
   }
 
@@ -236,8 +249,7 @@ class UserProvider extends ChangeNotifier {
     }
 
     if (progress.data == null || progress.data['data'] == null) {
-      return ResponseData(
-          error: "get last progress user level: No data result", data: null);
+       return ResponseData(error: null, data: null);
     } else {
       userProgress = LastProgressUser.fromMap(progress.data['data']);
       setProgressUser(userProgress);

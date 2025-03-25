@@ -32,8 +32,11 @@ class AuthenticationProvider extends ChangeNotifier {
     if (userToken != null && userDataString != null) {
       isAuthenticated = true;
       token = userToken;
+      final dataUserload = LoginUser.fromJson(jsonDecode(userDataString));
       Provider.of<UserProvider>(context, listen: false)
           .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
+      await loadProfileUser(dataUserload.user.id, userToken);
+      print('cargo nueva data de perfil');
     } else {
       isAuthenticated = false;
       token = userToken;
@@ -96,7 +99,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }
 
     // llamamos a achievement
-    final UserTitle = await getUserTitle( userId);
+    final UserTitle = await getUserTitle(userId);
     error = UserTitle.error;
     if (UserTitle.error != null) {
       return ResponseData(data: null, error: error);
@@ -299,11 +302,11 @@ class AuthenticationProvider extends ChangeNotifier {
   // }
 
   Future logoutUser(context) async {
-    final ResponseData result =  await logout();
-    if( result.error != null) {
+    final ResponseData result = await logout();
+    if (result.error != null) {
       return false;
     }
-    
+
     Navigator.of(context).popUntil((route) => route.isFirst);
     Navigator.pushReplacementNamed(context, '/homePage');
     Provider.of<UserProvider>(context, listen: false).setUser(null);

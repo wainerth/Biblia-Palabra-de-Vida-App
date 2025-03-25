@@ -19,7 +19,16 @@ class _LayoutScreenState extends State<LayoutScreen> {
       }
     });
   }
-
+ @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final Object? args = ModalRoute.of(context)!.settings.arguments;
+    if (args != null) {
+      setState(() {
+        _selectedIndex = (args as Map<String, dynamic>)["selectedIndex"];
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

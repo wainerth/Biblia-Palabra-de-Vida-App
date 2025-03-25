@@ -43,8 +43,30 @@ final List<BottomNavItem> items = [
         icon: Icons.directions_walk_outlined,
         page: AventureScreen()),
     BottomNavItem(
-        title: "Ranking", icon: Icons.panorama_rounded, page: RankingScreen()),
-    BottomNavItem(title: "Dudas", icon: Icons.menu, page: DoubtScreen()),
+        title: "Ranking", icon: Icons.area_chart_sharp, page: RankingScreen()),
+    BottomNavItem(title: "Dudas", icon: Icons.question_mark_outlined, page: DoubtScreen()),
+    BottomNavItem(
+        title: "Reto online",
+        icon: Icons.language,
+        page: OnlineChallengeScreen()),
+    BottomNavItem(
+        title: "Novedad",
+        icon: Icons.notifications_none_rounded,
+        page: NewsScreen())
+  ];
+  
+final List<BottomNavItem> itemsMap = [
+    BottomNavItem(
+        title: "Inicio",
+        icon: Icons.home_outlined,
+        page: WorkspaceScreen()),
+    BottomNavItem(
+        title: "Aventuras",
+        icon: Icons.directions_walk_outlined,
+        page: AventureScreen()),
+    BottomNavItem(
+        title: "Mapa", icon: Icons.map_rounded, page: MapScreen()),
+    BottomNavItem(title: "Dudas", icon: Icons.question_mark_outlined, page: DoubtScreen()),
     BottomNavItem(
         title: "Reto online",
         icon: Icons.language,

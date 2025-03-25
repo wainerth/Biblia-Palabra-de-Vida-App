@@ -1,24 +1,27 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:flutter/material.dart';
 
-enum DialogType { info, warning, error }
+enum DialogTypeAction { info, warning, error }
 
-class CustomDialog extends StatelessWidget {
+class CustomDialogWithAction extends StatelessWidget {
   final String message;
+  final DialogTypeAction dialogType;
   final String buttonOk;
-  final DialogType dialogType;
-  final String textButton;
+  final String textButtonAction;
   final bool showAction;
+  final void Function()? CallbackActionOk;
   final void Function()? actionCallback;
 
-  const CustomDialog(
+  const CustomDialogWithAction(
       {Key? key,
-      this.buttonOk = 'Ok',
       required this.message,
       required this.dialogType,
-      this.showAction = false,
+      this.buttonOk = 'Ok',
       this.actionCallback,
-      this.textButton = 'Aceptar'})
+      this.showAction = false,
+      this.textButtonAction = 'Aceptar', 
+      this.CallbackActionOk,
+      })
       : super(key: key);
 
   @override
@@ -28,17 +31,17 @@ class CustomDialog extends StatelessWidget {
     String title;
 
     switch (dialogType) {
-      case DialogType.info:
+      case DialogTypeAction.info:
         icon = Icons.info_outline;
         color = Colors.blue;
         title = 'Información';
         break;
-      case DialogType.warning:
+      case DialogTypeAction.warning:
         icon = Icons.warning_amber;
         color = Colors.orange;
         title = 'Advertencia';
         break;
-      case DialogType.error:
+      case DialogTypeAction.error:
         icon = Icons.error_outline;
         color = Colors.red;
         title = 'Error';
@@ -61,7 +64,7 @@ class CustomDialog extends StatelessWidget {
       actions: [
         TextButton(
           style: StylesApp(context).btnWidgetSmall,
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: CallbackActionOk,
           child: Text(
             buttonOk,
             style: StylesApp(context).textStyleBody14,
@@ -73,7 +76,7 @@ class CustomDialog extends StatelessWidget {
             style: StylesApp(context).btnWidgetSmall,
             onPressed: actionCallback,
             child: Text(
-              textButton,
+              textButtonAction,
               style: StylesApp(context).textStyleBody14,
             ),
           ),

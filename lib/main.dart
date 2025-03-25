@@ -97,6 +97,7 @@ class _MyAppState extends State<MyApp> {
     }
     if (_hasSeenIntro!) {
       final authProvider = context.read<AuthenticationProvider>();
+      
       if (authProvider.token != null) {
         return PageScreen();
       } else {

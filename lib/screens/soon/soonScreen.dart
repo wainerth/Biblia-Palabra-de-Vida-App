@@ -56,7 +56,7 @@ class SoonScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Image.asset(
-                      "assets/fire_animate.gif", // GIF animado
+                      "assets/comingSoon.gif", // GIF animado
                       height: 200,
                       width: 200,
                     ),

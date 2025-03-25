@@ -9,6 +9,7 @@ export 'package:biblia_palabra_de_vida_app/widgets/player_youtube_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/player_no_youtube.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/custom_dialog.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/custom_dialog_with_action.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/radio_button_widget.dart';
 

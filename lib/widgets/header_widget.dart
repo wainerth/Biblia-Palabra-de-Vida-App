@@ -45,7 +45,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     child: CircleAvatar(
                       radius: 50,
                       backgroundImage: NetworkImage (
-                        "${userData?.imgProfileUser}",
+                        "${GraphQLConfig.urlServidor}${userData?.imgProfileUser}",
                       ),
                     ),
                   ),
@@ -69,14 +69,14 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   textAlign: TextAlign.left,
                   style: StylesApp(context).textStyleBody17,
                   TextSpan(
-                    children: [TextSpan(text: "Exp:"), TextSpan(text: "${userData!.expTotalUser}")],
+                    children: [TextSpan(text: "Exp: "), TextSpan(text: "${userData!.expTotalUser}")],
                   ),
                 ),
                 Text.rich(
                   style: StylesApp(context).textStyleBody17,
                   TextSpan(
                     children: [
-                      TextSpan(text: "Racha:"),
+                      TextSpan(text: "Racha: "),
                       TextSpan(text: "${userData.streakDaysCount} días")
                     ],
                   ),

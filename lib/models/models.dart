@@ -1,3 +1,6 @@
+export 'package:biblia_palabra_de_vida_app/models/audio.dart';
+export 'package:biblia_palabra_de_vida_app/models/video.dart';
+
 export 'package:biblia_palabra_de_vida_app/models/reward.dart';
 
 export 'package:biblia_palabra_de_vida_app/models/send_score_model.dart';

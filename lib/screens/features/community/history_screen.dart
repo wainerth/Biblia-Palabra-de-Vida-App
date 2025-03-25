@@ -409,11 +409,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         // height: 213,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: story.videoUrl != null &&
-                                  (story.videoUrl!.contains('youtube.com') ||
-                                      story.videoUrl!.contains('youtu.be'))
+                          child: story.video!= null &&
+                                  (story.video!.url.contains('youtube.com') ||
+                                      story.video!.url.contains('youtu.be'))
                               ? PlayerYoutubeWidget(
-                                  videoUrl: story.videoUrl ?? '')
+                                  videoUrl: story.video!.url ?? '')
                               : playerNoYoutube(
                                   url:
                                       'https://videos.pexels.com/video-files/20000940/20000940-hd_1080_1920_30fps.mp4'),
@@ -454,51 +454,53 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ? StyleColor.turquoise
                       : StyleColor.twilightBlue,
                 ),
-                IconButton(
-                  onPressed: () {
-                    // Lógica para reproducir audio
-                    setState(() {
-                      _selectedButtonIndex = 2;
-                      _isPlayingVideo = false;
-                      _isPlayingAudio = true;
-                    });
-                  },
-                  // story.audioUrl != null
-                  //     ? () {
-                  // // Lógica para reproducir audio
-                  // setState(() {
-                  //   _isPlayingVideo = false;
-                  //   _isPlayingAudio = true;
-                  // });
-                  //       }
-                  //     : null, // Deshabilitado si no hay URL de audio
-                  icon: Icon(Icons.audiotrack),
-                  color: _selectedButtonIndex == 2
-                      ? StyleColor.turquoise
-                      : StyleColor.twilightBlue,
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedButtonIndex = 3;
-                      _isPlayingVideo = true;
-                      _isPlayingAudio = false;
-                    });
-                  },
+                if (story.audio != null && story.audio!.url != '' )
+                  IconButton(
+                    onPressed: () {
+                      // Lógica para reproducir audio
+                      setState(() {
+                        _selectedButtonIndex = 2;
+                        _isPlayingVideo = false;
+                        _isPlayingAudio = true;
+                      });
+                    },
+                    // story.audioUrl != null
+                    //     ? () {
+                    // // Lógica para reproducir audio
+                    // setState(() {
+                    //   _isPlayingVideo = false;
+                    //   _isPlayingAudio = true;
+                    // });
+                    //       }
+                    //     : null, // Deshabilitado si no hay URL de audio
+                    icon: Icon(Icons.audiotrack),
+                    color: _selectedButtonIndex == 2
+                        ? StyleColor.turquoise
+                        : StyleColor.twilightBlue,
+                  ),
+                if (story.video != null && story.video!.url != '')
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedButtonIndex = 3;
+                        _isPlayingVideo = true;
+                        _isPlayingAudio = false;
+                      });
+                    },
 
-                  // story.videoUrl != null
-                  //     ? () {
-                  // setState(() {
-                  //   _isPlayingVideo = true;
-                  //   _isPlayingAudio = false;
-                  // });
-                  //       }
-                  //     : null, // Deshabilitado si no hay URL de video
-                  icon: Icon(Icons.videocam),
-                  color: _selectedButtonIndex == 3
-                      ? StyleColor.turquoise
-                      : StyleColor.twilightBlue,
-                ),
+                    // story.videoUrl != null
+                    //     ? () {
+                    // setState(() {
+                    //   _isPlayingVideo = true;
+                    //   _isPlayingAudio = false;
+                    // });
+                    //       }
+                    //     : null, // Deshabilitado si no hay URL de video
+                    icon: Icon(Icons.videocam),
+                    color: _selectedButtonIndex == 3
+                        ? StyleColor.turquoise
+                        : StyleColor.twilightBlue,
+                  ),
               ],
             ),
           ),

@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 class CommunityScreen extends StatelessWidget {
@@ -6,10 +7,18 @@ class CommunityScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Text("Página de Comunidad"),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+             HeadScreenNotAvatar(
+                  title: "Comunidad",
+                  onRoute: () {
+                    Navigator.pushNamed(context, "/layoutPage");
+                  },
+                ),
+            Center(child: Text("Página de Comunidad")),
+          ],
+        ),
       ),
     );
   }

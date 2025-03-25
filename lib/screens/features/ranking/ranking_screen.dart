@@ -1,7 +1,12 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
@@ -11,103 +16,83 @@ class RankingScreen extends StatefulWidget {
 }
 
 class _RankingScreenState extends State<RankingScreen> {
-  List<League> ranking = [
-    League(
-      id: "1",
-      name: "Principiante",
-      minMembers: 1,
-      maxMembers: 10,
-      img: ImageDetails(urlImg: "assets/league1.png"),
-      color: "64E8FC",
-      status: "active",
-    ),
-    League(
-      id: "2",
-      name: "Creyente",
-      minMembers: 1,
-      maxMembers: 10,
-      img: ImageDetails(urlImg: "assets/league1.png"),
-      color: "602D18",
-      status: "active",
-    ),
-    League(
-      id: "3",
-      name: "Seguidor",
-      minMembers: 1,
-      maxMembers: 10,
-      img: ImageDetails(urlImg: "assets/league1.png"),
-      color: "D67A56",
-      status: "active",
-    ),
-    League(
-      id: "4",
-      name: "Discípulo",
-      minMembers: 1,
-      maxMembers: 10,
-      img: ImageDetails(urlImg: "assets/league1.png"),
-      color: "12CBC4",
-      status: "active",
-    ),
-    League(
-      id: "5",
-      name: "Soldado",
-      minMembers: 1,
-      maxMembers: 10,
-      img: ImageDetails(urlImg: "assets/league1.png"),
-      color: "64E8FC",
-      status: "active",
-    ),
-    League(
-      id: "6",
-      name: "Guerrero",
-      minMembers: 1,
-      maxMembers: 10,
-      img: ImageDetails(urlImg: "assets/league1.png"),
-      color: "64E8FC",
-      status: "active",
-    ),
-    League(
-      id: "7",
-      name: "Siervo",
-      minMembers: 1,
-      maxMembers: 10,
-      img: ImageDetails(urlImg: "assets/league1.png"),
-      color: "64E8FC",
-      status: "active",
-    ),
-    League(
-      id: "8",
-      name: "Lider",
-      minMembers: 1,
-      maxMembers: 10,
-      img: ImageDetails(urlImg: "assets/league1.png"),
-      color: "64E8FC",
-      status: "active",
-    ),
-  ];
+  List<League> leagues = [];
+  String? errorMessage;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generateData(context);
+    });
+  }
+
+  Future<void> _generateData(BuildContext context) async {
+    LoadingService().showLoading(context);
+    setState(() {
+      errorMessage = null;
+    });
+
+    try {
+      leagues = Provider.of<CatalogueProvider>(context, listen: false)
+          .allLeagues
+          .map((league) => league)
+          .toList();
+      if (leagues.isEmpty) {
+        setState(() {
+          errorMessage = "No se encontraron ligas";
+        });
+      }
+    
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+      });
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: ranking.length,
-      child: RankingScreenView(ranking: ranking),
-    );
+    return leagues.length > 0
+        ? DefaultTabController(
+            length: leagues.length,
+            child: RankingScreenView(ranking: leagues),
+          )
+        : Center(
+            child: BuildErrorWidget(
+              errorMessage: errorMessage ?? '',
+              onRetry: () async => _generateData(context),
+              onBack: () => Navigator.pop(context),
+            ),
+          );
   }
 }
 
-class RankingScreenView extends StatelessWidget {
+class RankingScreenView extends StatefulWidget {
   final List<League> ranking;
   const RankingScreenView({super.key, required this.ranking});
 
+  @override
+  State<RankingScreenView> createState() => _RankingScreenViewState();
+}
+
+class _RankingScreenViewState extends State<RankingScreenView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: StyleColor.turquoise,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // body
-              Container(
+        child: Column(
+          children: [
+            // body
+            Expanded(
+              child: Container(
                 child: Column(
                   children: [
                     // Pestañas
@@ -118,14 +103,17 @@ class RankingScreenView extends StatelessWidget {
                         indicatorPadding: EdgeInsets.all(0),
                         indicatorSize: TabBarIndicatorSize.label,
                         isScrollable: true,
-                        tabs: ranking
+                        onTap: (tab)=>{
+                          print(tab)
+                        },
+                        tabs: widget.ranking
                             .map(
                               (league) => Tab(
-                                height: 80,
+                                height: 90,
                                 child: Column(
                                   children: [
                                     Container(
-                                      height: 50,
+                                      height: 60,
                                       padding: EdgeInsets.all(6),
                                       decoration: BoxDecoration(
                                         color: Color(int.parse(
@@ -159,13 +147,14 @@ class RankingScreenView extends StatelessWidget {
                                             ),
                                           ],
                                         ),
-                                        child: Image.asset(league.img.urlImg),
+                                        child: Image.network(
+                                            GraphQLConfig.urlServidor +
+                                                league.img.urlImg),
                                       ),
                                     ),
                                     if (DefaultTabController.of(context)
                                             .index ==
-                                        ranking.indexOf(league))
-                                      
+                                        widget.ranking.indexOf(league))
                                       Container(
                                         width: 30,
                                         height: 6,
@@ -183,7 +172,7 @@ class RankingScreenView extends StatelessWidget {
                                             color:
                                                 DefaultTabController.of(context)
                                                             .index ==
-                                                        ranking.indexOf(league)
+                                                        widget.ranking.indexOf(league)
                                                     ? StyleColor.turquoise
                                                     : StyleColor.orange,
                                           ),
@@ -195,29 +184,35 @@ class RankingScreenView extends StatelessWidget {
                             .toList(),
                       ),
                     ),
-                    Container(
-                      margin: EdgeInsets.only(left: 8, top: 0, right: 8),
-                      height: MediaQuery.of(context).size.height,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                      ),
-                      child: TabBarView(
-                        children: ranking
-                            .map((league) => _buildRankingList())
-                            .toList(),
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.only(left: 8, top: 0, right: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                        ),
+                        child: TabBarView(
+                          children: widget.ranking
+                              .map((league) => _buildRankingList(context))
+                              .toList(),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildRankingList() {
+  Widget _buildRankingList(BuildContext context) {
+    int activeTabIndex = DefaultTabController.of(context).index;
+    String activeLeagueId = widget.ranking[activeTabIndex].id;
+    print("activeTabIndex: $activeTabIndex, activeLeagueId: $activeLeagueId");
+    loadMembers(activeLeagueId);
+      // Cargar los miembros de la liga
     return ListView.builder(
       shrinkWrap: true,
       itemCount: 15, // Ejemplo: 10 usuarios en el ranking
@@ -330,20 +325,12 @@ class RankingScreenView extends StatelessWidget {
               ],
             ),
           );
-
-          // ListTile(
-          //   leading: CircleAvatar(
-          //     backgroundImage: AssetImage(
-          //         'assets/avatar.png'), // Reemplaza con la imagen del usuario
-          //   ),
-          //   title: Text(
-          //       'Usuario ${index + 1}'), // Reemplaza con el nombre del usuario
-          //   subtitle: Text('Posición: ${index + 1}'),
-          //   trailing: Text(
-          //       'exp ${500 - index * 10}'), // Reemplaza con el exp del usuario
-          // );
         }
       },
     );
+  }
+
+  void loadMembers(activeLeagueId) async {
+    final membersLeague = await getLeagueMembers(activeLeagueId);
   }
 }

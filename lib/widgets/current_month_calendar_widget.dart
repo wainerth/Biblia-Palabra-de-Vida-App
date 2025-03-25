@@ -7,7 +7,8 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
 class CurrentMonthCalendarWidget extends StatefulWidget {
-  const CurrentMonthCalendarWidget({super.key});
+  final DateTime registrationDate;
+  const CurrentMonthCalendarWidget({super.key, required this.registrationDate});
 
   @override
   State<CurrentMonthCalendarWidget> createState() =>
@@ -16,10 +17,10 @@ class CurrentMonthCalendarWidget extends StatefulWidget {
 
 class _CurrentMonthCalendarWidgetState
     extends State<CurrentMonthCalendarWidget> {
-   String? errorMessage;
+  String? errorMessage;
   DateCalendar? dayProtectedStreak;
   late DateTime displayedMonth; // Mueve displayedMonth aquí
-  late DateTime registrationDate;
+  // late DateTime registrationDate;
   late DateTime lastDate;
   int daysInMonth = 0;
 
@@ -28,16 +29,16 @@ class _CurrentMonthCalendarWidgetState
     super.initState();
     DateTime now = DateTime.now();
     DateTime currentDate = DateTime(now.year, now.month);
-    registrationDate = DateTime(2023, 7, 1); // Fecha de registro
-    lastDate = registrationDate.add(Duration(days: 365 * 5));
+    // registrationDate = DateTime(2023, 7, 1); // Fecha de registro
+    lastDate = widget.registrationDate.add(Duration(days: 365 * 5));
 
-    if (currentDate.isBefore(registrationDate)) {
-      displayedMonth = registrationDate;
+    if (currentDate.isBefore(widget.registrationDate)) {
+      displayedMonth = widget.registrationDate;
     } else {
       displayedMonth = currentDate;
     }
-      daysInMonth =
-            DateTime(displayedMonth.year, displayedMonth.month + 1, 0).day;
+    daysInMonth =
+        DateTime(displayedMonth.year, displayedMonth.month + 1, 0).day;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generateData(context);
     });
@@ -92,19 +93,19 @@ class _CurrentMonthCalendarWidgetState
 
   @override
   Widget build(BuildContext context) {
-    DateTime registrationDate = DateTime(2023, 7, 1); // Fecha de registro
-    DateTime now = DateTime.now();
-    DateTime currentDate = DateTime(now.year, now.month);
-    DateTime lastDate = registrationDate.add(Duration(days: 365 * 5));
+    // DateTime registrationDate = DateTime(2023, 7, 1); // Fecha de registro
+    // DateTime now = DateTime.now();
+    // DateTime currentDate = DateTime(now.year, now.month);
+    // DateTime lastDate = widget.registrationDate.add(Duration(days: 365 * 5));
 
-    if (currentDate.isBefore(registrationDate)) {
-      currentDate = registrationDate;
-    }
+    // if (currentDate.isBefore(registrationDate)) {
+    //   currentDate = registrationDate;
+    // }
 
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         void previousMonth() async {
-          if (displayedMonth.isAfter(registrationDate)) {
+          if (displayedMonth.isAfter(widget.registrationDate)) {
             setState(() {
               displayedMonth =
                   DateTime(displayedMonth.year, displayedMonth.month - 1);
@@ -115,7 +116,7 @@ class _CurrentMonthCalendarWidgetState
 
         void nextMonth() async {
           if (displayedMonth
-              .isBefore(registrationDate.add(Duration(days: 365 * 5)))) {
+              .isBefore(widget.registrationDate.add(Duration(days: 365 * 5)))) {
             setState(() {
               displayedMonth =
                   DateTime(displayedMonth.year, displayedMonth.month + 1);
@@ -126,7 +127,6 @@ class _CurrentMonthCalendarWidgetState
           }
         }
 
-      
         List<Widget> dayWidgets = [];
 
         for (int i = 1; i <= daysInMonth; i++) {
@@ -160,11 +160,9 @@ class _CurrentMonthCalendarWidgetState
                           ),
                         ),
                       )
-                    } ,
-                    
-                    if (dayProtectedStreak!.protectedStreak.contains(
-                        DateTime(
-                            displayedMonth.year, displayedMonth.month, i))) ...{
+                    },
+                    if (dayProtectedStreak!.protectedStreak.contains(DateTime(
+                        displayedMonth.year, displayedMonth.month, i))) ...{
                       Positioned(
                         top: 0,
                         left: 0,
@@ -227,7 +225,7 @@ class _CurrentMonthCalendarWidgetState
                                 size: 20,
                               ),
                               onPressed:
-                                  displayedMonth.isAfter(registrationDate)
+                                  displayedMonth.isAfter(widget.registrationDate)
                                       ? previousMonth
                                       : null,
                               color: Colors.white,

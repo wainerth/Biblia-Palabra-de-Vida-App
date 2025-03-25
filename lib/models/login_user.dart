@@ -179,27 +179,27 @@ class LoginUser {
       int? preachingsCreatedCount}) {
     return LoginUser(
         name: name ?? this.name,
-        lastname: lastname,
-        city: city,
+        lastname: lastname ?? this.lastname,
+        city: city ?? this.city,
         imgProfileUser: imgProfileUser ?? this.imgProfileUser,
         expTotalUser: expTotalUser ?? this.expTotalUser ,
         energyPoints: energyPoints ?? this.energyPoints,
-        country: country,
-        phoneNumber: phoneNumber,
-        favoriteVerseId: favoriteVerseId ?? '',
+        country: country ?? this.country,
+        phoneNumber: phoneNumber ?? this.phoneNumber,
+        favoriteVerseId: favoriteVerseId ?? this.favoriteVerseId,
         notifications: notifications ?? this.notifications,
-        createdAt: createdAt ?? '',
-        achievementsReachedCount: achievementsReachedCount ?? 0,
-        streakDaysCount: streakDaysCount ?? 0,
-        preachingsCreatedCount: preachingsCreatedCount ?? 0,
+        createdAt: createdAt ?? this.createdAt,
+        achievementsReachedCount: achievementsReachedCount ?? this.achievementsReachedCount,
+        streakDaysCount: streakDaysCount ?? this.streakDaysCount,
+        preachingsCreatedCount: preachingsCreatedCount ?? this.preachingsCreatedCount,
         user: user ?? this.user,
-        title: title,
-        league: league,
-        birthdate: birthdate,
-        identifier: identifier,
-        gender: gender,
-        isBaptized: isBaptized,
-        currentLeagueId: currentLeagueId);
+        title: title ?? this.title,
+        league: league ?? this.league,
+        birthdate: birthdate ?? this.birthdate,
+        identifier: identifier ?? this.identifier,
+        gender: gender ?? this.gender,
+        isBaptized: isBaptized ?? this.isBaptized,
+        currentLeagueId: currentLeagueId ?? this.currentLeagueId);
   }
 
   factory LoginUser.fromJson(Map<String, dynamic> json) {

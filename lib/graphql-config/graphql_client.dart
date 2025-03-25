@@ -17,7 +17,7 @@ GraphQLClient createClient({String? authToken}) {
     getToken: () async =>  authToken ?? GraphQLConfig.authToken,
   );
 // TimeoutLink(httpLink, timeout: Duration(seconds: 10)); /
-  final Link link = TimeoutLink(authLink.concat(httpLink),timeout: Duration(seconds: 20));
+  final Link link = authLink.concat(httpLink); //TimeoutLink(authLink.concat(httpLink),timeout: Duration(seconds: 20));
 
   return GraphQLClient(
     cache: GraphQLCache(store: InMemoryStore()),

@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -75,7 +76,7 @@ class HeaderWidgetProgress extends StatelessWidget {
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
                               imageUrl: userData!.imgProfileUser.isNotEmpty
-                              ? userData.imgProfileUser
+                              ? GraphQLConfig.urlServidor+userData.imgProfileUser
                               : 'assets/no-image.jpg',
                               placeholder:(context, url ) => Image.asset('assets/no-image.jpg'),
                               errorWidget:(context, url , error) => Image.asset('assets/no-image.jpg')
@@ -106,7 +107,7 @@ class HeaderWidgetProgress extends StatelessWidget {
             ],
           ),
           Positioned(
-              top: userData.expTotalUser >= 1000 ? 0 : 30,
+              top: userData.energyPoints >= 1000 ? 0 : 30,
               bottom: 0,
               right: 15,
               child: Column(
@@ -114,11 +115,11 @@ class HeaderWidgetProgress extends StatelessWidget {
                   Image.asset(
                     "assets/kawaii_fire.png",
                     height: calculateHeight(
-                        double.parse("${userData.expTotalUser}")),
+                        double.parse("${userData.energyPoints}")),
                     fit: BoxFit.contain,
                   ),
                   Text(
-                    userData.expTotalUser.floorToDouble().toStringAsFixed(0),
+                    userData.energyPoints.toString(),
                     style: StylesApp(context)
                         .textStyleBody4
                         .copyWith(color: Color(0XFFFD8C43)),

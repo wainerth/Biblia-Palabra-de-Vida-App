@@ -235,7 +235,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
             setState(() {
               _editingData[index] = ModelData(
                 label: _editingData[index].label,
-                value: newValue!.value,
+                value: newValue!.label,
                 clave: _editingData[index].clave,
                 showLabel: _editingData[index].showLabel,
               );
@@ -244,7 +244,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
           selectedItem: item.value.isNotEmpty
               ? optionsSex.firstWhere(
                   (element) => 
-                  element.value.toLowerCase() == item.value.toLowerCase())
+                  element.label.toLowerCase() == item.value.toLowerCase())
               : null,
         ),
       );

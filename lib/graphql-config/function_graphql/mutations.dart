@@ -71,8 +71,29 @@ Future<ResponseData> loginGoogle() async {
   final GraphQLClient _client = createClient();
 
   final GoogleSignIn googleSignIn;
+  //   final googleSignIn = GoogleSignIn(
+  //   clientId: Platform.isAndroid
+  //       ? null // En Android, no es necesario proporcionar clientId
+  //       : "823422522259-lsaj5empb8t54pims7m727krgrcfu6lf.apps.googleusercontent.com", // Web
+  //   serverClientId: Platform.isIOS
+  //       ? "214929717096-c669jpm1gb9q87cribgbknuteemuj8st.apps.googleusercontent.com" // iOS
+  //       : null,
+  //   forceCodeForRefreshToken: true,
+  //   scopes: [
+  //     "email",
+  //     "profile",
+  //     "https://www.googleapis.com/auth/user.birthday.read",
+  //     "https://www.googleapis.com/auth/user.gender.read",
+  //   ],
+  // );
   if (Platform.isAndroid) {
-    googleSignIn = GoogleSignIn();
+    googleSignIn = GoogleSignIn(scopes: [
+      "email",
+      "profile",
+      // "https://www.googleapis.com/auth/user.birthday.read",
+      // "https://www.googleapis.com/auth/user.gender.read",
+    ],);
+
   } else if(kIsWeb){
 
     googleSignIn = GoogleSignIn(
@@ -86,7 +107,7 @@ Future<ResponseData> loginGoogle() async {
         serverClientId:
             "214929717096-c669jpm1gb9q87cribgbknuteemuj8st.apps.googleusercontent.com",
         forceCodeForRefreshToken: true,
-        scopes: ["email"]);
+        scopes: ["email",'https://www.googleapis.com/auth/user.birthday.read']);
   }
 
   final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
@@ -219,11 +240,11 @@ Future updateChurchUser(token, userId, churchId) async {
   final MutationOptions mutateGql = MutationOptions(
       operationName: "UpdateChurchUser",
       document: gql(r'''
-      mutation UpdateChurchUser($userId: ID, $churchIds: [ID]) {
-        updateChurchUser(userId: $userId, churchIds: $churchIds)
+      mutation UpdateChurchUser($userId: ID, $churchId: ID) {
+        updateChurchUser(userId: $userId, churchId: $churchId)
       }
       '''),
-      variables: <String, dynamic>{"userId": userId, "churchIds": churchId},
+      variables: <String, dynamic>{"userId": userId, "churchId": churchId},
       fetchPolicy: FetchPolicy.noCache);
 
   try {

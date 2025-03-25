@@ -16,6 +16,7 @@ class ProgressDetailScreen extends StatefulWidget {
 
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   List<UserTitle>? titles = [];
+  LastProgressUser? progressUser = null;
   List awards = [
     {
       "img": "assets/premios/sardica.png",
@@ -66,6 +67,27 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
       "level": "Jaspe"
     },
   ];
+  Future<void> _loadProgress(BuildContext context) async {
+    LoadingService().showLoading(context);
+    final userProvider = Provider.of<UserProvider>(context,
+        listen:
+            false); // listen: false para evitar reconstrucciones innecesarias
+    LoginUser? dataUser = userProvider.currentUser;
+    final progressResponse =
+        await userProvider.getProgressUser(dataUser?.user.id, null);
+    if (progressResponse!.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(
+        context,
+        message: progressResponse.error!,
+        dialogType: DialogType.error,
+      );
+      return;
+    }
+    progressUser = progressResponse.data;
+    LoadingService().hideLoading();
+    setState(() {}); // Fuerza una reconstrucción para mostrar los datos
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +197,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                   ],
                 ),
               ),
-              CurrentMonthCalendarWidget(),
+              CurrentMonthCalendarWidget( registrationDate: userData.createdAt.isNotEmpty
+                                            ? DateTime.fromMillisecondsSinceEpoch(
+                                                int.parse(userData.createdAt))
+                                            : DateTime.now() ,),
               _buildAchievements(context),
               SizedBox(
                 height: 8.0,
@@ -222,6 +247,17 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             width: 239.0,
             height: 41.0,
             buttonStyle: StylesApp(context).btnWidgetSmall,
+            onPressed: () async {
+              await _loadProgress(context);
+              if (progressUser != null) {
+                Navigator.pushNamed(context, '/mapPage', arguments: {
+                  'courseId': progressUser!.courseId,
+                  'sectionId': progressUser!.sectionId
+                });
+              } else {
+                 Navigator.pushNamed(context, '/introAventurePage');
+              }
+            },
           ),
         ),
         SizedBox(
@@ -424,8 +460,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                     Radius.circular(8),
                                   ),
                                   image: DecorationImage(
-                                    image: NetworkImage( '${GraphQLConfig.urlServidor}${titles![index].img.urlImg}',
-                                        ),
+                                    image: NetworkImage(
+                                      '${GraphQLConfig.urlServidor}${titles![index].img.urlImg}',
+                                    ),
                                     fit: BoxFit.cover,
                                   ),
                                 ),

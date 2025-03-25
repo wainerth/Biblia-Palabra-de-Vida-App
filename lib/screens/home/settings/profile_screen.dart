@@ -8,6 +8,7 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:mime/mime.dart';
@@ -56,8 +57,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           avatarImg = pickedFile.path;
         });
+        LoadingService().showLoading(context);
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        userProvider.updateAvatarUser(dataUser!.user.id, dataUrl);
+        final ResponseData responseUpdateAvatar =
+            await userProvider.updateAvatarUser(dataUser!.user.id, dataUrl);
+        if (responseUpdateAvatar.error != null) {
+          LoadingService().hideLoading();
+          await showCustomDialog(
+            context,
+            message: responseUpdateAvatar.error!,
+            dialogType: DialogType.error,
+          );
+          return;
+        }
+        LoadingService().hideLoading();
       } else {
         showDialog(
           context: context,
@@ -423,10 +436,21 @@ class CardColumnWidget extends StatelessWidget {
                                       .then((value) async {
                                     if (dataEnviar.dataProfiles.church !=
                                         null) {
-                                      await userProvider.updateUserChurch(
-                                          user.user.id,
-                                          dataEnviar.dataProfiles.church!.id,
-                                          catalogueProvider.allChurches);
+                                      final response =
+                                          await userProvider.updateUserChurch(
+                                              user.user.id,
+                                              dataEnviar
+                                                  .dataProfiles.church!.id,
+                                              catalogueProvider.allChurches);
+
+                                      if (response.error != null) {
+                                        LoadingService().hideLoading();
+                                        await showCustomDialog(
+                                          context,
+                                          message: response.error!,
+                                          dialogType: DialogType.error,
+                                        );
+                                      }
                                     }
                                   });
 
