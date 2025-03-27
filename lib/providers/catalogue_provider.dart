@@ -143,7 +143,8 @@ class CatalogueProvider extends ChangeNotifier {
             name
             minMembers
             maxMembers
-            color
+            colorFront
+            colorBack
             status
             img {
               urlImg

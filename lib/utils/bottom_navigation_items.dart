@@ -76,3 +76,24 @@ final List<BottomNavItem> itemsMap = [
         icon: Icons.notifications_none_rounded,
         page: NewsScreen())
   ];
+final List<BottomNavItem> itemsPromises = [
+    BottomNavItem(
+        title: "Inicio",
+        icon: Icons.home_outlined,
+        page: WorkspaceScreen()),
+    BottomNavItem(
+        title: "Biblia",
+        icon: Icons.book_outlined,
+        page: BibleScreen()),
+    BottomNavItem(
+        title: "Promesas", icon: Icons.sync, page: PromisesScreen()),
+    BottomNavItem(title: "Dudas", icon: Icons.question_mark_outlined, page: DoubtScreen()),
+    BottomNavItem(
+        title: "Reto online",
+        icon: Icons.language,
+        page: OnlineChallengeScreen()),
+    BottomNavItem(
+        title: "Novedad",
+        icon: Icons.notifications_none_rounded,
+        page: NewsScreen())
+  ];

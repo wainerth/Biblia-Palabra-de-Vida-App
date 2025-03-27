@@ -68,7 +68,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     borderRadius: BorderRadius.circular(8),
                     child: widget.data.urlVideo.contains('youtube.com') ||
                             widget.data.urlVideo.contains('youtu.be')
-                        ? PlayerYoutubeWidget(videoUrl:  widget.data.urlVideo)
+                        ? PlayerYoutubeWidget(videoUrl: widget.data.urlVideo)
                         : playerNoYoutube(url: widget.data.urlVideo),
                   ),
                 ),
@@ -154,6 +154,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               Size(double.infinity, double.infinity))),
                       width: MediaQuery.sizeOf(context).width,
                       height: StylesApp(context).btnSizeSmall.height,
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return _buildModaldetails(context);
+                            });
+                      },
                     ),
                     ButtonThemeWidget(
                       text: "Salmo 34:17",
@@ -164,6 +171,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               Size(double.infinity, double.infinity))),
                       width: MediaQuery.sizeOf(context).width,
                       height: StylesApp(context).btnSizeSmall.height,
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return _buildModaldetails(context);
+                            });
+                      },
                     ),
                     ButtonThemeWidget(
                       text: "Gálatas 6:2-8",
@@ -174,6 +188,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               Size(double.infinity, double.infinity))),
                       width: MediaQuery.sizeOf(context).width,
                       height: StylesApp(context).btnSizeSmall.height,
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return _buildModaldetails(context);
+                            });
+                      },
                     ),
                     ButtonThemeWidget(
                       text: "Mateo 18:20-30",
@@ -184,6 +205,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               Size(double.infinity, double.infinity))),
                       width: MediaQuery.sizeOf(context).width,
                       height: StylesApp(context).btnSizeSmall.height,
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return _buildModaldetails(context);
+                            });
+                      },
                     ),
                     ButtonThemeWidget(
                       text: "Salmo 46:10",
@@ -194,12 +222,50 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               Size(double.infinity, double.infinity))),
                       width: MediaQuery.sizeOf(context).width,
                       height: StylesApp(context).btnSizeSmall.height,
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return _buildModaldetails(context);
+                            });
+                      },
                     ),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Container _buildModaldetails(BuildContext context) {
+    return Container(
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              "Salmo 34:17-7",
+              style: StylesApp(context)
+                  .textStyleBody16
+                  .copyWith(color: StyleColor.orange),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              '17 Claman los justos, y Jehová oye, Y los libra de todas sus angustias.',
+              style: StylesApp(context)
+                  .textStyleBody14
+                  .copyWith(color: Colors.black),
+            )
+          ],
         ),
       ),
     );

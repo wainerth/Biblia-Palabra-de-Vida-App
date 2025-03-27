@@ -14,4 +14,5 @@ class StyleColor {
   static const Color turquoise = Color(0xFF12CBC4);
   static const Color orange = Color(0XFFFD8C43);
   static const Color redLight = Color(0XFFE85151);
+  static const Color yellowLight = Color(0XFFFFCF25);
 }

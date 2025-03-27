@@ -4,6 +4,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ class RankingScreen extends StatefulWidget {
 
 class _RankingScreenState extends State<RankingScreen> {
   List<League> leagues = [];
+
   String? errorMessage;
   bool isLoading = true;
 
@@ -44,7 +46,6 @@ class _RankingScreenState extends State<RankingScreen> {
           errorMessage = "No se encontraron ligas";
         });
       }
-    
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
@@ -59,18 +60,20 @@ class _RankingScreenState extends State<RankingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return leagues.length > 0
-        ? DefaultTabController(
-            length: leagues.length,
-            child: RankingScreenView(ranking: leagues),
-          )
-        : Center(
-            child: BuildErrorWidget(
-              errorMessage: errorMessage ?? '',
-              onRetry: () async => _generateData(context),
-              onBack: () => Navigator.pop(context),
-            ),
-          );
+    return isLoading
+        ? Container()
+        : errorMessage != null
+            ? Center(
+                child: BuildErrorWidget(
+                  errorMessage: errorMessage ?? '',
+                  onRetry: () async => _generateData(context),
+                  onBack: () => Navigator.pop(context),
+                ),
+              )
+            : DefaultTabController(
+                length: leagues.length,
+                child: RankingScreenView(ranking: leagues),
+              );
   }
 }
 
@@ -83,8 +86,33 @@ class RankingScreenView extends StatefulWidget {
 }
 
 class _RankingScreenViewState extends State<RankingScreenView> {
+  List<MemberModel> members = [];
+  String activeLeagueId = "";
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialMembers(context);
+    });
+  }
+
+  void _loadInitialMembers(BuildContext context) {
+    activeLeagueId = widget.ranking[DefaultTabController.of(context).index].id;
+    loadMembers(activeLeagueId, context);
+  }
+
+  @override
+  void didUpdateWidget(covariant RankingScreenView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.ranking != widget.ranking) {
+      _loadInitialMembers(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+   
     return Scaffold(
       backgroundColor: StyleColor.turquoise,
       body: SafeArea(
@@ -97,55 +125,64 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                   children: [
                     // Pestañas
                     Container(
-                      decoration: BoxDecoration(color: Colors.white),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Colors.black,
+                            width: 1.0,
+                          ),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: .30),
+                            spreadRadius: 0,
+                            blurRadius: 4,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
                       child: TabBar(
+                        dividerColor: Colors.transparent,
                         tabAlignment: TabAlignment.start,
                         indicatorPadding: EdgeInsets.all(0),
+                        indicatorColor: Colors.transparent,
                         indicatorSize: TabBarIndicatorSize.label,
                         isScrollable: true,
-                        onTap: (tab)=>{
-                          print(tab)
+                        onTap: (tab) async {
+                          loadMembers(widget.ranking[tab].id, context);
                         },
                         tabs: widget.ranking
                             .map(
                               (league) => Tab(
-                                height: 90,
+                                height: 109,
                                 child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Container(
                                       height: 60,
                                       padding: EdgeInsets.all(6),
                                       decoration: BoxDecoration(
                                         color: Color(int.parse(
-                                                "0xFF${league.color}"))
-                                            .withValues(alpha: 0.12),
+                                            "0xFF${league.colorBack}")),
                                         borderRadius: BorderRadius.circular(30),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Color(int.parse(
-                                                "0xFF${league.color}")),
-                                            spreadRadius: 1,
-                                            blurRadius: 7,
-                                            offset: Offset(0, 3),
+                                                "0xFF${league.colorFront}")),
+                                            spreadRadius: 0,
+                                            blurRadius: 0,
+                                            offset: Offset(0, 6),
                                           ),
                                         ],
                                       ),
                                       child: Container(
-                                        height: 38,
+                                        height: 40,
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(30),
-                                          color: Color(
-                                              int.parse("0xFF${league.color}")),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey
-                                                  .withValues(alpha: 0.5),
-                                              spreadRadius: 1,
-                                              blurRadius: 7,
-                                              offset: Offset(0, 3),
-                                            ),
-                                          ],
+                                          color: Color(int.parse(
+                                              "0xFF${league.colorFront}")),
                                         ),
                                         child: Image.network(
                                             GraphQLConfig.urlServidor +
@@ -154,16 +191,23 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                     ),
                                     if (DefaultTabController.of(context)
                                             .index ==
-                                        widget.ranking.indexOf(league))
-                                      Container(
-                                        width: 30,
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber,
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
+                                        widget.ranking.indexOf(league)) ...{
+                                      SizedBox(
+                                        height: 8,
                                       ),
+                                      ClipOval(
+                                        child: Container(
+                                          width: 80,
+                                          height: 9,
+                                          decoration: BoxDecoration(
+                                              color: Colors.amber),
+                                        ),
+                                      )
+                                    } else ...{
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                    },
                                     Text(
                                       league.name,
                                       style: StylesApp(context)
@@ -172,7 +216,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                             color:
                                                 DefaultTabController.of(context)
                                                             .index ==
-                                                        widget.ranking.indexOf(league)
+                                                        widget.ranking
+                                                            .indexOf(league)
                                                     ? StyleColor.turquoise
                                                     : StyleColor.orange,
                                           ),
@@ -192,7 +237,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                         ),
                         child: TabBarView(
                           children: widget.ranking
-                              .map((league) => _buildRankingList(context))
+                              .map((league) =>
+                                  _buildRankingList(context, members))
                               .toList(),
                         ),
                       ),
@@ -207,15 +253,11 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     );
   }
 
-  Widget _buildRankingList(BuildContext context) {
-    int activeTabIndex = DefaultTabController.of(context).index;
-    String activeLeagueId = widget.ranking[activeTabIndex].id;
-    print("activeTabIndex: $activeTabIndex, activeLeagueId: $activeLeagueId");
-    loadMembers(activeLeagueId);
-      // Cargar los miembros de la liga
+  Widget _buildRankingList(BuildContext context, members) {
+    // Cargar los miembros de la liga
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: 15, // Ejemplo: 10 usuarios en el ranking
+      itemCount: members.length, // Ejemplo: 10 usuarios en el ranking
       itemBuilder: (context, index) {
         if (index == 5) {
           return Padding(
@@ -278,6 +320,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
+                  spacing: 10,
                   children: [
                     Stack(
                       alignment: Alignment.center,
@@ -303,23 +346,24 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                       ],
                     ),
                     CircleAvatar(
-                      radius: 30,
-                      backgroundImage: AssetImage(
-                          'assets/avatar.png'), // Reemplaza con la imagen del usuario
+                      radius: 20,
+                      backgroundImage: NetworkImage(GraphQLConfig.urlServidor +
+                          members[index]
+                              .profilePicture), // Reemplaza con la imagen del usuario
                     ),
                     Text(
-                      'Robinson',
+                      members[index].username,
                       style: StylesApp(context)
-                          .textStyleBody20
+                          .textStyleBody18
                           .copyWith(color: Colors.black),
                     ),
                   ],
                 ),
 
                 Text(
-                  'exp ${500 - index * 10}',
+                  'exp ${members[index].currentPoints}',
                   style: StylesApp(context)
-                      .textStyleBody14
+                      .textStyleBody18
                       .copyWith(color: Colors.black),
                 ), // Reemplaza con el exp del usuario
               ],
@@ -330,7 +374,21 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     );
   }
 
-  void loadMembers(activeLeagueId) async {
-    final membersLeague = await getLeagueMembers(activeLeagueId);
+  void loadMembers(activeLeagueId, BuildContext context) async {
+    LoadingService().showLoading(context);
+    final memberResponse = await getLeagueMembers(activeLeagueId);
+    if (memberResponse.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(context,
+          message: memberResponse.error!, dialogType: DialogType.error);
+      return;
+    }
+    setState(() {
+      members = memberResponse.data
+          .map((member) => MemberModel.fromJson(removeTypename(member)))
+          .cast<MemberModel>()
+          .toList();
+    });
+    LoadingService().hideLoading();
   }
 }

@@ -1,4 +1,6 @@
 
+export 'package:biblia_palabra_de_vida_app/widgets/simple_header_widget.dart';
+
 export 'package:biblia_palabra_de_vida_app/widgets/reward_widget.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/ordering_question_draggable_widget.dart';

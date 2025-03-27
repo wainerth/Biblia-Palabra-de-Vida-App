@@ -1200,7 +1200,7 @@ Future getLeagueMembers(leagueId) async {
     }
 
     return ResponseData(
-      data: removeTypename(data['getLeagueMembers']),
+      data: data['getLeagueMembers'],
       error: null,
     );
   } on TimeoutException catch (e) {

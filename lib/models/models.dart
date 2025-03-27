@@ -49,5 +49,5 @@ export 'package:biblia_palabra_de_vida_app/models/title_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/prize_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/date_calendar.dart';
 export 'package:biblia_palabra_de_vida_app/models/user_title.dart';
-
+export 'package:biblia_palabra_de_vida_app/models/member_model.dart';
 

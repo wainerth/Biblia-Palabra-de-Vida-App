@@ -2,7 +2,8 @@ class League {
   final String id;
   final String name;
   final int minMembers;
-  final String? color;
+  final String? colorFront;
+  final String? colorBack;
   final int maxMembers;
   final String status;
   final ImageDetails img;
@@ -14,7 +15,8 @@ class League {
     required this.maxMembers,
     required this.status,
     required this.img,
-    this.color, 
+    this.colorFront, 
+    this.colorBack, 
   });
 
   // Factory constructor to create a League object from a JSON map
@@ -25,7 +27,8 @@ class League {
       minMembers: json['minMembers'],
       maxMembers: json['maxMembers'],
       status: json['status'],
-      color: json['color'],
+      colorFront: json['colorFront'],
+      colorBack: json['colorBack'],
       img: ImageDetails.fromJson(json['img']),
     );
   }
@@ -38,7 +41,8 @@ class League {
       'minMembers': minMembers,
       'maxMembers': maxMembers,
       'img': img.toJson(),
-      'color': color,
+      'colorFront': colorFront,
+      'colorBack': colorBack,
       'status': status,
     };
   }

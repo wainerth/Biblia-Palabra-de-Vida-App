@@ -269,7 +269,6 @@ class StylesApp {
       return 16.sp;
     }
   }
-
   double get fontSizeBtn {
     if (screenWidth <= SizeScreensApp().sm) {
       return 14.sp;
@@ -483,6 +482,21 @@ class StylesApp {
   TextStyle get textStyleBody20 => TextStyle(
         fontFamily: "Aclonica",
         fontSize: fontSizeBody20,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBodyRoboto20 => TextStyle(
+        fontFamily: "Roboto",
+        fontSize: fontSizeBody20,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBody24 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody24,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBodyRoboto24 => TextStyle(
+        fontFamily: "Roboto",
+        fontSize: fontSizeBody24,
         color: const Color(0XFFFFF5F5),
       );
   TextStyle get textStyleBody32 => TextStyle(
@@ -848,7 +862,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().sm) {
       return Size(39.0, 39.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(39.0, 59.0);
+      return Size(39.0, 39.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
       return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
