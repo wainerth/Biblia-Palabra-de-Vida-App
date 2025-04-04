@@ -202,13 +202,13 @@ class StylesApp {
 
   double get fontSizeBody16 {
     if (screenWidth <= SizeScreensApp().sm) {
-      return 12.sp;
+      return 16.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 12.sp;
+      return 16.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 12.sp;
+      return 16.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 12.sp;
+      return 16.sp;
     } else {
       return 16.sp;
     }
@@ -269,6 +269,7 @@ class StylesApp {
       return 16.sp;
     }
   }
+
   double get fontSizeBtn {
     if (screenWidth <= SizeScreensApp().sm) {
       return 14.sp;
@@ -333,8 +334,8 @@ class StylesApp {
       );
   TextStyle get textStyleLevelNumber => TextStyle(
       fontFamily: 'Alfa Slab One',
-      fontSize: fontSizeTitle1,
-      fontWeight: FontWeight.normal);
+      fontSize: fontSizeBody15, //SizeTitle1,
+      fontWeight: FontWeight.w300);
 
   TextStyle get textStyNameNumber => TextStyle(
       fontFamily: 'Alfa Slab One',
@@ -459,11 +460,6 @@ class StylesApp {
         fontSize: fontSizeBody12,
         color: const Color(0XFFFFF5F5),
       );
-  TextStyle get textStyleBody16 => TextStyle(
-        fontFamily: "Aclonica",
-        fontSize: fontSizeBody16,
-        color: const Color(0XFFFFF5F5),
-      );
   TextStyle get textStyleBody15 => TextStyle(
         fontFamily: "Aclonica",
         fontSize: fontSizeBody15,
@@ -473,6 +469,11 @@ class StylesApp {
         fontFamily: "Aclonica",
         fontSize: fontSizeBody15,
         color: const Color(0XFFFD8C43),
+      );
+  TextStyle get textStyleBody16 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody16,
+        color: const Color(0XFFFFF5F5),
       );
   TextStyle get textStyleBody17 => TextStyle(
         fontFamily: "Aclonica",
@@ -678,9 +679,8 @@ class StylesApp {
         filled: true,
         contentPadding: EdgeInsets.symmetric(horizontal: 8),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(width: 2.0)
-        ),
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(width: 2.0)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: Colors.black),
@@ -746,7 +746,7 @@ class StylesApp {
     if (screenWidth <= SizeScreensApp().xsm) {
       return Size(223.0, 35.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(MediaQuery.sizeOf(context).width, 43.0);
+      return Size(MediaQuery.sizeOf(context).width* 0.8, 43.0);
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(MediaQuery.sizeOf(context).width * 0.7, 43.0);
     } else if (screenWidth <= SizeScreensApp().lg) {

@@ -5,8 +5,8 @@ class ButtonThemeWidget extends StatelessWidget {
   final String? text;
   final TextStyle? textStyle;
   final ButtonStyle? buttonStyle;
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
   final bool showIcon;
   final IconData icon;
   final bool textWithImage;
@@ -20,8 +20,8 @@ class ButtonThemeWidget extends StatelessWidget {
       this.text,
       this.textStyle,
       this.buttonStyle,
-      this.width = 150,
-      this.height = 27,
+      this.width,
+      this.height,
       this.showIcon = false,
       this.icon = Icons.arrow_back,
       this.colorIcon = Colors.black,
@@ -35,13 +35,17 @@ class ButtonThemeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(maxWidth: width, minHeight: height),
+      constraints: BoxConstraints(
+        maxWidth: width ?? double.infinity,
+        minHeight: height ?? 0,
+      ),
       height: height,
+      width: width,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
+            color: Colors.black.withOpacity(0.25),
             offset: const Offset(0, 4),
             blurRadius: 4,
           ),

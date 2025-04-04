@@ -68,7 +68,7 @@ class _DatePickerFormFieldState extends State<DatePickerFormField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: _dateController,
-      style: StylesApp(context).textStyleBody16.copyWith(color: Colors.black),
+      style: StylesApp(context).textStyleBody12.copyWith(color: Colors.black),
       readOnly: true,
       onTap: () => _selectDate(context),
       onChanged: widget.onChanged,

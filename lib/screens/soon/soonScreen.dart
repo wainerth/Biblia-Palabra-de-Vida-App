@@ -55,10 +55,18 @@ class SoonScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Image.asset(
-                      "assets/comingSoon.gif", // GIF animado
-                      height: 200,
-                      width: 200,
+                    Container(
+                      height: 250,
+                      width: 250,
+                      decoration:BoxDecoration(
+                        color:Colors.black,
+                        borderRadius: BorderRadius.circular(200)
+                      ),
+                      child: Image.asset(
+                        "assets/comingSoon.gif", // GIF animado
+                        height: 200,
+                        width: 200,
+                      ),
                     ),
                     SizedBox(height: 20),
                     Text(

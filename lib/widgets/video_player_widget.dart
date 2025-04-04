@@ -109,7 +109,7 @@ import 'package:video_player/video_player.dart';
                           const SizedBox(height: 5),
                           Text(
                             widget.data.title,
-                            style: StylesApp(context).textStyleBody16.copyWith(color: StyleColor.orange),
+                            style: StylesApp(context).textStyleBody12.copyWith(color: StyleColor.orange),
                           ),
                         ],
                       ),

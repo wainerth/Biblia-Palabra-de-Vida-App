@@ -10,6 +10,7 @@ import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -37,25 +38,66 @@ class _MapScreenState extends State<MapScreen> {
   ];
   bool isLoading = true;
   String? errorMessage;
+  final AudioPlayer audioPlayer = AudioPlayer();
+  bool isMuted = false;
 
   @override
   void initState() {
     super.initState();
-
     scrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generateData(context);
     });
+
+    playAudio();
+    _loadMutePreference();
   }
+
   @override
   void dispose() {
     _timer?.cancel();
+    stopAudio();
+    audioPlayer.dispose();
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+  }
+
+  Future<void> playAudio() async {
+    await audioPlayer.setReleaseMode(ReleaseMode.loop);
+    await audioPlayer.setVolume(0.5);
+    await audioPlayer.play(AssetSource('mar-aves.mp3'));
+  }
+
+  Future<void> stopAudio() async {
+    await audioPlayer.stop();
+  }
+
+  Future<void> muteAudio() async {
+    if (isMuted) {
+      await audioPlayer.setVolume(1.0); // Restaura el volumen
+    } else {
+      await audioPlayer.setVolume(0.0); // Silencia el audio
+    }
+    setState(() {
+      isMuted = !isMuted;
+    });
+    _saveMutePreference();
+  }
+
+  _loadMutePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isMuted = prefs.getBool('isMuted') ?? false;
+    });
+  }
+
+  _saveMutePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isMuted', isMuted);
   }
 
   onScrollPosition() {
@@ -142,6 +184,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _onItemTapped(int index) {
+    stopAudio();
+    audioPlayer.dispose();
     setState(() {
       _selectedIndex = index;
       if (_selectedIndex == 0) {
@@ -176,6 +220,12 @@ class _MapScreenState extends State<MapScreen> {
 
     List coordBTop = [0.0, 0.25, 0.50, 0.75];
     List coordBLeft = [0.30, 0.17, 0.05, 0.05];
+
+    List coordATopBarco = [0.25, 0.35, 0.45, 0.48, 0.65, 0.75, 0.75, 0.85];
+    List coordAleftBarco = [0.20, 0.10, -0.05, 0.35, 0.17, 0.35, 0.10, 0.20];
+
+    List coordBTopBarco = [0.05, 0.25, 0.35, 0.45, 0.45, 0.60, 0.75, 0.85];
+    List coordBleftBarco = [0.90, 0.85, 0.65, 0.80, 0.52, 0.80, 0.50, 0.90];
 
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
@@ -217,7 +267,8 @@ class _MapScreenState extends State<MapScreen> {
                             onBack: () => Navigator.pop(context),
                           )
                         } else ...{
-                          HeaderMapWidget(
+                          Stack(children: [
+                            HeaderMapWidget(
                               title: course!.title,
                               subtitleStage: stage!.sectionName,
                               indexStage: stage!.orderCard,
@@ -247,7 +298,29 @@ class _MapScreenState extends State<MapScreen> {
                                   },
                                 );
                               },
-                              onScroller: onScrollPosition),
+                              onScroller: onScrollPosition,
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 30,
+                              child: IconButton(
+                                iconSize: 25,
+                                icon: Icon(
+                                  isMuted ? Icons.volume_off : Icons.volume_up,
+                                  color: isMuted ? Colors.grey : Colors.white,
+                                ),
+                                onPressed: () {
+                                  if (isMuted) {
+                                    playAudio();
+                                  } else {
+                                    stopAudio();
+                                  }
+
+                                  muteAudio();
+                                },
+                              ),
+                            )
+                          ]),
                           SizedBox(
                             height: MediaQuery.sizeOf(context).height,
                             child: ListView.builder(
@@ -277,6 +350,25 @@ class _MapScreenState extends State<MapScreen> {
                                             fit: BoxFit.fill,
                                           ),
                                         ),
+                                        if (index % 2 == 0) ...{
+                                          for (var j = 0; j < 8; j++) ...{
+                                            InfiniteAnimation(
+                                              coordTop: coordATopBarco[j],
+                                              coordLeft: coordAleftBarco[j],
+                                              j: j,
+                                              index: index,
+                                            ),
+                                          },
+                                        } else ...{
+                                          for (var j = 0; j < 8; j++) ...{
+                                            InfiniteAnimation(
+                                              coordTop: coordBTopBarco[j],
+                                              coordLeft: coordBleftBarco[j],
+                                              j: j,
+                                              index: index,
+                                            ),
+                                          }
+                                        },
                                         for (var i = 0;
                                             i < grupo.length;
                                             i++) ...{
@@ -513,9 +605,9 @@ class _MapScreenState extends State<MapScreen> {
       return 0XFFD5886B;
     }
   }
-  
+
   void _showBottomNavigationBar() {
-      _isVisible.value = true;
+    _isVisible.value = true;
     _timer?.cancel();
     _timer = Timer(Duration(seconds: 2), () {
       _isVisible.value = false;
@@ -603,5 +695,92 @@ int getColorInner(int score) {
     return 0XFFA5A7A1;
   } else {
     return 0XFFB05E3C;
+  }
+}
+
+class InfiniteAnimation extends StatefulWidget {
+  final double coordTop;
+  final double coordLeft;
+  final int j;
+  final int index;
+  const InfiniteAnimation(
+      {super.key,
+      required this.coordTop,
+      required this.coordLeft,
+      required this.j,
+      required this.index});
+  @override
+  _InfiniteAnimationState createState() => _InfiniteAnimationState();
+}
+
+class _InfiniteAnimationState extends State<InfiniteAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  // Variables para las coordenadas y el índice
+  List<String> imageBarcos = [
+    "assets/barcos/barco1.png",
+    "assets/barcos/barco2.png",
+    "assets/barcos/barco3.png",
+    "assets/barcos/barco4.png",
+    "assets/barcos/barco5.png",
+    "assets/barcos/barco6.png",
+    "assets/barcos/barco7.png",
+    "assets/barcos/barco8.png",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+    )..repeat(
+        reverse: true); // Repite la animación en reversa para un bucle continuo
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        double value = _animation.value;
+        double verticalOffset = (widget.j % 2 == 0 ? 10 : -10) * value;
+        double horizontalOffset = (widget.j % 2 == 0 ? 5 : -5) * value;
+        return Positioned(
+          top: widget.index % 2 == 0
+              ? StylesApp(context).positionedLevels(widget.coordTop).dy +
+                  verticalOffset
+              : StylesApp(context).positionedLevels(widget.coordTop).dy +
+                  verticalOffset,
+          left: widget.index % 2 == 0
+              ? StylesApp(context).positionedLevels(widget.coordLeft).dx +
+                  horizontalOffset
+              : StylesApp(context).positionedLevels(widget.coordLeft).dx +
+                  horizontalOffset,
+          child: Container(
+            width: 40,
+            child: Image.asset(
+              imageBarcos[widget.j],
+              width: double.infinity,
+              height: 60,
+              fit: BoxFit.fill,
+            ),
+          ),
+        );
+      },
+    );
   }
 }

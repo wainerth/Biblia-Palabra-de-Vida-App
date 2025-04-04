@@ -118,7 +118,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         Text(
                           widget.data.title,
                           style: StylesApp(context)
-                              .textStyleBody16
+                              .textStyleBody12
                               .copyWith(color: StyleColor.orange),
                         ),
                       ],
@@ -253,7 +253,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             Text(
               "Salmo 34:17-7",
               style: StylesApp(context)
-                  .textStyleBody16
+                  .textStyleBody12
                   .copyWith(color: StyleColor.orange),
             ),
             SizedBox(

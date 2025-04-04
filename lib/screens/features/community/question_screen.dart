@@ -531,7 +531,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                       padding: EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                       width: double.infinity,
-                      height: 25.0,
+                      // height: 25.0,
                       decoration: BoxDecoration(
                           color: StyleColor.orange,
                           borderRadius: BorderRadius.circular(8.0)),
@@ -951,7 +951,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           Text(
             "550 lms",
             style: StylesApp(context)
-                .textStyleBody16
+                .textStyleBody12
                 .copyWith(color: StyleColor.orange),
           ),
           ButtonThemeWidget(
@@ -1095,7 +1095,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       Text(
                         "550 lms",
                         style: StylesApp(context)
-                            .textStyleBody16
+                            .textStyleBody12
                             .copyWith(color: StyleColor.orange),
                       ),
                     ],
@@ -1239,7 +1239,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       Text(
                         "550 lms",
                         style: StylesApp(context)
-                            .textStyleBody16
+                            .textStyleBody12
                             .copyWith(color: StyleColor.orange),
                       ),
                     ],

@@ -159,6 +159,8 @@ class _OrderingQuestionDraggableStateWidget
             },
           ),
           ButtonThemeWidget(
+            width: 150.0,
+            height: 27.0,
             text: "Verificar",
             buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                   backgroundColor: WidgetStatePropertyAll(
@@ -404,6 +406,8 @@ class _OrderingQuestionDraggableStateWidget
                   height: 16.0,
                 ),
                 ButtonThemeWidget(
+                  width: 150.0,
+                  height: 27.0,
                   onPressed: widget.onContinue,
                   text: "Continuar",
                   buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -423,7 +427,8 @@ class _OrderingQuestionDraggableStateWidget
   String getCorrectOrderString() {
     List<Answer> sortedAnswers =
         List.from(widget.orderedAnswers); // Crea una copia de la lista
-    sortedAnswers.sort((a, b) => a.correctOrder!.compareTo(b!.correctOrder as num));
+    sortedAnswers
+        .sort((a, b) => a.correctOrder!.compareTo(b!.correctOrder as num));
 
     String orderedText =
         sortedAnswers.map((answer) => answer.answer).join(', ');

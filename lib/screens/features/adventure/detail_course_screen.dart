@@ -350,7 +350,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                 Row(
                                   children: [
                                     ButtonThemeWidget(
-                                      // height: 14.sp,
+                                      height: 27.0,
+                                      width:150.0,
                                       onPressed:
                                           (getStatus(stage) == "Pendiente")
                                               ? null
@@ -398,6 +399,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                         textStyle:
                                             StylesApp(context).textStyleBody14,
                                         width: 50.sp,
+                                        height: 27.0,
                                         text: "Ir",
                                         buttonStyle:
                                             StylesApp(context).btnWidgetSmall,

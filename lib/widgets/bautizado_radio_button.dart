@@ -22,7 +22,7 @@ class _BautizadoRadioButtonState extends State<BautizadoRadioButton> {
         Text(
           '¿Está bautizado?',
           style:
-              StylesApp(context).textStyleBody16.copyWith(color: Colors.black),
+              StylesApp(context).textStyleBody12.copyWith(color: Colors.black),
         ), // Etiqueta para el grupo de RadioButtons
         Radio<bool>(
           value: true, // Valor para la opción "Sí"
@@ -33,7 +33,7 @@ class _BautizadoRadioButtonState extends State<BautizadoRadioButton> {
         ),
         Text('Sí',
             style: StylesApp(context)
-                .textStyleBody16
+                .textStyleBody12
                 .copyWith(color: Colors.black)), // Etiqueta para la opción "Sí"
         Radio<bool>(
           value: false, // Valor para la opción "No"
@@ -44,7 +44,7 @@ class _BautizadoRadioButtonState extends State<BautizadoRadioButton> {
         ),
         Text('No',
             style: StylesApp(context)
-                .textStyleBody16
+                .textStyleBody12
                 .copyWith(color: Colors.black)), // Etiqueta para la opción "No"
       ],
     );

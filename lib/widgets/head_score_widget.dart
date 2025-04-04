@@ -31,7 +31,7 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
         children: [
           Text.rich(
             TextSpan(
-              style: StylesApp(context).textStyleBody18,
+              style: StylesApp(context).textStyleBody15,
               children: [
                 TextSpan(text: "Exp: "),
                 TextSpan(text: "${userData!.expTotalUser}"),
@@ -40,7 +40,7 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
           ),
           Text.rich(
             TextSpan(
-              style: StylesApp(context).textStyleBody18,
+              style: StylesApp(context).textStyleBody15,
               children: [
                 TextSpan(text: "Racha: "),
                 TextSpan(text: "${userData.streakDaysCount} días"),
@@ -54,7 +54,7 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
                 Center(
                   child: Text(
                     "1",
-                    style: StylesApp(context).textStyleBody18,
+                    style: StylesApp(context).textStyleBody15,
                   ),
                 ),
                 Positioned(

@@ -175,6 +175,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                       text: widget.data[index].name,
                       buttonStyle: StylesApp(context).btnWidgetSmall,
                       width: MediaQuery.sizeOf(context).width * 0.7,
+                      height: 27.0,
                       onPressed: () {
                         setState(() {
                           taleSelected = widget.data[index];

@@ -130,6 +130,8 @@ class CardAventureWidget extends StatelessWidget {
                       .copyWith(color: Colors.white),
                   buttonStyle: StylesApp(context).btnWidgetSmall,
                   text: "Ir a aventura",
+                  width: 150.0,
+                  height: 27,
                 ),
               )
             ],

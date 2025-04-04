@@ -87,7 +87,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildHomeScreen() {
-    // if the value is null, show a loading spinner
+    // if the _hasSeenIntro is null, show a loading spinner
     if (_hasSeenIntro == null) {
       return const Scaffold(
         body: Center(

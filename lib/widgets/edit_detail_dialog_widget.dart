@@ -132,7 +132,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
                             child: ButtonThemeWidget(
                               buttonStyle: StylesApp(context).btnWidgetSmall,
                               text: 'Guardar',
-                              // width: 239.0,
+                              width: 150.0,
                               height: 40.0,
                               onPressed: () {
                                 widget.onSave(_editingData);
@@ -216,7 +216,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
                         hintText: "Número de teléfono",
                       ),
               style: StylesApp(context)
-                  .textStyleBody16
+                  .textStyleBody12
                   .copyWith(color: Colors.black),
             ),
           )

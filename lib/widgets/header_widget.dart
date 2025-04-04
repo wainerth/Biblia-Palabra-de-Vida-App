@@ -27,7 +27,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
         color: Color(0XFFFD8C43),
         borderRadius: BorderRadius.circular(8.0),
       ),
-      padding: EdgeInsets.symmetric(horizontal:  0.0, vertical: 5.0),
+      padding: EdgeInsets.only(left: 4.0, top: 5.0, bottom: 5.0),
       child: Row(
         spacing: 0,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -44,7 +44,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     width: 50.0,
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundImage: NetworkImage (
+                      backgroundImage: NetworkImage(
                         "${GraphQLConfig.urlServidor}${userData?.imgProfileUser}",
                       ),
                     ),
@@ -53,7 +53,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                 Center(
                   child: Text(
                     "${userData?.user.username}",
-                    style: StylesApp(context).textStyleBody14,
+                    style: StylesApp(context).textStyleBody12,
                   ),
                 )
               ],
@@ -67,13 +67,16 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               children: [
                 Text.rich(
                   textAlign: TextAlign.left,
-                  style: StylesApp(context).textStyleBody17,
+                  style: StylesApp(context).textStyleBody14,
                   TextSpan(
-                    children: [TextSpan(text: "Exp: "), TextSpan(text: "${userData!.expTotalUser}")],
+                    children: [
+                      TextSpan(text: "Exp: "),
+                      TextSpan(text: "${userData!.expTotalUser}")
+                    ],
                   ),
                 ),
                 Text.rich(
-                  style: StylesApp(context).textStyleBody17,
+                  style: StylesApp(context).textStyleBody14,
                   TextSpan(
                     children: [
                       TextSpan(text: "Racha: "),

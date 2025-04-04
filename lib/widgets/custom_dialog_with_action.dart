@@ -59,7 +59,7 @@ class CustomDialogWithAction extends StatelessWidget {
       ),
       content: Text(
         message,
-        style: StylesApp(context).textStyleBody16.copyWith(color: Colors.black),
+        style: StylesApp(context).textStyleBody12.copyWith(color: Colors.black),
       ),
       actions: [
         TextButton(

@@ -29,7 +29,7 @@ class _RadioButtonWidgetState<T> extends State<RadioButtonWidget<T>> {
           Text(
             "${widget.label}",
             style: StylesApp(context)
-                .textStyleBody16
+                .textStyleBody12
                 .copyWith(color: Colors.black),
           ),
         Wrap(
@@ -49,7 +49,7 @@ class _RadioButtonWidgetState<T> extends State<RadioButtonWidget<T>> {
                   Text(
                     option.label,
                     style: StylesApp(context)
-                        .textStyleBody16
+                        .textStyleBody12
                         .copyWith(color: Colors.black),
                   )
                 ],

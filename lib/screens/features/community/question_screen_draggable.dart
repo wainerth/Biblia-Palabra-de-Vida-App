@@ -39,7 +39,8 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
     unLockLevel: true,
     color: "3ae4e4",
     section: Section(sectionName: "Genesis"),
-    img: Img(urlImg: "assets/level.png"), levelScore: 0,
+    img: Img(urlImg: "assets/level.png"),
+    levelScore: 0,
   );
 
   // Question By level
@@ -316,7 +317,15 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
           Offset(100 + i * 50, 200);
     }
     currentPositions = Map.from(initialPositions);
-    orderedAnswers = List.generate(countList, (index) => Answer(id: "", answer: "", isCorrect: false, questionId: "", orderInAnswer: 0, status: 0));
+    orderedAnswers = List.generate(
+        countList,
+        (index) => Answer(
+            id: "",
+            answer: "",
+            isCorrect: false,
+            questionId: "",
+            orderInAnswer: 0,
+            status: 0));
   }
 
   bool _searchExistedOrdered(id) {
@@ -478,36 +487,34 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
                                           ),
                                         ],
                                       ),
-                                          if (index ==
-                                              orderedAnswers.length - 1)
-                                            Positioned(
-                                              right: 0,
-                                              top: 0,
-                                              bottom:0,
-                                              child: SizedBox(
-                                                width: 25.0,
-                                                height: 25.0,
-                                                child: IconButton(
-                                                  iconSize: 25.0,
-                                                  padding: EdgeInsets.all(0.0),
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      orderedAnswers.removeWhere(
-                                                          (element) =>
-                                                              element.id ==
-                                                              orderedAnswers[
-                                                                      index]
-                                                                  .id);
-                                                    });
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.cancel_outlined,
-                                                    color: Colors.white,
-                                                    size: 25,
-                                                  ),
-                                                ),
+                                      if (index == orderedAnswers.length - 1)
+                                        Positioned(
+                                          right: 0,
+                                          top: 0,
+                                          bottom: 0,
+                                          child: SizedBox(
+                                            width: 25.0,
+                                            height: 25.0,
+                                            child: IconButton(
+                                              iconSize: 25.0,
+                                              padding: EdgeInsets.all(0.0),
+                                              onPressed: () {
+                                                setState(() {
+                                                  orderedAnswers.removeWhere(
+                                                      (element) =>
+                                                          element.id ==
+                                                          orderedAnswers[index]
+                                                              .id);
+                                                });
+                                              },
+                                              icon: Icon(
+                                                Icons.cancel_outlined,
+                                                color: Colors.white,
+                                                size: 25,
                                               ),
-                                            )
+                                            ),
+                                          ),
+                                        )
                                     ],
                                   )
                                 : Container(),
@@ -517,6 +524,8 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
                     },
                   ),
                   ButtonThemeWidget(
+                    width: 150.0,
+                    height: 27.0,
                     text: "Verificar",
                     buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                           backgroundColor: WidgetStatePropertyAll(
@@ -791,6 +800,8 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
                           text: "Continuar",
                           buttonStyle: StylesApp(context).btnWidgetSmall,
                           textStyle: StylesApp(context).textStyleBody6,
+                          width: 150.0,
+                          height: 27.0,
                         ),
                         SizedBox(
                           height: 17.0,

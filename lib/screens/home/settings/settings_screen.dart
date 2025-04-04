@@ -38,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ListTile(
               title: Text(
                 'Notificaciones',
-                style: StylesApp(context).textStyleBody16,
+                style: StylesApp(context).textStyleBody12,
               ),
               trailing: Switch(
                 value: true, // TODO: Obtener valor real
@@ -57,11 +57,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ListTile(
               title: Text(
                 'Idioma',
-                style: StylesApp(context).textStyleBody16,
+                style: StylesApp(context).textStyleBody12,
               ),
               trailing: Text(
                 'Español',
-                style: StylesApp(context).textStyleBody16,
+                style: StylesApp(context).textStyleBody12,
               ), // TODO: Implementar selección de idioma
               onTap: () {
                 // TODO: Implementar lógica para cambiar idioma
@@ -77,7 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ListTile(
               title: Text(
                 'Acerca de',
-                style: StylesApp(context).textStyleBody16,
+                style: StylesApp(context).textStyleBody12,
               ),
               onTap: () {},
             ),
@@ -91,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ListTile(
               title: Text(
                 'Cerrar  Sesión',
-                style: StylesApp(context).textStyleBody16,
+                style: StylesApp(context).textStyleBody12,
               ),
               onTap: () {
                 showModalBottomSheet(
@@ -130,6 +130,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               ButtonThemeWidget(
+                                width: 150.0,
+                                height: 27.0,
                                 text: "Cancelar",
                                 buttonStyle: StylesApp(context).btnWidgetSmall,
                                 onPressed: () {
@@ -137,21 +139,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 },
                               ),
                               ButtonThemeWidget(
+                                width: 150.0,
+                                height: 27.0,
                                 text: "Aceptar",
                                 buttonStyle: StylesApp(context).btnWidgetSmall,
                                 onPressed: () {
                                   LoadingService().showLoading(context);
                                   final authentication =
                                       Provider.of<AuthenticationProvider>(
-                                          context, listen: false);
+                                          context,
+                                          listen: false);
 
-                                  final logout = authentication.logoutUser(context);
+                                  final logout =
+                                      authentication.logoutUser(context);
                                   // if (logout != null) {
                                   //   authentication.token = null;
                                   //   Navigator.of(context).popUntil((route) => route.isFirst);
                                   //   Navigator.pushReplacementNamed(context, '/homePage');
                                   // }
-                                    LoadingService().hideLoading();
+                                  LoadingService().hideLoading();
                                 },
                               )
                             ],

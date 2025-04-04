@@ -1,9 +1,13 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:share_plus/share_plus.dart';
 
 class BibleScreen extends StatefulWidget {
   const BibleScreen({super.key});
@@ -324,6 +328,23 @@ class _BibleScreenState extends State<BibleScreen> {
       "status": 1
     }
   ];
+
+  List tabs = [
+    {
+      "title": 'Mensaje',
+      "placeholder": 'Mensaje a buscar',
+    },
+    {
+      "title": 'Predicador',
+      "placeholder": 'Nombre del predicador a buscar',
+    },
+    {
+      "title": 'Favoritas',
+      "placeholder": 'Favorito a buscar',
+    }
+  ];
+  var _selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -371,6 +392,8 @@ class _BibleScreenState extends State<BibleScreen> {
                       ),
                       Center(
                         child: ButtonThemeWidget(
+                          width: 150.0,
+                          height: 27.0,
                           text: "RVR 1960",
                           buttonStyle: StylesApp(context).btnWidgetSmall,
                           onPressed: () {
@@ -550,7 +573,17 @@ class _BibleScreenState extends State<BibleScreen> {
                             IconButton(
                               padding: EdgeInsets.zero,
                               iconSize: 25.0,
-                              onPressed: () {},
+                              onPressed: () async {
+                                Clipboard.setData(ClipboardData(
+                                    text:
+                                        "Proverbios 3:4\n Y hallarás gracia y buena opinión En los ojos de Dios y de los hombres."));
+                                await showCustomDialog(
+                                  context,
+                                  message:
+                                      "El capitulo S. Juan 22\n se copiado con éxito al\n portapapeles",
+                                  dialogType: DialogType.info,
+                                );
+                              },
                               icon: Icon(
                                 Icons.file_copy_rounded,
                                 color: StyleColor.turquoise,
@@ -559,7 +592,12 @@ class _BibleScreenState extends State<BibleScreen> {
                             IconButton(
                               padding: EdgeInsets.zero,
                               iconSize: 25.0,
-                              onPressed: () {},
+                              onPressed: () async {
+                                await Share.share(
+                                  "Las bodas de Caná\n 1 Al tercer día hicieron unas bodas en Caná de Galilea; y estaba allí la madre de Jesús. 2 Y fueron también invitados a  las bodas Jseús y sus dicípulos. 3 Y faltando el vino, la madre de Jesús le dijo: No tienen vino. 4 Jesús le fijo : ¿Qué tienes conmigo, mujer? Aún no ha venido mi hora. 5 Su madre dijo a los que servian:  Haced todo lo que os dijere. 6 Y estaban allí seis tinajas de piedra para agua, conforme al rito de  la purificación de los judíos, en  cas una de las cuales  cabian dos o tres càntaros.",
+                                  subject: "S. Juan 22",
+                                );
+                              },
                               icon: Icon(
                                 Icons.share_rounded,
                                 color: StyleColor.turquoise,
@@ -568,7 +606,15 @@ class _BibleScreenState extends State<BibleScreen> {
                             IconButton(
                               padding: EdgeInsets.zero,
                               iconSize: 25.0,
-                              onPressed: () {},
+                              onPressed: () {
+                                showModalBottomSheet(
+                                  isDismissible: false,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return SearchBibleWidget();
+                                  },
+                                );
+                              },
                               icon: Icon(
                                 Icons.search_rounded,
                                 color: StyleColor.turquoise,
@@ -692,6 +738,8 @@ class _BibleScreenState extends State<BibleScreen> {
                   ),
                   Center(
                     child: ButtonThemeWidget(
+                         width: 150.0,
+                          height: 27.0,
                       text: "Aceptar",
                       buttonStyle: StylesApp(context).btnWidgetSmall,
                     ),
@@ -811,9 +859,9 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
               Expanded(
                 flex: 1,
                 child: Slider(
-                  activeColor: Colors.grey,
-                  inactiveColor: Colors.grey,
-                  thumbColor: StyleColor.orange,
+                    activeColor: Colors.grey,
+                    inactiveColor: Colors.grey,
+                    thumbColor: StyleColor.orange,
                     value: fontSize,
                     onChanged: (value) {
                       setState(() {
@@ -829,8 +877,146 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
                   ))
             ],
           ),
-          SizedBox(height: 30,)
+          SizedBox(
+            height: 30,
+          )
         ],
+      ),
+    );
+  }
+}
+
+class SearchBibleWidget extends StatefulWidget {
+  const SearchBibleWidget({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<SearchBibleWidget> createState() => _SearchBibleWidgetState();
+}
+
+class _SearchBibleWidgetState extends State<SearchBibleWidget> {
+  
+  var _selectedIndex = 0;
+  List tabs = [
+    {
+      "title": 'Libro',
+      "placeholder": 'Mensaje a buscar',
+    },
+    {
+      "title": 'Texto',
+      "placeholder": 'Nombre del predicador a buscar',
+    },
+    {
+      "title": 'Tema',
+      "placeholder": 'Favorito a buscar',
+    },
+    {
+      "title": 'Personajes',
+      "placeholder": 'Favorito a buscar',
+    }
+  ];
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: tabs.length,
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              AppBarHeaderWidget(
+                backColor: StyleColor.turquoise,
+                buttonColor: StyleColor.orange,
+                textButtonColor: Colors.white,
+                title: 'Búsqueda',
+                styleText: StylesApp(context).textStyleBody7,
+                onRoute: () {
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.only(right: 65),
+                decoration: BoxDecoration(color: Colors.white, boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    spreadRadius: 0,
+                    offset: const Offset(0, 4),
+                  )
+                ]),
+                child: TabBar(
+                  onTap: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  unselectedLabelColor: Colors.white,
+                  labelColor: Colors.white,
+                  labelStyle: StylesApp(context).textStyleBody12,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  automaticIndicatorColorAdjustment: true,
+                  indicatorWeight: 0,
+                  indicatorPadding: EdgeInsets.all(0),
+                  padding: EdgeInsets.all(0),
+                  dividerColor: Color(0XFFFFFDFD),
+                  dividerHeight: 0,
+                  labelPadding: EdgeInsets.symmetric(horizontal: 2),
+                  indicator: BoxDecoration(
+                    color: Colors.orange, // Color de la pestaña seleccionada
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                    ), // Bordes redondeados
+                  ),
+                  tabs: tabs.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    var tab = entry.value;
+                    return Tab(
+                      height: 32.sp,
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: _selectedIndex == index
+                              ? Colors.orange
+                              : Colors.grey,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10),
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Center(child: Text(tab["title"])),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+             
+              // Lista de mensajes
+              Expanded(
+                child: TabBarView(
+                  children: [
+                   Container(),
+                   Container(),
+                   Container(),
+                   Container(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        //  bottomNavigationBar: CustomBottomNavigationBarWidget(
+        //     type: BottomNavigationBarType.fixed,
+        //     showUnselectedLabels: true,
+        //     backgroundColor: Color(0XFF7D7878),
+        //     selectedItemColor: Color(0XFF12CBC4),
+        //     unselectedItemColor: Colors.white,
+        //     selectedLabelStyle: StylesApp(context).textStyleBody10,
+        //     unselectedLabelStyle: StylesApp(context).textStyleBody10,
+        //     items: getBottomNavigationBarItems(context),
+        //     currentIndex: _selectedIndex,
+        // onTap: _onItemTapped)
       ),
     );
   }

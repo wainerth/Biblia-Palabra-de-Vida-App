@@ -75,7 +75,7 @@ class _RewardWidgetState extends State<RewardWidget>
                   child: Text(
                     textAlign: TextAlign.center,
                     widget.rewardInfo != null ? widget.rewardInfo.description : '',
-                    style:StylesApp(context).textStyleBody16.copyWith(
+                    style:StylesApp(context).textStyleBody12.copyWith(
                       color: Colors.white
                     ) ,
                   ),

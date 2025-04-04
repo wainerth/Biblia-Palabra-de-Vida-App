@@ -22,16 +22,20 @@ class BuildErrorWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              textAlign: TextAlign.center,
-              errorMessage ?? "Failed to load stages.",
+                textAlign: TextAlign.center,
+                errorMessage ?? "Failed to load stages.",
                 style: TextStyle(color: Colors.red)),
             SizedBox(height: 10),
             ButtonThemeWidget(
+              width: 150.0,
+              height: 27.0,
               buttonStyle: StylesApp(context).btnWidgetSmall,
               text: "Reintentar",
               onPressed: onRetry,
             ),
             ButtonThemeWidget(
+              width: 150.0,
+              height: 27.0,
               text: "volver",
               buttonStyle: StylesApp(context).btnWidgetSmall,
               onPressed: onBack,
