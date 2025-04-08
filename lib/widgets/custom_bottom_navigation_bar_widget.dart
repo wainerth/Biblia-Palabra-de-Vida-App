@@ -28,7 +28,18 @@ class CustomBottomNavigationBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
+    return Container(
+      decoration: BoxDecoration(
+      boxShadow: [
+        BoxShadow(
+        color: Colors.black.withValues(alpha: .50),
+        blurRadius: 10,
+        offset: Offset(0, -2), // Shadow above the widget
+        ),
+      ],
+      ),
+      child: BottomNavigationBar(
+      elevation: 8.0,
       type: type,
       showUnselectedLabels: showUnselectedLabels,
       backgroundColor: backgroundColor,
@@ -39,6 +50,7 @@ class CustomBottomNavigationBarWidget extends StatelessWidget {
       items: items,
       currentIndex: currentIndex,
       onTap: onTap,
+      ),
     );
   }
 }

@@ -32,13 +32,17 @@ class _AventureScreenState extends State<AventureScreen> {
 
   Future<void> _generateData(BuildContext context) async {
     LoadingService().showLoading(context);
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     dataUser = userProvider.currentUser;
     setState(() {
       errorMessage = null;
     });
     try {
-      final result = await loadCoursesByUserAndChurch(dataUser!.user.id, dataUser!.user.userChurch.isNotEmpty ? dataUser!.user.userChurch.first.id : null);
+      final result = await loadCoursesByUserAndChurch(
+          dataUser!.user.id,
+          dataUser!.user.userChurch.isNotEmpty
+              ? dataUser!.user.userChurch.first.id
+              : null);
       if (result.error != null) {
         LoadingService().hideLoading();
         if (result.error.contains("Información")) {
@@ -47,7 +51,7 @@ class _AventureScreenState extends State<AventureScreen> {
               dialogType: DialogTypeAction.info,
               buttonOk: 'Volver',
               actionCallbackOk: () {
-                 Navigator.popAndPushNamed(context, '/workspacePage');
+                Navigator.popAndPushNamed(context, '/workspacePage');
               },
               showAction: true,
               textButton: 'Afiliar a una Iglesia?',
@@ -160,6 +164,9 @@ class _AventureScreenState extends State<AventureScreen> {
                                     'sectionId': stage.id
                                   });
                             } else {
+                              setState(() {
+                                loadAventure[index] = false;
+                              });
                               await showCustomDialog(context,
                                   message: "¡Este curso no esta Disponible!",
                                   dialogType: DialogType.info);

@@ -120,7 +120,7 @@ class UserProvider extends ChangeNotifier {
       String? userToken = prefs.getString('userToken');
       final response = await updateUserProfile(userToken, data);
       if (response.error != null) {
-        return ResponseData(data: null, error: null);
+        return ResponseData(data: null, error: response.error);
       }
       _user = _user?.copyWith(
           name: data.dataProfiles.name,

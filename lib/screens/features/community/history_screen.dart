@@ -7,6 +7,7 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -18,7 +19,7 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   final PageController _controllerPage = PageController();
 
-  double fontSizeText = 16.sp;
+  double fontSizeText =  16.sp;
   double isPage = 0;
   List<History> stories = [];
   bool isLoading = true;
@@ -41,9 +42,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generateData(context);
       // _controllerPage.addListener(_pageListener);
+      getFontSizeText();
     });
   }
-
+getFontSizeText() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    double? fontSize = sharedPreferences.getDouble('fontSizeText');
+    if (fontSize != null) {
+      setState(() {
+        fontSizeText = fontSize;
+      });
+    } else {
+      setState(() {
+        fontSizeText = 16.sp;
+      });
+    }
+  }
   Future<void> _generateData(BuildContext context) async {
     setState(() {
       errorMessage = null;
@@ -302,8 +316,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             min: 10.sp,
                             max: 20.sp,
                             value: fontSizeText,
-                            onChanged: (value) {
-                              setState(() {
+                            onChanged: (value) async {
+                                final sharedPreferences =
+                                    await SharedPreferences.getInstance();
+                                await sharedPreferences.setDouble(
+                                    'fontSizeText', value);
+                              setState(()  {
                                 fontSizeText = value;
                               });
                             },

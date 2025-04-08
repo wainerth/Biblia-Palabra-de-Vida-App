@@ -98,7 +98,7 @@ UpdateDataProfile updateFromModelData(UpdateDataProfile dataToSend,
         nuevosDatos["city"] = item.value as String?;
         break;
       case 'gender':
-        nuevosDatos["gender"] = item.value as String?;
+        nuevosDatos["gender"] = item.value.isNotEmpty ? item.value[0].toLowerCase() : null;
         break;
       case 'isBaptized':
         nuevosDatos["isBaptized"] = item.value == 'Bautizado' ? true : false;

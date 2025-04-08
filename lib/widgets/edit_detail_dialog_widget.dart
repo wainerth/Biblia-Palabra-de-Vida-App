@@ -29,7 +29,9 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
     for (var item in _editingData) {
       if (item.label == 'Tel.') {
         _controllers.add(TextEditingController(
-            text: item.value.isNotEmpty ? item.value.split(' ')[1] : ''));
+            text: item.value.isNotEmpty
+                ? maskFormatterTel.maskText(item.value.split(' ')[1])
+                : ''));
       } else {
         _controllers.add(TextEditingController(text: item.value));
       }
@@ -187,8 +189,12 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
                   });
                 },
                 selectedItem: item.value.isNotEmpty
-                    ? listPrefixCode.firstWhere(
-                        (element) => element.label == item.value.split(' ')[0])
+                    ? item.value.contains(' ') &&
+                            item.value.split(' ').length > 1 &&
+                            item.value.split(' ')[0].isNotEmpty
+                        ? listPrefixCode.firstWhere((element) =>
+                            element.label == item.value.split(' ')[0])
+                        : null
                     : null,
               ),
             ),
@@ -196,11 +202,11 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
           Expanded(
             flex: 2,
             child: TextFormField(
-              controller: _controllers[index],
-              keyboardType: TextInputType.phone,
               inputFormatters: [
                 maskFormatterTel, // Permite solo números
               ],
+              controller: _controllers[index],
+              keyboardType: TextInputType.phone,
               onChanged: (value) {
                 _controllers[index].text = value;
                 _editingData[index] = ModelData(
@@ -242,8 +248,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
             });
           },
           selectedItem: item.value.isNotEmpty
-              ? optionsSex.firstWhere(
-                  (element) => 
+              ? optionsSex.firstWhere((element) =>
                   element.label.toLowerCase() == item.value.toLowerCase())
               : null,
         ),
@@ -302,13 +307,12 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
           minWidth: 160.0,
           maxWidth: StylesApp(context).sizeTextFormField.width,
         ),
-        child: 
-        CustomDropdownBottomWidget(
+        child: CustomDropdownBottomWidget(
           hintText: "Seleccione un país",
           items: dropDownList,
           onChanged: (ModelData? newValue) {
             setState(() {
-               _editingData[index] = ModelData(
+              _editingData[index] = ModelData(
                 label: _editingData[index].label,
                 value: newValue!.label,
                 clave: _editingData[index].clave,
@@ -321,25 +325,6 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
                   .firstWhere((element) => element.label == item.value)
               : null,
         ),
-        
-        // CustomDropdownWidget<Country>(
-        //   hintText: "Seleccione un país",
-        //   items: dropDownList,
-        //   onChanged: (ModelData? newValue) {
-        //     setState(() {
-        //       _editingData[index] = ModelData(
-        //         label: _editingData[index].label,
-        //         value: newValue!.label,
-        //         clave: _editingData[index].clave,
-        //         showLabel: _editingData[index].showLabel,
-        //       );
-        //     });
-        //   },
-        //   selectedItem: item.value.isNotEmpty
-        //       ? dropDownList
-        //           .firstWhere((element) => element.label == item.value)
-        //       : null,
-        // ),
       );
     } else if (item.label == 'Iglesia') {
       return Container(

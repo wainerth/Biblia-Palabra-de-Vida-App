@@ -38,6 +38,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
   ];
 
   void _onItemTapped(int index) {
+    if(index == _selectedIndex) return; 
     setState(() {
       _selectedIndex = index;
       Navigator.popAndPushNamed(
@@ -139,20 +140,12 @@ class _PromisesScreenState extends State<PromisesScreen> {
       bottomNavigationBar: CustomBottomNavigationBarWidget(
         type: BottomNavigationBarType.fixed,
         showUnselectedLabels: true,
-        backgroundColor: Color(0XFF7D7878),
+        backgroundColor: Colors.white,
         selectedItemColor: Color(0XFF12CBC4),
         unselectedItemColor: Colors.white,
         selectedLabelStyle: StylesApp(context).textStyleBody10,
         unselectedLabelStyle: StylesApp(context).textStyleBody10,
-        items: itemsPromises
-            .map((item) => BottomNavigationBarItem(
-                  icon: Icon(
-                    item.icon,
-                    size: StylesApp(context).sizeIconBottomBar,
-                  ),
-                  label: item.title,
-                ))
-            .toList(),
+        items: getItemsPromises(context),
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),

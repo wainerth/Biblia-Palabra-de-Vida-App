@@ -22,8 +22,28 @@ class _PrayerScreenState extends State<PrayerScreen> {
     {"label": "Espirituales", "value": "8"},
     {"label": "Otro", "value": "9"},
   ];
+  int _selectedIndex = 2;
   goToRequest(type) {
     Navigator.pushNamed(context, '/requestPage', arguments: type);
+  }
+
+  void _onItemTapped(int index) {
+    if (index == _selectedIndex)
+      return; // No hacer nada si el índice no ha cambiado
+
+    setState(() {
+      _selectedIndex = index;
+
+      if (_selectedIndex == 0) {
+        Navigator.pushNamed(context, '/layoutPage');
+      } else {
+        Navigator.pushNamed(
+          context,
+          '/layoutPage',
+          arguments: {'selectedIndex': _selectedIndex},
+        );
+      }
+    });
   }
 
   Color generateColor(position) {
@@ -66,7 +86,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
                   height: 52.sp,
                   buttonStyle: StylesApp(context).btnWidgetSmall,
                   textCenter: true,
-                  onPressed: (){
+                  onPressed: () {
                     Navigator.popAndPushNamed(context, "/listRequestPage");
                   },
                 ),
@@ -86,56 +106,68 @@ class _PrayerScreenState extends State<PrayerScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: CustomBottomNavigationBarWidget(
+        type: BottomNavigationBarType.fixed,
+        showUnselectedLabels: true,
+        backgroundColor: Colors.white,
+        selectedItemColor: Color(0XFF12CBC4),
+        unselectedItemColor: Colors.white,
+        selectedLabelStyle: StylesApp(context).textStyleBody10,
+        unselectedLabelStyle: StylesApp(context).textStyleBody10,
+        items: getItemsPreach(context),
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
     );
   }
 
   _buildButtonActions(BuildContext context) {
     var isWideScreen = MediaQuery.of(context).size.width > 600;
     return isWideScreen
-      ? Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: GridView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 10.sp,
-            mainAxisSpacing: 10.sp,
-            childAspectRatio: 3,
-          ),
-          itemCount: requestTypes.length,
-          itemBuilder: (context, index) {
-            return ButtonThemeWidget(
-            text: requestTypes[index]["label"],
-            buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                backgroundColor: WidgetStatePropertyAll(generateColor(index)),
+        ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10.sp,
+                mainAxisSpacing: 10.sp,
+                childAspectRatio: 3,
               ),
-            width: 285.sp,
-            height: 30,
-            onPressed: () => goToRequest(requestTypes[index]),
-            );
-          },
-          ),
-      )
-      : Column(
-        children: [
-          for (var index = 0; index < requestTypes.length; index++) ...{
-          ButtonThemeWidget(
-            text: requestTypes[index]["label"],
-            buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-              backgroundColor: WidgetStatePropertyAll(generateColor(index)),
-              ),
-            width: 285.sp,
-            height: StylesApp(context).btnHeight.height,
-            onPressed: () => goToRequest(requestTypes[index]),
-          ),
-          SizedBox(
-            height: 8.sp,
+              itemCount: requestTypes.length,
+              itemBuilder: (context, index) {
+                return ButtonThemeWidget(
+                  text: requestTypes[index]["label"],
+                  buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                        backgroundColor:
+                            WidgetStatePropertyAll(generateColor(index)),
+                      ),
+                  width: 285.sp,
+                  height: 30,
+                  onPressed: () => goToRequest(requestTypes[index]),
+                );
+              },
+            ),
           )
-          }
-        ],
-        );
+        : Column(
+            children: [
+              for (var index = 0; index < requestTypes.length; index++) ...{
+                ButtonThemeWidget(
+                  text: requestTypes[index]["label"],
+                  buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                        backgroundColor:
+                            WidgetStatePropertyAll(generateColor(index)),
+                      ),
+                  width: 285.sp,
+                  height: StylesApp(context).btnHeight.height,
+                  onPressed: () => goToRequest(requestTypes[index]),
+                ),
+                SizedBox(
+                  height: 8.sp,
+                )
+              }
+            ],
+          );
   }
 }
-
-

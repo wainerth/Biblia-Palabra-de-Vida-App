@@ -15,4 +15,9 @@ class StyleColor {
   static const Color orange = Color(0XFFFD8C43);
   static const Color redLight = Color(0XFFE85151);
   static const Color yellowLight = Color(0XFFFFCF25);
+  static const Color black = Color(0XFF000000);
+  static const Color greenDark = Color(0XFF2E8C39);
+  static const Color blueDark = Color(0XFF1D1CBD);
+  static const Color redDark = Color(0XFFBF0000);
+  static const Color grayMedium = Color(0XFF868784);
 }

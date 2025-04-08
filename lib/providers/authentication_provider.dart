@@ -187,7 +187,8 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       final userId = registerResponse.data["id"];
       final token = registerResponse.data["userJwtToken"]["token"];
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('userToken', token);
       // consultamos perfil del usuario
       final ResponseData response = await loadProfileUser(userId, token);
       error = response.error;

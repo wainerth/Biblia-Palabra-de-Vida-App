@@ -22,19 +22,19 @@ class _HeaderWidgetState extends State<HeaderWidget> {
     final LoginUser? userData = userProvider.currentUser;
 
     return Container(
-      constraints: BoxConstraints(minHeight: 90.0),
+      constraints: BoxConstraints(minHeight: 80.0),
       decoration: BoxDecoration(
         color: Color(0XFFFD8C43),
         borderRadius: BorderRadius.circular(8.0),
       ),
-      padding: EdgeInsets.only(left: 4.0, top: 5.0, bottom: 5.0),
+      // padding: EdgeInsets.only(left: 4.0, top: 5.0, bottom: 5.0),
       child: Row(
         spacing: 0,
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -50,12 +50,12 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     ),
                   ),
                 ),
-                Center(
-                  child: Text(
-                    "${userData?.user.username}",
-                    style: StylesApp(context).textStyleBody12,
-                  ),
-                )
+                // Center(
+                //   child: Text(
+                //     "${userData?.user.username}",
+                //     style: StylesApp(context).textStyleBody12,
+                //   ),
+                // )
               ],
             ),
           ),
@@ -67,7 +67,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               children: [
                 Text.rich(
                   textAlign: TextAlign.left,
-                  style: StylesApp(context).textStyleBody14,
+                  style: StylesApp(context).textStyleBody12,
                   TextSpan(
                     children: [
                       TextSpan(text: "Exp: "),
@@ -76,7 +76,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   ),
                 ),
                 Text.rich(
-                  style: StylesApp(context).textStyleBody14,
+                  style: StylesApp(context).textStyleBody12,
                   TextSpan(
                     children: [
                       TextSpan(text: "Racha: "),
@@ -99,10 +99,10 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   children: [
                     Text(
                       "3",
-                      style: StylesApp(context).textStyleBody18,
+                      style: StylesApp(context).textStyleBody12,
                     ),
                     Icon(
-                      size: 21.sp,
+                      size: 16.sp,
                       Icons.star,
                       color: Colors.white,
                     )
@@ -115,7 +115,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   padding: EdgeInsets.all(0),
                   iconSize: 20.sp,
                   icon: Icon(
-                    size: 30.sp,
+                    size: 20.sp,
                     Icons.fast_forward_sharp,
                     color: Colors.white,
                   ),

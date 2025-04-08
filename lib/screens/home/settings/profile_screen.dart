@@ -431,28 +431,34 @@ class CardColumnWidget extends StatelessWidget {
                                           catalogueProvider.allCountries,
                                           catalogueProvider.allChurches));
 
-                                  await userProvider
-                                      .updateProfile(dataEnviar)
-                                      .then((value) async {
-                                    if (dataEnviar.dataProfiles.church !=
-                                        null) {
-                                      final response =
-                                          await userProvider.updateUserChurch(
-                                              user.user.id,
-                                              dataEnviar
-                                                  .dataProfiles.church!.id,
-                                              catalogueProvider.allChurches);
+                                  final responseUpdateProfile =
+                                      await userProvider
+                                          .updateProfile(dataEnviar);
+                                  if (responseUpdateProfile.error != null) {
+                                    LoadingService().hideLoading();
+                                    await showCustomDialog(
+                                      context,
+                                      message: responseUpdateProfile.error!,
+                                      dialogType: DialogType.error,
+                                    );
+                                    return;
+                                  }
+                                  if (dataEnviar.dataProfiles.church != null) {
+                                    final response =
+                                        await userProvider.updateUserChurch(
+                                            user.user.id,
+                                            dataEnviar.dataProfiles.church!.id,
+                                            catalogueProvider.allChurches);
 
-                                      if (response.error != null) {
-                                        LoadingService().hideLoading();
-                                        await showCustomDialog(
-                                          context,
-                                          message: response.error!,
-                                          dialogType: DialogType.error,
-                                        );
-                                      }
+                                    if (response.error != null) {
+                                      LoadingService().hideLoading();
+                                      await showCustomDialog(
+                                        context,
+                                        message: response.error!,
+                                        dialogType: DialogType.error,
+                                      );
                                     }
-                                  });
+                                  }
 
                                   Navigator.pop(context);
                                   LoadingService().hideLoading();

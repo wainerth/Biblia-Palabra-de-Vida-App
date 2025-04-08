@@ -6,9 +6,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,12 +43,13 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     scrollController = ScrollController();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _generateData(context);
+      await _loadMutePreference();
+      if (!isMuted) {
+        await playAudio();
+      }
     });
-
-    playAudio();
-    _loadMutePreference();
   }
 
   @override
@@ -77,15 +76,16 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> muteAudio() async {
-    if (isMuted) {
-      await audioPlayer.setVolume(1.0); // Restaura el volumen
-    } else {
-      await audioPlayer.setVolume(0.0); // Silencia el audio
-    }
     setState(() {
       isMuted = !isMuted;
     });
     _saveMutePreference();
+
+    if (isMuted) {
+      await audioPlayer.setVolume(0.0); // Restaura el volumen
+    } else {
+      await audioPlayer.setVolume(1.0); // Silencia el audio
+    }
   }
 
   _loadMutePreference() async {
@@ -168,7 +168,7 @@ class _MapScreenState extends State<MapScreen> {
                 .map((level) => Level.fromJson(removeTypename(level)))
                 .cast<Level>()
                 .toList();
-            gruposDeNiveles = chunked(levels, 4);
+            gruposDeNiveles = chunked(levels, 6);
           });
         }
       } catch (e) {
@@ -184,16 +184,17 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _onItemTapped(int index) {
+    if (index == _selectedIndex)
+      return; // No hacer nada si el índice no ha cambiado
+
     stopAudio();
     audioPlayer.dispose();
     setState(() {
       _selectedIndex = index;
+
       if (_selectedIndex == 0) {
         Navigator.pushNamed(context, '/layoutPage');
-      } else if (_selectedIndex != 2) {
-        setState(() {
-          _selectedIndex = index;
-        });
+      } else {
         Navigator.pushNamed(
           context,
           '/layoutPage1',
@@ -214,12 +215,12 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List coordATop = [0.00, 0.25, 0.48, 0.75];
+    List coordATop = [-0.02, 0.10, 0.28, 0.45, 0.62,0.80];
 
-    List coordALeft = [0.17, 0.55, 0.65, 0.65];
+    List coordALeft = [0.20, 0.50, 0.65, 0.65,0.65,0.60];
 
-    List coordBTop = [0.0, 0.25, 0.50, 0.75];
-    List coordBLeft = [0.30, 0.17, 0.05, 0.05];
+    List coordBTop = [-0.02, 0.15, 0.32, 0.48,0.64,0.80];
+    List coordBLeft = [0.40, 0.17, 0.05, -0.01,0.05,0.11];
 
     List coordATopBarco = [0.25, 0.35, 0.45, 0.48, 0.65, 0.75, 0.75, 0.85];
     List coordAleftBarco = [0.20, 0.10, -0.05, 0.35, 0.17, 0.35, 0.10, 0.20];
@@ -309,14 +310,13 @@ class _MapScreenState extends State<MapScreen> {
                                   isMuted ? Icons.volume_off : Icons.volume_up,
                                   color: isMuted ? Colors.grey : Colors.white,
                                 ),
-                                onPressed: () {
+                                onPressed: () async {
+                                  await muteAudio();
                                   if (isMuted) {
-                                    playAudio();
-                                  } else {
                                     stopAudio();
+                                  } else {
+                                    playAudio();
                                   }
-
-                                  muteAudio();
                                 },
                               ),
                             )
@@ -342,6 +342,9 @@ class _MapScreenState extends State<MapScreen> {
                                               minHeight:
                                                   MediaQuery.sizeOf(context)
                                                       .height),
+                                                      // decoration:BoxDecoration(
+                                                      //   border: Border.all(color: Colors.black, width: 1),
+                                                      // ),
                                           child: Image.asset(
                                             image,
                                             width: double.infinity,
@@ -559,24 +562,16 @@ class _MapScreenState extends State<MapScreen> {
         builder: (context, value, child) {
           return AnimatedContainer(
             duration: Duration(milliseconds: 300),
-            height: value ? kBottomNavigationBarHeight : 0,
+            height: value ? kBottomNavigationBarHeight + 20 : 0,
             child: CustomBottomNavigationBarWidget(
               type: BottomNavigationBarType.fixed,
               showUnselectedLabels: true,
-              backgroundColor: Color(0XFF7D7878),
+              backgroundColor: Colors.white,
               selectedItemColor: Color(0XFF12CBC4),
               unselectedItemColor: Colors.white,
               selectedLabelStyle: StylesApp(context).textStyleBody10,
               unselectedLabelStyle: StylesApp(context).textStyleBody10,
-              items: itemsMap
-                  .map((item) => BottomNavigationBarItem(
-                        icon: Icon(
-                          item.icon,
-                          size: StylesApp(context).sizeIconBottomBar,
-                        ),
-                        label: item.title,
-                      ))
-                  .toList(),
+              items: getItemsMap(context),
               currentIndex: _selectedIndex,
               onTap: _onItemTapped,
             ),
@@ -735,13 +730,13 @@ class _InfiniteAnimationState extends State<InfiniteAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 4),
     )..repeat(
         reverse: true); // Repite la animación en reversa para un bucle continuo
 
     _animation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeInOut,
+      curve: Curves.easeInOutSine,
     );
   }
 
@@ -758,7 +753,7 @@ class _InfiniteAnimationState extends State<InfiniteAnimation>
       builder: (context, child) {
         double value = _animation.value;
         double verticalOffset = (widget.j % 2 == 0 ? 10 : -10) * value;
-        double horizontalOffset = (widget.j % 2 == 0 ? 5 : -5) * value;
+        double horizontalOffset = (widget.j % 2 == 0 ? 30 : -30) * value;
         return Positioned(
           top: widget.index % 2 == 0
               ? StylesApp(context).positionedLevels(widget.coordTop).dy +

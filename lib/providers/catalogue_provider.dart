@@ -65,7 +65,7 @@ class CatalogueProvider extends ChangeNotifier {
       if (data == null || data['getAllCountries'] == null) {
         throw Exception('obtain Countries no data');
       }
-
+      print("countries llamado ");
       allCountries = (data['getAllCountries'] as List)
           .map((i) => Country.fromJson(i))
           .toList();

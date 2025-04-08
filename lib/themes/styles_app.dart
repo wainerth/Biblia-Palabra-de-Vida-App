@@ -938,17 +938,17 @@ class StylesApp {
 
   double get sizeIconBottomBar {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return 20.sp;
+      return 25.sp;
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return 20.sp;
+      return 25.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 20.sp;
+      return 25.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 20.sp;
+      return 25.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 20.sp;
+      return 25.sp;
     } else {
-      return 20.sp;
+      return 25.sp;
     }
   }
 

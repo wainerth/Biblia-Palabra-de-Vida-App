@@ -39,11 +39,12 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final courseId = ModalRoute.of(context)!.settings.arguments as String;
       final LoginUser? userData = userProvider.currentUser;
-      errorMessage = null; 
+      errorMessage = null;
       progressUser = userProvider.progressUser;
 
       // obtenemos curso
-      final ResponseData courseResponse = await loadOneCourse(userData!.user.id, courseId);
+      final ResponseData courseResponse =
+          await loadOneCourse(userData!.user.id, courseId);
       if (courseResponse.error != null) {
         errorMessage = courseResponse.error;
       }
@@ -75,15 +76,17 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   Widget build(BuildContext context) {
     int _selectedIndex = 1;
     void _onItemTapped(int index) {
+      
+      if (index == _selectedIndex) return;
       setState(() {
         _selectedIndex = index;
         if (_selectedIndex == 0) {
           Navigator.pushNamed(context, '/layoutPage');
-        } else if(_selectedIndex != 1){
+        } else {
           _selectedIndex = index;
           Navigator.pushNamed(
             context,
-            '/layoutPage',
+            '/layoutPage1',
             arguments: {'selectedIndex': _selectedIndex},
           );
         }
@@ -134,20 +137,12 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
       bottomNavigationBar: CustomBottomNavigationBarWidget(
         type: BottomNavigationBarType.fixed,
         showUnselectedLabels: true,
-        backgroundColor: Color(0XFF7D7878),
+        backgroundColor: Colors.white,
         selectedItemColor: Color(0XFF12CBC4),
         unselectedItemColor: Colors.white,
         selectedLabelStyle: StylesApp(context).textStyleBody10,
         unselectedLabelStyle: StylesApp(context).textStyleBody10,
-        items: items
-            .map((item) => BottomNavigationBarItem(
-                  icon: Icon(
-                    item.icon,
-                    size: StylesApp(context).sizeIconBottomBar,
-                  ),
-                  label: item.title,
-                ))
-            .toList(),
+        items: getItemsBarSecond(context),
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
@@ -351,7 +346,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                   children: [
                                     ButtonThemeWidget(
                                       height: 27.0,
-                                      width:150.0,
+                                      width: 150.0,
                                       onPressed:
                                           (getStatus(stage) == "Pendiente")
                                               ? null

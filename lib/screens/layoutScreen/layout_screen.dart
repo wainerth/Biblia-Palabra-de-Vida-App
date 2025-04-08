@@ -12,6 +12,8 @@ class LayoutScreen extends StatefulWidget {
 class _LayoutScreenState extends State<LayoutScreen> {
   int _selectedIndex = 1;
   void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+
     setState(() {
       _selectedIndex = index;
       if (_selectedIndex == 0) {
@@ -19,7 +21,8 @@ class _LayoutScreenState extends State<LayoutScreen> {
       }
     });
   }
- @override
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final Object? args = ModalRoute.of(context)!.settings.arguments;
@@ -29,6 +32,7 @@ class _LayoutScreenState extends State<LayoutScreen> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,20 +42,12 @@ class _LayoutScreenState extends State<LayoutScreen> {
       bottomNavigationBar: CustomBottomNavigationBarWidget(
         type: BottomNavigationBarType.fixed,
         showUnselectedLabels: true,
-        backgroundColor: Color(0XFF7D7878),
+        backgroundColor: Colors.white,
         selectedItemColor: Color(0XFF12CBC4),
         unselectedItemColor: Colors.white,
         selectedLabelStyle: StylesApp(context).textStyleBody10,
         unselectedLabelStyle: StylesApp(context).textStyleBody10,
-        items: items
-            .map((item) => BottomNavigationBarItem(
-                  icon: Icon(
-                    item.icon,
-                    size: StylesApp(context).sizeIconBottomBar,
-                  ),
-                  label: item.title,
-                ))
-            .toList(),
+        items: getItemsBarSecond(context),
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),

@@ -17,7 +17,7 @@ class CardOptionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         constraints: BoxConstraints(
-            minHeight: MediaQuery.sizeOf(context).width > 400 ? 70.sp : 40.sp,
+            minHeight: MediaQuery.sizeOf(context).width > 400 ? 60.sp : 40.sp,
             maxWidth: 170.0.sp),
         width: double.infinity,
         decoration: BoxDecoration(
@@ -42,7 +42,7 @@ class CardOptionWidget extends StatelessWidget {
               child: Text(
                 labelCard,
                 textAlign: TextAlign.center,
-                style: StylesApp(context).textStyleBody7,
+                style: StylesApp(context).textStyleBody16,
               ),
             ),
           ],
