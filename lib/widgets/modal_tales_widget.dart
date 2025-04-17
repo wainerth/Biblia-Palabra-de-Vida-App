@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -7,8 +8,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ModalTalesWidget extends StatefulWidget {
   final List<ButtonData> data;
+  final Pagination pagination;
 
-  const ModalTalesWidget({super.key, required this.data});
+  const ModalTalesWidget(
+      {super.key, required this.data, required this.pagination});
 
   @override
   State<ModalTalesWidget> createState() => _ModalTalesWidgetState();
@@ -16,6 +19,51 @@ class ModalTalesWidget extends StatefulWidget {
 
 class _ModalTalesWidgetState extends State<ModalTalesWidget> {
   ButtonData? taleSelected;
+  List<ButtonData>? _localReflection;
+  Pagination? _localPagination;
+  String title = '';
+  int limit = 12;
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _localReflection = widget.data;
+      _localPagination = widget.pagination;
+    });
+  }
+
+  Future<void> loadMoreReflection(
+    int page,
+    int limit,
+    String title,
+  ) async {
+    LoadingService().showLoading(context);
+    final response = await getAllReflections(page, limit, title);
+    if (response.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(
+        context,
+        message: response.error!,
+        dialogType: DialogType.error,
+      );
+      return;
+    }
+    LoadingService().hideLoading();
+    setState(() {
+      final reflections = response.data['data']
+          .map<Reflection>(
+              (reflex) => Reflection.fromJson(removeTypename(reflex)))
+          .toList();
+      _localReflection = reflections
+          .map<ButtonData>((reflection) => ButtonData(
+              id: reflection.id,
+              name: reflection.title,
+              urlAudio: reflection.url))
+          .toList();
+      _localPagination =
+          Pagination.fromJson(removeTypename(response.data['meta']));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,46 +76,11 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
           children: [
             Expanded(
               flex: 0,
-              child: Container(
-                constraints: BoxConstraints(minHeight: 44.0),
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                width: double.infinity,
-                decoration: BoxDecoration(color: StyleColor.turquoise),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 0,
-                      left: 10,
-                      child: Container(
-                        width: 32.0,
-                        height: 32.0,
-                        decoration: BoxDecoration(
-                            color: StyleColor.orange,
-                            borderRadius: BorderRadius.circular(32.0)),
-                        child: Center(
-                          child: IconButton(
-                            padding: EdgeInsets.all(0),
-                            iconSize: 30.0,
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: Icon(
-                              Icons.arrow_back,
-                              size: 30,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Center(
-                      child: Text(
-                        "Cuentos",
-                        style: StylesApp(context).textStyleBody7,
-                      ),
-                    )
-                  ],
-                ),
+              child: SimpleHeaderWidget(
+                title: 'Cuentos',
+                onRoute: () {
+                  Navigator.pop(context);
+                },
               ),
             ),
             Container(
@@ -77,7 +90,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                   if (textEditingValue.text.isEmpty) {
                     return const Iterable<ButtonData>.empty();
                   }
-                  return widget.data.where(
+                  return _localReflection!.where(
                     (ButtonData option) {
                       return option.name
                           .toLowerCase()
@@ -101,7 +114,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                     TextEditingController textEditingController,
                     FocusNode focusNode,
                     VoidCallback onFieldSubmitted) {
-                      textEditingController.clear();
+                  textEditingController.clear();
                   return TextField(
                     controller: textEditingController,
                     style: StylesApp(context)
@@ -143,7 +156,6 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                             return GestureDetector(
                               onTap: () {
                                 onSelected(option);
-                                
                               },
                               child: ListTile(
                                 title: Text(
@@ -163,27 +175,91 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: widget.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    constraints: BoxConstraints(minHeight: 40.sp),
-                    height: 40.sp,
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                    child: ButtonThemeWidget(
-                      text: widget.data[index].name,
-                      buttonStyle: StylesApp(context).btnWidgetSmall,
-                      width: MediaQuery.sizeOf(context).width * 0.7,
-                      height: 27.0,
-                      onPressed: () {
-                        setState(() {
-                          taleSelected = widget.data[index];
-                        });
-                      },
+              child: Stack(
+                children: [
+                  ListView.builder(
+                    itemCount: _localReflection!.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                        constraints: BoxConstraints(minHeight: 40.sp),
+                        height: 40.sp,
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 12.0),
+                        child: ButtonThemeWidget(
+                          text: _localReflection![index].name,
+                          buttonStyle: StylesApp(context).btnWidgetSmall,
+                          width: MediaQuery.sizeOf(context).width * 0.7,
+                          height: 27.0,
+                          onPressed: () {
+                            setState(() {
+                              taleSelected = _localReflection![index];
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                  Positioned(
+                    bottom: 5,
+                    left: 5,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: StyleColor.orange,
+                        boxShadow: [
+                          BoxShadow(
+                              color: StyleColor.black.withValues(alpha: .75),
+                              offset: Offset(0, 3),
+                              blurRadius: 10)
+                        ],
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: IconButton(
+                        onPressed: _localPagination!.hasPreviousPage
+                            ? () async {
+                                await loadMoreReflection(
+                                    _localPagination!.currentPage - 1,
+                                    limit,
+                                    title);
+                              }
+                            : null,
+                        icon: Icon(Icons.arrow_back),
+                        color: Colors.white,
+                      ),
                     ),
-                  );
-                },
+                  ),
+                  Positioned(
+                    bottom: 5,
+                    right: 5,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: StyleColor.orange,
+                        boxShadow: [
+                          BoxShadow(
+                              color: StyleColor.black.withValues(alpha: .75),
+                              offset: Offset(0, 3),
+                              blurRadius: 10)
+                        ],
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: IconButton(
+                        onPressed: _localPagination!.hasNextPage
+                            ? () async {
+                                await loadMoreReflection(
+                                    _localPagination!.currentPage + 1,
+                                    limit,
+                                    title);
+                              }
+                            : null,
+                        icon: Icon(Icons.arrow_forward),
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
             Container(
@@ -195,8 +271,8 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                   BoxShadow(
                     offset: Offset(0, -4),
                     blurRadius: 4,
-                    color: Colors.black
-                        .withValues(alpha: 0.25), // Negro con 25% de transparencia
+                    color: Colors.black.withValues(
+                        alpha: 0.25), // Negro con 25% de transparencia
                   ),
                 ],
               ),

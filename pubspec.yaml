@@ -61,6 +61,7 @@ dependencies:
   mime: ^2.0.0
   cached_network_image: ^3.2.3
   flutter_launcher_icons: ^0.13.1 # Usa la versión más reciente
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -92,7 +93,7 @@ flutter:
   assets:
     - assets/
     - assets/barcos/
-    - assets/premios/
+    # - assets/premios/lñ
     - assets/packages/youtube_player_flutter/assets/speedometer.webp
   #   - images/a_dot_ham.jpeg
 

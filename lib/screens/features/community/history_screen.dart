@@ -174,7 +174,7 @@ getFontSizeText() async {
                       color: StyleColor.orange,
                       borderRadius: BorderRadius.circular(8.0)),
                   child: Text(
-                    "Paso ${(isPage + 1).floorToDouble().toStringAsFixed(0)} ${level != null ? level!.name : ''}",
+                    " ${level != null ? level!.name : ''} - Paso ${(isPage + 1).floorToDouble().toStringAsFixed(0)}",
                     style: StylesApp(context).textStyleBody5,
                   ),
                 ),

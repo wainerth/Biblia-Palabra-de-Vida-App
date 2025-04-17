@@ -144,6 +144,19 @@ class StylesApp {
     }
   }
 
+  double get fontSizeBody28 {
+    if (screenWidth <= SizeScreensApp().sm) {
+      return 28.sp;
+    } else if (screenWidth <= SizeScreensApp().md) {
+      return 28.sp;
+    } else if (screenWidth <= SizeScreensApp().lg) {
+      return 28.sp;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 28.sp;
+    } else {
+      return 16.sp;
+    }
+  }
   double get fontSizeBody32 {
     if (screenWidth <= SizeScreensApp().sm) {
       return 32.sp;
@@ -498,6 +511,11 @@ class StylesApp {
   TextStyle get textStyleBodyRoboto24 => TextStyle(
         fontFamily: "Roboto",
         fontSize: fontSizeBody24,
+        color: const Color(0XFFFFF5F5),
+      );
+  TextStyle get textStyleBody28 => TextStyle(
+        fontFamily: "Aclonica",
+        fontSize: fontSizeBody28,
         color: const Color(0XFFFFF5F5),
       );
   TextStyle get textStyleBody32 => TextStyle(

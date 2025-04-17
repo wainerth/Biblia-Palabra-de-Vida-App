@@ -95,10 +95,6 @@ Future<ResponseData> getProfileUser(token, idUser) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -163,11 +159,6 @@ Future<ResponseData> getAchievement(userId) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -230,11 +221,6 @@ Future<ResponseData> getUserTitle(userId) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -299,11 +285,6 @@ Future<ResponseData> getPrizeWon(userId) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -365,10 +346,6 @@ Future<ResponseData> getRewardObtained(sectionId) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -1224,6 +1201,90 @@ Future getLeagueMembers(leagueId) async {
   }
 }
 
+Future getAllPrize(page, limit, userId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetAllPrize",
+    document: gql(r'''
+          query GetAllPrize($page: Int, $limit: Int, $userId: String) {
+            getAllPrize(page: $page, limit: $limit, userId: $userId) {
+              data {
+                id
+                courseId
+                biblicalName
+                typeStone
+                description
+                img {
+                  urlImg
+                }
+                exchangeValue
+                unLockPrize
+                redeemed
+                status
+              }
+              meta {
+                currentPage
+                totalPages
+                itemsPerPage
+                totalItems
+                hasPreviousPage
+                hasNextPage
+              }
+            }
+          }
+      '''),
+    variables: <String, dynamic>{
+      "page": page,
+      "limit": limit,
+      "userId": userId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null ||
+        data['getAllPrize'] == null ||
+        data['getAllPrize']['data'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'get All Prize Members failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: removeTypename(data['getAllPrize']),
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'get League Members Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+    // return ResponseData(data: null, error: "connection error $e");
+  }
+}
+
 Future streaksCalendar(userId, month) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
@@ -1279,5 +1340,274 @@ Future streaksCalendar(userId, month) async {
           error: "An unexpected error occurred: $e"); // Generic error
     }
     // return ResponseData(data: null, error: "connection error $e");
+  }
+}
+
+Future<ResponseData> getDailyWord() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetDailyWord",
+    document: gql(r'''
+         query GetDailyWord {
+          getDailyWord {
+            book {
+              modernName
+            }
+            chapter {
+              chapter
+            }
+            verse {
+              verse
+              text
+            }
+            img {
+              urlImg
+            }
+          }
+        }
+      '''),
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['getDailyWord'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'get Daily Word failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: removeTypename(data['getDailyWord']),
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'get Daily Word Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+    // return ResponseData(data: null, error: "connection error $e");
+  }
+}
+
+Future<ResponseData> getOneReflection() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+         query GetOneReflectionRandom {
+            getOneReflectionRandom {
+              id
+              title
+              url
+              countCards
+              status
+            }
+          }
+      '''),
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['getOneReflectionRandom'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'get One Reflection Random failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: removeTypename(data['getOneReflectionRandom']),
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'get One Reflection Random Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getDailyPromises(userId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+         query GetDailyPromise($userId: ID) {
+          getDailyPromise(userId: $userId) {
+            id
+            book {
+              modernName
+            }
+            chapter {
+              chapter
+            }
+            verse {
+              verse
+              text
+            }
+            hasViewed
+            energyPoint
+            status
+          }
+        }
+      '''),
+    fetchPolicy: FetchPolicy.noCache,
+    variables: <String, dynamic>{"userId": userId},
+  );
+  try {
+    final QueryResult result = await _client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['getDailyPromise'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'get Daily Promise failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getDailyPromise'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'get Daily Promise Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getAllReflections(int page, int limit, String title) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+         query GetAllReflection($page: Int, $limit: Int, $title: String) {
+          getAllReflection(page: $page, limit: $limit, title: $title) {
+            data {
+              id
+              title
+              url
+              countCards
+              status
+            }
+            meta {
+              currentPage
+              totalPages
+              itemsPerPage
+              totalItems
+              hasPreviousPage
+              hasNextPage
+            }
+          }
+        }
+      '''),
+    variables: <String, dynamic>{
+      "page": page,
+       "limit": limit, 
+       "title": title},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data == null || data['getAllReflection'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'get All Reflection failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllReflection'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'get All Reflection Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
   }
 }

@@ -41,6 +41,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   Duration? _duration;
   Duration? _position;
   bool _isPlaying = false;
+  bool loading = false;
   double volume = 0.5;
   String get _durationText => _duration?.toString().split('.').first ?? '';
   String get _positionText => _position?.toString().split('.').first ?? '';
@@ -58,10 +59,35 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     _positionSubscription?.cancel();
     _playerCompleteSubscription?.cancel();
     _playerStateChangeSubscription?.cancel();
+    player.stop();
     player.dispose();
     super.dispose();
   }
-
+@override
+void didUpdateWidget(covariant AudioPlayerWidget oldWidget) {
+  super.didUpdateWidget(oldWidget);
+  if (oldWidget.pathUrl != widget.pathUrl) {
+    player.stop();
+    setState(() {
+      _duration = null;
+      _position = null;
+      _isPlaying = false;
+    });
+    _initStreams();
+  }
+}
+@override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent && _isPlaying) {
+      // La pantalla ya no es la actual y el audio estaba reproduciéndose
+      player.pause();
+      setState(() {
+        _isPlaying = false;
+      });
+    }
+  }
   Future<void> _downloadFile(url) async {
     try {
       // Obtener la dirección del directorio de documentos
@@ -121,33 +147,47 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               : null,
           color: widget.showImage
               ? Colors.black.withValues(alpha: 0.9)
-              :   widget.backgroundColor,
+              : widget.backgroundColor,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               flex: 0,
-              child: IconButton(
-                padding: EdgeInsets.all(0),
-                constraints: BoxConstraints(minHeight: 24.sp),
-                color: widget.controlsColor,
-                onPressed: widget.pathUrl.isEmpty
-                    ? null
-                    : () {
-                        setState(() {
-                          _isPlaying = !_isPlaying;
-                        });
-                        if (_isPlaying) {
-                          _play();
-                        } else {
-                          player.pause();
-                        }
-                      },
-                icon: Icon(
-                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                  size: 25.sp,
-                ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (loading)//_isPlaying && _position == null && _duration == null)
+                    SizedBox(
+                      width: 25.sp,
+                      height: 25.sp,
+                      child: CircularProgressIndicator(
+                        color: widget.controlsColor,
+                        strokeWidth: 2.0,
+                      ),
+                    ),
+                  IconButton(
+                    padding: EdgeInsets.all(0),
+                    constraints: BoxConstraints(minHeight: 24.sp),
+                    color: widget.controlsColor,
+                    onPressed: widget.pathUrl.isEmpty
+                        ? null
+                        : () {
+                            setState(() {
+                              _isPlaying = !_isPlaying;
+                            });
+                            if (_isPlaying) {
+                              _play();
+                            } else {
+                              player.pause();
+                            }
+                          },
+                    icon: Icon(
+                      _isPlaying ? Icons.pause : Icons.play_arrow,
+                      size: 25.sp,
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -155,7 +195,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               child: Text.rich(
                 style: TextStyle(color: widget.actionColor, fontSize: 12.sp),
                 TextSpan(
-                  text: _position != null
+                  text: _position != null && _durationText.isNotEmpty
                       ? '${_positionText.substring(3)} / ${_durationText.substring(3)}'
                       : _duration != null
                           ? _durationText
@@ -333,6 +373,12 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   Future<void> _play() async {
-    await player.play(AssetSource(widget.pathUrl));
+      setState(() {
+loading= true;
+      });
+    await player.play(UrlSource(widget.pathUrl));
+      setState(() {
+loading= false;
+      });
   }
 }

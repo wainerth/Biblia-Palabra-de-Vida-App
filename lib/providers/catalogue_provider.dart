@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
@@ -36,9 +39,7 @@ class CatalogueProvider extends ChangeNotifier {
     await _getConfigurations();
   }
 
-
   Future<void> _loadCountries() async {
-
     QueryOptions options = QueryOptions(
       operationName: "GetAllCountries",
       document: gql(r'''
@@ -57,7 +58,8 @@ class CatalogueProvider extends ChangeNotifier {
       final QueryResult result = await _client.query(options);
 
       if (result.hasException) {
-        throw Exception('Failed to obtain Countries');
+       final response = ResponseData.fromQueryResult(result);
+        throw Exception('Failed to obtain Countries ${response.error}');
       }
 
       final data = result.data;
@@ -71,8 +73,21 @@ class CatalogueProvider extends ChangeNotifier {
           .toList();
 
       notifyListeners();
+    } on TimeoutException catch (e) {
+      print('Timeout: $e');
+      throw Exception('obtain Countries Timeout de conexión $e');
     } catch (e) {
-      throw Exception('Failed to obtain Countries $e');
+      // More specific error handling if needed:
+      if (e is TimeoutException) {
+        throw Exception("Request timed out");
+      } else if (e is SocketException) {
+        throw Exception("No Internet Connection");
+      } else if (e is FormatException) {
+        // Example: JSON parsing error
+        throw Exception("Invalid data format");
+      } else {
+        throw Exception("Failed to obtain Countries : $e"); // Generic error
+      }
     }
   }
 
@@ -114,7 +129,8 @@ class CatalogueProvider extends ChangeNotifier {
       final QueryResult result = await _client.query(options);
 
       if (result.hasException) {
-        throw Exception('Failed to obtain Churches');
+        final response = ResponseData.fromQueryResult(result);
+        throw Exception('Failed to obtain Churches ${response.error}');
       }
 
       final data = result.data;
@@ -141,8 +157,6 @@ class CatalogueProvider extends ChangeNotifier {
           getAllLeagues {
             id
             name
-            minMembers
-            maxMembers
             colorFront
             colorBack
             status
@@ -159,7 +173,8 @@ class CatalogueProvider extends ChangeNotifier {
       final QueryResult result = await _client.query(options);
 
       if (result.hasException) {
-        throw Exception('Failed to obtain leagues');
+        final response = ResponseData.fromQueryResult(result);
+        throw Exception('Failed to obtain leagues ${response.error}');
       }
 
       final data = result.data;
@@ -179,8 +194,7 @@ class CatalogueProvider extends ChangeNotifier {
   }
 
   Future<void> _getConfigurations() async {
-
-    QueryOptions options =  QueryOptions(
+    QueryOptions options = QueryOptions(
       operationName: "GetConfigurations",
       document: gql(r'''
         query GetConfigurations {
@@ -203,9 +217,10 @@ class CatalogueProvider extends ChangeNotifier {
         throw Exception('Failed to obtain getConfigurations');
       }
 
-      allConfig = Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
+      allConfig =
+          Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
       print(allConfig);
-      
+
       notifyListeners();
     } catch (e) {
       throw Exception('Failed to obtain getConfigurations $e');

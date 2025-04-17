@@ -15,6 +15,8 @@ class UserProvider extends ChangeNotifier {
   LoginUser? _user;
   LastProgressUser? _progressUser;
   LoginUser? get currentUser => _user;
+  DailyWord? dailyProverb;
+  DailyWord? get  getDailyProverb => dailyProverb;
 
   LastProgressUser? get progressUser => _progressUser;
 

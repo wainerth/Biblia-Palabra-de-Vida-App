@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -22,7 +23,8 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
         child: Column(
           children: [
             HeaderWidget(),
-             Expanded( // Use Expanded to fill the remaining space
+            Expanded(
+              // Use Expanded to fill the remaining space
               child: _buildIntroSlide(context),
             ),
           ],
@@ -53,10 +55,14 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
               });
             },
             children: [
-              _buildPage(context, "assets/introAventureOne.png"),
-              _buildPage(context, "assets/introAventureTwo.png"),
-              _buildPage(context, "assets/introAventureThree.png"),
-              _buildPage(context, "assets/introAventureFour.png"),
+              _buildPage(context, "assets/layerIntro.png", "",
+                  "Sigue\n la\n ruta\n de la\n sabiduría"),
+              _buildPage(context, "assets/layerIntro.png", "1",
+                  "Selecciona\n el tema\n que\n quiere\n aprender"),
+              _buildPage(context, "assets/layerIntro.png", "2",
+                  "Inicia la\n aventura,\n completa\n y avanza en\n las etapas\n para conocer\n más de\n Dios"),
+              _buildPage(context, "assets/finalIntro.png", "3",
+                  "Sigue los\n pasos lee o\n escucha el\n contenido y\n responde las\n preguntas\n para sumar\n puntos de\n experiencia"),
             ],
           ),
         ),
@@ -90,17 +96,57 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
     );
   }
 
-  _buildPage(BuildContext context, String imageUrl) {
+  _buildPage(
+      BuildContext context, String imageUrl, String number, String text) {
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
         return Container(
           height: MediaQuery.of(context).size.height,
-          child: Image.asset(
-            imageUrl,
-            fit: orientation == Orientation.landscape
-                ? BoxFit.contain
-                : BoxFit.fill,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(imageUrl),
+              fit: orientation == Orientation.landscape
+                  ? BoxFit.contain
+                  : BoxFit.fill,
+            ),
           ),
+          child: Stack(children: [
+            Positioned(
+              top: 40,
+              left: 30,
+              child: Text.rich(
+
+                TextSpan(
+                  children: [
+                    if(number.isNotEmpty)
+                    WidgetSpan(
+                      child: Container(
+                        width: 40.sp,
+                        height: 40.sp,
+                        decoration: BoxDecoration(
+                          color: StyleColor.orange,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          number,
+                          style: StylesApp(context)
+                              .textStyleBody7
+                              .copyWith(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    TextSpan(
+                      text: text,
+                      style: StylesApp(context)
+                          .textStyleBody28
+                          .copyWith(color: StyleColor.orange),
+                    )
+                  ],
+                ),
+              ),
+            )
+          ]),
         );
       },
     );
@@ -141,7 +187,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
             Navigator.pushNamed(context, '/layoutPage1');
           });
         } else {
-          if (_controller.page! >= 2) {
+          if (_controller.page! >= 3) {
             setState(() {
               _isLastPage = true;
             });
@@ -166,7 +212,11 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
               "Iniciar Aventura",
               style: StylesApp(context).textStyleBody7,
             )
-          :  Icon(Icons.arrow_forward, color: Colors.white, size: 25.sp,),
+          : Icon(
+              Icons.arrow_forward,
+              color: Colors.white,
+              size: 25.sp,
+            ),
     );
   }
 }

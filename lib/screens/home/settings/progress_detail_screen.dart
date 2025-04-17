@@ -1,3 +1,5 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
@@ -17,56 +19,7 @@ class ProgressDetailScreen extends StatefulWidget {
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   List<UserTitle>? titles = [];
   LastProgressUser? progressUser = null;
-  List awards = [
-    {
-      "img": "assets/premios/sardica.png",
-      "character": "Rubén",
-      "level": "Sardica"
-    },
-    {
-      "img": "assets/premios/topacio.png",
-      "character": "Simeon",
-      "level": "Topacio"
-    },
-    {
-      "img": "assets/premios/carbunclo.png",
-      "character": "Levi",
-      "level": "Carbunclo"
-    },
-    {
-      "img": "assets/premios/esmeralda.png",
-      "character": "Judá",
-      "level": "Esmeralda"
-    },
-    {"img": "assets/premios/zafiro.png", "character": "Dan", "level": "Zafiro"},
-    {
-      "img": "assets/premios/diamante.png",
-      "character": "Neftali",
-      "level": "Diamante"
-    },
-    {
-      "img": "assets/premios/rubi-jacinto.png",
-      "character": "Gab",
-      "level": "Rubí-Jacinto"
-    },
-    {"img": "assets/premios/agata.png", "character": "Aser", "level": "Ágata"},
-    {
-      "img": "assets/premios/amatista.png",
-      "character": "Isacar",
-      "level": "Amatista"
-    },
-    {
-      "img": "assets/premios/berilio.png",
-      "character": "Zabulón",
-      "level": "Berilio"
-    },
-    {"img": "assets/premios/onice.png", "character": "José", "level": "Ónice"},
-    {
-      "img": "assets/premios/jaspe.png",
-      "character": "Benjamín",
-      "level": "Jaspe"
-    },
-  ];
+
   Future<void> _loadProgress(BuildContext context) async {
     LoadingService().showLoading(context);
     final userProvider = Provider.of<UserProvider>(context,
@@ -197,10 +150,12 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                   ],
                 ),
               ),
-              CurrentMonthCalendarWidget( registrationDate: userData.createdAt.isNotEmpty
-                                            ? DateTime.fromMillisecondsSinceEpoch(
-                                                int.parse(userData.createdAt))
-                                            : DateTime.now() ,),
+              CurrentMonthCalendarWidget(
+                registrationDate: userData.createdAt.isNotEmpty
+                    ? DateTime.fromMillisecondsSinceEpoch(
+                        int.parse(userData.createdAt))
+                    : DateTime.now(),
+              ),
               _buildAchievements(context),
               SizedBox(
                 height: 8.0,
@@ -255,7 +210,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                   'sectionId': progressUser!.sectionId
                 });
               } else {
-                 Navigator.pushNamed(context, '/introAventurePage');
+                Navigator.pushNamed(context, '/introAventurePage');
               }
             },
           ),
@@ -267,127 +222,235 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     );
   }
 
-  Future<dynamic> _dialogAwards(BuildContext context) {
+  Future<dynamic> _dialogAwards(BuildContext context) async {
+    // Variables locales para el estado del diálogo
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userData = userProvider.currentUser;
+    List awards = [];
+    Pagination pagination = Pagination(
+      currentPage: 0,
+      totalPages: 0,
+      itemsPerPage: 0,
+      totalItems: 0,
+      hasPreviousPage: false,
+      hasNextPage: false,
+    );
+    int limit = 12;
+
+    // Función para cargar los premios y la paginación
+    Future<void> _loadAwards(
+        int page, int limit, String userId, StateSetter setStateDialog) async {
+      LoadingService().showLoading(context);
+
+      final responsePrize = await getAllPrize(page, limit, userId);
+      if (responsePrize.error != null) {
+        LoadingService().hideLoading();
+        await showCustomDialog(
+          context,
+          message: responsePrize.error!,
+          dialogType: DialogType.error,
+        );
+        return;
+      }
+
+      LoadingService().hideLoading();
+      setStateDialog(() {
+        // Usamos el StateSetter del StatefulBuilder
+        awards = responsePrize.data['data']
+            .map((award) => Award.fromJson(removeTypename(award)))
+            .cast<Award>()
+            .toList();
+
+        pagination =
+            Pagination.fromJson(removeTypename(responsePrize.data["meta"]));
+      });
+    }
+
+    // Llamada inicial para cargar los premios
+    // No necesitamos el await aquí ya que showDialog lo esperará
+    final response = await getAllAwards(1, limit, userData!.user.id);
+    if (response != null) {
+      setState(() {
+        awards = response["awards"] as List<Award>;
+        pagination = response["pagination"] as Pagination;
+      });
+    } else {
+      return;
+    }
+
     return showDialog(
       barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          insetPadding:
-              EdgeInsets.only(left: 12.0, right: 12.0, top: 0.0, bottom: 0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 22.0, vertical: 6.0),
-                  margin: EdgeInsets.symmetric(horizontal: 14.0, vertical: 4),
-                  constraints: BoxConstraints(minHeight: 38.0),
-                  decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(8.0)),
-                  child: Text(
-                    "Piedras Preciosas usadas en el pectoral sacerdotal",
-                    style: StylesApp(context).textStyleBody14,
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 22.0),
-                  constraints: BoxConstraints(maxHeight: 383),
-                  height: double.infinity, // Adjust the height as needed
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3, // Number of columns
-                      crossAxisSpacing: 5,
-                      mainAxisSpacing: 5,
-                      childAspectRatio: 1.0,
-                    ),
-                    itemCount: awards.length, // Number of items
-                    itemBuilder: (BuildContext context, int index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                          _dialogDetailsAdware(awards[index]);
-                        },
-                        child: Container(
-                          width: 80.0,
-                          height: 80.0,
-                          margin: EdgeInsets.only(bottom: 4),
-                          padding: EdgeInsets.all(4.0),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withValues(alpha: .25),
-                                    offset: Offset(0, 4),
-                                    blurRadius: 2,
-                                    blurStyle: BlurStyle.outer)
-                              ]),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                  width: 40,
-                                  height: 40,
-                                  child: Image.asset(awards[index]["img"],
-                                      fit: BoxFit.fill)),
-                              Text(awards[index]["character"]),
-                              Text(awards[index]["level"]),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                SizedBox(
-                  height: 10.0,
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ButtonThemeWidget(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        text: "Salir",
-                        width: 129.0,
-                        height: 35.0,
-                        buttonStyle: StylesApp(context).btnWidgetSmall,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            // La llamada inicial ahora se realiza fuera del StatefulBuilder,
+            // pero necesitamos la referencia al setState del builder para las paginaciones.
+
+            return Dialog(
+              insetPadding:
+                  EdgeInsets.only(left: 12.0, right: 12.0, top: 0.0, bottom: 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 22.0, vertical: 6.0),
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 14.0, vertical: 4),
+                      constraints: BoxConstraints(minHeight: 38.0),
+                      decoration: BoxDecoration(
+                          color: Colors.orange,
+                          borderRadius: BorderRadius.circular(8.0)),
+                      child: Text(
+                        "Piedras Preciosas usadas en el pectoral sacerdotal",
+                        style: StylesApp(context).textStyleBody14,
                       ),
-                      Row(
-                        spacing: 10.0,
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 22.0),
+                      constraints: BoxConstraints(maxHeight: 383),
+                      height: double.infinity, // Adjust the height as needed
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3, // Number of columns
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                          childAspectRatio: 1.0,
+                        ),
+                        itemCount: awards.length, // Usar la lista local
+                        itemBuilder: (BuildContext context, int index) {
+                          final award = awards[index];
+                          return GestureDetector(
+                            onTap: award.unLockPrize
+                                ? () {
+                                    Navigator.pop(context);
+                                    _dialogDetailsAdware(award);
+                                  }
+                                : null,
+                            child: Opacity(
+                              opacity: award.unLockPrize ? 1 : 0.5,
+                              child: Container(
+                                width: 80.0,
+                                height: 80.0,
+                                margin: EdgeInsets.only(bottom: 4),
+                                padding: EdgeInsets.all(4.0),
+                                decoration: BoxDecoration(
+                                    color: award.unLockPrize
+                                        ? null
+                                        : StyleColor.grayMedium
+                                            .withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black
+                                              .withValues(alpha: .25),
+                                          offset: Offset(0, 4),
+                                          blurRadius: 2,
+                                          blurStyle: BlurStyle.outer)
+                                    ]),
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                        width: 40,
+                                        height: 40,
+                                        child: Image.network(
+                                            GraphQLConfig.urlServidor +
+                                                award.img.urlImg,
+                                            fit: BoxFit.fill)),
+                                    Text(award.biblicalName),
+                                    Text(award.typeStone),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ButtonThemeWidget(
-                            icon: Icons.arrow_back,
-                            colorIcon: Colors.white,
-                            width: 70.0,
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            text: "Salir",
+                            width: 129.0,
                             height: 35.0,
                             buttonStyle: StylesApp(context).btnWidgetSmall,
                           ),
-                          ButtonThemeWidget(
-                            icon: Icons.arrow_forward,
-                            colorIcon: Colors.white,
-                            width: 70.0,
-                            height: 35.0,
-                            buttonStyle: StylesApp(context).btnWidgetSmall,
+                          Row(
+                            spacing: 10.0,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ButtonThemeWidget(
+                                icon: Icons.arrow_back,
+                                colorIcon: Colors.white,
+                                width: 70.0,
+                                height: 35.0,
+                                buttonStyle: StylesApp(context)
+                                    .btnWidgetSmall
+                                    .copyWith(
+                                        backgroundColor: WidgetStatePropertyAll(
+                                            pagination.hasPreviousPage
+                                                ? StyleColor.orange
+                                                : StyleColor.grayMedium
+                                                    .withValues(alpha: .25))),
+                                onPressed: pagination.hasPreviousPage
+                                    ? () async {
+                                        await _loadAwards(
+                                            pagination.currentPage - 1,
+                                            limit,
+                                            "77",
+                                            setState); // Pasar el setState del StatefulBuilder
+                                      }
+                                    : null,
+                              ),
+                              ButtonThemeWidget(
+                                icon: Icons.arrow_forward,
+                                colorIcon: Colors.white,
+                                width: 70.0,
+                                height: 35.0,
+                                buttonStyle: StylesApp(context)
+                                    .btnWidgetSmall
+                                    .copyWith(
+                                        backgroundColor: WidgetStatePropertyAll(
+                                            pagination.hasNextPage
+                                                ? StyleColor.orange
+                                                : StyleColor.grayMedium
+                                                    .withValues(alpha: .25))),
+                                onPressed: pagination.hasNextPage
+                                    ? () async {
+                                        await _loadAwards(
+                                            pagination.currentPage + 1,
+                                            limit,
+                                            "77",
+                                            setState); // Pasar el setState del StatefulBuilder
+                                      }
+                                    : null,
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                  ],
                 ),
-                SizedBox(
-                  height: 10.0,
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -514,7 +577,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       color: Colors.orange,
                       borderRadius: BorderRadius.circular(8.0)),
                   child: Text(
-                    "El Zafiro es una Piedra preciosa usada en el pectoral sacerdotal",
+                    "${item.typeStone} es una Piedra preciosa usada en el pectoral sacerdotal",
                     style: StylesApp(context).textStyleBody14,
                   ),
                 ),
@@ -524,10 +587,12 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       SizedBox(
                         width: 80.0,
                         height: 84.0,
-                        child: Image.asset(item["img"]),
+                        child: Image.network(
+                            GraphQLConfig.urlServidor + item.img.urlImg,
+                            fit: BoxFit.fill),
                       ),
-                      Text(item["character"]),
-                      Text(item["level"]),
+                      Text(item.biblicalName),
+                      Text(item.typeStone),
                     ],
                   ),
                 ),
@@ -556,14 +621,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       spacing: 10.0,
                       children: [
                         Text(
-                          "El zafiro reprenta a la tribu de Dan en el pectoral del sumo sacerdote.",
-                          style:
-                              StylesApp(context).textStyleBodyWhite4.copyWith(
-                                    color: Colors.black,
-                                  ),
-                        ),
-                        Text(
-                          "El zafiro reprenta a la tribu de Dan en el pectoral del sumo sacerdote.Jesucristo como el Sumo Sacerdote eterno (Hebreos 4:14-16) lleva en su corazon a casa una de las 12 tribus de isrrael como piedras preciosas siendo el unico intercesor ante Dios Padre.",
+                          item.description,
                           style:
                               StylesApp(context).textStyleBodyWhite4.copyWith(
                                     color: Colors.black,
@@ -579,27 +637,59 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      textAlign: TextAlign.center,
-                      "Puedes canjear  esta gema por 200Lsm de energía",
-                      style: StylesApp(context)
-                          .textStyleBody14
-                          .copyWith(color: Colors.black),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        item.redeemed
+                          ? "Este Premio ya fue canjeado"
+                          : "Puedes canjear esta gema por ${item.exchangeValue.toInt()}Lsm de energía",
+                        style: StylesApp(context)
+                            .textStyleBody14
+                            .copyWith(color: Colors.black),
+                      ),
                     ),
                     SizedBox(
                       height: 7.0,
                     ),
-                    ButtonThemeWidget(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      text: "Canjear",
-                      width: 132.0,
-                      height: 32.0,
-                      buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                            backgroundColor:
-                                WidgetStatePropertyAll(Color(0XFF12CBC4)),
-                          ),
+                    Opacity(
+                      opacity: item.redeemed ? 0.5 : 1,
+                      child: ButtonThemeWidget(
+                        onPressed: item.redeemed
+                            ? null
+                            : () async {
+                                LoadingService().showLoading(context);
+                                final responseRedime =
+                                    await redeemedPrize(item.id);
+                                if (responseRedime.error != null) {
+                                  LoadingService().hideLoading();
+                                  await showCustomDialog(
+                                    context,
+                                    message: responseRedime.error!,
+                                    dialogType: DialogType.error,
+                                  );
+                                  return;
+                                } else {
+                                  LoadingService().hideLoading();
+                                  await showCustomDialog(
+                                    context,
+                                    message: responseRedime.data,
+                                    dialogType: DialogType.info,
+                                  );
+                                }
+                                LoadingService().hideLoading();
+                                Navigator.pop(context);
+                              },
+                        text: "Canjear",
+                        width: 132.0,
+                        height: 32.0,
+                        buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                              backgroundColor: WidgetStatePropertyAll(
+                                  item.redeemed
+                                      ? StyleColor.grayMedium
+                                      : StyleColor.turquoise),
+                            ),
+                      ),
                     ),
                   ],
                 ),
@@ -629,5 +719,31 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
         );
       },
     );
+  }
+
+  Future<Map<String, dynamic>?> getAllAwards(
+      int page, int limit, String userId) async {
+    LoadingService().showLoading(context);
+
+    final responsePrize = await getAllPrize(page, limit, userId);
+    if (responsePrize.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(
+        context,
+        message: responsePrize.error!,
+        dialogType: DialogType.error,
+      );
+      return null;
+    }
+
+    LoadingService().hideLoading();
+    return {
+      "awards": responsePrize.data['data']
+          .map((award) => Award.fromJson(removeTypename(award)))
+          .cast<Award>()
+          .toList(),
+      "pagination":
+          Pagination.fromJson(removeTypename(responsePrize.data["meta"]))
+    };
   }
 }

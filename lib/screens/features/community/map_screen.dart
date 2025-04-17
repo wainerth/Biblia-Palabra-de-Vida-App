@@ -18,21 +18,21 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  late final userProvider;
-  CourseModel? course = null;
-  Stage? stage = null;
+  late final UserProvider userProvider;
+  CourseModel? course;
+  Stage? stage;
   List<Level> levels = [];
   List<List<Level>> gruposDeNiveles = [];
   late ScrollController scrollController;
   final _isVisible = ValueNotifier<bool>(true);
   Timer? _timer;
-  bool _showBottomNavBar = false;
   int _selectedIndex = 2;
 
   // int _selectedIndex = 0;
   final List<String> imagePaths = [
     'assets/mapa1.png',
     'assets/mapa2.png',
+    'assets/mapa3.png',
   ];
   bool isLoading = true;
   String? errorMessage;
@@ -100,6 +100,7 @@ class _MapScreenState extends State<MapScreen> {
     prefs.setBool('isMuted', isMuted);
   }
 
+  // función que hace scroll en la pantallax
   onScrollPosition() {
     final int lastUnlockedIndex = gruposDeNiveles.lastIndexWhere(
       (grupo) => grupo.any((level) => level.unLockLevel == true),
@@ -168,7 +169,7 @@ class _MapScreenState extends State<MapScreen> {
                 .map((level) => Level.fromJson(removeTypename(level)))
                 .cast<Level>()
                 .toList();
-            gruposDeNiveles = chunked(levels, 6);
+            gruposDeNiveles = chunked(levels, 5);
           });
         }
       } catch (e) {
@@ -178,14 +179,13 @@ class _MapScreenState extends State<MapScreen> {
         setState(() {
           isLoading = false;
         });
-        // onScrollPosition();
       }
     }
   }
 
+// función que se encarga de navegar entre las opciones
   void _onItemTapped(int index) {
-    if (index == _selectedIndex)
-      return; // No hacer nada si el índice no ha cambiado
+    if (index == _selectedIndex) return;
 
     stopAudio();
     audioPlayer.dispose();
@@ -215,18 +215,18 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List coordATop = [-0.02, 0.10, 0.28, 0.45, 0.62,0.80];
+    List coordATop = [-0.02, 0.10, 0.31, 0.54, 0.76];
 
-    List coordALeft = [0.20, 0.50, 0.65, 0.65,0.65,0.60];
+    List coordALeft = [0.20, 0.49, 0.65, 0.65, 0.64];
 
-    List coordBTop = [-0.02, 0.15, 0.32, 0.48,0.64,0.80];
-    List coordBLeft = [0.40, 0.17, 0.05, -0.01,0.05,0.11];
+    List coordBTop = [-0.03, 0.13, 0.31, 0.54, 0.76];
+    List coordBLeft = [0.40, 0.17, 0.01, 0.03, 0.05];
 
     List coordATopBarco = [0.25, 0.35, 0.45, 0.48, 0.65, 0.75, 0.75, 0.85];
-    List coordAleftBarco = [0.20, 0.10, -0.05, 0.35, 0.17, 0.35, 0.10, 0.20];
+    List coordAleftBarco = [0.20, 0.10, -0.05, 0.35, 0.17, 0.35, 0.10, 0.25];
 
     List coordBTopBarco = [0.05, 0.25, 0.35, 0.45, 0.45, 0.60, 0.75, 0.85];
-    List coordBleftBarco = [0.90, 0.85, 0.65, 0.80, 0.52, 0.80, 0.50, 0.90];
+    List coordBleftBarco = [0.90, 0.85, 0.65, 0.80, 0.52, 0.87, 0.50, 0.90];
 
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
@@ -329,9 +329,11 @@ class _MapScreenState extends State<MapScreen> {
                                   .length, // Dividimos por 4 para obtener el número de grupos de niveles
                               itemBuilder: (context, index) {
                                 List<Level> grupo = gruposDeNiveles[index];
-                                String image = index % 2 == 0
+                                String image = index == 0
                                     ? imagePaths[0]
-                                    : imagePaths[1];
+                                    : index % 2 == 0
+                                        ? imagePaths[1]
+                                        : imagePaths[2];
                                 return Column(
                                   children: [
                                     Stack(
@@ -342,9 +344,9 @@ class _MapScreenState extends State<MapScreen> {
                                               minHeight:
                                                   MediaQuery.sizeOf(context)
                                                       .height),
-                                                      // decoration:BoxDecoration(
-                                                      //   border: Border.all(color: Colors.black, width: 1),
-                                                      // ),
+                                          // decoration:BoxDecoration(
+                                          //   border: Border.all(color: Colors.black, width: 1),
+                                          // ),
                                           child: Image.asset(
                                             image,
                                             width: double.infinity,
@@ -401,6 +403,7 @@ class _MapScreenState extends State<MapScreen> {
                                                       false
                                                   ? null
                                                   : () {
+                                                      stopAudio();
                                                       //aaaa
                                                       Navigator.pushNamed(
                                                         context,

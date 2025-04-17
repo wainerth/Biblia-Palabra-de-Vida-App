@@ -1,15 +1,17 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+import 'package:share_plus/share_plus.dart';
+
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 class WorkspaceScreen extends StatefulWidget {
   const WorkspaceScreen({super.key});
@@ -21,14 +23,37 @@ class WorkspaceScreen extends StatefulWidget {
 class _WorkspaceScreenState extends State<WorkspaceScreen> {
   LoginUser? dataUser;
   late final catalogueProvider;
+  Pagination? paginate;
   LastProgressUser? progressUser = null;
-
+  bool error = false;
+  bool errorDaily = false;
+  bool loadingDaily = false;
+  Reflection? reflection;
+  DailyWord dailyWord = DailyWord(
+      book: Book(modernName: ""),
+      chapter: Chapter(chapter: 0),
+      verse: Verse(verse: 0, text: ""));
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (Provider.of<UserProvider>(context, listen: false).getDailyProverb !=
+          null) {
+        setState(() {
+          dailyWord = Provider.of<UserProvider>(context, listen: false)
+              .getDailyProverb!;
+        });
+      } else {
+        await getDailyProverb();
+      }
+      await loadGetOneReflection();
+    });
   }
 
   Future<void> _loadProgress(BuildContext context) async {
+    setState(() {
+      error = false;
+    });
     LoadingService().showLoading(context);
     final userProvider = Provider.of<UserProvider>(context,
         listen:
@@ -37,6 +62,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     final progressResponse =
         await userProvider.getProgressUser(dataUser?.user.id, null);
     if (progressResponse!.error != null) {
+      setState(() {
+        error = true;
+      });
       LoadingService().hideLoading();
       await showCustomDialog(
         context,
@@ -50,47 +78,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     setState(() {}); // Fuerza una reconstrucción para mostrar los datos
   }
 
-  void _initializeCatalogues() async {
-    catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
-    catalogueProvider._initialize();
-  }
-
-  List<ButtonData> buttonsData = [
-    ButtonData(
-        id: "1",
-        name: "La liebre y la tortuga",
-        urlAudio: "assets/audio/liebre_tortuga.mp3"),
-    ButtonData(
-        id: "2", name: "El labrador", urlAudio: "assets/audio/labrador.mp3"),
-    ButtonData(
-        id: "3", name: "El Navegante", urlAudio: "assets/audio/navegante.mp3"),
-    ButtonData(
-        id: "4",
-        name: "El explorador",
-        urlAudio: "assets/audio/explorador.mp3"),
-    ButtonData(
-        id: "5", name: "Los Hermanos", urlAudio: "assets/audio/hermanos.mp3"),
-    ButtonData(
-        id: "6",
-        name: "La Casa Vieja",
-        urlAudio: "assets/audio/casa_vieja.mp3"),
-    ButtonData(
-        id: "7", name: "Los Artistas", urlAudio: "assets/audio/artistas.mp3"),
-    ButtonData(id: "8", name: "La cuenta", urlAudio: "assets/audio/cuenta.mp3"),
-    ButtonData(
-        id: "9",
-        name: "Tres es mejor que dos",
-        urlAudio: "assets/audio/tres_es_mejor.mp3"),
-    ButtonData(
-        id: "10",
-        name: "Saltamontes",
-        urlAudio: "assets/audio/saltamontes.mp3"),
-    ButtonData(
-        id: "11", name: "La Hormiga", urlAudio: "assets/audio/hormiga.mp3"),
-  ];
-  onSearch(value) {
-    setState(() {});
-  }
+  List<ButtonData> buttonsData = [];
 
   @override
   Widget build(BuildContext context) {
@@ -130,8 +118,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
               SizedBox(
                 height: 12.0,
               ),
-              _buildProverbsSection(context),
-              _buildStoriesSection(context),
+              _buildProverbsSection(
+                  context, loadingDaily, errorDaily, dailyWord),
+              _buildStoriesSection(context, reflection),
               SizedBox(
                 height: 12.0,
               ),
@@ -194,6 +183,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
       child: GestureDetector(
         onTap: () async {
           await _loadProgress(context);
+          if (error) return;
           if (progressUser != null && card['label'] == 'Aventura') {
             Navigator.pushNamed(context, '/mapPage', arguments: {
               'courseId': progressUser!.courseId,
@@ -232,7 +222,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     );
   }
 
-  _buildStoriesSection(BuildContext context) {
+  _buildStoriesSection(BuildContext context, reflection) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -246,11 +236,39 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                   .copyWith(color: Color(0xFFFE8D43)),
             ),
             IconButton(
-              onPressed: () {
+              onPressed: () async {
+                LoadingService().showLoading(context);
+                final limit = 12;
+                final page = 1;
+                final responseReflection =
+                    await getAllReflections(page, limit, '');
+                if (responseReflection.error != null) {
+                  LoadingService().hideLoading();
+                  await showCustomDialog(
+                    context,
+                    message: responseReflection.error!,
+                    dialogType: DialogType.error,
+                  );
+                  return;
+                }
+                LoadingService().hideLoading();
+                List reflections = responseReflection.data['data']
+                    .map<Reflection>(
+                        (reflex) => Reflection.fromJson(removeTypename(reflex)))
+                    .toList();
+                final Pagination paginate = Pagination.fromJson(
+                    removeTypename(responseReflection.data['meta']));
+                buttonsData = reflections
+                    .map<ButtonData>((reflection) => ButtonData(
+                        id: reflection.id,
+                        name: reflection.title,
+                        urlAudio: reflection.url))
+                    .toList();
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return ModalTalesWidget(data: buttonsData);
+                    return ModalTalesWidget(
+                        data: buttonsData, pagination: paginate);
                   },
                 );
               },
@@ -263,12 +281,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
           ],
         ),
         AudioPlayerWidget(
-          showImage: false,
-          inactiveColor: StyleColor.orange,
-          backgroundColor: Colors.white,
-          controlsColor: StyleColor.turquoise,
-          pathUrl: "reflexion2.mp3",
-        ),
+            showImage: false,
+            inactiveColor: StyleColor.orange,
+            backgroundColor: Colors.white,
+            controlsColor: StyleColor.turquoise,
+            pathUrl: reflection != null ? reflection.url : ''),
       ],
     );
   }
@@ -282,6 +299,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
           child: GestureDetector(
             onTap: () async {
               await _loadProgress(context);
+              if (error) return;
+
               if (progressUser != null) {
                 Navigator.pushNamed(context, '/mapPage', arguments: {
                   'courseId': progressUser!.courseId,
@@ -336,278 +355,359 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
       ],
     );
   }
-}
 
-_buildProverbsSection(BuildContext context) {
-  return Container(
-    decoration: BoxDecoration(
-      color: const Color(0xFF12CBC4),
-      borderRadius: BorderRadius.circular(8.0),
-    ),
-    margin: const EdgeInsets.symmetric(horizontal: 10.0),
-    width: MediaQuery.of(context).size.width,
-    padding:
-        const EdgeInsets.only(left: 7.0, right: 7.0, top: 6.0, bottom: 6.0),
-    child: Column(
-      children: [
-        SizedBox(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 45.0),
-                child: Text(
-                  "Proverbios 3:4",
-                  style: StylesApp(context).textStyleBody7.copyWith(
-                        color: Colors.white,
-                      ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                spacing: 10.0,
-                children: [
-                  Center(
-                    child: SizedBox(
-                      width: 16.sp,
-                      height: 16.sp,
-                      child: IconButton(
-                        padding: EdgeInsets.all(0),
-                        icon: Icon(
-                          Icons.copy,
-                          color: Colors.white,
-                          size: 16.sp,
-                        ),
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(
-                              text:
-                                  "Proverbios 3:4\n Y hallarás gracia y buena opinión En los ojos de Dios y de los hombres."));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text('Proverbio copiado al portapapeles')),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 16.sp,
-                    height: 16.sp,
-                    child: IconButton(
-                      padding: EdgeInsets.all(0),
-                      icon: Icon(
-                        Icons.share,
-                        color: Colors.white,
-                        size: 16.sp,
-                      ),
-                      onPressed: () async {
-                        await Share.share(
-                          "Proverbios 3:4\nY hallarás gracia y buena opinión En los ojos de Dios y de los hombres.",
-                          subject: "Proverbio del día",
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    width: 8,
-                  )
-                ],
-              ),
-            ],
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          constraints: MediaQuery.of(context).size.width > 400
-              ? BoxConstraints(minHeight: 96.0)
-              : BoxConstraints(),
-          width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                  child: Text(
-                    "Y hallarás gracia y buena opinión En los ojos de Dios y de los hombres.",
-                    style: StylesApp(context)
-                        .textStyleBody5
-                        .copyWith(color: Colors.black, fontSize: 14.sp),
+  Future<void> getDailyProverb() async {
+    if (!mounted) return;
+
+    setState(() {
+      loadingDaily = true;
+    });
+    final responseDailyWord = await getDailyWord();
+    if (mounted) {
+      if (responseDailyWord.error != null) {
+        setState(() {
+          loadingDaily = false;
+          errorDaily = true;
+        });
+      } else {
+        setState(() {
+          loadingDaily = false;
+          errorDaily = false;
+          dailyWord = DailyWord.fromJson(responseDailyWord.data);
+          Provider.of<UserProvider>(context, listen: false).dailyProverb =
+              dailyWord;
+        });
+      }
+    }
+  }
+
+  Future<void> loadGetOneReflection() async {
+    if (!mounted) return;
+    final responseReflection = await getOneReflection();
+    if (responseReflection.error != null) {
+    } else {
+      setState(() {
+        reflection = Reflection.fromJson(responseReflection.data);
+      });
+    }
+  }
+
+  _buildProverbsSection(BuildContext context, bool loadingDaily,
+      bool errorDaily, DailyWord dailyWord) {
+    bool loading = false;
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF12CBC4),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 10.0),
+      width: MediaQuery.of(context).size.width,
+      padding:
+          const EdgeInsets.only(left: 7.0, right: 7.0, top: 6.0, bottom: 6.0),
+      child: errorDaily
+          ? Stack(children: [
+              if (!loading)
+                Center(
+                  child: ButtonThemeWidget(
+                    // text: "Recargar",
+                    width: 40,
+                    height: 40,
+                    icon: Icons.restart_alt_rounded,
+                    buttonStyle: StylesApp(context).btnWidgetSmall,
+                    onPressed: () async {
+                      setState(() {
+                        loading = true;
+                      });
+                      await getDailyProverb();
+                      setState(() {
+                        loading = false;
+                      });
+                    },
                   ),
                 ),
-              ),
-            ],
-          ),
-        )
-      ],
-    ),
-  );
-}
-
-_buildPositionSection(BuildContext context, userData) {
-  return Container(
-    decoration: BoxDecoration(
-      color: const Color(0xFF12CBC4),
-      borderRadius: BorderRadius.circular(8.0),
-    ),
-    margin: const EdgeInsets.symmetric(horizontal: 10.0),
-    width: MediaQuery.of(context).size.width,
-    padding:
-        const EdgeInsets.only(left: 5.0, right: 5.0, top: 6.0, bottom: 6.0),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Stack(
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+            ])
+          : Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Center(
+                SizedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 45.0),
+                        child: dailyWord.book!.modernName!.isNotEmpty
+                            ? Text(
+                                "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}",
+                                style:
+                                    StylesApp(context).textStyleBody7.copyWith(
+                                          color: Colors.white,
+                                        ),
+                              )
+                            : Text(""),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 10.0,
+                        children: [
+                          Center(
+                            child: SizedBox(
+                              width: 16.sp,
+                              height: 16.sp,
+                              child: IconButton(
+                                padding: EdgeInsets.all(0),
+                                icon: Icon(
+                                  Icons.copy,
+                                  color: Colors.white,
+                                  size: 16.sp,
+                                ),
+                                onPressed: () {
+                                  Clipboard.setData(ClipboardData(
+                                      text:
+                                          "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}."));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Proverbio copiado al portapapeles')),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 16.sp,
+                            height: 16.sp,
+                            child: IconButton(
+                              padding: EdgeInsets.all(0),
+                              icon: Icon(
+                                Icons.share,
+                                color: Colors.white,
+                                size: 16.sp,
+                              ),
+                              onPressed: () async {
+                                await Share.share(
+                                  "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.",
+                                  subject: "Proverbio del día",
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: 8,
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFFFF),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  constraints: MediaQuery.of(context).size.width > 400
+                      ? BoxConstraints(minHeight: 96.0)
+                      : BoxConstraints(),
+                  width: double.infinity,
+                  child: loadingDaily
+                      ? Center(child: CircularProgressIndicator())
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: Text(
+                                  "${dailyWord.verse!.text}.",
+                                  style: StylesApp(context)
+                                      .textStyleBody5
+                                      .copyWith(
+                                          color: Colors.black, fontSize: 14.sp),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                )
+              ],
+            ),
+    );
+  }
+
+  _buildPositionSection(BuildContext context, userData) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF12CBC4),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 10.0),
+      width: MediaQuery.of(context).size.width,
+      padding:
+          const EdgeInsets.only(left: 5.0, right: 5.0, top: 6.0, bottom: 6.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Container(
+                                // width: double.infinity,
+                                height: StylesApp(context)
+                                    .sizeContainerAvatar
+                                    .height,
+                                width: StylesApp(context)
+                                    .sizeContainerAvatar
+                                    .width,
+                                child: ClipOval(
+                                  child: CachedNetworkImage(
+                                      fit: BoxFit.cover,
+                                      alignment: Alignment.topCenter,
+                                      imageUrl: userData!
+                                              .imgProfileUser.isNotEmpty
+                                          ? GraphQLConfig.urlServidor +
+                                              userData.imgProfileUser +
+                                              '?timestamp=${DateTime.now().millisecondsSinceEpoch}'
+                                          : 'assets/no-image.jpg',
+                                      placeholder: (context, url) =>
+                                          Image.asset('assets/no-image.jpg'),
+                                      errorWidget: (context, url, error) =>
+                                          Image.asset('assets/no-image.jpg')),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
                         child: Column(
                           children: [
                             Container(
-                               
-                        // width: double.infinity,
-                        height:StylesApp(context).sizeContainerAvatar.height,
-                              width:
-                                  StylesApp(context).sizeContainerAvatar.width,
-                              child: ClipOval(
-                            child: CachedNetworkImage(
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
-                              imageUrl: userData!.imgProfileUser.isNotEmpty
-                              ? GraphQLConfig.urlServidor+ userData.imgProfileUser + '?timestamp=${DateTime.now().millisecondsSinceEpoch}'
-                              : 'assets/no-image.jpg',
-                              placeholder:(context, url ) => Image.asset('assets/no-image.jpg'),
-                              errorWidget:(context, url , error) => Image.asset('assets/no-image.jpg')
-                            ),
-                          ),
+                              constraints: BoxConstraints(
+                                  maxWidth: StylesApp(context).sizeTextPosition,
+                                  minHeight: 20),
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFC7AA34),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child:  Center(
+                                      child: Text(
+                                        textAlign: TextAlign.center,
+                                        "${userData?.league != null
+                                  ? userData.league.leagueName : 'necesitas experiencia para Entrar a una liga'}",
+                                        style: userData?.league != null ? StylesApp(context)
+                                            .textStyleBody6
+                                            .copyWith(color: Colors.white): StylesApp(context)
+                                            .textStyleBody10
+                                            .copyWith(color: Colors.white) ,
+                                      ),
+                                    ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        children: [
-                          Container(
-                            constraints: BoxConstraints(
-                                maxWidth: StylesApp(context).sizeTextPosition,
-                                minHeight: 20),
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFC7AA34),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: Center(
-                              child: Text(
-                                textAlign: TextAlign.center,
-                                "${userData?.league != null ? userData.league.leagueName : ''}",
-                                style: StylesApp(context)
-                                    .textStyleBody6
-                                    .copyWith(color: Colors.white),
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width:
+                                  StylesApp(context).sizeContainerAvatar.width,
+                              child: Image.asset(
+                                'assets/kawaii_fire.png',
+                                alignment: Alignment.center,
+                                fit: BoxFit.cover,
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                      // SizedBox(
+                      //   width: 20,
+                      // )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Center(
+                          child: Text(
+                            textAlign: TextAlign.center,
+                            softWrap: true,
+                            dataUser!.name.split(' ')[0][0].toUpperCase() +
+                                dataUser!.name
+                                    .split(' ')[0]
+                                    .substring(1), //userData!.user.username,
+                            style: StylesApp(context)
+                                .textStyleBody6
+                                .copyWith(color: Colors.white),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: StylesApp(context).sizeContainerAvatar.width,
-                            child: Image.asset(
-                              'assets/kawaii_fire.png',
-                              alignment: Alignment.center,
-                              fit: BoxFit.cover,
-                            ),
+                      Expanded(
+                        flex: 2,
+                        child: Center(
+                          child: Text(
+                            textAlign: TextAlign.center,
+                            "Const: ${userData.streakDaysCount} Dias",
+                            style: StylesApp(context)
+                                .textStyleBody6
+                                .copyWith(color: Colors.white),
                           ),
-                        ],
-                      ),
-                    ),
-                    // SizedBox(
-                    //   width: 20,
-                    // )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: Text(
-                          userData!.user.username,
-                          style: StylesApp(context)
-                              .textStyleBody6
-                              .copyWith(color: Colors.white),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Center(
-                        child: Text(
-                          textAlign: TextAlign.center,
-                          "Const: ${userData.streakDaysCount} Dias",
-                          style: StylesApp(context)
-                              .textStyleBody6
-                              .copyWith(color: Colors.white),
+                      Expanded(
+                        flex: 1,
+                        child: Center(
+                          child: Text(
+                            " ${userData.energyPoints} Lms.",
+                            style: StylesApp(context)
+                                .textStyleBody6
+                                .copyWith(color: Colors.white),
+                          ),
                         ),
                       ),
+                    ],
+                  )
+                ],
+              ),
+              Positioned(
+                right: -3,
+                top: -15,
+                child: SizedBox(
+                  width: 40.0.sp,
+                  height: 30.0.sp,
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/profilePage');
+                    },
+                    icon: Icon(
+                      Icons.fast_forward_outlined,
+                      color: Colors.white,
+                      size: 30.0,
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: Text(
-                          " ${userData.energyPoints} Lms.",
-                          style: StylesApp(context)
-                              .textStyleBody6
-                              .copyWith(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-            Positioned(
-              right: -3,
-              top: -15,
-              child: SizedBox(
-                width: 40.0.sp,
-                height: 30.0.sp,
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/profilePage');
-                  },
-                  icon: Icon(
-                    Icons.fast_forward_outlined,
-                    color: Colors.white,
-                    size: 30.0,
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -114,8 +114,7 @@ class AuthenticationProvider extends ChangeNotifier {
       orElse: () => League(
           id: "-1",
           name: "",
-          minMembers: 0,
-          maxMembers: 0,
+          description:"",
           status: "0",
           img: ImageDetails(urlImg: "")),
     );
@@ -310,6 +309,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
     Navigator.of(context).popUntil((route) => route.isFirst);
     Navigator.pushReplacementNamed(context, '/homePage');
+    Provider.of<UserProvider>(context, listen: false).dailyProverb = null;
     Provider.of<UserProvider>(context, listen: false).setUser(null);
     token = null;
     return true;

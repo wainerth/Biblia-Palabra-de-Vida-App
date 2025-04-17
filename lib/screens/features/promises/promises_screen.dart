@@ -1,8 +1,13 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PromisesScreen extends StatefulWidget {
   const PromisesScreen({super.key});
@@ -13,32 +18,109 @@ class PromisesScreen extends StatefulWidget {
 
 class _PromisesScreenState extends State<PromisesScreen> {
   int _selectedIndex = 2;
-  List<Map<String, dynamic>> promises = [
-    {
-      "id": 1,
-      "title": "¡Abre tu promesa!",
-      "img": "assets/promesa-1.png",
-      "description":
-          "Encontrarás la fuerza interior necesaria para hallar consuelo en tu vida"
-    },
-    {
-      "id": 2,
-      "title": "¡Abre tu promesa!",
-      "img": "assets/promesa-2.png",
-      "description":
-          "Conecta con la fuente de toda sabiduria y encuentra la paz que tanto anhelas"
-    },
-    {
-      "id": 3,
-      "title": "¡Abre tu promesa!",
-      "img": "assets/promesa-3.png",
-      "description":
-          "¿Qué secreto esconde este versiculo que puede cambiar tu vida?"
-    },
+  bool isLoading = true;
+  String? errorMessage;
+  LoginUser? userData;
+  List<PromiseModel> redeemedPromise = [];
+  List<PromiseCardModel> promises = [];
+
+  // lista de mensaje de presentación para las promesas
+  final List<String> textPromise = [
+    "¿Qué secreto esconde este versículo que puede cambiar tu vida?",
+    "Descubre la fuerza que transforma vidas y embárcate en un viaje espiritual",
+    "Permite que la sabiduría te inspire a vivir una vida auténtica y compasiva",
+    "Embárcate en un viaje que te llevará a descubrir las profundidades de tu alma",
+    "Encontrarás la fuerza interior necesaria para hallar consuelo en tu vida",
+    "Cada verso es una semilla que puede florecer en tu corazón",
+    "Conecta con la fuente de toda sabiduría y encuentra la paz que tanto anhelas",
+    "Descubre el tesoro oculto que se encuentra en cada palabra",
+    "Permite que la sabiduría de los antiguos maestros te guíe",
+    "Abre tu mente y tu corazón a las infinitas posibilidades que la palabra te ofrece",
+    "Descubre la belleza de la simplicidad y la profundidad de la fe",
+    "Las palabras tienen el poder de sanar, inspirar y transformar",
+    "Permite que estas verdades eternas transforme enormemente tu corazón",
+    "Cada verso es un regalo que te invita a crecer como persona",
+    "Conecta con la fuente de toda sabiduría y encuentra la paz que tanto anhelas",
+    "Cada palabra es una pieza que te ayudará a comprender tu lugar en el mundo."
+  ]..shuffle();
+  // lista de imágenes para las promesas
+  List<String> images = [
+    "assets/promesa-1.png",
+    "assets/promesa-2.png",
+    "assets/promesa-3.png",
   ];
+  // lista de colores para las card de las promesas canjeadas
+  final List<String> colorsCard = ["03C6DC", "9747FF", "E85151"];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _generateData(context);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    setState(() {
+      userData = userProvider.currentUser;
+    });
+  }
+
+  // Función que genera la data de las promesas a mostrar
+  Future<void> _generateData(BuildContext context) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userData = userProvider.currentUser;
+
+    LoadingService().showLoading(context);
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+    try {
+      setState(() {});
+      // cargamos las promesas
+      final responsePromises = await getDailyPromises(userData!.user.id);
+      if (responsePromises.error != null) {
+        errorMessage = responsePromises.error;
+      }
+      redeemedPromise = responsePromises.data
+          .map<PromiseModel>((pr) => PromiseModel.fromJson(removeTypename(pr)))
+          .toList();
+      redeemedPromise = redeemedPromise.map((promise) {
+        final randomColor = colorsCard[redeemedPromise.indexOf(promise)];
+        // colorsCard[redeemedPromise.indexOf(promise) % colorsCard.length];
+        return promise.copyWith(
+          color: randomColor.toString(),
+        );
+      }).toList();
+
+      promises = redeemedPromise.map((promise) {
+        return PromiseCardModel(
+          id: promise.id!,
+          title: "¡Abre tu promesa!",
+          description: textPromise.isNotEmpty
+              ? textPromise[
+                  redeemedPromise.indexOf(promise) % textPromise.length]
+              : "Descubre tu promesa",
+          images: images[redeemedPromise.indexOf(promise)],
+          hasViewed: promise.hasViewed!,
+        );
+      }).toList();
+    } catch (e) {
+      errorMessage = "An error occurred: $e";
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
-    if(index == _selectedIndex) return; 
+    if (index == _selectedIndex) return;
     setState(() {
       _selectedIndex = index;
       Navigator.popAndPushNamed(
@@ -48,6 +130,8 @@ class _PromisesScreenState extends State<PromisesScreen> {
       );
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +170,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
                       Expanded(
                         flex: 0,
                         child: Text(
-                          '571',
+                          '${userData != null ? userData!.energyPoints : ''}',
                           style: StylesApp(context).textStyleBody14,
                         ),
                       ),
@@ -98,7 +182,9 @@ class _PromisesScreenState extends State<PromisesScreen> {
                             style: StylesApp(context).textStyleBody14,
                             children: [
                               TextSpan(text: 'Racha: '),
-                              TextSpan(text: '0 días'),
+                              TextSpan(
+                                  text:
+                                      '${userData != null ? userData!.streakDaysCount : '0'} días'),
                             ],
                           ),
                         ),
@@ -109,29 +195,54 @@ class _PromisesScreenState extends State<PromisesScreen> {
                 SizedBox(
                   height: 5.0,
                 ),
-                Column(
-                  children: promises.map((promise) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20.0, vertical: 5.0),
-                      child: CardPromiseWidget(
-                        onePromise: promise,
+                if (isLoading) ...{
+                  Container()
+                } else ...{
+                  if (errorMessage != null) ...{
+                    BuildErrorWidget(
+                      errorMessage: errorMessage!,
+                      onRetry: () async => _generateData(context),
+                      onBack: () => Navigator.pop(context),
+                    )
+                  } else ...{
+                    Column(
+                      children: [
+                        for (var index = 0; index < promises.length; index++)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20.0, vertical: 5.0),
+                            child: CardPromiseWidget(
+                              onePromise: promises[index],
+                              redeemedPromise: redeemedPromise[index],
+                              updateData: (bool value) {
+                                if (value) {
+                                  setState(() {
+                                    promises[index] = promises[index]
+                                        .copyWith(hasViewed: value);
+                                    print(
+                                        "cambio valor ${promises[index].hasViewed}");
+                                    didChangeDependencies();
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Center(
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        'Las promesas se actualizarán cada 24 horas',
+                        style: StylesApp(context)
+                            .textStyleBody12
+                            .copyWith(color: StyleColor.turquoise),
                       ),
-                    );
-                  }).toList(),
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Center(
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    'Las promesas se actualizarán cada 24 horas',
-                    style: StylesApp(context)
-                        .textStyleBody12
-                        .copyWith(color: StyleColor.turquoise),
-                  ),
-                ),
+                    ),
+                  }
+                }
               ],
             ),
           ),
@@ -154,10 +265,14 @@ class _PromisesScreenState extends State<PromisesScreen> {
 }
 
 class CardPromiseWidget extends StatefulWidget {
-  final onePromise;
+  final PromiseCardModel onePromise;
+  final PromiseModel? redeemedPromise;
+  final Function(bool value) updateData;
   const CardPromiseWidget({
     super.key,
-    this.onePromise,
+    required this.onePromise,
+    this.redeemedPromise,
+    required this.updateData,
   });
 
   @override
@@ -165,55 +280,34 @@ class CardPromiseWidget extends StatefulWidget {
 }
 
 class _CardPromiseWidgetState extends State<CardPromiseWidget> {
-  bool redeemedPromise = false;
-  Map<String, dynamic> promise = {
-    "id": null,
-    "color": '',
-    "verse": '',
-    "earnedEnergy": 0,
-    "description": ""
-  };
-  List<Map<String, dynamic>> RedeemedPromiseObj = [
-    {
-      "id": 1,
-      "color": "03C6DC",
-      "verse": "Gálatas 3:22",
-      "earnedEnergy": 10,
-      "description":
-          "Mas encerró la Escritura todo bajo pecado, para que la promesa fuese dada a los creyentes por la fe de Jesucristo."
-    },
-    {
-      "id": 2,
-      "color": "9747FF",
-      "verse": "1 Crónicas 16:34",
-      "earnedEnergy": 10,
-      "description":
-          "Celebrad a Jehová, porque es bueno; Porque su misericordia es eterna."
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          //canjear
-          promise = RedeemedPromiseObj.firstWhere(
-            (element) => element['id'] == widget.onePromise['id'],
-            orElse: () => {
-              "id": null,
-              "color": '',
-              "verse": '',
-              "earnedEnergy": 0,
-              "description": ""
+      onTap: widget.onePromise.hasViewed
+          ? null
+          : () async {
+              LoadingService().showLoading(context);
+              final responseOpenPromise =
+                  await openOnePromise(widget.onePromise!.id);
+              if (responseOpenPromise.error != null) {
+                LoadingService().hideLoading();
+                await showCustomDialog(context,
+                    message: responseOpenPromise!.error!,
+                    dialogType: DialogType.error);
+                return;
+              }
+              final userProvider =
+                  Provider.of<UserProvider>(context, listen: false);
+              final userData = userProvider.currentUser;
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              String? userToken = prefs.getString('userToken');
+
+              await Provider.of<AuthenticationProvider>(context, listen: false)
+                  .loadProfileUser(userData!.user.id, userToken);
+              LoadingService().hideLoading();
+              widget.updateData(responseOpenPromise.data);
             },
-          );
-          if (promise["id"] != null) {
-            redeemedPromise = true;
-          }
-        });
-      },
-       child: AnimatedSwitcher(
+      child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 500),
         transitionBuilder: (Widget child, Animation<double> animation) {
           // Animación de fundido
@@ -222,55 +316,13 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
             child: child,
           );
         },
-        child: redeemedPromise ? _buildRedeemedPromiseCard() : _buildPromiseCard(),
+        child: widget.onePromise.hasViewed
+            ? _buildRedeemedPromiseCard()
+            : widget.onePromise != null
+                ? _buildPromiseCard()
+                : Container(),
       ),
     );
-  //      child: AnimatedSwitcher(
-  //     duration: const Duration(milliseconds: 500),
-  //     transitionBuilder: (Widget child, Animation<double> animation) {
-  //       // Animación de "volteo de hoja"
-  //       return AnimatedBuilder(
-  //         animation: animation,
-  //         builder: (context, child) {
-  //           double value = Curves.easeInOut.transform(animation.value);
-  //           return Transform(
-  //             transform: Matrix4.identity()
-  //               ..setEntry(3, 2, 0.001) // Perspectiva
-  //               ..rotateY(3.1415927 * value), // Rotación en el eje Y
-  //             alignment: Alignment.center,
-  //             child: child,
-  //           );
-  //         },
-  //         child: child,
-  //       );
-  //     },
-  //     child: redeemedPromise ? _buildRedeemedPromiseCard() : _buildPromiseCard(),
-  //   )
-  // );
-  //      child: AnimatedSwitcher(
-  //       duration: const Duration(milliseconds: 500),
-  //       transitionBuilder: (Widget child, Animation<double> animation) {
-  //         // Animación de rotación horizontal
-  //         return RotationTransition(
-  //           turns: Tween<double>(begin: 0.5, end: 1).animate(animation),
-  //           child: child,
-  //         );
-  //       },
-  //       child: redeemedPromise ? _buildRedeemedPromiseCard() : _buildPromiseCard(),
-  //     ),
-  //   );
-    //   child: AnimatedSwitcher(
-    //     duration: const Duration(milliseconds: 500),
-    //     transitionBuilder: (Widget child, Animation<double> animation) {
-    //       // Animación de rotación
-    //       return RotationTransition(
-    //         turns: Tween<double>(begin: 0, end: 1).animate(animation),
-    //         child: child,
-    //       );
-    //     },
-    //     child: redeemedPromise ? _buildRedeemedPromiseCard() : _buildPromiseCard(),
-    //   ),
-    // );
   }
 
   Widget _buildPromiseCard() {
@@ -291,13 +343,14 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            Image.asset(widget.onePromise['img']),
+            Image.asset(
+                widget.onePromise != null ? widget.onePromise!.images : ''),
             Text(
-              widget.onePromise['title'],
+              widget.onePromise != null ? widget.onePromise!.title : '',
               style: StylesApp(context).textStyleBodyOrange15,
             ),
             Text(
-              widget.onePromise['description'],
+              widget.onePromise != null ? widget.onePromise!.description : '',
               textAlign: TextAlign.center,
               style: StylesApp(context)
                   .textStyleBody12
@@ -314,7 +367,7 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
       key: ValueKey(2), // Clave única para AnimatedSwitcher
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Color(int.parse("0XFF${promise['color']}")),
+        color: Color(int.parse("0XFF${widget.redeemedPromise!.color}")),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
@@ -330,12 +383,12 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
             top: 0,
             right: 0,
             child: IconButton(
-              onPressed:  () async {
-                        await Share.share(
-                          "${promise['verse']}\n${promise['description']}.",
-                          subject: "Promesa",
-                        );
-                      },
+              onPressed: () async {
+                await Share.share(
+                  "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}\n${widget.redeemedPromise!.verse!.text}.",
+                  subject: "Promesa",
+                );
+              },
               icon: Icon(Icons.share, color: Colors.white),
             ),
           ),
@@ -344,7 +397,7 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
             child: Column(
               children: [
                 Text(
-                  promise['verse'],
+                  "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}",
                   style: StylesApp(context)
                       .textStyleBody4
                       .copyWith(color: Colors.white),
@@ -355,10 +408,9 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
                 Center(
                   child: Container(
                     width: double.infinity,
-                    constraints:
-                        BoxConstraints(maxWidth: 280, minHeight: 80),
+                    constraints: BoxConstraints(maxWidth: 280, minHeight: 80),
                     child: Text(
-                      promise['description'],
+                      widget.redeemedPromise!.verse!.text!,
                       textAlign: TextAlign.center,
                       style: StylesApp(context).textStyleBody12,
                     ),
@@ -367,7 +419,7 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
                 Image.asset("assets/star_complete.png"),
                 Text(
                   textAlign: TextAlign.center,
-                  "Haz gando una mini estrella\n ${promise['earnedEnergy']} Lms de energia",
+                  "Haz gando una mini estrella\n ${widget.redeemedPromise!.energyPoint} Lms de energia",
                   style: StylesApp(context)
                       .textStyleBody12
                       .copyWith(color: StyleColor.yellowLight),

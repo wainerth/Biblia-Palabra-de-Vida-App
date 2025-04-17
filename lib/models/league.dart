@@ -1,18 +1,16 @@
 class League {
   final String id;
   final String name;
-  final int minMembers;
+  final String description;
   final String? colorFront;
   final String? colorBack;
-  final int maxMembers;
   final String status;
   final ImageDetails img;
 
   League({
     required this.id,
     required this.name,
-    required this.minMembers,
-    required this.maxMembers,
+    required this.description,
     required this.status,
     required this.img,
     this.colorFront, 
@@ -24,8 +22,7 @@ class League {
     return League(
       id: json['id'],
       name: json['name'],
-      minMembers: json['minMembers'],
-      maxMembers: json['maxMembers'],
+      description: json['description'] ?? '',
       status: json['status'],
       colorFront: json['colorFront'],
       colorBack: json['colorBack'],
@@ -38,8 +35,7 @@ class League {
     return {
       'id': id,
       'name': name,
-      'minMembers': minMembers,
-      'maxMembers': maxMembers,
+      'description': description,
       'img': img.toJson(),
       'colorFront': colorFront,
       'colorBack': colorBack,

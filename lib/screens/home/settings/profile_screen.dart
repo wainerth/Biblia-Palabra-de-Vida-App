@@ -8,7 +8,6 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:mime/mime.dart';
@@ -118,9 +117,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           clave: "streakDaysCount"),
       ModelData(
           label: "Energía",
-          value: "${dataUser!.expTotalUser}",
+          value: "${dataUser!.energyPoints}",
           clave: "expTotalUser"),
-      ModelData(label: "Cursos Completados", value: "4"),
+      ModelData(
+          label: "Cursos Completados", value: "${dataUser!.completedCourse}"),
     ];
     List<ModelData> personalData = [
       ModelData(
@@ -189,7 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           decoration: BoxDecoration(color: Color(0XFF12CBC4)),
           child: SingleChildScrollView(
             child: Column(
-              mainAxisSize: MainAxisSize.max,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // _headerDetails(),
                 ProfileHeader(
@@ -207,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   route: "/detailsProgressPage",
                 ),
                 SizedBox(
-                  height: 16,
+                  height: 10,
                 ),
                 CardColumnWidget(
                   iconRight: "assets/User.png",
@@ -215,7 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   iconLeft: Icons.edit,
                 ),
                 SizedBox(
-                  height: 16,
+                  height: 10,
                 ),
                 CardColumnWidget(
                   iconRight: "assets/Link.png",
@@ -223,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   iconLeft: Icons.edit,
                 ),
                 SizedBox(
-                  height: 16,
+                  height: 10,
                 ),
                 CardColumnWidget(
                   iconRight: "assets/Map_pin.png",
@@ -232,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   divider: false,
                 ),
                 SizedBox(
-                  height: 35.0,
+                  height: 20.0,
                 ),
                 ButtonThemeWidget(
                   onPressed: () {
@@ -244,9 +244,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: 239.0,
                   height: 40.0,
                 ),
-                SizedBox(
-                  height: 40,
-                )
+                // SizedBox(
+                //   height: 40,
+                // )
               ],
             ),
           ),
@@ -312,7 +312,7 @@ class CardColumnWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 18.0, top: 10, bottom: 16),

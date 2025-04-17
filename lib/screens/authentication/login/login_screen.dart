@@ -20,6 +20,10 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController textEmail = TextEditingController();
   TextEditingController textPass = TextEditingController();
   bool _obscureTextPass = true;
+  // final LocalAuthentication auth = LocalAuthentication();
+  // bool _canCheckBiometrics = false;
+  // List<BiometricType> _availableBiometrics = <BiometricType>[];
+  // String _authorized = 'No autorizado';
 
   @override
   Widget build(BuildContext context) {
@@ -85,29 +89,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                       const BoxConstraints(minWidth: 160.0),
                                   child: TextFormField(
                                     controller: textPass,
-
                                     cursorHeight: 16.sp,
                                     obscureText: _obscureTextPass,
                                     textAlignVertical: TextAlignVertical.center,
-                                    // decoration: StylesApp(context)
-                                    //     .inputDecorationOutlineStyle
-                                    //     .copyWith(
-                                    // hintText: "Contraseña",
-                                    // suffixIcon: IconButton(
-                                    //   iconSize: 20,
-                                    //   padding: const EdgeInsets.all(0),
-                                    //   icon: Icon(
-                                    //     _obscureTextPass
-                                    //         ? Icons.visibility
-                                    //         : Icons.visibility_off,
-                                    //   ),
-                                    //   onPressed: () {
-                                    //     setState(() {
-                                    //       _obscureTextPass = !_obscureTextPass;
-                                    //     });
-                                    //   },
-                                    // ),
-                                    //     ),
                                     style: StylesApp(context).textStyleHintText,
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
@@ -202,11 +186,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                       Navigator.pushNamed(
                                           context, '/layoutPage');
                                     }
-                                    // } else {
-                                    //   // Manejar el caso para otras plataformas si es necesario
-                                    //   print(
-                                    //       'Google Sign-In no es compatible con esta plataforma.');
-                                    // }
                                   },
                                   width: StylesApp(context).btnHeight.width,
                                   height: StylesApp(context).btnHeight.height,
@@ -214,6 +193,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(
                                   height: 48,
                                 ),
+                                // IconButton(
+                                //     onPressed: () {},
+                                //     icon: Icon(Icons.fingerprint_rounded))
                               ],
                             ),
                           ),

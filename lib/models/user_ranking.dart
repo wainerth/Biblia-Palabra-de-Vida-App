@@ -28,9 +28,9 @@ class UserRanking {
       id: json['id'],
       groupId: json['groupId'],
       userId: json['userId'],
-      currentPoints: json['currentPoints'],
-      position: json['position'],
-      promoted: json['promoted'],
+      currentPoints: json['currentPoints'] ?? 0,
+      position: json['position'] ?? 0,
+      promoted: json['promoted'] ?? false,
       leagueName: json['leagueName'], // Extrae el nombre de la liga del JSON
       leagueId: json['leagueId'],    // Extrae el ID de la liga del JSON
 

@@ -50,4 +50,9 @@ export 'package:biblia_palabra_de_vida_app/models/prize_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/date_calendar.dart';
 export 'package:biblia_palabra_de_vida_app/models/user_title.dart';
 export 'package:biblia_palabra_de_vida_app/models/member_model.dart';
-
+export 'package:biblia_palabra_de_vida_app/models/award.dart';
+export 'package:biblia_palabra_de_vida_app/models/pagination.dart';
+export 'package:biblia_palabra_de_vida_app/models/daily_word.dart';
+export 'package:biblia_palabra_de_vida_app/models/reflection.dart';
+export 'package:biblia_palabra_de_vida_app/models/promise_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/promise_card_model.dart';

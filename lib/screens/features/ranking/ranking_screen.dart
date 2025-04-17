@@ -1,12 +1,10 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RankingScreen extends StatefulWidget {
@@ -70,10 +68,7 @@ class _RankingScreenState extends State<RankingScreen> {
                   onBack: () => Navigator.pop(context),
                 ),
               )
-            : DefaultTabController(
-                length: leagues.length,
-                child: RankingScreenView(ranking: leagues),
-              );
+            : RankingScreenView(ranking: leagues);
   }
 }
 
@@ -98,21 +93,16 @@ class _RankingScreenViewState extends State<RankingScreenView> {
   }
 
   void _loadInitialMembers(BuildContext context) {
-    activeLeagueId = widget.ranking[DefaultTabController.of(context).index].id;
+    final userData = Provider.of<UserProvider>(context, listen: false);
+    // activeLeagueId = widget.ranking[DefaultTabController.of(context).index].id;
+    if (userData != null && userData.currentUser != null) {
+      activeLeagueId = userData.currentUser!.currentLeagueId!;
+    }
     loadMembers(activeLeagueId, context);
   }
 
   @override
-  void didUpdateWidget(covariant RankingScreenView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.ranking != widget.ranking) {
-      _loadInitialMembers(context);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-   
     return Scaffold(
       backgroundColor: StyleColor.turquoise,
       body: SafeArea(
@@ -124,6 +114,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                 child: Column(
                   children: [
                     // Pestañas
+                    LeagueTimeRemaining(),
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -142,19 +133,75 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                           ),
                         ],
                       ),
-                      child: TabBar(
-                        dividerColor: Colors.transparent,
-                        tabAlignment: TabAlignment.start,
-                        indicatorPadding: EdgeInsets.all(0),
-                        indicatorColor: Colors.transparent,
-                        indicatorSize: TabBarIndicatorSize.label,
-                        isScrollable: true,
-                        onTap: (tab) async {
-                          loadMembers(widget.ranking[tab].id, context);
-                        },
-                        tabs: widget.ranking
-                            .map(
-                              (league) => Tab(
+                      child: Container(
+                        width: MediaQuery.sizeOf(context).width,
+                        height: 120,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: widget.ranking.length,
+                          itemBuilder: (BuildContext context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  builder: (context) {
+                                    return SingleChildScrollView(
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: EdgeInsets.all(16),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              widget.ranking[index].name,
+                                              style: StylesApp(context)
+                                                  .textStyleBody18
+                                                  .copyWith(
+                                                      color: StyleColor.black,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                            ),
+                                            SizedBox(height: 10),
+                                            Image.network(
+                                              GraphQLConfig.urlServidor +
+                                                  widget.ranking[index].img
+                                                      .urlImg,
+                                              height: 120,
+                                            ),
+                                            SizedBox(height: 10),
+                                            Text(
+                                              'Color de Fondo: ${widget.ranking[index].colorBack}',
+                                              style: StylesApp(context)
+                                                  .textStyleBody14
+                                                  .copyWith(
+                                                      color: StyleColor.black),
+                                            ),
+                                            SizedBox(height: 10),
+                                            Text(
+                                              'Color de Frente: ${widget.ranking[index].colorFront}',
+                                              style: StylesApp(context)
+                                                  .textStyleBody14
+                                                  .copyWith(
+                                                      color: StyleColor.black),
+                                            ),
+                                            SizedBox(height: 10),
+                                            Text(
+                                              'ID de Liga: ${widget.ranking[index].id}',
+                                              style: StylesApp(context)
+                                                  .textStyleBody14
+                                                  .copyWith(
+                                                      color: StyleColor.black),
+                                            ),
+                                            SizedBox(height: 20),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
                                 height: 109,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
@@ -164,12 +211,12 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                       padding: EdgeInsets.all(6),
                                       decoration: BoxDecoration(
                                         color: Color(int.parse(
-                                            "0xFF${league.colorBack}")),
+                                            "0xFF${widget.ranking[index].colorBack}")),
                                         borderRadius: BorderRadius.circular(30),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Color(int.parse(
-                                                "0xFF${league.colorFront}")),
+                                                "0xFF${widget.ranking[index].colorFront}")),
                                             spreadRadius: 0,
                                             blurRadius: 0,
                                             offset: Offset(0, 6),
@@ -182,16 +229,15 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                           borderRadius:
                                               BorderRadius.circular(30),
                                           color: Color(int.parse(
-                                              "0xFF${league.colorFront}")),
+                                              "0xFF${widget.ranking[index].colorFront}")),
                                         ),
-                                        child: Image.network(
-                                            GraphQLConfig.urlServidor +
-                                                league.img.urlImg),
+                                        child: Image.network(GraphQLConfig
+                                                .urlServidor +
+                                            widget.ranking[index].img.urlImg),
                                       ),
                                     ),
-                                    if (DefaultTabController.of(context)
-                                            .index ==
-                                        widget.ranking.indexOf(league)) ...{
+                                    if (widget.ranking[index].id ==
+                                        activeLeagueId) ...{
                                       SizedBox(
                                         height: 8,
                                       ),
@@ -209,24 +255,22 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                       ),
                                     },
                                     Text(
-                                      league.name,
+                                      widget.ranking[index].name,
                                       style: StylesApp(context)
                                           .textStyleBody14
                                           .copyWith(
-                                            color:
-                                                DefaultTabController.of(context)
-                                                            .index ==
-                                                        widget.ranking
-                                                            .indexOf(league)
-                                                    ? StyleColor.turquoise
-                                                    : StyleColor.orange,
+                                            color: widget.ranking[index].id ==
+                                                    activeLeagueId
+                                                ? StyleColor.turquoise
+                                                : StyleColor.orange,
                                           ),
                                     ),
                                   ],
                                 ),
                               ),
-                            )
-                            .toList(),
+                            );
+                          },
+                        ),
                       ),
                     ),
                     Expanded(
@@ -235,13 +279,16 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                         ),
-                        child: TabBarView(
-                          children: widget.ranking
-                              .map((league) =>
-                                  _buildRankingList(context, members))
-                              .toList(),
-                        ),
+                        child: _buildRankingList(context, members),
                       ),
+                      //   TabBarView(
+                      //     physics:
+                      //         const NeverScrollableScrollPhysics(),
+                      //     children: widget.ranking
+                      //         .map((league) =>
+                      //         .toList(),
+                      //   ),
+                      // ),
                     ),
                   ],
                 ),
@@ -351,11 +398,15 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                           members[index]
                               .profilePicture), // Reemplaza con la imagen del usuario
                     ),
-                    Text(
-                      members[index].username,
-                      style: StylesApp(context)
-                          .textStyleBody18
-                          .copyWith(color: Colors.black),
+                    SizedBox(
+                      width: 130,
+                      child: Text(
+                        members[index].username,
+                        overflow: TextOverflow.ellipsis,
+                        style: StylesApp(context)
+                            .textStyleBody18
+                            .copyWith(color: Colors.black),
+                      ),
                     ),
                   ],
                 ),
@@ -379,8 +430,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     final memberResponse = await getLeagueMembers(activeLeagueId);
     if (memberResponse.error != null) {
       LoadingService().hideLoading();
-      await showCustomDialog(context,
-          message: memberResponse.error!, dialogType: DialogType.error);
+      // await showCustomDialog(context,
+      //     message: memberResponse.error!, dialogType: DialogType.error);
       return;
     }
     setState(() {
@@ -390,5 +441,61 @@ class _RankingScreenViewState extends State<RankingScreenView> {
           .toList();
     });
     LoadingService().hideLoading();
+  }
+}
+
+class LeagueTimeRemaining extends StatelessWidget {
+  const LeagueTimeRemaining({super.key});
+
+  DateTime _getFechaFinDeSemana() {
+    final now = DateTime.now();
+    final currentWeekday = now.weekday; // 1 para Lunes, 7 para Domingo
+    // Calcular cuántos días faltan hasta el Domingo (último día de la semana)
+    final daysUntilEndOfWeek = DateTime.daysPerWeek - currentWeekday;
+    final endOfWeek = now.add(Duration(days: daysUntilEndOfWeek));
+    // Establecer la hora al final del día (23:59:59)
+    return DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59);
+  }
+String _formatTwoDigits(int number) {
+    return number.toString().padLeft(2, '0');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: Stream.periodic(const Duration(seconds: 1), (_) {
+        final now = DateTime.now();
+        final fechaFin = _getFechaFinDeSemana();
+        final difference = fechaFin.difference(now);
+        // Asegurarse de que la diferencia no sea negativa
+        return difference.isNegative ? Duration.zero : difference;
+      }),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Text(
+            'Cargando...',
+            style: StylesApp(context).textStyleBody18.copyWith(
+                  color: Colors.white,
+                ),
+          );
+        }
+        final difference = snapshot.data as Duration;
+        final days = _formatTwoDigits(difference.inDays);
+        final hours = _formatTwoDigits(difference.inHours % 24);
+        final minutes = _formatTwoDigits(difference.inMinutes % 60);
+        final seconds = _formatTwoDigits(difference.inSeconds % 60);
+
+        return Text.rich(
+          TextSpan(children: [
+            TextSpan(text: "Tiempo Restante:  ", style: StylesApp(context).textStyleBody14),
+            TextSpan(text:'$days días $hours:$minutes:$seconds',
+          style: StylesApp(context).textStyleBody14.copyWith(
+                color: Colors.white,
+              ), )
+          ],)
+        ) ;
+  
+      },
+    );
   }
 }

@@ -127,6 +127,7 @@ class LoginUser {
   final int achievementsReachedCount;
   final int streakDaysCount;
   final int preachingsCreatedCount;
+  final int completedCourse;
   final User user;
   final List<UserTitle>? title;
   final UserRanking? league;
@@ -144,6 +145,7 @@ class LoginUser {
     required this.achievementsReachedCount,
     required this.streakDaysCount,
     required this.preachingsCreatedCount,
+    required this.completedCourse,
     required this.user,
     required this.title,
     required this.league,
@@ -176,7 +178,9 @@ class LoginUser {
       String? createdAt,
       int? achievementsReachedCount,
       int? streakDaysCount,
-      int? preachingsCreatedCount}) {
+      int? preachingsCreatedCount,
+      int? completedCourse,
+      }) {
     return LoginUser(
         name: name ?? this.name,
         lastname: lastname ?? this.lastname,
@@ -192,6 +196,7 @@ class LoginUser {
         achievementsReachedCount: achievementsReachedCount ?? this.achievementsReachedCount,
         streakDaysCount: streakDaysCount ?? this.streakDaysCount,
         preachingsCreatedCount: preachingsCreatedCount ?? this.preachingsCreatedCount,
+        completedCourse: completedCourse ?? this.completedCourse,
         user: user ?? this.user,
         title: title ?? this.title,
         league: league ?? this.league,
@@ -229,6 +234,7 @@ class LoginUser {
       achievementsReachedCount: json['achievementsReachedCount'],
       streakDaysCount: json['streakDaysCount'],
       preachingsCreatedCount: json['preachingsCreatedCount'],
+      completedCourse: json['completedCourse'] ?? 0,
       currentLeagueId: json['currentLeagueId'],
       user: User.fromJson(json['user']),
       title: title,
@@ -256,6 +262,7 @@ class LoginUser {
         'achievementsReachedCount': achievementsReachedCount,
         'streakDaysCount': streakDaysCount,
         'preachingsCreatedCount': preachingsCreatedCount,
+        'completedCourse': completedCourse,
         'currentLeagueId': currentLeagueId,
         'user': user.toJson(),
         'title': title,
