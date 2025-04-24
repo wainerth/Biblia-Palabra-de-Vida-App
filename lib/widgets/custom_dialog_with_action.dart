@@ -9,20 +9,19 @@ class CustomDialogWithAction extends StatelessWidget {
   final String buttonOk;
   final String textButtonAction;
   final bool showAction;
-  final void Function()? CallbackActionOk;
+  final void Function()? callbackActionOk;
   final void Function()? actionCallback;
 
-  const CustomDialogWithAction(
-      {Key? key,
-      required this.message,
-      required this.dialogType,
-      this.buttonOk = 'Ok',
-      this.actionCallback,
-      this.showAction = false,
-      this.textButtonAction = 'Aceptar', 
-      this.CallbackActionOk,
-      })
-      : super(key: key);
+  const CustomDialogWithAction({
+    super.key,
+    required this.message,
+    required this.dialogType,
+    this.buttonOk = 'Ok',
+    this.actionCallback,
+    this.showAction = false,
+    this.textButtonAction = 'Aceptar',
+    this.callbackActionOk,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +63,7 @@ class CustomDialogWithAction extends StatelessWidget {
       actions: [
         TextButton(
           style: StylesApp(context).btnWidgetSmall,
-          onPressed: CallbackActionOk,
+          onPressed: callbackActionOk,
           child: Text(
             buttonOk,
             style: StylesApp(context).textStyleBody14,

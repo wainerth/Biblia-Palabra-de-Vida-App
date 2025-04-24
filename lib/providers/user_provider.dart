@@ -11,7 +11,6 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProvider extends ChangeNotifier {
-  late GraphQLClient _client;
   LoginUser? _user;
   LastProgressUser? _progressUser;
   LoginUser? get currentUser => _user;
@@ -26,8 +25,7 @@ class UserProvider extends ChangeNotifier {
 
   Future<void> _initializeClient() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userToken = prefs.getString('userToken');
-    _client = createClient(authToken: userToken);
+    prefs.getString('userToken');
   }
 
   void setUser(LoginUser? user) {
@@ -55,7 +53,7 @@ class UserProvider extends ChangeNotifier {
   Future<ResponseData> updateAvatarUser(String userId, String toBase64) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
       String? userToken = prefs.getString('userToken');
-      final GraphQLClient _client = createClient(authToken: userToken);
+      final GraphQLClient client = createClient(authToken: userToken);
     if (userId.isEmpty || toBase64.isEmpty) {
       return ResponseData(
         data: null,
@@ -78,7 +76,7 @@ class UserProvider extends ChangeNotifier {
 
     try {
       print(toBase64);
-      final QueryResult result = await _client.mutate(options);
+      final QueryResult result = await client.mutate(options);
 
       if (result.hasException) {
         return ResponseData.fromQueryResult(result);

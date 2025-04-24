@@ -11,13 +11,14 @@ final Map<String, WidgetBuilder> routes = {
   '/changePasswordPage': (BuildContext context) => const ChangePassScreen(),
   '/layoutPage': (BuildContext context) => const PageScreen(),
   '/layoutPage1': (BuildContext context) => const LayoutScreen(),
-  '/mapPage': (BuildContext context) =>const MapScreen(),
+  '/mapPage': (BuildContext context) => const MapScreen(),
   '/introAventurePage': (BuildContext context) => IntroAventureScreen(),
   '/aventurePage': (BuildContext context) => AventureScreen(),
   '/bibliaPage': (BuildContext context) => BibleScreen(),
   '/communityPage': (BuildContext context) => CommunityScreen(),
   '/profilePage': (BuildContext context) => ProfileScreen(),
-  '/workspacePage':(BuildContext context)=>  AuthGuard(child: WorkspaceScreen()) ,
+  '/workspacePage': (BuildContext context) =>
+      AuthGuard(child: WorkspaceScreen()),
   '/detailsProgressPage': (BuildContext context) => ProgressDetailScreen(),
   '/prayerPage': (BuildContext context) => PrayerScreen(),
   '/listRequestPage': (BuildContext context) => ListRequestScreen(),
@@ -27,9 +28,10 @@ final Map<String, WidgetBuilder> routes = {
   '/questionPage': (BuildContext context) => QuestionScreen(),
   '/soonPage': (BuildContext context) => SoonScreen(),
   '/preachPage': (BuildContext context) => PreachScreen(),
-  '/promisePage': (BuildContext context) => PromisesScreen(), //SoonScreen(), 
+  '/promisePage': (BuildContext context) => PromisesScreen(), //SoonScreen(),
   '/playPage': (BuildContext context) => SoonScreen(), // PlayScreen(),
-  '/settingPage': (BuildContext context) => AuthGuard(child: SettingsScreen())
+  '/settingPage': (BuildContext context) => AuthGuard(child: SettingsScreen()),
+  '/leaguePage': (BuildContext context) => RankingScreen(),
 };
 
 Route<dynamic> generateRoute(RouteSettings settings) {

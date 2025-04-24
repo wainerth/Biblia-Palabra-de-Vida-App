@@ -3,9 +3,7 @@ import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dar
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';

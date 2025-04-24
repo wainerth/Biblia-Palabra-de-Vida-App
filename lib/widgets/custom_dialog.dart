@@ -12,14 +12,13 @@ class CustomDialog extends StatelessWidget {
   final void Function()? actionCallback;
 
   const CustomDialog(
-      {Key? key,
+      {super.key,
       this.buttonOk = 'Ok',
       required this.message,
       required this.dialogType,
       this.showAction = false,
       this.actionCallback,
-      this.textButton = 'Aceptar'})
-      : super(key: key);
+      this.textButton = 'Aceptar'});
 
   @override
   Widget build(BuildContext context) {

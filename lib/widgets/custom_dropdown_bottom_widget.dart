@@ -123,7 +123,7 @@ class _CustomDropdownBottomWidgetState<T>
             item.label.toLowerCase().contains(_searchText.toLowerCase()))
         .toList();
 
-    return Container(
+    return SizedBox(
       height: MediaQuery.sizeOf(context).height * 0.4,
       child: ListView.builder(
         shrinkWrap:

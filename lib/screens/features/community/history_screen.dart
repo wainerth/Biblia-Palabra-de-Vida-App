@@ -19,7 +19,7 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   final PageController _controllerPage = PageController();
 
-  double fontSizeText =  16.sp;
+  double fontSizeText = 16.sp;
   double isPage = 0;
   List<History> stories = [];
   bool isLoading = true;
@@ -34,7 +34,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String sectionId = '';
   String courseId = '';
   bool finalStory = false;
-  int _currentPage = 0;
 
   @override
   void initState() {
@@ -45,7 +44,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       getFontSizeText();
     });
   }
-getFontSizeText() async {
+
+  getFontSizeText() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     double? fontSize = sharedPreferences.getDouble('fontSizeText');
     if (fontSize != null) {
@@ -58,6 +58,7 @@ getFontSizeText() async {
       });
     }
   }
+
   Future<void> _generateData(BuildContext context) async {
     setState(() {
       errorMessage = null;
@@ -121,19 +122,6 @@ getFontSizeText() async {
     }
   }
 
-  // void _pageListener() {
-  //   setState(() {
-  //     _currentPage = _controllerPage.page?.round() ?? 0;
-  //   });
-  //   if (_controllerPage.position.atEdge &&
-  //       _controllerPage.position.pixels > 0 &&
-  //       _currentPage.toString() == stories.length.toString()) {
-  //     setState(() {
-  //       finalStory = true;
-  //     });
-  //   }
-  // }
-
   @override
   void dispose() {
     // _controllerPage.removeListener(_pageListener);
@@ -188,7 +176,8 @@ getFontSizeText() async {
                                 height: 250,
                                 width: 250,
                                 decoration: BoxDecoration(
-                                    color: const Color.fromARGB(255, 221, 193, 148),
+                                    color: const Color.fromARGB(
+                                        255, 221, 193, 148),
                                     borderRadius: BorderRadius.circular(200)),
                                 child: Stack(children: [
                                   Center(
@@ -317,11 +306,11 @@ getFontSizeText() async {
                             max: 20.sp,
                             value: fontSizeText,
                             onChanged: (value) async {
-                                final sharedPreferences =
-                                    await SharedPreferences.getInstance();
-                                await sharedPreferences.setDouble(
-                                    'fontSizeText', value);
-                              setState(()  {
+                              final sharedPreferences =
+                                  await SharedPreferences.getInstance();
+                              await sharedPreferences.setDouble(
+                                  'fontSizeText', value);
+                              setState(() {
                                 fontSizeText = value;
                               });
                             },
@@ -550,7 +539,9 @@ getFontSizeText() async {
                         inactiveColor: StyleColor.orange,
                         backgroundColor: Colors.white,
                         controlsColor: StyleColor.turquoise,
-                        pathUrl: "reflexion2.mp3",
+                        pathUrl: story.audio == null
+                            ? "reflexion2.mp3"
+                            : story.audio!.url,
                       ),
                     ),
                   ),
@@ -569,8 +560,7 @@ getFontSizeText() async {
                           child: story.video != null &&
                                   (story.video!.url.contains('youtube.com') ||
                                       story.video!.url.contains('youtu.be'))
-                              ? PlayerYoutubeWidget(
-                                  videoUrl: story.video!.url ?? '')
+                              ? PlayerYoutubeWidget(videoUrl: story.video!.url)
                               : playerNoYoutube(
                                   url:
                                       'https://videos.pexels.com/video-files/20000940/20000940-hd_1080_1920_30fps.mp4'),

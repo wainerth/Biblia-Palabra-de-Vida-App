@@ -83,6 +83,7 @@ class RankingScreenView extends StatefulWidget {
 class _RankingScreenViewState extends State<RankingScreenView> {
   List<MemberModel> members = [];
   String activeLeagueId = "";
+  bool noActiveLigue = false;
 
   @override
   void initState() {
@@ -96,9 +97,17 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     final userData = Provider.of<UserProvider>(context, listen: false);
     // activeLeagueId = widget.ranking[DefaultTabController.of(context).index].id;
     if (userData != null && userData.currentUser != null) {
-      activeLeagueId = userData.currentUser!.currentLeagueId!;
+      if (userData.currentUser!.currentLeagueId != null &&
+          userData.currentUser!.currentLeagueId != '0') {
+        activeLeagueId = userData.currentUser!.currentLeagueId!;
+        loadMembers(activeLeagueId, userData.currentUser!.user!.id, context);
+      } else {
+        // Si no hay una liga activa, puedes manejarlo como desees
+        setState(() {
+          noActiveLigue = true;
+        });
+      }
     }
-    loadMembers(activeLeagueId, context);
   }
 
   @override
@@ -114,7 +123,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                 child: Column(
                   children: [
                     // Pestañas
-                    LeagueTimeRemaining(),
+                    if (!noActiveLigue) LeagueTimeRemaining(),
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -170,7 +179,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                             ),
                                             SizedBox(height: 10),
                                             Text(
-                                              'Color de Fondo: ${widget.ranking[index].colorBack}',
+                                              '${widget.ranking[index].description}',
                                               style: StylesApp(context)
                                                   .textStyleBody14
                                                   .copyWith(
@@ -178,20 +187,21 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                             ),
                                             SizedBox(height: 10),
                                             Text(
-                                              'Color de Frente: ${widget.ranking[index].colorFront}',
+                                              'Maximo de Participantes: ${widget.ranking[index].maxMembers}',
                                               style: StylesApp(context)
                                                   .textStyleBody14
                                                   .copyWith(
                                                       color: StyleColor.black),
                                             ),
                                             SizedBox(height: 10),
-                                            Text(
-                                              'ID de Liga: ${widget.ranking[index].id}',
-                                              style: StylesApp(context)
-                                                  .textStyleBody14
-                                                  .copyWith(
-                                                      color: StyleColor.black),
-                                            ),
+                                            // Text(
+                                            //   'ID de Liga: ${widget.ranking[index].id}',
+                                            //   style: StylesApp(context)
+                                            //       .textStyleBody14
+                                            //       .copyWith(
+                                            //           color: StyleColor
+                                            //               .black),
+                                            // ),
                                             SizedBox(height: 20),
                                           ],
                                         ),
@@ -279,16 +289,50 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                         ),
-                        child: _buildRankingList(context, members),
+                        child: noActiveLigue
+                            ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(
+                                              255, 56, 54, 54),
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                        ),
+                                        child: Image.asset(
+                                          'assets/go-aventure.gif',
+                                          height: 100,
+                                        ),
+                                      ),
+                                      Text(
+                                        'No tienes una liga activa',
+                                        style: StylesApp(context)
+                                            .textStyleBody18
+                                            .copyWith(
+                                              color: const Color.fromARGB(
+                                                  255, 22, 22, 22),
+                                            ),
+                                      ),
+                                      Text(
+                                        textAlign: TextAlign.center,
+                                        'Juega Aventuras para conseguir una liga',
+                                        style: StylesApp(context)
+                                            .textStyleBody15
+                                            .copyWith(
+                                              color: const Color.fromARGB(
+                                                  255, 22, 22, 22),
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : _buildRankingList(context, members),
                       ),
-                      //   TabBarView(
-                      //     physics:
-                      //         const NeverScrollableScrollPhysics(),
-                      //     children: widget.ranking
-                      //         .map((league) =>
-                      //         .toList(),
-                      //   ),
-                      // ),
                     ),
                   ],
                 ),
@@ -306,61 +350,192 @@ class _RankingScreenViewState extends State<RankingScreenView> {
       shrinkWrap: true,
       itemCount: members.length, // Ejemplo: 10 usuarios en el ranking
       itemBuilder: (context, index) {
+        String mono = '';
+        if (index == 0) {
+          mono = 'assets/position1.png';
+        } else if (index == 1) {
+          mono = 'assets/position2.png';
+        } else if (index == 2) {
+          mono = 'assets/position3.png';
+        }
+        Color color;
+        if (index < 5) {
+          color = Colors.green;
+        } else if (index > 15) {
+          color = Colors.red;
+        } else {
+          color = Colors.black;
+        }
+
         if (index == 5) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.arrow_upward_rounded, color: Colors.green),
-                Text(
-                  'Zona de Ascenso',
-                  style: StylesApp(context)
-                      .textStyleBody14
-                      .copyWith(color: Colors.green),
-                  textAlign: TextAlign.center,
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.arrow_upward_rounded, color: Colors.green),
+                    Text(
+                      'Zona de Ascenso',
+                      style: StylesApp(context).textStyleBody15.copyWith(
+                            color: StyleColor.greenDark,
+                            fontWeight: FontWeight.bold,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Icon(Icons.arrow_upward_rounded, color: Colors.green),
+                  ],
                 ),
-                Icon(Icons.arrow_upward_rounded, color: Colors.green),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      spacing: 10,
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Center(
+                              child: Container(
+                                width: 45,
+                                height: 45,
+                                child: Center(
+                                  child: Text("${index + 1}",
+                                      style: StylesApp(context)
+                                          .textStyleBody20
+                                          .copyWith(color: color)),
+                                ),
+                              ),
+                            ),
+                            if (index < 3)
+                              Image.asset(
+                                mono,
+                                height: 45,
+                                fit: BoxFit.fill,
+                              ),
+                          ],
+                        ),
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundImage: NetworkImage(GraphQLConfig
+                                  .urlServidor +
+                              members[index]
+                                  .profilePicture), // Reemplaza con la imagen del usuario
+                        ),
+                        SizedBox(
+                          width: 130,
+                          child: Text(
+                            members[index].username,
+                            overflow: TextOverflow.ellipsis,
+                            style: StylesApp(context)
+                                .textStyleBody18
+                                .copyWith(color: Colors.black),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    Text(
+                      'exp ${members[index].currentPoints}',
+                      style: StylesApp(context)
+                          .textStyleBody18
+                          .copyWith(color: Colors.black),
+                    ), // Reemplaza con el exp del usuario
+                  ],
+                ),
+              )
+            ],
           );
-        } else if (index == 15) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.arrow_downward_rounded, color: Colors.red),
-                Text(
-                  'Zona de Descenso',
-                  style: StylesApp(context)
-                      .textStyleBody14
-                      .copyWith(color: Colors.red),
-                  textAlign: TextAlign.center,
+        } else if (index == 10) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.arrow_downward_rounded, color: Colors.red),
+                    Text(
+                      'Zona de Descenso',
+                      style: StylesApp(context).textStyleBody15.copyWith(
+                            color: StyleColor.redDark,
+                            fontWeight: FontWeight.bold,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Icon(Icons.arrow_downward_rounded, color: Colors.red),
+                  ],
                 ),
-                Icon(Icons.arrow_downward_rounded, color: Colors.red),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      spacing: 10,
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Center(
+                              child: Container(
+                                width: 45,
+                                height: 45,
+                                child: Center(
+                                  child: Text("${index + 1}",
+                                      style: StylesApp(context)
+                                          .textStyleBody20
+                                          .copyWith(color: color)),
+                                ),
+                              ),
+                            ),
+                            if (index < 3)
+                              Image.asset(
+                                mono,
+                                height: 45,
+                                fit: BoxFit.fill,
+                              ),
+                          ],
+                        ),
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundImage: NetworkImage(GraphQLConfig
+                                  .urlServidor +
+                              members[index]
+                                  .profilePicture), // Reemplaza con la imagen del usuario
+                        ),
+                        SizedBox(
+                          width: 130,
+                          child: Text(
+                            members[index].username,
+                            overflow: TextOverflow.ellipsis,
+                            style: StylesApp(context)
+                                .textStyleBody18
+                                .copyWith(color: Colors.black),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    Text(
+                      'exp ${members[index].currentPoints}',
+                      style: StylesApp(context)
+                          .textStyleBody18
+                          .copyWith(color: Colors.black),
+                    ), // Reemplaza con el exp del usuario
+                  ],
+                ),
+              )
+            ],
           );
         } else {
-          String mono = '';
-          if (index == 0) {
-            mono = 'assets/position1.png';
-          } else if (index == 1) {
-            mono = 'assets/position2.png';
-          } else if (index == 2) {
-            mono = 'assets/position3.png';
-          }
-          Color color;
-          if (index < 5) {
-            color = Colors.green;
-          } else if (index > 15) {
-            color = Colors.red;
-          } else {
-            color = Colors.black;
-          }
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -399,24 +574,53 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                               .profilePicture), // Reemplaza con la imagen del usuario
                     ),
                     SizedBox(
-                      width: 130,
-                      child: Text(
-                        members[index].username,
-                        overflow: TextOverflow.ellipsis,
-                        style: StylesApp(context)
-                            .textStyleBody18
-                            .copyWith(color: Colors.black),
-                      ),
+                      width: 140,
+                      child: index <= 2
+                          ? TextWithGradient(
+                              text: members[index]
+                                      .username
+                                      .split(' ')[0][0]
+                                      .toUpperCase() +
+                                  members[index]
+                                      .username
+                                      .split(' ')[0]
+                                      .substring(1),
+                              colorList: getColorsGradient(index),
+                              font: StylesApp(context).textStyleBody18.copyWith(
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                            )
+                          : Text(
+                              members[index]
+                                      .username
+                                      .split(' ')[0][0]
+                                      .toUpperCase() +
+                                  members[index]
+                                      .username
+                                      .split(' ')[0]
+                                      .substring(1),
+                              overflow: TextOverflow.ellipsis,
+                              style: StylesApp(context)
+                                  .textStyleBody18
+                                  .copyWith(color: Colors.black),
+                            ),
                     ),
                   ],
                 ),
-
-                Text(
-                  'exp ${members[index].currentPoints}',
-                  style: StylesApp(context)
-                      .textStyleBody18
-                      .copyWith(color: Colors.black),
-                ), // Reemplaza con el exp del usuario
+                index <= 2
+                    ? TextWithGradient(
+                        text: 'exp ${members[index].currentPoints}',
+                        colorList: getColorsGradient(index),
+                        font: StylesApp(context).textStyleBody18.copyWith(
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                      )
+                    : Text(
+                        'exp ${members[index].currentPoints}',
+                        style: StylesApp(context)
+                            .textStyleBody18
+                            .copyWith(color: Colors.black),
+                      ), // Reemplaza con el exp del usuario
               ],
             ),
           );
@@ -425,9 +629,9 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     );
   }
 
-  void loadMembers(activeLeagueId, BuildContext context) async {
+  void loadMembers(activeLeagueId, userId, BuildContext context) async {
     LoadingService().showLoading(context);
-    final memberResponse = await getLeagueMembers(activeLeagueId);
+    final memberResponse = await getLeagueMembers(activeLeagueId, userId);
     if (memberResponse.error != null) {
       LoadingService().hideLoading();
       // await showCustomDialog(context,
@@ -441,6 +645,34 @@ class _RankingScreenViewState extends State<RankingScreenView> {
           .toList();
     });
     LoadingService().hideLoading();
+  }
+
+  List<Color> getColorsGradient(int index) {
+    List<Color> colors = [];
+    if (index == 0) {
+      colors = [
+        Color(0xFF775D0C),
+        Color(0xFFA07D11),
+        Color(0xFFBA9113),
+        Color(0XFFDDAC17)
+      ];
+    } else if (index == 1) {
+      colors = [
+        Color(0xFF3D3D3D),
+        Color(0xFF676767),
+        Color(0XFFB7B6B4),
+        Color(0xFF8B8B8B)
+      ];
+    } else if (index == 2) {
+      colors = [
+        Color(0xFFA97654),
+        Color(0xFF875E43),
+        Color(0xFF6C4B35),
+        Color(0xFF432F21)
+      ];
+    }
+
+    return colors;
   }
 }
 
@@ -456,7 +688,8 @@ class LeagueTimeRemaining extends StatelessWidget {
     // Establecer la hora al final del día (23:59:59)
     return DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59);
   }
-String _formatTwoDigits(int number) {
+
+  String _formatTwoDigits(int number) {
     return number.toString().padLeft(2, '0');
   }
 
@@ -485,16 +718,19 @@ String _formatTwoDigits(int number) {
         final minutes = _formatTwoDigits(difference.inMinutes % 60);
         final seconds = _formatTwoDigits(difference.inSeconds % 60);
 
-        return Text.rich(
-          TextSpan(children: [
-            TextSpan(text: "Tiempo Restante:  ", style: StylesApp(context).textStyleBody14),
-            TextSpan(text:'$days días $hours:$minutes:$seconds',
-          style: StylesApp(context).textStyleBody14.copyWith(
-                color: Colors.white,
-              ), )
-          ],)
-        ) ;
-  
+        return Text.rich(TextSpan(
+          children: [
+            TextSpan(
+                text: "Tiempo Restante:  ",
+                style: StylesApp(context).textStyleBody14),
+            TextSpan(
+              text: '$days días $hours:$minutes:$seconds',
+              style: StylesApp(context).textStyleBody14.copyWith(
+                    color: Colors.white,
+                  ),
+            )
+          ],
+        ));
       },
     );
   }

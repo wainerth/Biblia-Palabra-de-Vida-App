@@ -114,24 +114,29 @@ class AuthenticationProvider extends ChangeNotifier {
       orElse: () => League(
           id: "-1",
           name: "",
-          description:"",
+          description: "",
           status: "0",
           img: ImageDetails(urlImg: "")),
     );
 
     // buscamos miembro
-    final dataMemberResponse = await getDataMember(token, userId);
-    error = dataMemberResponse.error;
-    if (error != null) {
-      return ResponseData(data: null, error: error);
-    }
-    final userRanking = dataMemberResponse.data;
-    userRanking["leagueId"] = league.id;
-    userRanking['leagueName'] = league.name;
+    if (userProfile.data["currentLeagueId"] != '0') {
+      final dataMemberResponse = await getDataMember(token, userId);
+      error = dataMemberResponse.error;
+      if (error != null) {
+        return ResponseData(data: null, error: error);
+      }
+      final userRanking = dataMemberResponse.data;
+      userRanking["leagueId"] = league.id;
+      userRanking['leagueName'] = league.name;
 
-    if (league.id != "-1") {
-      userProfile.data["league"] = userRanking;
+      if (league.id != "-1") {
+        userProfile.data["league"] = userRanking;
+      }
+    } else {
+      userProfile.data["league"] = null;
     }
+
     Provider.of<UserProvider>(context, listen: false)
         .setUser(LoginUser.fromJson(userProfile.data));
 

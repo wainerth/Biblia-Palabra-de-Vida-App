@@ -1,13 +1,19 @@
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/routes/router_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FlutterDownloader.initialize(
+    debug: true, // Set to false in production
+    ignoreSsl: true, // Set to false for secure connections
+  );
   runApp(
     MultiProvider(
       providers: [
@@ -16,14 +22,13 @@ void main() {
             create: (_) => CatalogueProvider()),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
         ChangeNotifierProvider<AuthenticationProvider>(
-          create: (context) => AuthenticationProvider(context, context.read<CatalogueProvider>()),
+          create: (context) => AuthenticationProvider(
+              context, context.read<CatalogueProvider>()),
         ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690), // size base of design
         builder: (context, child) {
-          WidgetsFlutterBinding.ensureInitialized();
-
           return const MyApp();
         },
       ),
@@ -55,11 +60,11 @@ class _MyAppState extends State<MyApp> {
       _loadTokenAndInitializeAuth(prefs);
     });
   }
+
 // function to load the token and initialize the authentication
   Future<void> _loadTokenAndInitializeAuth(SharedPreferences prefs) async {
     final authProvider = context.read<AuthenticationProvider>();
-    await authProvider
-        .checkAuthentication(context); 
+    await authProvider.checkAuthentication(context);
   }
 
   @override
@@ -97,7 +102,7 @@ class _MyAppState extends State<MyApp> {
     }
     if (_hasSeenIntro!) {
       final authProvider = context.read<AuthenticationProvider>();
-      
+
       if (authProvider.token != null) {
         return PageScreen();
       } else {

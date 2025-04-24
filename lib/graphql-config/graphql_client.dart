@@ -1,4 +1,3 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/time_out_link.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'graphql_config.dart';
 

@@ -4,11 +4,12 @@ import 'dart:io';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<ResponseData> getProfileUser(token, idUser) async {
-  final GraphQLClient _client = createClient(authToken: token);
+  final GraphQLClient client = createClient(authToken: token);
   final QueryOptions options = QueryOptions(
     operationName: 'GetOneProfileByUserId',
     document: gql(r'''
@@ -27,7 +28,7 @@ Future<ResponseData> getProfileUser(token, idUser) async {
                         country
                         country_code
                       }
-                      favoriteVerseId # si asigna versiculo favorito
+                      favoriteVerseId # si asigna versículo favorito
                       notifications # notification user
                       birthdate
                         identifier #cédula
@@ -36,7 +37,7 @@ Future<ResponseData> getProfileUser(token, idUser) async {
                         currentLeagueId #future ligue in ranking
                       createdAt # fecha registro
                       achievementsReachedCount #contador de logros
-                      streakDaysCount # contador de dias 
+                      streakDaysCount # contador de Dias 
                       preachingsCreatedCount # cantidad de predicas
                       user {
                         id
@@ -61,7 +62,7 @@ Future<ResponseData> getProfileUser(token, idUser) async {
   );
 
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -78,7 +79,9 @@ Future<ResponseData> getProfileUser(token, idUser) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get One Profile By User Id Timeout de conexión $e');
   } catch (e) {
@@ -101,7 +104,7 @@ Future<ResponseData> getProfileUser(token, idUser) async {
 Future<ResponseData> getAchievement(userId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
   final QueryOptions options = QueryOptions(
     operationName: "GetUserAchievement",
     document: gql(r'''
@@ -125,7 +128,7 @@ Future<ResponseData> getAchievement(userId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -143,7 +146,9 @@ Future<ResponseData> getAchievement(userId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get User Achievement Timeout de conexión $e');
   } catch (e) {
@@ -165,7 +170,7 @@ Future<ResponseData> getAchievement(userId) async {
 Future<ResponseData> getUserTitle(userId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
   final QueryOptions options = QueryOptions(
     operationName: "GetUserTitle",
     document: gql(r'''
@@ -187,7 +192,7 @@ Future<ResponseData> getUserTitle(userId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -205,7 +210,9 @@ Future<ResponseData> getUserTitle(userId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get User Title Timeout de conexión $e');
   } catch (e) {
@@ -227,7 +234,7 @@ Future<ResponseData> getUserTitle(userId) async {
 Future<ResponseData> getPrizeWon(userId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
   final QueryOptions options = QueryOptions(
     operationName: "getPrizeByCourse",
     document: gql(r'''
@@ -251,7 +258,7 @@ Future<ResponseData> getPrizeWon(userId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -269,7 +276,9 @@ Future<ResponseData> getPrizeWon(userId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get User Achievement Timeout de conexión $e');
   } catch (e) {
@@ -291,7 +300,7 @@ Future<ResponseData> getPrizeWon(userId) async {
 Future<ResponseData> getRewardObtained(sectionId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
   final QueryOptions options = QueryOptions(
     operationName: "GetOneRewardBySection",
     document: gql(r'''
@@ -311,8 +320,10 @@ Future<ResponseData> getRewardObtained(sectionId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
-    print(result.data);
+    final QueryResult result = await client.query(options);
+    if (kDebugMode) {
+      print(result.data);
+    }
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -330,7 +341,9 @@ Future<ResponseData> getRewardObtained(sectionId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get One reward Timeout de conexión $e');
   } catch (e) {
@@ -350,7 +363,7 @@ Future<ResponseData> getRewardObtained(sectionId) async {
 }
 
 Future getDataMember(token, userId) async {
-  final GraphQLClient _client = createClient(authToken: token);
+  final GraphQLClient client = createClient(authToken: token);
 
   final QueryOptions query = QueryOptions(
       operationName: "GetMemberByUserId",
@@ -370,7 +383,7 @@ Future getDataMember(token, userId) async {
       fetchPolicy: FetchPolicy.noCache);
 
   try {
-    final QueryResult result = await _client.query(query);
+    final QueryResult result = await client.query(query);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -386,7 +399,9 @@ Future getDataMember(token, userId) async {
     return ResponseData(
         data: removeTypename(data['getMemberByUserId']), error: null);
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get Member By Id Timeout de conexión $e');
   } catch (e) {
@@ -410,7 +425,7 @@ Future loadCoursesByUserAndChurch(userId, churchId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     // operationName: "GetAllCourses",
@@ -437,7 +452,7 @@ Future loadCoursesByUserAndChurch(userId, churchId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -455,7 +470,9 @@ Future loadCoursesByUserAndChurch(userId, churchId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get all Courses Timeout de conexión $e');
   } catch (e) {
@@ -479,7 +496,7 @@ Future loadOneCourse(userId, courseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetOneCourse",
@@ -506,7 +523,7 @@ Future loadOneCourse(userId, courseId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -524,7 +541,9 @@ Future loadOneCourse(userId, courseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get One Course Timeout de conexión $e');
   } catch (e) {
@@ -548,7 +567,7 @@ Future loadStageById(sectionId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetSectionById",
@@ -578,7 +597,7 @@ Future loadStageById(sectionId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -596,7 +615,9 @@ Future loadStageById(sectionId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get Section By Id Timeout de conexión $e');
   } catch (e) {
@@ -620,7 +641,7 @@ Future loadStageByCourse(userId, courseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetSections",
@@ -648,7 +669,7 @@ Future loadStageByCourse(userId, courseId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -666,7 +687,9 @@ Future loadStageByCourse(userId, courseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get Sections Timeout de conexión $e');
   } catch (e) {
@@ -690,7 +713,7 @@ Future loadLevelsByCourse(userId, sectionId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetAllLevelsBySectionId",
@@ -719,7 +742,7 @@ Future loadLevelsByCourse(userId, sectionId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -737,7 +760,9 @@ Future loadLevelsByCourse(userId, sectionId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null,
         error: 'Get All Levels By Section Id Timeout de conexión $e');
@@ -750,7 +775,7 @@ Future loadOneLevel(levelId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetLevelById",
@@ -780,7 +805,7 @@ Future loadOneLevel(levelId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -798,7 +823,9 @@ Future loadOneLevel(levelId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get Level Id Timeout de conexión $e');
   } catch (e) {
@@ -822,7 +849,7 @@ Future loadStoriesByLevel(String levelId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetStoryByLevelId",
@@ -868,7 +895,7 @@ Future loadStoriesByLevel(String levelId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -886,7 +913,9 @@ Future loadStoriesByLevel(String levelId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get Story Level Id Timeout de conexión $e');
   } catch (e) {
@@ -910,7 +939,7 @@ Future loadQuestionByStory(levelId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetQuestionsByLevelId",
@@ -954,7 +983,7 @@ Future loadQuestionByStory(levelId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -972,7 +1001,9 @@ Future loadQuestionByStory(levelId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get Question By Level Id Timeout de conexión $e');
   } catch (e) {
@@ -996,7 +1027,7 @@ Future getLastProgressUser(userId, courseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetLastProgressUser",
@@ -1019,7 +1050,7 @@ Future getLastProgressUser(userId, courseId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -1037,7 +1068,9 @@ Future getLastProgressUser(userId, courseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get last progress User Timeout de conexión $e');
   } catch (e) {
@@ -1061,7 +1094,7 @@ Future lastLevelProgressUser(userId, levelId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetProgressLevelUser",
@@ -1101,7 +1134,7 @@ Future lastLevelProgressUser(userId, levelId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -1119,7 +1152,9 @@ Future lastLevelProgressUser(userId, levelId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Get progress Level User Timeout de conexión $e');
   } catch (e) {
@@ -1139,17 +1174,17 @@ Future lastLevelProgressUser(userId, levelId) async {
   }
 }
 
-Future getLeagueMembers(leagueId) async {
+Future getLeagueMembers(leagueId, userId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetLeagueMembers",
     document: gql(r'''
-          query GetLeagueMembers($leagueId: ID!) {
-          getLeagueMembers(leagueId: $leagueId) {
+          query GetLeagueMembers($leagueId: ID!, $userId: ID!) {
+          getLeagueMembers(leagueId: $leagueId, userId: $userId) {
             userId
             currentPoints
             position
@@ -1159,11 +1194,14 @@ Future getLeagueMembers(leagueId) async {
           }
         }
       '''),
-    variables: <String, dynamic>{"leagueId": leagueId},
+    variables: <String, dynamic>{
+      "leagueId": leagueId,
+      "userId": userId,
+    },
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -1181,7 +1219,9 @@ Future getLeagueMembers(leagueId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'get League Members Timeout de conexión $e');
   } catch (e) {
@@ -1205,7 +1245,7 @@ Future getAllPrize(page, limit, userId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetAllPrize",
@@ -1245,7 +1285,7 @@ Future getAllPrize(page, limit, userId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -1265,7 +1305,9 @@ Future getAllPrize(page, limit, userId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'get League Members Timeout de conexión $e');
   } catch (e) {
@@ -1289,7 +1331,7 @@ Future streaksCalendar(userId, month) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "StreakCalendarService",
@@ -1305,7 +1347,7 @@ Future streaksCalendar(userId, month) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -1323,7 +1365,9 @@ Future streaksCalendar(userId, month) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'Streak Calendar Service Timeout de conexión $e');
   } catch (e) {
@@ -1347,7 +1391,7 @@ Future<ResponseData> getDailyWord() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     operationName: "GetDailyWord",
@@ -1373,7 +1417,7 @@ Future<ResponseData> getDailyWord() async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -1391,7 +1435,9 @@ Future<ResponseData> getDailyWord() async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'get Daily Word Timeout de conexión $e');
   } catch (e) {
@@ -1415,7 +1461,7 @@ Future<ResponseData> getOneReflection() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     // operationName: "GetOneReflectionRandom ",
@@ -1433,7 +1479,7 @@ Future<ResponseData> getOneReflection() async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -1451,7 +1497,9 @@ Future<ResponseData> getOneReflection() async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'get One Reflection Random Timeout de conexión $e');
   } catch (e) {
@@ -1474,7 +1522,7 @@ Future<ResponseData> getDailyPromises(userId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     // operationName: "GetOneReflectionRandom ",
@@ -1502,7 +1550,7 @@ Future<ResponseData> getDailyPromises(userId) async {
     variables: <String, dynamic>{"userId": userId},
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
@@ -1520,7 +1568,9 @@ Future<ResponseData> getDailyPromises(userId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'get Daily Promise Timeout de conexión $e');
   } catch (e) {
@@ -1539,11 +1589,12 @@ Future<ResponseData> getDailyPromises(userId) async {
   }
 }
 
-Future<ResponseData> getAllReflections(int page, int limit, String title) async {
+Future<ResponseData> getAllReflections(
+    int page, int limit, String title) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
     // operationName: "GetOneReflectionRandom ",
@@ -1568,20 +1619,17 @@ Future<ResponseData> getAllReflections(int page, int limit, String title) async 
           }
         }
       '''),
-    variables: <String, dynamic>{
-      "page": page,
-       "limit": limit, 
-       "title": title},
+    variables: <String, dynamic>{"page": page, "limit": limit, "title": title},
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
-    if (data == null || data['getAllReflection'] == null) {
+    if (data['getAllReflection'] == null) {
       return ResponseData(
         data: null,
         error: 'get All Reflection failed: No data returned',
@@ -1593,7 +1641,9 @@ Future<ResponseData> getAllReflections(int page, int limit, String title) async 
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
     return ResponseData(
         data: null, error: 'get All Reflection Timeout de conexión $e');
   } catch (e) {

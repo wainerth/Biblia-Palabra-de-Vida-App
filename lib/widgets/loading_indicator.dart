@@ -28,7 +28,6 @@ class _LoadingIndicatorState extends State<LoadingIndicator> with SingleTickerPr
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _controller.dispose();
     super.dispose();
   }

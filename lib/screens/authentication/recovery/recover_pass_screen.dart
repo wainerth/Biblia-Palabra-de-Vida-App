@@ -2,9 +2,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
 
@@ -55,9 +53,6 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
   }
 
   // Método para registrar al usuario
-  void _recoveryPassword(email, code, password) {
-    if (_formKey.currentState?.validate() ?? false) {}
-  }
 
   @override
   Widget build(BuildContext context) {

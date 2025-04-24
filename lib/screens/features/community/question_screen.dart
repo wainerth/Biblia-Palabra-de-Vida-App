@@ -536,7 +536,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           color: StyleColor.orange,
                           borderRadius: BorderRadius.circular(8.0)),
                       child: Text(
-                        "Paso 1 ${level?.name}",
+                        "${level?.name} - Paso 1",
                         style: StylesApp(context).textStyleBody5,
                       ),
                     ),

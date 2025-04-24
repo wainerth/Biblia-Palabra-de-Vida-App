@@ -136,41 +136,44 @@ class _AventureScreenState extends State<AventureScreen> {
                           setState(() {
                             loadAventure[index] = true;
                           });
-                          // consulto si el usuario tiene algún progreso para este curso?
-                          final userProvider =
-                              Provider.of<UserProvider>(context, listen: false);
-                          final progressResponse =
-                              await userProvider.getProgressUser(
-                                  dataUser?.user.id, courses[index].id);
-                          if (progressResponse!.error != null) {
-                            await showCustomDialog(context,
-                                message: progressResponse.error!,
-                                dialogType: DialogType.error);
-                          }
-                          progressUser = progressResponse.data;
-                          if (progressUser != null) {
-                            Navigator.pushNamed(context, '/mapPage',
-                                arguments: {
-                                  'courseId': courses[index].id,
-                                  'sectionId': progressUser!.sectionId
-                                });
-                          } else {
-                            Stage stage = await loadStage(
-                                dataUser?.user.id, courses[index].id);
-                            if (stage.levelCount > 0) {
+                          //consulto si el curso tiene niveles
+
+                          Stage stage = await loadStage(
+                              dataUser?.user.id, courses[index].id);
+                          if (stage.levelCount > 0) {
+                            // consulto si el usuario tiene algún progreso para este curso?
+                            final userProvider = Provider.of<UserProvider>(
+                                context,
+                                listen: false);
+                            final progressResponse =
+                                await userProvider.getProgressUser(
+                                    dataUser?.user.id, courses[index].id);
+                            if (progressResponse!.error != null) {
+                              await showCustomDialog(context,
+                                  message: progressResponse.error!,
+                                  dialogType: DialogType.error);
+                            }
+                            progressUser = progressResponse.data;
+                            if (progressUser != null) {
+                              Navigator.pushNamed(
+                                  context, '/mapPage', arguments: {
+                                'courseId': courses[index].id,
+                                'sectionId': progressUser!.sectionId ?? stage.id
+                              });
+                            } else {
                               Navigator.pushNamed(context, '/mapPage',
                                   arguments: {
                                     'courseId': courses[index].id,
                                     'sectionId': stage.id
                                   });
-                            } else {
-                              setState(() {
-                                loadAventure[index] = false;
-                              });
-                              await showCustomDialog(context,
-                                  message: "¡Este curso no esta Disponible!",
-                                  dialogType: DialogType.info);
                             }
+                          } else {
+                            setState(() {
+                              loadAventure[index] = false;
+                            });
+                            await showCustomDialog(context,
+                                message: "¡Este curso no esta Disponible!",
+                                dialogType: DialogType.info);
                           }
                           setState(() {
                             loadAventure[index] = false;

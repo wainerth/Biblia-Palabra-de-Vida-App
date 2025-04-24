@@ -4,6 +4,7 @@ class League {
   final String description;
   final String? colorFront;
   final String? colorBack;
+  final int? maxMembers;
   final String status;
   final ImageDetails img;
 
@@ -13,6 +14,7 @@ class League {
     required this.description,
     required this.status,
     required this.img,
+     this.maxMembers,
     this.colorFront, 
     this.colorBack, 
   });
@@ -26,6 +28,7 @@ class League {
       status: json['status'],
       colorFront: json['colorFront'],
       colorBack: json['colorBack'],
+      maxMembers: json['maxMembers'] ?? 0,
       img: ImageDetails.fromJson(json['img']),
     );
   }
@@ -39,6 +42,7 @@ class League {
       'img': img.toJson(),
       'colorFront': colorFront,
       'colorBack': colorBack,
+      'maxMembers': maxMembers,
       'status': status,
     };
   }

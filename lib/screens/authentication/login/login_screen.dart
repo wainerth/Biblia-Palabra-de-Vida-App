@@ -1,12 +1,10 @@
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'dart:io' as uio;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -143,6 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                     if (user.error != null) {
                                       LoadingService().hideLoading();
+                                      // ignore: use_build_context_synchronously
                                       await showCustomDialog(context,
                                           message: user.error!,
                                           dialogType: DialogType.error);
@@ -165,7 +164,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   buttonStyle:
                                       StylesApp(context).btnTransparentSmall,
                                   onPressed: () async {
-                                    print("estoy en iniciar sesion con google");
+                                    if (kDebugMode) {
+                                      print("estoy en iniciar session con google");
+                                    }
 
                                     // if (uio.Platform.isAndroid ||
                                     //     uio.Platform.isIOS) {

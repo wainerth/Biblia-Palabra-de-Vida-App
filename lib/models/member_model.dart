@@ -1,4 +1,3 @@
-import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class MemberModel {
   final String userId;
@@ -34,9 +33,9 @@ class MemberModel {
     return MemberModel(
       userId: json['userId'],
       currentPoints: json['currentPoints'],
-      position: json['position'],
-      promoted: json['promoted'],
-      username: json['username'],
+      position: json['position'] ?? 0,
+      promoted: json['promoted'] ?? false,
+      username: json['username'] ?? false,
       profilePicture: json['profilePicture'],
     );
   }

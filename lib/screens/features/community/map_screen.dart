@@ -17,7 +17,8 @@ class MapScreen extends StatefulWidget {
   State<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapScreenState extends State<MapScreen>
+    with SingleTickerProviderStateMixin {
   late final UserProvider userProvider;
   CourseModel? course;
   Stage? stage;
@@ -27,6 +28,8 @@ class _MapScreenState extends State<MapScreen> {
   final _isVisible = ValueNotifier<bool>(true);
   Timer? _timer;
   int _selectedIndex = 2;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   // int _selectedIndex = 0;
   final List<String> imagePaths = [
@@ -42,10 +45,20 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    scrollController = ScrollController();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      scrollController = ScrollController();
       _generateData(context);
-      await _loadMutePreference();
+      // super.dispose();
       if (!isMuted) {
         await playAudio();
       }
@@ -57,6 +70,7 @@ class _MapScreenState extends State<MapScreen> {
     _timer?.cancel();
     stopAudio();
     audioPlayer.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -121,7 +135,10 @@ class _MapScreenState extends State<MapScreen> {
           .id;
 
       scrollController.animateTo(
-        int.parse(lastLockedId) * 190, // Ajusta según el tamaño del nivel
+        int.parse(lastLockedId) *
+            StylesApp(context)
+                .sizeContainerLevel
+                .height, //50.0, // Ajusta según el tamaño del nivel
         duration: Duration(seconds: 2),
         curve: Curves.easeInOut,
       );
@@ -146,7 +163,7 @@ class _MapScreenState extends State<MapScreen> {
         final LoginUser? userData = userProvider.currentUser;
         // obtenemos curso
         final ResponseData courseResponse = await loadOneCourse(
-            userData != null ? userData!.user.id : null, courseId);
+            userData != null ? userData.user.id : null, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
         }
@@ -215,7 +232,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List coordATop = [-0.02, 0.10, 0.31, 0.54, 0.76];
+    List coordATop = [0.0, 0.10, 0.31, 0.54, 0.76];
 
     List coordALeft = [0.20, 0.49, 0.65, 0.65, 0.64];
 
@@ -340,6 +357,9 @@ class _MapScreenState extends State<MapScreen> {
                                       alignment: Alignment.topCenter,
                                       children: [
                                         Container(
+                                          padding: index == 0
+                                              ? EdgeInsets.only(top: 20)
+                                              : EdgeInsets.only(top: 0),
                                           constraints: BoxConstraints(
                                               minHeight:
                                                   MediaQuery.sizeOf(context)
@@ -488,10 +508,38 @@ class _MapScreenState extends State<MapScreen> {
                                                                           blurStyle: BlurStyle.outer)
                                                                     ]),
                                                                 child: Center(
-                                                                    child: _buildItemLevel(
-                                                                        context,
-                                                                        grupo[
-                                                                            i])),
+                                                                  child: Stack(
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .center,
+                                                                    children: [
+                                                                      if (grupo[i].unLockLevel ==
+                                                                              true &&
+                                                                          grupo[i].levelScore ==
+                                                                              0) ...{
+                                                                        AnimatedBuilder(
+                                                                          animation:
+                                                                              _animation,
+                                                                          builder:
+                                                                              (context, child) {
+                                                                            return Container(
+                                                                              width: StylesApp(context).sizeContainer.width + 10 * _animation.value,
+                                                                              height: StylesApp(context).sizeContainer.height + 10 * _animation.value,
+                                                                              decoration: BoxDecoration(
+                                                                                shape: BoxShape.circle,
+                                                                                color: Colors.yellow.withOpacity(0.5 * (1 - _animation.value)),
+                                                                              ),
+                                                                            );
+                                                                          },
+                                                                        ),
+                                                                      },
+                                                                      _buildItemLevel(
+                                                                          context,
+                                                                          grupo[
+                                                                              i]),
+                                                                    ],
+                                                                  ),
+                                                                ),
                                                               ),
                                                               if (grupo[i]
                                                                       .unLockLevel ==

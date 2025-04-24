@@ -292,6 +292,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                       inactiveColor: StyleColor.orange,
                       showImage: false,
                       backgroundColor: Colors.white,
+                      fileName: taleSelected != null ?  taleSelected!.name : '',
                       pathUrl:
                           taleSelected != null ? taleSelected!.urlAudio : ''),
                   SizedBox(height: 13.0)

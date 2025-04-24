@@ -32,7 +32,7 @@ class LevelProgressUser {
     return LevelProgressUser(
       id: id,
       score: score ?? this.score,
-      energy: energy ?? this.energy,
+      energy: energy,
       message: message,
       newRecord: newRecord ?? this.newRecord,
       user: user,

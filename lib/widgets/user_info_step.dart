@@ -14,7 +14,7 @@ class UserInfoStep extends StatefulWidget {
   final ValueChanged<bool> onObscureTextRepeatChanged;
 
   const UserInfoStep({
-    Key? key,
+    super.key,
     required this.userIdController,
     required this.emailController,
     required this.userNameController,
@@ -24,7 +24,7 @@ class UserInfoStep extends StatefulWidget {
     required this.obscureTextRepeat,
     required this.onObscureTextPassChanged,
     required this.onObscureTextRepeatChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<UserInfoStep> createState() => _UserInfoStepState();

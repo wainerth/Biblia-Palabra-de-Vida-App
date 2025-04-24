@@ -1,10 +1,8 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
@@ -17,10 +15,7 @@ class BibleScreen extends StatefulWidget {
 }
 
 class _BibleScreenState extends State<BibleScreen> {
-  int _ultimoVersiculoLeido = 0;
   ScrollController _scrollController = ScrollController();
-  static const String iconFont = 'MaterialIcons';
-  static const String? iconFontPackage = null;
   List<Map<String, dynamic>> verses = [
     {
       "id": "1",
@@ -451,7 +446,7 @@ class _BibleScreenState extends State<BibleScreen> {
               ),
             ),
             Expanded(
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
                 child: Stack(
                   children: [

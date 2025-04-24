@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 class LastProgressUser {
-  final String courseId;
-  final String sectionId;
+  final String? courseId;
+  final String? sectionId;
   final String levelId;
 
   LastProgressUser({

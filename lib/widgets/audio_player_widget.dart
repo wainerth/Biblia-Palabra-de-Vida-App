@@ -2,15 +2,23 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:open_filex/open_filex.dart';
+
 import 'package:http/http.dart' as http;
 
 class AudioPlayerWidget extends StatefulWidget {
   final String pathUrl;
+  final String? fileName;
   final bool showImage;
   final Color backgroundColor;
   final bool showAction;
@@ -25,7 +33,8 @@ class AudioPlayerWidget extends StatefulWidget {
       this.backgroundColor = Colors.green,
       this.actionColor = Colors.black,
       this.controlsColor = Colors.white,
-      this.inactiveColor = const Color.fromRGBO(128, 128, 128, 0.5)});
+      this.inactiveColor = const Color.fromRGBO(128, 128, 128, 0.5),
+      this.fileName});
 
   @override
   AudioPlayerWidgetState createState() => AudioPlayerWidgetState();
@@ -37,6 +46,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   StreamSubscription<Duration>? _positionSubscription;
   StreamSubscription<void>? _playerCompleteSubscription;
   StreamSubscription<PlayerState>? _playerStateChangeSubscription;
+  Directory? externalStorage;
+  Directory? internalStorage;
 
   Duration? _duration;
   Duration? _position;
@@ -45,12 +56,22 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   double volume = 0.5;
   String get _durationText => _duration?.toString().split('.').first ?? '';
   String get _positionText => _position?.toString().split('.').first ?? '';
-
   @override
   void initState() {
     super.initState();
+    // FlutterDownloader.initialize is already called in main.dart
     _initStreams();
+    getDirectory();
     // _play(); // Start playing audio on initialization
+  }
+
+  getDirectory() async {
+    final externalDir = await getExternalStorageDirectory();
+    final internalDir = await getApplicationDocumentsDirectory();
+    setState(() {
+      externalStorage = externalDir;
+      internalStorage = internalDir;
+    });
   }
 
   @override
@@ -63,20 +84,22 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     player.dispose();
     super.dispose();
   }
-@override
-void didUpdateWidget(covariant AudioPlayerWidget oldWidget) {
-  super.didUpdateWidget(oldWidget);
-  if (oldWidget.pathUrl != widget.pathUrl) {
-    player.stop();
-    setState(() {
-      _duration = null;
-      _position = null;
-      _isPlaying = false;
-    });
-    _initStreams();
+
+  @override
+  void didUpdateWidget(covariant AudioPlayerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pathUrl != widget.pathUrl) {
+      player.stop();
+      setState(() {
+        _duration = null;
+        _position = null;
+        _isPlaying = false;
+      });
+      _initStreams();
+    }
   }
-}
-@override
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final route = ModalRoute.of(context);
@@ -88,36 +111,86 @@ void didUpdateWidget(covariant AudioPlayerWidget oldWidget) {
       });
     }
   }
-  Future<void> _downloadFile(url) async {
-    try {
-      // Obtener la dirección del directorio de documentos
-      final directory = await getDownloadsDirectory();
 
-      if (kDebugMode) {
-        print(directory);
-      }
+  Future<void> downloadFile(
+      BuildContext context1, String url, String fileName) async {
+    LoadingService().showLoading(context);
+    // declaración de variables
+    Directory? externalDir;
+    Directory? internalDir;
 
-      // Crear la ruta del archivo de destino
-      final filePath = '${directory?.path ?? ''}/audio.mp3';
+    PermissionStatus storageStatus = PermissionStatus.denied;
 
-      // Descargar el archivo
-      final response = await http.get(Uri.parse(url));
-      final file = File(filePath);
-      await file.writeAsBytes(response.bodyBytes);
+    // Obtengo los diferentes directorios dependiendo de la plataforma
+    if (Platform.isAndroid) {
+      final newStatus = await Permission.storage.request();
+      setState(() {
+        storageStatus = newStatus;
+      });
+      externalDir = await getExternalStorageDirectory();
+      internalDir = await getApplicationDocumentsDirectory();
+    } else {
+      internalDir = await getApplicationDocumentsDirectory();
+    }
 
-      // Mostrar mensaje de éxito
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Descarga completada')),
+    // tomo el directorio de descarga si tengo permisos uso el externo si no el interno
+    Directory? savedDir;
+    if (Platform.isAndroid && storageStatus.isGranted && externalDir != null) {
+      savedDir = Directory(
+          '${externalDir.path}/Download'); //externalDir!.path + '/Download';
+    } else if (internalDir != null) {
+      savedDir = Directory('${internalDir.path}/Download');
+    }
+    if (savedDir != null && !await savedDir.exists()) {
+      await savedDir.create(recursive: true);
+    }
+
+    if (savedDir != null) {
+      Future.delayed(Duration(seconds: 1));
+      final taskId = await FlutterDownloader.enqueue(
+        url: url,
+        savedDir: savedDir.path,
+        fileName: "$fileName.mp3",
+        showNotification: true,
+        openFileFromNotification: Platform.isIOS ? false : true,
       );
-    } catch (e) {
-      // Manejar errores
+
       if (kDebugMode) {
-        print('Error al descargar el archivo: $e');
+        print('Descarga iniciada con ID: $taskId');
       }
+      if (taskId != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: StyleColor.turquoise,
+            content: Text(
+              'Descarga iniciada en ${savedDir == externalDir ? 'almacenamiento externo' : 'almacenamiento interno'}. Revisar notificaciones.',
+              style: StylesApp(context).textStyleBody12,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: StyleColor.redLight,
+            content: Text(
+              'Error al iniciar la descarga.',
+              style: StylesApp(context).textStyleBody12,
+            ),
+          ),
+        );
+      }
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al descargar')),
+        SnackBar(
+          backgroundColor: StyleColor.redLight,
+          content: Text(
+            'No se pudo acceder al almacenamiento.',
+            style: StylesApp(context).textStyleBody12,
+          ),
+        ),
       );
     }
+    LoadingService().hideLoading();
   }
 
   @override
@@ -157,7 +230,7 @@ void didUpdateWidget(covariant AudioPlayerWidget oldWidget) {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (loading)//_isPlaying && _position == null && _duration == null)
+                  if (loading) //_isPlaying && _position == null && _duration == null)
                     SizedBox(
                       width: 25.sp,
                       height: 25.sp,
@@ -298,34 +371,46 @@ void didUpdateWidget(covariant AudioPlayerWidget oldWidget) {
                                 }),
                                 ListTile(
                                   leading: Icon(Icons.download),
-                                  title: Text('Download'),
-                                  onTap: () async {
-                                    _downloadFile(widget.pathUrl);
-                                  },
+                                  title: Text('Descargar'),
+                                  onTap: widget.pathUrl.isEmpty
+                                      ? null
+                                      : () async {
+                                          Navigator.pop(context);
+                                          downloadFile(
+                                              context,
+                                              widget.pathUrl,
+                                              widget.fileName == null
+                                                  ? 'audio.mp3'
+                                                  : widget.fileName!);
+                                        },
                                 ),
                                 ListTile(
                                   leading: Icon(Icons.share),
-                                  title: Text('Share'),
-                                  onTap: () async {
-                                    final directory =
-                                        await getApplicationDocumentsDirectory();
-                                    final filePath =
-                                        '${directory.path}/${widget.pathUrl}';
-                                    final file = File(filePath);
-                                    if (await file.exists()) {
-                                      // Use the share package to share the file
-                                      Share.shareXFiles([XFile(filePath)],
-                                          text: '¡Mira este audio!');
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                            content: Text(
-                                                'Archivo de audio no encontrado')),
-                                      );
-                                    }
-                                    Navigator.pop(context);
-                                  },
+                                  title: Text('Compartir'),
+                                  onTap: widget.pathUrl.isEmpty
+                                      ? null
+                                      : () async {
+                                          final directory =
+                                              await getApplicationDocumentsDirectory();
+                                          final filePath =
+                                              '${directory.path}/${widget.pathUrl}';
+                                          final file = File(filePath);
+                                          if (await file.exists()) {
+                                            // Use the share package to share the file
+                                            Share.shareXFiles([XFile(filePath)],
+                                                text: '¡Mira este audio!');
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  backgroundColor:
+                                                      StyleColor.redLight,
+                                                  content: Text(
+                                                      'Archivo de audio no encontrado')),
+                                            );
+                                          }
+                                          Navigator.pop(context);
+                                        },
                                 ),
                               ],
                             );
@@ -373,12 +458,12 @@ void didUpdateWidget(covariant AudioPlayerWidget oldWidget) {
   }
 
   Future<void> _play() async {
-      setState(() {
-loading= true;
-      });
+    setState(() {
+      loading = true;
+    });
     await player.play(UrlSource(widget.pathUrl));
-      setState(() {
-loading= false;
-      });
+    setState(() {
+      loading = false;
+    });
   }
 }

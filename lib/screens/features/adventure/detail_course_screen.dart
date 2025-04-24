@@ -4,7 +4,6 @@ import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +16,7 @@ class DetailCourseScreen extends StatefulWidget {
 }
 
 class _DetailCorseScreenState extends State<DetailCourseScreen> {
-  late final course;
+  late final CourseModel course;
   List<Stage> stages = [];
   bool loadAventure = false;
   bool isLoading = true;
@@ -49,7 +48,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
         errorMessage = courseResponse.error;
       }
       course = CourseModel.fromJson(courseResponse.data);
-      final result = await loadStageByCourse(userData?.user.id, course.id);
+      final result = await loadStageByCourse(userData.user.id, course.id);
       if (result.error != null) {
         errorMessage = result.error;
       } else {
@@ -86,7 +85,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
           _selectedIndex = index;
           Navigator.pushNamed(
             context,
-            '/layoutPage1',
+            '/layoutPage',
             arguments: {'selectedIndex': _selectedIndex},
           );
         }
@@ -175,7 +174,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                   if (progressUser != null) {
                     Navigator.pushNamed(context, '/mapPage', arguments: {
                       'courseId': course.id,
-                      'sectionId': progressUser!.sectionId
+                      'sectionId': progressUser!.sectionId ?? stages.first.id
                     });
                   } else {
                     if (stages.first.levelCount > 0) {
@@ -216,7 +215,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                 Positioned(
                   right: 20,
                   bottom: 20,
-                  child: Container(
+                  child: SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator.adaptive(
@@ -449,7 +448,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
               ),
               if (index == stages.length - 1) ...{
                 SizedBox(
-                  height: kBottomNavigationBarHeight - 30,
+                  height: kBottomNavigationBarHeight,
                 )
               }
             ],

@@ -128,33 +128,33 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
               SizedBox(
                 height: 22.0,
               ),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                padding: EdgeInsets.symmetric(horizontal: 26.0),
-                decoration: BoxDecoration(
-                    color: Color(0XFF5C9EDB),
-                    borderRadius: BorderRadius.circular(12.0)),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Librería Cristiana",
-                      style: StylesApp(context).textStyleBody7,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/soonPage');
-                      },
-                      child: Padding(
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/soonPage');
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                  padding: EdgeInsets.symmetric(horizontal: 26.0),
+                  decoration: BoxDecoration(
+                      color: Color(0XFF5C9EDB),
+                      borderRadius: BorderRadius.circular(12.0)),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Librería Cristiana",
+                        style: StylesApp(context).textStyleBody7,
+                      ),
+                      Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Image.asset(
                           'assets/books.png',
                           width: 52.sp,
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
               SizedBox(
@@ -285,6 +285,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
             inactiveColor: StyleColor.orange,
             backgroundColor: Colors.white,
             controlsColor: StyleColor.turquoise,
+            fileName: reflection != null ? reflection.title : '',
             pathUrl: reflection != null ? reflection.url : ''),
       ],
     );
@@ -436,13 +437,45 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                       Padding(
                         padding: const EdgeInsets.only(left: 45.0),
                         child: dailyWord.book!.modernName!.isNotEmpty
-                            ? Text(
-                                "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}",
-                                style:
-                                    StylesApp(context).textStyleBody7.copyWith(
+                            ? Text.rich(
+                                TextSpan(
+                                    style: StylesApp(context)
+                                        .textStyleBody7
+                                        .copyWith(
                                           color: Colors.white,
                                         ),
+                                    children: [
+                                      WidgetSpan(
+                                        child: Container(
+                                          constraints: BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Text(
+                                             overflow: TextOverflow.ellipsis,
+                                            "${dailyWord.book!.modernName} ",
+                                            style: StylesApp(context)
+                                                .textStyleBody7
+                                                .copyWith(
+                                                  color: Colors.white,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: "${dailyWord.chapter!.chapter}:",
+                                      ),
+                                      TextSpan(
+                                        text: "${dailyWord.verse!.verse}",
+                                      ),
+                                    ]),
                               )
+                            //  Text(
+                            //     "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}",
+                            //     style:
+                            //         StylesApp(context).textStyleBody7.copyWith(
+                            //               color: Colors.white,
+                            //             ),
+                            //   )
                             : Text(""),
                       ),
                       Row(
@@ -506,28 +539,41 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   constraints: MediaQuery.of(context).size.width > 400
-                      ? BoxConstraints(minHeight: 96.0)
+                      ? BoxConstraints(minHeight: 96.0, maxHeight: 100.0)
                       : BoxConstraints(),
                   width: double.infinity,
                   child: loadingDaily
                       ? Center(child: CircularProgressIndicator())
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: Text(
-                                  "${dailyWord.verse!.text}.",
-                                  style: StylesApp(context)
-                                      .textStyleBody5
-                                      .copyWith(
-                                          color: Colors.black, fontSize: 14.sp),
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            return ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight,
+                              ),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Center(
+                                        child: Text(
+                                          "${dailyWord.verse!.text}.",
+                                          style: StylesApp(context)
+                                              .textStyleBody5
+                                              .copyWith(
+                                                color: Colors.black,
+                                                fontSize: 14.sp,
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                          ],
+                            );
+                          },
                         ),
                 )
               ],
@@ -593,27 +639,33 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                         flex: 2,
                         child: Column(
                           children: [
-                            Container(
-                              constraints: BoxConstraints(
-                                  maxWidth: StylesApp(context).sizeTextPosition,
-                                  minHeight: 20),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFC7AA34),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child:  Center(
-                                      child: Text(
-                                        textAlign: TextAlign.center,
-                                        "${userData?.league != null
-                                  ? userData.league.leagueName : 'necesitas experiencia para Entrar a una liga'}",
-                                        style: userData?.league != null ? StylesApp(context)
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/layoutPage1', arguments: {'selectedIndex':2});
+                              },
+                              child: Container(
+                                constraints: BoxConstraints(
+                                    maxWidth: StylesApp(context).sizeTextPosition,
+                                    minHeight: 20),
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFC7AA34),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    textAlign: TextAlign.center,
+                                    "${userData?.league != null ? userData.league.leagueName : 'necesitas experiencia para Entrar a una liga'}",
+                                    style: userData?.league != null
+                                        ? StylesApp(context)
                                             .textStyleBody6
-                                            .copyWith(color: Colors.white): StylesApp(context)
+                                            .copyWith(color: Colors.white)
+                                        : StylesApp(context)
                                             .textStyleBody10
-                                            .copyWith(color: Colors.white) ,
-                                      ),
-                                    ),
+                                            .copyWith(color: Colors.white),
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),

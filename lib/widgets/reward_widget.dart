@@ -131,7 +131,7 @@ class ParticlePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final random = Random();
-    final paint = Paint()..color = const Color.fromARGB(255, 252, 248, 248).withOpacity(0.5);
+    final paint = Paint()..color = const Color.fromARGB(255, 252, 248, 248).withValues(alpha:  0.5);
 
     for (int i = 0; i < 50; i++) {
       final x = random.nextDouble() * size.width;

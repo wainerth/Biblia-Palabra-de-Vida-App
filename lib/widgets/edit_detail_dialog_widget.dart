@@ -1,10 +1,9 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -173,7 +172,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
         children: [
           Expanded(
             flex: 1,
-            child: Container(
+            child: SizedBox(
               child: CustomDropdownWidget<Country>(
                 hintText: "código",
                 items: listPrefixCode,
@@ -259,7 +258,9 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
             ? DateFormat("dd/MM/yyyy").parse(item.value)
             : DateTime.now().subtract(Duration(days: 15 * 365)),
         onChanged: (value) {
-          print(value);
+          if (kDebugMode) {
+            print(value);
+          }
           _editingData[index] = ModelData(
             label: _editingData[index].label,
             value: value,
