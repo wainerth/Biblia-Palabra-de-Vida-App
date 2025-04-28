@@ -57,7 +57,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       answers: [],
       isOrdering: false);
   // ResponseData? responseSend;
-
+ int numberQuestion = 0;
   List currentAnswers = [];
   List<Question> questions = [];
   List<UserResponses> responses = [];
@@ -169,6 +169,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             }
           }
           currentQuestion = questions[currentIndex];
+          numberQuestion = currentIndex + 1;
           currentAnswers = questions[currentIndex].answers;
         });
       } catch (e) {
@@ -404,7 +405,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 dialogType: DialogType.error);
             return;
           }
-          nextSectionId = responseUnlockSection.data["nextSectionId"];
+          nextSectionId = responseUnlockSection.data["nextSectionId"] ?? '';
         }
 
         // si es la ultima etapa del curso
@@ -440,16 +441,18 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   loadTitleForUser() async {
-    final responseAchievement = await getAchievement(userData!.user.id);
+    final responseTitle = await getTitleForUser(userData!.user.id, course!.id);
 
-    if (responseAchievement.error != null) {
+    if (responseTitle.error != null) {
       // si desbloqueo un titulo
       LoadingService().hideLoading();
       await showCustomDialog(context,
-          message: responseAchievement.error!, dialogType: DialogType.error);
+          message: responseTitle.error!, dialogType: DialogType.error);
       return;
     } else {
-      title = TitleModel.fromJson(removeTypename(responseAchievement.data));
+      if (responseTitle.data != null) {
+        title = TitleModel.fromJson(removeTypename(responseTitle.data));
+      }
     }
   }
 
@@ -496,156 +499,166 @@ class _QuestionScreenState extends State<QuestionScreen> {
     MAX_SCORE = config["highScore"];
     MEDIUM_SCORE = config["mediumScore"];
     LOW_SCORE = config["lowScore"];
-    return Scaffold(
-      body: SafeArea(
-        child: SizedBox(
-          height: MediaQuery.sizeOf(context).height,
-          child: Column(
-            children: [
-              if (isLoading) ...{
-                Container()
-              } else ...{
-                if (errorMessage != null) ...{
-                  BuildErrorWidget(
-                    errorMessage: errorMessage!,
-                    onRetry: () async => _generateData(context),
-                    onBack: () => Navigator.pop(context),
-                  )
+    return PopScope(
+      canPop:
+          true, // Permite que la pantalla sea sacada de la pila de navegación
+      onPopInvokedWithResult: (didPop, result) async {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: SizedBox(
+            height: MediaQuery.sizeOf(context).height,
+            child: Column(
+              children: [
+                if (isLoading) ...{
+                  Container()
                 } else ...{
-                  Column(
-                    children: <Widget>[
-                      HeaderNotDetailsStageWidget(
-                        title:
-                            "Conoce el ${course != null ? course!.title : ''}",
-                        stage: stage != null ? stage!.id : '',
-                        subtitle: stage != null ? stage!.sectionName : '',
-                        details: stage,
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                  if (!showTitleObtained && !showLastStageCompleted) ...{
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      padding: EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                      width: double.infinity,
-                      // height: 25.0,
-                      decoration: BoxDecoration(
-                          color: StyleColor.orange,
-                          borderRadius: BorderRadius.circular(8.0)),
-                      child: Text(
-                        "${level?.name} - Paso 1",
-                        style: StylesApp(context).textStyleBody5,
-                      ),
-                    ),
-                  },
-                  SizedBox(
-                    height: 19.0,
-                  ),
-                  if (!activityIsCompleted) ...{
-                    // we show  question and answer or ordering
-                    Container(
-                      constraints: BoxConstraints(minHeight: 68.0),
-                      margin: EdgeInsets.symmetric(horizontal: 6.0),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 11.0, vertical: 15.0),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Color(0XFFFFBB00),
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withValues(alpha: .25),
-                              offset: Offset(0.0, 4.0),
-                              blurStyle: BlurStyle.outer,
-                              blurRadius: 4.0)
-                        ],
-                      ),
-                      child: Text(
-                        currentQuestion.question,
-                        style: StylesApp(context)
-                            .textStyleBody12
-                            .copyWith(color: Colors.black),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 38.0,
-                    ),
-                    if (questions.isNotEmpty)
-                      Expanded(
-                        child: _buildBody(context),
-                      )
+                  if (errorMessage != null) ...{
+                    BuildErrorWidget(
+                      errorMessage: errorMessage!,
+                      onRetry: () async => _generateData(context),
+                      onBack: () => Navigator.pop(context),
+                    )
                   } else ...{
-                    // si completo nivel
-                    if (showStepCompleted) ...{
-                      Expanded(
-                        child: _buildActivityCompleted(context, levelProgress!),
-                      )
-                    },
-                    // si obtiene recompensa por completar sección
-                    if (showRewardObtained) ...{
-                      Expanded(
-                        child: RewardWidget(
-                          rewardInfo: reward,
-                          onPressed: () async {
-                            LoadingService().showLoading(context);
-                            // aplico recompensa a usuario
-                            final responseApply = await applyRewardToUser(
-                                userData!.user.id, reward?.id);
-                            if (responseApply.error != null) {
-                              LoadingService().hideLoading();
-                              await showCustomDialog(context,
-                                  message: responseApply.error!,
-                                  dialogType: DialogType.error);
-                              return;
-                            }
-                            // actualizo datos local de perfil de usuario
-                            updateLocalProfile(responseApply.data);
-                            LoadingService().hideLoading();
-
-                            // si es la ultima sección del curso
-                            if (sendScore!.isLastStage) {
-                              setState(() {
-                                showStepCompleted = false;
-                                showTitleObtained = false;
-                                showRewardObtained = false;
-                                showLastStageCompleted = true;
-                              });
-                            } else {
-                              Navigator.popAndPushNamed(context, '/mapPage',
-                                  arguments: {
-                                    'courseId': courseId,
-                                    'sectionId': '$nextSectionId'
-                                  });
-                            }
+                    Column(
+                      children: <Widget>[
+                        HeaderNotDetailsStageWidget(
+                          title:
+                              "Conoce el ${course != null ? course!.title : ''}",
+                          stage: stage != null ? stage!.id : '',
+                          subtitle: stage != null ? stage!.sectionName : '',
+                          details: stage,
+                          onPressed: () {
+                            Navigator.pop(context);
                           },
+                        ),
+                      ],
+                    ),
+                    if (!showTitleObtained && !showLastStageCompleted) ...{
+                      Container(
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                        width: double.infinity,
+                        // height: 25.0,
+                        decoration: BoxDecoration(
+                            color: StyleColor.orange,
+                            borderRadius: BorderRadius.circular(8.0)),
+                        child: Text(
+                          "${level?.name} - Paso ${numberQuestion}",
+                          style: StylesApp(context).textStyleBody5,
                         ),
                       ),
                     },
-                    // si es la ultima sección del curso
-                    if (showLastStageCompleted) ...{
-                      Expanded(
-                        child: _buildLastStage(context),
+                    SizedBox(
+                      height: 19.0,
+                    ),
+                    if (!activityIsCompleted) ...{
+                      // we show  question and answer or ordering
+                      Container(
+                        constraints: BoxConstraints(minHeight: 68.0),
+                        margin: EdgeInsets.symmetric(horizontal: 6.0),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 11.0, vertical: 15.0),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color(0XFFFFBB00),
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withValues(alpha: .25),
+                                offset: Offset(0.0, 4.0),
+                                blurStyle: BlurStyle.outer,
+                                blurRadius: 4.0)
+                          ],
+                        ),
+                        child: Text(
+                          currentQuestion.question,
+                          style: StylesApp(context)
+                              .textStyleBody12
+                              .copyWith(color: Colors.black),
+                        ),
                       ),
-                    },
-                    //si tiene premio por el curso
-                    if (showPrizeWon) ...{
-                      Expanded(
-                        child: _buildPrizeWon(context),
-                      )
-                    },
-                    //si tiene Titulo por el curso
-                    if (showTitleObtained) ...{
-                      Expanded(
-                        child: _buildAchievementUnloked(context),
-                      )
+                      SizedBox(
+                        height: 38.0,
+                      ),
+                      if (questions.isNotEmpty)
+                        Expanded(
+                          child: _buildBody(context),
+                        )
+                    } else ...{
+                      // si completo nivel
+                      if (showStepCompleted) ...{
+                        Expanded(
+                          child:
+                              _buildActivityCompleted(context, levelProgress!),
+                        )
+                      },
+                      // si obtiene recompensa por completar sección
+                      if (showRewardObtained) ...{
+                        Expanded(
+                          child: RewardWidget(
+                            rewardInfo: reward,
+                            onPressed: () async {
+                              LoadingService().showLoading(context);
+                              // aplico recompensa a usuario
+                              final responseApply = await applyRewardToUser(
+                                  userData!.user.id, reward?.id);
+                              if (responseApply.error != null) {
+                                LoadingService().hideLoading();
+                                await showCustomDialog(context,
+                                    message: responseApply.error!,
+                                    dialogType: DialogType.error);
+                                return;
+                              }
+                              // actualizo datos local de perfil de usuario
+                              updateLocalProfile(responseApply.data);
+                              LoadingService().hideLoading();
+
+                              // si es la ultima sección del curso
+                              if (sendScore!.isLastStage) {
+                                setState(() {
+                                  showStepCompleted = false;
+                                  showTitleObtained = false;
+                                  showRewardObtained = false;
+                                  showLastStageCompleted = true;
+                                });
+                              } else {
+                                Navigator.popAndPushNamed(context, '/mapPage',
+                                    arguments: {
+                                      'courseId': courseId,
+                                      'sectionId': '$nextSectionId'
+                                    });
+                              }
+                            },
+                          ),
+                        ),
+                      },
+                      // si es la ultima sección del curso
+                      if (showLastStageCompleted) ...{
+                        Expanded(
+                          child: _buildLastStage(context),
+                        ),
+                      },
+                      //si tiene premio por el curso
+                      if (showPrizeWon) ...{
+                        Expanded(
+                          child: _buildPrizeWon(context),
+                        )
+                      },
+                      //si tiene Titulo por el curso
+                      if (showTitleObtained) ...{
+                        Expanded(
+                          child: _buildAchievementUnloked(context),
+                        )
+                      },
                     },
                   },
                 },
-              },
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -835,7 +848,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ),
               Text(
                 textAlign: TextAlign.center,
-                data.score > 0
+                data.score > 0 && data.score < MAX_SCORE
                     ? "Puedes repetir el paso para\n tratar de ganar 3 estrellas"
                     : "En toda labor hay fruto.",
                 style: StylesApp(context).textStyleBodyAso20.copyWith(
@@ -949,7 +962,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             fit: BoxFit.contain,
           ),
           Text(
-            "550 lms",
+            "${userData!.energyPoints} lms",
             style: StylesApp(context)
                 .textStyleBody12
                 .copyWith(color: StyleColor.orange),
@@ -1020,7 +1033,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   ),
                   Text(
                     textAlign: TextAlign.center,
-                    'Haz ganado un zafiro para\n tu coleccion',
+                    'Haz ganado un ${prize!.typeStone} para\n tu colección',
                     style: StylesApp(context).textStyleBody20,
                   ),
                   SizedBox(
@@ -1042,8 +1055,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    Image.asset(
-                      'assets/premios/zafiro.png',
+                    Image.network(
+                      GraphQLConfig.urlServidor + prize!.img.urlImg,
                       height: 80,
                     ),
                     Divider(
@@ -1051,13 +1064,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       height: 2,
                     ),
                     Text(
-                      "Dan",
+                      "${prize?.biblicalName}",
                       style: StylesApp(context)
                           .textStyleBody12
                           .copyWith(color: Colors.black),
                     ),
                     Text(
-                      "Zafiro",
+                      "${prize?.typeStone}",
                       style: StylesApp(context)
                           .textStyleBody12
                           .copyWith(color: Colors.black),
@@ -1071,7 +1084,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
             Text(
               textAlign: TextAlign.center,
-              "Cuando lo requieras puede canjearlo\n por 200lms de energia",
+              "Cuando lo requieras puede canjearlo\n por ${prize?.exchangeValue}lms de energia",
               style: StylesApp(context)
                   .textStyleBody14
                   .copyWith(color: Colors.black),
@@ -1089,11 +1102,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     children: [
                       Image.asset(
                         "assets/kawaii_fire.png",
-                        height: calculateHeight(550),
+                        height:
+                            calculateHeight(userData!.energyPoints.toDouble()),
                         fit: BoxFit.contain,
                       ),
                       Text(
-                        "550 lms",
+                        "${userData!.energyPoints} lms",
                         style: StylesApp(context)
                             .textStyleBody12
                             .copyWith(color: StyleColor.orange),

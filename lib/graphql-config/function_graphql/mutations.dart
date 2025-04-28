@@ -139,7 +139,6 @@ Future<ResponseData> loginGoogle() async {
                 email
                 username
                 password
-                rolId
                 imgProfileUser
                 userJwtToken {
                   token
@@ -298,7 +297,6 @@ Future register(dataToRegister) async {
           email
           username
           password
-          rolId
           imgProfileUser
           userJwtToken {
             token
@@ -491,7 +489,6 @@ Future resetPassword(email, password) async {
           email
           username
           password
-          rolId
           imgProfileUser
           userJwtToken {
             token

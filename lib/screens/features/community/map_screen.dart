@@ -58,6 +58,7 @@ class _MapScreenState extends State<MapScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       scrollController = ScrollController();
       _generateData(context);
+      await _loadMutePreference();
       // super.dispose();
       if (!isMuted) {
         await playAudio();
@@ -211,6 +212,12 @@ class _MapScreenState extends State<MapScreen>
 
       if (_selectedIndex == 0) {
         Navigator.pushNamed(context, '/layoutPage');
+      } else if (index == 3) {
+        Navigator.pushNamed(
+          context,
+          '/layoutPage1',
+          arguments: {'selectedIndex': 2},
+        );
       } else {
         Navigator.pushNamed(
           context,
@@ -236,7 +243,7 @@ class _MapScreenState extends State<MapScreen>
 
     List coordALeft = [0.20, 0.49, 0.65, 0.65, 0.64];
 
-    List coordBTop = [-0.03, 0.13, 0.31, 0.54, 0.76];
+    List coordBTop = [0.0, 0.13, 0.31, 0.54, 0.76];
     List coordBLeft = [0.40, 0.17, 0.01, 0.03, 0.05];
 
     List coordATopBarco = [0.25, 0.35, 0.45, 0.48, 0.65, 0.75, 0.75, 0.85];

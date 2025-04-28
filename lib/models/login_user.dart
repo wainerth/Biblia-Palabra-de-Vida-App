@@ -92,7 +92,7 @@ class User {
       username: json['username'],
       email: json['email'],
       lastLogin: json['lastLogin'],
-      rolId: json['rolId'],
+      rolId: json['rolId'] ?? 0,
       userChurch: userChurch,
     );
   }

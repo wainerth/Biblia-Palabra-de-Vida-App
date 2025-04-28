@@ -451,7 +451,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                                             maxWidth: 200,
                                           ),
                                           child: Text(
-                                             overflow: TextOverflow.ellipsis,
+                                            overflow: TextOverflow.ellipsis,
                                             "${dailyWord.book!.modernName} ",
                                             style: StylesApp(context)
                                                 .textStyleBody7
@@ -544,36 +544,27 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                   width: double.infinity,
                   child: loadingDaily
                       ? Center(child: CircularProgressIndicator())
-                      : LayoutBuilder(
-                          builder: (context, constraints) {
-                            return ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minHeight: constraints.maxHeight,
-                              ),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Center(
-                                        child: Text(
-                                          "${dailyWord.verse!.text}.",
-                                          style: StylesApp(context)
-                                              .textStyleBody5
-                                              .copyWith(
-                                                color: Colors.black,
-                                                fontSize: 14.sp,
-                                              ),
+                      : SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                  child: Text(
+                                    "${dailyWord.verse!.text}.",
+                                    style: StylesApp(context)
+                                        .textStyleBody5
+                                        .copyWith(
+                                          color: Colors.black,
+                                          fontSize: 14.sp,
                                         ),
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            );
-                          },
+                            ],
+                          ),
                         ),
                 )
               ],
@@ -641,11 +632,13 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                Navigator.pushNamed(context, '/layoutPage1', arguments: {'selectedIndex':2});
+                                Navigator.pushNamed(context, '/layoutPage1',
+                                    arguments: {'selectedIndex': 2});
                               },
                               child: Container(
                                 constraints: BoxConstraints(
-                                    maxWidth: StylesApp(context).sizeTextPosition,
+                                    maxWidth:
+                                        StylesApp(context).sizeTextPosition,
                                     minHeight: 20),
                                 width: double.infinity,
                                 decoration: BoxDecoration(

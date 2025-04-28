@@ -370,25 +370,26 @@ class _RankingScreenViewState extends State<RankingScreenView> {
         if (index == 5) {
           return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.arrow_upward_rounded, color: Colors.green),
-                    Text(
-                      'Zona de Ascenso',
-                      style: StylesApp(context).textStyleBody15.copyWith(
-                            color: StyleColor.greenDark,
-                            fontWeight: FontWeight.bold,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    Icon(Icons.arrow_upward_rounded, color: Colors.green),
-                  ],
+              if (!isLastLeague())
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.arrow_upward_rounded, color: Colors.green),
+                      Text(
+                        'Zona de Ascenso',
+                        style: StylesApp(context).textStyleBody15.copyWith(
+                              color: StyleColor.greenDark,
+                              fontWeight: FontWeight.bold,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Icon(Icons.arrow_upward_rounded, color: Colors.green),
+                    ],
+                  ),
                 ),
-              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -454,25 +455,26 @@ class _RankingScreenViewState extends State<RankingScreenView> {
         } else if (index == 10) {
           return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.arrow_downward_rounded, color: Colors.red),
-                    Text(
-                      'Zona de Descenso',
-                      style: StylesApp(context).textStyleBody15.copyWith(
-                            color: StyleColor.redDark,
-                            fontWeight: FontWeight.bold,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    Icon(Icons.arrow_downward_rounded, color: Colors.red),
-                  ],
+              if (!isFirstLeague())
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.arrow_downward_rounded, color: Colors.red),
+                      Text(
+                        'Zona de Descenso',
+                        style: StylesApp(context).textStyleBody15.copyWith(
+                              color: StyleColor.redDark,
+                              fontWeight: FontWeight.bold,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Icon(Icons.arrow_downward_rounded, color: Colors.red),
+                    ],
+                  ),
                 ),
-              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -673,6 +675,28 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     }
 
     return colors;
+  }
+
+  bool isFirstLeague() {
+    final leagues = Provider.of<CatalogueProvider>(context, listen: false)
+        .allLeagues
+        .map((league) => league)
+        .toList();
+    if (leagues.first.id == activeLeagueId) {
+      return true;
+    }
+    return false;
+  }
+
+  bool isLastLeague() {
+    final leagues = Provider.of<CatalogueProvider>(context, listen: false)
+        .allLeagues
+        .map((league) => league)
+        .toList();
+    if (leagues.last.id == activeLeagueId) {
+      return true;
+    }
+    return false;
   }
 }
 

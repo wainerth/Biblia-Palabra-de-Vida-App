@@ -44,7 +44,6 @@ Future<ResponseData> getProfileUser(token, idUser) async {
                         username
                         email
                         lastLogin
-                        rolId
                         userChurch {
                         churchId
                         status
@@ -215,6 +214,76 @@ Future<ResponseData> getUserTitle(userId) async {
     }
     return ResponseData(
         data: null, error: 'Get User Title Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getTitleForUser(userId, courseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+  final GraphQLClient client = createClient(authToken: userToken);
+  final QueryOptions options = QueryOptions(
+    operationName: "GetTitleForUser",
+    document: gql(r'''
+      query GetTitleForUser($userId: ID, $courseId: ID) {
+        getTitleForUser(userId: $userId, courseId: $courseId) {
+          data {
+            id
+            courseId
+            title
+            description
+            img {
+            urlImg 
+            }
+            unLockTitle
+            status
+          }
+          message
+        }
+      }
+    '''),
+    variables: <String, dynamic>{"userId": userId, "courseId": courseId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data == null ||
+        data['getTitleForUser'] == null ||
+        data['getTitleForUser']["data"] == null) {
+      return ResponseData(
+        data: null,
+        error: data?['getTitleForUser']["message"] ??
+            'get title for user failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getTitleForUser']["data"],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get User for title Title Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -1112,7 +1181,6 @@ Future lastLevelProgressUser(userId, levelId) async {
         newRecord
         user {
           username
-          rolId
           id
         }
         failedAttempts

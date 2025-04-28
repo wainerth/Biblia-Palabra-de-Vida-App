@@ -747,7 +747,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       activeIcon: Column(
         children: [
           Icon(
-            Icons.question_mark_outlined,
+            Icons.area_chart_sharp,
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.blueDark,
           ),
@@ -759,9 +759,9 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
           //   fit: BoxFit.cover,
           // ),
           Text(
-            'Dudas',
+            'Ranking',
             style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.greenDark,
+                  color: StyleColor.blueDark,
                 ),
           ),
           Container(
@@ -777,7 +777,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       icon: Column(
         children: [
           Icon(
-            Icons.question_mark_outlined,
+            Icons.area_chart_sharp,
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.blueDark,
           ),
@@ -789,7 +789,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
           //   fit: BoxFit.cover,
           // ),
           Text(
-            'Dudas',
+            'Ranking',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -798,23 +798,23 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
+     BottomNavigationBarItem(
       activeIcon: Column(
         children: [
           Icon(
-            Icons.language,
+            Icons.question_mark_outlined,
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.redDark,
           ),
           // Image.asset(
           //   'assets/home.png',
-          //   color: StyleColor.blueDark,
+          //   color: StyleColor.violetDream,
           //   width: StylesApp(context).sizeIconBottomBar,
           //   height: StylesApp(context).sizeIconBottomBar,
           //   fit: BoxFit.cover,
           // ),
           Text(
-            'Reto online',
+            'Dudas',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -832,19 +832,19 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       icon: Column(
         children: [
           Icon(
-            Icons.language,
+            Icons.question_mark_outlined,
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.redDark,
           ),
           // Image.asset(
           //   'assets/home.png',
-          //   color: StyleColor.blueDark,
+          //   color: StyleColor.violetDream,
           //   width: StylesApp(context).sizeIconBottomBar,
           //   height: StylesApp(context).sizeIconBottomBar,
           //   fit: BoxFit.cover,
           // ),
           Text(
-            'Reto online',
+            'Dudas',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -857,19 +857,19 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       activeIcon: Column(
         children: [
           Icon(
-            Icons.notifications_none_rounded,
+            Icons.language,
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.grayMedium,
           ),
           // Image.asset(
           //   'assets/home.png',
-          //   color: StyleColor.violetDream,
+          //   color: StyleColor.blueDark,
           //   width: StylesApp(context).sizeIconBottomBar,
           //   height: StylesApp(context).sizeIconBottomBar,
           //   fit: BoxFit.cover,
           // ),
           Text(
-            'Novedad',
+            'Reto online',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),
@@ -887,19 +887,19 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       icon: Column(
         children: [
           Icon(
-            Icons.notifications_none_rounded,
+            Icons.language,
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.grayMedium,
           ),
           // Image.asset(
           //   'assets/home.png',
-          //   color: StyleColor.redDark,
+          //   color: StyleColor.blueDark,
           //   width: StylesApp(context).sizeIconBottomBar,
           //   height: StylesApp(context).sizeIconBottomBar,
           //   fit: BoxFit.cover,
           // ),
           Text(
-            'Novedad',
+            'Reto online',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),
@@ -908,6 +908,61 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       ),
       label: '',
     ),
+    // BottomNavigationBarItem(
+    //   activeIcon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.notifications_none_rounded,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.grayMedium,
+    //       ),
+    //       // Image.asset(
+    //       //   'assets/home.png',
+    //       //   color: StyleColor.violetDream,
+    //       //   width: StylesApp(context).sizeIconBottomBar,
+    //       //   height: StylesApp(context).sizeIconBottomBar,
+    //       //   fit: BoxFit.cover,
+    //       // ),
+    //       Text(
+    //         'Novedad',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.grayMedium,
+    //             ),
+    //       ),
+    //       Container(
+    //         width: double.infinity,
+    //         height: 2,
+    //         decoration: BoxDecoration(
+    //           color: StyleColor.grayMedium,
+    //           borderRadius: BorderRadius.circular(5),
+    //         ),
+    //       )
+    //     ],
+    //   ),
+    //   icon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.notifications_none_rounded,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.grayMedium,
+    //       ),
+    //       // Image.asset(
+    //       //   'assets/home.png',
+    //       //   color: StyleColor.redDark,
+    //       //   width: StylesApp(context).sizeIconBottomBar,
+    //       //   height: StylesApp(context).sizeIconBottomBar,
+    //       //   fit: BoxFit.cover,
+    //       // ),
+    //       Text(
+    //         'Novedad',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.grayMedium,
+    //             ),
+    //       ),
+    //     ],
+    //   ),
+    //   label: '',
+    // ),
   ];
 }
 
