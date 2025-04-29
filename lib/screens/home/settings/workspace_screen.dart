@@ -37,16 +37,18 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (Provider.of<UserProvider>(context, listen: false).getDailyProverb !=
-          null) {
-        setState(() {
-          dailyWord = Provider.of<UserProvider>(context, listen: false)
-              .getDailyProverb!;
-        });
-      } else {
-        await getDailyProverb();
+      if (mounted) {
+        if (Provider.of<UserProvider>(context, listen: false).getDailyProverb !=
+            null) {
+          setState(() {
+            dailyWord = Provider.of<UserProvider>(context, listen: false)
+                .getDailyProverb!;
+          });
+        } else {
+          await getDailyProverb();
+        }
+        await loadGetOneReflection();
       }
-      await loadGetOneReflection();
     });
   }
 
@@ -114,7 +116,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
               SizedBox(
                 height: 12.0,
               ),
-              _buildPositionSection(context, dataUser!),
+              dataUser != null
+                  ? _buildPositionSection(context, dataUser)
+                  : Container(),
               SizedBox(
                 height: 12.0,
               ),
@@ -469,13 +473,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                                       ),
                                     ]),
                               )
-                            //  Text(
-                            //     "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}",
-                            //     style:
-                            //         StylesApp(context).textStyleBody7.copyWith(
-                            //               color: Colors.white,
-                            //             ),
-                            //   )
                             : Text(""),
                       ),
                       Row(
@@ -610,8 +607,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                                   child: CachedNetworkImage(
                                       fit: BoxFit.cover,
                                       alignment: Alignment.topCenter,
-                                      imageUrl: userData!
-                                              .imgProfileUser.isNotEmpty
+                                      imageUrl: userData != null &&
+                                              userData!
+                                                  .imgProfileUser.isNotEmpty
                                           ? GraphQLConfig.urlServidor +
                                               userData.imgProfileUser +
                                               '?timestamp=${DateTime.now().millisecondsSinceEpoch}'
@@ -694,10 +692,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                           child: Text(
                             textAlign: TextAlign.center,
                             softWrap: true,
-                            dataUser!.name.split(' ')[0][0].toUpperCase() +
-                                dataUser!.name
-                                    .split(' ')[0]
-                                    .substring(1), //userData!.user.username,
+                            dataUser != null
+                                ? dataUser!.name
+                                        .split(' ')[0][0]
+                                        .toUpperCase() +
+                                    dataUser!.name.split(' ')[0].substring(1)
+                                : '', //userData!.user.username,
                             style: StylesApp(context)
                                 .textStyleBody6
                                 .copyWith(color: Colors.white),

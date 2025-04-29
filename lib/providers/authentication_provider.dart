@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../graphql-config/function_graphql/mutations.dart';
+import '../main.dart';
 
 class AuthenticationProvider extends ChangeNotifier {
   final CatalogueProvider _catalogueProvider;
@@ -95,6 +96,10 @@ class AuthenticationProvider extends ChangeNotifier {
     final userProfile = await getProfileUser(token, userId);
     error = userProfile.error;
     if (error != null) {
+      if (error.contains("No se encontró el usuario")) {
+        await logoutUser(navigatorKey);
+        return ResponseData(data: null, error: "No se encontró el usuario");
+      }
       return ResponseData(data: null, error: error);
     }
 
@@ -311,12 +316,19 @@ class AuthenticationProvider extends ChangeNotifier {
     if (result.error != null) {
       return false;
     }
+    // Usa navigatorKey.currentState para acceder al Navigator
+    if (navigatorKey.currentState != null) {
+      navigatorKey.currentState!.popUntil((route) => route.isFirst);
+      navigatorKey.currentState!.pushReplacementNamed('/homePage');
 
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    Navigator.pushReplacementNamed(context, '/homePage');
-    Provider.of<UserProvider>(context, listen: false).dailyProverb = null;
-    Provider.of<UserProvider>(context, listen: false).setUser(null);
+      // Accede a UserProvider usando el contexto del NavigatorKey
+      final userProvider = Provider.of<UserProvider>(
+          navigatorKey.currentContext!,
+          listen: false);
+      userProvider.dailyProverb = null;
+      userProvider.setUser(null);
+    }
     token = null;
-    return true;
+    notifyListeners();
   }
 }

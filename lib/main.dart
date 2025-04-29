@@ -8,7 +8,11 @@ import 'package:provider/provider.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
+  
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterDownloader.initialize(
     debug: true, // Set to false in production
@@ -72,7 +76,8 @@ class _MyAppState extends State<MyApp> {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Palabra de Vida',
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: themeProvider.currentTheme,
       localizationsDelegates: const [
