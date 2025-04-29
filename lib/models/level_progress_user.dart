@@ -95,7 +95,7 @@ class InfoUser {
   factory InfoUser.fromJson(Map<String, dynamic> json) {
     return InfoUser(
       username: json['username'],
-      rolId: json['rolId'],
+      rolId: json['rolId'] ?? 0,
       id: json['id'],
     );
   }

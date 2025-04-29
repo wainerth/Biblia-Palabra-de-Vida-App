@@ -101,6 +101,9 @@ class _UserInfoStepState extends State<UserInfoStep> {
               if (value == null || value.isEmpty) {
                 return "El Nombre de Usuario es obligatorio";
               }
+              if(value.contains(' ')){
+                return "El Nombre de Usuario no puede contener espacios";
+              }
               return null;
             },
           ),

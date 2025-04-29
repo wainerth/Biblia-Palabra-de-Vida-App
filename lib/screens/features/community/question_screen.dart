@@ -300,6 +300,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         orderedCompleted = false;
         _selectionCompleted = false;
         currentQuestion = questions[currentIndex];
+        numberQuestion = currentIndex + 1;
         currentAnswers = questions[currentIndex].answers;
         orderedAnswers.clear();
       });
@@ -535,7 +536,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         ),
                       ],
                     ),
-                    if (!showTitleObtained && !showLastStageCompleted) ...{
+                    if (!showTitleObtained && !showRewardObtained && !showPrizeWon && !showLastStageCompleted) ...{
                       Container(
                         margin:
                             EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -944,7 +945,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 Text(
                   textAlign: TextAlign.center,
-                  'El esfuerzo valió la pena  completaste la Etapa 2 \n “${stage?.sectionName}” \n fue completada con éxito"',
+                  'El esfuerzo valió la pena  completaste la Etapa ${sectionId} \n “${stage?.sectionName}” \n fue completada con éxito"',
                   style: StylesApp(context).textStyleBody20,
                 ),
                 SizedBox(
@@ -975,6 +976,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
             colorIcon: Colors.white,
             buttonStyle: StylesApp(context).btnPrimary,
             text: "Compartir logro",
+            onPressed: () async { 
+                await Share.share(
+                  "¡Etapa ${sectionId}-${stage?.sectionName} completada",
+                  subject: "¡Felicita a ${userData!.user.username}! ",
+                );
+            }
+
           ),
           SizedBox(height: 43),
           ButtonThemeWidget(
@@ -1006,7 +1014,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
             Container(
@@ -1029,40 +1037,56 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         .copyWith(color: Colors.white),
                   ),
                   SizedBox(
-                    height: 29,
+                    height: 8,
                   ),
-                  Text(
-                    textAlign: TextAlign.center,
-                    'Haz ganado un ${prize!.typeStone} para\n tu colección',
-                    style: StylesApp(context).textStyleBody20,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      'Haz ganado un ${prize!.typeStone} para\n tu colección',
+                      style: StylesApp(context).textStyleBody20,
+                    ),
                   ),
                   SizedBox(
-                    height: 29,
+                    height: 15,
                   ),
                 ],
               ),
             ),
-            SizedBox(
-              height: 29,
-            ),
+            // SizedBox(
+            //   height: 10,
+            // ),
             Container(
               width: 158,
               // height: 175,
               decoration: BoxDecoration(
-                  border: Border.all(width: 15, color: StyleColor.orange),
+                  border: Border.all(width: 15, color: Color(0XFFF3AD3D)),
                   borderRadius: BorderRadius.circular(12)),
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(2.0),
                 child: Column(
                   children: [
-                    Image.network(
-                      GraphQLConfig.urlServidor + prize!.img.urlImg,
-                      height: 80,
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            offset: Offset(0.0, 4.0),
+                            blurStyle: BlurStyle.outer,
+                            blurRadius: 4.0,
+                          ),
+                        ]
+                      ),
+                      child: Image.network(
+                        GraphQLConfig.urlServidor + prize!.img.urlImg,
+                        height: 80,
+                      ),
                     ),
-                    Divider(
-                      color: Colors.black.withValues(alpha: 0.50),
-                      height: 2,
-                    ),
+                    // Divider(
+                    //   color: Colors.black.withValues(alpha: 0.50),
+                    //   height: 3,
+                    // ),
                     Text(
                       "${prize?.biblicalName}",
                       style: StylesApp(context)
@@ -1084,7 +1108,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
             Text(
               textAlign: TextAlign.center,
-              "Cuando lo requieras puede canjearlo\n por ${prize?.exchangeValue}lms de energia",
+              "Cuando lo requieras puede canjearlo\n por ${prize?.exchangeValue.toInt()}lms de energia",
               style: StylesApp(context)
                   .textStyleBody14
                   .copyWith(color: Colors.black),
@@ -1115,29 +1139,30 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     ],
                   ),
                 ),
-                Expanded(
-                  flex: 1,
-                  child: ButtonThemeWidget(
-                    text: "Continuar",
-                    width: 132,
-                    height: 32,
-                    buttonStyle: StylesApp(context).btnWidgetSmall,
-                    onPressed: () {
-                      //si obtuvo Premio
-                      if (title != null) {
-                        setState(() {
-                          showStepCompleted = false;
-                          showRewardObtained = false;
-                          showLastStageCompleted = false;
-                          showPrizeWon = false;
-                          showTitleObtained = true;
-                        });
-                      } else {
-                        // hacemos route a aventura screen
-                        Navigator.popAndPushNamed(context, '/aventurePage');
-                      }
-                    },
-                  ),
+                SizedBox(
+                  width: 29,
+                ),
+                ButtonThemeWidget(
+                  text: "Continuar",
+                  width: 132,
+                  height: 32,
+                  buttonStyle: StylesApp(context).btnWidgetSmall,
+                  onPressed: () {
+                    //si obtuvo Premio
+                    if (title != null) {
+                      setState(() {
+                        showStepCompleted = false;
+                        showRewardObtained = false;
+                        showLastStageCompleted = false;
+                        showPrizeWon = false;
+                        showTitleObtained = true;
+                      });
+                    } else {
+                      // hacemos route a aventura screen
+                     Navigator.popAndPushNamed(
+                                    context, '/layoutPage1');
+                    }
+                  },
                 ),
               ],
             ),
@@ -1247,11 +1272,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     children: [
                       Image.asset(
                         "assets/kawaii_fire.png",
-                        height: calculateHeight(550),
+                        height: calculateHeight(userData!.energyPoints.toDouble()),
                         fit: BoxFit.contain,
                       ),
                       Text(
-                        "550 lms",
+                        "${userData!.energyPoints} lms",
                         style: StylesApp(context)
                             .textStyleBody12
                             .copyWith(color: StyleColor.orange),
@@ -1269,7 +1294,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     height: 32,
                     buttonStyle: StylesApp(context).btnWidgetSmall,
                     onPressed: () {
-                      Navigator.popAndPushNamed(context, '/aventurePage');
+                       Navigator.popAndPushNamed(
+                                    context, '/layoutPage1');
+                      // Navigator.popAndPushNamed(context, '/aventurePage');
                     },
                   ),
                 ),

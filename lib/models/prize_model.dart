@@ -8,7 +8,7 @@ class PrizeModel {
   final String description;
   final Img img;
   final double exchangeValue;
-  final String unLockPrize;
+  final bool unLockPrize;
   final int status;
 
   PrizeModel({
@@ -27,12 +27,12 @@ class PrizeModel {
     return PrizeModel(
       id: json['id'],
       courseId: json['courseId'],
-      biblicalName: json['biblicalName'] as String,
-      typeStone: json['typeStone'] as String,
-      description: json['description'] as String,
-      img: Img.fromJson(json['img'] as Map<String, dynamic>),
+      biblicalName: json['biblicalName'] ,
+      typeStone: json['typeStone'] ,
+      description: json['description'] ,
+      img: Img.fromJson(json['img']),
       exchangeValue: (json['exchangeValue'] as num).toDouble(),
-      unLockPrize: json['unLockPrize'] as String,
+      unLockPrize: json['unLockPrize'] ?? false,
       status: json['status'],
     );
   }
