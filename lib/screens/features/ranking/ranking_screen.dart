@@ -186,14 +186,14 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                                       color: StyleColor.black),
                                             ),
                                             SizedBox(height: 10),
-                                            Text(
-                                              'Maximo de Participantes: ${widget.ranking[index].maxMembers}',
-                                              style: StylesApp(context)
-                                                  .textStyleBody14
-                                                  .copyWith(
-                                                      color: StyleColor.black),
-                                            ),
-                                            SizedBox(height: 10),
+                                            // Text(
+                                            //   'Maximo de Participantes: ${widget.ranking[index].maxMembers}',
+                                            //   style: StylesApp(context)
+                                            //       .textStyleBody14
+                                            //       .copyWith(
+                                            //           color: StyleColor.black),
+                                            // ),
+                                            // SizedBox(height: 10),
                                             // Text(
                                             //   'ID de Liga: ${widget.ranking[index].id}',
                                             //   style: StylesApp(context)
@@ -243,7 +243,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                         ),
                                         child: Image.network(GraphQLConfig
                                                 .urlServidor +
-                                            widget.ranking[index].img.urlImg),
+                                            widget.ranking[index].img.urlImg,
+                                            ),
                                       ),
                                     ),
                                     if (widget.ranking[index].id ==

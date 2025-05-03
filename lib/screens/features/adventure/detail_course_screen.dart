@@ -22,6 +22,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   bool isLoading = true;
   String? errorMessage;
   LastProgressUser? progressUser;
+  int _selectedIndex = 1;
 
   @override
   void initState() {
@@ -71,27 +72,28 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
     }
   }
 
+  void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil('/layoutPage', (route) => false);
+
+    setState(() {
+      _selectedIndex = index;
+      if (_selectedIndex == 0) {
+        Navigator.pushNamed(context, '/layoutPage');
+      } else {
+        _selectedIndex = index;
+        Navigator.pushNamed(
+          context,
+          '/layoutPage1',
+          arguments: {'selectedIndex': _selectedIndex},
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    int _selectedIndex = 1;
-    void _onItemTapped(int index) {
-      
-      if (index == _selectedIndex) return;
-      setState(() {
-        _selectedIndex = index;
-        if (_selectedIndex == 0) {
-          Navigator.pushNamed(context, '/layoutPage');
-        } else {
-          _selectedIndex = index;
-          Navigator.pushNamed(
-            context,
-            '/layoutPage',
-            arguments: {'selectedIndex': _selectedIndex},
-          );
-        }
-      });
-    }
-
     return Scaffold(
       body: SafeArea(
         child: OrientationBuilder(

@@ -525,6 +525,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     Column(
                       children: <Widget>[
                         HeaderNotDetailsStageWidget(
+                          showStage: !showTitleObtained && !showRewardObtained && !showPrizeWon,
+                          showAction:!showTitleObtained && !showRewardObtained && !showPrizeWon, 
                           title:
                               "Conoce el ${course != null ? course!.title : ''}",
                           stage: stage != null ? stage!.id : '',

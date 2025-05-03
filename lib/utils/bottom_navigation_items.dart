@@ -17,11 +17,6 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             height: StylesApp(context).sizeIconBottomBar,
             fit: BoxFit.cover,
           ),
-          // Icon(
-          //   Icons.home_outlined,
-          //   size: StylesApp(context).sizeIconBottomBar,
-          //   color: StyleColor.violetDream,
-          // ),
           Text(
             'Inicio',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -47,11 +42,6 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             height: StylesApp(context).sizeIconBottomBar,
             fit: BoxFit.cover,
           ),
-          // Icon(
-          //   Icons.home_outlined,
-          //   size: StylesApp(context).sizeIconBottomBar,
-          //   color: StyleColor.violetDream,
-          // ),
           Text(
             'Inicio',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -335,13 +325,6 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.black,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Aventuras',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -365,13 +348,6 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.black,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Aventuras',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -390,13 +366,6 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.greenDark,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Ranking',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -572,18 +541,20 @@ final List<BottomNavItem> items = [
     page: RankingScreen(),
   ),
   BottomNavItem(
-    title: "Dudas",
-    icon: Icons.question_mark_outlined,
-    page: DoubtScreen(),
-  ),
+      title: "Dudas",
+      icon: Icons.question_mark_outlined,
+      page: SoonScreen() //DoubtScreen(),
+      ),
   BottomNavItem(
       title: "Reto online",
       icon: Icons.language,
-      page: OnlineChallengeScreen()),
+      page: SoonScreen() // OnlineChallengeScreen(),
+      ),
   BottomNavItem(
       title: "Novedad",
       icon: Icons.notifications_none_rounded,
-      page: NewsScreen())
+      page: SoonScreen() // NewsScreen(),
+      )
 ];
 
 List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
@@ -641,13 +612,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.black,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Aventuras',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -671,13 +635,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.black,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Aventuras',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -696,13 +653,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.greenDark,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Mapa',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -726,13 +676,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.greenDark,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Mapa',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -751,13 +694,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.blueDark,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Ranking',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -781,13 +717,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.blueDark,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Ranking',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -798,7 +727,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       ),
       label: '',
     ),
-     BottomNavigationBarItem(
+    BottomNavigationBarItem(
       activeIcon: Column(
         children: [
           Icon(
@@ -806,13 +735,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.redDark,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Dudas',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -836,13 +758,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.redDark,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.violetDream,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Dudas',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -861,13 +776,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.grayMedium,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.blueDark,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Reto online',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -891,13 +799,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.grayMedium,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.blueDark,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Reto online',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -908,61 +809,6 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       ),
       label: '',
     ),
-    // BottomNavigationBarItem(
-    //   activeIcon: Column(
-    //     children: [
-    //       Icon(
-    //         Icons.notifications_none_rounded,
-    //         size: StylesApp(context).sizeIconBottomBar,
-    //         color: StyleColor.grayMedium,
-    //       ),
-    //       // Image.asset(
-    //       //   'assets/home.png',
-    //       //   color: StyleColor.violetDream,
-    //       //   width: StylesApp(context).sizeIconBottomBar,
-    //       //   height: StylesApp(context).sizeIconBottomBar,
-    //       //   fit: BoxFit.cover,
-    //       // ),
-    //       Text(
-    //         'Novedad',
-    //         style: StylesApp(context).textStyleBody10.copyWith(
-    //               color: StyleColor.grayMedium,
-    //             ),
-    //       ),
-    //       Container(
-    //         width: double.infinity,
-    //         height: 2,
-    //         decoration: BoxDecoration(
-    //           color: StyleColor.grayMedium,
-    //           borderRadius: BorderRadius.circular(5),
-    //         ),
-    //       )
-    //     ],
-    //   ),
-    //   icon: Column(
-    //     children: [
-    //       Icon(
-    //         Icons.notifications_none_rounded,
-    //         size: StylesApp(context).sizeIconBottomBar,
-    //         color: StyleColor.grayMedium,
-    //       ),
-    //       // Image.asset(
-    //       //   'assets/home.png',
-    //       //   color: StyleColor.redDark,
-    //       //   width: StylesApp(context).sizeIconBottomBar,
-    //       //   height: StylesApp(context).sizeIconBottomBar,
-    //       //   fit: BoxFit.cover,
-    //       // ),
-    //       Text(
-    //         'Novedad',
-    //         style: StylesApp(context).textStyleBody10.copyWith(
-    //               color: StyleColor.grayMedium,
-    //             ),
-    //       ),
-    //     ],
-    //   ),
-    //   label: '',
-    // ),
   ];
 }
 
@@ -975,15 +821,20 @@ final List<BottomNavItem> itemsMap = [
       page: AventureScreen()),
   BottomNavItem(title: "Mapa", icon: Icons.map_rounded, page: MapScreen()),
   BottomNavItem(
-      title: "Dudas", icon: Icons.question_mark_outlined, page: DoubtScreen()),
+    title: "Dudas",
+    icon: Icons.question_mark_outlined,
+    page: SoonScreen(), //DoubtScreen(),
+  ),
   BottomNavItem(
-      title: "Reto online",
-      icon: Icons.language,
-      page: OnlineChallengeScreen()),
+    title: "Reto online",
+    icon: Icons.language,
+    page: SoonScreen(), // OnlineChallengeScreen(),
+  ),
   BottomNavItem(
-      title: "Novedad",
-      icon: Icons.notifications_none_rounded,
-      page: NewsScreen())
+    title: "Novedad",
+    icon: Icons.notifications_none_rounded,
+    page: SoonScreen(), // NewsScreen(),
+  )
 ];
 
 List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
@@ -1168,13 +1019,6 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.redDark,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.blueDark,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Reto online',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -1198,13 +1042,6 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.redDark,
           ),
-          // Image.asset(
-          //   'assets/home.png',
-          //   color: StyleColor.blueDark,
-          //   width: StylesApp(context).sizeIconBottomBar,
-          //   height: StylesApp(context).sizeIconBottomBar,
-          //   fit: BoxFit.cover,
-          // ),
           Text(
             'Reto online',
             style: StylesApp(context).textStyleBody10.copyWith(
@@ -1528,16 +1365,25 @@ final List<BottomNavItem> itemsPromises = [
   BottomNavItem(
       title: "Inicio", icon: Icons.home_outlined, page: WorkspaceScreen()),
   BottomNavItem(
-      title: "Biblia", icon: Icons.book_outlined, page: BibleScreen()),
+      title: "Biblia",
+      icon: Icons.book_outlined,
+      page: SoonScreen() // BibleScreen(),
+
+      ),
   BottomNavItem(title: "Promesas", icon: Icons.sync, page: PromisesScreen()),
   BottomNavItem(
-      title: "Dudas", icon: Icons.question_mark_outlined, page: DoubtScreen()),
+      title: "Dudas",
+      icon: Icons.question_mark_outlined,
+      page: SoonScreen() //DoubtScreen(),
+      ),
   BottomNavItem(
       title: "Reto online",
       icon: Icons.language,
-      page: OnlineChallengeScreen()),
+      page: SoonScreen() //OnlineChallengeScreen()
+      ),
   BottomNavItem(
       title: "Novedad",
       icon: Icons.notifications_none_rounded,
-      page: NewsScreen())
+      page: SoonScreen() // NewsScreen()
+      )
 ];

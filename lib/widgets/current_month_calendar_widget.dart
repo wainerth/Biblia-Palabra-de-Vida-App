@@ -62,6 +62,10 @@ class _CurrentMonthCalendarWidgetState
       });
       // dayProtectedStreak = responseStreakCalendar.data["protectedStreak"];
     } catch (e) {
+      setState(() {
+      errorMessage = e as String?;
+        
+      });
     } finally {
       LoadingService().hideLoading();
     }
@@ -83,7 +87,6 @@ class _CurrentMonthCalendarWidgetState
         dayProtectedStreak =
             DateCalendar.fromJson(removeTypename(responseStreakCalendar.data));
       });
-      // dayProtectedStreak = responseStreakCalendar.data["protectedStreak"];
     } catch (e) {
       print(e);
     } finally {
@@ -93,14 +96,6 @@ class _CurrentMonthCalendarWidgetState
 
   @override
   Widget build(BuildContext context) {
-    // DateTime registrationDate = DateTime(2023, 7, 1); // Fecha de registro
-    // DateTime now = DateTime.now();
-    // DateTime currentDate = DateTime(now.year, now.month);
-    // DateTime lastDate = widget.registrationDate.add(Duration(days: 365 * 5));
-
-    // if (currentDate.isBefore(registrationDate)) {
-    //   currentDate = registrationDate;
-    // }
 
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
@@ -132,8 +127,9 @@ class _CurrentMonthCalendarWidgetState
         for (int i = 1; i <= daysInMonth; i++) {
           dayWidgets.add(
             Container(
-              height: 26,
+              height: 26.0,
               width: 26.0,
+              padding: EdgeInsets.all(0),
               margin: EdgeInsets.all(0.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4.0),
@@ -155,8 +151,8 @@ class _CurrentMonthCalendarWidgetState
                           child: Image.asset(
                             "assets/fire_rachaActive.png",
                             fit: BoxFit.fitHeight,
-                            height: 50,
-                            width: 50,
+                            height: 40,
+                            width: 40,
                           ),
                         ),
                       )
@@ -174,8 +170,8 @@ class _CurrentMonthCalendarWidgetState
                           child: Image.asset(
                             "assets/fire_rachaInactive.png",
                             fit: BoxFit.fitHeight,
-                            height: 50,
-                            width: 50,
+                            height: 40,
+                            width: 40,
                           ),
                         ),
                       )
@@ -266,7 +262,7 @@ class _CurrentMonthCalendarWidgetState
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 22.0, vertical: 5),
+                          horizontal: 22.0, vertical: 0),
                       child: GridView.count(
                         crossAxisCount: 7,
                         shrinkWrap: true,

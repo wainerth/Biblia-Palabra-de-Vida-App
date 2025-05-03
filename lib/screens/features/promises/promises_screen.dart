@@ -131,120 +131,127 @@ class _PromisesScreenState extends State<PromisesScreen> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            child: Column(
-              children: [
-                SimpleHeaderWidget(
-                  title: 'Promesas',
-                  onRoute: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                SizedBox(
-                  height: 8.0,
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                      color: StyleColor.orange,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        flex: 0,
-                        child: Image.asset(
-                          'assets/kawaii_fire.png',
-                          width: 40,
-                          height: 40,
-                        ),
+        child: Container(
+          child: Column(
+            children: [
+              SimpleHeaderWidget(
+                title: 'Promesas',
+                onRoute: () {
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(
+                height: 8.0,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                    color: StyleColor.orange,
+                    borderRadius: BorderRadius.circular(8)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 0,
+                      child: Image.asset(
+                        'assets/kawaii_fire.png',
+                        width: 40,
+                        height: 40,
                       ),
-                      Expanded(
-                        flex: 0,
-                        child: Text(
-                          '${userData != null ? userData!.energyPoints : ''}',
+                    ),
+                    Expanded(
+                      flex: 0,
+                      child: Text(
+                        '${userData != null ? userData!.energyPoints : ''}',
+                        style: StylesApp(context).textStyleBody14,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text.rich(
+                        textAlign: TextAlign.center,
+                        TextSpan(
                           style: StylesApp(context).textStyleBody14,
+                          children: [
+                            TextSpan(text: 'Racha: '),
+                            TextSpan(
+                                text:
+                                    '${userData != null ? userData!.streakDaysCount : '0'} días'),
+                          ],
                         ),
                       ),
-                      Expanded(
-                        flex: 1,
-                        child: Text.rich(
-                          textAlign: TextAlign.center,
-                          TextSpan(
-                            style: StylesApp(context).textStyleBody14,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 5.0,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                      child: Column(
+                    children: [
+                      if (isLoading) ...{
+                        Container()
+                      } else ...{
+                        if (errorMessage != null) ...{
+                          BuildErrorWidget(
+                            errorMessage: errorMessage!,
+                            onRetry: () async => _generateData(context),
+                            onBack: () => Navigator.pop(context),
+                          )
+                        } else ...{
+                          Column(
                             children: [
-                              TextSpan(text: 'Racha: '),
-                              TextSpan(
-                                  text:
-                                      '${userData != null ? userData!.streakDaysCount : '0'} días'),
+                              for (var index = 0;
+                                  index < promises.length;
+                                  index++)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0, vertical: 5.0),
+                                  child: CardPromiseWidget(
+                                    onePromise: promises[index],
+                                    redeemedPromise: redeemedPromise[index],
+                                    updateData: (bool value) {
+                                      if (value) {
+                                        setState(() {
+                                          promises[index] = promises[index]
+                                              .copyWith(hasViewed: value);
+                                          print(
+                                              "cambio valor ${promises[index].hasViewed}");
+                                          didChangeDependencies();
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
                             ],
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                if (isLoading) ...{
-                  Container()
-                } else ...{
-                  if (errorMessage != null) ...{
-                    BuildErrorWidget(
-                      errorMessage: errorMessage!,
-                      onRetry: () async => _generateData(context),
-                      onBack: () => Navigator.pop(context),
-                    )
-                  } else ...{
-                    Column(
-                      children: [
-                        for (var index = 0; index < promises.length; index++)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20.0, vertical: 5.0),
-                            child: CardPromiseWidget(
-                              onePromise: promises[index],
-                              redeemedPromise: redeemedPromise[index],
-                              updateData: (bool value) {
-                                if (value) {
-                                  setState(() {
-                                    promises[index] = promises[index]
-                                        .copyWith(hasViewed: value);
-                                    print(
-                                        "cambio valor ${promises[index].hasViewed}");
-                                    didChangeDependencies();
-                                  });
-                                }
-                              },
+                          SizedBox(
+                            height: 20.0,
+                          ),
+                          Center(
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              'Las promesas se actualizarán cada 24 horas',
+                              style: StylesApp(context)
+                                  .textStyleBody12
+                                  .copyWith(color: StyleColor.turquoise),
                             ),
                           ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    Center(
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        'Las promesas se actualizarán cada 24 horas',
-                        style: StylesApp(context)
-                            .textStyleBody12
-                            .copyWith(color: StyleColor.turquoise),
-                      ),
-                    ),
-                  }
-                }
-              ],
-            ),
+                        }
+                      }
+                    ],
+                  )),
+                ),
+              )
+            ],
           ),
         ),
       ),

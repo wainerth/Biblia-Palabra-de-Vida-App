@@ -471,9 +471,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
           ),
           Container(
             constraints: BoxConstraints(
-              minHeight: 84,
+              minHeight: 75
             ),
-            height: 100.sp,
+            height: 85.sp,
             decoration: BoxDecoration(
               color: Color(0XFFFFF2C2),
               borderRadius: BorderRadius.circular(8.0),

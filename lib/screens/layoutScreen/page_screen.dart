@@ -1,7 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class PageScreen extends StatefulWidget {
@@ -15,10 +14,10 @@ class _PageScreenState extends State<PageScreen> {
   int _selectedIndex = 0;
   final List<Widget> _screens = [
     WorkspaceScreen(),
-    BibleScreen(),
-    PrayerScreen(),
-    AudioScreen(),
-    OfferingsScreen(),
+    SoonScreen(),//BibleScreen(),
+    SoonScreen(),//PrayerScreen(),
+    SoonScreen(),//AudioScreen(),
+    SoonScreen(), //OfferingsScreen(),
     SettingsScreen(),
   ];
 
@@ -28,10 +27,10 @@ class _PageScreenState extends State<PageScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    if (index.toString() == 2.toString()) {
-      Navigator.pushNamed(context, '/prayerPage');
-      return;
-    }
+    // if (index.toString() == 2.toString()) {
+    //   Navigator.pushNamed(context, '/prayerPage');
+    //   return;
+    // }
   }
 
   @override
@@ -43,6 +42,12 @@ class _PageScreenState extends State<PageScreen> {
         _selectedIndex = (args as Map<String, dynamic>)["selectedIndex"];
       });
     }
+  }
+
+  getItemsBar(int index, BuildContext context) {
+    return index.toString() == 2.toString()
+        ? getItemsMap(context)
+        : getBottomNavigationBarItems(context);
   }
 
   @override

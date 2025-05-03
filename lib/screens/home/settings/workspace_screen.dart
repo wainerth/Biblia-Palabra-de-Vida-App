@@ -441,37 +441,47 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                       Padding(
                         padding: const EdgeInsets.only(left: 45.0),
                         child: dailyWord.book!.modernName!.isNotEmpty
-                            ? Text.rich(
-                                TextSpan(
-                                    style: StylesApp(context)
-                                        .textStyleBody7
-                                        .copyWith(
-                                          color: Colors.white,
-                                        ),
-                                    children: [
-                                      WidgetSpan(
-                                        child: Container(
-                                          constraints: BoxConstraints(
-                                            maxWidth: 200,
-                                          ),
-                                          child: Text(
-                                            overflow: TextOverflow.ellipsis,
-                                            "${dailyWord.book!.modernName} ",
-                                            style: StylesApp(context)
-                                                .textStyleBody7
-                                                .copyWith(
-                                                  color: Colors.white,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: "${dailyWord.chapter!.chapter}:",
-                                      ),
-                                      TextSpan(
-                                        text: "${dailyWord.verse!.verse}",
-                                      ),
-                                    ]),
+                            ? Row(
+                              spacing: 10,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  constraints: BoxConstraints(maxWidth: 180),
+                                  width: double.infinity,
+                                  child: Text(
+                                    maxLines: 1,
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                  "${dailyWord.book!.modernName}",
+                                  style: StylesApp(context)
+                                    .textStyleBody15
+                                    .copyWith(
+                                      
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                children: [
+                                  Text(
+                                  "${dailyWord.chapter!.chapter}:",
+                                  style: StylesApp(context)
+                                    .textStyleBody15
+                                    .copyWith(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Text(
+                                  "${dailyWord.verse!.verse}",
+                                  style: StylesApp(context)
+                                    .textStyleBody15
+                                    .copyWith(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                                ),
+                              ],
                               )
                             : Text(""),
                       ),

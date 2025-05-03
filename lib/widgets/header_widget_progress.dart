@@ -82,23 +82,15 @@ class HeaderWidgetProgress extends StatelessWidget {
                               errorWidget:(context, url , error) => Image.asset('assets/no-image.jpg')
                             ),
                           ),
-                          
-                          // Image.network(
-                          //   userData!.imgProfileUser.isNotEmpty
-                          //       ? userData.imgProfileUser
-                          //       : 'assets/no-image.jpg',
-                          //   fit: BoxFit.fill,
-                          //   errorBuilder: (context, object, stackTrace) {
-                          //     return Image.asset('assets/no-image.jpg');
-                          //   },
-                          // ),
                         ),
                     ],
                   ),
                 ),
               ),
               Text(
-                userData!.user.username,
+                 textAlign: TextAlign.center,
+                softWrap: true,
+                userData.name.split(' ')[0][0].toUpperCase() + userData.name.split(' ')[0].substring(1),
                 style: StylesApp(context).textStyleTitleWithe24,
               ),
               SizedBox(

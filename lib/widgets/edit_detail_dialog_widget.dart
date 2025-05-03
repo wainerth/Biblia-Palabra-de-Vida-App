@@ -333,9 +333,9 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
           minWidth: 160.0,
           maxWidth: StylesApp(context).sizeTextFormField.width,
         ),
-        child: CustomDropdownWidget<Church>(
-          hintText: "Seleccione una Iglesia",
+        child: CustomDropdownBottomWidget(
           items: optionsChurches,
+          hintText: "Seleccione una Iglesia",
           onChanged: (ModelData? newValue) {
             setState(() {
               _editingData[index] = ModelData(

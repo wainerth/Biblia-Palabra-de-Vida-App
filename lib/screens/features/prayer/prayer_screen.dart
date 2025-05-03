@@ -27,24 +27,24 @@ class _PrayerScreenState extends State<PrayerScreen> {
     Navigator.pushNamed(context, '/requestPage', arguments: type);
   }
 
-  void _onItemTapped(int index) {
-    if (index == _selectedIndex)
-      return; // No hacer nada si el índice no ha cambiado
+  // void _onItemTapped(int index) {
+  //   if (index == _selectedIndex)
+  //     return; // No hacer nada si el índice no ha cambiado
 
-    setState(() {
-      _selectedIndex = index;
+  //   setState(() {
+  //     _selectedIndex = index;
 
-      if (_selectedIndex == 0) {
-        Navigator.pushNamed(context, '/layoutPage');
-      } else {
-        Navigator.pushNamed(
-          context,
-          '/layoutPage',
-          arguments: {'selectedIndex': _selectedIndex},
-        );
-      }
-    });
-  }
+  //     if (_selectedIndex == 0) {
+  //       Navigator.pushNamed(context, '/layoutPage');
+  //     } else {
+  //       Navigator.pushNamed(
+  //         context,
+  //         '/layoutPage',
+  //         arguments: {'selectedIndex': _selectedIndex},
+  //       );
+  //     }
+  //   });
+  // }
 
   Color generateColor(position) {
     List<Color> color = [
@@ -106,18 +106,18 @@ class _PrayerScreenState extends State<PrayerScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBarWidget(
-        type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: true,
-        backgroundColor: Colors.white,
-        selectedItemColor: Color(0XFF12CBC4),
-        unselectedItemColor: Colors.white,
-        selectedLabelStyle: StylesApp(context).textStyleBody10,
-        unselectedLabelStyle: StylesApp(context).textStyleBody10,
-        items: getItemsPreach(context),
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
+      // bottomNavigationBar: CustomBottomNavigationBarWidget(
+      //   type: BottomNavigationBarType.fixed,
+      //   showUnselectedLabels: true,
+      //   backgroundColor: Colors.white,
+      //   selectedItemColor: Color(0XFF12CBC4),
+      //   unselectedItemColor: Colors.white,
+      //   selectedLabelStyle: StylesApp(context).textStyleBody10,
+      //   unselectedLabelStyle: StylesApp(context).textStyleBody10,
+      //   items: getItemsPreach(context),
+      //   currentIndex: _selectedIndex,
+      //   onTap: _onItemTapped,
+      // ),
     );
   }
 
