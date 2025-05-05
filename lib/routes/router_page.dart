@@ -14,8 +14,8 @@ final Map<String, WidgetBuilder> routes = {
   '/mapPage': (BuildContext context) => const MapScreen(),
   '/introAventurePage': (BuildContext context) => IntroAventureScreen(),
   '/aventurePage': (BuildContext context) => AventureScreen(),
-  '/bibliaPage': (BuildContext context) => BibleScreen(),
-  '/communityPage': (BuildContext context) => CommunityScreen(),
+  '/bibliaPage': (BuildContext context) => SoonScreen(),//BibleScreen(),
+  '/communityPage': (BuildContext context) => SoonScreen(), // CommunityScreen(),
   '/profilePage': (BuildContext context) => ProfileScreen(),
   '/workspacePage': (BuildContext context) =>
       AuthGuard(child: WorkspaceScreen()),
