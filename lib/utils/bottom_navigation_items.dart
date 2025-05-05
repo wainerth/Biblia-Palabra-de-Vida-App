@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/bottom_nav_item.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -543,17 +544,17 @@ final List<BottomNavItem> items = [
   BottomNavItem(
       title: "Dudas",
       icon: Icons.question_mark_outlined,
-      page: SoonScreen() //DoubtScreen(),
+      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen()
       ),
   BottomNavItem(
       title: "Reto online",
       icon: Icons.language,
-      page: SoonScreen() // OnlineChallengeScreen(),
+      page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()
       ),
   BottomNavItem(
       title: "Novedad",
       icon: Icons.notifications_none_rounded,
-      page: SoonScreen() // NewsScreen(),
+      page: GraphQLConfig.development ? NewsScreen() : SoonScreen() // ,
       )
 ];
 
@@ -823,17 +824,17 @@ final List<BottomNavItem> itemsMap = [
   BottomNavItem(
     title: "Dudas",
     icon: Icons.question_mark_outlined,
-    page: SoonScreen(), //DoubtScreen(),
+    page: GraphQLConfig.development ? DoubtScreen() : SoonScreen(),
   ),
   BottomNavItem(
     title: "Reto online",
     icon: Icons.language,
-    page: SoonScreen(), // OnlineChallengeScreen(),
+    page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen(), 
   ),
   BottomNavItem(
     title: "Novedad",
     icon: Icons.notifications_none_rounded,
-    page: SoonScreen(), // NewsScreen(),
+    page: GraphQLConfig.development ? NewsScreen() : SoonScreen(), 
   )
 ];
 
@@ -1367,23 +1368,23 @@ final List<BottomNavItem> itemsPromises = [
   BottomNavItem(
       title: "Biblia",
       icon: Icons.book_outlined,
-      page: SoonScreen() // BibleScreen(),
+      page: GraphQLConfig.development ? BibleScreen() : SoonScreen()
 
       ),
   BottomNavItem(title: "Promesas", icon: Icons.sync, page: PromisesScreen()),
   BottomNavItem(
       title: "Dudas",
       icon: Icons.question_mark_outlined,
-      page: SoonScreen() //DoubtScreen(),
+      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen() 
       ),
   BottomNavItem(
       title: "Reto online",
       icon: Icons.language,
-      page: SoonScreen() //OnlineChallengeScreen()
+      page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()
       ),
   BottomNavItem(
       title: "Novedad",
       icon: Icons.notifications_none_rounded,
-      page: SoonScreen() // NewsScreen()
+      page: GraphQLConfig.development ? NewsScreen()  : SoonScreen() 
       )
 ];

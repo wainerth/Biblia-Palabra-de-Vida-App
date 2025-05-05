@@ -1,5 +1,7 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 final Map<String, WidgetBuilder> routes = {
@@ -14,8 +16,8 @@ final Map<String, WidgetBuilder> routes = {
   '/mapPage': (BuildContext context) => const MapScreen(),
   '/introAventurePage': (BuildContext context) => IntroAventureScreen(),
   '/aventurePage': (BuildContext context) => AventureScreen(),
-  '/bibliaPage': (BuildContext context) => SoonScreen(),//BibleScreen(),
-  '/communityPage': (BuildContext context) => SoonScreen(), // CommunityScreen(),
+  '/bibliaPage': (BuildContext context) => GraphQLConfig.development ? BibleScreen() :  SoonScreen(),
+  '/communityPage': (BuildContext context) => GraphQLConfig.development ? CommunityScreen() : SoonScreen(), 
   '/profilePage': (BuildContext context) => ProfileScreen(),
   '/workspacePage': (BuildContext context) =>
       AuthGuard(child: WorkspaceScreen()),
@@ -29,7 +31,7 @@ final Map<String, WidgetBuilder> routes = {
   '/soonPage': (BuildContext context) => SoonScreen(),
   '/preachPage': (BuildContext context) => PreachScreen(),
   '/promisePage': (BuildContext context) => PromisesScreen(), //SoonScreen(),
-  '/playPage': (BuildContext context) => SoonScreen(), // PlayScreen(),
+  '/playPage': (BuildContext context) => GraphQLConfig.development ? PlayScreen() : SoonScreen(), 
   '/settingPage': (BuildContext context) => AuthGuard(child: SettingsScreen()),
   '/leaguePage': (BuildContext context) => RankingScreen(),
 };

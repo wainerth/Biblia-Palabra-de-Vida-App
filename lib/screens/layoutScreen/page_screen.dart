@@ -1,7 +1,9 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 class PageScreen extends StatefulWidget {
   const PageScreen({super.key});
@@ -14,10 +16,10 @@ class _PageScreenState extends State<PageScreen> {
   int _selectedIndex = 0;
   final List<Widget> _screens = [
     WorkspaceScreen(),
-    SoonScreen(),//BibleScreen(),
-    SoonScreen(),//PrayerScreen(),
-    SoonScreen(),//AudioScreen(),
-    SoonScreen(), //OfferingsScreen(),
+    GraphQLConfig.development ? BibleScreen(): SoonScreen(),
+    GraphQLConfig.development ? PrayerScreen() : SoonScreen(),
+    GraphQLConfig.development ? AudioScreen() : SoonScreen(),
+    GraphQLConfig.development ? OfferingsScreen() : SoonScreen(),
     SettingsScreen(),
   ];
 
@@ -27,10 +29,6 @@ class _PageScreenState extends State<PageScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    // if (index.toString() == 2.toString()) {
-    //   Navigator.pushNamed(context, '/prayerPage');
-    //   return;
-    // }
   }
 
   @override
