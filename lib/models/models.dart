@@ -56,3 +56,4 @@ export 'package:biblia_palabra_de_vida_app/models/daily_word.dart';
 export 'package:biblia_palabra_de_vida_app/models/reflection.dart';
 export 'package:biblia_palabra_de_vida_app/models/promise_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/promise_card_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/preach.dart';

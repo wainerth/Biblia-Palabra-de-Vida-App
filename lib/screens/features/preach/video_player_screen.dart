@@ -6,7 +6,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
-  final DataPreach data;
+  final Preach data;
   const VideoPlayerScreen({super.key, required this.data});
 
   @override
@@ -19,7 +19,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    String? videoId = YoutubePlayer.convertUrlToId(widget.data.urlVideo);
+    String? videoId = YoutubePlayer.convertUrlToId(widget.data.video!.url!);
     if (videoId != null) {
       _controller = YoutubePlayerController(
         initialVideoId: videoId, // Reemplaza con el ID de tu video
@@ -66,10 +66,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   // height: 213,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: widget.data.urlVideo.contains('youtube.com') ||
-                            widget.data.urlVideo.contains('youtu.be')
-                        ? PlayerYoutubeWidget(videoUrl: widget.data.urlVideo)
-                        : playerNoYoutube(url: widget.data.urlVideo),
+                    child: widget.data.video!.url!.contains('youtube.com') ||
+                            widget.data.video!.url!.contains('youtu.be')
+                        ? PlayerYoutubeWidget(videoUrl: widget.data.video!.url!)
+                        : playerNoYoutube(url: widget.data.video!.url!),
                   ),
                 ),
               ),
@@ -94,7 +94,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             Expanded(
                               flex: 2,
                               child: Text(
-                                widget.data.author.replaceAll('.', '.\n'),
+                                widget.data.preachers!.replaceAll('.', '.\n'),
                                 style: StylesApp(context)
                                     .textStyleBody14
                                     .copyWith(color: StyleColor.turquoise),
@@ -105,7 +105,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  widget.data.date,
+                                  widget.data.createdAt!,
                                   style: StylesApp(context)
                                       .textStyleBody12
                                       .copyWith(color: Colors.black),
@@ -116,7 +116,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         ),
                         const SizedBox(height: 5),
                         Text(
-                          widget.data.title,
+                          widget.data.title!,
                           style: StylesApp(context)
                               .textStyleBody12
                               .copyWith(color: StyleColor.orange),

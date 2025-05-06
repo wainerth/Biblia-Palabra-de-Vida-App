@@ -1729,3 +1729,78 @@ Future<ResponseData> getAllReflections(
     }
   }
 }
+
+Future<ResponseData> getAllPreach(String userId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+         query GetAllPreachesWithFavorite($userId: ID) {
+        getAllPreachesWithFavorite(userId: $userId) {
+          id
+          title
+          content
+          preachers
+          img {
+            urlImg
+          }
+          video {
+            url
+            img {
+              urlImg
+            }
+          }
+          status
+          isFavorite
+          createdAt
+          updatedAt
+        }
+      }
+      '''),
+    variables: <String, dynamic>{"userId": userId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllPreachesWithFavorite'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'get All Preaches With Favorite failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllPreachesWithFavorite'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'get All Preaches With Favorite Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}

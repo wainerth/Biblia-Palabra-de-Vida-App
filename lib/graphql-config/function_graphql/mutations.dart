@@ -1016,3 +1016,57 @@ Future<ResponseData> openOnePromise(promiseId) async {
     // return ResponseData(data: null, error: "connection error $e");
   }
 }
+Future<ResponseData> addToFavoritePreach(userId, preachId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "AddPredicateToFavorite",
+    document: gql(r'''
+     mutation AddPredicateToFavorite($userId: ID, $preachId: ID) {
+        addPredicateToFavorite(userId: $userId, preachId: $preachId)
+      }
+      '''),
+    variables: <String, dynamic>{"userId": userId, "preachId": preachId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['addPredicateToFavorite'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'add Predicate To Favorite failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['addPredicateToFavorite'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'add Predicate To Favorite Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+    // return ResponseData(data: null, error: "connection error $e");
+  }
+}

@@ -1,4 +1,8 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
@@ -6,6 +10,7 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class PreachScreen extends StatefulWidget {
@@ -17,15 +22,18 @@ class PreachScreen extends StatefulWidget {
 
 class _PreachScreenState extends State<PreachScreen> {
   var _selectedIndex = 0;
-  Map<String, List<DataPreach>> groupedPreaches = {};
-  final List<DataPreach> favorites = [
-    DataPreach(
-      id: '1',
-      title: 'Amor, Fidelidad y Compromiso',
-      author: 'Pr. Eduardo Castro',
-      date: '13/01/2025',
-      urlVideo: 'https://youtu.be/1ASoPx-r_Xo?list=PL27339DE7B0837012',
-    ),
+  String? errorMessage;
+  bool isLoading = true;
+  LoginUser? userData;
+  Map<String, List<Preach>> groupedPreaches = {};
+  final List<Preach> favorites = [
+    // DataPreach(
+    //   id: '1',
+    //   title: 'Amor, Fidelidad y Compromiso',
+    //   author: 'Pr. Eduardo Castro',
+    //   date: '13/01/2025',
+    //   urlVideo: 'https://youtu.be/1ASoPx-r_Xo?list=PL27339DE7B0837012',
+    // ),
   ];
   List tabs = [
     {
@@ -42,82 +50,10 @@ class _PreachScreenState extends State<PreachScreen> {
     }
   ];
 
-  List<DataPreach> preaches = [
-    DataPreach(
-      id: '1',
-      title: 'Amor, Fidelidad y Compromiso',
-      author: 'Pr. Eduardo Castro',
-      date: '13/01/2025',
-      urlVideo: 'https://youtu.be/1ASoPx-r_Xo?list=PL27339DE7B0837012',
-    ),
-    DataPreach(
-      id: '2',
-      title: 'Dios pone un valle',
-      author: 'Pr. Fabian',
-      date: '13/01/2025',
-      urlVideo: 'https://cdn.pixabay.com/video/2025/01/07/251262_large.mp4',
-    ),
-    DataPreach(
-      id: '3',
-      title: 'Pon tus manos en el arado',
-      author: 'Pr. Robinson Graces y Vanessa Castro',
-      date: '13/01/2025',
-      urlVideo:
-          'https://videos.pexels.com/video-files/20000940/20000940-hd_1080_1920_30fps.mp4',
-    ),
-    DataPreach(
-      id: '5',
-      title: 'El virus chino que destruyó familias',
-      author: 'Pr. Yesnelit Then',
-      date: '13/01/2025',
-      urlVideo: 'https://www.youtube.com/watch?v=3l7Tzv1Y1Zg',
-    ),
-    DataPreach(
-      id: '6',
-      title: 'mensaje 1',
-      author: 'Pr. Yesnelit Then',
-      date: '13/01/2025',
-      urlVideo: 'https://www.youtube.com/watch?v=3l7Tzv1Y1Zg',
-    ),
-    DataPreach(
-      id: '7',
-      title: 'Mensaje 2',
-      author: 'Pr. jhon Doe',
-      date: '13/01/2025',
-      urlVideo: 'https://www.youtube.com/watch?v=3l7Tzv1Y1Zg',
-    ),
-    DataPreach(
-      id: '8',
-      title: 'Mensaje 3',
-      author: 'Pr. Juan bautista',
-      date: '13/01/2025',
-      urlVideo: 'https://www.youtube.com/watch?v=3l7Tzv1Y1Zg',
-    ),
-    DataPreach(
-      id: '9',
-      title: 'Mensaje 4',
-      author: 'Pr. Yesnelit Then',
-      date: '13/01/2025',
-      urlVideo: 'https://www.youtube.com/watch?v=3l7Tzv1Y1Zg',
-    ),
-    DataPreach(
-      id: '10',
-      title: 'Mensaje 5',
-      author: 'Pr. Maria torres',
-      date: '25/12/2024',
-      urlVideo: 'https://www.youtube.com/watch?v=3l7Tzv1Y1Zg',
-    ),
-    DataPreach(
-      id: '11',
-      title: 'mensaje 6',
-      author: 'Pr. Yesnelit Then',
-      date: '13/12/2024',
-      urlVideo: 'https://www.youtube.com/watch?v=3l7Tzv1Y1Zg',
-    ),
-  ];
+  List<Preach> preaches = [];
   groupByMonthYear() {
     for (var preach in preaches) {
-      List<String> dateParts = preach.date.split('/');
+      List<String> dateParts = preach.createdAt!.split('/');
       String monthYear =
           '${_getMonthName(int.parse(dateParts[1]))} ${dateParts[2]}';
       if (!groupedPreaches.containsKey(monthYear)) {
@@ -149,20 +85,22 @@ class _PreachScreenState extends State<PreachScreen> {
       case "Mensaje":
         return preaches
             .where((element) =>
-                element.title.toLowerCase().contains(value.toLowerCase()))
+                element.title!.toLowerCase().contains(value.toLowerCase()))
             .map((e) => e.title);
       case "Predicador":
         return preaches
             .where((element) =>
-                element.author.toLowerCase().contains(value.toLowerCase()))
-            .map((e) => e.author);
+                element.preachers!.toLowerCase().contains(value.toLowerCase()))
+            .map((e) => e.preachers);
       case "Favoritas":
         return favorites
             .where((element) =>
-                element.author.toLowerCase().contains(value.toLowerCase()) ||
-                element.title.toLowerCase().contains(value.toLowerCase()))
-            .map((e) => e.author.toLowerCase().contains(value.toLowerCase())
-                ? e.author
+                element.preachers!
+                    .toLowerCase()
+                    .contains(value.toLowerCase()) ||
+                element.title!.toLowerCase().contains(value.toLowerCase()))
+            .map((e) => e.preachers!.toLowerCase().contains(value.toLowerCase())
+                ? e.preachers
                 : e.title);
     }
   }
@@ -179,8 +117,59 @@ class _PreachScreenState extends State<PreachScreen> {
 
   @override
   void initState() {
-    groupByMonthYear();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _generateData(context);
+    });
+  }
+
+  Future<void> _generateData(BuildContext context) async {
+    LoadingService().showLoading(context);
+    final user = Provider.of<UserProvider>(context, listen: false);
+    setState(() {
+      errorMessage = null;
+      userData = user.currentUser;
+    });
+
+    try {
+      final responsePreach = await getAllPreach(userData!.user.id);
+      if (responsePreach.error != null) {
+        setState(() {
+          errorMessage = responsePreach.error;
+        });
+      }
+      if (responsePreach.data != null) {
+        setState(() {
+          preaches = responsePreach.data.map<Preach>((preach) {
+            return Preach.fromJson(preach);
+          }).toList();
+          favorites
+              .addAll(preaches.where((preach) => preach.isFavorite == true));
+        });
+
+        groupByMonthYear();
+      }
+    } catch (e) {
+      errorMessage = "An error occurred: $e";
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> addToFavorite(preach) async {
+    final responseAddFavorite =
+        await addToFavoritePreach(userData!.user.id, preach.id);
+    if (responseAddFavorite.error != null) {
+      await showCustomDialog(context,
+          message: responseAddFavorite.error!, dialogType: DialogType.error);
+      return;
+    }
+    setState(() {
+      favorites.add(preach);
+    });
   }
 
   @override
@@ -280,7 +269,7 @@ class _PreachScreenState extends State<PreachScreen> {
                           .expand((list) => list)
                           .where((preach) {
                         return preach.title == selection ||
-                            preach.author == selection;
+                            preach.preachers == selection;
                       }).toList();
                       Navigator.push(
                         context,
@@ -313,181 +302,198 @@ class _PreachScreenState extends State<PreachScreen> {
               // Título de sección
 
               // Lista de mensajes
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    Column(
+              if (isLoading) ...{
+                Container()
+              } else ...{
+                if (errorMessage != null) ...{
+                  BuildErrorWidget(
+                    errorMessage: errorMessage!,
+                    onRetry: () async => _generateData(context),
+                    onBack: () => Navigator.pop(context),
+                  )
+                } else ...{
+                  Expanded(
+                    child: TabBarView(
                       children: [
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: groupedPreaches.length,
-                            itemBuilder: (context, index) {
-                              List<String> dates =
-                                  groupedPreaches.keys.toList();
-                              // Construir los elementos agrupados por fecha
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0, vertical: 8.0),
-                                    child: Text(
-                                      dates[index],
-                                      style: StylesApp(context)
-                                          .textStyleBody14
-                                          .copyWith(
-                                            color: StyleColor.turquoise,
+                        Column(
+                          children: [
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: groupedPreaches.length,
+                                itemBuilder: (context, index) {
+                                  List<String> dates =
+                                      groupedPreaches.keys.toList();
+                                  // Construir los elementos agrupados por fecha
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0, vertical: 8.0),
+                                        child: Text(
+                                          dates[index],
+                                          style: StylesApp(context)
+                                              .textStyleBody14
+                                              .copyWith(
+                                                color: StyleColor.turquoise,
+                                              ),
+                                        ),
+                                      ),
+                                      ...groupedPreaches[dates[index]]!
+                                          .map((preach) {
+                                        return MessageCard(
+                                          id: preach.id!,
+                                          imageUrl:
+                                              "${GraphQLConfig.urlServidor}${preach.video!.img!.urlImg}",
+                                          // "https://placehold.co/100x80.png",
+                                          urlVideo: preach.video!.url!,
+                                          title: preach.title!,
+                                          author: preach.preachers!,
+                                          date: preach.createdAt!,
+                                          iconFavorite: Icon(
+                                            favorites.any((element) =>
+                                                    element.id == preach.id)
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
+                                            color: favorites.any((element) =>
+                                                    element.id == preach.id)
+                                                ? Colors.red
+                                                : Colors.grey,
                                           ),
-                                    ),
-                                  ),
-                                  ...groupedPreaches[dates[index]]!
-                                      .map((preach) {
-                                    return MessageCard(
-                                      id: preach.id,
-                                      imageUrl:
-                                          "https://placehold.co/100x80.png",
-                                      urlVideo: preach.urlVideo,
-                                      title: preach.title,
-                                      author: preach.author,
-                                      date: preach.date,
-                                      iconFavorite: Icon(
-                                        favorites.any((element) =>
-                                                element.id == preach.id)
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: favorites.any((element) =>
-                                                element.id == preach.id)
-                                            ? Colors.red
-                                            : Colors.grey,
-                                      ),
-                                      onPressed: () {
-                                        setState(() {
-                                          if (!favorites.any((element) =>
-                                              element.id == preach.id)) {
-                                            favorites.add(preach);
-                                          }
-                                        });
-                                      },
-                                    );
-                                  }),
-                                ],
-                              );
-                            },
-                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              if (!favorites.any((element) =>
+                                                  element.id == preach.id)) {
+                                                addToFavorite(preach);
+                                              }
+                                            });
+                                          },
+                                        );
+                                      }),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: groupedPreaches.length,
-                            itemBuilder: (context, index) {
-                              List<String> dates =
-                                  groupedPreaches.keys.toList();
-                              // Construir los elementos agrupados por fecha
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0, vertical: 8.0),
-                                    child: Text(
-                                      dates[index],
-                                      style: StylesApp(context)
-                                          .textStyleBody14
-                                          .copyWith(
-                                            color: StyleColor.turquoise,
+                        Column(
+                          children: [
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: groupedPreaches.length,
+                                itemBuilder: (context, index) {
+                                  List<String> dates =
+                                      groupedPreaches.keys.toList();
+                                  // Construir los elementos agrupados por fecha
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0, vertical: 8.0),
+                                        child: Text(
+                                          dates[index],
+                                          style: StylesApp(context)
+                                              .textStyleBody14
+                                              .copyWith(
+                                                color: StyleColor.turquoise,
+                                              ),
+                                        ),
+                                      ),
+                                      ...groupedPreaches[dates[index]]!
+                                          .map((preach) {
+                                        return MessageCard(
+                                          id: preach.id!,
+                                          imageUrl:
+                                              "${GraphQLConfig.urlServidor}${preach.video!.img!.urlImg}",
+                                          urlVideo: preach.video!.url!,
+                                          title: preach.title!,
+                                          author: preach.preachers!,
+                                          date: preach.createdAt!,
+                                          iconFavorite: Icon(
+                                            favorites.any((element) =>
+                                                    element.id == preach.id)
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
+                                            color: favorites.any((element) =>
+                                                    element.id == preach.id)
+                                                ? Colors.red
+                                                : Colors.grey,
                                           ),
-                                    ),
-                                  ),
-                                  ...groupedPreaches[dates[index]]!
-                                      .map((preach) {
-                                    return MessageCard(
-                                      id: preach.id,
-                                      imageUrl:
-                                          "https://static.vecteezy.com/system/resources/thumbnails/035/158/342/small_2x/loop-background-neon-retro-wave-80s-style-video.jpg",
-                                      urlVideo: preach.urlVideo,
-                                      title: preach.title,
-                                      author: preach.author,
-                                      date: preach.date,
-                                      iconFavorite: Icon(
-                                        favorites.any((element) =>
-                                                element.id == preach.id)
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: favorites.any((element) =>
-                                                element.id == preach.id)
-                                            ? Colors.red
-                                            : Colors.grey,
-                                      ),
-                                      onPressed: () {
-                                        setState(() {
-                                          favorites.add(preach);
-                                        });
-                                      },
-                                    );
-                                  }),
-                                ],
-                              );
-                            },
-                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              addToFavorite(preach);
+                                            });
+                                          },
+                                        );
+                                      }),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Show favorite list
+                        Column(
+                          children: [
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: groupedPreaches.length,
+                                itemBuilder: (context, index) {
+                                  List<String> dates =
+                                      groupedPreaches.keys.toList();
+                                  var items = groupedPreaches[dates[index]]!
+                                      .where((preach) => favorites.any(
+                                          (element) =>
+                                              element.id == preach.id));
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (items.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0, vertical: 8.0),
+                                          child: Text(
+                                            dates[index],
+                                            style: StylesApp(context)
+                                                .textStyleBody14
+                                                .copyWith(
+                                                  color: StyleColor.turquoise,
+                                                ),
+                                          ),
+                                        ),
+                                      ...items.map((preach) {
+                                        return MessageCard(
+                                          id: "${preach.id}",
+                                          imageUrl:
+                                              "${GraphQLConfig.urlServidor}${preach.video!.img!.urlImg}",
+                                          urlVideo: preach.video!.url!,
+                                          title: preach.title!,
+                                          author: preach.preachers!,
+                                          date: preach.createdAt!,
+                                          iconFavorite: Icon(
+                                            Icons.favorite,
+                                            color: Colors.red,
+                                          ),
+                                        );
+                                      }),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    // Show favorite list
-                    Column(
-                      children: [
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: groupedPreaches.length,
-                            itemBuilder: (context, index) {
-                              List<String> dates =
-                                  groupedPreaches.keys.toList();
-                              var items = groupedPreaches[dates[index]]!
-                                  .where((preach) => favorites.any(
-                                      (element) => element.id == preach.id));
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (items.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0, vertical: 8.0),
-                                      child: Text(
-                                        dates[index],
-                                        style: StylesApp(context)
-                                            .textStyleBody14
-                                            .copyWith(
-                                              color: StyleColor.turquoise,
-                                            ),
-                                      ),
-                                    ),
-                                  ...items.map((preach) {
-                                    return MessageCard(
-                                      id: preach.id,
-                                      imageUrl:
-                                          "https://static.vecteezy.com/system/resources/thumbnails/035/158/342/small_2x/loop-background-neon-retro-wave-80s-style-video.jpg",
-                                      urlVideo: preach.urlVideo,
-                                      title: preach.title,
-                                      author: preach.author,
-                                      date: preach.date,
-                                      iconFavorite: Icon(
-                                        Icons.favorite,
-                                        color: Colors.red,
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                }
+              },
             ],
           ),
         ),
@@ -536,12 +542,12 @@ class MessageCard extends StatefulWidget {
 class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
-    DataPreach valores = DataPreach(
+    Preach valores = Preach(
       id: widget.id,
       title: widget.title,
-      urlVideo: widget.urlVideo,
-      author: widget.author,
-      date: widget.date,
+      video: VideoPreach(img: null, url: widget.urlVideo),
+      preachers: widget.author,
+      createdAt: widget.date,
     );
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
