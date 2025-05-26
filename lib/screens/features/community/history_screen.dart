@@ -5,6 +5,7 @@ import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -126,6 +127,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void dispose() {
     // _controllerPage.removeListener(_pageListener);
     _controllerPage.dispose();
+    bool _isPlayingAudio = false;
+    bool _isPlayingVideo = false;
     super.dispose();
   }
 
@@ -302,8 +305,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             activeColor: Colors.blueGrey,
                             inactiveColor: Colors.grey,
                             thumbColor: StyleColor.turquoise,
-                            min: 10.sp,
-                            max: 20.sp,
+                            min: 10.0,
+                            max: 20.0,
                             value: fontSizeText,
                             onChanged: (value) async {
                               final sharedPreferences =
@@ -421,6 +424,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         duration: Duration(milliseconds: 350),
                                         curve: Curves.easeIn,
                                       );
+
                                       if (isPage < stories.length - 1) {
                                         setState(() {
                                           isPage = _controllerPage.page! + 1;
@@ -431,15 +435,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             finalStory = true;
                                           },
                                         );
-                                        // Navigator.popAndPushNamed(
-                                        //   context,
-                                        //   "/questionPage",
-                                        //   arguments: {
-                                        //     'courseId': courseId,
-                                        //     "levelId": levelId,
-                                        //     "sectionId": sectionId
-                                        //   },
-                                        // );
                                       }
                                     },
                                     icon: Icon(
@@ -467,15 +462,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     finalStory = true;
                                   },
                                 );
-                                // Navigator.popAndPushNamed(
-                                //   context,
-                                //   "/questionPage",
-                                //   arguments: {
-                                //     'courseId': courseId,
-                                //     "levelId": levelId,
-                                //     "sectionId": sectionId
-                                //   },
-                                // );
                               },
                               icon: Icon(
                                 Icons.skip_next_outlined,
@@ -525,53 +511,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ); // Imagen de marcador de posición
                   }, // Ajusta la imagen al contenedor
                 ),
-                if (_isPlayingAudio) // Mostrar reproductor de audio
-                  Positioned(
-                    bottom: 50,
-                    left: 0,
-                    child: Container(
-                      decoration: BoxDecoration(color: Colors.transparent),
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      height: 50,
-                      width: MediaQuery.sizeOf(context).width,
-                      child: AudioPlayerWidget(
-                        showImage: false,
-                        inactiveColor: StyleColor.orange,
-                        backgroundColor: Colors.white,
-                        controlsColor: StyleColor.turquoise,
-                        pathUrl: story.audio == null
-                            ? "reflexion2.mp3"
-                            : story.audio!.url,
-                      ),
-                    ),
-                  ),
-                if (_isPlayingVideo) // Mostrar reproductor de video
-                  Positioned.fill(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8)),
-                        constraints: BoxConstraints(minHeight: 213),
-                        // height: 213,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: story.video != null &&
-                                  (story.video!.url.contains('youtube.com') ||
-                                      story.video!.url.contains('youtu.be'))
-                              ? PlayerYoutubeWidget(videoUrl: story.video!.url)
-                              : playerNoYoutube(
-                                  url:
-                                      'https://videos.pexels.com/video-files/20000940/20000940-hd_1080_1920_30fps.mp4'),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // SizedBox(
-                //   height: 7.0,
-                // ),
               ],
             ),
           ),
@@ -589,7 +528,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 IconButton(
                   onPressed: () {
-                    // Lógica para ver imagen (siempre habilitado)
                     setState(() {
                       _selectedButtonIndex = 1;
                       _isPlayingVideo = false;
@@ -610,16 +548,75 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         _isPlayingVideo = false;
                         _isPlayingAudio = true;
                       });
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Center(
+                              child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Stack(
+                                children: [
+                                  Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                        BorderRadius.circular(8)),
+                                    constraints:
+                                      BoxConstraints(minHeight: 213),
+                                    child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                    height: 50,
+                                    width: MediaQuery.sizeOf(context)
+                                      .width,
+                                    child: AudioPlayerWidget(
+                                      showImage: false,
+                                      inactiveColor: StyleColor.orange,
+                                      backgroundColor: Colors.white,
+                                      controlsColor:
+                                        StyleColor.turquoise,
+                                      pathUrl: story.audio == null
+                                        ? "reflexion2.mp3"
+                                        : story.audio!.url,
+                                    ),
+                                    ),
+                                  ),
+                                  ),
+                                  Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                    Navigator.of(context)
+                                      .pop(); // Cierra el diálogo
+                                    },
+                                    child: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withOpacity(
+                                        0.7), // Fondo semitransparente para el botón
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 20.0,
+                                    ),
+                                    ),
+                                  ),
+                                  ),
+                                ],
+                                ),
+                              ],
+                              ),
+                            );
+                          });
                     },
-                    // story.audioUrl != null
-                    //     ? () {
-                    // // Lógica para reproducir audio
-                    // setState(() {
-                    //   _isPlayingVideo = false;
-                    //   _isPlayingAudio = true;
-                    // });
-                    //       }
-                    //     : null, // Deshabilitado si no hay URL de audio
                     icon: Icon(Icons.audiotrack),
                     color: _selectedButtonIndex == 2
                         ? StyleColor.turquoise
@@ -627,22 +624,71 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                 if (story.video != null && story.video!.url != '')
                   IconButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         _selectedButtonIndex = 3;
                         _isPlayingVideo = true;
                         _isPlayingAudio = false;
                       });
+                      await SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.portraitUp,
+                        DeviceOrientation.portraitDown,
+                      ]);
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Center(
+                              child: Stack(children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8)),
+                                    constraints: BoxConstraints(minHeight: 213),
+                                    // height: 213,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: story.video != null &&
+                                              (story.video!.url
+                                                      .contains('youtube.com') ||
+                                                  story.video!.url
+                                                      .contains('youtu.be'))
+                                          ? PlayerYoutubeWidget(
+                                              videoUrl: story.video!.url)
+                                          : playerNoYoutube(
+                                              url: story.video!.url),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  // Posiciona el botón de cerrar
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context)
+                                          .pop(); // Cierra el diálogo
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(
+                                            0.7), // Fondo semitransparente para el botón
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 20.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ]),
+                            );
+                          });
                     },
-
-                    // story.videoUrl != null
-                    //     ? () {
-                    // setState(() {
-                    //   _isPlayingVideo = true;
-                    //   _isPlayingAudio = false;
-                    // });
-                    //       }
-                    //     : null, // Deshabilitado si no hay URL de video
                     icon: Icon(Icons.videocam),
                     color: _selectedButtonIndex == 3
                         ? StyleColor.turquoise

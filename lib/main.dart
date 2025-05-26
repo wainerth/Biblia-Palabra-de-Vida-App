@@ -1,5 +1,9 @@
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/routes/router_page.dart';
+import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/text_with_gradient.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -8,15 +12,16 @@ import 'package:provider/provider.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb) {
   await FlutterDownloader.initialize(
     debug: true, // Set to false in production
     ignoreSsl: true, // Set to false for secure connections
   );
+  }
   runApp(
     MultiProvider(
       providers: [
@@ -60,12 +65,11 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
       //  load after the get token and initialize the authentication
-      _loadTokenAndInitializeAuth(prefs);
     });
   }
 
 // function to load the token and initialize the authentication
-  Future<void> _loadTokenAndInitializeAuth(SharedPreferences prefs) async {
+  Future<void> _loadTokenAndInitializeAuth() async {
     final authProvider = context.read<AuthenticationProvider>();
     await authProvider.checkAuthentication(context);
   }
@@ -107,13 +111,64 @@ class _MyAppState extends State<MyApp> {
     if (_hasSeenIntro!) {
       final authProvider = context.read<AuthenticationProvider>();
 
+      return FutureBuilder(
+        future: _loadTokenAndInitializeAuth(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return loadMaskedWidget();
+          } else {
+            LoadingService().hideLoading();
+            final authProvider = context.read<AuthenticationProvider>();
       if (authProvider.token != null) {
         return PageScreen();
       } else {
         return const HomeScreen();
       }
+          }
+        },
+      );
     } else {
       return const WelcomeScreen();
     }
+  }
+}
+
+class loadMaskedWidget extends StatefulWidget {
+  const loadMaskedWidget({
+    super.key,
+  });
+
+  @override
+  State<loadMaskedWidget> createState() => _loadMaskedWidgetState();
+}
+
+class _loadMaskedWidgetState extends State<loadMaskedWidget> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      LoadingService().showLoading(context);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    LoadingService().hideLoading();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset("assets/bibleLogo.png"),
+            TextWithGradient(text: "La Biblia", font: StylesApp(context).textStyleBody1 )
+          ],
+        ),
+      ),
+    );
   }
 }

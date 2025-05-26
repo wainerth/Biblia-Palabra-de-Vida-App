@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -20,10 +21,10 @@ class AuthenticationProvider extends ChangeNotifier {
   // LoginUser? currentUser;
 
   AuthenticationProvider(this.context, this._catalogueProvider) {
-    checkAuthentication(context);
+    //checkAuthentication(context);
   }
 
-  Future<void> checkAuthentication(context) async {
+  Future<void> checkAuthentication(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userToken = prefs.getString('userToken');
     String? userDataString = prefs.getString('userData');
@@ -31,7 +32,34 @@ class AuthenticationProvider extends ChangeNotifier {
       print(userToken);
     }
     if (userToken != null && userDataString != null) {
-      isAuthenticated = true;
+      // final oldToken ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc4IiwidXNlcm5hbWUiOiJMZW9uYXJkb2ciLCJlbWFpbCI6Imxlb25hcmRvamdhcmNpYXBhcmFkYTIwMDVAZ21haWwuY29tIiwicm9sSWQiOiIyIiwiaWF0IjoxNzM4NDI2NDc3LCJleHAiOjE3NDE0NTA0Nzd9.q7LUJc2ELe1kSj1KyLWoWUo8aMrSJVT1mOlwbcpK1NA";
+      final verifyTokenResponse = await verifyToken(userToken);
+      if(verifyTokenResponse.data != null) {
+
+      if (verifyTokenResponse.data["success"]) {
+        isAuthenticated = true;
+      } else if (!verifyTokenResponse.data["success"] &&
+          verifyTokenResponse.data["isLogout"]) {
+        //Logout voluntario → no mostrar modal
+        isAuthenticated = false;
+        logoutUser( navigatorKey.currentContext!);
+        LoadingService().hideLoading();
+        return;
+      } else {
+        isAuthenticated = false;
+        LoadingService().hideLoading();
+        await showCustomDialogWithAction(
+          navigatorKey.currentContext!, 
+          message:"Tu sesión ha expirado o fue cerrada. Por favor, inicia sesión nuevamente." , 
+          dialogType: DialogTypeAction.info, buttonOk: "Ok",
+          actionCallbackOk: () async{
+          await logoutUser( navigatorKey.currentContext!);
+
+          }
+          );
+        return;
+        }
+      }
       token = userToken;
       final dataUserload = LoginUser.fromJson(jsonDecode(userDataString));
       Provider.of<UserProvider>(context, listen: false)

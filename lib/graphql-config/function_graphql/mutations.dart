@@ -170,6 +170,63 @@ Future<ResponseData> loginGoogle() async {
   );
 }
 
+Future<ResponseData> verifyToken(token) async {
+  final GraphQLClient _client = createClient();
+  final MutationOptions options = MutationOptions(
+    operationName: 'VerifyToken',
+    document: gql(r'''
+       mutation VerifyToken($token: String!) {
+          verifyToken(token: $token) {
+            user {
+              id
+              email
+              username
+              handleTimeFeeling
+              lastLogin
+              createdAt
+            }
+            success
+            isLogout
+          }
+          
+        }
+      '''),
+    variables: <String, dynamic>{
+      'token': token,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+
+  try {
+    final QueryResult result = await _client.mutate(options);
+    if (result.hasException) {
+      print(ResponseData.fromQueryResult(result));
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['verifyToken'] == null) {
+      print("No data returned");
+      return ResponseData(data: false, error: "No data returned");
+      // return false;
+    }
+    return ResponseData(data: data['verifyToken'], error: null);
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
 Future updateUserProfile(token, UserProfile data) async {
   final GraphQLClient _client = createClient(authToken: token);
 
@@ -908,6 +965,7 @@ Future<ResponseData> setPrizeObtained(userId, courseId) async {
     // return ResponseData(data: null, error: "connection error $e");
   }
 }
+
 Future<ResponseData> redeemedPrize(prizeId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
@@ -962,6 +1020,7 @@ Future<ResponseData> redeemedPrize(prizeId) async {
     // return ResponseData(data: null, error: "connection error $e");
   }
 }
+
 Future<ResponseData> openOnePromise(promiseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');

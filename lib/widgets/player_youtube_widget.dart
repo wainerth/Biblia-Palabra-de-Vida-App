@@ -8,7 +8,6 @@ class PlayerYoutubeWidget extends StatefulWidget {
     required this.videoUrl,
   });
 
-
   @override
   State<PlayerYoutubeWidget> createState() => _PlayerYoutubeWidgetState();
 }
@@ -30,10 +29,24 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
       );
     }
   }
-
+  @override
+  void dispose() {
+    super.dispose();
+    controllerPlayer.dispose();
+  }
   @override
   Widget build(BuildContext context) {
-    return YoutubePlayer(
+    return PopScope(
+      canPop:
+          false, // Permite que la pantalla sea sacada de la pila de navegación
+      onPopInvokedWithResult: (didPop, result) async {
+        if (controllerPlayer.value.isFullScreen) {
+          controllerPlayer.toggleFullScreenMode(); // Salir de pantalla completa
+          // Completa la función sin retornar un valor
+        }
+         
+      },
+      child: YoutubePlayer(
       controller: controllerPlayer,
       showVideoProgressIndicator: true,
       progressIndicatorColor: Colors.orange,
@@ -44,6 +57,7 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
         // }
         // });
       },
+      ),
       );
   }
 }
