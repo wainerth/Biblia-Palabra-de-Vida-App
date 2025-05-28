@@ -168,8 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                       print("estoy en iniciar session con google");
                                     }
 
-                                    // if (uio.Platform.isAndroid ||
-                                    //     uio.Platform.isIOS) {
                                     LoadingService().showLoading(context);
                                     final user = await authProvider
                                         .loginWithGoogle(context);

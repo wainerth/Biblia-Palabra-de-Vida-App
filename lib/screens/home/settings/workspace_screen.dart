@@ -532,9 +532,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                               },
                             ),
                           ),
-                          SizedBox(
-                            width: 8,
-                          )
+                          // SizedBox(
+                          //   width: 8,
+                          // )
                         ],
                       ),
                     ],

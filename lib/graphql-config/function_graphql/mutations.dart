@@ -71,22 +71,8 @@ Future<ResponseData> loginGoogle() async {
   final GraphQLClient _client = createClient();
 
   final GoogleSignIn googleSignIn;
-  //   final googleSignIn = GoogleSignIn(
-  //   clientId: Platform.isAndroid
-  //       ? null // En Android, no es necesario proporcionar clientId
-  //       : "823422522259-lsaj5empb8t54pims7m727krgrcfu6lf.apps.googleusercontent.com", // Web
-  //   serverClientId: Platform.isIOS
-  //       ? "214929717096-c669jpm1gb9q87cribgbknuteemuj8st.apps.googleusercontent.com" // iOS
-  //       : null,
-  //   forceCodeForRefreshToken: true,
-  //   scopes: [
-  //     "email",
-  //     "profile",
-  //     "https://www.googleapis.com/auth/user.birthday.read",
-  //     "https://www.googleapis.com/auth/user.gender.read",
-  //   ],
-  // );
-  if (Platform.isAndroid) {
+
+  if (Platform.isAndroid ) {
     googleSignIn = GoogleSignIn(
       scopes: [
         "email",

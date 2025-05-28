@@ -122,7 +122,7 @@ class LoginUser {
   final String? identifier; //cédula
   final String? gender; // example M o F
   final bool? isBaptized;
-  final String? currentLeagueId; //future ligue in ranking
+  final League? currentLeague; //future ligue in ranking
   final String createdAt;
   final int achievementsReachedCount;
   final int streakDaysCount;
@@ -154,48 +154,50 @@ class LoginUser {
     this.identifier,
     this.gender,
     this.isBaptized,
-    this.currentLeagueId,
+    this.currentLeague,
     this.city,
   });
 
-  LoginUser copyWith(
-      {String? name,
-      String? lastname,
-      String? gender,
-      int? expTotalUser,
-      int? energyPoints,
-      String? city,
-      String? email,
-      String? imgProfileUser,
-      String? birthdate,
-      String? identifier,
-      String? phoneNumber,
-      Country? country,
-      bool? isBaptized,
-      User? user,
-      String? favoriteVerseId,
-      bool? notifications,
-      String? createdAt,
-      int? achievementsReachedCount,
-      int? streakDaysCount,
-      int? preachingsCreatedCount,
-      int? completedCourse,
-      }) {
+  LoginUser copyWith({
+    String? name,
+    String? lastname,
+    String? gender,
+    int? expTotalUser,
+    int? energyPoints,
+    String? city,
+    String? email,
+    String? imgProfileUser,
+    String? birthdate,
+    String? identifier,
+    String? phoneNumber,
+    Country? country,
+    bool? isBaptized,
+    User? user,
+    String? favoriteVerseId,
+    bool? notifications,
+    String? createdAt,
+    int? achievementsReachedCount,
+    int? streakDaysCount,
+    int? preachingsCreatedCount,
+    int? completedCourse,
+  }) {
     return LoginUser(
         name: name ?? this.name,
         lastname: lastname ?? this.lastname,
         city: city ?? this.city,
         imgProfileUser: imgProfileUser ?? this.imgProfileUser,
-        expTotalUser: expTotalUser ?? this.expTotalUser ,
+        expTotalUser: expTotalUser ?? this.expTotalUser,
         energyPoints: energyPoints ?? this.energyPoints,
         country: country ?? this.country,
         phoneNumber: phoneNumber ?? this.phoneNumber,
         favoriteVerseId: favoriteVerseId ?? this.favoriteVerseId,
         notifications: notifications ?? this.notifications,
         createdAt: createdAt ?? this.createdAt,
-        achievementsReachedCount: achievementsReachedCount ?? this.achievementsReachedCount,
+        achievementsReachedCount:
+            achievementsReachedCount ?? this.achievementsReachedCount,
         streakDaysCount: streakDaysCount ?? this.streakDaysCount,
-        preachingsCreatedCount: preachingsCreatedCount ?? this.preachingsCreatedCount,
+        preachingsCreatedCount:
+            preachingsCreatedCount ?? this.preachingsCreatedCount,
         completedCourse: completedCourse ?? this.completedCourse,
         user: user ?? this.user,
         title: title ?? this.title,
@@ -204,15 +206,14 @@ class LoginUser {
         identifier: identifier ?? this.identifier,
         gender: gender ?? this.gender,
         isBaptized: isBaptized ?? this.isBaptized,
-        currentLeagueId: currentLeagueId ?? this.currentLeagueId);
+        currentLeague: currentLeague ?? this.currentLeague);
   }
 
   factory LoginUser.fromJson(Map<String, dynamic> json) {
     List<UserTitle> title = [];
     if (json['title'] != null) {
-      title = (json['title'] as List)
-          .map((i) => UserTitle.fromJson(i))
-          .toList();
+      title =
+          (json['title'] as List).map((i) => UserTitle.fromJson(i)).toList();
     }
     return LoginUser(
       identifier: json['identifier'],
@@ -235,7 +236,7 @@ class LoginUser {
       streakDaysCount: json['streakDaysCount'],
       preachingsCreatedCount: json['preachingsCreatedCount'],
       completedCourse: json['completedCourse'] ?? 0,
-      currentLeagueId: json['currentLeagueId'],
+      currentLeague: League.fromJson(json['currentLeague']),
       user: User.fromJson(json['user']),
       title: title,
       league:
@@ -263,7 +264,7 @@ class LoginUser {
         'streakDaysCount': streakDaysCount,
         'preachingsCreatedCount': preachingsCreatedCount,
         'completedCourse': completedCourse,
-        'currentLeagueId': currentLeagueId,
+        'currentLeague': currentLeague?.toJson(),
         'user': user.toJson(),
         'title': title,
         'league': league,

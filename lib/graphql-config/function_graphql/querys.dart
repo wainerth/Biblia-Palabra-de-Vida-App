@@ -31,10 +31,14 @@ Future<ResponseData> getProfileUser(token, idUser) async {
                       favoriteVerseId # si asigna versículo favorito
                       notifications # notification user
                       birthdate
-                        identifier #cédula
-                        gender
-                        isBaptized
-                        currentLeagueId #future ligue in ranking
+                      identifier #cédula
+                      gender
+                      isBaptized
+                      currentLeague {
+                        id
+                        name
+                        description
+                      } #future ligue in ranking
                       createdAt # fecha registro
                       achievementsReachedCount #contador de logros
                       streakDaysCount # contador de Dias 

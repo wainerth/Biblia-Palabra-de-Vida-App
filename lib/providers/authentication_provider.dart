@@ -28,36 +28,33 @@ class AuthenticationProvider extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userToken = prefs.getString('userToken');
     String? userDataString = prefs.getString('userData');
-    if (kDebugMode) {
-      print(userToken);
-    }
+    // if (kDebugMode) {
+    //   print(userToken);
+    // }
     if (userToken != null && userDataString != null) {
       // final oldToken ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc4IiwidXNlcm5hbWUiOiJMZW9uYXJkb2ciLCJlbWFpbCI6Imxlb25hcmRvamdhcmNpYXBhcmFkYTIwMDVAZ21haWwuY29tIiwicm9sSWQiOiIyIiwiaWF0IjoxNzM4NDI2NDc3LCJleHAiOjE3NDE0NTA0Nzd9.q7LUJc2ELe1kSj1KyLWoWUo8aMrSJVT1mOlwbcpK1NA";
       final verifyTokenResponse = await verifyToken(userToken);
-      if(verifyTokenResponse.data != null) {
-
-      if (verifyTokenResponse.data["success"]) {
-        isAuthenticated = true;
-      } else if (!verifyTokenResponse.data["success"] &&
-          verifyTokenResponse.data["isLogout"]) {
-        //Logout voluntario → no mostrar modal
-        isAuthenticated = false;
-        logoutUser( navigatorKey.currentContext!);
-        LoadingService().hideLoading();
-        return;
-      } else {
-        isAuthenticated = false;
-        LoadingService().hideLoading();
-        await showCustomDialogWithAction(
-          navigatorKey.currentContext!, 
-          message:"Tu sesión ha expirado o fue cerrada. Por favor, inicia sesión nuevamente." , 
-          dialogType: DialogTypeAction.info, buttonOk: "Ok",
-          actionCallbackOk: () async{
-          await logoutUser( navigatorKey.currentContext!);
-
-          }
-          );
-        return;
+      if (verifyTokenResponse.data != null) {
+        if (verifyTokenResponse.data["success"]) {
+          isAuthenticated = true;
+        } else if (!verifyTokenResponse.data["success"] &&
+            verifyTokenResponse.data["isLogout"]) {
+          //Logout voluntario → no mostrar modal
+          isAuthenticated = false;
+          logoutUser(navigatorKey.currentContext!);
+          LoadingService().hideLoading();
+          return;
+        } else {
+          isAuthenticated = false;
+          LoadingService().hideLoading();
+          await showCustomDialogWithAction(navigatorKey.currentContext!,
+              message:
+                  "Tu sesión ha expirado o fue cerrada. Por favor, inicia sesión nuevamente.",
+              dialogType: DialogTypeAction.info,
+              buttonOk: "Ok", actionCallbackOk: () async {
+            await logoutUser(navigatorKey.currentContext!);
+          });
+          return;
         }
       }
       token = userToken;
@@ -138,34 +135,19 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: null, error: error);
     }
     userProfile.data['title'] = UserTitle.data;
-    // consultamos la liga
-    if (userProfile.data["currentLeagueId"] == null) {
-      userProfile.data["currentLeagueId"] = "0";
-    }
-    League? league = _catalogueProvider.allLeagues.firstWhere(
-      (element) => element.id == userProfile.data["currentLeagueId"],
-      orElse: () => League(
-          id: "-1",
-          name: "",
-          description: "",
-          status: "0",
-          img: ImageDetails(urlImg: "")),
-    );
 
-    // buscamos miembro
-    if (userProfile.data["currentLeagueId"] != '0') {
+    // buscamos miembro si la liga es distinta de null
+    if (userProfile.data["currentLeague"] != null) {
       final dataMemberResponse = await getDataMember(token, userId);
       error = dataMemberResponse.error;
       if (error != null) {
         return ResponseData(data: null, error: error);
       }
       final userRanking = dataMemberResponse.data;
-      userRanking["leagueId"] = league.id;
-      userRanking['leagueName'] = league.name;
+      userRanking["leagueId"] = userProfile.data["currentLeague"]["id"];
+      userRanking['leagueName'] = userProfile.data["currentLeague"]["name"];
 
-      if (league.id != "-1") {
-        userProfile.data["league"] = userRanking;
-      }
+      userProfile.data["league"] = userRanking;
     } else {
       userProfile.data["league"] = null;
     }
@@ -317,27 +299,6 @@ class AuthenticationProvider extends ChangeNotifier {
       }
     }
   }
-  // Future<bool> changePassword(String oldPassword, String newPassword) async {
-  //   final MutationOptions options = MutationOptions(
-  //     document: gql(r'''
-  //       mutation ChangePassword($oldPassword: String!, $newPassword: String!) {
-  //         changePassword(oldPassword: $oldPassword, newPassword: $newPassword)
-  //       }
-  //     '''),
-  //     variables: <String, dynamic>{
-  //       'oldPassword': oldPassword,
-  //       'newPassword': newPassword,
-  //     },
-  //   );
-
-  //   final QueryResult result = await _client.mutate(options);
-
-  //   if (result.hasException) {
-  //     throw Exception(result.exception.toString());
-  //   }
-
-  //   return result.data['changePassword'];
-  // }
 
   Future logoutUser(context) async {
     final ResponseData result = await logout();

@@ -75,7 +75,7 @@ class UserProvider extends ChangeNotifier {
     );
 
     try {
-      print(toBase64);
+      // print(toBase64);
       final QueryResult result = await client.mutate(options);
 
       if (result.hasException) {

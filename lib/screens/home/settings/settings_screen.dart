@@ -143,20 +143,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 height: 27.0,
                                 text: "Aceptar",
                                 buttonStyle: StylesApp(context).btnWidgetSmall,
-                                onPressed: () {
+                                onPressed: () async {
                                   LoadingService().showLoading(context);
                                   final authentication =
                                       Provider.of<AuthenticationProvider>(
                                           context,
                                           listen: false);
-
-                                  final logout =
-                                      authentication.logoutUser(context);
-                                  // if (logout != null) {
-                                  //   authentication.token = null;
-                                  //   Navigator.of(context).popUntil((route) => route.isFirst);
-                                  //   Navigator.pushReplacementNamed(context, '/homePage');
-                                  // }
+                                  await authentication.logoutUser(context);
                                   LoadingService().hideLoading();
                                 },
                               )

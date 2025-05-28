@@ -97,9 +97,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     final userData = Provider.of<UserProvider>(context, listen: false);
     // activeLeagueId = widget.ranking[DefaultTabController.of(context).index].id;
     if (userData != null && userData.currentUser != null) {
-      if (userData.currentUser!.currentLeagueId != null &&
-          userData.currentUser!.currentLeagueId != '0') {
-        activeLeagueId = userData.currentUser!.currentLeagueId!;
+      if (userData.currentUser!.currentLeague != null ) {
+        activeLeagueId = userData.currentUser!.currentLeague!.id;
         loadMembers(activeLeagueId, userData.currentUser!.user!.id, context);
       } else {
         // Si no hay una liga activa, puedes manejarlo como desees
@@ -174,7 +173,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                             Image.network(
                                               GraphQLConfig.urlServidor +
                                                   widget.ranking[index].img
-                                                      .urlImg,
+                                                      !.urlImg,
                                               height: 120,
                                             ),
                                             SizedBox(height: 10),
@@ -243,7 +242,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                         ),
                                         child: Image.network(GraphQLConfig
                                                 .urlServidor +
-                                            widget.ranking[index].img.urlImg,
+                                            widget.ranking[index].img!.urlImg,
                                             ),
                                       ),
                                     ),
