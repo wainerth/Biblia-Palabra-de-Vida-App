@@ -44,12 +44,12 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
 
       // obtenemos curso
       final ResponseData courseResponse =
-          await loadOneCourse(userData!.user.id, courseId);
+          await loadOneCourse(userData!.userId, courseId);
       if (courseResponse.error != null) {
         errorMessage = courseResponse.error;
       }
       course = CourseModel.fromJson(courseResponse.data);
-      final result = await loadStageByCourse(userData.user.id, course.id);
+      final result = await loadStageByCourse(userData.userId, course.id);
       if (result.error != null) {
         errorMessage = result.error;
       } else {
@@ -166,7 +166,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                   final userProvider =
                       Provider.of<UserProvider>(context, listen: false);
                   final progressResponse = await userProvider.getProgressUser(
-                      userProvider.currentUser?.user.id, course.id);
+                      userProvider.currentUser?.userId, course.id);
                   if (progressResponse!.error != null) {
                     await showCustomDialog(context,
                         message: progressResponse.error!,

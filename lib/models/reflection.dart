@@ -2,14 +2,16 @@ class Reflection {
   final String? id;
   final String? title;
   final String? url;
-  final int? countCards;
+  final String? visibility;
+  final String? statusContent;
   final int? status;
 
   Reflection({
     this.id,
     this.title,
     this.url,
-    this.countCards,
+    this.visibility,
+    this.statusContent,
     this.status,
   });
 
@@ -18,7 +20,8 @@ class Reflection {
       id: json['id'],
       title: json['title'] as String?,
       url: json['url'] as String?,
-      countCards: json['countCards'] ?? 0,
+      visibility: json['visibility'] ??'',
+      statusContent: json['statusContent'] ??'',
       status: json['status'],
     );
   }
@@ -28,7 +31,8 @@ class Reflection {
       'id': id,
       'title': title,
       'url': url,
-      'countCards': countCards,
+      'visibility': visibility,
+      'statusContent': statusContent,
       'status': status,
     };
   }

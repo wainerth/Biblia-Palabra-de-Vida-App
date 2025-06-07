@@ -55,9 +55,8 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
         .map((country) => ModelData(value: country.id, label: country.country))
         .cast<ModelData>()
         .toList();
-    final List<ModelData> prefixCode = catalogueProvider.allCountries
-        .map((country) =>
-            ModelData(value: country.id, label: country.countryCode))
+    final List<ModelData> prefixCode = catalogueProvider.allAreasCode
+        .map((areaCode) => ModelData(value: areaCode.id, label: areaCode.code))
         .cast<ModelData>()
         .toList();
 
@@ -173,7 +172,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
           Expanded(
             flex: 1,
             child: SizedBox(
-              child: CustomDropdownWidget<Country>(
+              child: CustomDropdownWidget<AreaCode>(
                 hintText: "código",
                 items: listPrefixCode,
                 onChanged: (ModelData? newValue) {
@@ -182,7 +181,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
                       label: _editingData[index].label,
                       clave: _editingData[index].clave,
                       value:
-                          '${newValue?.label} ${_editingData[index].value.split(' ')[1]}',
+                          '${newValue?.value} ${_editingData[index].value.split(' ')[1]}',
                       showLabel: _editingData[index].showLabel,
                     );
                   });
@@ -192,7 +191,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
                             item.value.split(' ').length > 1 &&
                             item.value.split(' ')[0].isNotEmpty
                         ? listPrefixCode.firstWhere((element) =>
-                            element.label == item.value.split(' ')[0])
+                            element.value == item.value.split(' ')[0])
                         : null
                     : null,
               ),
@@ -288,20 +287,6 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
             RadioButtonOption(value: true, label: "Si"),
             RadioButtonOption(value: false, label: "No")
           ]);
-
-      // BautizadoRadioButton(
-      //   isBautizado: item.value == 'Bautizado',
-      //   onChanged: (bool? value) {
-      //     setState(() {
-      //       _editingData[index] = ModelData(
-      //         label: _editingData[index].label,
-      //         value: value! ? "Bautizado" : "No Bautizado",
-      //         clave: _editingData[index].clave,
-      //         showLabel: _editingData[index].showLabel,
-      //       );
-      //     });
-      //   },
-      // );
     } else if (item.label == 'País') {
       return Container(
         constraints: BoxConstraints(

@@ -72,7 +72,7 @@ Future<ResponseData> loginGoogle() async {
 
   final GoogleSignIn googleSignIn;
 
-  if (Platform.isAndroid ) {
+  if (Platform.isAndroid) {
     googleSignIn = GoogleSignIn(
       scopes: [
         "email",
@@ -219,7 +219,7 @@ Future updateUserProfile(token, UserProfile data) async {
   final MutationOptions mutateGql = MutationOptions(
       operationName: "UpdateDataProfileUsers",
       document: gql(r'''
-      mutation UpdateDataProfileUsers($userId: ID, $dataProfiles: dataProfiles) {
+     mutation UpdateDataProfileUsers($userId: ID, $dataProfiles: DataProfiles) {
       updateDataProfileUsers(userId: $userId, dataProfiles: $dataProfiles)
     }
  '''),
@@ -234,6 +234,7 @@ Future updateUserProfile(token, UserProfile data) async {
           "identifier": data.dataProfiles.identifier!.isEmpty
               ? null
               : data.dataProfiles.identifier,
+          "codeAreaId": data.dataProfiles.profileAreaCode?.id,
           "phoneNumber": data.dataProfiles.phoneNumber!.isEmpty
               ? null
               : data.dataProfiles.phoneNumber,
@@ -1061,6 +1062,7 @@ Future<ResponseData> openOnePromise(promiseId) async {
     // return ResponseData(data: null, error: "connection error $e");
   }
 }
+
 Future<ResponseData> addToFavoritePreach(userId, preachId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');

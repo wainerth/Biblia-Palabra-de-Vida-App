@@ -99,7 +99,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     if (userData != null && userData.currentUser != null) {
       if (userData.currentUser!.currentLeague != null ) {
         activeLeagueId = userData.currentUser!.currentLeague!.id;
-        loadMembers(activeLeagueId, userData.currentUser!.user!.id, context);
+        loadMembers(activeLeagueId, userData.currentUser!.userId, context);
       } else {
         // Si no hay una liga activa, puedes manejarlo como desees
         setState(() {

@@ -27,7 +27,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             false); // listen: false para evitar reconstrucciones innecesarias
     LoginUser? dataUser = userProvider.currentUser;
     final progressResponse =
-        await userProvider.getProgressUser(dataUser?.user.id, null);
+        await userProvider.getProgressUser(dataUser?.userId, null);
     if (progressResponse!.error != null) {
       LoadingService().hideLoading();
       await showCustomDialog(
@@ -268,7 +268,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
 
     // Llamada inicial para cargar los premios
     // No necesitamos el await aquí ya que showDialog lo esperará
-    final response = await getAllAwards(1, limit, userData!.user.id);
+    final response = await getAllAwards(1, limit, userData!.userId);
     if (response != null) {
       setState(() {
         awards = response["awards"] as List<Award>;

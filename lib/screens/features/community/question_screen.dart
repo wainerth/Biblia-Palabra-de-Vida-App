@@ -57,7 +57,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       answers: [],
       isOrdering: false);
   // ResponseData? responseSend;
- int numberQuestion = 0;
+  int numberQuestion = 0;
   List currentAnswers = [];
   List<Question> questions = [];
   List<UserResponses> responses = [];
@@ -130,7 +130,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
         // obtenemos curso
         final ResponseData courseResponse = await loadOneCourse(
-            userData != null ? userData!.user.id : null, courseId);
+            userData != null ? userData!.userId : null, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
         }
@@ -199,7 +199,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       responses.add(UserResponses(
         answerId: currentAnswers[index].id,
         questionId: currentQuestion.id,
-        userId: userData!.user.id,
+        userId: userData!.userId,
       ));
     }
 
@@ -336,7 +336,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         // }
         // lamamos al servicios que nos registra el score
         final ResponseData sendScoreResponse = await sendScoreUser(
-            userData != null ? userData!.user.id : '',
+            userData != null ? userData!.userId : '',
             courseId,
             levelId,
             failedAttempts);
@@ -351,7 +351,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
         // consultamos ultimo progreso en el nivel correspondiente para obtener experiencia acumulada y energía acumulada
         final ResponseData progressLevelResponse = await lastLevelProgressUser(
-            userData != null ? userData!.user.id : '',
+            userData != null ? userData!.userId : '',
             level != null ? level!.id : '');
         if (progressLevelResponse.error != null) {
           LoadingService().hideLoading();
@@ -398,7 +398,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           }
           // desbloquear la proxima sección
           final responseUnlockSection =
-              await unlockedNextSection(userData!.user.id, sectionId);
+              await unlockedNextSection(userData!.userId, sectionId);
           if (responseUnlockSection.error != null) {
             LoadingService().hideLoading();
             await showCustomDialog(context,
@@ -438,11 +438,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userToken = prefs.getString('userToken');
     await Provider.of<AuthenticationProvider>(context, listen: false)
-        .loadProfileUser(userData!.user.id, userToken);
+        .loadProfileUser(userData!.userId, userToken);
   }
 
   loadTitleForUser() async {
-    final responseTitle = await getTitleForUser(userData!.user.id, course!.id);
+    final responseTitle = await getTitleForUser(userData!.userId, course!.id);
 
     if (responseTitle.error != null) {
       // si desbloqueo un titulo
@@ -458,8 +458,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   loadPrizeForUser() async {
-    final responsePrizeWon =
-        await setPrizeObtained(userData!.user.id, courseId);
+    final responsePrizeWon = await setPrizeObtained(userData!.userId, courseId);
     if (responsePrizeWon.error != null) {
       // si desbloqueo un titulo
       LoadingService().hideLoading();
@@ -525,8 +524,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     Column(
                       children: <Widget>[
                         HeaderNotDetailsStageWidget(
-                          showStage: !showTitleObtained && !showRewardObtained && !showPrizeWon,
-                          showAction:!showTitleObtained && !showRewardObtained && !showPrizeWon, 
+                          showStage: !showTitleObtained &&
+                              !showRewardObtained &&
+                              !showPrizeWon,
+                          showAction: !showTitleObtained &&
+                              !showRewardObtained &&
+                              !showPrizeWon,
                           title:
                               "Conoce el ${course != null ? course!.title : ''}",
                           stage: stage != null ? stage!.id : '',
@@ -538,7 +541,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         ),
                       ],
                     ),
-                    if (!showTitleObtained && !showRewardObtained && !showPrizeWon && !showLastStageCompleted) ...{
+                    if (!showTitleObtained &&
+                        !showRewardObtained &&
+                        !showPrizeWon &&
+                        !showLastStageCompleted) ...{
                       Container(
                         margin:
                             EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -608,7 +614,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                               LoadingService().showLoading(context);
                               // aplico recompensa a usuario
                               final responseApply = await applyRewardToUser(
-                                  userData!.user.id, reward?.id);
+                                  userData!.userId, reward?.id);
                               if (responseApply.error != null) {
                                 LoadingService().hideLoading();
                                 await showCustomDialog(context,
@@ -971,21 +977,19 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 .copyWith(color: StyleColor.orange),
           ),
           ButtonThemeWidget(
-            showIcon: true,
-            icon: Icons.share,
-            width: 208,
-            height: 32,
-            colorIcon: Colors.white,
-            buttonStyle: StylesApp(context).btnPrimary,
-            text: "Compartir logro",
-            onPressed: () async { 
+              showIcon: true,
+              icon: Icons.share,
+              width: 208,
+              height: 32,
+              colorIcon: Colors.white,
+              buttonStyle: StylesApp(context).btnPrimary,
+              text: "Compartir logro",
+              onPressed: () async {
                 await Share.share(
                   "¡Etapa ${sectionId}-${stage?.sectionName} completada",
-                  subject: "¡Felicita a ${userData!.user.username}! ",
+                  subject: "¡Felicita a ${userData!.username}! ",
                 );
-            }
-
-          ),
+              }),
           SizedBox(height: 43),
           ButtonThemeWidget(
             text: "Continuar",
@@ -1070,16 +1074,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   children: [
                     Container(
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            offset: Offset(0.0, 4.0),
-                            blurStyle: BlurStyle.outer,
-                            blurRadius: 4.0,
-                          ),
-                        ]
-                      ),
+                      decoration: BoxDecoration(boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          offset: Offset(0.0, 4.0),
+                          blurStyle: BlurStyle.outer,
+                          blurRadius: 4.0,
+                        ),
+                      ]),
                       child: Image.network(
                         GraphQLConfig.urlServidor + prize!.img.urlImg,
                         height: 80,
@@ -1161,8 +1163,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       });
                     } else {
                       // hacemos route a aventura screen
-                     Navigator.popAndPushNamed(
-                                    context, '/layoutPage1');
+                      Navigator.popAndPushNamed(context, '/layoutPage1');
                     }
                   },
                 ),
@@ -1258,7 +1259,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               onPressed: () async {
                 await Share.share(
                   "¡He obtenido el titulo de ${title?.title}!",
-                  subject: "¡Felicita a ${userData!.user.username}! ",
+                  subject: "¡Felicita a ${userData!.username}! ",
                 );
               },
             ),
@@ -1274,7 +1275,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     children: [
                       Image.asset(
                         "assets/kawaii_fire.png",
-                        height: calculateHeight(userData!.energyPoints.toDouble()),
+                        height:
+                            calculateHeight(userData!.energyPoints.toDouble()),
                         fit: BoxFit.contain,
                       ),
                       Text(
@@ -1296,8 +1298,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     height: 32,
                     buttonStyle: StylesApp(context).btnWidgetSmall,
                     onPressed: () {
-                       Navigator.popAndPushNamed(
-                                    context, '/layoutPage1');
+                      Navigator.popAndPushNamed(context, '/layoutPage1');
                       // Navigator.popAndPushNamed(context, '/aventurePage');
                     },
                   ),

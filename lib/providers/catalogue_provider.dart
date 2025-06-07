@@ -1,150 +1,232 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
-
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-
 import 'package:flutter/foundation.dart';
-
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class CatalogueProvider extends ChangeNotifier {
   late GraphQLClient _client;
   late Map<String, dynamic> allConfig;
-  List<Country> allCountries = []; // Inicializa las listas
+  List<Country> allCountries = [];
+  List<AreaCode> allAreasCode = [];
   List<Church> allChurches = [];
   List<League> allLeagues = [];
   List<CourseModel> allCourses = [];
+  List<VersionModel> allBibleVersion = [];
+
+  bool _isInitialized = false;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  bool get isInitialized => _isInitialized;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   CatalogueProvider() {
-    initialize(); // Llama a la función de initialize
+    initialize();
   }
 
   Future<void> initialize() async {
-    _client = createClient();
+    if (_isLoading) return;
 
-    // carga los paises
-    await _loadCountries();
-    // carga el sexo
-    await _loadSex();
-    // carga las versiones de la biblia
-    await _loadVersions();
-
-    // carga las iglesias
-    await _loadChurches();
-
-    // carga los ligas
-    await _loadLeagues();
-
-    // carga las configuraciones
-    await _getConfigurations();
-  }
-
-  Future<void> _loadCountries() async {
-    QueryOptions options = QueryOptions(
-      operationName: "GetAllCountries",
-      document: gql(r'''
-      query GetAllCountries {
-        getAllCountries {
-          id
-          country
-          country_code
-        }
-      }
-      '''),
-      fetchPolicy: FetchPolicy.noCache,
-    );
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
     try {
-      final QueryResult result = await _client.query(options);
+      // Verificar conexión a internet primero
+      await _checkInternetConnection();
 
-      if (result.hasException) {
-        final response = ResponseData.fromQueryResult(result);
-        throw Exception('Failed to obtain Countries ${response.error}');
-      }
+      _client = await _createClientWithRetry();
 
-      final data = result.data;
+      // Cargar datos en paralelo donde sea posible
+      await Future.wait([
+        _loadAllCountriesWithIsolates(),
+        _loadAreasCodeWithIsolates(),
+        _loadChurches(),
+        _loadLeagues(),
+        _getConfigurations(),
+        _loadBibleVersions()
+      ]);
 
-      if (data == null || data['getAllCountries'] == null) {
-        throw Exception('obtain Countries no data');
-      }
-      if (kDebugMode) {
-        print("countries llamado ");
-      }
-      allCountries = (data['getAllCountries'] as List)
-          .map((i) => Country.fromJson(i))
-          .toList();
-
-      notifyListeners();
-    } on TimeoutException catch (e) {
-      if (kDebugMode) {
-        print('Timeout: $e');
-      }
-      throw Exception('obtain Countries Timeout de conexión $e');
+      _isInitialized = true;
     } catch (e) {
-      // More specific error handling if needed:
-      if (e is TimeoutException) {
-        throw Exception("Request timed out");
-      } else if (e is SocketException) {
-        throw Exception("No Internet Connection");
-      } else if (e is FormatException) {
-        // Example: JSON parsing error
-        throw Exception("Invalid data format");
-      } else {
-        throw Exception("Failed to obtain Countries : $e"); // Generic error
+      _errorMessage = e.toString();
+      if (kDebugMode) {
+        print('Error initializing CatalogueProvider: $e');
+      }
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isEmpty || result[0].rawAddress.isEmpty) {
+        throw SocketException('No Internet connection');
+      }
+    } on SocketException catch (_) {
+      throw Exception('No Internet connection');
+    }
+  }
+
+  Future<GraphQLClient> _createClientWithRetry({int retries = 3}) async {
+    for (var i = 0; i < retries; i++) {
+      try {
+        final client = createClient();
+        // Verificar que el cliente funciona con una consulta simple
+        final options = QueryOptions(
+          document: gql(r'query { __typename }'),
+        );
+        await client.query(options);
+        return client;
+      } catch (e) {
+        if (i == retries - 1) rethrow;
+        await Future.delayed(const Duration(seconds: 1));
+      }
+    }
+    throw Exception('Failed to create GraphQL client after $retries attempts');
+  }
+
+  Future<void> _loadAllCountriesWithIsolates() async {
+    final receivePort = ReceivePort();
+    await Isolate.spawn(_countriesLoader, receivePort.sendPort);
+
+    await for (var message in receivePort) {
+      if (message is List<Country>) {
+        allCountries.addAll(message);
+        notifyListeners();
+      } else if (message == 'completed') {
+        print("countries cargados...");
+        break;
       }
     }
   }
 
-  Future<void> _loadSex() async {
-    // Lógica para cargar la lista de opciones de sexo
+  static void _countriesLoader(SendPort sendPort) async {
+    final client = createClient();
+    var offset = 0;
+    const limit = 20;
+    var hasMore = true;
 
-    // Ejemplo:
+    while (hasMore) {
+      final options = QueryOptions(
+        operationName: "GetAllCountryWithCodeAreas",
+        document: gql(r'''
+        query GetAllCountryWithCodeAreas($limit: Int, $offset: Int, $search: String) {
+          getAllCountryWithCodeAreas(limit: $limit, offset: $offset, search: $search) {
+            id
+            country
+            areaCodeCountry {
+              id
+              code
+            }
+          }
+        }
+        '''),
+        variables: <String, dynamic>{
+          "limit": limit,
+          "offset": offset,
+          "search": ""
+        },
+        fetchPolicy: FetchPolicy.noCache,
+      );
 
-    // final sexo = await _obtenerOpcionesSexoDesdeBaseDeDatos();
+      final result = await client.query(options);
+      final data = result.data?['getAllCountryWithCodeAreas'] as List? ?? [];
+      final countries = data.map((i) => Country.fromJson(i)).toList();
 
-    // ...
+      sendPort.send(countries);
+      offset += countries.length;
+      hasMore = countries.length >= limit;
+      await Future.delayed(Duration(milliseconds: 300));
+    }
+
+    sendPort.send('completed');
   }
 
-  Future<void> _loadVersions() async {
-    // Lógica para cargar la lista de versiones
+  // Future<void> _loadCountries(int? limit, int? offset, String? search) async {
+  //   try {
+  //     final options = QueryOptions(
+  //       operationName: "GetAllCountryWithCodeAreas",
+  //       document: gql(r'''
+  //       query GetAllCountryWithCodeAreas($limit: Int, $offset: Int, $search: String) {
+  //         getAllCountryWithCodeAreas(limit: $limit, offset: $offset, search: $search) {
+  //           id
+  //           country
+  //           areaCodeCountry {
+  //             id
+  //             code
+  //           }
+  //         }
+  //       }
+  //       '''),
+  //       variables: <String, dynamic>{
+  //         "limit": limit,
+  //         "offset": offset,
+  //         "search": search
+  //       },
+  //       fetchPolicy: FetchPolicy.noCache,
+  //     );
 
-    // Ejemplo:
+  //     final result = await _client.query(options).timeout(
+  //           const Duration(seconds: 10),
+  //           onTimeout: () => throw TimeoutException('Request timed out'),
+  //         );
 
-    // final versiones = await _obtenerVersionesDesdeAPI();
+  //     if (result.hasException) {
+  //       throw Exception('Failed to obtain Countries: ${result.exception}');
+  //     }
 
-    // ...
-  }
+  //     final data = result.data;
+  //     if (data == null || data['getAllCountryWithCodeAreas'] == null) {
+  //       throw Exception('No countries data received');
+  //     }
+
+  //     allCountries = (data['getAllCountryWithCodeAreas'] as List)
+  //         .map((i) => Country.fromJson(i))
+  //         .toList();
+
+  //     notifyListeners();
+  //   } catch (e) {
+  //     throw Exception('Failed to load countries: $e');
+  //   }
+  // }
 
   Future<void> _loadChurches() async {
-    QueryOptions options = QueryOptions(
-      operationName: "GetAllChurches",
-      document: gql(r'''
-      query GetAllChurches {
+    try {
+      final options = QueryOptions(
+        operationName: "GetAllChurches",
+        document: gql(r'''
+        query GetAllChurches {
           getAllChurches {
             id
             name
           }
         }
-      '''),
-      fetchPolicy: FetchPolicy.noCache,
-    );
+        '''),
+        fetchPolicy: FetchPolicy.noCache,
+      );
 
-    try {
-      final QueryResult result = await _client.query(options);
+      final result = await _client.query(options).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Request timed out'),
+          );
 
       if (result.hasException) {
-        final response = ResponseData.fromQueryResult(result);
-        throw Exception('Failed to obtain Churches ${response.error}');
+        throw Exception('Failed to obtain Churches: ${result.exception}');
       }
 
       final data = result.data;
-
       if (data == null || data['getAllChurches'] == null) {
-        throw Exception('obtain Churches no data');
+        throw Exception('No churches data received');
       }
 
       allChurches = (data['getAllChurches'] as List)
@@ -153,15 +235,16 @@ class CatalogueProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      throw Exception('Failed to obtain Churches $e');
+      throw Exception('Failed to load churches: $e');
     }
   }
 
   Future<void> _loadLeagues() async {
-    QueryOptions options = QueryOptions(
-      operationName: "GetAllLeagues",
-      document: gql(r'''
-     query GetAllLeagues {
+    try {
+      final options = QueryOptions(
+        operationName: "GetAllLeagues",
+        document: gql(r'''
+        query GetAllLeagues {
           getAllLeagues {
             id
             name
@@ -175,22 +258,22 @@ class CatalogueProvider extends ChangeNotifier {
             }
           }
         }
-      '''),
-      fetchPolicy: FetchPolicy.noCache,
-    );
+        '''),
+        fetchPolicy: FetchPolicy.noCache,
+      );
 
-    try {
-      final QueryResult result = await _client.query(options);
+      final result = await _client.query(options).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Request timed out'),
+          );
 
       if (result.hasException) {
-        final response = ResponseData.fromQueryResult(result);
-        throw Exception('Failed to obtain leagues ${response.error}');
+        throw Exception('Failed to obtain leagues: ${result.exception}');
       }
 
       final data = result.data;
-
       if (data == null || data['getAllLeagues'] == null) {
-        throw Exception('obtain leagues no data');
+        throw Exception('No leagues data received');
       }
 
       allLeagues = (data['getAllLeagues'] as List)
@@ -199,43 +282,143 @@ class CatalogueProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      throw Exception('Failed to obtain leagues $e');
+      throw Exception('Failed to load leagues: $e');
     }
   }
 
   Future<void> _getConfigurations() async {
-    QueryOptions options = QueryOptions(
-      operationName: "GetConfigurations",
-      document: gql(r'''
-        query GetConfigurations {
-      getConfigurations
-    }
-      '''),
-      fetchPolicy: FetchPolicy.noCache,
-    );
-
     try {
-      final QueryResult result = await _client.query(options);
+      final options = QueryOptions(
+        operationName: "GetConfigurations",
+        document: gql(r'''
+        query GetConfigurations {
+          getConfigurations
+        }
+        '''),
+        fetchPolicy: FetchPolicy.noCache,
+      );
+
+      final result = await _client.query(options).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Request timed out'),
+          );
 
       if (result.hasException) {
-        throw Exception('Failed to obtain getConfigurations');
+        throw Exception('Failed to obtain configurations: ${result.exception}');
       }
 
       final data = result.data;
-
       if (data == null || data['getConfigurations'] == null) {
-        throw Exception('Failed to obtain getConfigurations');
+        throw Exception('No configurations data received');
       }
 
       allConfig =
           Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
-      if (kDebugMode) {
-        print(allConfig);
-      }
-
       notifyListeners();
     } catch (e) {
-      throw Exception('Failed to obtain getConfigurations $e');
+      throw Exception('Failed to load configurations: $e');
+    }
+  }
+
+  // Métodos para _loadSex()...
+
+  Future<void> _loadAreasCodeWithIsolates() async {
+    final receivePort = ReceivePort();
+    await Isolate.spawn(_areasCodeLoader, receivePort.sendPort);
+
+    await for (var message in receivePort) {
+      if (message is List<AreaCode>) {
+        allAreasCode.addAll(message);
+        notifyListeners();
+      } else if (message == 'completed') {
+        print("areas code cargados...");
+        break;
+      }
+    }
+  }
+
+  static void _areasCodeLoader(SendPort sendPort) async {
+    final client = createClient();
+    var offset = 0;
+    const limit = 20;
+    var hasMore = true;
+
+    while (hasMore) {
+      final options = QueryOptions(
+        operationName: "GetAllAreaCodes",
+        document: gql(r'''
+         query GetAllAreaCodes($limit: Int, $offset: Int, $search: String) {
+            getAllAreaCodes(limit: $limit, offset: $offset, search: $search) {
+              id
+              code
+            }
+          }
+        '''),
+        variables: <String, dynamic>{
+          "limit": limit,
+          "offset": offset,
+          "search": ""
+        },
+        fetchPolicy: FetchPolicy.noCache,
+      );
+
+      final result = await client.query(options);
+      final data = result.data?['getAllAreaCodes'] as List? ?? [];
+      final areas = data.map((i) => AreaCode.fromJson(i)).toList();
+
+      sendPort.send(areas);
+      offset += areas.length;
+      hasMore = areas.length >= limit;
+      await Future.delayed(Duration(milliseconds: 300));
+    }
+
+    sendPort.send('completed');
+  }
+
+  Future<void> _loadBibleVersions() async {
+    try {
+      final options = QueryOptions(
+        operationName: "GetAllVersion",
+        document: gql(r'''
+        query GetAllVersion {
+            getAllVersion {
+              id
+              version
+              books {
+                id
+                numberBook
+                modernName
+              }
+            }
+        }
+        '''),
+        fetchPolicy: FetchPolicy.noCache,
+      );
+
+      final result = await _client.query(options).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Request timed out'),
+          );
+
+      if (result.hasException) {
+        throw Exception(
+            'Failed to obtain get All Version: ${result.exception}');
+      }
+
+      final data = result.data;
+      if (data == null || data['getAllVersion'] == null) {
+        throw Exception('No get All Version data received');
+      }
+
+      allBibleVersion = (data['getAllVersion'] as List)
+          .map((version) => VersionModel.fromJson(version))
+          .toList();
+      if (kDebugMode) {
+        print('all versions loaded');
+      }
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to all versions configurations: $e');
     }
   }
 }

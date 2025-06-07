@@ -19,281 +19,225 @@ class _CurrentMonthCalendarWidgetState
     extends State<CurrentMonthCalendarWidget> {
   String? errorMessage;
   DateCalendar? dayProtectedStreak;
-  late DateTime displayedMonth; // Mueve displayedMonth aquí
-  // late DateTime registrationDate;
+  late DateTime displayedMonth;
   late DateTime lastDate;
   int daysInMonth = 0;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    DateTime now = DateTime.now();
-    DateTime currentDate = DateTime(now.year, now.month);
-    // registrationDate = DateTime(2023, 7, 1); // Fecha de registro
+    final now = DateTime.now();
     lastDate = widget.registrationDate.add(Duration(days: 365 * 5));
-
-    if (currentDate.isBefore(widget.registrationDate)) {
-      displayedMonth = widget.registrationDate;
-    } else {
-      displayedMonth = currentDate;
-    }
-    daysInMonth =
-        DateTime(displayedMonth.year, displayedMonth.month + 1, 0).day;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _generateData(context);
-    });
+    
+    // Inicializar con el mes actual o fecha de registro si es posterior
+    displayedMonth = now.isBefore(widget.registrationDate) 
+        ? widget.registrationDate 
+        : DateTime(now.year, now.month);
+    
+    _updateDaysInMonth();
+    _generateData();
   }
 
-  Future<void> _generateData(BuildContext context) async {
-    LoadingService().showLoading(context);
-    DateTime now = DateTime.now();
+  void _updateDaysInMonth() {
+    daysInMonth = DateTime(displayedMonth.year, displayedMonth.month + 1, 0).day;
+  }
+
+  Future<void> _generateData() async {
+    if (_isLoading) return;
+    
+    setState(() => _isLoading = true);
     try {
-      setState(() {});
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final LoginUser? userData = userProvider.currentUser;
-      final responseStreakCalendar =
-          await streaksCalendar(userData!.user.id, now.month);
-      if (responseStreakCalendar.error != null) {
-        errorMessage = responseStreakCalendar.error;
+      final userProvider = context.read<UserProvider>();
+      final userData = userProvider.currentUser;
+      
+      final response = await streaksCalendar(
+        userData!.userId, 
+        displayedMonth.month
+      );
+      
+      if (response.error != null) {
+        errorMessage = response.error;
+      } else {
+        dayProtectedStreak = DateCalendar.fromJson(
+          removeTypename(response.data)
+        );
       }
-      setState(() {
-        dayProtectedStreak =
-            DateCalendar.fromJson(removeTypename(responseStreakCalendar.data));
-      });
-      // dayProtectedStreak = responseStreakCalendar.data["protectedStreak"];
     } catch (e) {
-      setState(() {
-      errorMessage = e as String?;
-        
-      });
+      errorMessage = e.toString();
     } finally {
-      LoadingService().hideLoading();
+      setState(() => _isLoading = false);
     }
   }
 
-  loadStreak(month) async {
-    dayProtectedStreak = null;
-    LoadingService().showLoading(context);
-    try {
-      setState(() {});
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final LoginUser? userData = userProvider.currentUser;
-      final responseStreakCalendar =
-          await streaksCalendar(userData!.user.id, month);
-      if (responseStreakCalendar.error != null) {
-        errorMessage = responseStreakCalendar.error;
-      }
+  Future<void> previousMonth() async {
+    final newMonth = DateTime(
+      displayedMonth.year, 
+      displayedMonth.month - 1
+    );
+    
+    if (newMonth.isAfter(widget.registrationDate) || 
+        newMonth.isAtSameMomentAs(widget.registrationDate)) {
       setState(() {
-        dayProtectedStreak =
-            DateCalendar.fromJson(removeTypename(responseStreakCalendar.data));
+        displayedMonth = newMonth;
+        _updateDaysInMonth();
       });
-    } catch (e) {
-      print(e);
-    } finally {
-      LoadingService().hideLoading();
+      await _generateData();
+    }
+  }
+
+  Future<void> nextMonth() async {
+    final newMonth = DateTime(
+      displayedMonth.year, 
+      displayedMonth.month + 1
+    );
+    
+    if (newMonth.isBefore(lastDate)) {
+      setState(() {
+        displayedMonth = newMonth;
+        _updateDaysInMonth();
+      });
+      await _generateData();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final dayWidgets = List.generate(daysInMonth, (index) {
+      final day = index + 1;
+      final currentDate = DateTime(
+        displayedMonth.year, 
+        displayedMonth.month, 
+        day
+      );
+      
+      final hasPlayDay = dayProtectedStreak?.playDay
+          .any((d) => _isSameDay(d, currentDate)) ?? false;
+      
+      final hasProtectedStreak = dayProtectedStreak?.protectedStreak
+          .any((d) => _isSameDay(d, currentDate)) ?? false;
 
-    return StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
-        void previousMonth() async {
-          if (displayedMonth.isAfter(widget.registrationDate)) {
-            setState(() {
-              displayedMonth =
-                  DateTime(displayedMonth.year, displayedMonth.month - 1);
-            });
-          }
-          await loadStreak(displayedMonth.month);
-        }
-
-        void nextMonth() async {
-          if (displayedMonth
-              .isBefore(widget.registrationDate.add(Duration(days: 365 * 5)))) {
-            setState(() {
-              displayedMonth =
-                  DateTime(displayedMonth.year, displayedMonth.month + 1);
-              print(displayedMonth.month);
-              // loadStreak(displayedMonth.month);
-            });
-            await loadStreak(displayedMonth.month);
-          }
-        }
-
-        List<Widget> dayWidgets = [];
-
-        for (int i = 1; i <= daysInMonth; i++) {
-          dayWidgets.add(
-            Container(
-              height: 26.0,
-              width: 26.0,
-              padding: EdgeInsets.all(0),
-              margin: EdgeInsets.all(0.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4.0),
-                // border: Border.all(width: 1)
+      return Container(
+        height: 26.0,
+        width: 26.0,
+        margin: const EdgeInsets.all(0.0),
+        child: Stack(
+          children: [
+            if (hasPlayDay)
+              Positioned.fill(
+                child: Image.asset(
+                  "assets/fire_rachaActive.png",
+                  fit: BoxFit.fitHeight,
+                ),
               ),
-              child: Stack(
-                children: [
-                  if (dayProtectedStreak != null) ...{
-                    if (dayProtectedStreak!.playDay.contains(DateTime(
-                        displayedMonth.year, displayedMonth.month, i))) ...{
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: double.infinity,
-                          child: Image.asset(
-                            "assets/fire_rachaActive.png",
-                            fit: BoxFit.fitHeight,
-                            height: 40,
-                            width: 40,
-                          ),
-                        ),
-                      )
-                    },
-                    if (dayProtectedStreak!.protectedStreak.contains(DateTime(
-                        displayedMonth.year, displayedMonth.month, i))) ...{
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: double.infinity,
-                          child: Image.asset(
-                            "assets/fire_rachaInactive.png",
-                            fit: BoxFit.fitHeight,
-                            height: 40,
-                            width: 40,
-                          ),
-                        ),
-                      )
-                    },
-                  },
-                  Center(
-                    child: Text(
-                      i.toString(),
-                      style: StylesApp(context).textStyleBody6,
-                    ),
-                  ),
-                ],
+            if (hasProtectedStreak)
+              Positioned.fill(
+                child: Image.asset(
+                  "assets/fire_rachaInactive.png",
+                  fit: BoxFit.fitHeight,
+                ),
+              ),
+            Center(
+              child: Text(
+                day.toString(),
+                style: StylesApp(context).textStyleBody6,
               ),
             ),
-          );
-        }
+          ],
+        ),
+      );
+    });
 
-        return Container(
-          margin: EdgeInsets.all(7.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Constancia",
-                style: StylesApp(context).textStyCalendar,
-              ),
-              Container(
-                decoration: BoxDecoration(
-                    color: Color(0XFF12CBC4),
-                    borderRadius: BorderRadius.circular(8.0)),
-                child: Column(
+    return Container(
+      margin: const EdgeInsets.all(7.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Constancia",
+            style: StylesApp(context).textStyCalendar,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0XFF12CBC4),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Column(
+              children: [
+                Stack(
                   children: [
-                    Stack(
-                      children: [
-                        Positioned(
-                          left: 10,
-                          top: 0,
-                          child: SizedBox(
-                            width: 25,
-                            height: 25,
-                            child: IconButton(
-                              padding: EdgeInsets.all(0),
-                              iconSize: 25.0,
-                              disabledColor: Colors.grey,
-                              icon: Icon(
-                                Icons.arrow_back,
-                                size: 20,
-                              ),
-                              onPressed:
-                                  displayedMonth.isAfter(widget.registrationDate)
-                                      ? previousMonth
-                                      : null,
-                              color: Colors.white,
-                            ),
-                          ),
+                    Positioned(
+                      left: 10,
+                      top: 0,
+                      child: SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          iconSize: 20.0,
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: _isLoading ? null : previousMonth,
+                          color: Colors.white,
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_getNameMonth(DateTime(displayedMonth.year, displayedMonth.month + 1, 0))} - ${displayedMonth.year}',
-                              style: StylesApp(context).textStyCalendarWhite,
-                            ),
-                          ],
-                        ),
-                        Positioned(
-                          right: 10,
-                          top: 0,
-                          child: SizedBox(
-                            width: 25,
-                            height: 25,
-                            child: IconButton(
-                              padding: EdgeInsets.all(0),
-                              iconSize: 25.0,
-                              disabledColor: Colors.grey,
-                              icon: Icon(
-                                Icons.arrow_forward,
-                                size: 20,
-                              ),
-                              onPressed: displayedMonth.isBefore(lastDate)
-                                  ? nextMonth
-                                  : null,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 22.0, vertical: 0),
-                      child: GridView.count(
-                        crossAxisCount: 7,
-                        shrinkWrap: true,
-                        children: dayWidgets,
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          '${_getNameMonth(displayedMonth)} ${displayedMonth.year}',
+                          style: StylesApp(context).textStyCalendarWhite,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 10,
+                      top: 0,
+                      child: SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          iconSize: 20.0,
+                          icon: const Icon(Icons.arrow_forward),
+                          onPressed: _isLoading ? null : nextMonth,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 22.0, 
+                    vertical: 8.0,
+                  ),
+                  child: GridView.count(
+                    crossAxisCount: 7,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: dayWidgets,
+                  ),
+                ),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  String _getNameMonth(DateTime dateTime) {
-    List<String> months = [
-      "Enero",
-      "Febrero",
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-      "Octubre",
-      "Noviembre",
-      "Diciembre"
+  bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+           date1.month == date2.month &&
+           date1.day == date2.day;
+  }
+
+  String _getNameMonth(DateTime date) {
+    const months = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
     ];
-    return months[dateTime.month - 1];
+    return months[date.month - 1];
   }
 }

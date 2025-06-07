@@ -79,7 +79,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         final LoginUser? userData = userProvider.currentUser;
         final ResponseData responseCourse =
-            await loadOneCourse(userData!.user.id, courseId);
+            await loadOneCourse(userData!.userId, courseId);
         if (responseCourse.error != null) {
           errorMessage = responseCourse.error;
         }

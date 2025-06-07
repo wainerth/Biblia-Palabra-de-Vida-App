@@ -15,7 +15,7 @@ class UserProvider extends ChangeNotifier {
   LastProgressUser? _progressUser;
   LoginUser? get currentUser => _user;
   DailyWord? dailyProverb;
-  DailyWord? get  getDailyProverb => dailyProverb;
+  DailyWord? get getDailyProverb => dailyProverb;
 
   LastProgressUser? get progressUser => _progressUser;
 
@@ -52,8 +52,8 @@ class UserProvider extends ChangeNotifier {
 
   Future<ResponseData> updateAvatarUser(String userId, String toBase64) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? userToken = prefs.getString('userToken');
-      final GraphQLClient client = createClient(authToken: userToken);
+    String? userToken = prefs.getString('userToken');
+    final GraphQLClient client = createClient(authToken: userToken);
     if (userId.isEmpty || toBase64.isEmpty) {
       return ResponseData(
         data: null,
@@ -129,6 +129,11 @@ class UserProvider extends ChangeNotifier {
           gender: data.dataProfiles.gender,
           birthdate: data.dataProfiles.birthdate,
           identifier: data.dataProfiles.identifier,
+          profileAreaCode: data.dataProfiles.profileAreaCode != null
+              ? AreaCode(
+                  id: data.dataProfiles.profileAreaCode!.id,
+                  code: data.dataProfiles.profileAreaCode!.code)
+              : null,
           phoneNumber: data.dataProfiles.phoneNumber,
           country: data.dataProfiles.country,
           isBaptized: data.dataProfiles.isBaptized);
@@ -163,13 +168,15 @@ class UserProvider extends ChangeNotifier {
       if (response.error != null) {
         return ResponseData(data: null, error: null);
       }
-      var current = currentUser!.user;
-      if (current.userChurch.isEmpty) {
+      var current = currentUser;
+      if (current!.userChurch.isEmpty) {
         // add church
         final findChurch = churches.firstWhere((ch) => ch.id == churchId);
         List<UserChurch> newChurch = [];
         newChurch.add(UserChurch(
-            id: findChurch.id, name: findChurch!.name, status: true));
+            id: findChurch.id,
+            churchName: findChurch!.churchName,
+            status: true));
         current = current.copyWith(userChurch: newChurch);
       } else {
         // search churches and set value status in false and church selected en true
@@ -196,7 +203,7 @@ class UserProvider extends ChangeNotifier {
           // La iglesia no existe, agregarla a la lista
           newChurch.add(UserChurch(
               id: findChurch.id,
-              name: findChurch.name,
+              churchName: findChurch.name,
               status: true)); // Agregar nueva iglesia
         }
         current = current.copyWith(userChurch: newChurch);
@@ -218,7 +225,7 @@ class UserProvider extends ChangeNotifier {
           notifications: _user?.notifications,
           preachingsCreatedCount: _user?.preachingsCreatedCount,
           streakDaysCount: _user?.streakDaysCount,
-          user: current);
+          userChurch: current.userChurch);
       setUser(_user);
       return ResponseData(data: response.data, error: null);
     } catch (e) {
@@ -249,7 +256,7 @@ class UserProvider extends ChangeNotifier {
     }
 
     if (progress.data == null || progress.data['data'] == null) {
-       return ResponseData(error: null, data: null);
+      return ResponseData(error: null, data: null);
     } else {
       userProgress = LastProgressUser.fromMap(progress.data['data']);
       setProgressUser(userProgress);

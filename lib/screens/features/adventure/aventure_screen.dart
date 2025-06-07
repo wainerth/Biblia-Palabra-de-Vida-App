@@ -39,9 +39,9 @@ class _AventureScreenState extends State<AventureScreen> {
     });
     try {
       final result = await loadCoursesByUserAndChurch(
-          dataUser!.user.id,
-          dataUser!.user.userChurch.isNotEmpty
-              ? dataUser!.user.userChurch.first.id
+          dataUser!.userId,
+          dataUser!.userChurch.isNotEmpty
+              ? dataUser!.userChurch.first.id
               : null);
       if (result.error != null) {
         LoadingService().hideLoading();
@@ -139,7 +139,7 @@ class _AventureScreenState extends State<AventureScreen> {
                           //consulto si el curso tiene niveles
 
                           Stage stage = await loadStage(
-                              dataUser?.user.id, courses[index].id);
+                              dataUser?.userId, courses[index].id);
                           if (stage.levelCount > 0) {
                             // consulto si el usuario tiene algún progreso para este curso?
                             final userProvider = Provider.of<UserProvider>(
@@ -147,7 +147,7 @@ class _AventureScreenState extends State<AventureScreen> {
                                 listen: false);
                             final progressResponse =
                                 await userProvider.getProgressUser(
-                                    dataUser?.user.id, courses[index].id);
+                                    dataUser?.userId, courses[index].id);
                             if (progressResponse!.error != null) {
                               await showCustomDialog(context,
                                   message: progressResponse.error!,

@@ -13,52 +13,51 @@ Future<ResponseData> getProfileUser(token, idUser) async {
   final QueryOptions options = QueryOptions(
     operationName: 'GetOneProfileByUserId',
     document: gql(r'''
-                  query GetOneProfileByUserId($userId: ID) {
-                    getOneProfileByUserId(userId: $userId) {
-                      name # nombre y apellido
-                      lastname
-                      expTotalUser # puntos no disminuye
-                      energyPoints #energía del usuario esta disminuye
-                      imgProfileUser
-                      phoneNumber
-                       city
-                      gender
-                      country {
-                        id
-                        country
-                        country_code
-                      }
-                      favoriteVerseId # si asigna versículo favorito
-                      notifications # notification user
-                      birthdate
-                      identifier #cédula
-                      gender
-                      isBaptized
-                      currentLeague {
-                        id
-                        name
-                        description
-                      } #future ligue in ranking
-                      createdAt # fecha registro
-                      achievementsReachedCount #contador de logros
-                      streakDaysCount # contador de Dias 
-                      preachingsCreatedCount # cantidad de predicas
-                      user {
-                        id
-                        username
-                        email
-                        lastLogin
-                        userChurch {
-                        churchId
-                        status
-                          churchRelation {
-                            name
-                          }
-                        }
-                      }
-                    }
-                  }
-
+    query GetOneProfileByUserId($userId: ID) {
+      getOneProfileByUserId(userId: $userId) {
+        userId
+        name
+        lastname
+        username
+        email
+        expTotalUser
+        favoriteVerseId
+        notifications
+        username
+        imgProfileUser {
+          urlImg
+        }
+        profileAreaCode {
+          id
+          code
+        }
+        userChurch {
+          id
+          churchName
+          status
+        }
+        createdAt
+        achievementsReachedCount
+        streakDaysCount
+        preachingsCreatedCount
+        country {
+          id
+          country
+        }
+        city
+        birthdate
+        gender
+        identifier
+        isBaptized
+        phoneNumber
+        energyPoints
+        currentLeague {
+          id
+          name
+          description
+        }
+      }
+    }
 '''),
     variables: <String, dynamic>{"userId": idUser},
     fetchPolicy: FetchPolicy.noCache,
@@ -659,7 +658,6 @@ Future loadStageById(sectionId) async {
         status
         levelCount
         levelCompletedCount
-        isChurchContent
         countCards
       }
     }
@@ -719,13 +717,13 @@ Future loadStageByCourse(userId, courseId) async {
   QueryOptions options = QueryOptions(
     operationName: "GetSections",
     document: gql(r'''
-     query GetSections( $courseId: ID, $userId: ID) {
-        getSections(courseId: $courseId, userId: $userId) {
+     query GetSections($userId: ID, $courseId: ID) {
+      getSections(userId: $userId, courseId: $courseId) {
+        data {
           id
           sectionName
           introduction
           unLockSection
-          isChurchContent
           levelCount
           levelCompletedCount
           countCards
@@ -736,7 +734,16 @@ Future loadStageByCourse(userId, courseId) async {
           }
           status
         }
+        meta {
+          currentPage
+          totalPages
+          itemsPerPage
+          totalItems
+          hasPreviousPage
+          hasNextPage
+        }
       }
+    }
       '''),
     variables: <String, dynamic>{"userId": userId, "courseId": courseId},
     fetchPolicy: FetchPolicy.noCache,
@@ -748,7 +755,9 @@ Future loadStageByCourse(userId, courseId) async {
     }
 
     final data = result.data;
-    if (data == null || data['getSections'] == null) {
+    if (data == null ||
+        data['getSections'] == null ||
+        data['getSections']['data'] == null) {
       return ResponseData(
         data: null,
         error: 'get Sections By course failed: No data returned',
@@ -756,7 +765,7 @@ Future loadStageByCourse(userId, courseId) async {
     }
 
     return ResponseData(
-      data: data['getSections'],
+      data: data['getSections']['data'],
       error: null,
     );
   } on TimeoutException catch (e) {
@@ -1259,8 +1268,6 @@ Future getLeagueMembers(leagueId, userId) async {
           getLeagueMembers(leagueId: $leagueId, userId: $userId) {
             userId
             currentPoints
-            position
-            promoted
             username
             profilePicture
           }
@@ -1543,7 +1550,9 @@ Future<ResponseData> getOneReflection() async {
               id
               title
               url
-              countCards
+              visibility
+              statusContent
+              type
               status
             }
           }
@@ -1677,7 +1686,9 @@ Future<ResponseData> getAllReflections(
               id
               title
               url
-              countCards
+              visibility
+              statusContent
+              type
               status
             }
             meta {
@@ -1793,6 +1804,149 @@ Future<ResponseData> getAllPreach(String userId) async {
     return ResponseData(
         data: null,
         error: 'get All Preaches With Favorite Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getChapterWithVerses(String bookId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+         query Chapters($bookId: ID) {
+          getOneBookByBookId(bookId: $bookId) {
+            chapters {
+              id
+              bookId
+              chapter
+              status
+              verses {
+                id
+                chapterId
+                verse
+                text
+                colorHighlight
+                getHighlighter
+                status
+              }
+            }
+          }
+        }
+      '''),
+    variables: <String, dynamic>{"bookId": bookId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data == null || data['getOneBookByBookId'] == null || data['getOneBookByBookId']['chapters'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'get One Book By BookId  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getOneBookByBookId']['chapters'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'get One Book By BookId Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+Future<ResponseData> getOneChapterWithVerses(String? chapterId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+         query GetOneChapterByChapterId($chapterId: ID) {
+            getOneChapterByChapterId(chapterId: $chapterId) {
+              id
+              bookId
+              chapter
+              status
+              verses {
+                id
+                chapterId
+                verse
+                text
+                colorHighlight
+                getHighlighter
+                status
+              }
+            }
+          }
+      '''),
+    variables: <String, dynamic>{"chapterId": chapterId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getOneChapterByChapterId'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'get One Chapter By ChapterId  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getOneChapterByChapterId'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'get One Chapter By ChapterId Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

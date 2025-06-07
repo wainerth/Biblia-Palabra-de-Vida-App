@@ -81,4 +81,8 @@ export 'package:biblia_palabra_de_vida_app/widgets/head_score_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/build_error_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/card_option_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/bible_header_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/version_selection_dialog.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/search_bible_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/modal_text_format_size_widget.dart';
 

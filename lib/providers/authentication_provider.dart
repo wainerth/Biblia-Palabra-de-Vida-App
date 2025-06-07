@@ -61,7 +61,7 @@ class AuthenticationProvider extends ChangeNotifier {
       final dataUserload = LoginUser.fromJson(jsonDecode(userDataString));
       Provider.of<UserProvider>(context, listen: false)
           .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
-      await loadProfileUser(dataUserload.user.id, userToken);
+      await loadProfileUser(dataUserload.userId, userToken);
       print('cargo nueva data de perfil');
     } else {
       isAuthenticated = false;

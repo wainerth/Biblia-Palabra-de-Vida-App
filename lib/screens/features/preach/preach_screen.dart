@@ -132,7 +132,7 @@ class _PreachScreenState extends State<PreachScreen> {
     });
 
     try {
-      final responsePreach = await getAllPreach(userData!.user.id);
+      final responsePreach = await getAllPreach(userData!.userId);
       if (responsePreach.error != null) {
         setState(() {
           errorMessage = responsePreach.error;
@@ -161,7 +161,7 @@ class _PreachScreenState extends State<PreachScreen> {
 
   Future<void> addToFavorite(preach) async {
     final responseAddFavorite =
-        await addToFavoritePreach(userData!.user.id, preach.id);
+        await addToFavoritePreach(userData!.userId, preach.id);
     if (responseAddFavorite.error != null) {
       await showCustomDialog(context,
           message: responseAddFavorite.error!, dialogType: DialogType.error);

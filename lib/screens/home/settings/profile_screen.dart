@@ -59,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         LoadingService().showLoading(context);
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         final ResponseData responseUpdateAvatar =
-            await userProvider.updateAvatarUser(dataUser!.user.id, dataUrl);
+            await userProvider.updateAvatarUser(dataUser!.userId, dataUrl);
         if (responseUpdateAvatar.error != null) {
           LoadingService().hideLoading();
           await showCustomDialog(
@@ -154,12 +154,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     List<ModelData> contactDetails = [
       ModelData(
         label: "Email",
-        value: dataUser!.user.email,
+        value: dataUser!.email!,
         showLabel: false,
       ),
+      // ModelData(
+      //     label: "Tel.",
+      //     value: dataUser != null && dataUser!.profileAreaCode != null
+      //         ? dataUser!.profileAreaCode!.id
+      //         : '',
+      //     clave: "profileAreaCode"),
       ModelData(
           label: "Tel.",
-          value: dataUser!.phoneNumber ?? '',
+          value:
+              "${dataUser != null && dataUser!.profileAreaCode != null ? dataUser!.profileAreaCode!.id : ''} ${dataUser!.phoneNumber ?? ''}",
           clave: "phoneNumber"),
     ];
     List<ModelData> locationData = [
@@ -175,8 +182,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ModelData(
         label: "Iglesia",
         clave: 'church',
-        value: getChurchActive(dataUser!.user.userChurch) != null
-            ? getChurchActive(dataUser!.user.userChurch)!.name
+        value: getChurchActive(dataUser!.userChurch) != null
+            ? getChurchActive(dataUser!.userChurch)!.churchName!
             : '',
       )
     ];
@@ -193,7 +200,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 // _headerDetails(),
                 ProfileHeader(
-                  avatarImg: dataUser!.imgProfileUser,
+                  avatarImg: dataUser!.imgProfileUser != null
+                      ? dataUser!.imgProfileUser!.urlImg
+                      : '',
                   onSelectImage: _selectImage,
                 ),
                 SizedBox(
@@ -311,6 +320,16 @@ class CardColumnWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Encuentra el item cuyo label sea 'Tel.'
+    String areaCode = '';
+    String phone = '';
+    final encontrado = data.firstWhere(
+      (item) => item.label == 'Tel.',
+      orElse: () => ModelData(label: '', value: ''),
+    );
+    if (encontrado.value.isNotEmpty) {
+      (areaCode, phone) = parsePhoneNumberSimple(context, encontrado.value);
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -350,7 +369,9 @@ class CardColumnWidget extends StatelessWidget {
                                       TextSpan(text: "${data[i].label}: "),
                                   TextSpan(
                                     text: data[i].value.isNotEmpty
-                                        ? data[i].value
+                                        ? data[i].label == 'Tel.'
+                                            ? '${areaCode} ${phone}'
+                                            : data[i].value
                                         : '',
                                     style: StylesApp(context)
                                         .textStyleBodyWhite4
@@ -416,16 +437,18 @@ class CardColumnWidget extends StatelessWidget {
                                         : null,
                                     gender: user?.gender ?? '',
                                     isBaptized: user?.isBaptized,
+                                    profileAreaCode: user?.profileAreaCode,
                                     phoneNumber: user?.phoneNumber ?? '',
-                                    church: user!.user.userChurch.isNotEmpty
-                                        ? user.user.userChurch.firstWhere(
+                                    church: user!.userChurch.isNotEmpty
+                                        ? user.userChurch.firstWhere(
                                             (ch) => ch.status == true,
                                           )
                                         : null,
                                   );
                                   final UserProfile dataEnviar = UserProfile(
-                                      userId: user.user.id,
+                                      userId: user.userId,
                                       dataProfiles: updateFromModelData(
+                                          context,
                                           dataToSend,
                                           dta,
                                           catalogueProvider.allCountries,
@@ -446,7 +469,7 @@ class CardColumnWidget extends StatelessWidget {
                                   if (dataEnviar.dataProfiles.church != null) {
                                     final response =
                                         await userProvider.updateUserChurch(
-                                            user.user.id,
+                                            user.userId,
                                             dataEnviar.dataProfiles.church!.id,
                                             catalogueProvider.allChurches);
 

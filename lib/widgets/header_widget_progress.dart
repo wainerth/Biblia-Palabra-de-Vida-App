@@ -75,8 +75,8 @@ class HeaderWidgetProgress extends StatelessWidget {
                             child: CachedNetworkImage(
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
-                              imageUrl: userData!.imgProfileUser.isNotEmpty
-                              ? GraphQLConfig.urlServidor+userData.imgProfileUser
+                              imageUrl: userData!.imgProfileUser != null
+                              ? GraphQLConfig.urlServidor+userData.imgProfileUser!.urlImg
                               : 'assets/no-image.jpg',
                               placeholder:(context, url ) => Image.asset('assets/no-image.jpg'),
                               errorWidget:(context, url , error) => Image.asset('assets/no-image.jpg')

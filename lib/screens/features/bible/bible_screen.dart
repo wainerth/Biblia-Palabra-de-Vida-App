@@ -1,11 +1,18 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:biblia_palabra_de_vida_app/class/bible_version_selector.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BibleScreen extends StatefulWidget {
   const BibleScreen({super.key});
@@ -15,1004 +22,824 @@ class BibleScreen extends StatefulWidget {
 }
 
 class _BibleScreenState extends State<BibleScreen> {
-  ScrollController _scrollController = ScrollController();
-  List<Map<String, dynamic>> verses = [
-    {
-      "id": "1",
-      "chapterId": 1,
-      "verse": 1,
-      "text": "En el principio crió Dios los cielos y la tierra.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "2",
-      "chapterId": 1,
-      "verse": 2,
-      "text":
-          "Y la tierra estaba desordenada y vacía, y las tinieblas estaban sobre la haz del abismo, y el Espíritu de Dios se movía sobre la haz de las aguas.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "3",
-      "chapterId": 1,
-      "verse": 3,
-      "text": "Y dijo Dios: Sea la luz: y fue la luz.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "4",
-      "chapterId": 1,
-      "verse": 4,
-      "text":
-          "Y vio Dios que la luz era buena: y apartó Dios la luz de las tinieblas.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "5",
-      "chapterId": 1,
-      "verse": 5,
-      "text":
-          "Y llamó Dios a la luz Día, y a las tinieblas llamó Noche: y fue la tarde y la mañana un día.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "6",
-      "chapterId": 1,
-      "verse": 6,
-      "text":
-          "Y dijo Dios: Haya expansión en medio de las aguas, y separe las aguas de las aguas.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "7",
-      "chapterId": 1,
-      "verse": 7,
-      "text":
-          "E hizo Dios la expansión, y apartó las aguas que estaban debajo de la expansión, de las aguas que estaban sobre la expansión: y fue así.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "8",
-      "chapterId": 1,
-      "verse": 8,
-      "text":
-          "Y llamó Dios a la expansión Cielos: y fue la tarde y la mañana el día segundo.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "9",
-      "chapterId": 1,
-      "verse": 9,
-      "text":
-          "Y dijo Dios: Júntense las aguas que están debajo de los cielos en un lugar, y descúbrase la seca: y fue así.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "10",
-      "chapterId": 1,
-      "verse": 10,
-      "text":
-          "Y llamó Dios a la seca Tierra, y a la reunión de las aguas llamó Mares: y vio Dios que era bueno.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "11",
-      "chapterId": 1,
-      "verse": 11,
-      "text":
-          "Y dijo Dios: Produzca la tierra hierba verde, hierba que dé simiente; árbol de fruto que dé fruto según su género, que su simiente esté en él, sobre la tierra: y fue así.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "12",
-      "chapterId": 1,
-      "verse": 12,
-      "text":
-          "Y produjo la tierra hierba verde, hierba que da simiente según su naturaleza, y árbol que da fruto, cuya simiente está en él, según su género: y vio Dios que era bueno.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "13",
-      "chapterId": 1,
-      "verse": 13,
-      "text": "Y fue la tarde y la mañana el día tercero.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "14",
-      "chapterId": 1,
-      "verse": 14,
-      "text":
-          "Y dijo Dios: Sean lumbreras en la expansión de los cielos para apartar el día y la noche: y sean por señales, y para las estaciones, y para días y años;",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "15",
-      "chapterId": 1,
-      "verse": 15,
-      "text":
-          "Y sean por lumbreras en la expansión de los cielos para alumbrar sobre la tierra: y fue.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "16",
-      "chapterId": 1,
-      "verse": 16,
-      "text":
-          "E hizo Dios las dos grandes lumbreras; la lumbrera mayor para que señorease en el día, y la lumbrera menor para que señorease en la noche: hizo también las estrellas.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "17",
-      "chapterId": 1,
-      "verse": 17,
-      "text":
-          "Y púsolas Dios en la expansión de los cielos, para alumbrar sobre la tierra,",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "18",
-      "chapterId": 1,
-      "verse": 18,
-      "text":
-          "Y para señorear en el día y en la noche, y para apartar la luz y las tinieblas: y vio Dios que era bueno.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "19",
-      "chapterId": 1,
-      "verse": 19,
-      "text": "Y fue la tarde y la mañana el día cuarto.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "20",
-      "chapterId": 1,
-      "verse": 20,
-      "text":
-          "Y dijo Dios: Produzcan las aguas reptil de ánima viviente, y aves que vuelen sobre la tierra, en la abierta expansión de los cielos.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "21",
-      "chapterId": 1,
-      "verse": 21,
-      "text":
-          "Y crió Dios las grandes ballenas, y toda cosa viva que anda arrastrando, que las aguas produjeron según su género, y toda ave alada según su especie: y vio Dios que era bueno.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "22",
-      "chapterId": 1,
-      "verse": 22,
-      "text":
-          "Y Dios los bendijo diciendo: Fructificad y multiplicad, y henchid las aguas en los mares, y las aves se multipliquen en la tierra.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "23",
-      "chapterId": 1,
-      "verse": 23,
-      "text": "Y fue la tarde y la mañana el día quinto.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "24",
-      "chapterId": 1,
-      "verse": 24,
-      "text":
-          "Y dijo Dios: Produzca la tierra seres vivientes según su género, bestias y serpientes y animales de la tierra según su especie: y fue así.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "25",
-      "chapterId": 1,
-      "verse": 25,
-      "text":
-          "E hizo Dios animales de la tierra según su género, y ganado según su género, y todo animal que anda arrastrando sobre la tierra según su especie: y vio Dios que era bueno.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "26",
-      "chapterId": 1,
-      "verse": 26,
-      "text":
-          "Y dijo Dios: Hagamos al hombre a nuestra imagen, conforme a nuestra semejanza; y señoree en los peces de la mar, y en las aves de los cielos, y en las bestias, y en toda la tierra, y en todo animal que anda arrastrando sobre la tierra.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "27",
-      "chapterId": 1,
-      "verse": 27,
-      "text":
-          "Y crió Dios al hombre a su imagen, a imagen de Dios lo crió; varón y hembra los crió.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "28",
-      "chapterId": 1,
-      "verse": 28,
-      "text":
-          "Y los bendijo Dios; y díjoles Dios: Fructificad y multiplicad, y henchid la tierra, y sojuzgadla, y señoread en los peces de la mar, y en las aves de los cielos, y en todas las bestias que se mueven sobre la tierra.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "29",
-      "chapterId": 1,
-      "verse": 29,
-      "text":
-          "Y dijo Dios: He aquí que os he dado toda hierba que da simiente, que está sobre la haz de toda la tierra; y todo árbol en que hay fruto de árbol que da simiente, seros ha para comer.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "30",
-      "chapterId": 1,
-      "verse": 30,
-      "text":
-          "Y a toda bestia de la tierra, y a todas las aves de los cielos, y a todo lo que se mueve sobre la tierra, en que hay vida, toda hierba verde les será para comer: y fue así.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    },
-    {
-      "id": "31",
-      "chapterId": 1,
-      "verse": 31,
-      "text":
-          "Y vio Dios todo lo que había hecho, y he aquí que era bueno en gran manera. Y fue la tarde y la mañana el día sexto.",
-      "colorHighlight": null,
-      "getHighlighter": null,
-      "status": 1
-    }
-  ];
+  final ScrollController scrollController = ScrollController();
+  SharedPreferences? prefs;
 
-  List tabs = [
-    {
-      "title": 'Mensaje',
-      "placeholder": 'Mensaje a buscar',
-    },
-    {
-      "title": 'Predicador',
-      "placeholder": 'Nombre del predicador a buscar',
-    },
-    {
-      "title": 'Favoritas',
-      "placeholder": 'Favorito a buscar',
+  String? errorMessage;
+  bool isLoading = true;
+  VersionModel? currentVersion;
+  BookModel? currentBook;
+  ChapterModel? currentChapter;
+  List<VerseModel> verses = [];
+  String? lastVersionsSelected;
+  bool versionConSaltos = true;
+  Color? selectedColor;
+  String preferenceKey = 'selectedBibleVersion';
+
+  List<String> _favoriteVerses = [];
+
+  List<HighlightRangeModel> _highlights = [];
+
+  Future<void> _saveHighlights() async {
+    final prefs = await SharedPreferences.getInstance();
+    final highlightsJson = _highlights.map((h) => h.toJson()).toList();
+    // llamar al servicio de crear los highlighter 
+    await prefs.setString('highlights', jsonEncode(highlightsJson));
+  }
+
+  Future<void> _loadHighlights() async {
+    final prefs = await SharedPreferences.getInstance();
+    final highlightsJson = prefs.getString('highlights');
+    if (highlightsJson != null) {
+      setState(() {
+        _highlights = (jsonDecode(highlightsJson) as List)
+            .map((h) => HighlightRangeModel.fromJson(h))
+            .toList();
+
+        // Asignar highlights a los versículos correspondientes
+        for (final verse in verses) {
+          verse.highlights.clear();
+          verse.highlights
+              .addAll(_highlights.where((h) => h.verseId == verse.id));
+        }
+        print(verses);
+      });
     }
-  ];
-  var _selectedIndex = 0;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadPersistedData();
+      await _initDataLoad();
+      _loadHighlights();
+    });
+  }
+
+  Future<void> _loadPersistedData() async {
+    final prefs = await SharedPreferences.getInstance();
+    // cargar los favoritos
+    _favoriteVerses = prefs.getStringList('favoriteVerses') ?? [];
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _saveFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favoriteVerses', _favoriteVerses);
+  }
+
+  Future<void> _initDataLoad() async {
+    prefs = await SharedPreferences.getInstance();
+    lastVersionsSelected =
+        prefs!.getString(preferenceKey); //  cargo la version almacena en cache
+    final loadBook =
+        prefs!.getString('bookSelected'); // cargo el libro almacenado en cache
+
+    // si hay version en cache
+    setState(() {
+      if (lastVersionsSelected != null) {
+        // busco esa version
+        currentVersion = Provider.of<CatalogueProvider>(context, listen: false)
+            .allBibleVersion
+            .firstWhere((version) => version.id == lastVersionsSelected);
+
+        if (loadBook != null) {
+          currentBook =
+              currentVersion!.books.firstWhere((book) => book.id == loadBook);
+          // cargamos el capitulo correspondiente
+        } else {
+          currentBook = currentVersion!.books[0];
+        }
+      } else {
+        currentVersion = Provider.of<CatalogueProvider>(context, listen: false)
+            .allBibleVersion[0];
+        currentBook = currentVersion!.books[0];
+      }
+      currentBook = currentBook!.copyWith(
+        chapters: currentVersion!.books.length, // Usamos el mapa de capítulos
+      );
+    });
+
+    await _loadChapterByBook(currentVersion, currentBook, null, context);
+  }
+
+  Future<void> _loadChapterByBook(
+      version, book, chapterId, BuildContext context) async {
+    setState(() {
+      errorMessage = null;
+    });
+    LoadingService().showLoading(context);
+    try {
+      if (chapterId == null) {
+        // consultamos un capitulo si chapter es null
+        final responseChapterByBook =
+            await getChapterWithVerses(currentBook!.id);
+        if (responseChapterByBook.error != null) {
+          setState(() {
+            errorMessage = responseChapterByBook.error;
+          });
+        }
+
+        chapterId = responseChapterByBook.data[0]!['id'];
+      }
+      final responseChapter = await getOneChapterWithVerses(chapterId);
+      if (responseChapter.error != null) {
+        errorMessage = responseChapter.error;
+      }
+      setState(() {
+        currentChapter = ChapterModel.fromJson(responseChapter.data);
+
+        verses = currentChapter!.verses
+            .map<VerseModel>((verse) => VerseModel.fromJson(verse.toJson()))
+            .toList();
+      });
+
+// actualizamos la cache
+      prefs!.setString(preferenceKey, version.id);
+      prefs!.setString('bookSelected', book!.id);
+      prefs!.setString('chapterSelected', chapterId);
+    } catch (e) {
+      errorMessage = 'Error cargar un capitulo $e';
+      setState(() {
+        isLoading = false;
+      });
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _goToPreviousChapter() async {
+    if (currentChapter!.chapter > 1) {
+      await _loadChapterByBook(currentVersion, currentBook,
+          '${currentBook!.id}_${currentChapter!.chapter - 1}', context);
+    } else if (currentBook!.numberBook > 1) {
+      // Ir al último capítulo del libro anterior
+      final prevBook = currentVersion!.books
+          .firstWhere((b) => b.numberBook == currentBook!.numberBook - 1);
+      await _loadChapterByBook(currentVersion, prevBook,
+          '${prevBook.id}_${prevBook.chapters}', context);
+    }
+  }
+
+  Future<void> _goToNextChapter() async {
+    if (currentChapter!.chapter < currentBook!.chapters) {
+      await _loadChapterByBook(currentVersion, currentBook,
+          '${currentBook!.id}_${currentChapter!.chapter + 1}', context);
+    } else if (currentBook!.numberBook < currentVersion!.books.length) {
+      // Ir al primer capítulo del siguiente libro
+      final nextBook = currentVersion!.books
+          .firstWhere((b) => b.numberBook == currentBook!.numberBook + 1);
+      await _loadChapterByBook(
+          currentVersion, nextBook, '${nextBook.id}_1', context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (currentBook != null) {
+      print('${currentBook!.chapters}');
+    }
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: const AssetImage("assets/elipsisTopColor.png"),
-                  fit: BoxFit.cover,
-                  alignment: Alignment.bottomCenter,
+            if (isLoading) ...{
+              Container()
+            } else ...{
+              if (errorMessage != null) ...{
+                BuildErrorWidget(
+                  errorMessage: errorMessage!,
+                  onRetry: () async => _loadChapterByBook(
+                      currentVersion, currentBook, currentChapter, context),
+                  onBack: () => Navigator.pop(context),
+                )
+              } else ...{
+                BibleHeaderWidget(
+                  versionName:
+                      currentVersion != null ? currentVersion!.version : '',
+                  title: currentBook != null ? currentBook!.modernName : '',
+                  chapter: currentChapter != null
+                      ? '${currentChapter!.chapter}'
+                      : '',
+                  onAudioTap: () {},
+                  onBack: () {
+                    Navigator.pop(context);
+                  },
+                  onVersionTap: () async {
+                    final bibleVersions = Provider.of<CatalogueProvider>(
+                            context,
+                            listen: false)
+                        .allBibleVersion
+                        .map((v) => ModelData(value: v.id, label: v.version))
+                        .toList();
+
+                    final selectedVersion = await BibleVersionSelector.show(
+                        context: context,
+                        versions: bibleVersions,
+                        preferenceKey: preferenceKey,
+                        savedId: lastVersionsSelected);
+
+                    if (selectedVersion != null) {
+                      // Aquí manejas la versión seleccionada
+                      print('Versión seleccionada: ${selectedVersion.label}');
+                      setState(() {
+                        lastVersionsSelected = selectedVersion
+                            .value; // actualizo la version de la biblia
+
+                        // removemos los datos de la cache para iniciar de nuevo
+                        prefs!.remove('bookSelected');
+                        prefs!.remove('chapterSelected');
+                      });
+                      prefs!.setString(preferenceKey, lastVersionsSelected!);
+                      _initDataLoad();
+                    }
+                  },
                 ),
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 10,
-                    left: 15,
-                    child: Container(
-                        height: 35.0,
-                        width: 35.0,
-                        decoration: BoxDecoration(
-                            color: Color(0XFFFD8C43),
-                            borderRadius: BorderRadius.circular(35.0)),
-                        child: IconButton(
-                            constraints: BoxConstraints(maxHeight: 35.0),
-                            padding: EdgeInsets.all(0),
-                            iconSize: 35.0,
-                            color: Colors.white,
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: Icon(
-                              Icons.arrow_back,
-                              size: 35.0,
-                            ))),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Center(
-                        child: ButtonThemeWidget(
-                          width: 150.0,
-                          height: 27.0,
-                          text: "RVR 1960",
-                          buttonStyle: StylesApp(context).btnWidgetSmall,
-                          onPressed: () {
-                            _showBibleVersion(context);
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Center(
-                        child: Text(
-                          textAlign: TextAlign.center,
-                          "S. juan",
-                          style: StylesApp(context)
-                              .textStyleTitleWithe
-                              .copyWith(fontWeight: FontWeight.normal),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Center(
-                        child: Text(
-                          textAlign: TextAlign.center,
-                          "22",
-                          style: StylesApp(context)
-                              .textStyleTitleWithe
-                              .copyWith(fontWeight: FontWeight.normal),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Positioned(
-                    top: 0,
-                    bottom: 0,
-                    right: 15,
-                    child: Column(
+                Expanded(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Stack(
                       children: [
-                        IconButton(
-                          constraints: BoxConstraints(maxHeight: 35.0),
-                          padding: EdgeInsets.all(0),
-                          iconSize: 35.0,
-                          color: Colors.white,
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.volume_up_outlined,
-                            size: 35.0,
+                        // body
+                        Scrollbar(
+                          controller: scrollController,
+                          thumbVisibility: true,
+                          thickness: 6.0,
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Container(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (versionConSaltos) ...{
+                                    Expanded(
+                                      child: ListView(
+                                        controller:scrollController ,
+                                        children: [
+                                          // Otros widgets de la lista...
+                                          const SizedBox(height: 40),
+                                          _buildContinuousText(), // Tu texto formateado como un widget
+                                          const SizedBox(height: 16),
+                                          // Más widgets...
+                                        ],
+                                      ),
+                                    ),
+                                  }
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Container(
+                            decoration: BoxDecoration(color: Colors.white),
+                            // width: MediaQuery.sizeOf(context).width,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                    padding: EdgeInsets.zero,
+                                    iconSize: 25.0,
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return modalTextFormatSizeWidget();
+                                          });
+                                    },
+                                    icon: Icon(
+                                      CupertinoIcons.textformat_size,
+                                      color: StyleColor.turquoise,
+                                    )),
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () async {
+                                    Clipboard.setData(ClipboardData(
+                                        text:
+                                            await copyChapter(currentChapter)));
+                                    await showCustomDialog(
+                                      context,
+                                      message:
+                                          "El capitulo ${currentChapter!.chapter} del libro ${currentBook!.modernName}  \n se ha copiado con éxito al\n portapapeles",
+                                      dialogType: DialogType.info,
+                                    );
+                                  },
+                                  icon: Icon(
+                                    Icons.file_copy_rounded,
+                                    color: StyleColor.turquoise,
+                                  ),
+                                ),
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () async {
+                                    await Share.share(
+                                      await copyChapter(currentChapter),
+                                      subject:
+                                          "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName}",
+                                    );
+                                  },
+                                  icon: Icon(
+                                    Icons.share_rounded,
+                                    color: StyleColor.turquoise,
+                                  ),
+                                ),
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                      isDismissible: false,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return SearchBibleWidget();
+                                      },
+                                    );
+                                  },
+                                  icon: Icon(
+                                    Icons.search_rounded,
+                                    color: StyleColor.turquoise,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 4,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 7.0),
+                            width: MediaQuery.sizeOf(context).width,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 35,
+                                  height: 35,
+                                  decoration: BoxDecoration(
+                                      color: StyleColor.turquoise,
+                                      borderRadius: BorderRadius.circular(8)),
+                                  child: Center(
+                                    child: IconButton(
+                                      padding: EdgeInsets.all(0),
+                                      alignment: Alignment.center,
+                                      iconSize: 35,
+                                      color: StyleColor.turquoise,
+                                      onPressed: currentBook != null &&
+                                              currentBook!.numberBook == 1 &&
+                                              (currentChapter != null &&
+                                                  currentChapter!.chapter == 1)
+                                          ? null
+                                          : () {
+                                              // Lógica para ir al capítulo anterior
+                                              _goToPreviousChapter();
+                                            },
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_left_rounded,
+                                        size: 35,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: 35,
+                                  height: 35,
+                                  decoration: BoxDecoration(
+                                      color: StyleColor.turquoise,
+                                      borderRadius: BorderRadius.circular(8)),
+                                  child: Center(
+                                    child: IconButton(
+                                      padding: EdgeInsets.all(0),
+                                      alignment: Alignment.center,
+                                      iconSize: 35,
+                                      onPressed: currentBook != null &&
+                                              currentBook!.numberBook ==
+                                                  currentBook!.chapters &&
+                                              currentChapter!.chapter ==
+                                                  currentBook!.chapters
+                                          ? null
+                                          : () {
+                                              // Lógica para ir al siguiente capítulo
+                                              _goToNextChapter();
+                                            },
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_right_rounded,
+                                        size: 35,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: SizedBox(
-                width: double.infinity,
-                child: Stack(
-                  children: [
-                    // body
-                    Scrollbar(
-                      controller: _scrollController,
-                      thumbVisibility: true,
-                      thickness: 6.0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: ListView.builder(
-                                  controller: _scrollController,
-                                  itemCount: verses.length,
-                                  itemBuilder: (BuildContext context, index) {
-                                    if (index == 0) {
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(height: 40),
-                                          Text(
-                                            "Las bodas de Caná",
-                                            style: StylesApp(context)
-                                                .textStyleBodyRoboto24
-                                                .copyWith(
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                          ),
-                                          SizedBox(
-                                            height: 42.0,
-                                          ),
-                                          Text.rich(
-                                            TextSpan(
-                                              style: StylesApp(context)
-                                                  .textStyleBodyRoboto20
-                                                  .copyWith(
-                                                    color: Colors.black,
-                                                  ),
-                                              children: [
-                                                TextSpan(
-                                                    text:
-                                                        "${verses[index]['verse']} ",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold)),
-                                                TextSpan(
-                                                    text:
-                                                        "${verses[index]['text']}",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.normal)),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    } else {
-                                      return Text.rich(
-                                        TextSpan(
-                                          style: StylesApp(context)
-                                              .textStyleBodyRoboto20
-                                              .copyWith(
-                                                color: Colors.black,
-                                              ),
-                                          children: [
-                                            TextSpan(
-                                                text:
-                                                    "${verses[index]['verse']} ",
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                            TextSpan(
-                                                text:
-                                                    "${verses[index]['text']}",
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.normal)),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Container(
-                        decoration: BoxDecoration(color: Colors.white),
-                        // width: MediaQuery.sizeOf(context).width,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                                padding: EdgeInsets.zero,
-                                iconSize: 25.0,
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return modalTextFormatSizeWidget();
-                                      });
-                                },
-                                icon: Icon(
-                                  CupertinoIcons.textformat_size,
-                                  color: StyleColor.turquoise,
-                                )),
-                            IconButton(
-                              padding: EdgeInsets.zero,
-                              iconSize: 25.0,
-                              onPressed: () async {
-                                Clipboard.setData(ClipboardData(
-                                    text:
-                                        "Proverbios 3:4\n Y hallarás gracia y buena opinión En los ojos de Dios y de los hombres."));
-                                await showCustomDialog(
-                                  context,
-                                  message:
-                                      "El capitulo S. Juan 22\n se copiado con éxito al\n portapapeles",
-                                  dialogType: DialogType.info,
-                                );
-                              },
-                              icon: Icon(
-                                Icons.file_copy_rounded,
-                                color: StyleColor.turquoise,
-                              ),
-                            ),
-                            IconButton(
-                              padding: EdgeInsets.zero,
-                              iconSize: 25.0,
-                              onPressed: () async {
-                                await Share.share(
-                                  "Las bodas de Caná\n 1 Al tercer día hicieron unas bodas en Caná de Galilea; y estaba allí la madre de Jesús. 2 Y fueron también invitados a  las bodas Jseús y sus dicípulos. 3 Y faltando el vino, la madre de Jesús le dijo: No tienen vino. 4 Jesús le fijo : ¿Qué tienes conmigo, mujer? Aún no ha venido mi hora. 5 Su madre dijo a los que servian:  Haced todo lo que os dijere. 6 Y estaban allí seis tinajas de piedra para agua, conforme al rito de  la purificación de los judíos, en  cas una de las cuales  cabian dos o tres càntaros.",
-                                  subject: "S. Juan 22",
-                                );
-                              },
-                              icon: Icon(
-                                Icons.share_rounded,
-                                color: StyleColor.turquoise,
-                              ),
-                            ),
-                            IconButton(
-                              padding: EdgeInsets.zero,
-                              iconSize: 25.0,
-                              onPressed: () {
-                                showModalBottomSheet(
-                                  isDismissible: false,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return SearchBibleWidget();
-                                  },
-                                );
-                              },
-                              icon: Icon(
-                                Icons.search_rounded,
-                                color: StyleColor.turquoise,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 4,
-                      right: 0,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 7.0),
-                        width: MediaQuery.sizeOf(context).width,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              width: 35,
-                              height: 35,
-                              decoration: BoxDecoration(
-                                  color: StyleColor.turquoise,
-                                  borderRadius: BorderRadius.circular(8)),
-                              child: Center(
-                                child: IconButton(
-                                  padding: EdgeInsets.all(0),
-                                  alignment: Alignment.center,
-                                  iconSize: 35,
-                                  color: StyleColor.turquoise,
-                                  onPressed: () {
-                                    print("anterior");
-                                  },
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_left_rounded,
-                                    size: 35,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 35,
-                              height: 35,
-                              decoration: BoxDecoration(
-                                  color: StyleColor.turquoise,
-                                  borderRadius: BorderRadius.circular(8)),
-                              child: Center(
-                                child: IconButton(
-                                  padding: EdgeInsets.all(0),
-                                  alignment: Alignment.center,
-                                  iconSize: 35,
-                                  onPressed: () {
-                                    print("siguiente");
-                                  },
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_right_rounded,
-                                    size: 35,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
+                )
+              }
+            }
           ],
         ),
       ),
     );
   }
 
-  Future _showBibleVersion(BuildContext context) async {
-    List<ModelData> bibleVersions = [
-      ModelData(label: 'RVR 1960', value: 'Reina-Valera 1960'),
-      ModelData(label: 'NVI', value: 'Nueva Versión Internacional'),
-      ModelData(label: 'LBLA', value: 'La Biblia de las Américas'),
-      ModelData(label: 'DHH', value: 'Dios Habla Hoy'),
-      ModelData(label: 'TLA', value: 'Traducción en Lenguaje Actual'),
-      ModelData(label: 'NBD', value: 'Nueva Biblia de los Hispanos'),
-      ModelData(label: 'PDT', value: 'Palabra de Dios para Todos'),
-    ];
-    ModelData versionSelected = bibleVersions[0];
-    await showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Column(
-                children: [
-                  SizedBox(height: 30.0),
-                  Text(
-                    'Seleccione La version de la Biblia',
-                    style: StylesApp(context)
-                        .textStyleBody16
-                        .copyWith(color: StyleColor.orange),
-                  ),
-                  SizedBox(height: 10.0),
-                  CustomDropdownBottomWidget<ModelData>(
-                    hintText: "Seleccione una versión",
-                    items: bibleVersions,
-                    onChanged: (ModelData? newValue) {
-                      if (newValue != null) {
-                        setModalState(() {
-                          versionSelected = newValue;
-                        });
-                      }
-                    },
-                    selectedItem: versionSelected,
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Center(
-                    child: ButtonThemeWidget(
-                         width: 150.0,
-                          height: 27.0,
-                      text: "Aceptar",
-                      buttonStyle: StylesApp(context).btnWidgetSmall,
-                    ),
-                  )
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-    setState(() {
-      // Update the state of the parent widget if needed
-    });
+  List<TextSpan> _buildHighlightedTextSpans(VerseModel verse) {
+    final fullText = verses.map((v) => "${v.verse} ${v.text}").join(' ');
+
+    final spans = <TextSpan>[];
+    final text = verse.text;
+    int currentPos = 0;
+
+    // Ordenar resaltados por posición
+    verse.highlights.sort((a, b) => a!.start.compareTo(b!.start));
+
+    for (final highlight in verse.highlights) {
+      // Texto antes del resaltado
+      if (currentPos < highlight!.start) {
+        spans.add(TextSpan(
+          text: text.substring(currentPos, highlight.start),
+        ));
+      }
+      print(text.length);
+      // Texto resaltado
+      spans.add(TextSpan(
+        text: text.substring(highlight.start, highlight.end),
+        style: TextStyle(
+          backgroundColor:
+              Color(int.parse('0XFF${highlight.color}')).withOpacity(0.3),
+          color: Colors.black,
+        ),
+      ));
+
+      currentPos = highlight.end;
+    }
+
+    // Texto restante
+    if (currentPos < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(currentPos),
+      ));
+    }
+
+    return spans;
   }
-}
 
-class modalTextFormatSizeWidget extends StatefulWidget {
-  const modalTextFormatSizeWidget({
-    super.key,
-  });
+  void _showColorPickerForSelection(
+      BuildContext context, VerseModel verse, int start, int end) {
+    final colors = [
+      const Color(0xFFEE5A24),
+      const Color(0xFFF79F1F),
+      const Color(0xFFFFC312),
+      const Color(0xFFFFD55F),
+      const Color(0xFFC4E538),
+      const Color(0xFFA3CB38),
+      const Color(0xFF009432),
+      const Color(0xFF006266),
+      const Color(0xFF12CBC4),
+      const Color(0xFF1289A7),
+      const Color(0xFF0652DD),
+      const Color(0xFF1B1464),
+      const Color(0xFF5758BB),
+      const Color(0xFF9980FA),
+      const Color(0xFFD980FA),
+      const Color(0xFFFDA7DF),
+      const Color(0xFF833471),
+      const Color(0xFFB53471),
+      const Color(0xFF6F1E51),
+      const Color(0xFFED4C67),
+      const Color(0xFFEA2027),
+    ];
 
-  @override
-  State<modalTextFormatSizeWidget> createState() =>
-      _modalTextFormatSizeWidgetState();
-}
-
-class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
-  ModelData selectedItem = ModelData(label: "Roboto", value: "1");
-  double fontSize = 0.5;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Resaltar selección',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Divider(),
           SizedBox(
-            height: 20,
+            height: 80,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: colors.map((color) {
+                final hexColor =
+                    '${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+                print('Color seleccionado: $hexColor');
+                return GestureDetector(
+                  onTap: () {
+                    _addHighlight(verse, start, end, hexColor);
+                    Navigator.pop(ctx);
+                  },
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    margin: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Color(color.value),
+                      shape: BoxShape.circle,
+                      border: Border.all(width: 2),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-          Row(
-            spacing: 10,
-            children: [
-              Container(
-                width: 40,
-                height: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1.0)),
-              ),
-              Container(
-                width: 40,
-                height: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1.0)),
-              ),
-              Container(
-                width: 40,
-                height: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1.0)),
-              ),
-              Container(
-                width: 40,
-                height: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1.0)),
-              ),
-              Container(
-                width: 40,
-                height: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1.0)),
-              ),
-              Container(
-                width: 40,
-                height: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1.0)),
-              ),
-              Container(
-                width: 40,
-                height: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1.0)),
-              ),
-            ],
+          ListTile(
+            leading: Icon(Icons.cancel),
+            title: Text('Cancelar'),
+            onTap: () => Navigator.pop(ctx),
           ),
-          SizedBox(
-            height: 20,
-          ),
-          CustomDropdownBottomWidget(
-            items: [
-              ModelData(label: "Roboto", value: "1"),
-              ModelData(label: "Erica One", value: "2"),
-              ModelData(label: "Aclonica", value: "3"),
-              ModelData(label: "All sane", value: "4"),
-            ],
-            selectedItem: selectedItem,
-            onChanged: (ModelData? newValue) {
-              setState(() {
-                selectedItem = newValue!;
-              });
-            },
-            hintText: "Tipo de fuente",
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Row(
-            children: [
-              Expanded(
-                  flex: 0,
-                  child: Icon(
-                    Icons.text_decrease,
-                    color: StyleColor.turquoise,
-                  )),
-              Expanded(
-                flex: 1,
-                child: Slider(
-                    activeColor: Colors.grey,
-                    inactiveColor: Colors.grey,
-                    thumbColor: StyleColor.orange,
-                    value: fontSize,
-                    onChanged: (value) {
-                      setState(() {
-                        fontSize = value;
-                      });
-                    }),
-              ),
-              Expanded(
-                  flex: 0,
-                  child: Icon(
-                    Icons.text_increase_rounded,
-                    color: StyleColor.turquoise,
-                  ))
-            ],
-          ),
-          SizedBox(
-            height: 30,
-          )
         ],
       ),
     );
   }
-}
 
-class SearchBibleWidget extends StatefulWidget {
-  const SearchBibleWidget({
-    Key? key,
-  }) : super(key: key);
+  void _addHighlight(VerseModel verse, int start, int end, String color) {
+    // Verificar si ya existe un resaltado en esta posición
+    final fullText = verses.map((v) => "${v.verse} ${v.text}").join(' ');
+    final existingIndex = _highlights.indexWhere(
+        (h) => h.verseId == verse.id && h.start == start && h.end == end);
 
-  @override
-  State<SearchBibleWidget> createState() => _SearchBibleWidgetState();
-}
+    if (existingIndex >= 0) {
+      // Actualizar color si ya existe
 
-class _SearchBibleWidgetState extends State<SearchBibleWidget> {
-  
-  var _selectedIndex = 0;
-  List tabs = [
-    {
-      "title": 'Libro',
-      "placeholder": 'Mensaje a buscar',
-    },
-    {
-      "title": 'Texto',
-      "placeholder": 'Nombre del predicador a buscar',
-    },
-    {
-      "title": 'Tema',
-      "placeholder": 'Favorito a buscar',
-    },
-    {
-      "title": 'Personajes',
-      "placeholder": 'Favorito a buscar',
+      _highlights[existingIndex] = HighlightRangeModel(
+        verseId: verse.id,
+        start: verse.posIni!,
+        end: verse.posFin!,
+        color: color,
+      );
+    } else {
+      // Agregar nuevo resaltado
+      final newHighlight = HighlightRangeModel(
+        verseId: verse.id,
+        start: verse.posIni!,
+        end: verse.posFin!,
+        color: color,
+      );
+      _highlights.add(newHighlight);
+      verse.highlights.add(newHighlight);
     }
-  ];
-  @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: tabs.length,
-      child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              AppBarHeaderWidget(
-                backColor: StyleColor.turquoise,
-                buttonColor: StyleColor.orange,
-                textButtonColor: Colors.white,
-                title: 'Búsqueda',
-                styleText: StylesApp(context).textStyleBody7,
-                onRoute: () {
-                  Navigator.pop(context);
+
+    setState(() {});
+    _saveHighlights();
+  }
+
+  Widget _buildContinuousText() {
+    final fullText = verses.map((v) => "${v.verse} ${v.text}").join(' ');
+    return SelectableText.rich(
+      TextSpan(
+        children: verses
+            .expand((verse) => [
+                  WidgetSpan(
+                    child: IgnorePointer(
+                      child: Text(
+                        "${verse.verse}",
+                        style: StylesApp(context).textStyleBody16.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: StyleColor.black,
+                              // recognizer: TapGestureRecognizer()..onTap = () {},
+                            ), // Opcional: estilo diferenciado
+                      ),
+                    ),
+                  ),
+                  const WidgetSpan(
+                      child: SizedBox(width: 8)), // Espacio no seleccionable
+                  ..._buildHighlightedTextSpans(verse),
+                  const WidgetSpan(
+                      child: SizedBox(width: 8)), // Espacio no seleccionables
+                ])
+            .toList(),
+      ),
+      // selectionControls: materialTextSelectionControls,
+      contextMenuBuilder: (context, editableTextState) {
+        final selection = editableTextState.textEditingValue.selection;
+        final selectedText = selection.textInside(fullText);
+
+        // Determinar qué versículos están incluidos en la selección
+        final selectedVerses = _getVersesInSelection(selection, fullText);
+
+        return AdaptiveTextSelectionToolbar.buttonItems(
+          anchors: editableTextState.contextMenuAnchors,
+          buttonItems: [
+            ContextMenuButtonItem(
+              label: 'Copiar',
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: selectedText));
+                editableTextState.hideToolbar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Texto copiado")),
+                );
+              },
+            ),
+            ContextMenuButtonItem(
+              label: 'Compartir',
+              onPressed: () {
+                editableTextState.hideToolbar();
+                Share.share(selectedText);
+              },
+            ),
+            if (selectedVerses.length == 1) ...[
+              ContextMenuButtonItem(
+                label: 'Resaltar',
+                onPressed: () {
+                  editableTextState.hideToolbar();
+                  VerseModel verse = selectedVerses.first;
+                  _showColorPickerForSelection(
+                    context,
+                    verse,
+                    verse.posIni!,
+                    verse.posFin!,
+                  );
                 },
               ),
-              SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.only(right: 65),
-                decoration: BoxDecoration(color: Colors.white, boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    spreadRadius: 0,
-                    offset: const Offset(0, 4),
-                  )
-                ]),
-                child: TabBar(
-                  onTap: (index) {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
-                  },
-                  unselectedLabelColor: Colors.white,
-                  labelColor: Colors.white,
-                  labelStyle: StylesApp(context).textStyleBody12,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  automaticIndicatorColorAdjustment: true,
-                  indicatorWeight: 0,
-                  indicatorPadding: EdgeInsets.all(0),
-                  padding: EdgeInsets.all(0),
-                  dividerColor: Color(0XFFFFFDFD),
-                  dividerHeight: 0,
-                  labelPadding: EdgeInsets.symmetric(horizontal: 2),
-                  indicator: BoxDecoration(
-                    color: Colors.orange, // Color de la pestaña seleccionada
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                    ), // Bordes redondeados
-                  ),
-                  tabs: tabs.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    var tab = entry.value;
-                    return Tab(
-                      height: 32.sp,
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: _selectedIndex == index
-                              ? Colors.orange
-                              : Colors.grey,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                          ),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Center(child: Text(tab["title"])),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-             
-              // Lista de mensajes
-              Expanded(
-                child: TabBarView(
-                  children: [
-                   Container(),
-                   Container(),
-                   Container(),
-                   Container(),
-                  ],
-                ),
-              ),
             ],
+            if (selectedVerses.length > 1)
+              ContextMenuButtonItem(
+                label: 'Resaltar ${selectedVerses.length} versículos',
+                onPressed: () {
+                  editableTextState.hideToolbar();
+                  _showColorPickerForMultipleVerses(
+                    context,
+                    selectedVerses,
+                    selection.start,
+                    selection.end,
+                  );
+                },
+              ),
+          ],
+        );
+      },
+      onSelectionChanged: (selection, cause) {
+        if (selection.isValid && !selection.isCollapsed) {
+          final selectedText = selection
+              .textInside(verses.map((v) => "${v.verse} ${v.text}").join(' '));
+          // Aquí puedes determinar qué versículo(s) fueron seleccionados
+        }
+      },
+    );
+  }
+
+  List<VerseModel> _getVersesInSelection(
+      TextSelection selection, String fullText) {
+    final selectedText = selection.textInside(fullText);
+    final selectedVerses = <VerseModel>[];
+    int currentPosition = 0;
+    int i = 0;
+    for (VerseModel verse in verses) {
+      final verseText = "${verse.text}";
+      final verseStart = currentPosition;
+      final verseEnd = currentPosition + verseText.length;
+  int initial = 0;
+  int posfinal = 0;
+      // Verificar si la selección se superpone con este versículo
+      if (selection.start < verseEnd && selection.end > verseStart) {
+         initial =
+            ((selection.start-8) > verseStart ? selection.start : verseStart) -
+                verseStart;
+         posfinal = selection.end > verseEnd ? verseEnd - verseStart : selection.end - verseStart;
+
+// Guarda la nueva instancia en la lista
+        verse = verse.copyWith(
+          // <- Asigna el resultado
+          posIni: initial == 2 ? initial - 8 : initial  ,
+          posFin: posfinal,
+        );
+        selectedVerses.add(verse);
+      }
+      i++;
+      currentPosition = verseEnd + 1; // +1 por el espacio entre versículos
+    }
+
+    return selectedVerses;
+  }
+
+  void _showColorPickerForMultipleVerses(BuildContext context,
+      List<VerseModel> verses, int selectionStart, int selectionEnd) {
+    final colors = [
+      const Color(0xFFEE5A24),
+      const Color(0xFFF79F1F),
+      const Color(0xFFFFC312),
+      const Color(0xFFFFD55F),
+      const Color(0xFFC4E538),
+      const Color(0xFFA3CB38),
+      const Color(0xFF009432),
+      const Color(0xFF006266),
+      const Color(0xFF12CBC4),
+      const Color(0xFF1289A7),
+      const Color(0xFF0652DD),
+      const Color(0xFF1B1464),
+      const Color(0xFF5758BB),
+      const Color(0xFF9980FA),
+      const Color(0xFFD980FA),
+      const Color(0xFFFDA7DF),
+      const Color(0xFF833471),
+      const Color(0xFFB53471),
+      const Color(0xFF6F1E51),
+      const Color(0xFFED4C67),
+      const Color(0xFFEA2027),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Resaltar ${verses.length} versículos seleccionados',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           ),
-        ),
-        //  bottomNavigationBar: CustomBottomNavigationBarWidget(
-        //     type: BottomNavigationBarType.fixed,
-        //     showUnselectedLabels: true,
-        //     backgroundColor: Color(0XFF7D7878),
-        //     selectedItemColor: Color(0XFF12CBC4),
-        //     unselectedItemColor: Colors.white,
-        //     selectedLabelStyle: StylesApp(context).textStyleBody10,
-        //     unselectedLabelStyle: StylesApp(context).textStyleBody10,
-        //     items: getBottomNavigationBarItems(context),
-        //     currentIndex: _selectedIndex,
-        // onTap: _onItemTapped)
+          Divider(),
+          SizedBox(
+            height: 80,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: colors.map((color) {
+                return GestureDetector(
+                  onTap: () {
+                    for (final verse in verses) {
+                      // Calcular los índices correctos para cada versículo
+                      final verseText = "${verse.verse} ${verse.text}";
+                      final start = max(0, verse.posIni!);
+                      final end = min(verse.posFin!, verseText.length);
+                      final hexColor =
+                          '${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+                      print('Color seleccionado: $hexColor');
+                      if (start < end) {
+                        _addHighlight(verse, start, end, hexColor);
+                      }
+                    }
+                    Navigator.pop(ctx);
+                  },
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    margin: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(width: 2),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.cancel),
+            title: Text('Cancelar'),
+            onTap: () => Navigator.pop(ctx),
+          ),
+        ],
       ),
     );
   }
+
+  void _removeHighlight(HighlightRangeModel highlight) {
+    setState(() {
+      _highlights.remove(highlight);
+      for (final verse in verses) {
+        verse.highlights.removeWhere((h) =>
+            h!.verseId == highlight.verseId &&
+            h.start == highlight.start &&
+            h.end == highlight.end);
+      }
+    });
+    _saveHighlights();
+  }
+
+// Manejar favoritos
+  void _toggleFavorite(VerseModel verse) async {
+    setState(() {
+      if (_favoriteVerses.contains(verse.id)) {
+        _favoriteVerses.remove(verse.id);
+      } else {
+        _favoriteVerses.add(verse.id);
+      }
+    });
+    await _saveFavorites();
+  }
 }
+

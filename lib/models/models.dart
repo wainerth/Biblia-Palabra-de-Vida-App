@@ -57,3 +57,8 @@ export 'package:biblia_palabra_de_vida_app/models/reflection.dart';
 export 'package:biblia_palabra_de_vida_app/models/promise_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/promise_card_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/preach.dart';
+export 'package:biblia_palabra_de_vida_app/models/book_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/version_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/verse_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/chapter_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/highlight_range_model.dart';

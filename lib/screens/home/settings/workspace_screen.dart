@@ -13,6 +13,15 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 
+
+
+mixin SafeStateMixin<T extends StatefulWidget> on State<T> {
+  void safeSetState(VoidCallback fn) {
+    if (mounted) {
+      setState(fn);
+    }
+  }
+}
 class WorkspaceScreen extends StatefulWidget {
   const WorkspaceScreen({super.key});
 
@@ -20,7 +29,7 @@ class WorkspaceScreen extends StatefulWidget {
   State<WorkspaceScreen> createState() => _WorkspaceScreenState();
 }
 
-class _WorkspaceScreenState extends State<WorkspaceScreen> {
+class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   LoginUser? dataUser;
   late final catalogueProvider;
   Pagination? paginate;
@@ -62,7 +71,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
             false); // listen: false para evitar reconstrucciones innecesarias
     dataUser = userProvider.currentUser;
     final progressResponse =
-        await userProvider.getProgressUser(dataUser?.user.id, null);
+        await userProvider.getProgressUser(dataUser?.userId, null);
     if (progressResponse!.error != null) {
       setState(() {
         error = true;
@@ -391,7 +400,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     final responseReflection = await getOneReflection();
     if (responseReflection.error != null) {
     } else {
-      setState(() {
+      safeSetState(() {
         reflection = Reflection.fromJson(responseReflection.data);
       });
     }
@@ -619,9 +628,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                                       alignment: Alignment.topCenter,
                                       imageUrl: userData != null &&
                                               userData!
-                                                  .imgProfileUser.isNotEmpty
+                                                  .imgProfileUser != null
                                           ? GraphQLConfig.urlServidor +
-                                              userData.imgProfileUser +
+                                              userData.imgProfileUser.urlImg+
                                               '?timestamp=${DateTime.now().millisecondsSinceEpoch}'
                                           : 'assets/no-image.jpg',
                                       placeholder: (context, url) =>

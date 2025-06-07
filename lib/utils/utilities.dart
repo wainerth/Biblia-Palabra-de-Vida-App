@@ -1,8 +1,11 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:provider/provider.dart';
 
 export 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 export 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
@@ -51,7 +54,12 @@ getGender() {}
 
 UserChurch? getChurchActive(churches) {
   if (churches.isNotEmpty) {
-    var church = churches.firstWhere((UserChurch element) => element.status);
+    UserChurch? church;
+    try {
+      church = (churches as List<UserChurch>).firstWhere((UserChurch element) => element.status);
+    } on StateError {
+      church = null;
+    }
     if (church != null) {
       return church;
     } else {
@@ -62,7 +70,7 @@ UserChurch? getChurchActive(churches) {
   }
 }
 
-UpdateDataProfile updateFromModelData(UpdateDataProfile dataToSend,
+UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
     List<ModelData> data, List<Country> countries, List<Church> churches) {
   var datos = dataToSend;
 
@@ -82,7 +90,17 @@ UpdateDataProfile updateFromModelData(UpdateDataProfile dataToSend,
         nuevosDatos["identifier"] = item.value as String?;
         break;
       case 'phoneNumber':
-        nuevosDatos["phoneNumber"] = item.value as String?;
+        final parts = item.value.split(' ');
+        AreaCode? code;
+        if (parts.length == 2) {
+          code = Provider.of<CatalogueProvider>(context, listen: false)
+              .allAreasCode
+              .firstWhere(
+                  (areaCode) => areaCode.id == item.value.split(' ')[0]);
+        }
+        nuevosDatos['profileAreaCode'] =
+            code != null ? AreaCode(id: code.id, code: code.code) : null;
+        nuevosDatos["phoneNumber"] = item.value.split(' ')[1] as String?;
         break;
       case 'country':
         if (item.value.isNotEmpty) {
@@ -98,15 +116,16 @@ UpdateDataProfile updateFromModelData(UpdateDataProfile dataToSend,
         nuevosDatos["city"] = item.value as String?;
         break;
       case 'gender':
-        nuevosDatos["gender"] = item.value.isNotEmpty ? item.value[0].toLowerCase() : null;
+        nuevosDatos["gender"] =
+            item.value.isNotEmpty ? item.value[0].toLowerCase() : null;
         break;
       case 'isBaptized':
         nuevosDatos["isBaptized"] = item.value == 'Bautizado' ? true : false;
         break;
       case 'church':
         var church = churches.firstWhere((church) => church.name == item.value);
-        nuevosDatos["church"] =
-            UserChurch(id: church.id, name: church.name, status: church.status);
+        nuevosDatos["church"] = UserChurch(
+            id: church.id, churchName: church.name, status: church.status);
         break;
     }
 
@@ -115,6 +134,7 @@ UpdateDataProfile updateFromModelData(UpdateDataProfile dataToSend,
       lastname: nuevosDatos["lastname"] ?? datos.lastname,
       birthdate: nuevosDatos["birthdate"] ?? datos.birthdate,
       identifier: nuevosDatos["identifier"] ?? datos.identifier,
+      profileAreaCode: nuevosDatos["profileAreaCode"] ?? datos.profileAreaCode,
       phoneNumber: nuevosDatos["phoneNumber"] ?? datos.phoneNumber,
       country: nuevosDatos["country"] ?? datos.country,
       city: nuevosDatos["city"] ?? datos.city,
@@ -123,7 +143,7 @@ UpdateDataProfile updateFromModelData(UpdateDataProfile dataToSend,
       church: nuevosDatos["church"] ?? datos.church,
     );
   }
-  print(datos);
+  // print(datos);
   return datos;
 }
 
@@ -162,11 +182,45 @@ Future<void> showCustomDialogWithAction(BuildContext context,
 }
 
 obtainedStar(int maxScore, int sectionCompleted, int sectionCount) {
-  if(sectionCount >0){
-  final score = maxScore / sectionCount;
-  return (score * sectionCompleted).toInt();
-
+  if (sectionCount > 0) {
+    final score = maxScore / sectionCount;
+    return (score * sectionCompleted).toInt();
   }
   return 0;
+}
 
+(String, String) parsePhoneNumberSimple(BuildContext context, String value) {
+  if (value.isEmpty) return ('', '');
+  String code = '';
+  String phone = '';
+  final parts = value.trim().split(RegExp(r'\s+'));
+  if (parts.length == 2) {
+    code = Provider.of<CatalogueProvider>(context, listen: false)
+        .allAreasCode
+        .firstWhere((areaCode) => areaCode.id == parts[0])
+        .code;
+    phone = parts[1];
+  } else {
+    phone = parts[0];
+  }
+
+  return (
+    parts.length >= 2 ? code : '',
+    parts.length >= 1
+        ? parts
+            .sublist(parts.length >= 2 ? 1 : 0)
+            .join('')
+            .replaceAll(RegExp(r'[^0-9]'), '')
+        : ''
+  );
+}
+
+Future<String> copyChapter(ChapterModel? chapter) async {
+  String text;
+  if (chapter == null) return '';
+  StringBuffer buffer = StringBuffer();
+  for (var verse in chapter.verses) {
+    buffer.write('${verse.verse} ${verse.text}\n');
+  }
+  return buffer.toString();
 }

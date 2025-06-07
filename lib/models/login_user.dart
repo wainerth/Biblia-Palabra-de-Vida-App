@@ -1,118 +1,38 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
-class ChurchRelation {
-  final String name;
-
-  ChurchRelation({
-    required this.name,
-  });
-
-  factory ChurchRelation.fromJson(Map<String, dynamic> json) {
-    return ChurchRelation(
-      name: json['name'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'name': name,
-      };
-}
-
 class UserChurch {
   final String id;
-  final String name;
+  final String? churchName;
   final bool status;
-  UserChurch({required this.id, required this.name, required this.status});
+  UserChurch({required this.id, required this.churchName, required this.status});
   UserChurch copyWith({String? id, String? name, bool? status}) {
     return UserChurch(
         id: id ?? this.id,
-        name: name ?? this.name,
+        churchName: churchName ?? this.churchName,
         status: status ?? this.status);
   }
 
   factory UserChurch.fromJson(Map<String, dynamic> json) {
-    var churchName = ChurchRelation.fromJson(
-        json['churchRelation'] ?? {"name": json['name']});
+  
     return UserChurch(
-      id: json['churchId'] ?? json['id'],
-      name: churchName.name,
-      status: json['status'] is bool
-          ? json['status']
-          : json['status'] > 0
-              ? true
-              : false,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'status': status};
-}
-
-class User {
-  final String id;
-  final String username;
-  final String email;
-  final String lastLogin;
-  final int rolId;
-  final List<UserChurch> userChurch;
-
-  User({
-    required this.id,
-    required this.username,
-    required this.email,
-    required this.lastLogin,
-    required this.rolId,
-    required this.userChurch,
-  });
-  User copyWith(
-      {String? id,
-      String? username,
-      String? email,
-      String? lastLogin,
-      int? rolId,
-      List<UserChurch>? userChurch}) {
-    return User(
-        id: id ?? this.id,
-        username: username ?? this.username,
-        email: email ?? this.email,
-        lastLogin: lastLogin ?? this.lastLogin,
-        rolId: rolId ?? this.rolId,
-        userChurch: userChurch ?? this.userChurch);
-  }
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    List<UserChurch> userChurch = [];
-    if (json['userChurch'] != null) {
-      userChurch = (json['userChurch'] as List)
-          .map((i) => UserChurch.fromJson(i))
-          .toList();
-    }
-
-    return User(
       id: json['id'],
-      username: json['username'],
-      email: json['email'],
-      lastLogin: json['lastLogin'],
-      rolId: json['rolId'] ?? 0,
-      userChurch: userChurch,
+      churchName: json['churchName'],
+      status: json['status'] is bool ? json['status'] : (json['status'] > 0 ? true : false)
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'username': username,
-        'email': email,
-        'lastLogin': lastLogin,
-        'rolId': rolId,
-        'userChurch': userChurch.map((e) => e.toJson()).toList(),
-      };
+  Map<String, dynamic> toJson() => {'id': id, 'churchName': churchName, 'status': status};
 }
-
 class LoginUser {
+  final String userId;
   final String name;
   final String? lastname;
+  final String? username;
+  final String? email;
   final int expTotalUser;
   final int energyPoints;
-  final String imgProfileUser;
+  final Img? imgProfileUser;
+  final AreaCode? profileAreaCode;
   final String? phoneNumber;
   final Country? country;
   final String? city;
@@ -128,15 +48,19 @@ class LoginUser {
   final int streakDaysCount;
   final int preachingsCreatedCount;
   final int completedCourse;
-  final User user;
+  final List<UserChurch> userChurch;
   final List<UserTitle>? title;
   final UserRanking? league;
 
   LoginUser({
+    required this.userId,
     required this.name,
+    required this.username,
+    required this.email,
     required this.expTotalUser,
     required this.energyPoints,
     required this.imgProfileUser,
+    this.profileAreaCode,
     this.phoneNumber,
     required this.country,
     required this.favoriteVerseId,
@@ -146,7 +70,7 @@ class LoginUser {
     required this.streakDaysCount,
     required this.preachingsCreatedCount,
     required this.completedCourse,
-    required this.user,
+    required this.userChurch,
     required this.title,
     required this.league,
     this.lastname,
@@ -159,20 +83,23 @@ class LoginUser {
   });
 
   LoginUser copyWith({
+    String? userId,
     String? name,
+    String? username,
     String? lastname,
+    String? email,
     String? gender,
     int? expTotalUser,
     int? energyPoints,
     String? city,
-    String? email,
-    String? imgProfileUser,
+    Img? imgProfileUser,
     String? birthdate,
     String? identifier,
+    AreaCode? profileAreaCode,
     String? phoneNumber,
     Country? country,
     bool? isBaptized,
-    User? user,
+    List<UserChurch>? userChurch,
     String? favoriteVerseId,
     bool? notifications,
     String? createdAt,
@@ -182,13 +109,17 @@ class LoginUser {
     int? completedCourse,
   }) {
     return LoginUser(
+        userId: userId ?? this.userId,
         name: name ?? this.name,
+        username: username ?? this.username,
         lastname: lastname ?? this.lastname,
+        email: email ?? this.email,
         city: city ?? this.city,
         imgProfileUser: imgProfileUser ?? this.imgProfileUser,
         expTotalUser: expTotalUser ?? this.expTotalUser,
         energyPoints: energyPoints ?? this.energyPoints,
         country: country ?? this.country,
+        profileAreaCode: profileAreaCode ?? this.profileAreaCode,
         phoneNumber: phoneNumber ?? this.phoneNumber,
         favoriteVerseId: favoriteVerseId ?? this.favoriteVerseId,
         notifications: notifications ?? this.notifications,
@@ -199,7 +130,7 @@ class LoginUser {
         preachingsCreatedCount:
             preachingsCreatedCount ?? this.preachingsCreatedCount,
         completedCourse: completedCourse ?? this.completedCourse,
-        user: user ?? this.user,
+        userChurch: userChurch ?? this.userChurch,
         title: title ?? this.title,
         league: league ?? this.league,
         birthdate: birthdate ?? this.birthdate,
@@ -216,16 +147,20 @@ class LoginUser {
           (json['title'] as List).map((i) => UserTitle.fromJson(i)).toList();
     }
     return LoginUser(
+      userId: json['userId'],
       identifier: json['identifier'],
       name: json['name'],
       lastname: json['lastname'] ?? '',
+      email: json['email'] ?? '',
+      username: json['username'],
       gender: json['gender'] ?? '',
       birthdate: json['birthdate'] ?? '',
       isBaptized: json['isBaptized'] ?? false,
       expTotalUser: json['expTotalUser'],
       energyPoints: json['energyPoints'] ?? 0,
-      imgProfileUser: json['imgProfileUser'],
+      imgProfileUser: json['imgProfileUser'] != null ? Img.fromJson(json['imgProfileUser']) : null,
       phoneNumber: json['phoneNumber'] ?? '',
+      profileAreaCode: json['profileAreaCode'] != null ? AreaCode.fromJson(json['profileAreaCode']) : null,
       country:
           json['country'] != null ? Country.fromJson(json['country']) : null,
       city: json['city'],
@@ -237,7 +172,11 @@ class LoginUser {
       preachingsCreatedCount: json['preachingsCreatedCount'],
       completedCourse: json['completedCourse'] ?? 0,
       currentLeague: League.fromJson(json['currentLeague']),
-      user: User.fromJson(json['user']),
+      userChurch: json['userChurch'] != null
+          ?  (json['userChurch'] as List)
+          .map((i) => UserChurch.fromJson(i))
+          .toList()
+          : [],
       title: title,
       league:
           json['league'] != null ? UserRanking.fromJson(json['league']) : null,
@@ -245,15 +184,19 @@ class LoginUser {
   }
 
   Map<String, dynamic> toJson() => {
+        'userId': userId,
         'identifier': identifier,
         'name': name,
         'lastname': lastname,
+        'email': email,
+        'username': username,
         'gender': gender,
         'birthdate': birthdate,
         'isBaptized': isBaptized,
         'expTotalUser': expTotalUser,
         'energyPoints': energyPoints,
-        'imgProfileUser': imgProfileUser,
+        'imgProfileUser': imgProfileUser?.toJson(),
+        'profileAreaCode': profileAreaCode,
         'phoneNumber': phoneNumber,
         'country': country?.toJson(),
         'city': city,
@@ -265,7 +208,7 @@ class LoginUser {
         'preachingsCreatedCount': preachingsCreatedCount,
         'completedCourse': completedCourse,
         'currentLeague': currentLeague?.toJson(),
-        'user': user.toJson(),
+        'userChurch': userChurch.map((e) => e.toJson()).toList(),
         'title': title,
         'league': league,
       };

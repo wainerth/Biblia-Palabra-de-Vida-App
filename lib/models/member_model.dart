@@ -2,16 +2,12 @@
 class MemberModel {
   final String userId;
   final int currentPoints;
-  final int position;
-  final bool promoted;
   final String username;
   final String profilePicture;
 
   MemberModel({
     required this.userId,
     required this.currentPoints,
-    required this.position,
-    required this.promoted,
     required this.username,
     required this.profilePicture,
   });
@@ -21,8 +17,6 @@ class MemberModel {
     return {
       'userId': userId,
       'currentPoints': currentPoints,
-      'position': position,
-      'promoted': promoted,
       'username': username,
       'profilePicture': profilePicture,
     };
@@ -33,8 +27,6 @@ class MemberModel {
     return MemberModel(
       userId: json['userId'],
       currentPoints: json['currentPoints'],
-      position: json['position'] ?? 0,
-      promoted: json['promoted'] ?? false,
       username: json['username'] ?? false,
       profilePicture: json['profilePicture'],
     );

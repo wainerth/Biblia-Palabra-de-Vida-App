@@ -82,7 +82,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
     try {
       setState(() {});
       // cargamos las promesas
-      final responsePromises = await getDailyPromises(userData!.user.id);
+      final responsePromises = await getDailyPromises(userData!.userId);
       if (responsePromises.error != null) {
         errorMessage = responsePromises.error;
       }
@@ -310,7 +310,7 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
               String? userToken = prefs.getString('userToken');
 
               await Provider.of<AuthenticationProvider>(context, listen: false)
-                  .loadProfileUser(userData!.user.id, userToken);
+                  .loadProfileUser(userData!.userId, userToken);
               LoadingService().hideLoading();
               widget.updateData(responseOpenPromise.data);
             },

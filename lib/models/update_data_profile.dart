@@ -4,7 +4,6 @@ class UserProfile {
   final String userId;
   final UpdateDataProfile dataProfiles;
 
-
   UserProfile({
     required this.userId,
     required this.dataProfiles,
@@ -32,6 +31,7 @@ class UpdateDataProfile {
   final String? name;
   final String? birthdate;
   final String? identifier;
+  final AreaCode? profileAreaCode;
   final String? phoneNumber;
   final Country? country;
   final String? city;
@@ -39,11 +39,12 @@ class UpdateDataProfile {
   final bool? isBaptized;
   final UserChurch? church;
 
-  UpdateDataProfile( {
+  UpdateDataProfile({
     this.lastname,
     this.name,
     this.birthdate,
     this.identifier,
+    this.profileAreaCode,
     this.phoneNumber,
     this.country,
     this.city,
@@ -57,6 +58,7 @@ class UpdateDataProfile {
     String? name,
     String? birthdate,
     String? identifier,
+    AreaCode? profileAreaCode,
     String? phoneNumber,
     Country? country,
     String? city,
@@ -73,40 +75,41 @@ class UpdateDataProfile {
         country: country,
         gender: gender,
         isBaptized: isBaptized,
+        profileAreaCode: profileAreaCode,
         phoneNumber: phoneNumber,
-        church:church
-        );
+        church: church);
   }
 
   factory UpdateDataProfile.fromJson(Map<String, dynamic> json) =>
       UpdateDataProfile(
-        lastname: json["lastname"],
-        name: json["name"],
-        birthdate: json["birthdate"],
-        identifier: json["identifier"],
-        phoneNumber: json["phoneNumber"],
-        country: json["country"],
-        city: json["city"],
-        gender: json["gender"],
-        isBaptized: json["isBaptized"],
-        church: json['church']
-      );
+          lastname: json["lastname"],
+          name: json["name"],
+          birthdate: json["birthdate"],
+          identifier: json["identifier"],
+          profileAreaCode: AreaCode.fromJson(json['profileAreaCode']),
+          phoneNumber: json["phoneNumber"],
+          country: json["country"],
+          city: json["city"],
+          gender: json["gender"],
+          isBaptized: json["isBaptized"],
+          church: json['church']);
 
   Map<String, dynamic> toJson() => {
         "lastname": lastname,
         "name": name,
         "birthdate": birthdate,
         "identifier": identifier,
+        'profileAreaCode': profileAreaCode,
         "phoneNumber": phoneNumber,
         "country": country,
         "city": city,
         "gender": gender,
         "isBaptized": isBaptized,
-        "church":church
+        "church": church
       };
 
   @override
   String toString() {
-    return 'DataProfiles{lastname: $lastname, name: $name, birthdate: $birthdate, identifier: $identifier, phoneNumber: $phoneNumber, country: $country, city: $city, gender: $gender, isBaptized: $isBaptized, church: $church}';
+    return 'DataProfiles{lastname: $lastname, name: $name, birthdate: $birthdate, identifier: $identifier, profileAreaCode: $profileAreaCode, phoneNumber: $phoneNumber, country: $country, city: $city, gender: $gender, isBaptized: $isBaptized, church: $church}';
   }
 }

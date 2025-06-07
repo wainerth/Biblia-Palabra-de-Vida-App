@@ -155,7 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           (country) =>
                                               country.id == newValue!.value);
                                       _prefixNumberController.text =
-                                          _selectedCountry!.countryCode;
+                                          _selectedCountry!.countryCode!.code;
                                     });
                                   },
                                   prefixNumberController:
@@ -202,7 +202,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         birthdate: _dateController.text,
                                         // city: _cityController ,
                                         countryCode:
-                                            _selectedCountry?.countryCode,
+                                            _selectedCountry?.countryCode!.code,
                                         countryId: _selectedCountry?.id,
                                         identifier: _userIdController.text,
                                         password: _passwordController.text,
