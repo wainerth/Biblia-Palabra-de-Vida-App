@@ -33,6 +33,7 @@ void main() async {
           create: (context) => AuthenticationProvider(
               context, context.read<CatalogueProvider>()),
         ),
+        ChangeNotifierProvider(create: (_) => BibleThemeProvider())
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690), // size base of design

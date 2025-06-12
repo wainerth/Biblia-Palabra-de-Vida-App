@@ -13,8 +13,6 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 
-
-
 mixin SafeStateMixin<T extends StatefulWidget> on State<T> {
   void safeSetState(VoidCallback fn) {
     if (mounted) {
@@ -22,6 +20,7 @@ mixin SafeStateMixin<T extends StatefulWidget> on State<T> {
     }
   }
 }
+
 class WorkspaceScreen extends StatefulWidget {
   const WorkspaceScreen({super.key});
 
@@ -202,6 +201,13 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               'courseId': progressUser!.courseId,
               'sectionId': progressUser!.sectionId
             });
+          }
+          if (card['label'] == 'La Biblia') {
+            Navigator.pushNamed(
+              context,
+              '/layoutPage',
+              arguments: {'selectedIndex': 1},
+            );
           } else {
             Navigator.pushNamed(context, card['route']!);
           }
@@ -451,46 +457,45 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         padding: const EdgeInsets.only(left: 45.0),
                         child: dailyWord.book!.modernName!.isNotEmpty
                             ? Row(
-                              spacing: 10,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  constraints: BoxConstraints(maxWidth: 180),
-                                  width: double.infinity,
-                                  child: Text(
-                                    maxLines: 1,
-                                    softWrap: true,
-                                    overflow: TextOverflow.ellipsis,
-                                  "${dailyWord.book!.modernName}",
-                                  style: StylesApp(context)
-                                    .textStyleBody15
-                                    .copyWith(
-                                      
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                Row(
+                                spacing: 10,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                  "${dailyWord.chapter!.chapter}:",
-                                  style: StylesApp(context)
-                                    .textStyleBody15
-                                    .copyWith(
-                                      color: Colors.white,
+                                  Container(
+                                    constraints: BoxConstraints(maxWidth: 180),
+                                    width: double.infinity,
+                                    child: Text(
+                                      maxLines: 1,
+                                      softWrap: true,
+                                      overflow: TextOverflow.ellipsis,
+                                      "${dailyWord.book!.modernName}",
+                                      style: StylesApp(context)
+                                          .textStyleBody15
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
                                     ),
                                   ),
-                                  Text(
-                                  "${dailyWord.verse!.verse}",
-                                  style: StylesApp(context)
-                                    .textStyleBody15
-                                    .copyWith(
-                                      color: Colors.white,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "${dailyWord.chapter!.chapter}:",
+                                        style: StylesApp(context)
+                                            .textStyleBody15
+                                            .copyWith(
+                                              color: Colors.white,
+                                            ),
+                                      ),
+                                      Text(
+                                        "${dailyWord.verse!.verse}",
+                                        style: StylesApp(context)
+                                            .textStyleBody15
+                                            .copyWith(
+                                              color: Colors.white,
+                                            ),
+                                      ),
+                                    ],
                                   ),
                                 ],
-                                ),
-                              ],
                               )
                             : Text(""),
                       ),
@@ -627,10 +632,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                       fit: BoxFit.cover,
                                       alignment: Alignment.topCenter,
                                       imageUrl: userData != null &&
-                                              userData!
-                                                  .imgProfileUser != null
+                                              userData!.imgProfileUser != null
                                           ? GraphQLConfig.urlServidor +
-                                              userData.imgProfileUser.urlImg+
+                                              userData.imgProfileUser.urlImg +
                                               '?timestamp=${DateTime.now().millisecondsSinceEpoch}'
                                           : 'assets/no-image.jpg',
                                       placeholder: (context, url) =>

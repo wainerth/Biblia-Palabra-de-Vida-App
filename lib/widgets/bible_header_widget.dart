@@ -1,5 +1,7 @@
+import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class BibleHeaderWidget extends StatelessWidget {
   final String title;
@@ -21,10 +23,13 @@ class BibleHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<BibleThemeProvider>(context);
+   final  currentTheme = themeProvider.themeData;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
+          colorFilter: currentTheme.name != 'Claro' ? ColorFilter.mode(currentTheme.backgroundColor, BlendMode.color) : null,
           image: const AssetImage("assets/elipsisTopColor.png"),
           fit: BoxFit.cover,
           alignment: Alignment.bottomCenter,
@@ -46,7 +51,7 @@ class BibleHeaderWidget extends StatelessWidget {
                 constraints: BoxConstraints(maxHeight: 35.0),
                 padding: EdgeInsets.all(0),
                 iconSize: 35.0,
-                color: Colors.white,
+                color: currentTheme.name != 'Claro' ? currentTheme.textColor : currentTheme.backgroundColor,
                 onPressed: onBack ?? () => Navigator.pop(context),
                 icon: Icon(
                   Icons.arrow_back,
@@ -64,7 +69,9 @@ class BibleHeaderWidget extends StatelessWidget {
                   // width: 150.0,
                   height: 27.0,
                   text: versionName,
-                  buttonStyle: StylesApp(context).btnWidgetSmall,
+                  buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                     foregroundColor: WidgetStateProperty.all<Color>(currentTheme.buttonTextColor),
+                  ),
                   onPressed: onVersionTap,
                 ),
               ),
@@ -75,7 +82,9 @@ class BibleHeaderWidget extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: StylesApp(context)
                       .textStyleTitleWithe
-                      .copyWith(fontWeight: FontWeight.normal),
+                      .copyWith(
+                        color: currentTheme.name != 'Claro' ? currentTheme.textColor : currentTheme.backgroundColor,
+                        fontWeight: FontWeight.normal),
                 ),
               ),
               SizedBox(height: 10.0),
@@ -85,7 +94,9 @@ class BibleHeaderWidget extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: StylesApp(context)
                       .textStyleTitleWithe
-                      .copyWith(fontWeight: FontWeight.normal),
+                      .copyWith(
+                         color: currentTheme.name != 'Claro' ? currentTheme.textColor : currentTheme.backgroundColor,
+                        fontWeight: FontWeight.normal),
                 ),
               ),
             ],
@@ -100,7 +111,7 @@ class BibleHeaderWidget extends StatelessWidget {
                   constraints: BoxConstraints(maxHeight: 35.0),
                   padding: EdgeInsets.all(0),
                   iconSize: 35.0,
-                  color: Colors.white,
+                  color: currentTheme.buttonColor,
                   onPressed: onAudioTap,
                   icon: Icon(
                     Icons.volume_up_outlined,

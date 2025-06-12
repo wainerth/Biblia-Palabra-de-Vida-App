@@ -351,7 +351,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                       showModalBottomSheet(
                                           context: context,
                                           builder: (BuildContext context) {
-                                            return modalTextFormatSizeWidget();
+                                            return Container(); // modalTextFormatSizeWidget();
                                           });
                                     },
                                     icon: Icon(

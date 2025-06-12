@@ -271,6 +271,271 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
   ];
 }
 
+List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
+  return [
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          Image.asset(
+            'assets/home.png',
+            color: StyleColor.violetDream,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Inicio',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.violetDream,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.violetDream,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          Image.asset(
+            'assets/home.png',
+            color: StyleColor.violetDream,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Inicio',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.violetDream,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          Image.asset(
+            'assets/book.png',
+            color: StyleColor.black,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Biblia',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.black,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.black,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          Image.asset(
+            'assets/book.png',
+            color: StyleColor.black,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Biblia',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.black,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          Image.asset(
+            'assets/prayer.png',
+            color: StyleColor.greenDark,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Oración',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.greenDark,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.greenDark,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          Image.asset(
+            'assets/prayer.png',
+            color: StyleColor.greenDark,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.fitHeight,
+          ),
+          Text(
+            'Oración',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.greenDark,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          Icon(
+            Icons.audiotrack,
+            size: StylesApp(context).sizeIconBottomBar,
+            color: StyleColor.blueDark,
+          ),
+          Text(
+            'Audio',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.blueDark,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.blueDark,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          Icon(
+            Icons.audiotrack,
+            size: StylesApp(context).sizeIconBottomBar,
+            color: StyleColor.blueDark,
+          ),
+          Text(
+            'Audio',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.blueDark,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          Image.asset(
+            'assets/heat.png',
+            color: StyleColor.redDark,
+            width: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Ofertas',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.redDark,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.redDark,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          Image.asset(
+            'assets/heat.png',
+            color: StyleColor.redDark,
+            width: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Ofertas',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.redDark,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          Icon(
+            Icons.settings,
+            size: StylesApp(context).sizeIconBottomBar,
+            color: StyleColor.grayMedium,
+          ),
+          Text(
+            'Configuración',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.grayMedium,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.grayMedium,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          Icon(
+            Icons.settings,
+            size: StylesApp(context).sizeIconBottomBar,
+            color: StyleColor.grayMedium,
+          ),
+          Text(
+            'Configuración',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.grayMedium,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+  ];
+}
+
 List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
   return [
     BottomNavigationBarItem(
@@ -544,13 +809,11 @@ final List<BottomNavItem> items = [
   BottomNavItem(
       title: "Dudas",
       icon: Icons.question_mark_outlined,
-      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen()
-      ),
+      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen()),
   BottomNavItem(
       title: "Reto online",
       icon: Icons.language,
-      page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()
-      ),
+      page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()),
   BottomNavItem(
       title: "Novedad",
       icon: Icons.notifications_none_rounded,
@@ -829,12 +1092,12 @@ final List<BottomNavItem> itemsMap = [
   BottomNavItem(
     title: "Reto online",
     icon: Icons.language,
-    page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen(), 
+    page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen(),
   ),
   BottomNavItem(
     title: "Novedad",
     icon: Icons.notifications_none_rounded,
-    page: GraphQLConfig.development ? NewsScreen() : SoonScreen(), 
+    page: GraphQLConfig.development ? NewsScreen() : SoonScreen(),
   )
 ];
 
@@ -1368,23 +1631,18 @@ final List<BottomNavItem> itemsPromises = [
   BottomNavItem(
       title: "Biblia",
       icon: Icons.book_outlined,
-      page: GraphQLConfig.development ? BibleScreen() : SoonScreen()
-
-      ),
+      page: GraphQLConfig.development ? BibleScreen() : SoonScreen()),
   BottomNavItem(title: "Promesas", icon: Icons.sync, page: PromisesScreen()),
   BottomNavItem(
       title: "Dudas",
       icon: Icons.question_mark_outlined,
-      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen() 
-      ),
+      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen()),
   BottomNavItem(
       title: "Reto online",
       icon: Icons.language,
-      page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()
-      ),
+      page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()),
   BottomNavItem(
       title: "Novedad",
       icon: Icons.notifications_none_rounded,
-      page: GraphQLConfig.development ? NewsScreen()  : SoonScreen() 
-      )
+      page: GraphQLConfig.development ? NewsScreen() : SoonScreen())
 ];

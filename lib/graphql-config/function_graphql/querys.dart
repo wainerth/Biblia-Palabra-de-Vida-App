@@ -1962,3 +1962,75 @@ Future<ResponseData> getOneChapterWithVerses(String? chapterId) async {
     }
   }
 }
+Future<ResponseData> getBooksByBibleId(String? versionId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+         query GetBooksByBibleId($getBooksByBibleIdId: ID) {
+            getBooksByBibleId(id: $getBooksByBibleIdId) {
+              id
+              numberBook
+              modernName
+              newTestament
+              bibleId
+              status
+              hasData
+              chapters {
+                id
+                chapter
+                verses {
+                  id
+                  verse
+                }
+              }
+            }
+          }
+      '''),
+    variables: <String, dynamic>{"getBooksByBibleIdId": versionId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getBooksByBibleId'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Books By BibleId  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getBooksByBibleId'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'Get Books By BibleId Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}

@@ -41,7 +41,7 @@ class _CustomDropdownBottomWidgetState<T>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: widget.items.isEmpty ? null : () {
       FocusScope.of(context).unfocus();
         showModalBottomSheet(
           backgroundColor: Colors.white,
