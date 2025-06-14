@@ -2137,7 +2137,7 @@ Future<ResponseData> getFavoriteVerseByUser(String userId) async {
     if (data['getFavVerseByUserId'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get Fav Verse By UserId  failed: No data returned',
+        error: 'Get All Teaching  failed: No data returned',
       );
     }
 
@@ -2150,7 +2150,172 @@ Future<ResponseData> getFavoriteVerseByUser(String userId) async {
       print('Timeout: $e');
     }
     return ResponseData(
-        data: null, error: 'Get Favorite Verse By UserId Timeout de conexión $e');
+        data: null, error: 'Get All Teaching Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getAllTeaching(
+    int page, int limit, String title, String churchId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+        query GetAllTeaching($page: Int, $limit: Int, $title: String, $churchId: ID) {
+        getAllTeaching(page: $page, limit: $limit, title: $title, churchId: $churchId) {
+          data {
+            id
+            title
+            description
+            img {
+              urlImg
+            }
+            orderCard
+            mostClicked
+            countCards
+            status
+          }
+          meta {
+            currentPage
+            totalPages
+            itemsPerPage
+            totalItems
+            hasPreviousPage
+            hasNextPage
+          }
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "page": page,
+      "limit": limit,
+      "title": title,
+      "churchId": churchId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllTeaching'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get All Teaching  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllTeaching'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get All Teaching Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getAllCharacters(
+    int page, int limit, String name, bool isNewTestament) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+        query GetCharacters($offset: Int, $limit: Int, $name: String, $isNewTestament: Boolean) {
+          getCharacters( offset: $offset limit: $limit name: $name isNewTestament: $isNewTestament) {
+            id
+            name
+            newTestament
+            haveMoreCharacters
+            countCards
+            color
+            img {
+              id
+              urlImg
+            }
+            relatedCharacters {
+              id
+              name
+              color
+              typeNameChar
+              img {
+                urlImg
+              }
+            }
+          }
+        }
+      '''),
+    variables: <String, dynamic>{
+      "offset": page,
+      "limit": limit,
+      "name": name,
+      "isNewTestament": isNewTestament,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getCharacters'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Characters  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getCharacters'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get Characters Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

@@ -64,3 +64,4 @@ export 'package:biblia_palabra_de_vida_app/models/chapter_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/highlight_range_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/grid_item_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/teaching_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/character_model.dart';

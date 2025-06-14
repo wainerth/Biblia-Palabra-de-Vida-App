@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -20,8 +23,9 @@ class SearchBibleWidget extends StatefulWidget {
 
 class _SearchBibleWidgetState extends State<SearchBibleWidget> {
   late BibleTheme currentTheme;
-
+  LoginUser? userData;
   var _selectedIndex = 0;
+
   List tabs = [
     {
       "title": 'Libro',
@@ -40,6 +44,18 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
       "placeholder": 'Favorito a buscar',
     }
   ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeAppData());
+  }
+
+  Future<void> _initializeAppData() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userData = userProvider.currentUser;
+    await Provider.of<BibleThemeProvider>(context, listen: false)
+        .loadSavedTheme();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,9 +123,7 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
                       return Tab(
                         height: 32.sp,
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: 100
-                          ),
+                          constraints: BoxConstraints(maxWidth: 100),
                           child: Container(
                             // width: double.infinity,
                             decoration: BoxDecoration(
@@ -121,11 +135,14 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
                                 topRight: Radius.circular(10),
                               ),
                             ),
-                            padding: const EdgeInsets.symmetric( vertical: 4),
-                            child: Center(child: Text(tab["title"],
-                            maxLines: 1,  // Asegura una sola línea
-                                        // overflow: TextOverflow.visible,
-                                        ),),
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Center(
+                              child: Text(
+                                tab["title"],
+                                maxLines: 1, // Asegura una sola línea
+                                // overflow: TextOverflow.visible,
+                              ),
+                            ),
                           ),
                         ),
                       );
@@ -140,11 +157,7 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
                       SearchByBookWidget(),
                       SearchByTextWidget(),
                       SearchByThemeWidget(),
-                      Column(
-                        children: [
-                          SearchByCharacterWidget(),
-                        ],
-                      ),
+                      SearchByCharacterWidget(),
                     ],
                   ),
                 ),
@@ -178,9 +191,66 @@ class SearchByThemeWidget extends StatefulWidget {
 }
 
 class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
+  LoginUser? userData;
+
   late BibleTheme currentTheme;
   TextEditingController searchTextController = TextEditingController();
   String _searchText = '';
+  List<TeachingModel> teachings = [];
+  Pagination pagination = Pagination(
+    currentPage: 0,
+    totalPages: 0,
+    itemsPerPage: 0,
+    totalItems: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  );
+  Timer? _debounceTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeAppData());
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    searchTextController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initializeAppData() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userData = userProvider.currentUser;
+    await Provider.of<BibleThemeProvider>(context, listen: false)
+        .loadSavedTheme();
+    await _loadData(1, "");
+  }
+
+  Future<void> _loadData(page, filter) async {
+    setState(() {
+      teachings = [];
+    });
+    final responseTeaching = await getAllTeaching(page, 10, filter, "");
+    if (responseTeaching.error != null) {
+      await showCustomDialog(
+        context,
+        message: responseTeaching.error!,
+        dialogType: DialogType.error,
+      );
+      return;
+    }
+    setState(() {
+      teachings = responseTeaching.data['data']
+          .map((teaching) => TeachingModel.fromJson(removeTypename(teaching)))
+          .cast<TeachingModel>()
+          .toList();
+
+      pagination =
+          Pagination.fromJson(removeTypename(responseTeaching.data["meta"]));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -222,6 +292,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
               setState(() {
                 _searchText = value;
               });
+              _onSearchChanged(value);
             },
           ),
         ),
@@ -230,29 +301,43 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
         ),
         // body de los resultados de la búsqueda
         Expanded(
-          child: ListView.builder(
-            itemCount: 10,
-            itemBuilder: (context, int index) {
-              return CardTeachingWidget(onTap: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return DialogInternalTeaching(currentTheme: currentTheme);
-                    });
-              });
-            },
-          ),
+          child: teachings.isEmpty
+              ? LoadingIndicator()
+              : ListView.builder(
+                  itemCount: teachings.length,
+                  itemBuilder: (context, int index) {
+                    return CardTeachingWidget(
+                        data: teachings[index],
+                        onTap: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return DialogInternalTeaching(
+                                    data: teachings[index],
+                                    currentTheme: currentTheme);
+                              });
+                        });
+                  },
+                ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              onPressed: () async {},
+              onPressed: pagination.hasPreviousPage
+                  ? () async {
+                      _loadData(pagination.currentPage - 1, "");
+                    }
+                  : null,
               icon: Icon(Icons.arrow_back),
               color: currentTheme.buttonColor,
             ),
             IconButton(
-              onPressed: () async {},
+              onPressed: pagination.hasNextPage
+                  ? () async {
+                      _loadData(pagination.currentPage + 1, "");
+                    }
+                  : null,
               icon: Icon(Icons.arrow_forward),
               color: currentTheme.buttonColor,
             ),
@@ -262,17 +347,39 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
     );
   }
 
+  void _onSearchChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+
+    _debounceTimer = Timer(Duration(milliseconds: 500), () {
+      _performSearch(query);
+    });
+  }
+
+  void _performSearch(String query) async {
+    if (query.isEmpty) return; // No buscar si está vacío
+
+    try {
+      _loadData(1, query);
+    } catch (e) {
+      print("error al filtrar $e");
+    }
+  }
+
   void cleanSearch() {
+    _debounceTimer?.cancel(); // Si usas la opción 2
+    searchTextController.clear();
+    _searchText = '';
     setState(() {
       _searchText = '';
-      searchTextController.text = '';
     });
   }
 }
 
 class DialogInternalTeaching extends StatelessWidget {
+  final TeachingModel data;
   const DialogInternalTeaching({
     super.key,
+    required this.data,
     required this.currentTheme,
   });
 
@@ -300,11 +407,12 @@ class DialogInternalTeaching extends StatelessWidget {
             child: Column(
               children: [
                 Center(
-                  child: Image.asset("assets/ensenanza.jpeg"),
+                  child: Image.network(
+                      '${GraphQLConfig.urlServidor}${data.img.urlImg}'),
                 ),
                 Text(
                   textAlign: TextAlign.center,
-                  "Como encontrar la ayuda de Dios",
+                  data.title,
                   style: StylesApp(context)
                       .textStyleBody16
                       .copyWith(color: StyleColor.orange),
@@ -317,7 +425,7 @@ class DialogInternalTeaching extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 12.0),
-            height: 390, // Altura fija para hacer el scroll visible
+            height: 500, // Altura fija para hacer el scroll visible
             child: Scrollbar(
               thumbVisibility:
                   true, // Hace que el scrollbar sea siempre visible
@@ -330,7 +438,7 @@ class DialogInternalTeaching extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
                     textAlign: TextAlign.justify,
-                    "¿Has buscado la ayuda de Dios en tus momentos de dificultad, pero no has sentido su respuesta? Si es así, no eres el único. Muchas personas pasan por situaciones difíciles y desafiantes en la vida que les hacen cuestionar la presencia y el amor de Dios. Sin embargo, Dios no está lejos de ti. Él está cerca y dispuesto a ayudarte, si sabes cómo buscarlo y confiar en él. Dios no nos impone su voluntad ni nos obliga a seguirlo, nos respeta",
+                    data.description,
                     style: StylesApp(context)
                         .textStyleBody16
                         .copyWith(color: currentTheme.textColor),
@@ -426,30 +534,39 @@ class DialogReference extends StatelessWidget {
   }
 }
 
-class CardTeachingWidget extends StatelessWidget {
+class CardTeachingWidget extends StatefulWidget {
+  final TeachingModel data;
   final void Function()? onTap;
   const CardTeachingWidget({
     super.key,
+    required this.data,
     this.onTap,
   });
 
   @override
+  State<CardTeachingWidget> createState() => _CardTeachingWidgetState();
+}
+
+class _CardTeachingWidgetState extends State<CardTeachingWidget> {
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
           padding: EdgeInsets.all(8.0),
           width: MediaQuery.sizeOf(context).width,
           child: Column(children: [
             Container(
-              width: MediaQuery.sizeOf(context).width,
-              constraints: BoxConstraints(minHeight: 150, maxHeight: 150),
-              child: Image.asset("assets/ensenanza.jpeg"),
-            ),
+                width: MediaQuery.sizeOf(context).width,
+                constraints: BoxConstraints(minHeight: 150, maxHeight: 150),
+                child: Image.network(
+                    '${GraphQLConfig.urlServidor}${widget.data.img.urlImg}')
+                //Image.asset("assets/ensenanza.jpeg"),
+                ),
             SizedBox(
               height: 8.0,
             ),
-            Text("Como encontrar la ayuda de Dios")
+            Text(widget.data.title)
           ])),
     );
   }

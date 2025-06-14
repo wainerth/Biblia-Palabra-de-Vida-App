@@ -9,7 +9,6 @@ class TeachingModel {
   final int orderCard;
   final int mostClicked;
   final int status;
-  final Pagination meta;
 
   TeachingModel(
       {required this.id,
@@ -19,7 +18,7 @@ class TeachingModel {
       required this.orderCard,
       required this.mostClicked,
       required this.status,
-      required this.meta});
+      });
 
   factory TeachingModel.fromJson(Map<String, dynamic> json) {
     return TeachingModel(
@@ -30,7 +29,6 @@ class TeachingModel {
       orderCard: json['orderCard'],
       mostClicked: json['mostClicked'],
       status: json['status'],
-      meta: Pagination.fromJson(json['meta']),
     );
   }
 
@@ -43,7 +41,6 @@ class TeachingModel {
       "orderCard": orderCard,
       "mostClicked": mostClicked,
       "status": status,
-      "meta": meta
     };
   }
 }
