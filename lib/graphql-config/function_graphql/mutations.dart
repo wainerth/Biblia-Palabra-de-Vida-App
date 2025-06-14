@@ -1117,3 +1117,190 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
     // return ResponseData(data: null, error: "connection error $e");
   }
 }
+
+Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
+    String userId, int bibleVersion, String chapterId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+  List<Map<String, dynamic>> dataMap = [];
+  for (final lighter in input) {
+
+  dataMap.add({
+    "verse": lighter.verse,
+    "startIndex": lighter.startIndex,
+    "endIndex": lighter.endIndex,
+    "color": lighter.color
+  });
+  }
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "AppCreateHighlighter",
+    document: gql(r'''
+     mutation AppCreateHighlighter($input: [HighlightInputApp], $chapterId: ID, $userId: ID, $bibleVersion: Int) {
+        appCreateHighlighter(input: $input, chapterId: $chapterId, userId: $userId, bibleVersion: $bibleVersion) {
+          id
+          bibleVersion
+          user {
+            id
+          }
+          startIndex
+          endIndex
+          color
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "input": dataMap,
+      "userId": userId,
+      "bibleVersion": bibleVersion,
+      "chapterId": chapterId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['appCreateHighlighter'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'App Create Highlighter failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['appCreateHighlighter'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'App Create Highlighter Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+Future<ResponseData>  removeHighLighters(String verseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "RemoveHighlighter",
+    document: gql(r'''
+     mutation RemoveHighlighter($verseId: ID) {
+        removeHighlighter(verseId: $verseId)
+      }
+      '''),
+    variables: <String, dynamic>{
+      "verseId": verseId
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['removeHighlighter'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Remove Highlighter failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['removeHighlighter'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Remove Highlighter Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+Future<ResponseData>  updateFavoriteVerse(String userId ,String verseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "UpdateFavoriteVerse",
+    document: gql(r'''
+     mutation UpdateFavoriteVerse($userId: ID, $verseId: ID) {
+        updateFavoriteVerse(userId: $userId, verseId: $verseId)
+      }
+      '''),
+    variables: <String, dynamic>{
+      "verseId": verseId,
+      "userId": userId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['updateFavoriteVerse'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Update Favorite Verse failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['updateFavoriteVerse'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Update Favorite Verse Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}

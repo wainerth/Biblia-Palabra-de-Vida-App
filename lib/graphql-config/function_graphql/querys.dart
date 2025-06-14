@@ -1859,7 +1859,9 @@ Future<ResponseData> getChapterWithVerses(String bookId) async {
     }
 
     final data = removeTypename(result.data);
-    if (data == null || data['getOneBookByBookId'] == null || data['getOneBookByBookId']['chapters'] == null) {
+    if (data == null ||
+        data['getOneBookByBookId'] == null ||
+        data['getOneBookByBookId']['chapters'] == null) {
       return ResponseData(
         data: null,
         error: 'get One Book By BookId  failed: No data returned',
@@ -1875,8 +1877,7 @@ Future<ResponseData> getChapterWithVerses(String bookId) async {
       print('Timeout: $e');
     }
     return ResponseData(
-        data: null,
-        error: 'get One Book By BookId Timeout de conexión $e');
+        data: null, error: 'get One Book By BookId Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -1892,6 +1893,7 @@ Future<ResponseData> getChapterWithVerses(String bookId) async {
     }
   }
 }
+
 Future<ResponseData> getOneChapterWithVerses(String? chapterId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
@@ -1962,6 +1964,7 @@ Future<ResponseData> getOneChapterWithVerses(String? chapterId) async {
     }
   }
 }
+
 Future<ResponseData> getBooksByBibleId(String? versionId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
@@ -2017,8 +2020,137 @@ Future<ResponseData> getBooksByBibleId(String? versionId) async {
       print('Timeout: $e');
     }
     return ResponseData(
+        data: null, error: 'Get Books By BibleId Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getAllHighLighters(
+    String userId, int versionId, String chapterId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+         query GetAllHighlighters($userId: ID, $bibleVersion: Int, $chapterId: ID) {
+          getAllHighlighters(userId: $userId, bibleVersion: $bibleVersion, chapterId: $chapterId) {
+            id
+            startIndex
+            endIndex
+            verse {
+              id
+              verse
+            }
+            color
+          }
+        }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "bibleVersion": versionId,
+      "chapterId": chapterId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllHighlighters'] == null) {
+      return ResponseData(
         data: null,
-        error: 'Get Books By BibleId Timeout de conexión $e');
+        error: 'Get All Highlighters  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllHighlighters'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get All Highlighters Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getFavoriteVerseByUser(String userId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+        query GetFavVerseByUserId($userId: ID) {
+          getFavVerseByUserId(userId: $userId) {
+            favoriteVerseId
+          }
+        }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getFavVerseByUserId'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Fav Verse By UserId  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getFavVerseByUserId']['favoriteVerseId'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get Favorite Verse By UserId Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

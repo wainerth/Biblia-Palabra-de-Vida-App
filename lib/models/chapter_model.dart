@@ -1,6 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
-class ChapterModel {
+class ChapterModel extends GridItem {
   final String id;
   final int bookId;
   final int chapter;
@@ -37,4 +37,7 @@ class ChapterModel {
       'status': status
     };
   }
+
+  @override
+  String get displayText => chapter.toString();
 }

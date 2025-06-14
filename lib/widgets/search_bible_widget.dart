@@ -1,20 +1,18 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
-import 'package:biblia_palabra_de_vida_app/models/model_data.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class SearchBibleWidget extends StatefulWidget {
   const SearchBibleWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<SearchBibleWidget> createState() => _SearchBibleWidgetState();
@@ -42,6 +40,7 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
       "placeholder": 'Favorito a buscar',
     }
   ];
+
   @override
   Widget build(BuildContext context) {
     final themeProvider =
@@ -51,88 +50,106 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
       child: DefaultTabController(
         length: tabs.length,
         child: Scaffold(
-          body: Column(
-            children: [
-              AppBarHeaderWidget(
-                backColor: StyleColor.turquoise,
-                buttonColor: StyleColor.orange,
-                textButtonColor: Colors.white,
-                title: 'Búsqueda',
-                styleText: StylesApp(context).textStyleBody7,
-                onRoute: () {
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.only(right: 65),
-                decoration: BoxDecoration(color: Colors.white, boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    spreadRadius: 0,
-                    offset: const Offset(0, 4),
-                  )
-                ]),
-                child: TabBar(
-                  onTap: (index) {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
+          body: SizedBox(
+            width: double.infinity,
+            height: double.infinity,
+            child: Column(
+              children: [
+                AppBarHeaderWidget(
+                  backColor: StyleColor.turquoise,
+                  buttonColor: StyleColor.orange,
+                  textButtonColor: Colors.white,
+                  title: 'Búsqueda',
+                  styleText: StylesApp(context).textStyleBody7,
+                  onRoute: () {
+                    Navigator.pop(context);
                   },
-                  unselectedLabelColor: Colors.white,
-                  labelColor: Colors.white,
-                  labelStyle: StylesApp(context).textStyleBody12,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  automaticIndicatorColorAdjustment: true,
-                  indicatorWeight: 0,
-                  indicatorPadding: EdgeInsets.all(0),
-                  padding: EdgeInsets.all(0),
-                  dividerColor: Color(0XFFFFFDFD),
-                  dividerHeight: 0,
-                  labelPadding: EdgeInsets.symmetric(horizontal: 2),
-                  indicator: BoxDecoration(
-                    color: Colors.orange, // Color de la pestaña seleccionada
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                    ), // Bordes redondeados
-                  ),
-                  tabs: tabs.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    var tab = entry.value;
-                    return Tab(
-                      height: 32.sp,
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: _selectedIndex == index
-                              ? Colors.orange
-                              : Colors.grey,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  width: MediaQuery.sizeOf(context).width,
+                  // padding: const EdgeInsets.only(right: 65),
+                  decoration: BoxDecoration(color: Colors.white, boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      spreadRadius: 0,
+                      offset: const Offset(0, 4),
+                    )
+                  ]),
+                  child: TabBar(
+                    // isScrollable: true,
+                    onTap: (index) {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    },
+                    unselectedLabelColor: Colors.white,
+                    labelColor: Colors.white,
+                    labelStyle: StylesApp(context).textStyleBody12,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    automaticIndicatorColorAdjustment: true,
+                    indicatorWeight: 0,
+                    indicatorPadding: EdgeInsets.all(0),
+                    padding: EdgeInsets.all(0),
+                    dividerColor: Color(0XFFFFFDFD),
+                    dividerHeight: 0,
+                    labelPadding: EdgeInsets.symmetric(horizontal: 2),
+                    indicator: BoxDecoration(
+                      color: Colors.orange, // Color de la pestaña seleccionada
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
+                      ), // Bordes redondeados
+                    ),
+                    tabs: tabs.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      var tab = entry.value;
+                      return Tab(
+                        height: 32.sp,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: 100
+                          ),
+                          child: Container(
+                            // width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: _selectedIndex == index
+                                  ? Colors.orange
+                                  : Colors.grey,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric( vertical: 4),
+                            child: Center(child: Text(tab["title"],
+                            maxLines: 1,  // Asegura una sola línea
+                                        // overflow: TextOverflow.visible,
+                                        ),),
                           ),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Center(child: Text(tab["title"])),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
 
-              // Lista de mensajes
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    SingleChildScrollView(child: searchByBookWidget()),
-                    SingleChildScrollView(child: searchByTextWidget()),
-                   SingleChildScrollView(child:  searchByTitleWidget()),
-                    SingleChildScrollView(child: searchByCharacterWidget()),
-                  ],
+                // Lista de mensajes
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      SearchByBookWidget(),
+                      SearchByTextWidget(),
+                      SearchByThemeWidget(),
+                      Column(
+                        children: [
+                          SearchByCharacterWidget(),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -140,8 +157,8 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
   }
 }
 
-class searchByCharacterWidget extends StatelessWidget {
-  const searchByCharacterWidget({
+class SearchByCharacterWidget extends StatelessWidget {
+  const SearchByCharacterWidget({
     super.key,
   });
 
@@ -151,53 +168,344 @@ class searchByCharacterWidget extends StatelessWidget {
   }
 }
 
-class searchByTitleWidget extends StatelessWidget {
-  const searchByTitleWidget({
+class SearchByThemeWidget extends StatefulWidget {
+  const SearchByThemeWidget({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
+  State<SearchByThemeWidget> createState() => _SearchByThemeWidgetState();
 }
 
-class searchByTextWidget extends StatelessWidget {
-  const searchByTextWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
-class searchByBookWidget extends StatefulWidget {
-  const searchByBookWidget({
-    super.key,
-  });
-
-  @override
-  State<searchByBookWidget> createState() => _searchByBookWidgetState();
-}
-
-class _searchByBookWidgetState extends State<searchByBookWidget> {
+class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
   late BibleTheme currentTheme;
+  TextEditingController searchTextController = TextEditingController();
+  String _searchText = '';
 
-  // variables para almacenar listas globales
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider =
+        Provider.of<BibleThemeProvider>(context, listen: false);
+    currentTheme = themeProvider.themeData;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 25.0,
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: 12.0,
+          ),
+          constraints: BoxConstraints(
+            minWidth: 160.0,
+            maxWidth: StylesApp(context).sizeTextFormField.width,
+          ),
+          child: TextFormField(
+            controller: searchTextController,
+            style: StylesApp(context).textStyleSmallBlack,
+            decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                  hintText: 'Buscar Tema...',
+                  border: OutlineInputBorder(),
+                  suffixIcon: _searchText.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              cleanSearch();
+                            });
+                          },
+                        )
+                      : Icon(Icons.search),
+                ),
+            onChanged: (value) {
+              setState(() {
+                _searchText = value;
+              });
+            },
+          ),
+        ),
+        SizedBox(
+          height: 25.0,
+        ),
+        // body de los resultados de la búsqueda
+        Expanded(
+          child: ListView.builder(
+            itemCount: 10,
+            itemBuilder: (context, int index) {
+              return CardTeachingWidget(onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return DialogInternalTeaching(currentTheme: currentTheme);
+                    });
+              });
+            },
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              onPressed: () async {},
+              icon: Icon(Icons.arrow_back),
+              color: currentTheme.buttonColor,
+            ),
+            IconButton(
+              onPressed: () async {},
+              icon: Icon(Icons.arrow_forward),
+              color: currentTheme.buttonColor,
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  void cleanSearch() {
+    setState(() {
+      _searchText = '';
+      searchTextController.text = '';
+    });
+  }
+}
+
+class DialogInternalTeaching extends StatelessWidget {
+  const DialogInternalTeaching({
+    super.key,
+    required this.currentTheme,
+  });
+
+  final BibleTheme currentTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: currentTheme.backgroundColor,
+      child: Column(
+        children: [
+          AppBarHeaderWidget(
+            backColor: StyleColor.turquoise,
+            buttonColor: StyleColor.orange,
+            textButtonColor: Colors.white,
+            title: 'Enseñanza',
+            styleText: StylesApp(context).textStyleBody7,
+            onRoute: () {
+              Navigator.pop(context);
+            },
+          ),
+          SizedBox(height: 8),
+          Container(
+            constraints: BoxConstraints(maxWidth: 211.0),
+            child: Column(
+              children: [
+                Center(
+                  child: Image.asset("assets/ensenanza.jpeg"),
+                ),
+                Text(
+                  textAlign: TextAlign.center,
+                  "Como encontrar la ayuda de Dios",
+                  style: StylesApp(context)
+                      .textStyleBody16
+                      .copyWith(color: StyleColor.orange),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 20.0,
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 12.0),
+            height: 390, // Altura fija para hacer el scroll visible
+            child: Scrollbar(
+              thumbVisibility:
+                  true, // Hace que el scrollbar sea siempre visible
+              trackVisibility: true, // Opcional: muestra la pista del scroll
+              thickness: 6.0, // Grosor del scrollbar
+              radius: Radius.circular(10), // Bordes redondeados
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(8), // Espacio interno
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    textAlign: TextAlign.justify,
+                    "¿Has buscado la ayuda de Dios en tus momentos de dificultad, pero no has sentido su respuesta? Si es así, no eres el único. Muchas personas pasan por situaciones difíciles y desafiantes en la vida que les hacen cuestionar la presencia y el amor de Dios. Sin embargo, Dios no está lejos de ti. Él está cerca y dispuesto a ayudarte, si sabes cómo buscarlo y confiar en él. Dios no nos impone su voluntad ni nos obliga a seguirlo, nos respeta",
+                    style: StylesApp(context)
+                        .textStyleBody16
+                        .copyWith(color: currentTheme.textColor),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          ButtonThemeWidget(
+            text: "Referencias Biblicas",
+            buttonStyle: StylesApp(context).btnWidgetSmall,
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return DialogReference(currentTheme: currentTheme);
+                  });
+            },
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class DialogReference extends StatelessWidget {
+  const DialogReference({
+    super.key,
+    required this.currentTheme,
+  });
+
+  final BibleTheme currentTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: currentTheme.backgroundColor,
+      child: Column(
+        children: [
+          AppBarHeaderWidget(
+            backColor: StyleColor.turquoise,
+            buttonColor: StyleColor.orange,
+            textButtonColor: Colors.white,
+            title: 'Referencias',
+            styleText: StylesApp(context).textStyleBody7,
+            onRoute: () {
+              Navigator.pop(context);
+            },
+          ),
+          SizedBox(height: 8),
+          Container(
+            constraints: BoxConstraints(maxWidth: 230.0),
+            child: Column(
+              children: [
+                Text(
+                  textAlign: TextAlign.center,
+                  "Como encontrar la ayuda de Dios",
+                  style: StylesApp(context)
+                      .textStyleBody18
+                      .copyWith(color: StyleColor.turquoise),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 20.0,
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: 10,
+              itemBuilder: (context, int index) {
+                return Container(
+                  // padding: EdgeInsets.all(8.0),
+                  width: MediaQuery.sizeOf(context).width,
+                  child: Column(
+                    children: [
+                      ButtonThemeWidget(
+                        text: "Salmo 86:1-17",
+                        buttonStyle: StylesApp(context).btnWidgetSmall,
+                      ),
+                      SizedBox(
+                        height: 15.0,
+                      )
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CardTeachingWidget extends StatelessWidget {
+  final void Function()? onTap;
+  const CardTeachingWidget({
+    super.key,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+          padding: EdgeInsets.all(8.0),
+          width: MediaQuery.sizeOf(context).width,
+          child: Column(children: [
+            Container(
+              width: MediaQuery.sizeOf(context).width,
+              constraints: BoxConstraints(minHeight: 150, maxHeight: 150),
+              child: Image.asset("assets/ensenanza.jpeg"),
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            Text("Como encontrar la ayuda de Dios")
+          ])),
+    );
+  }
+}
+
+// widget para pestaña  libro
+class SearchByTextWidget extends StatefulWidget {
+  const SearchByTextWidget({
+    super.key,
+  });
+
+  @override
+  State<SearchByTextWidget> createState() => _SearchByTextWidgetState();
+}
+
+class _SearchByTextWidgetState extends State<SearchByTextWidget> {
+  late BibleTheme currentTheme;
+  TextEditingController searchTextController = TextEditingController();
   List<VersionModel> listBibleVersions = [];
-  List<ChapterModel> chapters = [];
-  List<VerseModel> verses = [];
-
-  // varibales de lista de  select
   List<ModelData> bibleVersions = [];
-  List<ModelData> books = [];
-
   ModelData? versionSelected = ModelData(label: "", value: "");
-  ModelData? bookSelected = ModelData(label: "", value: "");
-  bool loadingChapter = false;
-  bool loadingVerses = false;
+
+  List searchResult = [
+    {
+      "moderName": "Deuteronomio",
+      "chapter": "6",
+      "verse": "4",
+      "text": "Escucha, Israel: Jehová nuestro Dios, Jehová uno es."
+    },
+    {
+      "moderName": "Deuteronomio",
+      "chapter": "5",
+      "verse": "1",
+      "text":
+          "Moisés convocó a todo Israel, y les dijo: Escucha, Israel, los estatutos y los decretos que hablo hoy a vuestros oídos."
+    },
+    {
+      "moderName": "Deuteronomio 6:4",
+      "chapter": "6",
+      "verse": "4",
+      "text": "Escucha, Israel: Jehová nuestro Dios, Jehová uno es."
+    },
+    {
+      "moderName": "Deuteronomio 6:4",
+      "chapter": "6",
+      "verse": "4",
+      "text": "Escucha, Israel: Jehová nuestro Dios, Jehová uno es."
+    },
+    {
+      "moderName": "Deuteronomio 6:4",
+      "chapter": "6",
+      "verse": "4",
+      "text": "Escucha, Israel: Jehová nuestro Dios, Jehová uno es."
+    },
+  ];
+  String _searchText = '';
   @override
   void initState() {
     super.initState();
@@ -221,202 +529,451 @@ class _searchByBookWidgetState extends State<searchByBookWidget> {
     final themeProvider =
         Provider.of<BibleThemeProvider>(context, listen: false);
     currentTheme = themeProvider.themeData;
-    return Column(children: [
-      SizedBox(
-        height: 25,
-      ),
-      Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.0),
-        constraints: BoxConstraints(
-          minWidth: 160.0,
-          maxWidth: StylesApp(context).sizeTextFormField.width,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 25.0,
         ),
-        child: CustomDropdownBottomWidget(
-          hintText: "Seleccione la version",
-          items: bibleVersions,
-          onChanged: (ModelData? version) async {
-            print("version seleccionada ${version!.value}");
-            setState(() {
-              versionSelected = version;
-            });
-            await loadBookByVersion(version.value);
-          },
-          selectedItem: versionSelected!.value.isNotEmpty
-              ? bibleVersions.firstWhere((element) =>
-                  element.value.toLowerCase() ==
-                  versionSelected?.value.toLowerCase())
-              : null,
-        ),
-      ),
-      SizedBox(
-        height: 25,
-      ),
-      Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.0),
-        constraints: BoxConstraints(
-          minWidth: 160.0,
-          maxWidth: StylesApp(context).sizeTextFormField.width,
-        ),
-        child: CustomDropdownBottomWidget(
-          hintText: "Seleccione el Libro",
-          items: books,
-          onChanged: (ModelData? book) async {
-            print("version seleccionada ${book!.value}");
-            setState(() {
-              bookSelected = book;
-            });
-
-            await getChapterByBook(book.value);
-          },
-          selectedItem: bookSelected!.value.isNotEmpty
-              ? books.firstWhere((element) =>
-                  element.value.toLowerCase() ==
-                  bookSelected?.value.toLowerCase())
-              : null,
-        ),
-      ),
-      SizedBox(
-        height: 25,
-      ),
-      Text(
-        "Capítulos",
-        style: StylesApp(context)
-            .textStyleBody16
-            .copyWith(color: currentTheme.textColor),
-      ),
-      Expanded(
-        child: Padding(
-          padding: EdgeInsets.all(12.0),
-          child: loadingChapter
-              ? Center(child: LoadingIndicator())
-              : GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 7,
-                    crossAxisSpacing: 10.0,
-                    mainAxisSpacing: 10.0,
-                  ),
-                  itemCount: chapters.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () async {
-                        await loadVerses(chapters[index].id);
-                      },
-                      child: Container(
-                        width: 25,
-                        height: 25,
-                        decoration: BoxDecoration(
-                            color: currentTheme.buttonColor,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(8.0)),
-                            boxShadow: [
-                              BoxShadow(
-                                  color:
-                                      StyleColor.black.withValues(alpha: .35),
-                                  blurRadius: 5.0,
-                                  offset: Offset(5, 3))
-                            ]),
-                        child: Center(
-                          child: Text(
-                            textAlign: TextAlign.center,
-                            '${chapters[index].chapter}',
-                            style: StylesApp(context).textStyleBody18.copyWith(
-                                  color: currentTheme.buttonTextColor,
-                                ),
-                          ),
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: 12.0,
+          ),
+          constraints: BoxConstraints(
+            minWidth: 160.0,
+            maxWidth: StylesApp(context).sizeTextFormField.width,
+          ),
+          child: Column(
+            children: [
+              Container(
+                child: CustomDropdownBottomWidget(
+                  hintText: "Seleccione la version",
+                  items: bibleVersions,
+                  onChanged: (ModelData? version) async {
+                    if (kDebugMode) {
+                      print("version seleccionada ${version!.value}");
+                    }
+                    setState(() {
+                      versionSelected = version;
+                    });
+                  },
+                  selectedItem: versionSelected!.value.isNotEmpty
+                      ? bibleVersions.firstWhere((element) =>
+                          element.value.toLowerCase() ==
+                          versionSelected?.value.toLowerCase())
+                      : null,
+                ),
+              ),
+              SizedBox(
+                height: 25.0,
+              ),
+              TextFormField(
+                controller: searchTextController,
+                style: StylesApp(context).textStyleSmallBlack,
+                decoration:
+                    StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                          hintText: 'Buscar...',
+                          border: OutlineInputBorder(),
+                          suffixIcon: _searchText.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear),
+                                  onPressed: () {
+                                    setState(() {
+                                      cleanSearch();
+                                    });
+                                  },
+                                )
+                              : Icon(Icons.search),
                         ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchText = value;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 25.0,
+        ),
+        // body de los resultados de la búsqueda
+        Expanded(
+          child: ListView.builder(
+            itemCount: 10,
+            itemBuilder: (context, int index) {
+              return CardSearchTextWidget(
+                data: "",
+                currentTheme: currentTheme,
+                onAction: () {
+                  showModalBottomSheet(
+                      backgroundColor: currentTheme.backgroundColor,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              title: Text("Ver Capitulo",
+                                  style: StylesApp(context)
+                                      .textStyleBody12
+                                      .copyWith(color: currentTheme.textColor)),
+                              trailing: Icon(
+                                Icons.play_arrow_outlined,
+                                color: currentTheme.buttonColor,
+                                size: 25,
+                              ),
+                              onTap: () {},
+                            ),
+                            Divider(
+                              color: StyleColor.grayMedium,
+                              height: 2.0,
+                              thickness: 4.0,
+                            ),
+                            ListTile(
+                              title: Text("Copiar",
+                                  style: StylesApp(context)
+                                      .textStyleBody12
+                                      .copyWith(color: currentTheme.textColor)),
+                              trailing: Icon(Icons.file_copy,
+                                  color: currentTheme.buttonColor, size: 25),
+                              onTap: () {},
+                            ),
+                            Divider(
+                              color: StyleColor.grayMedium,
+                              height: 2,
+                              thickness: 4.0,
+                            ),
+                            ListTile(
+                              title: Text("Favoritos",
+                                  style: StylesApp(context)
+                                      .textStyleBody12
+                                      .copyWith(color: currentTheme.textColor)),
+                              trailing: Icon(Icons.star_border,
+                                  color: currentTheme.buttonColor, size: 25),
+                              onTap: () {},
+                            ),
+                            Divider(
+                              color: StyleColor.grayMedium,
+                              height: 2,
+                              thickness: 4.0,
+                            ),
+                          ],
+                        );
+                      });
+                },
+              );
+            },
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              onPressed: () async {},
+              icon: Icon(Icons.arrow_back),
+              color: currentTheme.buttonColor,
+            ),
+            IconButton(
+              onPressed: () async {},
+              icon: Icon(Icons.arrow_forward),
+              color: currentTheme.buttonColor,
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  void cleanSearch() {
+    setState(() {
+      _searchText = '';
+      searchTextController.text = '';
+    });
+  }
+}
+
+class CardSearchTextWidget extends StatelessWidget {
+  const CardSearchTextWidget(
+      {super.key,
+      required this.currentTheme,
+      required this.data,
+      required this.onAction});
+
+  final BibleTheme currentTheme;
+  final data;
+  final void Function()? onAction;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            constraints: BoxConstraints(minHeight: 75),
+            decoration: BoxDecoration(
+                color: currentTheme.backgroundColor,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 4.0,
+                    offset: Offset(0, 4),
+                    color: StyleColor.black.withValues(alpha: 0.25),
+                  )
+                ]),
+            width: MediaQuery.sizeOf(context).width,
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Deuteronomio 6:4",
+                        style: StylesApp(context)
+                            .textStyleBody14
+                            .copyWith(color: StyleColor.orange),
                       ),
-                    );
+                      Text(
+                        '"Escucha, Israel: Jehová nuestro Dios, Jehová uno es."',
+                        style: StylesApp(context)
+                            .textStyleBody12
+                            .copyWith(color: currentTheme.textColor),
+                      )
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.more_vert_rounded),
+                    onPressed: onAction,
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 10.0,
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// widget para pestaña  libro
+class SearchByBookWidget extends StatefulWidget {
+  const SearchByBookWidget({
+    super.key,
+  });
+
+  @override
+  State<SearchByBookWidget> createState() => _SearchByBookWidgetState();
+}
+
+class _SearchByBookWidgetState extends State<SearchByBookWidget> {
+  late BibleTheme currentTheme;
+
+  // variables para almacenar listas globales
+  List<VersionModel> listBibleVersions = [];
+  List<ChapterModel> chapters = [];
+  List<VerseModel> verses = [];
+
+  // variables de lista de  select
+  List<ModelData> bibleVersions = [];
+  List<ModelData> books = [];
+
+  ModelData? versionSelected = ModelData(label: "", value: "");
+  ModelData? bookSelected = ModelData(label: "", value: "");
+  bool loadingChapter = false;
+  bool loadingVerses = false;
+  bool verseRange = false;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        listBibleVersions =
+            Provider.of<CatalogueProvider>(context, listen: false)
+                .allBibleVersion
+                .map((v) => v)
+                .toList();
+        bibleVersions = Provider.of<CatalogueProvider>(context, listen: false)
+            .allBibleVersion
+            .map((v) => ModelData(value: v.id, label: v.version))
+            .toList();
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider =
+        Provider.of<BibleThemeProvider>(context, listen: false);
+    currentTheme = themeProvider.themeData;
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 25,
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
+            constraints: BoxConstraints(
+              minWidth: 160.0,
+              maxWidth: StylesApp(context).sizeTextFormField.width,
+            ),
+            child: CustomDropdownBottomWidget(
+              hintText: "Seleccione la version",
+              items: bibleVersions,
+              onChanged: (ModelData? version) async {
+                if (kDebugMode) {
+                  print("version seleccionada ${version!.value}");
+                }
+                setState(() {
+                  versionSelected = version;
+                });
+                await loadBookByVersion(version!.value);
+              },
+              selectedItem: versionSelected!.value.isNotEmpty
+                  ? bibleVersions.firstWhere((element) =>
+                      element.value.toLowerCase() ==
+                      versionSelected?.value.toLowerCase())
+                  : null,
+            ),
+          ),
+          SizedBox(
+            height: 25,
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
+            constraints: BoxConstraints(
+              minWidth: 160.0,
+              maxWidth: StylesApp(context).sizeTextFormField.width,
+            ),
+            child: CustomDropdownBottomWidget(
+              hintText: "Seleccione el Libro",
+              items: books,
+              onChanged: (ModelData? book) async {
+                if (kDebugMode) {
+                  print("version seleccionada ${book!.value}");
+                }
+                setState(() {
+                  bookSelected = book;
+                });
+
+                await getChapterByBook(book!.value);
+              },
+              selectedItem: bookSelected!.value.isNotEmpty
+                  ? books.firstWhere((element) =>
+                      element.value.toLowerCase() ==
+                      bookSelected?.value.toLowerCase())
+                  : null,
+            ),
+          ),
+          SizedBox(
+            height: 25,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(
+              textAlign: TextAlign.start,
+              "Capítulos",
+              style: StylesApp(context)
+                  .textStyleBody16
+                  .copyWith(color: currentTheme.textColor),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Container(
+              decoration: BoxDecoration(
+                  color: currentTheme.backgroundColor,
+                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                  boxShadow: [
+                    BoxShadow(
+                        color: StyleColor.black.withValues(alpha: 0.25),
+                        blurRadius: 4.0,
+                        offset: Offset(0, 4))
+                  ]),
+              padding: EdgeInsets.symmetric(horizontal: 12.0),
+              height: 280,
+              child: GridButtonWidget<ChapterModel>(
+                  loading: loadingChapter,
+                  data: chapters,
+                  currentTheme: currentTheme,
+                  onTap: (chapter) async {
+                    if (kDebugMode) {
+                      print('Capítulo seleccionado: ${chapter.chapter}');
+                      loadVerses(chapter.id);
+                    }
                   }),
-        ),
-      ),
-      Text(
-        "Versículos",
-        style: StylesApp(context)
-            .textStyleBody16
-            .copyWith(color: currentTheme.textColor),
-      ),
-      Expanded(
-        child: Padding(
-          padding: EdgeInsets.all(12.0),
-          child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                crossAxisSpacing: 10.0,
-                mainAxisSpacing: 10.0,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(
+              textAlign: TextAlign.start,
+              "Versículos",
+              style: StylesApp(context)
+                  .textStyleBody16
+                  .copyWith(color: currentTheme.textColor),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Container(
+              decoration: BoxDecoration(
+                  color: currentTheme.backgroundColor,
+                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                  boxShadow: [
+                    BoxShadow(
+                        color: StyleColor.black.withValues(alpha: 0.25),
+                        blurRadius: 4.0,
+                        offset: Offset(0, 4))
+                  ]),
+              padding: EdgeInsets.symmetric(horizontal: 12.0),
+              height: 280,
+              child: GridButtonWidget<VerseModel>(
+                  loading: loadingVerses,
+                  data: verses, // List<VerseModel>
+                  currentTheme: currentTheme,
+                  onTap: (verse) {
+                    if (kDebugMode) {
+                      print('Versículo seleccionado: ${verse.verse}');
+                    }
+                  }),
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width,
+                child: CheckboxListTile(
+                  activeColor: currentTheme.buttonColor,
+                  title: Text("Rango de versículos"),
+                  value: verseRange,
+                  onChanged: (bool? value) {
+                    setState(() => verseRange = value!);
+                  },
+                ),
               ),
-              itemCount: verses.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  child: Container(
-                    width: 25,
-                    height: 25,
-                    decoration: BoxDecoration(
-                        color: currentTheme.buttonColor,
-                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        boxShadow: [
-                          BoxShadow(
-                              color: StyleColor.black.withValues(alpha: .35),
-                              blurRadius: 5.0,
-                              offset: Offset(5, 3))
-                        ]),
-                    child: Center(
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        '${verses[index].verse}',
-                        style: StylesApp(context).textStyleBody18.copyWith(
-                              color: currentTheme.buttonTextColor,
-                            ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-        ),
+            ],
+          )
+        ],
       ),
-      Expanded(
-        child: Padding(
-          padding: EdgeInsets.all(12.0),
-          child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                crossAxisSpacing: 10.0,
-                mainAxisSpacing: 10.0,
-              ),
-              itemCount: verses.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  child: Container(
-                    width: 25,
-                    height: 25,
-                    decoration: BoxDecoration(
-                        color: currentTheme.buttonColor,
-                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        boxShadow: [
-                          BoxShadow(
-                              color: StyleColor.black.withValues(alpha: .35),
-                              blurRadius: 5.0,
-                              offset: Offset(5, 3))
-                        ]),
-                    child: Center(
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        '${verses[index].verse}',
-                        style: StylesApp(context).textStyleBody18.copyWith(
-                              color: currentTheme.buttonTextColor,
-                            ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-        ),
-      ),
-    ]);
+    );
   }
 
   /// Leemos los libros que corresponden a la version de la biblia
   loadBookByVersion(String versionId) {
     setState(() {
+      bookSelected = ModelData(label: '', value: '');
       chapters = [];
       verses = [];
       final VersionModel currenVersion =
@@ -440,17 +997,20 @@ class _searchByBookWidgetState extends State<searchByBookWidget> {
       setState(() {
         loadingChapter = false;
       });
-      await showCustomDialog(context,
-          message: responseChapterWithVerses.error!,
-          dialogType: DialogType.error);
+      if (mounted) {
+        await showCustomDialog(context,
+            message: responseChapterWithVerses.error!,
+            dialogType: DialogType.error);
+      }
+    } else {
+      setState(() {
+        // guardamos los capítulos de un libro
+        chapters = responseChapterWithVerses.data
+            .map<ChapterModel>((chapter) => ChapterModel.fromJson(chapter))
+            .toList();
+      });
+      loadingChapter = false;
     }
-    setState(() {
-      // guardamos los capítulos de un libro
-      chapters = responseChapterWithVerses.data
-          .map<ChapterModel>((chapter) => ChapterModel.fromJson(chapter))
-          .toList();
-    });
-    loadingChapter = false;
   }
 
   loadVerses(String id) {

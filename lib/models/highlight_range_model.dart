@@ -1,27 +1,31 @@
 class HighlightRangeModel {
-  final String verseId;
-  final int start;
-  final int end;
+  final String id;
+  final int verse;
+  final int startIndex;
+  final int endIndex;
   final String? color;
 
   HighlightRangeModel({
-    required this.verseId,
-    required this.start,
-    required this.end,
+    required this.id,
+    required this.verse,
+    required this.startIndex,
+    required this.endIndex,
     required this.color,
   });
 
   Map<String, dynamic> toJson() => {
-        'verseId': verseId,
-        'start': start,
-        'end': end,
+        'id': id,
+        'verse': verse,
+        'startIndex': startIndex,
+        'endIndex': endIndex,
         'color': color,
       };
 
   factory HighlightRangeModel.fromJson(Map<String, dynamic> json) => HighlightRangeModel(
-        verseId: json['verseId'],
-        start: json['start'],
-        end: json['end'],
+        id: json['id'],
+        verse: json['verse'],
+        startIndex: json['startIndex'],
+        endIndex: json['endIndex'],
         color: json['color'] ?? null,
       );
 }

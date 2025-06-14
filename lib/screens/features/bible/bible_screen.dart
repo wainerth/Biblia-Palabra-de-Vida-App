@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
-import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
+
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -12,10 +13,10 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/class/bible_version_selector.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -28,6 +29,8 @@ class BibleScreen extends StatefulWidget {
 }
 
 class _BibleScreenState extends State<BibleScreen> {
+  late final userProvider;
+  LoginUser? userData;
   final ScrollController scrollController = ScrollController();
   SharedPreferences? prefs;
   String? errorMessage;
@@ -44,48 +47,20 @@ class _BibleScreenState extends State<BibleScreen> {
   double fontSizeVerse = 14.sp;
   ModelData fontFamilySet = ModelData(label: "Aclonica", value: "1");
   //  Variable para controlar el overlay
-  OverlayEntry? _contextMenuOverlayEntry;
-
   List<String> _favoriteVerses = [];
-
   List<HighlightRangeModel> _highlights = [];
-
   final GlobalKey _selectableTextKey = GlobalKey();
   late BibleTheme currentTheme;
-
-  Future<void> _saveHighlights() async {
-    final prefs = await SharedPreferences.getInstance();
-    final highlightsJson = _highlights.map((h) => h.toJson()).toList();
-    // llamar al servicio de crear los highlighter
-    await prefs.setString('highlights', jsonEncode(highlightsJson));
-  }
-
-  Future<void> _loadHighlights() async {
-    final prefs = await SharedPreferences.getInstance();
-    final highlightsJson = prefs.getString('highlights');
-    if (highlightsJson != null) {
-      setState(() {
-        _highlights = (jsonDecode(highlightsJson) as List)
-            .map((h) => HighlightRangeModel.fromJson(h))
-            .toList();
-
-        for (final verse in verses) {
-          verse.highlights.clear();
-          verse.highlights
-              .addAll(_highlights.where((h) => h.verseId == verse.id));
-        }
-      });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userData = userProvider.currentUser;
       // Cargar el tema guardado primero
       await Provider.of<BibleThemeProvider>(context, listen: false)
           .loadSavedTheme();
-
       await _loadPersistedData();
       await _initDataLoad();
       _loadHighlights();
@@ -94,129 +69,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
   @override
   void dispose() {
-    _closeContextMenu();
     super.dispose();
-  }
-
-  Future<void> _loadPersistedData() async {
-    final prefs = await SharedPreferences.getInstance();
-    // cargar los favoritos
-    _favoriteVerses = prefs.getStringList('favoriteVerses') ?? [];
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _saveFavorites() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('favoriteVerses', _favoriteVerses);
-  }
-
-  Future<void> _initDataLoad() async {
-    prefs = await SharedPreferences.getInstance();
-    lastVersionsSelected =
-        prefs!.getString(preferenceKey); //  cargo la version almacena en cache
-    final loadBook =
-        prefs!.getString('bookSelected'); // cargo el libro almacenado en cache
-
-    // si hay version en cache
-    setState(() {
-      if (lastVersionsSelected != null) {
-        // busco esa version
-        currentVersion = Provider.of<CatalogueProvider>(context, listen: false)
-            .allBibleVersion
-            .firstWhere((version) => version.id == lastVersionsSelected);
-
-        if (loadBook != null) {
-          currentBook =
-              currentVersion!.books.firstWhere((book) => book.id == loadBook);
-          // cargamos el capitulo correspondiente
-        } else {
-          currentBook = currentVersion!.books[0];
-        }
-      } else {
-        currentVersion = Provider.of<CatalogueProvider>(context, listen: false)
-            .allBibleVersion[0];
-        currentBook = currentVersion!.books[0];
-      }
-      currentBook = currentBook!.copyWith(
-        chapters: currentVersion!.books.length, // Usamos el mapa de capítulos
-      );
-    });
-
-    await _loadChapterByBook(currentVersion, currentBook, null, context);
-  }
-
-  Future<void> _loadChapterByBook(
-      version, book, chapterId, BuildContext context) async {
-    setState(() {
-      errorMessage = null;
-    });
-    LoadingService().showLoading(context);
-    try {
-      if (chapterId == null) {
-        // consultamos un capitulo si chapter es null
-        final responseChapterByBook =
-            await getChapterWithVerses(currentBook!.id);
-        if (responseChapterByBook.error != null) {
-          setState(() {
-            errorMessage = responseChapterByBook.error;
-          });
-        }
-
-        chapterId = responseChapterByBook.data[0]!['id'];
-      }
-      final responseChapter = await getOneChapterWithVerses(chapterId);
-      if (responseChapter.error != null) {
-        errorMessage = responseChapter.error;
-      }
-      setState(() {
-        currentChapter = ChapterModel.fromJson(responseChapter.data);
-
-        verses = currentChapter!.verses
-            .map<VerseModel>((verse) => VerseModel.fromJson(verse.toJson()))
-            .toList();
-      });
-
-// actualizamos la cache
-      prefs!.setString(preferenceKey, version.id);
-      prefs!.setString('bookSelected', book!.id);
-      prefs!.setString('chapterSelected', chapterId);
-    } catch (e) {
-      errorMessage = 'Error cargar un capitulo $e';
-      setState(() {
-        isLoading = false;
-      });
-    } finally {
-      LoadingService().hideLoading();
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _goToPreviousChapter() async {
-    if (currentChapter!.chapter > 1) {
-      await _loadChapterByBook(currentVersion, currentBook,
-          '${currentBook!.id}_${currentChapter!.chapter - 1}', context);
-    } else if (currentBook!.numberBook > 1) {
-      // Ir al último capítulo del libro anterior
-      final prevBook = currentVersion!.books
-          .firstWhere((b) => b.numberBook == currentBook!.numberBook - 1);
-      await _loadChapterByBook(currentVersion, prevBook,
-          '${prevBook.id}_${prevBook.chapters}', context);
-    }
-  }
-
-  Future<void> _goToNextChapter() async {
-    if (currentChapter!.chapter < currentBook!.chapters) {
-      await _loadChapterByBook(currentVersion, currentBook,
-          '${currentBook!.id}_${currentChapter!.chapter + 1}', context);
-    } else if (currentBook!.numberBook < currentVersion!.books.length) {
-      // Ir al primer capítulo del siguiente libro
-      final nextBook = currentVersion!.books
-          .firstWhere((b) => b.numberBook == currentBook!.numberBook + 1);
-      await _loadChapterByBook(
-          currentVersion, nextBook, '${nextBook.id}_1', context);
-    }
   }
 
   @override
@@ -275,7 +128,10 @@ class _BibleScreenState extends State<BibleScreen> {
 
                       if (selectedVersion != null) {
                         // Aquí manejas la versión seleccionada
-                        print('Versión seleccionada: ${selectedVersion.label}');
+                        if (kDebugMode) {
+                          print(
+                              'Versión seleccionada: ${selectedVersion.label}');
+                        }
                         setState(() {
                           lastVersionsSelected = selectedVersion
                               .value; // actualizo la version de la biblia
@@ -346,8 +202,10 @@ class _BibleScreenState extends State<BibleScreen> {
                                                 fontSize: fontSizeVerse,
                                                 selectedItem: fontFamilySet,
                                                 onChangedFontSize: (fontSize) {
-                                                  print(
-                                                      'el nuevo tamaño de fuente $fontSize');
+                                                  if (kDebugMode) {
+                                                    print(
+                                                        'el nuevo tamaño de fuente $fontSize');
+                                                  }
                                                   setState(() {
                                                     fontSizeNumber =
                                                         fontSize! + 2;
@@ -355,10 +213,12 @@ class _BibleScreenState extends State<BibleScreen> {
                                                   });
                                                 },
                                                 onChangedFont: (newFont) {
-                                                  print(
-                                                      'la nueva fuente ${newFont!.label}');
+                                                  if (kDebugMode) {
+                                                    print(
+                                                        'la nueva fuente ${newFont!.label}');
+                                                  }
                                                   setState(() {
-                                                    fontFamilySet = newFont;
+                                                    fontFamilySet = newFont!;
                                                   });
                                                 },
                                               );
@@ -414,7 +274,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                         pageBuilder: (_, __, ___) {
                                           return Dialog(
                                             insetPadding: EdgeInsets.zero,
-                                            child: Container(
+                                            child: SizedBox(
                                               width: MediaQuery.of(context)
                                                   .size
                                                   .width,
@@ -532,19 +392,231 @@ class _BibleScreenState extends State<BibleScreen> {
     });
   }
 
+  /// Widget realiza la construcción de los textSpan para selección
+  /// continua
+  Widget _buildContinuousText() {
+    final fullText = verses.map((v) => "${v.verse} ${v.text}").join(' ');
+
+    return SelectableText.rich(
+      key: _selectableTextKey,
+      TextSpan(
+        children: verses
+            .expand((verse) => [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.baseline,
+                    baseline: TextBaseline.alphabetic,
+                    child: Stack(
+                      alignment:
+                          Alignment.center, // Centra los hijos en el Stack
+                      children: [
+                        // Estrella de favorito (superpuesta y centrada)
+                        if (_isFavorite(verse))
+                          Positioned(
+                            top: -1, // Ajusta esta posición según necesites
+                            left: 3, // Ajusta esta posición según necesites
+                            child: Icon(
+                              Icons.star,
+                              size: 20, // Tamaño un poco más pequeño
+                              color: StyleColor.yellowLight,
+                            ),
+                          ),
+                        // Número del versículo (no seleccionable)
+                        SelectionContainer.disabled(
+                          child: GestureDetector(
+                            onTap: () {
+                              print("favoritos");
+                              _showVersePopupMenu(context, verse);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                left: verse.verse == 1 ? 4.0 : 4.0,
+                                right: 4.0,
+                              ),
+                              child: Text(
+                                "${verse.verse}",
+                                style:
+                                    StylesApp(context).textStyleBody16.copyWith(
+                                          fontFamily: fontFamilySet.label,
+                                          fontSize: fontSizeNumber,
+                                          fontWeight: FontWeight.bold,
+                                          color: currentTheme.textColor,
+                                        ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ..._buildHighlightedTextSpans(verse),
+                ])
+            .toList(),
+      ),
+      contextMenuBuilder: (context, selectableRegionState) {
+        final selection = selectableRegionState.textEditingValue.selection;
+        final selectedText = selection.textInside(fullText);
+        final selectedVerses = _getVersesInSelection(selection, fullText);
+        final overlapsHighlights =
+            _selectionOverlapsHighlights(selection, fullText);
+
+        return CustomContextMenu(
+          anchors: selectableRegionState.contextMenuAnchors,
+          children: [
+            CustomContextMenuItem(
+              icon: Icons.content_copy,
+              label: 'Copiar versículo',
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: selectedText));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Versículo copiado')),
+                );
+              },
+            ),
+            CustomContextMenuItem(
+              icon: Icons.share,
+              label: 'Compartir versículo',
+              onPressed: () {
+                Share.share(
+                  selectedText,
+                  subject: 'Versículo de ${currentBook?.modernName}',
+                );
+              },
+            ),
+            if (!overlapsHighlights)
+              CustomContextMenuItem(
+                icon: selectedVerses.length > 1
+                    ? Icons.format_paint
+                    : Icons.highlight,
+                label: selectedVerses.length > 1
+                    ? 'Resaltar ${selectedVerses.length} versículos'
+                    : 'Resaltar versículo',
+                onPressed: () {
+                  _showColorPickerForSelection(
+                    context,
+                    selectedVerses,
+                    selection.start,
+                    selection.end,
+                    selectedVerses.length > 1,
+                  );
+                },
+              ),
+          ],
+        );
+      },
+      onSelectionChanged: (selection, cause) {
+        if (selection.isValid && !selection.isCollapsed) {
+          final overlaps = _selectionOverlapsHighlights(selection, fullText);
+          if (overlaps) {
+            // Usar un Future para esperar al siguiente frame y luego limpiar la selección
+            Future.delayed(Duration.zero, () {
+              final renderObject =
+                  _selectableTextKey.currentContext?.findRenderObject();
+              if (renderObject is RenderEditable) {
+                renderObject.selection =
+                    TextSelection.collapsed(offset: selection.baseOffset);
+              }
+            });
+          }
+        }
+      },
+    );
+  }
+
+  bool _isFavorite(VerseModel verse) {
+    final verseId = '${verse.id}';
+    return _favoriteVerses.contains(verseId);
+  }
+
+  void _showVersePopupMenu(BuildContext context, VerseModel verse) {
+    final verseId = '${verse.id}';
+    final isFavorite = _isFavorite(verse);
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(isFavorite ? Icons.star_outline : Icons.star),
+            title: Text(
+                isFavorite ? 'Remover de favoritos' : 'Agregar a favoritos'),
+            onTap: () {
+              _toggleFavorite(verse);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(isFavorite ? Icons.star_outline : Icons.star),
+            title: Text('Ver Versículo favorito'),
+            onTap: () {
+              Navigator.pop(context);
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    final favoriteVerse = verses.firstWhere(
+                        (verse) => verse.id == _favoriteVerses.first);
+                    return Column(
+                      mainAxisAlignment : MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: 8.0),
+                          constraints: BoxConstraints(
+                            minHeight: 60
+                          ),
+                            decoration: BoxDecoration(
+                            color: currentTheme.backgroundColor,
+                            borderRadius: BorderRadius.circular(8.0),
+                              boxShadow: [
+                              BoxShadow(
+                                  color: StyleColor.black.withValues(alpha: .25),
+                                  spreadRadius: 4.0,
+                                  offset: Offset(0, 4.0))
+                            ]),
+                            child: Column(
+                              children: [
+                                Text("Versículo Favorito", style: StylesApp(context).textStyleBody18.copyWith(
+                                  color: StyleColor.orange
+                                )),
+                                // ${favoriteVerse.chapterId} :
+                                Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        textAlign:TextAlign.center,
+                                          "${favoriteVerse.verse}  \n${favoriteVerse.text}", style: StylesApp(context).textStyleBody12.copyWith(
+                                            color: currentTheme.textColor
+                                          ),),
+                                    )),
+                              ],
+                            )),
+                      ],
+                    );
+                  });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Método para la creación de los resaltados
   List<TextSpan> _buildHighlightedTextSpans(VerseModel verse) {
     final text = verse.text;
     final spans = <TextSpan>[];
     int currentPos = 0;
 
     // Ordenar resaltados por posición de inicio (opcional, pero recomendado)
-    verse.highlights.sort((a, b) => a!.start.compareTo(b!.start));
+    verse.highlights.sort((a, b) => a!.startIndex.compareTo(b!.startIndex));
 
     for (final highlight in verse.highlights) {
       // 1. Texto antes del resaltado (si hay espacio no cubierto)
-      if (currentPos < highlight!.start) {
+      if (currentPos < highlight!.startIndex) {
         spans.add(TextSpan(
-          text: text.substring(currentPos, highlight.start),
+          text: text.substring(
+              currentPos,
+              (highlight.startIndex > 0
+                  ? highlight.startIndex - 1
+                  : highlight.startIndex)),
           style: StylesApp(context).textStyleBody14.copyWith(
                 fontFamily: fontFamilySet.label,
                 fontSize: fontSizeVerse,
@@ -563,7 +635,11 @@ class _BibleScreenState extends State<BibleScreen> {
             }
             _showHighlightOptions(context, highlight);
           },
-        text: text.substring(highlight.start, highlight.end),
+        text: text.substring(
+            (highlight.startIndex > 0
+                ? highlight.startIndex - 1
+                : highlight.startIndex),
+            highlight.endIndex - 1),
         style: StylesApp(context).textStyleBody14.copyWith(
               fontFamily: fontFamilySet.label,
               fontSize: fontSizeVerse,
@@ -575,7 +651,7 @@ class _BibleScreenState extends State<BibleScreen> {
       ));
 
       // Actualizar posición actual al final del resaltado actual
-      currentPos = highlight.end;
+      currentPos = highlight.endIndex - 1;
     }
 
     // 3. Texto restante después del último resaltado
@@ -594,6 +670,8 @@ class _BibleScreenState extends State<BibleScreen> {
     return spans;
   }
 
+  /// Método que me muestra la modal bottom Sheet pata la elección del color de resaltado
+  ///
   void _showColorPickerForSelection(BuildContext context,
       List<VerseModel> verses, int start, int end, bool isContinue) {
     final colors = [
@@ -640,26 +718,24 @@ class _BibleScreenState extends State<BibleScreen> {
               children: colors.map((color) {
                 return GestureDetector(
                   onTap: () {
-                    if (isContinue) {
-                      for (final verse in verses) {
-                        // Calcular los índices correctos para cada versículo
-                        final verseText = "${verse.verse} ${verse.text}";
-                        final start = max(0, verse.posIni!);
-                        final end = min(verse.posFin!, verseText.length);
-                        final hexColor =
-                            '${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
-                        print('Color seleccionado: $hexColor');
-                        if (start < end) {
-                          _addHighlight(verse, start, end, hexColor);
-                        }
-                      }
-                    } else {
-                      final hexColor =
-                          '${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
-                      print('Color seleccionado: $hexColor');
+                    final hexColor =
+                        '${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+                    final List<VerseModel> newVerses = [];
 
-                      _addHighlight(verses.first, start, end, hexColor);
+                    for (final verse in verses) {
+                      // Calcular los índices correctos para cada versículo
+                      final verseText = "${verse.verse} ${verse.text}";
+                      final start = max(0, verse.posIni!);
+                      final end = min(verse.posFin!, verseText.length);
+                      if (kDebugMode) {
+                        print('Color seleccionado: $hexColor');
+                      }
+                      if (start < end) {
+                        newVerses.add(verse);
+                      }
                     }
+                    _addHighlight(newVerses, hexColor);
+
                     Navigator.pop(ctx);
                   },
                   child: Container(
@@ -686,254 +762,50 @@ class _BibleScreenState extends State<BibleScreen> {
     );
   }
 
-  void _addHighlight(VerseModel verse, int start, int end, String color) {
+  /// Método que agrega el resaltado
+  void _addHighlight(List<VerseModel> listVerses, String color) async {
     // Verificar si ya existe un resaltado en esta posición
-    // final fullText = verses.map((v) => "${v.verse} ${v.text}").join(' ');
-    final existingIndex = _highlights.indexWhere(
-        (h) => h.verseId == verse.id && h.start == start && h.end == end);
-
-    if (existingIndex >= 0) {
-      // Actualizar color si ya existe
-
-      _highlights[existingIndex] = HighlightRangeModel(
-        verseId: verse.id,
-        start: verse.posIni!,
-        end: verse.posFin!,
-        color: color,
-      );
-    } else {
-      // Agregar nuevo resaltado
+    final List<HighlightRangeModel> inputHighlight = [];
+    for (final verse in listVerses) {
       final newHighlight = HighlightRangeModel(
-        verseId: verse.id,
-        start: verse.posIni!,
-        end: verse.posFin!,
+        id: verse.id,
+        verse: verse.verse,
+        startIndex: verse.posIni!,
+        endIndex: verse.posFin!,
         color: color,
       );
-      _highlights.add(newHighlight);
-      verse.highlights.add(newHighlight);
+      inputHighlight.add(newHighlight); // actualizo temporal
+    }
+    LoadingService().showLoading(context);
+    final responseCreate = await crateHighLighters(inputHighlight,
+        userData!.userId, int.parse(currentVersion!.id), currentChapter!.id);
+    if (responseCreate.error != null) {
+      LoadingService().hideLoading();
+      // ignore: use_build_context_synchronously
+      await showCustomDialog(context,
+          message: responseCreate.error!, dialogType: DialogType.error);
+      return;
+    }
+    LoadingService().hideLoading();
+    for (final lighter in inputHighlight) {
+      _highlights.add(lighter); // actualizo local
+      final encontrado = verses.indexWhere((verse) => verse.id == lighter.id);
+      if (encontrado != -1) {
+        verses[encontrado].highlights.add(lighter); // actualizo verses
+      }
     }
 
     setState(() {});
-    _saveHighlights();
   }
 
-  Widget _buildContinuousText() {
-    final fullText = verses.map((v) => "${v.verse} ${v.text}").join(' ');
-
-    return SelectableText.rich(
-      key: _selectableTextKey,
-      TextSpan(
-        children: verses
-            .expand((verse) => [
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment
-                        .baseline, // Alinea con la base del texto
-                    baseline: TextBaseline.alphabetic,
-                    child: Opacity(
-                      opacity: 1,
-                      child: AbsorbPointer(
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              left: verse.verse == 1 ? 0 : 4.0, right: 8.0),
-                          child: Text(
-                            "${verse.verse}",
-                            style: StylesApp(context).textStyleBody16.copyWith(
-                                fontFamily: fontFamilySet.label,
-                                fontSize: fontSizeNumber,
-                                fontWeight: FontWeight.bold,
-                                color: currentTheme.textColor
-                                // recognizer: TapGestureRecognizer()..onTap = () {},
-                                ), // Opcional: estilo diferenciado
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  ..._buildHighlightedTextSpans(verse),
-                ])
-            .toList(),
-      ),
-      contextMenuBuilder: (context, editableTextState) {
-        final selection = editableTextState.textEditingValue.selection;
-        final selectedText = selection.textInside(fullText);
-        final selectedVerses = _getVersesInSelection(selection, fullText);
-        final overlapsHighlights =
-            _selectionOverlapsHighlights(selection, fullText);
-
-        // Usamos un post-frame callback para mostrar el overlay después del build
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _closeContextMenu(); // Cierra cualquier menú previo
-          if (editableTextState != null) {
-            _contextMenuOverlayEntry = OverlayEntry(
-              builder: (context) => _buildContextMenuContent(
-                context: context,
-                editableTextState: editableTextState,
-                selectedText: selectedText,
-                selectedVerses: selectedVerses,
-                selection: selection,
-                overlapsHighlights: overlapsHighlights,
-              ),
-            );
-            if (_contextMenuOverlayEntry != null) {
-              Overlay.of(context).insert(_contextMenuOverlayEntry!);
-            }
-          }
-        });
-
-        return const SizedBox.shrink(); // Retornamos un widget vacío
-      },
-      onSelectionChanged: (selection, cause) {
-        if (selection.isValid && !selection.isCollapsed) {
-          final overlaps = _selectionOverlapsHighlights(selection, fullText);
-          if (overlaps) {
-            // Usar un Future para esperar al siguiente frame y luego limpiar la selección
-            Future.delayed(Duration.zero, () {
-              final renderObject =
-                  _selectableTextKey.currentContext?.findRenderObject();
-              if (renderObject is RenderEditable) {
-                renderObject.selection =
-                    TextSelection.collapsed(offset: selection.baseOffset);
-              }
-            });
-          }
-        }
-      },
-    );
-  }
-
-  Widget _buildContextMenuContent({
-    required BuildContext context,
-    required EditableTextState editableTextState,
-    required String selectedText,
-    required List<VerseModel> selectedVerses,
-    required TextSelection selection,
-    required bool overlapsHighlights,
-  }) {
-    return Stack(
-      children: [
-        // Fondo semitransparente para cerrar al tocar fuera
-        Positioned.fill(
-          child: GestureDetector(
-            onTap: _closeContextMenu,
-            // behavior: HitTestBehavior.translucent,
-          ),
-        ),
-
-        // Menú contextual
-        Positioned(
-          left: editableTextState.contextMenuAnchors.primaryAnchor.dx,
-          top: editableTextState.contextMenuAnchors.primaryAnchor.dy,
-          child: Material(
-            elevation: 4,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              width: 220,
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildMenuItem(
-                    icon: Icons.content_copy,
-                    label: 'Copiar',
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: selectedText));
-                      _closeContextMenu();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Versículo copiado')),
-                      );
-                    },
-                  ),
-                  _buildMenuItem(
-                    icon: Icons.share,
-                    label: 'Compartir',
-                    onTap: () {
-                      _closeContextMenu();
-                      Share.share(
-                        selectedText,
-                        subject: 'Versículo de ${currentBook?.modernName}',
-                      );
-                    },
-                  ),
-                  if (!overlapsHighlights && selectedVerses.length == 1)
-                    _buildMenuItem(
-                      icon: Icons.highlight,
-                      label: 'Resaltar',
-                      onTap: () {
-                        _closeContextMenu();
-                        final verse = selectedVerses.first;
-                        _showColorPickerForSelection(
-                          context,
-                          [verse],
-                          verse.posIni!,
-                          verse.posFin!,
-                          false,
-                        );
-                      },
-                    ),
-                  if (!overlapsHighlights && selectedVerses.length > 1)
-                    _buildMenuItem(
-                      icon: Icons.format_paint,
-                      label: 'Resaltar ${selectedVerses.length} versículos',
-                      onTap: () {
-                        _closeContextMenu();
-                        _showColorPickerForSelection(
-                          context,
-                          selectedVerses,
-                          selection.start,
-                          selection.end,
-                          true,
-                        );
-                      },
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMenuItem({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(4),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Icon(icon, size: 20, color: Theme.of(context).primaryColor),
-              SizedBox(width: 12),
-              Text(label, style: Theme.of(context).textTheme.bodyMedium),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-// 5. Método para cerrar el menú
-  void _closeContextMenu() {
-    _contextMenuOverlayEntry?.remove();
-    _contextMenuOverlayEntry = null;
-  }
-
+  /// Método que verifica si ya esta resaltado la elección
   bool _selectionOverlapsHighlights(TextSelection selection, String fullText) {
     for (final verse in verses) {
       for (final highlight in verse.highlights) {
         // Calcular las posiciones globales del resaltado en el texto completo
         final verseStart = _getVerseGlobalStart(verse, fullText);
-        final highlightStart = verseStart + highlight!.start;
-        final highlightEnd = verseStart + highlight.end;
+        final highlightStart = verseStart + highlight!.startIndex;
+        final highlightEnd = verseStart + highlight.endIndex;
 
         // Verificar si la selección se superpone con este resaltado
         if (selection.start < highlightEnd && selection.end > highlightStart) {
@@ -944,6 +816,7 @@ class _BibleScreenState extends State<BibleScreen> {
     return false;
   }
 
+  /// Método que se encarga de mostrar dialogo para eliminar el resaltado
   void _showHighlightOptions(
       BuildContext context, HighlightRangeModel highlight) {
     showDialog(
@@ -968,7 +841,7 @@ class _BibleScreenState extends State<BibleScreen> {
     );
   }
 
-// Función auxiliar para obtener la posición inicial global de un versículo
+  /// Función auxiliar para obtener la posición inicial global de un versículo
   int _getVerseGlobalStart(VerseModel verse, String fullText) {
     int position = 0;
     for (final v in verses) {
@@ -984,8 +857,6 @@ class _BibleScreenState extends State<BibleScreen> {
       TextSelection selection, String fullText) {
     int currentPosition = 0;
     final selectedVerses = <VerseModel>[];
-
-    // selection.textInside(fullText);
 
     // recorremos verses para asignar posición inicial y final
     for (VerseModel verse in verses) {
@@ -1019,28 +890,204 @@ class _BibleScreenState extends State<BibleScreen> {
     return selectedVerses;
   }
 
-  void _removeHighlight(HighlightRangeModel highlight) {
+  /// Método que se encarga de remover el resaltado
+  void _removeHighlight(HighlightRangeModel highlight) async {
+    // llamamos servicio de remover resaltado
+    LoadingService().showLoading(context);
+    final responseRemove = await removeHighLighters(highlight.id);
+    if (responseRemove.error != null) {
+      LoadingService().hideLoading();
+      // ignore: use_build_context_synchronously
+      await showCustomDialog(context,
+          message: responseRemove.error!, dialogType: DialogType.error);
+      return;
+    }
+    LoadingService().hideLoading();
     setState(() {
       _highlights.remove(highlight);
       for (final verse in verses) {
         verse.highlights.removeWhere((h) =>
-            h!.verseId == highlight.verseId &&
-            h.start == highlight.start &&
-            h.end == highlight.end);
+            h!.id == highlight.id &&
+            h.startIndex == highlight.startIndex &&
+            h.endIndex == highlight.endIndex);
       }
     });
-    _saveHighlights();
+    // _saveHighlights();
   }
 
 // Manejar favoritos
   void _toggleFavorite(VerseModel verse) async {
+    LoadingService().showLoading(context);
+    final responseFavorite =
+        await updateFavoriteVerse(userData!.userId, verse.id);
+    if (responseFavorite.error != null) {
+      LoadingService().hideLoading();
+      // ignore: use_build_context_synchronously
+      await showCustomDialog(context,
+          message: responseFavorite.error!, dialogType: DialogType.error);
+      return;
+    }
+    LoadingService().hideLoading();
     setState(() {
-      if (_favoriteVerses.contains(verse.id)) {
-        _favoriteVerses.remove(verse.id);
-      } else {
-        _favoriteVerses.add(verse.id);
-      }
+      // if (_favoriteVerses.contains(verse.id)) {
+      _favoriteVerses[0] = verse.id;
+      // }
+      //else {
+      //   _favoriteVerses.add(verse.id);
+      // }
     });
-    await _saveFavorites();
+  }
+
+  /// Método que se encarga de cargar los versículos resaltados
+  Future<void> _loadHighlights() async {
+    final responseHighLighter = await getAllHighLighters(
+        userData!.userId, int.parse(currentVersion!.id), currentChapter!.id);
+    if (responseHighLighter.error != null) {
+      errorMessage = responseHighLighter.error;
+      return;
+    }
+
+    if (responseHighLighter.data.length > 0) {
+      setState(() {
+        _highlights = responseHighLighter.data
+            .map<HighlightRangeModel>((h) => HighlightRangeModel(
+                id: h['verse']['id'],
+                verse: h['verse']['verse'],
+                startIndex: h['startIndex'],
+                endIndex: h['endIndex'],
+                color: h['color']))
+            .toList();
+
+        for (final verse in verses) {
+          verse.highlights.clear();
+          verse.highlights.addAll(_highlights.where((h) => h.id == verse.id));
+        }
+      });
+    }
+  }
+
+  /// Método que se encarga de cargar la data persistente de lso resaltados
+  Future<void> _loadPersistedData() async {
+    // cargar los favoritos
+    final responseFavorite = await getFavoriteVerseByUser(userData!.userId);
+    if (responseFavorite.data != null && responseFavorite.data.length > 0) {
+      _favoriteVerses.add(responseFavorite
+          .data); // =responseFavorite.data.map((favorite) => favorite);
+    }
+
+    if (mounted) setState(() {});
+  }
+
+  /// Método de carga inicial de datos
+  Future<void> _initDataLoad() async {
+    prefs = await SharedPreferences.getInstance();
+    lastVersionsSelected =
+        prefs!.getString(preferenceKey); //  cargo la version almacena en cache
+    final loadBook =
+        prefs!.getString('bookSelected'); // cargo el libro almacenado en cache
+
+    // si hay version en cache
+    setState(() {
+      if (lastVersionsSelected != null) {
+        // busco esa version
+        currentVersion = Provider.of<CatalogueProvider>(context, listen: false)
+            .allBibleVersion
+            .firstWhere((version) => version.id == lastVersionsSelected);
+
+        if (loadBook != null) {
+          currentBook =
+              currentVersion!.books.firstWhere((book) => book.id == loadBook);
+          // cargamos el capitulo correspondiente
+        } else {
+          currentBook = currentVersion!.books[0];
+        }
+      } else {
+        currentVersion = Provider.of<CatalogueProvider>(context, listen: false)
+            .allBibleVersion[0];
+        currentBook = currentVersion!.books[0];
+      }
+      currentBook = currentBook!.copyWith(
+        chapters: currentVersion!.books.length, // Usamos el mapa de capítulos
+      );
+    });
+
+    await _loadChapterByBook(currentVersion, currentBook, null, context);
+  }
+
+  /// Método para cargar los capítulos de un libro
+  Future<void> _loadChapterByBook(
+      version, book, chapterId, BuildContext context) async {
+    setState(() {
+      errorMessage = null;
+    });
+    LoadingService().showLoading(context);
+    try {
+      if (chapterId == null) {
+        // consultamos un capitulo si chapter es null
+        final responseChapterByBook =
+            await getChapterWithVerses(currentBook!.id);
+        if (responseChapterByBook.error != null) {
+          setState(() {
+            errorMessage = responseChapterByBook.error;
+          });
+        }
+
+        chapterId = responseChapterByBook.data[0]!['id'];
+      }
+      final responseChapter = await getOneChapterWithVerses(chapterId);
+      if (responseChapter.error != null) {
+        errorMessage = responseChapter.error;
+      }
+      setState(() {
+        currentChapter = ChapterModel.fromJson(responseChapter.data);
+
+        verses = currentChapter!.verses
+            .map<VerseModel>((verse) => VerseModel.fromJson(verse.toJson()))
+            .toList();
+      });
+
+      // actualizamos la cache
+      prefs!.setString(preferenceKey, version.id);
+      prefs!.setString('bookSelected', book!.id);
+      prefs!.setString('chapterSelected', chapterId);
+    } catch (e) {
+      errorMessage = 'Error cargar un capitulo $e';
+      setState(() {
+        isLoading = false;
+      });
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  /// Método para ir al siguiente capítulo
+  Future<void> _goToPreviousChapter() async {
+    if (currentChapter!.chapter > 1) {
+      await _loadChapterByBook(currentVersion, currentBook,
+          '${currentBook!.id}_${currentChapter!.chapter - 1}', context);
+    } else if (currentBook!.numberBook > 1) {
+      // Ir al último capítulo del libro anterior
+      final prevBook = currentVersion!.books
+          .firstWhere((b) => b.numberBook == currentBook!.numberBook - 1);
+      await _loadChapterByBook(currentVersion, prevBook,
+          '${prevBook.id}_${prevBook.chapters}', context);
+    }
+  }
+
+  /// Método para regresar al capítulo anterior
+  Future<void> _goToNextChapter() async {
+    if (currentChapter!.chapter < currentBook!.chapters) {
+      await _loadChapterByBook(currentVersion, currentBook,
+          '${currentBook!.id}_${currentChapter!.chapter + 1}', context);
+    } else if (currentBook!.numberBook < currentVersion!.books.length) {
+      // Ir al primer capítulo del siguiente libro
+      final nextBook = currentVersion!.books
+          .firstWhere((b) => b.numberBook == currentBook!.numberBook + 1);
+      await _loadChapterByBook(
+          currentVersion, nextBook, '${nextBook.id}_1', context);
+    }
   }
 }

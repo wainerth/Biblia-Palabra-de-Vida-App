@@ -171,7 +171,7 @@ class LoginUser {
       streakDaysCount: json['streakDaysCount'],
       preachingsCreatedCount: json['preachingsCreatedCount'],
       completedCourse: json['completedCourse'] ?? 0,
-      currentLeague: League.fromJson(json['currentLeague']),
+      currentLeague: json['currentLeague'] != null ? League.fromJson(json['currentLeague']) : null,
       userChurch: json['userChurch'] != null
           ?  (json['userChurch'] as List)
           .map((i) => UserChurch.fromJson(i))

@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/models/highlight_range_model.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
-class VerseModel {
+class VerseModel extends GridItem {
   final String id;
   final int chapterId;
   final int verse;
@@ -69,4 +70,7 @@ class VerseModel {
       'status': status
     };
   }
+
+   @override
+  String get displayText => verse.toString(); 
 }
