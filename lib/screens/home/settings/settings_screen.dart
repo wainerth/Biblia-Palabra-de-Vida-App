@@ -32,7 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             HeadScreenNotAvatar(
               title: "Configuración",
               onRoute: () {
-                Navigator.pop(context);
+                  Navigator.pushNamed(context, "/layoutPage");
               },
             ),
             ListTile(

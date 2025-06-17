@@ -50,7 +50,7 @@ class CatalogueProvider extends ChangeNotifier {
         _loadChurches(),
         _loadLeagues(),
         _getConfigurations(),
-        _loadBibleVersions()
+        loadBibleVersions()
       ]);
 
       _isInitialized = true;
@@ -375,7 +375,7 @@ class CatalogueProvider extends ChangeNotifier {
     sendPort.send('completed');
   }
 
-  Future<void> _loadBibleVersions() async {
+  Future<void> loadBibleVersions() async {
     try {
       final options = QueryOptions(
         operationName: "GetAllVersion",

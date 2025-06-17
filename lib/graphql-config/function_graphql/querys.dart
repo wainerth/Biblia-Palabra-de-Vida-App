@@ -2260,26 +2260,33 @@ Future<ResponseData> getAllCharacters(
   QueryOptions options = QueryOptions(
     // operationName: "GetOneReflectionRandom ",
     document: gql(r'''
-        query GetCharacters($offset: Int, $limit: Int, $name: String, $isNewTestament: Boolean) {
-          getCharacters( offset: $offset limit: $limit name: $name isNewTestament: $isNewTestament) {
-            id
-            name
-            newTestament
-            haveMoreCharacters
-            countCards
-            color
-            img {
-              id
-              urlImg
-            }
-            relatedCharacters {
+        query GetCharacters($page: Int, $limit: Int, $name: String, $isNewTestament: Boolean) {
+          getCharacters(page: $page, limit: $limit, name: $name, isNewTestament: $isNewTestament) {
+            data {
               id
               name
-              color
               typeNameChar
+              description
+              meaningName
+              haveMoreCharacters
+              color
               img {
                 urlImg
               }
+              newTestament
+              countCards
+              status
+              relatedCharacters {
+                
+              }
+            }
+            meta {
+              currentPage
+              totalPages
+              itemsPerPage
+              totalItems
+              hasPreviousPage
+              hasNextPage
             }
           }
         }

@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -37,17 +37,20 @@ class _BibleScreenState extends State<BibleScreen> {
   bool isLoading = true;
   VersionModel? currentVersion;
   BookModel? currentBook;
+  List<ChapterModel> allChapters = [];
   ChapterModel? currentChapter;
   List<VerseModel> verses = [];
   String? lastVersionsSelected;
   bool versionConSaltos = true;
+  bool hasPreviousChapter = true;
+  bool hasNextChapter = true;
   Color? selectedColor;
   String preferenceKey = 'selectedBibleVersion';
   double fontSizeNumber = 16.sp;
   double fontSizeVerse = 14.sp;
   ModelData fontFamilySet = ModelData(label: "Aclonica", value: "1");
   //  Variable para controlar el overlay
-  List<String> _favoriteVerses = [];
+  final List<String> _favoriteVerses = [];
   List<HighlightRangeModel> _highlights = [];
   final GlobalKey _selectableTextKey = GlobalKey();
   late BibleTheme currentTheme;
@@ -58,10 +61,7 @@ class _BibleScreenState extends State<BibleScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       userData = userProvider.currentUser;
-      // Cargar el tema guardado primero
-      await Provider.of<BibleThemeProvider>(context, listen: false)
-          .loadSavedTheme();
-      await _loadPersistedData();
+
       await _initDataLoad();
       _loadHighlights();
     });
@@ -91,8 +91,7 @@ class _BibleScreenState extends State<BibleScreen> {
                 if (errorMessage != null) ...{
                   BuildErrorWidget(
                     errorMessage: errorMessage!,
-                    onRetry: () async => _loadChapterByBook(
-                        currentVersion, currentBook, currentChapter, context),
+                    onRetry: () async => _initDataLoad(),
                     onBack: () => Navigator.pop(context),
                   )
                 } else ...{
@@ -185,123 +184,210 @@ class _BibleScreenState extends State<BibleScreen> {
                             top: 0,
                             right: 0,
                             child: Container(
+                              width: MediaQuery.sizeOf(context).width,
                               decoration: BoxDecoration(
                                   color: currentTheme.backgroundColor),
                               // width: MediaQuery.sizeOf(context).width,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
+                              child: Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                        padding: EdgeInsets.zero,
+                                        iconSize: 25.0,
+                                        onPressed: () {
+                                          showModalBottomSheet(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return modalTextFormatSizeWidget(
+                                                  fontSize: fontSizeVerse,
+                                                  selectedItem: fontFamilySet,
+                                                  onChangedFontSize:
+                                                      (fontSize) {
+                                                    if (kDebugMode) {
+                                                      print(
+                                                          'el nuevo tamaño de fuente $fontSize');
+                                                    }
+                                                    setState(() {
+                                                      fontSizeNumber =
+                                                          fontSize! + 2;
+                                                      fontSizeVerse = fontSize;
+                                                    });
+                                                  },
+                                                  onChangedFont: (newFont) {
+                                                    if (kDebugMode) {
+                                                      print(
+                                                          'la nueva fuente ${newFont!.label}');
+                                                    }
+                                                    setState(() {
+                                                      fontFamilySet = newFont!;
+                                                    });
+                                                  },
+                                                );
+                                              });
+                                        },
+                                        icon: Icon(
+                                          CupertinoIcons.textformat_size,
+                                          color: currentTheme.buttonColor,
+                                        )),
+                                    IconButton(
+                                      padding: EdgeInsets.zero,
+                                      iconSize: 25.0,
+                                      onPressed: () async {
+                                        Clipboard.setData(ClipboardData(
+                                            text: await copyChapter(
+                                                currentChapter)));
+                                        await showCustomDialog(
+                                          context,
+                                          message:
+                                              "El capitulo ${currentChapter!.chapter} del libro ${currentBook!.modernName}  \n se ha copiado con éxito al\n portapapeles",
+                                          dialogType: DialogType.info,
+                                        );
+                                      },
+                                      icon: Icon(
+                                        Icons.file_copy_rounded,
+                                        color: currentTheme.buttonColor,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      padding: EdgeInsets.zero,
+                                      iconSize: 25.0,
+                                      onPressed: () async {
+                                        await Share.share(
+                                          await copyChapter(currentChapter),
+                                          subject:
+                                              "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName} \n ver en:${GraphQLConfig.urlServidor}officialbible",
+                                        );
+                                      },
+                                      icon: Icon(
+                                        Icons.share_rounded,
+                                        color: StyleColor.turquoise,
+                                      ),
+                                    ),
+                                    IconButton(
                                       padding: EdgeInsets.zero,
                                       iconSize: 25.0,
                                       onPressed: () {
-                                        showModalBottomSheet(
+                                        showGeneralDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          transitionDuration:
+                                              Duration(milliseconds: 500),
+                                          pageBuilder: (_, __, ___) {
+                                            return Dialog(
+                                              insetPadding: EdgeInsets.zero,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                height: MediaQuery.of(context)
+                                                    .size
+                                                    .height,
+                                                child: SearchBibleWidget(),
+                                              ),
+                                            );
+                                          },
+                                          transitionBuilder: (context,
+                                              animation,
+                                              secondaryAnimation,
+                                              child) {
+                                            return ScaleTransition(
+                                              scale: animation.drive(CurveTween(
+                                                  curve: Curves
+                                                      .fastOutSlowIn)), // ← Solución segura
+                                              child: child,
+                                            );
+                                          },
+                                        );
+                                      },
+                                      icon: Icon(
+                                        Icons.search_rounded,
+                                        color: currentTheme.buttonColor,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      padding: EdgeInsets.zero,
+                                      iconSize: 25.0,
+                                      onPressed: () async {
+                                        showDialog(
                                             context: context,
                                             builder: (BuildContext context) {
-                                              return modalTextFormatSizeWidget(
-                                                fontSize: fontSizeVerse,
-                                                selectedItem: fontFamilySet,
-                                                onChangedFontSize: (fontSize) {
-                                                  if (kDebugMode) {
-                                                    print(
-                                                        'el nuevo tamaño de fuente $fontSize');
-                                                  }
-                                                  setState(() {
-                                                    fontSizeNumber =
-                                                        fontSize! + 2;
-                                                    fontSizeVerse = fontSize;
-                                                  });
-                                                },
-                                                onChangedFont: (newFont) {
-                                                  if (kDebugMode) {
-                                                    print(
-                                                        'la nueva fuente ${newFont!.label}');
-                                                  }
-                                                  setState(() {
-                                                    fontFamilySet = newFont!;
-                                                  });
-                                                },
+                                              final favoriteVerse =
+                                                  verses.firstWhere((verse) =>
+                                                      verse.id ==
+                                                      _favoriteVerses.first);
+                                              return Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Container(
+                                                      margin:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 8.0),
+                                                      constraints:
+                                                          BoxConstraints(
+                                                              minHeight: 60),
+                                                      decoration: BoxDecoration(
+                                                          color: currentTheme
+                                                              .backgroundColor,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      8.0),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                                color: StyleColor
+                                                                    .black
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            .25),
+                                                                spreadRadius:
+                                                                    4.0,
+                                                                offset: Offset(
+                                                                    0, 4.0))
+                                                          ]),
+                                                      child: Column(
+                                                        children: [
+                                                          Text(
+                                                              "Versículo Favorito",
+                                                              style: StylesApp(
+                                                                      context)
+                                                                  .textStyleBody18
+                                                                  .copyWith(
+                                                                      color: StyleColor
+                                                                          .orange)),
+                                                          // ${favoriteVerse.chapterId} :
+                                                          Center(
+                                                              child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(8.0),
+                                                            child: Text(
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              "${favoriteVerse.verse}  \n${favoriteVerse.text}",
+                                                              style: StylesApp(
+                                                                      context)
+                                                                  .textStyleBody12
+                                                                  .copyWith(
+                                                                      color: currentTheme
+                                                                          .textColor),
+                                                            ),
+                                                          )),
+                                                        ],
+                                                      )),
+                                                ],
                                               );
                                             });
                                       },
                                       icon: Icon(
-                                        CupertinoIcons.textformat_size,
-                                        color: currentTheme.buttonColor,
-                                      )),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 25.0,
-                                    onPressed: () async {
-                                      Clipboard.setData(ClipboardData(
-                                          text: await copyChapter(
-                                              currentChapter)));
-                                      await showCustomDialog(
-                                        context,
-                                        message:
-                                            "El capitulo ${currentChapter!.chapter} del libro ${currentBook!.modernName}  \n se ha copiado con éxito al\n portapapeles",
-                                        dialogType: DialogType.info,
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.file_copy_rounded,
-                                      color: currentTheme.buttonColor,
+                                        Icons.star,
+                                        color: StyleColor.turquoise,
+                                      ),
                                     ),
-                                  ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 25.0,
-                                    onPressed: () async {
-                                      await Share.share(
-                                        await copyChapter(currentChapter),
-                                        subject:
-                                            "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName}",
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.share_rounded,
-                                      color: StyleColor.turquoise,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 25.0,
-                                    onPressed: () {
-                                      showGeneralDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        transitionDuration:
-                                            Duration(milliseconds: 500),
-                                        pageBuilder: (_, __, ___) {
-                                          return Dialog(
-                                            insetPadding: EdgeInsets.zero,
-                                            child: SizedBox(
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              height: MediaQuery.of(context)
-                                                  .size
-                                                  .height,
-                                              child: SearchBibleWidget(),
-                                            ),
-                                          );
-                                        },
-                                        transitionBuilder: (context, animation,
-                                            secondaryAnimation, child) {
-                                          return ScaleTransition(
-                                            scale: animation.drive(CurveTween(
-                                                curve: Curves
-                                                    .fastOutSlowIn)), // ← Solución segura
-                                            child: child,
-                                          );
-                                        },
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.search_rounded,
-                                      color: currentTheme.buttonColor,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -320,23 +406,25 @@ class _BibleScreenState extends State<BibleScreen> {
                                     width: 35,
                                     height: 35,
                                     decoration: BoxDecoration(
-                                        color: currentTheme.buttonColor,
+                                        color: hasPreviousChapter
+                                            ? currentTheme.buttonColor
+                                            : StyleColor.grayMedium,
                                         borderRadius: BorderRadius.circular(8)),
                                     child: Center(
                                       child: IconButton(
+                                        disabledColor: StyleColor.grayMedium,
                                         padding: EdgeInsets.all(0),
                                         alignment: Alignment.center,
                                         iconSize: 35,
                                         //  color: currentTheme.buttonColor,
-                                        onPressed: currentBook != null &&
-                                                currentBook!.numberBook == 1 &&
-                                                (currentChapter != null &&
-                                                    currentChapter!.chapter ==
-                                                        1)
+                                        onPressed: !hasPreviousChapter
                                             ? null
                                             : () {
                                                 // Lógica para ir al capítulo anterior
-                                                _goToPreviousChapter();
+                                                _goToPreviousChapter(
+                                                    (currentChapter!.chapter -
+                                                            1)
+                                                        .toString());
                                               },
                                         icon: Icon(
                                           Icons.keyboard_arrow_left_rounded,
@@ -350,22 +438,23 @@ class _BibleScreenState extends State<BibleScreen> {
                                     width: 35,
                                     height: 35,
                                     decoration: BoxDecoration(
-                                        color: currentTheme.buttonColor,
+                                        color: hasNextChapter
+                                            ? currentTheme.buttonColor
+                                            : StyleColor.grayMedium,
                                         borderRadius: BorderRadius.circular(8)),
                                     child: Center(
                                       child: IconButton(
                                         padding: EdgeInsets.all(0),
                                         alignment: Alignment.center,
                                         iconSize: 35,
-                                        onPressed: currentBook != null &&
-                                                currentBook!.numberBook ==
-                                                    currentBook!.chapters &&
-                                                currentChapter!.chapter ==
-                                                    currentBook!.chapters
+                                        onPressed: !hasNextChapter
                                             ? null
                                             : () {
                                                 // Lógica para ir al siguiente capítulo
-                                                _goToNextChapter();
+                                                _goToNextChapter(
+                                                    (currentChapter!.chapter +
+                                                            1)
+                                                        .toString());
                                               },
                                         icon: Icon(
                                           Icons.keyboard_arrow_right_rounded,
@@ -424,7 +513,9 @@ class _BibleScreenState extends State<BibleScreen> {
                         SelectionContainer.disabled(
                           child: GestureDetector(
                             onTap: () {
-                              print("favoritos");
+                              if (kDebugMode) {
+                                print("favoritos");
+                              }
                               _showVersePopupMenu(context, verse);
                             },
                             child: Padding(
@@ -523,12 +614,11 @@ class _BibleScreenState extends State<BibleScreen> {
   }
 
   bool _isFavorite(VerseModel verse) {
-    final verseId = '${verse.id}';
+    final verseId = verse.id;
     return _favoriteVerses.contains(verseId);
   }
 
   void _showVersePopupMenu(BuildContext context, VerseModel verse) {
-    final verseId = '${verse.id}';
     final isFavorite = _isFavorite(verse);
 
     showModalBottomSheet(
@@ -543,55 +633,6 @@ class _BibleScreenState extends State<BibleScreen> {
             onTap: () {
               _toggleFavorite(verse);
               Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: Icon(isFavorite ? Icons.star_outline : Icons.star),
-            title: Text('Ver Versículo favorito'),
-            onTap: () {
-              Navigator.pop(context);
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    final favoriteVerse = verses.firstWhere(
-                        (verse) => verse.id == _favoriteVerses.first);
-                    return Column(
-                      mainAxisAlignment : MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.symmetric(horizontal: 8.0),
-                          constraints: BoxConstraints(
-                            minHeight: 60
-                          ),
-                            decoration: BoxDecoration(
-                            color: currentTheme.backgroundColor,
-                            borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [
-                              BoxShadow(
-                                  color: StyleColor.black.withValues(alpha: .25),
-                                  spreadRadius: 4.0,
-                                  offset: Offset(0, 4.0))
-                            ]),
-                            child: Column(
-                              children: [
-                                Text("Versículo Favorito", style: StylesApp(context).textStyleBody18.copyWith(
-                                  color: StyleColor.orange
-                                )),
-                                // ${favoriteVerse.chapterId} :
-                                Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        textAlign:TextAlign.center,
-                                          "${favoriteVerse.verse}  \n${favoriteVerse.text}", style: StylesApp(context).textStyleBody12.copyWith(
-                                            color: currentTheme.textColor
-                                          ),),
-                                    )),
-                              ],
-                            )),
-                      ],
-                    );
-                  });
             },
           ),
         ],
@@ -644,7 +685,8 @@ class _BibleScreenState extends State<BibleScreen> {
               fontFamily: fontFamilySet.label,
               fontSize: fontSizeVerse,
               backgroundColor:
-                  Color(int.parse('0XFF${highlight.color}')).withOpacity(0.3),
+                  Color(int.parse('0XFF${formatColor(highlight.color)}'))
+                      .withValues(alpha: 0.3),
               color: currentTheme.textColor,
               fontWeight: FontWeight.w400,
             ),
@@ -912,7 +954,6 @@ class _BibleScreenState extends State<BibleScreen> {
             h.endIndex == highlight.endIndex);
       }
     });
-    // _saveHighlights();
   }
 
 // Manejar favoritos
@@ -929,129 +970,103 @@ class _BibleScreenState extends State<BibleScreen> {
     }
     LoadingService().hideLoading();
     setState(() {
-      // if (_favoriteVerses.contains(verse.id)) {
       _favoriteVerses[0] = verse.id;
-      // }
-      //else {
-      //   _favoriteVerses.add(verse.id);
-      // }
     });
   }
 
   /// Método que se encarga de cargar los versículos resaltados
   Future<void> _loadHighlights() async {
-    final responseHighLighter = await getAllHighLighters(
-        userData!.userId, int.parse(currentVersion!.id), currentChapter!.id);
-    if (responseHighLighter.error != null) {
-      errorMessage = responseHighLighter.error;
-      return;
-    }
+    if (userData != null && currentVersion != null && currentChapter != null) {
+      final responseHighLighter = await getAllHighLighters(
+          userData!.userId, int.parse(currentVersion!.id), currentChapter!.id);
+      if (responseHighLighter.error != null) {
+        errorMessage = responseHighLighter.error;
+        return;
+      }
 
-    if (responseHighLighter.data.length > 0) {
-      setState(() {
-        _highlights = responseHighLighter.data
-            .map<HighlightRangeModel>((h) => HighlightRangeModel(
-                id: h['verse']['id'],
-                verse: h['verse']['verse'],
-                startIndex: h['startIndex'],
-                endIndex: h['endIndex'],
-                color: h['color']))
-            .toList();
-
-        for (final verse in verses) {
-          verse.highlights.clear();
-          verse.highlights.addAll(_highlights.where((h) => h.id == verse.id));
-        }
-      });
+      if (responseHighLighter.data.length > 0) {
+        setState(() {
+          _highlights = responseHighLighter.data
+              .map<HighlightRangeModel>((h) => HighlightRangeModel(
+                  id: h['verse']['id'],
+                  verse: h['verse']['verse'],
+                  startIndex: h['startIndex'],
+                  endIndex: h['endIndex'],
+                  color: h['color']))
+              .toList();
+          for (final verse in verses) {
+            verse.highlights.clear();
+            verse.highlights.addAll(_highlights.where((h) => h.id == verse.id));
+          }
+        });
+      }
     }
   }
 
   /// Método que se encarga de cargar la data persistente de lso resaltados
   Future<void> _loadPersistedData() async {
+    // Cargar el tema guardado primero
+    await Provider.of<BibleThemeProvider>(context, listen: false)
+        .loadSavedTheme();
     // cargar los favoritos
     final responseFavorite = await getFavoriteVerseByUser(userData!.userId);
     if (responseFavorite.data != null && responseFavorite.data.length > 0) {
       _favoriteVerses.add(responseFavorite
           .data); // =responseFavorite.data.map((favorite) => favorite);
     }
-
+    if (Provider.of<CatalogueProvider>(context, listen: false)
+        .allBibleVersion
+        .isEmpty) {
+      await Provider.of<CatalogueProvider>(context, listen: false)
+          .loadBibleVersions();
+    }
+    prefs = await SharedPreferences.getInstance();
     if (mounted) setState(() {});
   }
 
   /// Método de carga inicial de datos
   Future<void> _initDataLoad() async {
-    prefs = await SharedPreferences.getInstance();
+    LoadingService().showLoading(context);
+
+    //leemos la data persistida
+    await _loadPersistedData();
+
     lastVersionsSelected =
         prefs!.getString(preferenceKey); //  cargo la version almacena en cache
     final loadBook =
         prefs!.getString('bookSelected'); // cargo el libro almacenado en cache
+    try {
+      // si hay version en cache
+      setState(() {
+        if (lastVersionsSelected != null) {
+          // busco esa version
+          currentVersion =
+              Provider.of<CatalogueProvider>(context, listen: false)
+                  .allBibleVersion
+                  .firstWhere((version) => version.id == lastVersionsSelected);
 
-    // si hay version en cache
-    setState(() {
-      if (lastVersionsSelected != null) {
-        // busco esa version
-        currentVersion = Provider.of<CatalogueProvider>(context, listen: false)
-            .allBibleVersion
-            .firstWhere((version) => version.id == lastVersionsSelected);
-
-        if (loadBook != null) {
-          currentBook =
-              currentVersion!.books.firstWhere((book) => book.id == loadBook);
-          // cargamos el capitulo correspondiente
+          if (loadBook != null) {
+            currentBook =
+                currentVersion!.books.firstWhere((book) => book.id == loadBook);
+            // cargamos el capitulo correspondiente
+          } else {
+            currentBook = currentVersion!.books[0];
+          }
         } else {
+          currentVersion =
+              Provider.of<CatalogueProvider>(context, listen: false)
+                  .allBibleVersion[0];
           currentBook = currentVersion!.books[0];
         }
-      } else {
-        currentVersion = Provider.of<CatalogueProvider>(context, listen: false)
-            .allBibleVersion[0];
-        currentBook = currentVersion!.books[0];
-      }
-      currentBook = currentBook!.copyWith(
-        chapters: currentVersion!.books.length, // Usamos el mapa de capítulos
-      );
-    });
-
-    await _loadChapterByBook(currentVersion, currentBook, null, context);
-  }
-
-  /// Método para cargar los capítulos de un libro
-  Future<void> _loadChapterByBook(
-      version, book, chapterId, BuildContext context) async {
-    setState(() {
-      errorMessage = null;
-    });
-    LoadingService().showLoading(context);
-    try {
-      if (chapterId == null) {
-        // consultamos un capitulo si chapter es null
-        final responseChapterByBook =
-            await getChapterWithVerses(currentBook!.id);
-        if (responseChapterByBook.error != null) {
-          setState(() {
-            errorMessage = responseChapterByBook.error;
-          });
-        }
-
-        chapterId = responseChapterByBook.data[0]!['id'];
-      }
-      final responseChapter = await getOneChapterWithVerses(chapterId);
-      if (responseChapter.error != null) {
-        errorMessage = responseChapter.error;
-      }
-      setState(() {
-        currentChapter = ChapterModel.fromJson(responseChapter.data);
-
-        verses = currentChapter!.verses
-            .map<VerseModel>((verse) => VerseModel.fromJson(verse.toJson()))
-            .toList();
       });
+      //consulto todos los capítulos del libro actual con sus versículos
+      await loadChapters(currentBook!, false);
 
-      // actualizamos la cache
-      prefs!.setString(preferenceKey, version.id);
-      prefs!.setString('bookSelected', book!.id);
-      prefs!.setString('chapterSelected', chapterId);
+      // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
+      validateNextAndPrevious();
     } catch (e) {
-      errorMessage = 'Error cargar un capitulo $e';
+      LoadingService().hideLoading();
+      errorMessage = 'Error al cargar la biblia $e';
       setState(() {
         isLoading = false;
       });
@@ -1064,30 +1079,191 @@ class _BibleScreenState extends State<BibleScreen> {
   }
 
   /// Método para ir al siguiente capítulo
-  Future<void> _goToPreviousChapter() async {
+  Future<void> _goToPreviousChapter(String chapterNumber) async {
+    LoadingService().showLoading(context);
     if (currentChapter!.chapter > 1) {
-      await _loadChapterByBook(currentVersion, currentBook,
-          '${currentBook!.id}_${currentChapter!.chapter - 1}', context);
+      setState(() {
+        currentChapter = allChapters.firstWhere((chapter) =>
+            chapter.chapter.toString() == chapterNumber.toString());
+        verses = currentChapter!.verses;
+        verses.sort((a, b) {
+          // Convertir a números si son strings (ejemplo: "1" -> 1)
+          final verseA = a.verse;
+          final verseB = b.verse;
+
+          return verseA.compareTo(verseB); // Orden ascendente
+        });
+        prefs!.setString('chapterSelected', chapterNumber);
+      });
     } else if (currentBook!.numberBook > 1) {
       // Ir al último capítulo del libro anterior
       final prevBook = currentVersion!.books
           .firstWhere((b) => b.numberBook == currentBook!.numberBook - 1);
-      await _loadChapterByBook(currentVersion, prevBook,
-          '${prevBook.id}_${prevBook.chapters}', context);
+      setState(() {
+        // actualizo libro actual con el anterior
+        currentBook = prevBook;
+      });
+      prefs!.setString('bookSelected', prevBook.id);
+
+      /// consultamos los capítulos con sus versículos del libro anterior y le indicamos
+      /// que es el primer capítulo del libro que se esta abandonando
+      await loadChapters(prevBook, true);
+
+      // actualizamos el storage del capítulo seleccionado
+      prefs!.setString('chapterSelected', currentChapter!.chapter.toString());
     }
+
+    // cargamos los resaltados
+    await _loadHighlights();
+
+    LoadingService().hideLoading();
+
+    // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
+    validateNextAndPrevious();
   }
 
   /// Método para regresar al capítulo anterior
-  Future<void> _goToNextChapter() async {
+  Future<void> _goToNextChapter(String chapterNumber) async {
+    LoadingService().showLoading(context);
     if (currentChapter!.chapter < currentBook!.chapters) {
-      await _loadChapterByBook(currentVersion, currentBook,
-          '${currentBook!.id}_${currentChapter!.chapter + 1}', context);
+      setState(() {
+        currentChapter = allChapters.firstWhere((chapter) =>
+            chapter.chapter.toString() == chapterNumber.toString());
+        verses = currentChapter!.verses;
+        verses.sort((a, b) {
+          // Convertir a números si son strings (ejemplo: "1" -> 1)
+          final verseA = a.verse;
+          final verseB = b.verse;
+
+          return verseA.compareTo(verseB); // Orden ascendente
+        });
+        prefs!.setString('chapterSelected', chapterNumber);
+      });
     } else if (currentBook!.numberBook < currentVersion!.books.length) {
       // Ir al primer capítulo del siguiente libro
       final nextBook = currentVersion!.books
           .firstWhere((b) => b.numberBook == currentBook!.numberBook + 1);
-      await _loadChapterByBook(
-          currentVersion, nextBook, '${nextBook.id}_1', context);
+      setState(() {
+        // actualizo libro actual con el anterior
+        currentBook = nextBook;
+      });
+
+      // actualizamos el storage de libro seleccionado
+      prefs!.setString('bookSelected', nextBook.id);
+
+      // removemos el storage de capítulo seleccionado
+      prefs!.remove('chapterSelected');
+
+      /// consultamos los capítulos con sus versículos del libro siguiente y le indicamos
+      /// en false el parámetro firstChapter
+      await loadChapters(nextBook, false);
+    }
+
+    // cargamos los resaltados
+    await _loadHighlights();
+    LoadingService().hideLoading();
+    // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
+    validateNextAndPrevious();
+  }
+
+  Future<void> loadChapters(BookModel book, bool firstChapter) async {
+    LoadingService().showLoading(context);
+    try {
+      //consulto todos los capítulos del libro actual con sus versículos
+      final responseChapterByBook = await getChapterWithVerses(book.id);
+      if (responseChapterByBook.error != null) {
+        setState(() {
+          errorMessage = responseChapterByBook.error;
+        });
+        return;
+      }
+      setState(() {
+        allChapters = responseChapterByBook.data
+            .map<ChapterModel>((chapter) => ChapterModel.fromJson(chapter))
+            .toList();
+
+        allChapters.sort((a, b) {
+          // Convertir a números si son strings (ejemplo: "1" -> 1)
+          final chapterA = a.chapter;
+          final chapterB = b.chapter;
+
+          return chapterA.compareTo(chapterB); // Orden ascendente
+        });
+        //si no es el el primer capítulo del libro
+        if (!firstChapter) {
+          // verificamos si hay capítulo en cache
+          if (prefs!.getString('chapterSelected') != null) {
+            currentChapter = allChapters.firstWhere((ch) =>
+                ch.chapter.toString() == prefs!.getString('chapterSelected'));
+          } else {
+            currentChapter = allChapters.first;
+          }
+        } else {
+          currentChapter = allChapters.last;
+        }
+
+        if (currentChapter != null) {
+          verses = currentChapter!.verses
+              .map<VerseModel>((verse) => VerseModel.fromJson(verse.toJson()))
+              .toList();
+          //ordenamos los versículos de menor a mayor
+          verses.sort((a, b) {
+            final verseA = a.verse;
+            final verseB = b.verse;
+
+            return verseA.compareTo(verseB); // Orden ascendente
+          });
+        }
+      });
+      // actualizamos la propiedad chapters con la cantidad de capítulos del libro
+      setState(() {
+        currentBook = book.copyWith(
+          chapters: allChapters.length - 1,
+        );
+      });
+    } catch (e) {
+      LoadingService().hideLoading();
+      errorMessage = 'Error al cargar el capítulo $e';
+      setState(() {
+        isLoading = false;
+      });
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
     }
   }
+
+  void validateNextAndPrevious() {
+    if (currentBook != null &&
+        currentBook!.numberBook == 1 &&
+        (currentChapter != null && currentChapter!.chapter == 1)) {
+      setState(() {
+        hasPreviousChapter = false;
+      });
+    } else {
+      setState(() {
+        hasPreviousChapter = true;
+      });
+    }
+    if (currentBook != null &&
+        currentBook!.numberBook == currentBook!.chapters &&
+        currentChapter!.chapter == currentBook!.chapters) {
+      setState(() {
+        hasNextChapter = false;
+      });
+    } else {
+      setState(() {
+        hasNextChapter = true;
+      });
+    }
+  }
+}
+
+formatColor(String? color) {
+  if (color!.contains('#')) {
+    return color.split('#')[1];
+  }
+  return color;
 }

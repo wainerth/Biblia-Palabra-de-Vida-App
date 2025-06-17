@@ -7,7 +7,7 @@ class CharacterModel {
   final bool haveMoreCharacters;
   final String color;
   final Img img;
-  final RelatedCharacters relatedCharacters;
+  final List<RelatedCharacters> relatedCharacters;
 
   CharacterModel(
       {required this.id,
@@ -26,8 +26,13 @@ class CharacterModel {
         haveMoreCharacters: json['haveMoreCharacters'],
         color: json['color'],
         img: Img.fromJson(json['img']),
-        relatedCharacters:
-            RelatedCharacters.fromJson(json['relatedCharacters']));
+        relatedCharacters: json['relatedCharacters'] != null && json['relatedCharacters'].isNotEmpty
+            ? (json['relatedCharacters'] as List)
+                .map((ralated) => RelatedCharacters.fromJson(ralated))
+                .toList()
+            : [],
+            // RelatedCharacters.fromJson(json['relatedCharacters'])
+          );
   }
 
   Map<String, dynamic> toJson() {
