@@ -42,8 +42,8 @@ class _BibleScreenState extends State<BibleScreen> {
   List<VerseModel> verses = [];
   String? lastVersionsSelected;
   bool versionConSaltos = true;
-  bool hasPreviousChapter = true;
-  bool hasNextChapter = true;
+  bool hasPreviousChapter = false;
+  bool hasNextChapter = false;
   Color? selectedColor;
   String preferenceKey = 'selectedBibleVersion';
   double fontSizeNumber = 16.sp;
@@ -188,206 +188,217 @@ class _BibleScreenState extends State<BibleScreen> {
                               decoration: BoxDecoration(
                                   color: currentTheme.backgroundColor),
                               // width: MediaQuery.sizeOf(context).width,
-                              child: Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    IconButton(
-                                        padding: EdgeInsets.zero,
-                                        iconSize: 25.0,
-                                        onPressed: () {
-                                          showModalBottomSheet(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return modalTextFormatSizeWidget(
-                                                  fontSize: fontSizeVerse,
-                                                  selectedItem: fontFamilySet,
-                                                  onChangedFontSize:
-                                                      (fontSize) {
-                                                    if (kDebugMode) {
-                                                      print(
-                                                          'el nuevo tamaño de fuente $fontSize');
-                                                    }
-                                                    setState(() {
-                                                      fontSizeNumber =
-                                                          fontSize! + 2;
-                                                      fontSizeVerse = fontSize;
-                                                    });
-                                                  },
-                                                  onChangedFont: (newFont) {
-                                                    if (kDebugMode) {
-                                                      print(
-                                                          'la nueva fuente ${newFont!.label}');
-                                                    }
-                                                    setState(() {
-                                                      fontFamilySet = newFont!;
-                                                    });
-                                                  },
-                                                );
-                                              });
-                                        },
-                                        icon: Icon(
-                                          CupertinoIcons.textformat_size,
-                                          color: currentTheme.buttonColor,
-                                        )),
-                                    IconButton(
-                                      padding: EdgeInsets.zero,
-                                      iconSize: 25.0,
-                                      onPressed: () async {
-                                        Clipboard.setData(ClipboardData(
-                                            text: await copyChapter(
-                                                currentChapter)));
-                                        await showCustomDialog(
-                                          context,
-                                          message:
-                                              "El capitulo ${currentChapter!.chapter} del libro ${currentBook!.modernName}  \n se ha copiado con éxito al\n portapapeles",
-                                          dialogType: DialogType.info,
-                                        );
-                                      },
-                                      icon: Icon(
-                                        Icons.file_copy_rounded,
-                                        color: currentTheme.buttonColor,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      padding: EdgeInsets.zero,
-                                      iconSize: 25.0,
-                                      onPressed: () async {
-                                        await Share.share(
-                                          await copyChapter(currentChapter),
-                                          subject:
-                                              "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName} \n ver en:${GraphQLConfig.urlServidor}officialbible",
-                                        );
-                                      },
-                                      icon: Icon(
-                                        Icons.share_rounded,
-                                        color: StyleColor.turquoise,
-                                      ),
-                                    ),
-                                    IconButton(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
                                       padding: EdgeInsets.zero,
                                       iconSize: 25.0,
                                       onPressed: () {
-                                        showGeneralDialog(
-                                          context: context,
-                                          barrierDismissible: false,
-                                          transitionDuration:
-                                              Duration(milliseconds: 500),
-                                          pageBuilder: (_, __, ___) {
-                                            return Dialog(
-                                              insetPadding: EdgeInsets.zero,
-                                              child: SizedBox(
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                                height: MediaQuery.of(context)
-                                                    .size
-                                                    .height,
-                                                child: SearchBibleWidget(),
-                                              ),
-                                            );
-                                          },
-                                          transitionBuilder: (context,
-                                              animation,
-                                              secondaryAnimation,
-                                              child) {
-                                            return ScaleTransition(
-                                              scale: animation.drive(CurveTween(
-                                                  curve: Curves
-                                                      .fastOutSlowIn)), // ← Solución segura
-                                              child: child,
-                                            );
-                                          },
-                                        );
-                                      },
-                                      icon: Icon(
-                                        Icons.search_rounded,
-                                        color: currentTheme.buttonColor,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      padding: EdgeInsets.zero,
-                                      iconSize: 25.0,
-                                      onPressed: () async {
-                                        showDialog(
+                                        showModalBottomSheet(
                                             context: context,
                                             builder: (BuildContext context) {
-                                              final favoriteVerse =
-                                                  verses.firstWhere((verse) =>
-                                                      verse.id ==
-                                                      _favoriteVerses.first);
-                                              return Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Container(
-                                                      margin:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 8.0),
-                                                      constraints:
-                                                          BoxConstraints(
-                                                              minHeight: 60),
-                                                      decoration: BoxDecoration(
-                                                          color: currentTheme
-                                                              .backgroundColor,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      8.0),
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                                color: StyleColor
-                                                                    .black
-                                                                    .withValues(
-                                                                        alpha:
-                                                                            .25),
-                                                                spreadRadius:
-                                                                    4.0,
-                                                                offset: Offset(
-                                                                    0, 4.0))
-                                                          ]),
-                                                      child: Column(
-                                                        children: [
-                                                          Text(
-                                                              "Versículo Favorito",
-                                                              style: StylesApp(
-                                                                      context)
-                                                                  .textStyleBody18
-                                                                  .copyWith(
-                                                                      color: StyleColor
-                                                                          .orange)),
-                                                          // ${favoriteVerse.chapterId} :
-                                                          Center(
-                                                              child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(8.0),
-                                                            child: Text(
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              "${favoriteVerse.verse}  \n${favoriteVerse.text}",
-                                                              style: StylesApp(
-                                                                      context)
-                                                                  .textStyleBody12
-                                                                  .copyWith(
-                                                                      color: currentTheme
-                                                                          .textColor),
-                                                            ),
-                                                          )),
-                                                        ],
-                                                      )),
-                                                ],
+                                              return modalTextFormatSizeWidget(
+                                                fontSize: fontSizeVerse,
+                                                selectedItem: fontFamilySet,
+                                                onChangedFontSize: (fontSize) {
+                                                  if (kDebugMode) {
+                                                    print(
+                                                        'el nuevo tamaño de fuente $fontSize');
+                                                  }
+                                                  setState(() {
+                                                    fontSizeNumber =
+                                                        fontSize! + 2;
+                                                    fontSizeVerse = fontSize;
+                                                  });
+                                                },
+                                                onChangedFont: (newFont) {
+                                                  if (kDebugMode) {
+                                                    print(
+                                                        'la nueva fuente ${newFont!.label}');
+                                                  }
+                                                  setState(() {
+                                                    fontFamilySet = newFont!;
+                                                  });
+                                                },
                                               );
                                             });
                                       },
                                       icon: Icon(
-                                        Icons.star,
-                                        color: StyleColor.turquoise,
-                                      ),
+                                        CupertinoIcons.textformat_size,
+                                        color: currentTheme.buttonColor,
+                                      )),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    iconSize: 25.0,
+                                    onPressed: () async {
+                                      Clipboard.setData(ClipboardData(
+                                          text: await copyChapter(
+                                              currentChapter)));
+                                      await showCustomDialog(
+                                        context,
+                                        message:
+                                            "El capitulo ${currentChapter!.chapter} del libro ${currentBook!.modernName}  \n se ha copiado con éxito al\n portapapeles",
+                                        dialogType: DialogType.info,
+                                      );
+                                    },
+                                    icon: Icon(
+                                      Icons.file_copy_rounded,
+                                      color: currentTheme.buttonColor,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    iconSize: 25.0,
+                                    onPressed: () async {
+                                      await Share.share(
+                                        await copyChapter(currentChapter),
+                                        subject:
+                                            "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName} \n ver en:${GraphQLConfig.urlServidor}officialbible",
+                                      );
+                                    },
+                                    icon: Icon(
+                                      Icons.share_rounded,
+                                      color: StyleColor.turquoise,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    iconSize: 25.0,
+                                    onPressed: () {
+                                      showGeneralDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        transitionDuration:
+                                            Duration(milliseconds: 500),
+                                        pageBuilder: (_, __, ___) {
+                                          return Dialog(
+                                            insetPadding: EdgeInsets.zero,
+                                            child: SizedBox(
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              height: MediaQuery.of(context)
+                                                  .size
+                                                  .height,
+                                              child: SearchBibleWidget(
+                                                onActionBook:
+                                                    (InputDataSearchModel
+                                                        data) async {
+                                                  await loadVersionAndVerseRange(
+                                                      data);
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        transitionBuilder: (context, animation,
+                                            secondaryAnimation, child) {
+                                          return ScaleTransition(
+                                            scale: animation.drive(CurveTween(
+                                                curve: Curves
+                                                    .fastOutSlowIn)), // ← Solución segura
+                                            child: child,
+                                          );
+                                        },
+                                      );
+                                    },
+                                    icon: Icon(
+                                      Icons.search_rounded,
+                                      color: currentTheme.buttonColor,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    iconSize: 25.0,
+                                    onPressed: () async {
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            final favoriteVerse = [];
+                                            for (final chapter in allChapters) {
+                                              chapter.verses.map((verse) => {
+                                                    if (verse.id ==
+                                                        _favoriteVerses.first)
+                                                      {
+                                                        favoriteVerse.add(
+                                                          FavoriteVerse(
+                                                              text: verse.text,
+                                                              chapterNumber:
+                                                                  chapter
+                                                                      .chapter,
+                                                              verseNumber:
+                                                                  verse.verse),
+                                                        )
+                                                      }
+                                                  });
+                                            }
+                                            return Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  margin: EdgeInsets.symmetric(
+                                                      horizontal: 8.0),
+                                                  constraints: BoxConstraints(
+                                                      minHeight: 60),
+                                                  decoration: BoxDecoration(
+                                                      color: currentTheme
+                                                          .backgroundColor,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                            color: StyleColor
+                                                                .black
+                                                                .withValues(
+                                                                    alpha: .25),
+                                                            spreadRadius: 4.0,
+                                                            offset:
+                                                                Offset(0, 4.0))
+                                                      ]),
+                                                  child: Column(
+                                                    children: [
+                                                      ...favoriteVerse
+                                                          .expand(
+                                                              (favorite) => [
+                                                                    Text(
+                                                                        "Versículo Favorito",
+                                                                        style: StylesApp(context)
+                                                                            .textStyleBody18
+                                                                            .copyWith(color: StyleColor.orange)),
+                                                                    Center(
+                                                                      child:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .all(
+                                                                            8.0),
+                                                                        child:
+                                                                            Text(
+                                                                          textAlign:
+                                                                              TextAlign.center,
+                                                                          "${favorite.verseNumber}  \n${favorite.text}",
+                                                                          style: StylesApp(context)
+                                                                              .textStyleBody12
+                                                                              .copyWith(color: currentTheme.textColor),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ]),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          });
+                                    },
+                                    icon: Icon(
+                                      Icons.star,
+                                      color: StyleColor.turquoise,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -498,18 +509,6 @@ class _BibleScreenState extends State<BibleScreen> {
                       alignment:
                           Alignment.center, // Centra los hijos en el Stack
                       children: [
-                        // Estrella de favorito (superpuesta y centrada)
-                        if (_isFavorite(verse))
-                          Positioned(
-                            top: -1, // Ajusta esta posición según necesites
-                            left: 3, // Ajusta esta posición según necesites
-                            child: Icon(
-                              Icons.star,
-                              size: 20, // Tamaño un poco más pequeño
-                              color: StyleColor.yellowLight,
-                            ),
-                          ),
-                        // Número del versículo (no seleccionable)
                         SelectionContainer.disabled(
                           child: GestureDetector(
                             onTap: () {
@@ -540,6 +539,18 @@ class _BibleScreenState extends State<BibleScreen> {
                     ),
                   ),
                   ..._buildHighlightedTextSpans(verse),
+                  if (_isFavorite(verse))
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.baseline,
+                      baseline: TextBaseline.alphabetic,
+                      child: SelectionContainer.disabled(
+                        child: Icon(
+                          Icons.star,
+                          size: 16,
+                          color: StyleColor.yellowLight,
+                        ),
+                      ),
+                    ),
                 ])
             .toList(),
       ),
@@ -680,7 +691,10 @@ class _BibleScreenState extends State<BibleScreen> {
             (highlight.startIndex > 0
                 ? highlight.startIndex - 1
                 : highlight.startIndex),
-            highlight.endIndex - 1),
+            highlight.endIndex < text.length - 1
+                ? highlight.endIndex
+                : highlight.endIndex),
+        // highlight.endIndex < text.length-1 ? highlight.endIndex - 1: highlight.endIndex ),
         style: StylesApp(context).textStyleBody14.copyWith(
               fontFamily: fontFamilySet.label,
               fontSize: fontSizeVerse,
@@ -693,7 +707,8 @@ class _BibleScreenState extends State<BibleScreen> {
       ));
 
       // Actualizar posición actual al final del resaltado actual
-      currentPos = highlight.endIndex - 1;
+      currentPos = highlight.endIndex;
+      // currentPos = highlight.endIndex < text.length-1 ?  highlight.endIndex - 1 : highlight.endIndex;
     }
 
     // 3. Texto restante después del último resaltado
@@ -909,10 +924,9 @@ class _BibleScreenState extends State<BibleScreen> {
       int posFinal = 0;
       // Verificar si la selección se superpone con este versículo
       if (selection.start < verseEnd && selection.end > verseStart) {
-        initial = ((selection.start - 8) > verseStart
-                ? selection.start
-                : verseStart) -
-            verseStart;
+        initial =
+            ((selection.start) > verseStart ? selection.start : verseStart) -
+                verseStart;
         posFinal = selection.end > verseEnd
             ? verseEnd - verseStart
             : selection.end - verseStart;
@@ -1258,6 +1272,100 @@ class _BibleScreenState extends State<BibleScreen> {
         hasNextChapter = true;
       });
     }
+  }
+
+  loadVersionAndVerseRange(InputDataSearchModel data) async {
+    final bibleVersions = Provider.of<CatalogueProvider>(context, listen: false)
+        .allBibleVersion
+        .map((v) => ModelData(value: v.id, label: v.version))
+        .toList();
+    setState(() {
+      lastVersionsSelected = bibleVersions
+          .firstWhere((version) => version.value == data.versionId)
+          .value;
+      final currentVers =
+          Provider.of<CatalogueProvider>(context, listen: false)
+              .allBibleVersion
+              .firstWhere((version) => version.id == lastVersionsSelected);
+              currentVersion = currentVers;
+      currentBook =
+          currentVers.books.firstWhere((book) => book.id == data.bookId);
+    });
+    LoadingService().showLoading(context);
+    try {
+      //consulto todos los capítulos del libro actual con sus versículos
+      final responseChapterByBook = await getChapterWithVerses(currentBook!.id);
+      if (responseChapterByBook.error != null) {
+        setState(() {
+          errorMessage = responseChapterByBook.error;
+        });
+        return;
+      }
+      setState(() {
+        allChapters = responseChapterByBook.data
+            .map<ChapterModel>((chapter) => ChapterModel.fromJson(chapter))
+            .toList();
+
+        allChapters.sort((a, b) {
+          // Convertir a números si son strings (ejemplo: "1" -> 1)
+          final chapterA = a.chapter;
+          final chapterB = b.chapter;
+
+          return chapterA.compareTo(chapterB); // Orden ascendente
+        });
+        //si no es el el primer capítulo del libro
+        currentChapter =
+            allChapters.firstWhere((chapter) => chapter.id == data.chapterId);
+
+        verses = getVersesInRange(
+            currentChapter!.verses, data.startVerseId, data.endVerseId);
+      });
+      setState(() {
+        currentBook = currentBook!.copyWith(
+          chapters: 1,
+        );
+        hasPreviousChapter = false;
+        hasNextChapter = false;
+      });
+    } catch (e) {
+      LoadingService().hideLoading();
+      errorMessage = 'Error al cargar el capítulo $e';
+      setState(() {
+        isLoading = false;
+      });
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+}
+
+// Obtener versículos por rango de IDs
+List<VerseModel> getVersesInRange(
+    List<VerseModel> verses, String startId, String endId) {
+  try {
+    final start = int.parse(startId);
+    final end = int.parse(endId);
+
+    if (start > end) {
+      throw ArgumentError('startVerseId no puede ser mayor que endVerseId');
+    }
+
+    // Buscar los versículos en el rango
+    final result = verses.where((verse) {
+      final verseNumber = int.parse(verse.id);
+      return verseNumber >= start && verseNumber <= end;
+    }).toList();
+
+    if (result.isEmpty) {
+      throw StateError('No se encontraron versículos en el rango $start-$end');
+    }
+
+    return result;
+  } on FormatException {
+    throw FormatException('Los IDs deben ser números válidos');
   }
 }
 

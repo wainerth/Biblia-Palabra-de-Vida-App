@@ -23,7 +23,15 @@ class VerseModel extends GridItem {
     required this.highlights,
     required this.status,
   });
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VerseModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id; // Usa un identificador único
 
+  @override
+  int get hashCode => id.hashCode;
   VerseModel copyWith({
     int? posIni,
     int? posFin,
@@ -71,6 +79,6 @@ class VerseModel extends GridItem {
     };
   }
 
-   @override
-  String get displayText => verse.toString(); 
+  @override
+  String get displayText => verse.toString();
 }

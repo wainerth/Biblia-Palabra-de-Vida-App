@@ -31,13 +31,22 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
   @override
   void initState() {
     super.initState();
-    fontSizeValue = widget.fontSize;
-    selectedFont = widget.selectedItem;
+    setState(() {
+      fontSizeValue = widget.fontSize;
+      selectedFont = widget.selectedItem;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       themeProvider = Provider.of<BibleThemeProvider>(context, listen: false);
     });
   }
-
+@override
+  void didUpdateWidget(covariant modalTextFormatSizeWidget oldWidget) {
+    setState(() {
+      fontSizeValue = widget.fontSize;
+      selectedFont = widget.selectedItem;
+    });
+    super.didUpdateWidget(oldWidget);
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -59,13 +68,14 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
                     children: BibleThemeType.values.map((theme) {
                       final currentTheme = BibleTheme.themes[theme]!;
                       final isSelected =
-                          Provider.of<BibleThemeProvider>(context).currentTheme ==
+                          Provider.of<BibleThemeProvider>(context)
+                                  .currentTheme ==
                               theme;
-                            
+
                       return GestureDetector(
-                        onTap: () =>
-                            Provider.of<BibleThemeProvider>(context, listen: false)
-                                .changeTheme(theme),
+                        onTap: () => Provider.of<BibleThemeProvider>(context,
+                                listen: false)
+                            .changeTheme(theme),
                         child: Container(
                           width: 100,
                           // height: 100.0,
@@ -78,7 +88,9 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
                             color: currentTheme.backgroundColor,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isSelected ? StyleColor.turquoise : Colors.grey[300]!,
+                              color: isSelected
+                                  ? StyleColor.turquoise
+                                  : Colors.grey[300]!,
                               width: isSelected ? 2 : 1,
                             ),
                             boxShadow: [
@@ -102,7 +114,7 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
                                       top: Radius.circular(6)),
                                 ),
                               ),
-                      
+
                               // Texto de muestra
                               Flexible(
                                 child: FittedBox(
@@ -116,7 +128,7 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
                                   ),
                                 ),
                               ),
-                      
+
                               // Nombre del tema
                               Container(
                                 padding: EdgeInsets.symmetric(vertical: 6),
@@ -164,6 +176,9 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
             ],
             selectedItem: selectedFont,
             onChanged: (ModelData? newValue) {
+              setState((){
+                selectedFont = newValue!;
+              });
               widget.onChangedFont(newValue);
             },
             hintText: "Tipo de fuente",

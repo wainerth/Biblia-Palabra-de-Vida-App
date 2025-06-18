@@ -16,8 +16,10 @@ class BibleThemeProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void changeTheme(BibleThemeType newTheme) {
+  void changeTheme(BibleThemeType newTheme) async {
     _currentTheme = newTheme;
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('saved_bible_theme', newTheme.index);
     notifyListeners();
   }
 }

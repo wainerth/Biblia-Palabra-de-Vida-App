@@ -2277,7 +2277,18 @@ Future<ResponseData> getAllCharacters(
               countCards
               status
               relatedCharacters {
-                
+                  img {
+                  urlImg
+                }
+                id
+                name
+                description
+                color
+                countCards
+                haveMoreCharacters
+                meaningName
+                newTestament
+                typeNameChar
               }
             }
             meta {
