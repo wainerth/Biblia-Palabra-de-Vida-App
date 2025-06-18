@@ -31,7 +31,7 @@ class WorkspaceScreen extends StatefulWidget {
 class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   LoginUser? dataUser;
   late final catalogueProvider;
-  Pagination? paginate;
+  PaginationInfo? paginate;
   LastProgressUser? progressUser = null;
   bool error = false;
   bool errorDaily = false;
@@ -275,7 +275,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                     .map<Reflection>(
                         (reflex) => Reflection.fromJson(removeTypename(reflex)))
                     .toList();
-                final Pagination paginate = Pagination.fromJson(
+                final PaginationInfo paginate = PaginationInfo.fromJson(
                     removeTypename(responseReflection.data['meta']));
                 buttonsData = reflections
                     .map<ButtonData>((reflection) => ButtonData(

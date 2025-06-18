@@ -25,7 +25,7 @@ class ChapterModel extends GridItem {
                 .map((book) => VerseModel.fromJson(book))
                 .toList()
             : [],
-        status: json['status']);
+        status: json['status'] ?? 1);
   }
 
   Map<String, dynamic> toJson() {

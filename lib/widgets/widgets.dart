@@ -92,4 +92,5 @@ export 'package:biblia_palabra_de_vida_app/widgets/card_teaching_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/card_character_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/dialog_internal_character.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/dialog_internal_teaching.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/custom_pagination.dart';
 

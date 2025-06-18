@@ -27,6 +27,7 @@ class _CardCharacterWidgetState extends State<CardCharacterWidget> {
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
+         constraints: BoxConstraints(maxWidth: 220.0),
           padding: EdgeInsets.all(8.0),
           width: MediaQuery.sizeOf(context).width,
           child: Column(children: [

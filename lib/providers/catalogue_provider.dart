@@ -151,55 +151,6 @@ class CatalogueProvider extends ChangeNotifier {
 
     sendPort.send('completed');
   }
-
-  // Future<void> _loadCountries(int? limit, int? offset, String? search) async {
-  //   try {
-  //     final options = QueryOptions(
-  //       operationName: "GetAllCountryWithCodeAreas",
-  //       document: gql(r'''
-  //       query GetAllCountryWithCodeAreas($limit: Int, $offset: Int, $search: String) {
-  //         getAllCountryWithCodeAreas(limit: $limit, offset: $offset, search: $search) {
-  //           id
-  //           country
-  //           areaCodeCountry {
-  //             id
-  //             code
-  //           }
-  //         }
-  //       }
-  //       '''),
-  //       variables: <String, dynamic>{
-  //         "limit": limit,
-  //         "offset": offset,
-  //         "search": search
-  //       },
-  //       fetchPolicy: FetchPolicy.noCache,
-  //     );
-
-  //     final result = await _client.query(options).timeout(
-  //           const Duration(seconds: 10),
-  //           onTimeout: () => throw TimeoutException('Request timed out'),
-  //         );
-
-  //     if (result.hasException) {
-  //       throw Exception('Failed to obtain Countries: ${result.exception}');
-  //     }
-
-  //     final data = result.data;
-  //     if (data == null || data['getAllCountryWithCodeAreas'] == null) {
-  //       throw Exception('No countries data received');
-  //     }
-
-  //     allCountries = (data['getAllCountryWithCodeAreas'] as List)
-  //         .map((i) => Country.fromJson(i))
-  //         .toList();
-
-  //     notifyListeners();
-  //   } catch (e) {
-  //     throw Exception('Failed to load countries: $e');
-  //   }
-  // }
-
   Future<void> _loadChurches() async {
     try {
       final options = QueryOptions(
@@ -234,9 +185,13 @@ class CatalogueProvider extends ChangeNotifier {
           .toList();
 
       notifyListeners();
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: ${e.message}');
+    } on FormatException catch (e) {
+      throw Exception('Data format error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to load churches: $e');
-    }
+      throw Exception('Failed to load leagues: ${e.toString()}');
+    } 
   }
 
   Future<void> _loadLeagues() async {
@@ -281,8 +236,12 @@ class CatalogueProvider extends ChangeNotifier {
           .toList();
 
       notifyListeners();
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: ${e.message}');
+    } on FormatException catch (e) {
+      throw Exception('Data format error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to load leagues: $e');
+      throw Exception('Failed to load leagues: ${e.toString()}');
     }
   }
 
@@ -315,8 +274,12 @@ class CatalogueProvider extends ChangeNotifier {
       allConfig =
           Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
       notifyListeners();
+    }  on TimeoutException catch (e) {
+      throw Exception('Request timeout: ${e.message}');
+    } on FormatException catch (e) {
+      throw Exception('Data format error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to load configurations: $e');
+      throw Exception('Failed to load leagues: ${e.toString()}');
     }
   }
 
@@ -417,8 +380,12 @@ class CatalogueProvider extends ChangeNotifier {
         print('all versions loaded');
       }
       notifyListeners();
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: ${e.message}');
+    } on FormatException catch (e) {
+      throw Exception('Data format error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to all versions configurations: $e');
+      throw Exception('Failed to load leagues: ${e.toString()}');
     }
   }
 }

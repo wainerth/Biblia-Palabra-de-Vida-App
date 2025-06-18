@@ -227,7 +227,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
   final userData = userProvider.currentUser;
     List awards = [];
-    Pagination pagination = Pagination(
+    PaginationInfo pagination = PaginationInfo(
       currentPage: 0,
       totalPages: 0,
       itemsPerPage: 0,
@@ -262,7 +262,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             .toList();
 
         pagination =
-            Pagination.fromJson(removeTypename(responsePrize.data["meta"]));
+            PaginationInfo.fromJson(removeTypename(responsePrize.data["meta"]));
       });
     }
 
@@ -272,7 +272,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     if (response != null) {
       setState(() {
         awards = response["awards"] as List<Award>;
-        pagination = response["pagination"] as Pagination;
+        pagination = response["pagination"] as PaginationInfo;
       });
     } else {
       return;
@@ -743,7 +743,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
           .cast<Award>()
           .toList(),
       "pagination":
-          Pagination.fromJson(removeTypename(responsePrize.data["meta"]))
+          PaginationInfo.fromJson(removeTypename(responsePrize.data["meta"]))
     };
   }
 }

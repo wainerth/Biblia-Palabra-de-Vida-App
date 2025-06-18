@@ -25,7 +25,17 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
   String _searchText = '';
   late BibleTheme currentTheme;
   List<CharacterModel> characters = [];
-  Pagination pagination = Pagination(
+  bool loading = false;
+  int itemPerPageValue = 50;
+  List<int> itemsPerPage = [
+    5,
+    10,
+    15,
+    25,
+    50,
+    100,
+  ];
+  PaginationInfo pagination = PaginationInfo(
     currentPage: 0,
     totalPages: 0,
     itemsPerPage: 0,
@@ -53,20 +63,36 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
     userData = userProvider.currentUser;
     await Provider.of<BibleThemeProvider>(context, listen: false)
         .loadSavedTheme();
-    await _loadData(1, "");
+    await _loadData(1, itemPerPageValue, "");
   }
 
-  Future<void> _loadData(page, filter) async {
+  Future<void> _loadData(int page,int limit, filter) async {
     setState(() {
+      loading = true;
       characters = [];
     });
-    final responseCharacter = await getAllCharacters(page, 10, filter, false);
+    final responseCharacter = await getAllCharacters(page, limit, filter, false);
     if (responseCharacter.error != null) {
-      await showCustomDialog(
-        context,
-        message: responseCharacter.error!,
-        dialogType: DialogType.error,
-      );
+      // await showCustomDialog(
+      //   context,
+      //   message: responseCharacter.error!,
+      //   dialogType: DialogType.error,
+      // );
+       await showCustomDialogWithAction(context,
+              message: responseCharacter.error!,
+              dialogType: DialogTypeAction.info,
+              buttonOk: 'Volver',
+              actionCallbackOk: () {
+                Navigator.pop(context);
+              },
+              showAction: true,
+              textButton: 'Reintentar',
+              actionCallback: () async {
+               await _loadData(1,limit, "");
+              });
+      setState(() {
+        loading = false;
+      });
       return;
     }
     setState(() {
@@ -77,7 +103,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
           .toList();
 
       pagination =
-          Pagination.fromJson(removeTypename(responseCharacter.data["meta"]));
+          PaginationInfo.fromJson(removeTypename(responseCharacter.data["meta"]));
+      loading = false;
     });
   }
 
@@ -130,8 +157,23 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
         ),
         // body de los resultados de la búsqueda
         Expanded(
-          child: characters.isEmpty
+          child: loading
               ? LoadingIndicator()
+              : characters.isEmpty ? 
+              Container(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Text(
+                        textAlign:  TextAlign.center,
+                        "No hay resultados...", style: StylesApp(context).textStyleBody18.copyWith(
+                        color: currentTheme.textColor
+                      ),),
+                    )
+                  ],
+                ),
+              )
               : ListView.builder(
                   itemCount: characters.length,
                   itemBuilder: (context, int index) {
@@ -174,7 +216,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                                     ),
                                     Expanded(
                                       child: Container(
-                                        padding:EdgeInsets.only(top: 12.0),
+                                        padding: EdgeInsets.only(top: 12.0),
                                         color: currentTheme.backgroundColor,
                                         child: ListView.builder(
                                           itemCount: relatedCharacters.length,
@@ -218,29 +260,50 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                   },
                 ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              onPressed: pagination.hasPreviousPage
-                  ? () async {
-                      _loadData(pagination.currentPage - 1, "");
-                    }
-                  : null,
-              icon: Icon(Icons.arrow_back),
-              color: currentTheme.buttonColor,
-            ),
-            IconButton(
-              onPressed: pagination.hasNextPage
-                  ? () async {
-                      _loadData(pagination.currentPage + 1, "");
-                    }
-                  : null,
-              icon: Icon(Icons.arrow_forward),
-              color: currentTheme.buttonColor,
-            ),
-          ],
+         CustomPagination(
+          pagination: PaginationInfo(
+              currentPage: pagination.currentPage,
+              itemsPerPage: pagination.itemsPerPage,
+              totalPages: pagination.totalPages,
+              hasPreviousPage: pagination.hasPreviousPage,
+              hasNextPage: pagination.hasNextPage,
+              totalItems: pagination.totalItems),
+          itemPerPageValue: itemPerPageValue,
+          currentTheme: currentTheme,
+          onPageChanged: (newPage, newPerPage) async {
+            if (characters.isNotEmpty) {
+              await _loadData(
+                newPage,
+                newPerPage,
+                _searchText,
+              );
+            }
+          },
+          itemsPerPage: itemsPerPage, // Opcional: personaliza los valores
         )
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     IconButton(
+        //       onPressed: pagination.hasPreviousPage
+        //           ? () async {
+        //               _loadData(pagination.currentPage - 1, "");
+        //             }
+        //           : null,
+        //       icon: Icon(Icons.arrow_back),
+        //       color: currentTheme.buttonColor,
+        //     ),
+        //     IconButton(
+        //       onPressed: pagination.hasNextPage
+        //           ? () async {
+        //               _loadData(pagination.currentPage + 1, "");
+        //             }
+        //           : null,
+        //       icon: Icon(Icons.arrow_forward),
+        //       color: currentTheme.buttonColor,
+        //     ),
+        //   ],
+        // )
       ],
     );
   }
@@ -257,7 +320,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
     if (query.isEmpty) return; // No buscar si está vacío
 
     try {
-      _loadData(1, query);
+      _loadData(1,itemPerPageValue, query);
     } catch (e) {
       print("error al filtrar $e");
     }

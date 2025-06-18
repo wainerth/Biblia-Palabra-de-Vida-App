@@ -1,4 +1,4 @@
-class Pagination {
+class PaginationInfo {
   final int currentPage;
   final int totalPages;
   final int itemsPerPage;
@@ -6,7 +6,7 @@ class Pagination {
   final bool hasPreviousPage;
   final bool hasNextPage;
 
-  Pagination({
+  PaginationInfo({
     required this.currentPage,
     required this.totalPages,
     required this.itemsPerPage,
@@ -15,9 +15,9 @@ class Pagination {
     required this.hasNextPage,
   });
 
-  // Factory method to create a Pagination object from a JSON map
-  factory Pagination.fromJson(Map<String, dynamic> json) {
-    return Pagination(
+  // Factory method to create a PaginationInfo object from a JSON map
+  factory PaginationInfo.fromJson(Map<String, dynamic> json) {
+    return PaginationInfo(
       currentPage: json['currentPage'] as int,
       totalPages: json['totalPages'] as int,
       itemsPerPage: json['itemsPerPage'] as int,

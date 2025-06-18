@@ -207,19 +207,27 @@ class _BibleScreenState extends State<BibleScreen> {
                                                         'el nuevo tamaño de fuente $fontSize');
                                                   }
                                                   setState(() {
+                                                    // persistir tamaño de fuente
                                                     fontSizeNumber =
                                                         fontSize! + 2;
                                                     fontSizeVerse = fontSize;
                                                   });
+                                                  prefs!.setDouble(
+                                                      "fontSizeVerse",
+                                                      fontSize!);
                                                 },
                                                 onChangedFont: (newFont) {
                                                   if (kDebugMode) {
                                                     print(
                                                         'la nueva fuente ${newFont!.label}');
                                                   }
+                                                  // persistir familia de fuente
                                                   setState(() {
                                                     fontFamilySet = newFont!;
                                                   });
+                                                  prefs!.setString(
+                                                      "fontFamilySet",
+                                                      newFont!.toString());
                                                 },
                                               );
                                             });
@@ -273,6 +281,8 @@ class _BibleScreenState extends State<BibleScreen> {
                                             Duration(milliseconds: 500),
                                         pageBuilder: (_, __, ___) {
                                           return Dialog(
+                                            backgroundColor:
+                                                currentTheme.backgroundColor,
                                             insetPadding: EdgeInsets.zero,
                                             child: SizedBox(
                                               width: MediaQuery.of(context)
@@ -282,13 +292,19 @@ class _BibleScreenState extends State<BibleScreen> {
                                                   .size
                                                   .height,
                                               child: SearchBibleWidget(
-                                                onActionBook:
-                                                    (InputDataSearchModel
-                                                        data) async {
-                                                  await loadVersionAndVerseRange(
-                                                      data);
-                                                },
-                                              ),
+                                                  onActionBook:
+                                                      (InputDataSearchModel
+                                                          data) async {
+                                                await loadVersionAndVerseRange(
+                                                    data);
+                                              }, onActionTheme:
+                                                      (InputDataSearchModel
+                                                          data) {
+                                                if (kDebugMode) {
+                                                  print(
+                                                      "Mostrar solo los rango de versículos");
+                                                }
+                                              }),
                                             ),
                                           );
                                         },
@@ -1035,13 +1051,25 @@ class _BibleScreenState extends State<BibleScreen> {
           .loadBibleVersions();
     }
     prefs = await SharedPreferences.getInstance();
+    if (prefs!.getDouble("fontSizeVerse") != null) {
+      setState(() {
+        fontSizeVerse = prefs!.getDouble("fontSizeVerse")!;
+      });
+    }
+    // if (prefs!.getDouble("fontFamilySet") != null) {
+    //   setState(() {
+    //   });
+    // }
+
     if (mounted) setState(() {});
   }
 
   /// Método de carga inicial de datos
   Future<void> _initDataLoad() async {
     LoadingService().showLoading(context);
-
+    setState(() {
+      errorMessage = null;
+    });
     //leemos la data persistida
     await _loadPersistedData();
 
@@ -1283,11 +1311,10 @@ class _BibleScreenState extends State<BibleScreen> {
       lastVersionsSelected = bibleVersions
           .firstWhere((version) => version.value == data.versionId)
           .value;
-      final currentVers =
-          Provider.of<CatalogueProvider>(context, listen: false)
-              .allBibleVersion
-              .firstWhere((version) => version.id == lastVersionsSelected);
-              currentVersion = currentVers;
+      final currentVers = Provider.of<CatalogueProvider>(context, listen: false)
+          .allBibleVersion
+          .firstWhere((version) => version.id == lastVersionsSelected);
+      currentVersion = currentVers;
       currentBook =
           currentVers.books.firstWhere((book) => book.id == data.bookId);
     });

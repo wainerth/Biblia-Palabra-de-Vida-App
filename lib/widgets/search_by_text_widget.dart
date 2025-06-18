@@ -1,9 +1,12 @@
+import 'dart:async';
+
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/search_bible_widget.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/custom_pagination.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -23,40 +26,27 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
   List<VersionModel> listBibleVersions = [];
   List<ModelData> bibleVersions = [];
   ModelData? versionSelected = ModelData(label: "", value: "");
-
-  List searchResult = [
-    {
-      "moderName": "Deuteronomio",
-      "chapter": "6",
-      "verse": "4",
-      "text": "Escucha, Israel: Jehová nuestro Dios, Jehová uno es."
-    },
-    {
-      "moderName": "Deuteronomio",
-      "chapter": "5",
-      "verse": "1",
-      "text":
-          "Moisés convocó a todo Israel, y les dijo: Escucha, Israel, los estatutos y los decretos que hablo hoy a vuestros oídos."
-    },
-    {
-      "moderName": "Deuteronomio 6:4",
-      "chapter": "6",
-      "verse": "4",
-      "text": "Escucha, Israel: Jehová nuestro Dios, Jehová uno es."
-    },
-    {
-      "moderName": "Deuteronomio 6:4",
-      "chapter": "6",
-      "verse": "4",
-      "text": "Escucha, Israel: Jehová nuestro Dios, Jehová uno es."
-    },
-    {
-      "moderName": "Deuteronomio 6:4",
-      "chapter": "6",
-      "verse": "4",
-      "text": "Escucha, Israel: Jehová nuestro Dios, Jehová uno es."
-    },
+  bool loading = false;
+  List<WordSearchResult> searchResult = [];
+  List<int> itemsPerPage = [
+    5,
+    10,
+    15,
+    25,
+    50,
+    100,
   ];
+  int itemPerPageValue = 50;
+  PaginationInfo pagination = PaginationInfo(
+    currentPage: 0,
+    totalPages: 0,
+    itemsPerPage: 0,
+    totalItems: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  );
+  Timer? _debounceTimer;
+
   String _searchText = '';
   @override
   void initState() {
@@ -74,6 +64,13 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
             .toList();
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    searchTextController.dispose();
+    super.dispose();
   }
 
   @override
@@ -120,6 +117,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                 height: 25.0,
               ),
               TextFormField(
+                readOnly: versionSelected!.value.isEmpty || loading,
                 controller: searchTextController,
                 style: StylesApp(context).textStyleSmallBlack,
                 decoration:
@@ -141,6 +139,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                   setState(() {
                     _searchText = value;
                   });
+                  _onSearchChanged(value);
                 },
               ),
             ],
@@ -151,96 +150,180 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
         ),
         // body de los resultados de la búsqueda
         Expanded(
-          child: ListView.builder(
-            itemCount: 10,
-            itemBuilder: (context, int index) {
-              return CardSearchTextWidget(
-                data: "",
-                currentTheme: currentTheme,
-                onAction: () {
-                  showModalBottomSheet(
-                      backgroundColor: currentTheme.backgroundColor,
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ListTile(
-                              title: Text("Ver Capitulo",
-                                  style: StylesApp(context)
-                                      .textStyleBody12
-                                      .copyWith(color: currentTheme.textColor)),
-                              trailing: Icon(
-                                Icons.play_arrow_outlined,
-                                color: currentTheme.buttonColor,
-                                size: 25,
-                              ),
-                              onTap: () {},
+          child: loading
+              ? LoadingIndicator()
+              : searchResult.isEmpty
+                  ? Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Center(
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              "No hay resultados...",
+                              style: StylesApp(context)
+                                  .textStyleBody18
+                                  .copyWith(color: currentTheme.textColor),
                             ),
-                            Divider(
-                              color: StyleColor.grayMedium,
-                              height: 2.0,
-                              thickness: 4.0,
-                            ),
-                            ListTile(
-                              title: Text("Copiar",
-                                  style: StylesApp(context)
-                                      .textStyleBody12
-                                      .copyWith(color: currentTheme.textColor)),
-                              trailing: Icon(Icons.file_copy,
-                                  color: currentTheme.buttonColor, size: 25),
-                              onTap: () {},
-                            ),
-                            Divider(
-                              color: StyleColor.grayMedium,
-                              height: 2,
-                              thickness: 4.0,
-                            ),
-                            ListTile(
-                              title: Text("Favoritos",
-                                  style: StylesApp(context)
-                                      .textStyleBody12
-                                      .copyWith(color: currentTheme.textColor)),
-                              trailing: Icon(Icons.star_border,
-                                  color: currentTheme.buttonColor, size: 25),
-                              onTap: () {},
-                            ),
-                            Divider(
-                              color: StyleColor.grayMedium,
-                              height: 2,
-                              thickness: 4.0,
-                            ),
-                          ],
+                          )
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: searchResult.length,
+                      itemBuilder: (context, int index) {
+                        return CardSearchTextWidget(
+                          data: searchResult[index],
+                          currentTheme: currentTheme,
+                          onAction: () {
+                            showModalBottomSheet(
+                                backgroundColor: currentTheme.backgroundColor,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        title: Text("Ver Capitulo",
+                                            style: StylesApp(context)
+                                                .textStyleBody12
+                                                .copyWith(
+                                                    color: currentTheme
+                                                        .textColor)),
+                                        trailing: Icon(
+                                          Icons.play_arrow_outlined,
+                                          color: currentTheme.buttonColor,
+                                          size: 25,
+                                        ),
+                                        onTap: () {},
+                                      ),
+                                      Divider(
+                                        color: StyleColor.grayMedium,
+                                        height: 2.0,
+                                        thickness: 4.0,
+                                      ),
+                                      ListTile(
+                                        title: Text("Copiar",
+                                            style: StylesApp(context)
+                                                .textStyleBody12
+                                                .copyWith(
+                                                    color: currentTheme
+                                                        .textColor)),
+                                        trailing: Icon(Icons.file_copy,
+                                            color: currentTheme.buttonColor,
+                                            size: 25),
+                                        onTap: () {},
+                                      ),
+                                      Divider(
+                                        color: StyleColor.grayMedium,
+                                        height: 2,
+                                        thickness: 4.0,
+                                      ),
+                                      ListTile(
+                                        title: Text("Favoritos",
+                                            style: StylesApp(context)
+                                                .textStyleBody12
+                                                .copyWith(
+                                                    color: currentTheme
+                                                        .textColor)),
+                                        trailing: Icon(Icons.star_border,
+                                            color: currentTheme.buttonColor,
+                                            size: 25),
+                                        onTap: () {},
+                                      ),
+                                      Divider(
+                                        color: StyleColor.grayMedium,
+                                        height: 2,
+                                        thickness: 4.0,
+                                      ),
+                                    ],
+                                  );
+                                });
+                          },
                         );
-                      });
-                },
-              );
-            },
-          ),
+                      },
+                    ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              onPressed: () async {},
-              icon: Icon(Icons.arrow_back),
-              color: currentTheme.buttonColor,
-            ),
-            IconButton(
-              onPressed: () async {},
-              icon: Icon(Icons.arrow_forward),
-              color: currentTheme.buttonColor,
-            ),
-          ],
+       
+        CustomPagination(
+          pagination: PaginationInfo(
+              currentPage: pagination.currentPage,
+              itemsPerPage: pagination.itemsPerPage,
+              totalPages: pagination.totalPages,
+              hasPreviousPage: pagination.hasPreviousPage,
+              hasNextPage: pagination.hasNextPage,
+              totalItems: pagination.totalItems),
+          itemPerPageValue: itemPerPageValue,
+          currentTheme: currentTheme,
+          onPageChanged: (newPage, newPerPage) async {
+            if (versionSelected!.value.isNotEmpty) {
+              await _loadData(
+                newPage,
+                newPerPage,
+                versionSelected!.value,
+                _searchText,
+              );
+            }
+          },
+          itemsPerPage: itemsPerPage, // Opcional: personaliza los valores
         )
       ],
     );
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+
+    _debounceTimer = Timer(Duration(milliseconds: 800), () {
+      _performSearch(query);
+    });
+  }
+
+  void _performSearch(String query) async {
+    if (query.isEmpty) return; // No buscar si está vacío
+
+    try {
+      _loadData(1, itemPerPageValue, versionSelected!.value, query);
+    } catch (e) {
+      print("error al filtrar $e");
+    }
   }
 
   void cleanSearch() {
     setState(() {
       _searchText = '';
       searchTextController.text = '';
+    });
+  }
+
+  Future<void> _loadData(
+      int page, int limit, String versionId, String searchWord) async {
+    setState(() {
+      loading = true;
+    });
+    final responseResult =
+        await getWordsConcordance(page, limit, versionId, searchWord);
+    if (responseResult.error != null) {
+      await showCustomDialog(
+        context,
+        message: responseResult.error!,
+        dialogType: DialogType.error,
+      );
+      setState(() {
+        loading = false;
+      });
+      return;
+    }
+
+    setState(() {
+      searchResult = responseResult.data['data']
+          .map<WordSearchResult>(
+              (wordSearch) => WordSearchResult.fromJson(wordSearch))
+          .toList();
+
+      pagination =
+          PaginationInfo.fromJson(removeTypename(responseResult.data["meta"]));
+      loading = false;
     });
   }
 }

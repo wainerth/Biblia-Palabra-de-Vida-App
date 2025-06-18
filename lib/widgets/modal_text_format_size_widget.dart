@@ -178,6 +178,7 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
             onChanged: (ModelData? newValue) {
               setState((){
                 selectedFont = newValue!;
+                
               });
               widget.onChangedFont(newValue);
             },

@@ -34,7 +34,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   bool loadingChapter = false;
   bool loadingVerses = false;
   bool verseRange = false;
-  bool _chaptersExpanded = false;
+  bool _chaptersExpanded = true;
   bool _versesExpanded = false;
   List<VerseModel> _selectedItems = [];
 
@@ -63,228 +63,236 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
     currentTheme = themeProvider.themeData;
     return SingleChildScrollView(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            height: 25,
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            constraints: BoxConstraints(
-              minWidth: 160.0,
-              maxWidth: StylesApp(context).sizeTextFormField.width,
-            ),
-            child: CustomDropdownBottomWidget(
-              hintText: "Seleccione la version",
-              items: bibleVersions,
-              onChanged: (ModelData? version) async {
-                if (kDebugMode) {
-                  print("version seleccionada ${version!.value}");
-                }
-                setState(() {
-                  versionSelected = version;
-                  _chaptersExpanded = false;
-                  _versesExpanded = false;
-                });
-                await loadBookByVersion(version!.value);
-              },
-              selectedItem: versionSelected!.value.isNotEmpty
-                  ? bibleVersions.firstWhere((element) =>
-                      element.value.toLowerCase() ==
-                      versionSelected?.value.toLowerCase())
-                  : null,
-            ),
-          ),
-          SizedBox(
-            height: 25,
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            constraints: BoxConstraints(
-              minWidth: 160.0,
-              maxWidth: StylesApp(context).sizeTextFormField.width,
-            ),
-            child: CustomDropdownBottomWidget(
-              hintText: "Seleccione el Libro",
-              items: books,
-              onChanged: (ModelData? book) async {
-                if (kDebugMode) {
-                  print("version seleccionada ${book!.value}");
-                }
-                setState(() {
-                  bookSelected = book;
-                  _chaptersExpanded = true;
-                  _versesExpanded = false;
-                });
-
-                await getChapterByBook(book!.value);
-              },
-              selectedItem: bookSelected!.value.isNotEmpty
-                  ? books.firstWhere((element) =>
-                      element.value.toLowerCase() ==
-                      bookSelected?.value.toLowerCase())
-                  : null,
-            ),
-          ),
-          SizedBox(
-            height: 25,
-          ),
           Column(
             children: [
-              // Sección Capítulos
-              GestureDetector(
-                onTap: () =>
-                    setState(() => _chaptersExpanded = !_chaptersExpanded),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Capítulos",
-                        style: StylesApp(context)
-                            .textStyleBody16
-                            .copyWith(color: currentTheme.textColor),
-                      ),
-                      Spacer(),
-                      Icon(
-                        _chaptersExpanded
-                            ? Icons.expand_less
-                            : Icons.expand_more,
-                        color: currentTheme.textColor,
-                      ),
-                    ],
-                  ),
+              SizedBox(
+                height: 25,
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                constraints: BoxConstraints(
+                  minWidth: 160.0,
+                  maxWidth: StylesApp(context).sizeTextFormField.width,
+                ),
+                child: CustomDropdownBottomWidget(
+                  hintText: "Seleccione la version",
+                  items: bibleVersions,
+                  onChanged: (ModelData? version) async {
+                    if (kDebugMode) {
+                      print("version seleccionada ${version!.value}");
+                    }
+                    setState(() {
+                      versionSelected = version;
+                      _chaptersExpanded = false;
+                      _versesExpanded = false;
+                    });
+                    await loadBookByVersion(version!.value);
+                  },
+                  selectedItem: versionSelected!.value.isNotEmpty
+                      ? bibleVersions.firstWhere((element) =>
+                          element.value.toLowerCase() ==
+                          versionSelected?.value.toLowerCase())
+                      : null,
                 ),
               ),
-              AnimatedCrossFade(
-                duration: Duration(milliseconds: 300),
-                crossFadeState: _chaptersExpanded
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-                firstChild: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: currentTheme.backgroundColor,
-                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: StyleColor.black.withValues(alpha: 0.25),
-                            blurRadius: 4.0,
-                            offset: Offset(0, 4)),
-                      ],
+              SizedBox(
+                height: 25,
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                constraints: BoxConstraints(
+                  minWidth: 160.0,
+                  maxWidth: StylesApp(context).sizeTextFormField.width,
+                ),
+                child: CustomDropdownBottomWidget(
+                  hintText: "Seleccione el Libro",
+                  items: books,
+                  onChanged: (ModelData? book) async {
+                    if (kDebugMode) {
+                      print("version seleccionada ${book!.value}");
+                    }
+                    setState(() {
+                      bookSelected = book;
+                      _chaptersExpanded = true;
+                      _versesExpanded = false;
+                    });
+
+                    await getChapterByBook(book!.value);
+                  },
+                  selectedItem: bookSelected!.value.isNotEmpty
+                      ? books.firstWhere((element) =>
+                          element.value.toLowerCase() ==
+                          bookSelected?.value.toLowerCase())
+                      : null,
+                ),
+              ),
+              SizedBox(
+                height: 25,
+              ),
+              Column(
+                children: [
+                  // Sección Capítulos
+                  GestureDetector(
+                    onTap: () =>
+                        setState(() => _chaptersExpanded = !_chaptersExpanded),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            "Capítulos",
+                            style: StylesApp(context)
+                                .textStyleBody16
+                                .copyWith(color: currentTheme.textColor),
+                          ),
+                          Spacer(),
+                          Icon(
+                            _chaptersExpanded
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                            color: currentTheme.textColor,
+                          ),
+                        ],
+                      ),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 12.0),
-                    height: 280,
-                    child: GridButtonWidget<ChapterModel>(
-                      loading: loadingChapter,
-                      data: chapters,
-                      currentTheme: currentTheme,
-                      onTap: (chapter) async {
-                        if (kDebugMode) {
-                          print('Capítulo seleccionado: ${chapter.first.id}');
-                          loadVerses(chapter.first.id);
+                  ),
+                  AnimatedCrossFade(
+                    duration: Duration(milliseconds: 300),
+                    crossFadeState: _chaptersExpanded
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: currentTheme.backgroundColor,
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                          boxShadow: [
+                            BoxShadow(
+                                color: StyleColor.black.withValues(alpha: 0.25),
+                                blurRadius: 4.0,
+                                offset: Offset(0, 4)),
+                          ],
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 12.0),
+                        height: 280,
+                        child: GridButtonWidget<ChapterModel>(
+                          loading: loadingChapter,
+                          data: chapters,
+                          currentTheme: currentTheme,
+                          onTap: (chapter) async {
+                            if (kDebugMode) {
+                              print(
+                                  'Capítulo seleccionado: ${chapter.first.id}');
+                              loadVerses(chapter.first.id);
+                              setState(() {
+                                chapterSelected = chapter.first;
+                                _chaptersExpanded = false;
+                                _versesExpanded = true;
+                                _selectedItems = [];
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    secondChild: Container(),
+                  ),
+
+                  // Sección Versículos
+                  GestureDetector(
+                    onTap: () =>
+                        setState(() => _versesExpanded = !_versesExpanded),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            "Versículos",
+                            style: StylesApp(context)
+                                .textStyleBody16
+                                .copyWith(color: currentTheme.textColor),
+                          ),
+                          Spacer(),
+                          Icon(
+                            _versesExpanded
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                            color: currentTheme.textColor,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  AnimatedCrossFade(
+                    duration: Duration(milliseconds: 300),
+                    crossFadeState: _versesExpanded
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: currentTheme.backgroundColor,
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                          boxShadow: [
+                            BoxShadow(
+                                color: StyleColor.black.withValues(alpha: 0.25),
+                                blurRadius: 4.0,
+                                offset: Offset(0, 4)),
+                          ],
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 12.0),
+                        height: 280,
+                        child: GridButtonWidget<VerseModel>(
+                          loading: loadingVerses,
+                          data: verses,
+                          currentTheme: currentTheme,
+                          rangeSelect: verseRange,
+                          initiallySelected: _selectedItems,
+                          onTap: (verse) {
+                            setState(() {
+                              _selectedItems = verse;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    secondChild: Container(),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: ListTile(
+                      title: Text(
+                        'Rango de versículos',
+                        style: StylesApp(context)
+                            .textStyleBody12
+                            .copyWith(color: currentTheme.textColor),
+                      ),
+                      trailing: Switch(
+                        activeColor: currentTheme.buttonColor,
+                        thumbColor:
+                            WidgetStatePropertyAll(currentTheme.buttonColor),
+                        trackOutlineColor:
+                            WidgetStatePropertyAll(StyleColor.grayMedium),
+                        value: verseRange,
+                        onChanged: (bool value) {
                           setState(() {
-                            chapterSelected = chapter.first;
-                            _chaptersExpanded = false;
-                            _versesExpanded = true;
+                            verseRange = value;
                             _selectedItems = [];
                           });
-                        }
-                      },
-                    ),
-                  ),
-                ),
-                secondChild: Container(),
-              ),
-
-              // Sección Versículos
-              GestureDetector(
-                onTap: () => setState(() => _versesExpanded = !_versesExpanded),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Versículos",
-                        style: StylesApp(context)
-                            .textStyleBody16
-                            .copyWith(color: currentTheme.textColor),
+                        },
                       ),
-                      Spacer(),
-                      Icon(
-                        _versesExpanded ? Icons.expand_less : Icons.expand_more,
-                        color: currentTheme.textColor,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              AnimatedCrossFade(
-                duration: Duration(milliseconds: 300),
-                crossFadeState: _versesExpanded
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-                firstChild: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: currentTheme.backgroundColor,
-                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: StyleColor.black.withValues(alpha: 0.25),
-                            blurRadius: 4.0,
-                            offset: Offset(0, 4)),
-                      ],
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 12.0),
-                    height: 280,
-                    child: GridButtonWidget<VerseModel>(
-                      loading: loadingVerses,
-                      data: verses,
-                      currentTheme: currentTheme,
-                      rangeSelect: verseRange,
-                      initiallySelected: _selectedItems,
-                      onTap: (verse) {
-                        setState(() {
-                          _selectedItems = verse;
-                        });
-                      },
                     ),
                   ),
-                ),
-                secondChild: Container(),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width,
-                child: ListTile(
-                  title: Text(
-                    'Rango de versículos',
-                    style: StylesApp(context)
-                        .textStyleBody12
-                        .copyWith(color: currentTheme.textColor),
-                  ),
-                  trailing: Switch(
-                    activeColor: currentTheme.buttonColor,
-                    thumbColor:
-                        WidgetStatePropertyAll(currentTheme.buttonColor),
-                    trackOutlineColor:
-                        WidgetStatePropertyAll(StyleColor.grayMedium),
-                    value: verseRange,
-                    onChanged: (bool value) {
-                      setState(() {
-                        verseRange = value;
-                        _selectedItems = [];
-                      });
-                    },
-                  ),
-                ),
+                ],
               ),
             ],
           ),
@@ -302,7 +310,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     startVerseId: _selectedItems.first.id,
                     endVerseId: _selectedItems.last.id,
                   );
-                   widget.onActionBook!(data);
+                  widget.onActionBook!(data);
                 },
               )
             ],

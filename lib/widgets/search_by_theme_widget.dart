@@ -11,13 +11,16 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
 class SearchByThemeWidget extends StatefulWidget {
+  final void Function(InputDataSearchModel data)? onActionTheme;
   const SearchByThemeWidget({
     super.key,
+    this.onActionTheme,
   });
 
   @override
   State<SearchByThemeWidget> createState() => _SearchByThemeWidgetState();
 }
+
 class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
   LoginUser? userData;
 
@@ -25,7 +28,16 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
   TextEditingController searchTextController = TextEditingController();
   String _searchText = '';
   List<TeachingModel> teachings = [];
-  Pagination pagination = Pagination(
+  int itemPerPageValue = 50;
+  List<int> itemsPerPage = [
+    5,
+    10,
+    15,
+    25,
+    50,
+    100,
+  ];
+  PaginationInfo pagination = PaginationInfo(
     currentPage: 0,
     totalPages: 0,
     itemsPerPage: 0,
@@ -53,14 +65,14 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
     userData = userProvider.currentUser;
     await Provider.of<BibleThemeProvider>(context, listen: false)
         .loadSavedTheme();
-    await _loadData(1, "");
+    await _loadData(1, itemPerPageValue, "");
   }
 
-  Future<void> _loadData(page, filter) async {
+  Future<void> _loadData(int page, int limit, filter) async {
     setState(() {
       teachings = [];
     });
-    final responseTeaching = await getAllTeaching(page, 10, filter, "");
+    final responseTeaching = await getAllTeaching(page, limit, filter, "");
     if (responseTeaching.error != null) {
       await showCustomDialog(
         context,
@@ -75,8 +87,8 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
           .cast<TeachingModel>()
           .toList();
 
-      pagination =
-          Pagination.fromJson(removeTypename(responseTeaching.data["meta"]));
+      pagination = PaginationInfo.fromJson(
+          removeTypename(responseTeaching.data["meta"]));
     });
   }
 
@@ -136,40 +148,45 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                   itemBuilder: (context, int index) {
                     return CardTeachingWidget(
                         data: teachings[index],
+                        currentTheme: currentTheme,
                         onTap: () {
                           showDialog(
                               context: context,
                               builder: (BuildContext context) {
                                 return DialogInternalTeaching(
-                                    data: teachings[index],
-                                    currentTheme: currentTheme);
+                                  data: teachings[index],
+                                  currentTheme: currentTheme,
+                                  onActionReferences:
+                                      (InputDataSearchModel data) {
+                                    widget.onActionTheme!(data);
+                                    Navigator.pop(context);
+                                  },
+                                );
                               });
                         });
                   },
                 ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              onPressed: pagination.hasPreviousPage
-                  ? () async {
-                      _loadData(pagination.currentPage - 1, "");
-                    }
-                  : null,
-              icon: Icon(Icons.arrow_back),
-              color: currentTheme.buttonColor,
-            ),
-            IconButton(
-              onPressed: pagination.hasNextPage
-                  ? () async {
-                      _loadData(pagination.currentPage + 1, "");
-                    }
-                  : null,
-              icon: Icon(Icons.arrow_forward),
-              color: currentTheme.buttonColor,
-            ),
-          ],
+        CustomPagination(
+          pagination: PaginationInfo(
+              currentPage: pagination.currentPage,
+              itemsPerPage: pagination.itemsPerPage,
+              totalPages: pagination.totalPages,
+              hasPreviousPage: pagination.hasPreviousPage,
+              hasNextPage: pagination.hasNextPage,
+              totalItems: pagination.totalItems),
+          itemPerPageValue: itemPerPageValue,
+          currentTheme: currentTheme,
+          onPageChanged: (newPage, newPerPage) async {
+            if (teachings.isNotEmpty) {
+              await _loadData(
+                newPage,
+                newPerPage,
+                _searchText,
+              );
+            }
+          },
+          itemsPerPage: itemsPerPage, // Opcional: personaliza los valores
         )
       ],
     );
@@ -187,7 +204,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
     if (query.isEmpty) return; // No buscar si está vacío
 
     try {
-      _loadData(1, query);
+      _loadData(1,itemPerPageValue, query);
     } catch (e) {
       print("error al filtrar $e");
     }

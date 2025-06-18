@@ -2349,3 +2349,169 @@ Future<ResponseData> getAllCharacters(
     }
   }
 }
+
+Future<ResponseData> getReferenceTeaching(String id) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+        query GetVersesForTeaching($id: ID) {
+          getVersesForTeaching(id: $id) {
+            id
+            verse {
+              verse
+              text
+              id
+            }
+            chapter {
+              id
+              chapter
+            }
+            book {
+              bibleId
+              id
+              modernName
+            }
+            numberEndVerse
+          }
+        }
+      '''),
+    variables: <String, dynamic>{"id": id},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getVersesForTeaching'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Verses For Teaching  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getVersesForTeaching'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get Verses For Teaching Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getWordsConcordance(
+    int page, int limit, String versionId, String searchWord) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+        query WordSearchConcordance($page: Int, $limit: Int, $versionId: ID, $searchWord: String) {
+        wordSearchConcordance(page: $page, limit: $limit, versionId: $versionId, searchWord: $searchWord) {
+          data {
+            verse {
+              id
+              verse
+              text
+              occurrence {
+                start
+                end
+              }
+            }
+            chapter {
+              id
+              chapter
+            }
+            book {
+              id
+              numberBook
+              modernName
+              newTestament
+            }
+          }
+          meta {
+            currentPage
+            totalPages
+            itemsPerPage
+            totalItems
+            hasPreviousPage
+            hasNextPage
+          }
+        }
+      }
+
+      '''),
+    variables: <String, dynamic>{
+      "page": page,
+      "limit": limit,
+      "versionId": versionId,
+      "searchWord": searchWord,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['wordSearchConcordance'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Word Search Concordance  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['wordSearchConcordance'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Word Search Concordance Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}

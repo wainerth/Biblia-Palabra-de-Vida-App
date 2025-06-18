@@ -8,7 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ModalTalesWidget extends StatefulWidget {
   final List<ButtonData> data;
-  final Pagination pagination;
+  final PaginationInfo pagination;
 
   const ModalTalesWidget(
       {super.key, required this.data, required this.pagination});
@@ -20,7 +20,7 @@ class ModalTalesWidget extends StatefulWidget {
 class _ModalTalesWidgetState extends State<ModalTalesWidget> {
   ButtonData? taleSelected;
   List<ButtonData>? _localReflection;
-  Pagination? _localPagination;
+  PaginationInfo? _localPagination;
   String title = '';
   int limit = 12;
   @override
@@ -61,7 +61,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
               urlAudio: reflection.url))
           .toList();
       _localPagination =
-          Pagination.fromJson(removeTypename(response.data['meta']));
+          PaginationInfo.fromJson(removeTypename(response.data['meta']));
     });
   }
 
