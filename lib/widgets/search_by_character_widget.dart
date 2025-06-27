@@ -88,6 +88,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
               showAction: true,
               textButton: 'Reintentar',
               actionCallback: () async {
+                Navigator.pop(context);
                await _loadData(1,limit, "");
               });
       setState(() {
@@ -272,6 +273,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
           currentTheme: currentTheme,
           onPageChanged: (newPage, newPerPage) async {
             if (characters.isNotEmpty) {
+               setState(() {
+                itemPerPageValue = newPerPage;
+              }); 
               await _loadData(
                 newPage,
                 newPerPage,

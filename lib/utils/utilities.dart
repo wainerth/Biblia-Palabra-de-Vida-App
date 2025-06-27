@@ -1,11 +1,12 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 export 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 export 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
@@ -56,7 +57,8 @@ UserChurch? getChurchActive(churches) {
   if (churches.isNotEmpty) {
     UserChurch? church;
     try {
-      church = (churches as List<UserChurch>).firstWhere((UserChurch element) => element.status);
+      church = (churches as List<UserChurch>)
+          .firstWhere((UserChurch element) => element.status);
     } on StateError {
       church = null;
     }
@@ -116,8 +118,7 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
         nuevosDatos["city"] = item.value as String?;
         break;
       case 'gender':
-        nuevosDatos["gender"] =
-            item.value.isNotEmpty ? item.value[0].toLowerCase() : null;
+        nuevosDatos["gender"] = item.value.isNotEmpty ? item.value[0] : null;
         break;
       case 'isBaptized':
         nuevosDatos["isBaptized"] = item.value == 'Bautizado' ? true : false;
@@ -214,13 +215,45 @@ obtainedStar(int maxScore, int sectionCompleted, int sectionCount) {
         : ''
   );
 }
+formatColor(String? color) {
+  if (color!.contains('#')) {
+    return color.split('#')[1];
+  }
+  return color;
+}
+
 
 Future<String> copyChapter(ChapterModel? chapter) async {
-  String text;
   if (chapter == null) return '';
   StringBuffer buffer = StringBuffer();
   for (var verse in chapter.verses) {
     buffer.write('${verse.verse} ${verse.text}\n');
   }
   return buffer.toString();
+}
+
+Future<void> copyToClipboard(BuildContext context, dynamic data) async {
+  final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+  final copyString =
+      "${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
+  await Clipboard.setData(ClipboardData(text: copyString));
+
+  // Mostrar diálogo de confirmación
+  await showCustomDialog(
+    context,
+    message:
+        "El capítulo ${data.chapter.chapter} del libro ${data.book.modernName}\nse ha copiado con éxito al portapapeles",
+    dialogType: DialogType.info,
+  );
+}
+
+Future<void> shareVerse(BuildContext context, dynamic data) async {
+  final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+  final shareText =
+      "${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
+  await Share.share(
+    shareText,
+    subject:
+        "Palabra de Vida - ${data.chapter.chapter} ${data.book.modernName}\nVer en: $baseUrl",
+  );
 }

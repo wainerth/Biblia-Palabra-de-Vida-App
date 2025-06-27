@@ -82,6 +82,7 @@ class CustomPagination extends StatelessWidget {
 
         // Botón de página siguiente
         IconButton(
+          disabledColor: currentTheme.disabledColor,
           onPressed: pagination.hasNextPage
               ? () => onPageChanged(
                     pagination.currentPage + 1,

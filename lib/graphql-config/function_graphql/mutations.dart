@@ -465,6 +465,9 @@ Future logout() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove('userData');
   await prefs.remove('userToken');
+  await prefs.remove("selectedBibleVersion");
+  await prefs.remove("bookSelected");
+  await prefs.remove("chapterSelected");
   return ResponseData(data: true, error: null);
 }
 
@@ -1290,6 +1293,122 @@ Future<ResponseData>  updateFavoriteVerse(String userId ,String verseId) async {
     print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Update Favorite Verse Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+Future<ResponseData>  createNewVerseFavoriteByUser(String userId ,String verseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "DeleteVerseFavorite",
+    document: gql(r'''
+     mutation CreateNewVerseFavoriteByUser($userId: ID, $verseId: ID) {
+        createNewVerseFavoriteByUser(userId: $userId, verseId: $verseId) {
+          success
+          message
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "verseId": verseId,
+      "userId": userId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['createNewVerseFavoriteByUser'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Create New Verse Favorite By User failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['createNewVerseFavoriteByUser'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Create New Verse Favorite By User Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+Future<ResponseData>  deleteVerseFavorite(String userId ,String verseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "DeleteVerseFavorite",
+    document: gql(r'''
+     mutation DeleteVerseFavorite($userId: ID, $verseId: ID) {
+        deleteVerseFavorite(userId: $userId, verseId: $verseId) {
+          success
+          message
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "verseId": verseId,
+      "userId": userId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['deleteVerseFavorite'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Delete Verse Favorite failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['deleteVerseFavorite'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Delete Verse Favorite Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

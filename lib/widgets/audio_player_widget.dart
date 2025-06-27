@@ -240,6 +240,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       ),
                     ),
                   IconButton(
+                    disabledColor: widget.inactiveColor,
                     padding: EdgeInsets.all(0),
                     constraints: BoxConstraints(minHeight: 24.sp),
                     color: widget.controlsColor,
@@ -258,6 +259,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     icon: Icon(
                       _isPlaying ? Icons.pause : Icons.play_arrow,
                       size: 25.sp,
+                      color: widget.controlsColor,
                     ),
                   ),
                 ],
@@ -329,11 +331,12 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     padding: EdgeInsets.all(0),
                     width: 30.sp,
                     child: IconButton(
+                      disabledColor: widget.inactiveColor,
                       padding: EdgeInsets.all(0),
                       iconSize: 25.sp,
                       constraints: BoxConstraints(minHeight: 25.sp),
                       color: widget.actionColor,
-                      onPressed: () {
+                      onPressed: widget.pathUrl.isEmpty ? null : () {
                         showModalBottomSheet(
                           context: context,
                           builder: (context) {
@@ -461,9 +464,21 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     setState(() {
       loading = true;
     });
-    await player.play(UrlSource(widget.pathUrl));
-    setState(() {
-      loading = false;
-    });
+    try {
+      await player.play(UrlSource(widget.pathUrl));
+      setState(() {
+        loading = false;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: StyleColor.redLight,
+          content: Text('Error al reproducir el audio: $e'),
+        ),
+      );
+      setState(() {
+        loading = false;
+      });
+    }
   }
 }

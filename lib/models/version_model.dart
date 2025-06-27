@@ -8,14 +8,14 @@ class VersionModel {
   VersionModel({required this.id, required this.version, required this.books});
 
   factory VersionModel.fromJson(Map<String, dynamic> json) {
+    final books = (json['books'] as List)
+        .map((book) => BookModel.fromJson(book))
+        .toList()
+      ..sort((a, b) => a.numberBook.compareTo(b.numberBook));
     return VersionModel(
       id: json['id'],
       version: json['version'] ?? '',
-      books: json['books'] != null
-          ? (json['books'] as List)
-              .map((book) => BookModel.fromJson(book))
-              .toList()
-          : [],
+      books: books,
     );
   }
 

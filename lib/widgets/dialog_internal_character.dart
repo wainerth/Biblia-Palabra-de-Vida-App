@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -5,22 +6,38 @@ import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
-class DialogInternalCharacter extends StatelessWidget {
+class DialogInternalCharacter extends StatefulWidget {
+  final void Function(InputDataSearchModel data)? onActionReferences;
   final CharacterModel data;
   final BibleTheme currentTheme;
 
   const DialogInternalCharacter({
     super.key,
     required this.data,
+    this.onActionReferences,
     required this.currentTheme,
   });
 
   @override
+  State<DialogInternalCharacter> createState() =>
+      _DialogInternalCharacterState();
+}
+
+class _DialogInternalCharacterState extends State<DialogInternalCharacter> {
+  List<ReferenceBiblicalModel> references = [];
+
+   @override
+  void initState() {
+    // consultamos las referencias
+    WidgetsBinding.instance.addPostFrameCallback((_) => initialized());
+    super.initState();
+  }
+  @override
   Widget build(BuildContext context) {
-    final imageUrl = '${GraphQLConfig.urlServidor}${data.img.urlImg}';
+    final imageUrl = '${GraphQLConfig.urlServidor}${widget.data.img.urlImg}';
 
     return Container(
-      color: currentTheme.backgroundColor,
+      color: widget.currentTheme.backgroundColor,
       child: Column(
         children: [
           AppBarHeaderWidget(
@@ -41,6 +58,7 @@ class DialogInternalCharacter extends StatelessWidget {
                   width: 211,
                   height: 211,
                   decoration: BoxDecoration(
+                    color: Color(int.parse('0XFF${widget.data.color}')),
                     borderRadius: BorderRadius.circular(12.0),
                     boxShadow: [
                       BoxShadow(
@@ -53,7 +71,7 @@ class DialogInternalCharacter extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12.0),
                     child: Image.network(
-                      color: currentTheme.textColor,
+                      color: widget.currentTheme.textColor,
                       imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
@@ -70,7 +88,7 @@ class DialogInternalCharacter extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "${data.typeNameChar} ${data.name}",
+                  "${widget.data.typeNameChar} ${widget.data.name}",
                   textAlign: TextAlign.center,
                   style: StylesApp(context).textStyleBody16.copyWith(
                         color: StyleColor.orange,
@@ -94,10 +112,10 @@ class DialogInternalCharacter extends StatelessWidget {
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    data.description,
+                    widget.data.description,
                     textAlign: TextAlign.justify,
                     style: StylesApp(context).textStyleBody16.copyWith(
-                          color: currentTheme.textColor,
+                          color: widget.currentTheme.textColor,
                           height: 1.5,
                         ),
                   ),
@@ -105,9 +123,51 @@ class DialogInternalCharacter extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 40,)
+          SizedBox(
+            height: 15.0,
+          ),
+          ButtonThemeWidget(
+            text: "Referencias Bíblicas",
+            buttonStyle: StylesApp(context).btnWidgetSmall,
+            onPressed: references.isEmpty
+                ? null
+                : () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return DialogReference(
+                            currentTheme: widget.currentTheme,
+                            title: "${widget.data.typeNameChar} ${widget.data.name}",
+                            data: references,
+                            onActionReferences: (InputDataSearchModel data) {
+                              widget.onActionReferences!(data);
+                              Navigator.pop(context);
+                            },
+                          );
+                        });
+                  },
+          ),
+            SizedBox(
+            height: 15.0,
+          ),
         ],
       ),
     );
+  }
+   void initialized() async {
+    // final responseReferences = await getCharacterFirstAppearance(widget.data.id);
+    // if (responseReferences.error != null) {
+    //   await showCustomDialog(
+    //     context,
+    //     message: responseReferences.error!,
+    //     dialogType: DialogType.error,
+    //   );
+    //   return;
+    // }
+    // setState(() {
+    //   references = responseReferences.data
+    //       .map<ReferenceBiblicalModel>((reference) => ReferenceBiblicalModel.fromJson(reference))
+    //       .toList();
+    // });
   }
 }

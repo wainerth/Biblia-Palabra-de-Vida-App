@@ -49,8 +49,9 @@ class _BibleScreenState extends State<BibleScreen> {
   double fontSizeNumber = 16.sp;
   double fontSizeVerse = 14.sp;
   ModelData fontFamilySet = ModelData(label: "Aclonica", value: "1");
+  AudioChapterModel? audioChapter;
   //  Variable para controlar el overlay
-  final List<String> _favoriteVerses = [];
+  List<FavoriteVerse> _favoriteVerses = [];
   List<HighlightRangeModel> _highlights = [];
   final GlobalKey _selectableTextKey = GlobalKey();
   late BibleTheme currentTheme;
@@ -61,7 +62,6 @@ class _BibleScreenState extends State<BibleScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       userData = userProvider.currentUser;
-
       await _initDataLoad();
       _loadHighlights();
     });
@@ -92,7 +92,8 @@ class _BibleScreenState extends State<BibleScreen> {
                   BuildErrorWidget(
                     errorMessage: errorMessage!,
                     onRetry: () async => _initDataLoad(),
-                    onBack: () => Navigator.pop(context),
+                    onBack: () => Navigator.pushNamed(context, '/layoutPage',
+                        arguments: {'selectedIndex': 0}),
                   )
                 } else ...{
                   // cabecera
@@ -168,7 +169,11 @@ class _BibleScreenState extends State<BibleScreen> {
                                             // Otros widgets de la lista...
                                             const SizedBox(height: 40),
                                             _buildContinuousText(), // Tu texto formateado como un widget
-                                            const SizedBox(height: 16),
+                                            SizedBox(
+                                              height:
+                                                  kBottomNavigationBarHeight +
+                                                      20,
+                                            )
                                             // Más widgets...
                                           ],
                                         ),
@@ -295,16 +300,20 @@ class _BibleScreenState extends State<BibleScreen> {
                                                   onActionBook:
                                                       (InputDataSearchModel
                                                           data) async {
-                                                await loadVersionAndVerseRange(
-                                                    data);
-                                              }, onActionTheme:
+                                                    await loadVersionAndVerseRange(
+                                                        data);
+                                                  },
+                                                  onActionTabText:
+                                                      (InputDataSearchModel
+                                                          data) {},
+                                                  onActionTheme:
                                                       (InputDataSearchModel
                                                           data) {
-                                                if (kDebugMode) {
-                                                  print(
-                                                      "Mostrar solo los rango de versículos");
-                                                }
-                                              }),
+                                                    if (kDebugMode) {
+                                                      print(
+                                                          "Mostrar solo los rango de versículos");
+                                                    }
+                                                  }),
                                             ),
                                           );
                                         },
@@ -328,85 +337,16 @@ class _BibleScreenState extends State<BibleScreen> {
                                     padding: EdgeInsets.zero,
                                     iconSize: 25.0,
                                     onPressed: () async {
-                                      showDialog(
+                                      showGeneralDialog(
                                           context: context,
-                                          builder: (BuildContext context) {
-                                            final favoriteVerse = [];
-                                            for (final chapter in allChapters) {
-                                              chapter.verses.map((verse) => {
-                                                    if (verse.id ==
-                                                        _favoriteVerses.first)
-                                                      {
-                                                        favoriteVerse.add(
-                                                          FavoriteVerse(
-                                                              text: verse.text,
-                                                              chapterNumber:
-                                                                  chapter
-                                                                      .chapter,
-                                                              verseNumber:
-                                                                  verse.verse),
-                                                        )
-                                                      }
-                                                  });
-                                            }
-                                            return Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  margin: EdgeInsets.symmetric(
-                                                      horizontal: 8.0),
-                                                  constraints: BoxConstraints(
-                                                      minHeight: 60),
-                                                  decoration: BoxDecoration(
-                                                      color: currentTheme
-                                                          .backgroundColor,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8.0),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                            color: StyleColor
-                                                                .black
-                                                                .withValues(
-                                                                    alpha: .25),
-                                                            spreadRadius: 4.0,
-                                                            offset:
-                                                                Offset(0, 4.0))
-                                                      ]),
-                                                  child: Column(
-                                                    children: [
-                                                      ...favoriteVerse
-                                                          .expand(
-                                                              (favorite) => [
-                                                                    Text(
-                                                                        "Versículo Favorito",
-                                                                        style: StylesApp(context)
-                                                                            .textStyleBody18
-                                                                            .copyWith(color: StyleColor.orange)),
-                                                                    Center(
-                                                                      child:
-                                                                          Padding(
-                                                                        padding: const EdgeInsets
-                                                                            .all(
-                                                                            8.0),
-                                                                        child:
-                                                                            Text(
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          "${favorite.verseNumber}  \n${favorite.text}",
-                                                                          style: StylesApp(context)
-                                                                              .textStyleBody12
-                                                                              .copyWith(color: currentTheme.textColor),
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ]),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            );
+                                          barrierDismissible: false,
+                                          transitionDuration:
+                                              Duration(milliseconds: 500),
+                                          pageBuilder: (_, __, ___) {
+                                            return DialogFavoriteVerseWidget(
+                                                currentTheme: currentTheme,
+                                                favoriteVerses:
+                                                    _favoriteVerses);
                                           });
                                     },
                                     icon: Icon(
@@ -459,6 +399,19 @@ class _BibleScreenState extends State<BibleScreen> {
                                           color: currentTheme.buttonTextColor,
                                         ),
                                       ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: AudioPlayerWidget(
+                                      showImage: false,
+                                      pathUrl: audioChapter != null &&
+                                              audioChapter!.audioUrl.isNotEmpty
+                                          ? '${GraphQLConfig.urlServidor}${audioChapter!.audioUrl}'
+                                          : '',
+                                      backgroundColor:
+                                          currentTheme.backgroundColor,
+                                      controlsColor: currentTheme.buttonColor,
+                                      actionColor: currentTheme.textColor,
                                     ),
                                   ),
                                   Container(
@@ -528,9 +481,6 @@ class _BibleScreenState extends State<BibleScreen> {
                         SelectionContainer.disabled(
                           child: GestureDetector(
                             onTap: () {
-                              if (kDebugMode) {
-                                print("favoritos");
-                              }
                               _showVersePopupMenu(context, verse);
                             },
                             child: Padding(
@@ -641,8 +591,7 @@ class _BibleScreenState extends State<BibleScreen> {
   }
 
   bool _isFavorite(VerseModel verse) {
-    final verseId = verse.id;
-    return _favoriteVerses.contains(verseId);
+    return _favoriteVerses.any((f) => f.verse.id == verse.id);
   }
 
   void _showVersePopupMenu(BuildContext context, VerseModel verse) {
@@ -740,7 +689,28 @@ class _BibleScreenState extends State<BibleScreen> {
       ));
     }
 
-    return spans;
+    // Aplica un estilo por defecto a todos los spans si no tienen uno
+    return spans.map((span) {
+      if (span.style != null) {
+        return span;
+      }
+      return TextSpan(
+        text: span.text,
+        children: span.children,
+        recognizer: span.recognizer,
+        style: StylesApp(context).textStyleBody14.copyWith(
+              decoration: _isFavorite(verse)
+                  ? TextDecoration.combine([
+                      TextDecoration.underline,
+                    ])
+                  : null,
+              fontFamily: fontFamilySet.label,
+              fontSize: fontSizeVerse,
+              color: currentTheme.textColor,
+              fontWeight: FontWeight.w400,
+            ),
+      );
+    }).toList();
   }
 
   /// Método que me muestra la modal bottom Sheet pata la elección del color de resaltado
@@ -989,19 +959,41 @@ class _BibleScreenState extends State<BibleScreen> {
 // Manejar favoritos
   void _toggleFavorite(VerseModel verse) async {
     LoadingService().showLoading(context);
-    final responseFavorite =
-        await updateFavoriteVerse(userData!.userId, verse.id);
-    if (responseFavorite.error != null) {
-      LoadingService().hideLoading();
-      // ignore: use_build_context_synchronously
-      await showCustomDialog(context,
-          message: responseFavorite.error!, dialogType: DialogType.error);
-      return;
+    if (_favoriteVerses.any((f) => f.verse.id == verse.id)) {
+      final responseRemove =
+          await deleteVerseFavorite(userData!.userId, verse.id);
+      if (responseRemove.error != null) {
+        await showCustomDialog(context,
+            message: responseRemove.error!, dialogType: DialogType.error);
+        LoadingService().hideLoading();
+        return;
+      }
+      // Si ya está en favoritos, lo eliminamos
+      setState(() {
+        _favoriteVerses
+            .removeAt(_favoriteVerses.indexWhere((f) => f.userId == verse.id));
+      });
+    } else {
+      final responseAddfavorite =
+          await createNewVerseFavoriteByUser(userData!.userId, verse.id);
+
+      if (responseAddfavorite.error != null) {
+        await showCustomDialog(context,
+            message: responseAddfavorite.error!, dialogType: DialogType.error);
+        LoadingService().hideLoading();
+        return;
+      }
+
+      // Si no está en favoritos, lo agregamos
+      setState(() {
+        _favoriteVerses.add(FavoriteVerse(
+            userId: userData!.userId,
+            book: currentBook!,
+            chapter: currentChapter!,
+            verse: verse));
+      });
     }
     LoadingService().hideLoading();
-    setState(() {
-      _favoriteVerses[0] = verse.id;
-    });
   }
 
   /// Método que se encarga de cargar los versículos resaltados
@@ -1039,10 +1031,14 @@ class _BibleScreenState extends State<BibleScreen> {
     await Provider.of<BibleThemeProvider>(context, listen: false)
         .loadSavedTheme();
     // cargar los favoritos
-    final responseFavorite = await getFavoriteVerseByUser(userData!.userId);
+    final responseFavorite =
+        await getFavoriteVerseByUser(1, 50, userData!.userId);
     if (responseFavorite.data != null && responseFavorite.data.length > 0) {
-      _favoriteVerses.add(responseFavorite
-          .data); // =responseFavorite.data.map((favorite) => favorite);
+      setState(() {
+        _favoriteVerses = responseFavorite.data
+            .map<FavoriteVerse>((favorite) => FavoriteVerse.fromJson(favorite))
+            .toList();
+      });
     }
     if (Provider.of<CatalogueProvider>(context, listen: false)
         .allBibleVersion
@@ -1056,11 +1052,6 @@ class _BibleScreenState extends State<BibleScreen> {
         fontSizeVerse = prefs!.getDouble("fontSizeVerse")!;
       });
     }
-    // if (prefs!.getDouble("fontFamilySet") != null) {
-    //   setState(() {
-    //   });
-    // }
-
     if (mounted) setState(() {});
   }
 
@@ -1098,12 +1089,13 @@ class _BibleScreenState extends State<BibleScreen> {
           currentVersion =
               Provider.of<CatalogueProvider>(context, listen: false)
                   .allBibleVersion[0];
+
           currentBook = currentVersion!.books[0];
         }
       });
       //consulto todos los capítulos del libro actual con sus versículos
       await loadChapters(currentBook!, false);
-
+      _loadAudioChapters();
       // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
       validateNextAndPrevious();
     } catch (e) {
@@ -1367,6 +1359,140 @@ class _BibleScreenState extends State<BibleScreen> {
       });
     }
   }
+
+  void _loadAudioChapters() async {
+    final audioChapterResponse = await getAudioByChapter(currentChapter!.id);
+    if (audioChapterResponse.error != null) {
+      await showCustomDialog(context,
+          message: audioChapterResponse.error!, dialogType: DialogType.error);
+      return;
+    }
+    setState(() {
+      audioChapter = AudioChapterModel.fromJson(audioChapterResponse.data);
+    });
+  }
+}
+
+class DialogFavoriteVerseWidget extends StatelessWidget {
+  const DialogFavoriteVerseWidget({
+    super.key,
+    required this.currentTheme,
+    required List<FavoriteVerse> favoriteVerses,
+  }) : _favoriteVerses = favoriteVerses;
+
+  final BibleTheme currentTheme;
+  final List<FavoriteVerse> _favoriteVerses;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+          color: currentTheme.backgroundColor,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          children: [
+            AppBarHeaderWidget(
+              backColor: StyleColor.turquoise,
+              buttonColor: StyleColor.orange,
+              textButtonColor: Colors.white,
+              title: 'Versículos Favoritos',
+              styleText: StylesApp(context).textStyleBody7,
+              onRoute: () {
+                Navigator.pop(context);
+              },
+            ),
+            Expanded(
+              child: Container(
+                child: ListView.builder(
+                  itemCount: _favoriteVerses.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      margin:
+                          EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                      padding: EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: currentTheme.backgroundColor,
+                        borderRadius: BorderRadius.circular(8.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: StyleColor.black.withValues(alpha: .25),
+                            spreadRadius: 2.0,
+                            offset: Offset(0, 2.0),
+                          )
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () => copyToClipboard(
+                                      context, _favoriteVerses[index]),
+                                  icon: Icon(
+                                    Icons.file_copy_rounded,
+                                    color: currentTheme.buttonColor,
+                                  ),
+                                ),
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () => shareVerse(
+                                      context, _favoriteVerses[index]),
+                                  icon: Icon(
+                                    Icons.share_rounded,
+                                    color: StyleColor.turquoise,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                textAlign: TextAlign.center,
+                                "${_favoriteVerses[index].book.modernName}",
+                                style: StylesApp(context)
+                                    .textStyleBody16
+                                    .copyWith(color: StyleColor.turquoise),
+                              ),
+                              Text(
+                                textAlign: TextAlign.center,
+                                "${_favoriteVerses[index].chapter.chapter}:${_favoriteVerses[index].verse.verse}",
+                                style: StylesApp(context)
+                                    .textStyleBody14
+                                    .copyWith(color: currentTheme.textColor),
+                              ),
+                              Text(
+                                textAlign: TextAlign.center,
+                                '"${_favoriteVerses[index].verse.text}"',
+                                style: StylesApp(context)
+                                    .textStyleBody12
+                                    .copyWith(color: currentTheme.textColor),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // Obtener versículos por rango de IDs
@@ -1394,11 +1520,4 @@ List<VerseModel> getVersesInRange(
   } on FormatException {
     throw FormatException('Los IDs deben ser números válidos');
   }
-}
-
-formatColor(String? color) {
-  if (color!.contains('#')) {
-    return color.split('#')[1];
-  }
-  return color;
 }

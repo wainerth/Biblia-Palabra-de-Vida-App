@@ -186,14 +186,14 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                             if (kDebugMode) {
                               print(
                                   'Capítulo seleccionado: ${chapter.first.id}');
-                              loadVerses(chapter.first.id);
-                              setState(() {
-                                chapterSelected = chapter.first;
-                                _chaptersExpanded = false;
-                                _versesExpanded = true;
-                                _selectedItems = [];
-                              });
                             }
+                           await loadVerses(chapter.first.id);
+                            setState(() {
+                              chapterSelected = chapter.first;
+                              _chaptersExpanded = false;
+                              _versesExpanded = true;
+                              _selectedItems = [];
+                            });
                           },
                         ),
                       ),
@@ -303,6 +303,15 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                 text: "Aceptar",
                 buttonStyle: StylesApp(context).btnWidgetSmall,
                 onPressed: () {
+                  if (versionSelected!.value.isEmpty ||
+                      bookSelected!.value.isEmpty ||
+                      chapterSelected == null ||
+                      _selectedItems.isEmpty) {
+                    showCustomDialog(context,
+                        message: "Debe seleccionar todos los campos",
+                        dialogType: DialogType.error);
+                    return;
+                  }
                   final data = InputDataSearchModel(
                     versionId: versionSelected!.value,
                     bookId: bookSelected!.value,

@@ -17,10 +17,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) {
-  await FlutterDownloader.initialize(
-    debug: true, // Set to false in production
-    ignoreSsl: true, // Set to false for secure connections
-  );
+    await FlutterDownloader.initialize(
+      debug: true, // Set to false in production
+      ignoreSsl: true, // Set to false for secure connections
+    );
   }
   runApp(
     MultiProvider(
@@ -110,21 +110,21 @@ class _MyAppState extends State<MyApp> {
       );
     }
     if (_hasSeenIntro!) {
-      final authProvider = context.read<AuthenticationProvider>();
+      context.read<AuthenticationProvider>();
 
       return FutureBuilder(
         future: _loadTokenAndInitializeAuth(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return loadMaskedWidget();
+            return LoadMaskedWidget();
           } else {
             LoadingService().hideLoading();
             final authProvider = context.read<AuthenticationProvider>();
-      if (authProvider.token != null) {
-        return PageScreen();
-      } else {
-        return const HomeScreen();
-      }
+            if (authProvider.token != null) {
+              return PageScreen();
+            } else {
+              return const HomeScreen();
+            }
           }
         },
       );
@@ -134,16 +134,16 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class loadMaskedWidget extends StatefulWidget {
-  const loadMaskedWidget({
+class LoadMaskedWidget extends StatefulWidget {
+  const LoadMaskedWidget({
     super.key,
   });
 
   @override
-  State<loadMaskedWidget> createState() => _loadMaskedWidgetState();
+  State<LoadMaskedWidget> createState() => _LoadMaskedWidgetState();
 }
 
-class _loadMaskedWidgetState extends State<loadMaskedWidget> {
+class _LoadMaskedWidgetState extends State<LoadMaskedWidget> {
   @override
   void initState() {
     super.initState();
@@ -166,7 +166,8 @@ class _loadMaskedWidgetState extends State<loadMaskedWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset("assets/bibleLogo.png"),
-            TextWithGradient(text: "La Biblia", font: StylesApp(context).textStyleBody1 )
+            TextWithGradient(
+                text: "La Biblia", font: StylesApp(context).textStyleBody1)
           ],
         ),
       ),

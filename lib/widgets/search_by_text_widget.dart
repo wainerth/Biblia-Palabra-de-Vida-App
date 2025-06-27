@@ -1,19 +1,23 @@
 import 'dart:async';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/custom_pagination.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+
 class SearchByTextWidget extends StatefulWidget {
+  final  void Function(InputDataSearchModel data)? onActionTabText;
   const SearchByTextWidget({
     super.key,
+    this.onActionTabText,
   });
 
   @override
@@ -195,7 +199,25 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                                           color: currentTheme.buttonColor,
                                           size: 25,
                                         ),
-                                        onTap: () {},
+                                        onTap: () {
+                                          final InputDataSearchModel inputData =
+                                              InputDataSearchModel(
+                                            bookId: searchResult[index]
+                                                .book
+                                                .id,
+                                            chapterId: searchResult[index]
+                                                .chapter
+                                                .id,
+                                            startVerseId: searchResult[index].verse.id,
+                                            endVerseId: "",
+                                            versionId: versionSelected!.value,
+                                          );
+                                          if (widget.onActionTabText != null) {
+                                            widget.onActionTabText!(inputData);
+                                          }
+                                          Navigator.pop(context);
+                                          
+                                        },
                                       ),
                                       Divider(
                                         color: StyleColor.grayMedium,
@@ -212,7 +234,10 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                                         trailing: Icon(Icons.file_copy,
                                             color: currentTheme.buttonColor,
                                             size: 25),
-                                        onTap: () {},
+                                        onTap: () {
+                                          _copyToClipboard(
+                                              context, searchResult[index]);
+                                        },
                                       ),
                                       Divider(
                                         color: StyleColor.grayMedium,
@@ -244,7 +269,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                       },
                     ),
         ),
-       
+
         CustomPagination(
           pagination: PaginationInfo(
               currentPage: pagination.currentPage,
@@ -257,6 +282,9 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
           currentTheme: currentTheme,
           onPageChanged: (newPage, newPerPage) async {
             if (versionSelected!.value.isNotEmpty) {
+              setState(() {
+                itemPerPageValue = newPerPage;
+              }); 
               await _loadData(
                 newPage,
                 newPerPage,
@@ -275,6 +303,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
 
     _debounceTimer = Timer(Duration(milliseconds: 800), () {
+      FocusScope.of(context).unfocus();
       _performSearch(query);
     });
   }
@@ -314,16 +343,38 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
       });
       return;
     }
-
     setState(() {
-      searchResult = responseResult.data['data']
-          .map<WordSearchResult>(
-              (wordSearch) => WordSearchResult.fromJson(wordSearch))
-          .toList();
+      if (responseResult.data['data'] != null && responseResult.data['data'].isNotEmpty) {
+        searchResult = responseResult.data['data']
+            .map<WordSearchResult>(
+                (wordSearch) => WordSearchResult.fromJson(wordSearch))
+            .toList();
 
-      pagination =
-          PaginationInfo.fromJson(removeTypename(responseResult.data["meta"]));
+        pagination = PaginationInfo.fromJson(
+            removeTypename(responseResult.data["meta"]));
+      }
+
       loading = false;
     });
   }
+
+  Future<void> _copyToClipboard(
+      BuildContext context, WordSearchResult data) async {
+    final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+    final copyString =
+        "${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
+    await Clipboard.setData(ClipboardData(text: copyString));
+
+    // Mostrar diálogo de confirmación
+    await showCustomDialog(
+      context,
+      message:
+          "El capítulo ${data.chapter.chapter} del libro ${data.book.modernName}\nse ha copiado con éxito al portapapeles",
+      dialogType: DialogType.info,
+    );
+  }
+  void addVerseFavorite(BuildContext context, WordSearchResult data ) async {
+
+  }
 }
+

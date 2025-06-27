@@ -502,24 +502,38 @@ Future loadCoursesByUserAndChurch(userId, churchId) async {
   QueryOptions options = QueryOptions(
     // operationName: "GetAllCourses",
     document: gql(r'''
-     query GetAllCourses($churchId: ID, $userId: ID) {
-        getAllCourses(churchId: $churchId, userId: $userId) {
-          id
-          title
-          color
-          introduction
-          status
-          img {
-            urlImg
-          }
-          sectionCount
-          sectionCompletedCount
+     query GetAllCourses($churchId: ID, $userId: ID, $page: Int, $limit: Int) {
+        getAllCourses(churchId: $churchId, userId: $userId, page: $page, limit: $limit ) {
+            data {
+              id
+              title
+              color
+              introduction
+              status
+              img {
+                urlImg
+              }
+              visibility
+              statusContent
+              sectionCount
+              sectionCompletedCount
+            }
+            meta {
+              currentPage
+              totalPages
+              itemsPerPage
+              totalItems
+              hasPreviousPage
+              hasNextPage
+            }
         }
       }
       '''),
     variables: <String, dynamic>{
       "churchId": churchId,
       "userId": userId,
+      "page": null,
+      "limit": null,
     },
     fetchPolicy: FetchPolicy.noCache,
   );
@@ -538,7 +552,7 @@ Future loadCoursesByUserAndChurch(userId, churchId) async {
     }
 
     return ResponseData(
-      data: data['getAllCourses'],
+      data: data['getAllCourses']['data'],
       error: null,
     );
   } on TimeoutException catch (e) {
@@ -1965,6 +1979,65 @@ Future<ResponseData> getOneChapterWithVerses(String? chapterId) async {
   }
 }
 
+Future<ResponseData> getAudioByChapter(String? chapterId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+         query GetAudioByChapter($chapterId: ID) {
+        getAudioByChapter(chapterId: $chapterId) {
+          audioUrl
+          chapter
+          id
+        }
+      }
+      '''),
+    variables: <String, dynamic>{"chapterId": chapterId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAudioByChapter'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Audio By Chapter  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAudioByChapter'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get Audio By Chapter Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
 Future<ResponseData> getBooksByBibleId(String? versionId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
@@ -2107,7 +2180,11 @@ Future<ResponseData> getAllHighLighters(
   }
 }
 
-Future<ResponseData> getFavoriteVerseByUser(String userId) async {
+Future<ResponseData> getFavoriteVerseByUser(
+  int page,
+  int limit,
+  String userId,
+) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -2116,13 +2193,40 @@ Future<ResponseData> getFavoriteVerseByUser(String userId) async {
   QueryOptions options = QueryOptions(
     // operationName: "GetOneReflectionRandom ",
     document: gql(r'''
-        query GetFavVerseByUserId($userId: ID) {
-          getFavVerseByUserId(userId: $userId) {
-            favoriteVerseId
+        query GetAllFavoritesByUser($userId: ID, $page: Int, $limit: Int) {
+        getAllFavoritesByUser(userId: $userId, page: $page, limit: $limit) {
+          data {
+            userId
+            book {
+              id
+              numberBook
+              modernName
+              newTestament
+            }
+            chapter {
+              id
+              chapter
+            }
+            verse:favoriteVerseUser {
+              id
+              verse
+              text
+            }
+          }
+          meta {
+            currentPage
+            totalPages
+            itemsPerPage
+            totalItems
+            hasPreviousPage
+            hasNextPage
           }
         }
+      }
       '''),
     variables: <String, dynamic>{
+      "page": page,
+      "limit": limit,
       "userId": userId,
     },
     fetchPolicy: FetchPolicy.noCache,
@@ -2134,15 +2238,15 @@ Future<ResponseData> getFavoriteVerseByUser(String userId) async {
     }
 
     final data = removeTypename(result.data);
-    if (data['getFavVerseByUserId'] == null) {
+    if (data['getAllFavoritesByUser'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get All Teaching  failed: No data returned',
+        error: 'Get All Favorites By User  failed: No data returned',
       );
     }
 
     return ResponseData(
-      data: data['getFavVerseByUserId']['favoriteVerseId'],
+      data: data['getAllFavoritesByUser']['favoriteVerseId'],
       error: null,
     );
   } on TimeoutException catch (e) {
@@ -2150,7 +2254,7 @@ Future<ResponseData> getFavoriteVerseByUser(String userId) async {
       print('Timeout: $e');
     }
     return ResponseData(
-        data: null, error: 'Get All Teaching Timeout de conexión $e');
+        data: null, error: 'Get All Favorites By User Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -2407,6 +2511,81 @@ Future<ResponseData> getReferenceTeaching(String id) async {
     }
     return ResponseData(
         data: null, error: 'Get Verses For Teaching Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getCharacterFirstAppearance(
+    String getCharacterFirstAppearanceId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+        query GetCharacterFirstAppearance($getCharacterFirstAppearanceId: ID) {
+          getCharacterFirstAppearance(id: $getCharacterFirstAppearanceId) {
+            id
+            verse {
+              verse
+              text
+              id
+            }
+            chapter {
+              id
+              chapter
+            }
+            book {
+              id
+              modernName
+              bibleId
+            }
+          }
+      '''),
+    variables: <String, dynamic>{
+      "getCharacterFirstAppearanceId": getCharacterFirstAppearanceId
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getCharacterFirstAppearance'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Character First Appearance  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getCharacterFirstAppearance'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'Get Character First Appearance Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

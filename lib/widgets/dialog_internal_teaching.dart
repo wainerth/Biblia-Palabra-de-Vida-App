@@ -71,25 +71,26 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
           SizedBox(
             height: 20.0,
           ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 12.0),
-            height: 500, // Altura fija para hacer el scroll visible
-            child: Scrollbar(
-              thumbVisibility:
-                  true, // Hace que el scrollbar sea siempre visible
-              trackVisibility: true, // Opcional: muestra la pista del scroll
-              thickness: 6.0, // Grosor del scrollbar
-              radius: Radius.circular(10), // Bordes redondeados
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(8), // Espacio interno
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    textAlign: TextAlign.justify,
-                    widget.data.description,
-                    style: StylesApp(context)
-                        .textStyleBody16
-                        .copyWith(color: widget.currentTheme.textColor),
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 12.0),
+              child: Scrollbar(
+                thumbVisibility:
+                    true, // Hace que el scrollbar sea siempre visible
+                trackVisibility: true, // Opcional: muestra la pista del scroll
+                thickness: 6.0, // Grosor del scrollbar
+                radius: Radius.circular(10), // Bordes redondeados
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(8), // Espacio interno
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      textAlign: TextAlign.justify,
+                      widget.data.description,
+                      style: StylesApp(context)
+                          .textStyleBody16
+                          .copyWith(color: widget.currentTheme.textColor),
+                    ),
                   ),
                 ),
               ),
@@ -97,7 +98,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
           ),
           SizedBox(height: 15.0,),
           ButtonThemeWidget(
-            text: "Referencias Biblicas",
+            text: "Referencias Bíblicas",
             buttonStyle: StylesApp(context).btnWidgetSmall,
             onPressed: references.isEmpty
                 ? null
@@ -116,7 +117,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                               );
                         });
                   },
-          )
+          ),
+           SizedBox(height: 15.0,),
         ],
       ),
     );

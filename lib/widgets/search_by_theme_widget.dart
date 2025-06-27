@@ -179,6 +179,9 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
           currentTheme: currentTheme,
           onPageChanged: (newPage, newPerPage) async {
             if (teachings.isNotEmpty) {
+               setState(() {
+                itemPerPageValue = newPerPage;
+              }); 
               await _loadData(
                 newPage,
                 newPerPage,

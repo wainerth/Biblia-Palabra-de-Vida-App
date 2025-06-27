@@ -96,8 +96,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
     List<ModelData> optionsSex = [
-      ModelData(value: 'm', label: 'Masculino'),
-      ModelData(value: 'f', label: 'Femenino')
+      ModelData(value: 'M', label: 'Masculino'),
+      ModelData(value: 'F', label: 'Femenino')
     ];
 
     final String userGender = (dataUser!.gender != null &&

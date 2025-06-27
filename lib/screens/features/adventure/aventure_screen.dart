@@ -1,6 +1,8 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
+import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -19,7 +21,26 @@ class _AventureScreenState extends State<AventureScreen> {
   LastProgressUser? progressUser;
   bool isLoading = true;
   List<bool> loadAventure = [];
+  late BibleTheme currentTheme;
+
   String? errorMessage;
+  int itemPerPageValue = 50;
+  List<int> itemsPerPage = [
+    5,
+    10,
+    15,
+    25,
+    50,
+    100,
+  ];
+  PaginationInfo pagination = PaginationInfo(
+    currentPage: 0,
+    totalPages: 0,
+    itemsPerPage: 0,
+    totalItems: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  );
 
   List<CourseModel> courses = [];
   @override
@@ -85,7 +106,9 @@ class _AventureScreenState extends State<AventureScreen> {
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
     progressUser = userProvider.progressUser;
-
+    final themeProvider =
+        Provider.of<BibleThemeProvider>(context, listen: false);
+    currentTheme = themeProvider.themeData;
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -103,6 +126,26 @@ class _AventureScreenState extends State<AventureScreen> {
                           ),
                         )
                       : listViewCardAventure(),
+              CustomPagination(
+                pagination: PaginationInfo(
+                    currentPage: pagination.currentPage,
+                    itemsPerPage: pagination.itemsPerPage,
+                    totalPages: pagination.totalPages,
+                    hasPreviousPage: pagination.hasPreviousPage,
+                    hasNextPage: pagination.hasNextPage,
+                    totalItems: pagination.totalItems),
+                itemPerPageValue: itemPerPageValue,
+                currentTheme: currentTheme,
+                onPageChanged: (newPage, newPerPage) async {
+                  if (courses.isNotEmpty) {
+                    setState(() {
+                      itemPerPageValue = newPerPage;
+                    });
+                    await _generateData(context);
+                  }
+                },
+                itemsPerPage: itemsPerPage, // Opcional: personaliza los valores
+              )
             ],
           ),
         ),
@@ -196,7 +239,7 @@ class _AventureScreenState extends State<AventureScreen> {
                     ]),
                     if (index == courses.length - 1) ...{
                       SizedBox(
-                        height: kBottomNavigationBarHeight + 30,
+                        height: kBottomNavigationBarHeight + 80,
                       )
                     }
                   ],

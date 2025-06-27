@@ -376,6 +376,8 @@ class CatalogueProvider extends ChangeNotifier {
       allBibleVersion = (data['getAllVersion'] as List)
           .map((version) => VersionModel.fromJson(version))
           .toList();
+     
+      
       if (kDebugMode) {
         print('all versions loaded');
       }

@@ -5,6 +5,7 @@ enum BibleThemeType { light, dark, sepia, nightBlue, greenPaper, highContrast }
 
 class BibleTheme {
   final Color backgroundColor;
+  final Color disabledColor;
   final Color textColor;
   final Color appBarColor;
   final Color buttonColor;
@@ -14,6 +15,7 @@ class BibleTheme {
 
   BibleTheme({
     required this.backgroundColor,
+    required this.disabledColor,
     required this.textColor,
     required this.appBarColor,
     required this.verseHighlightColor,
@@ -26,6 +28,7 @@ class BibleTheme {
     BibleThemeType.light: BibleTheme(
       name: "Claro",
       backgroundColor: StyleColor.white,
+      disabledColor: StyleColor.grayMedium,
       textColor: StyleColor.black,
       appBarColor: StyleColor.turquoise,
       buttonColor: StyleColor.turquoise,
@@ -35,6 +38,7 @@ class BibleTheme {
     BibleThemeType.dark: BibleTheme(
       name: "Oscuro",
       backgroundColor: Colors.grey[850]!,
+      disabledColor: StyleColor.grayMedium,
       textColor: StyleColor.white,
       appBarColor: Colors.grey[900]!,
       buttonColor: StyleColor.turquoise,
@@ -44,6 +48,7 @@ class BibleTheme {
     BibleThemeType.sepia: BibleTheme(
       name: "Sepia",
       backgroundColor: const Color(0xFFF4ECD8),
+      disabledColor: StyleColor.grayMedium,
       textColor: const Color(0xFF5B4636),
       appBarColor: const Color(0xFFC4B393),
       buttonColor: StyleColor.turquoise,
@@ -53,6 +58,7 @@ class BibleTheme {
     BibleThemeType.nightBlue: BibleTheme(
       name: "Azul Nocturno",
       backgroundColor: const Color(0xFF0F1B2D),
+      disabledColor: StyleColor.grayMedium,
       textColor: const Color(0xFFE0E9FF),
       appBarColor: const Color(0xFF1A2D4D),
       buttonColor: StyleColor.turquoise,
@@ -62,6 +68,7 @@ class BibleTheme {
     BibleThemeType.greenPaper: BibleTheme(
       name: "Papel Verde",
       backgroundColor: const Color(0xFFE8F5E9),
+      disabledColor: StyleColor.grayMedium,
       textColor: const Color(0xFF1B5E20),
       appBarColor: const Color(0xFFA5D6A7),
       buttonColor: StyleColor.turquoise,
@@ -71,6 +78,7 @@ class BibleTheme {
     BibleThemeType.highContrast: BibleTheme(
       name: "Alto Contraste",
       backgroundColor: StyleColor.black,
+      disabledColor: StyleColor.grayMedium,
       textColor: StyleColor.white,
       appBarColor: StyleColor.black,
       buttonColor: StyleColor.turquoise,

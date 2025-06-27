@@ -11,15 +11,20 @@ import 'package:biblia_palabra_de_vida_app/widgets/search_by_character_widget.da
 import 'package:biblia_palabra_de_vida_app/widgets/search_by_text_widget.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/search_by_theme_widget.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 class SearchBibleWidget extends StatefulWidget {
   final void Function(InputDataSearchModel searchData) onActionBook;
+  final void Function(InputDataSearchModel searchData) onActionTabText;
   final void Function(InputDataSearchModel searchData) onActionTheme;
-  const SearchBibleWidget({super.key, required this.onActionBook, required this.onActionTheme});
+  const SearchBibleWidget({
+    super.key,
+    required this.onActionBook,
+    required this.onActionTabText,
+    required this.onActionTheme,
+  });
 
   @override
   State<SearchBibleWidget> createState() => _SearchBibleWidgetState();
@@ -161,12 +166,22 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
                     children: [
                       SearchByBookWidget(
                         onActionBook: (InputDataSearchModel data) {
-                          print(data.versionId);
+                          if (kDebugMode) {
+                            print(data.versionId);
+                          }
                           widget.onActionBook(data);
                           Navigator.pop(context);
                         },
                       ),
-                      SearchByTextWidget(),
+                      SearchByTextWidget(
+                        onActionTabText: (InputDataSearchModel data) {
+                          if (kDebugMode) {
+                            print(data.versionId);
+                          }
+                          widget.onActionTabText(data);
+                          Navigator.pop(context);
+                        },
+                      ),
                       SearchByThemeWidget(
                         onActionTheme: (InputDataSearchModel data) {
                           widget.onActionTheme(data);
@@ -248,194 +263,31 @@ class _DialogReferenceState extends State<DialogReference> {
                     children: [
                       ButtonThemeWidget(
                         text:
-                            "${widget.data[index].book.modernName} ${widget.data[index].chapter.chapter}:${widget.data[index].verse.verse}-${widget.data[index].numberEndVerse}",
+                            "${widget.data[index].book.modernName} ${widget.data[index].chapter.chapter}:${widget.data[index].verse.verse}${widget.data[index].numberEndVerse > 0 ? '-${widget.data[index].numberEndVerse}' : ''}",
                         buttonStyle: StylesApp(context).btnWidgetSmall,
                         onPressed: () {
+                          // En lugar de showDialog con todo el contenido, ahora solo necesitas:
                           showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.all(4.0),
-                                        // constraints: BoxConstraints(
-                                        //   maxHeight: 80,
-                                        // ),
-                                        decoration: BoxDecoration(
-                                            color: widget
-                                                .currentTheme.backgroundColor,
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                  offset: Offset(0, 4.0),
-                                                  spreadRadius: 4.0,
-                                                  color: StyleColor.black
-                                                      .withValues(alpha: 0.25))
-                                            ]),
-                                        child: Stack(
-                                          children: [
-                                            Positioned(
-                                              top: 0,
-                                              right: 0,
-                                              child: Container(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                        .width,
-                                                decoration: BoxDecoration(
-                                                    color: widget.currentTheme
-                                                        .backgroundColor),
-                                                // width: MediaQuery.sizeOf(context).width,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  children: [
-                                                    IconButton(
-                                                      padding: EdgeInsets.zero,
-                                                      iconSize: 25.0,
-                                                      onPressed: () async {
-                                                        final copyString =
-                                                            "${widget.data[index].chapter.chapter}:${widget.data[index].verse.verse} \n ${widget.data[index].verse.text}\n${GraphQLConfig.urlServidor}officialbible";
-                                                        Clipboard.setData(
-                                                            ClipboardData(
-                                                                text:
-                                                                    copyString));
-                                                        await showCustomDialog(
-                                                          context,
-                                                          message:
-                                                              "El capitulo ${widget.data[index].chapter.chapter} del libro ${widget.data[index].book.modernName}  \n se ha copiado con éxito al\n portapapeles",
-                                                          dialogType:
-                                                              DialogType.info,
-                                                        );
-                                                      },
-                                                      icon: Icon(
-                                                        Icons.file_copy_rounded,
-                                                        color: widget
-                                                            .currentTheme
-                                                            .buttonColor,
-                                                      ),
-                                                    ),
-                                                    IconButton(
-                                                      padding: EdgeInsets.zero,
-                                                      iconSize: 25.0,
-                                                      onPressed: () async {
-                                                        final copyString =
-                                                            "${widget.data[index].chapter.chapter}:${widget.data[index].verse.verse} \n ${widget.data[index].verse.text}\n${GraphQLConfig.urlServidor}officialbible";
-                                                        await Share.share(
-                                                          copyString,
-                                                          subject:
-                                                              "Palabra de Vida - ${widget.data[index].chapter.chapter} ${widget.data[index].book.modernName} \n ver en:${GraphQLConfig.urlServidor}officialbible",
-                                                        );
-                                                      },
-                                                      icon: Icon(
-                                                        Icons.share_rounded,
-                                                        color: StyleColor
-                                                            .turquoise,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Column(
-                                              children: [
-                                                Text(
-                                                  textAlign: TextAlign.center,
-                                                  widget.data[index].book
-                                                      .modernName,
-                                                  style: StylesApp(context)
-                                                      .textStyleBody18
-                                                      .copyWith(
-                                                          color: widget
-                                                              .currentTheme
-                                                              .textColor),
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Text(
-                                                  textAlign: TextAlign.center,
-                                                  "${widget.data[index].chapter.chapter}:${widget.data[index].verse.verse}-${widget.data[index].numberEndVerse}",
-                                                  style: StylesApp(context)
-                                                      .textStyleBody16
-                                                      .copyWith(
-                                                          color: widget
-                                                              .currentTheme
-                                                              .textColor),
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Text(
-                                                  textAlign: TextAlign.center,
-                                                  widget.data[index].verse.text,
-                                                  style: StylesApp(context)
-                                                      .textStyleBody14
-                                                      .copyWith(
-                                                          color: widget
-                                                              .currentTheme
-                                                              .textColor),
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    children: [
-                                                      ButtonThemeWidget(
-                                                        width: 120,
-                                                        icon: Icons
-                                                            .read_more_outlined,
-                                                        showIcon: true,
-                                                        text: "Leer Más",
-                                                        buttonStyle:
-                                                            StylesApp(context)
-                                                                .btnWidgetSmall,
-                                                        onPressed: () {
-                                                          final dataToSend =
-                                                              InputDataSearchModel(
-                                                            versionId: widget
-                                                                .data[index]
-                                                                .book
-                                                                .bibleId
-                                                                .toString(),
-                                                            bookId: widget
-                                                                .data[index]
-                                                                .book
-                                                                .id,
-                                                            chapterId: widget
-                                                                .data[index]
-                                                                .chapter
-                                                                .id,
-                                                            startVerseId: widget
-                                                                .data[index]
-                                                                .verse
-                                                                .id,
-                                                            endVerseId: widget
-                                                                .data[index]
-                                                                .numberEndVerse
-                                                                .toString(),
-                                                          );
-                                                          widget
-                                                              .onActionReferences(dataToSend);
-                                                              Navigator.pop(context);
-                                                        },
-                                                      )
-                                                    ])
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            context: context,
+                            builder: (context) => CustomVerseDialog(
+                              data: widget.data[index],
+                              currentTheme: widget.currentTheme,
+                              onActionReferences: (data) {
+                                final dataToSend = InputDataSearchModel(
+                                  versionId: widget.data[index].book.bibleId
+                                      .toString(),
+                                  bookId: widget.data[index].book.id,
+                                  chapterId: widget.data[index].chapter.id,
+                                  startVerseId: widget.data[index].verse.id,
+                                  endVerseId: widget.data[index].numberEndVerse
+                                      .toString(),
                                 );
-                              });
+                                widget.onActionReferences(dataToSend);
+                                Navigator.pop(context);
+                              },
+                              baseUrl: GraphQLConfig.urlServidor,
+                            ),
+                          );
                         },
                       ),
                       SizedBox(
