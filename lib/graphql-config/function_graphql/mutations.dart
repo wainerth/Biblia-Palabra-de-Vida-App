@@ -1314,7 +1314,7 @@ Future<ResponseData>  createNewVerseFavoriteByUser(String userId ,String verseId
   final GraphQLClient _client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
-    operationName: "DeleteVerseFavorite",
+    operationName: "CreateNewVerseFavoriteByUser",
     document: gql(r'''
      mutation CreateNewVerseFavoriteByUser($userId: ID, $verseId: ID) {
         createNewVerseFavoriteByUser(userId: $userId, verseId: $verseId) {

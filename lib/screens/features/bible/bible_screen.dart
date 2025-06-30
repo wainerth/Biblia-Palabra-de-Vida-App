@@ -297,23 +297,25 @@ class _BibleScreenState extends State<BibleScreen> {
                                                   .size
                                                   .height,
                                               child: SearchBibleWidget(
-                                                  onActionBook:
-                                                      (InputDataSearchModel
-                                                          data) async {
-                                                    await loadVersionAndVerseRange(
-                                                        data);
-                                                  },
-                                                  onActionTabText:
-                                                      (InputDataSearchModel
-                                                          data) {},
-                                                  onActionTheme:
-                                                      (InputDataSearchModel
-                                                          data) {
-                                                    if (kDebugMode) {
-                                                      print(
-                                                          "Mostrar solo los rango de versículos");
-                                                    }
-                                                  }),
+                                                onActionBook:
+                                                    (InputDataSearchModel
+                                                        data) async {
+                                                  await loadVersionAndVerseRange(
+                                                      data);
+                                                },
+                                                onActionTabText:
+                                                    (InputDataSearchModel
+                                                        data) async {
+                                                  await loadVersionAndChapter(
+                                                      data);
+                                                },
+                                                onActionTheme:
+                                                    (InputDataSearchModel
+                                                        data) async {
+                                                  await loadVersionAndChapter(
+                                                      data);
+                                                },
+                                              ),
                                             ),
                                           );
                                         },
@@ -1035,7 +1037,7 @@ class _BibleScreenState extends State<BibleScreen> {
         await getFavoriteVerseByUser(1, 50, userData!.userId);
     if (responseFavorite.data != null && responseFavorite.data.length > 0) {
       setState(() {
-        _favoriteVerses = responseFavorite.data
+        _favoriteVerses = responseFavorite.data['data']
             .map<FavoriteVerse>((favorite) => FavoriteVerse.fromJson(favorite))
             .toList();
       });
@@ -1341,10 +1343,107 @@ class _BibleScreenState extends State<BibleScreen> {
       });
       setState(() {
         currentBook = currentBook!.copyWith(
-          chapters: 1,
+          chapters: allChapters.length - 1,
         );
-        hasPreviousChapter = false;
-        hasNextChapter = false;
+        // Mover el scroll al versículo de inicio si está presente
+        if (data.startVerseId != null && verses.isNotEmpty) {
+          final startIndex =
+              verses.indexWhere((v) => v.id == data.startVerseId);
+          if (startIndex != -1) {
+            // Esperar al siguiente frame para asegurar que el ListView esté construido
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Calcular la posición aproximada (ajusta el valor si usas un itemExtent fijo)
+              final itemHeight = 40.0; // Ajusta según el alto de tus items
+              scrollController.animateTo(
+                startIndex * itemHeight,
+                duration: Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
+              );
+            });
+          }
+        }
+      });
+    } catch (e) {
+      LoadingService().hideLoading();
+      errorMessage = 'Error al cargar el capítulo $e';
+      setState(() {
+        isLoading = false;
+      });
+    } finally {
+      LoadingService().hideLoading();
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  loadVersionAndChapter(InputDataSearchModel data) async {
+    final bibleVersions = Provider.of<CatalogueProvider>(context, listen: false)
+        .allBibleVersion
+        .map((v) => ModelData(value: v.id, label: v.version))
+        .toList();
+    setState(() {
+      lastVersionsSelected = bibleVersions
+          .firstWhere((version) => version.value == data.versionId)
+          .value;
+      final currentVers = Provider.of<CatalogueProvider>(context, listen: false)
+          .allBibleVersion
+          .firstWhere((version) => version.id == lastVersionsSelected);
+      currentVersion = currentVers;
+      currentBook =
+          currentVers.books.firstWhere((book) => book.id == data.bookId);
+    });
+    LoadingService().showLoading(context);
+    try {
+      //consulto todos los capítulos del libro actual con sus versículos
+      final responseChapterByBook = await getChapterWithVerses(currentBook!.id);
+      if (responseChapterByBook.error != null) {
+        setState(() {
+          errorMessage = responseChapterByBook.error;
+        });
+        return;
+      }
+      setState(() {
+        allChapters = responseChapterByBook.data
+            .map<ChapterModel>((chapter) => ChapterModel.fromJson(chapter))
+            .toList();
+
+        allChapters.sort((a, b) {
+          // Convertir a números si son strings (ejemplo: "1" -> 1)
+          final chapterA = a.chapter;
+          final chapterB = b.chapter;
+
+          return chapterA.compareTo(chapterB); // Orden ascendente
+        });
+        //si no es el el primer capítulo del libro
+        currentChapter =
+            allChapters.firstWhere((chapter) => chapter.id == data.chapterId);
+
+        verses = currentChapter!.verses;
+      });
+      setState(() {
+        currentBook = currentBook!.copyWith(
+          chapters: allChapters.length - 1,
+        );
+        // Mover el scroll al versículo de inicio si está presente
+        if (data.startVerseId != null && verses.isNotEmpty) {
+          final startIndex =
+              verses.indexWhere((v) => v.id == data.startVerseId);
+          if (startIndex != -1) {
+            // Esperar al siguiente frame para asegurar que el ListView esté construido
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Calcular la posición aproximada (ajusta el valor si usas un itemExtent fijo)
+              final itemHeight = 40.0; // Ajusta según el alto de tus items
+              scrollController.animateTo(
+                startIndex * itemHeight,
+                duration: Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
+              );
+            });
+          }
+        }
+        // hasPreviousChapter = false;
+        // hasNextChapter = false;
       });
     } catch (e) {
       LoadingService().hideLoading();
@@ -1373,15 +1472,46 @@ class _BibleScreenState extends State<BibleScreen> {
   }
 }
 
-class DialogFavoriteVerseWidget extends StatelessWidget {
+class DialogFavoriteVerseWidget extends StatefulWidget {
+  final List<FavoriteVerse> favoriteVerses;
+  final BibleTheme currentTheme;
   const DialogFavoriteVerseWidget({
     super.key,
     required this.currentTheme,
-    required List<FavoriteVerse> favoriteVerses,
-  }) : _favoriteVerses = favoriteVerses;
+    required this.favoriteVerses,
+  });
 
-  final BibleTheme currentTheme;
-  final List<FavoriteVerse> _favoriteVerses;
+  @override
+  State<DialogFavoriteVerseWidget> createState() =>
+      _DialogFavoriteVerseWidgetState();
+}
+
+class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
+  bool loading = false;
+  List<FavoriteVerse> _favoriteVerses = [];
+  List<int> itemsPerPage = [
+    5,
+    10,
+    15,
+    25,
+    50,
+    100,
+  ];
+  int itemPerPageValue = 50;
+  PaginationInfo pagination = PaginationInfo(
+    currentPage: 1,
+    totalPages: 1,
+    itemsPerPage: 50,
+    totalItems: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  );
+
+  @override
+  void initState() {
+    _favoriteVerses = widget.favoriteVerses;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1390,10 +1520,11 @@ class DialogFavoriteVerseWidget extends StatelessWidget {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
-          color: currentTheme.backgroundColor,
+          color: widget.currentTheme.backgroundColor,
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AppBarHeaderWidget(
               backColor: StyleColor.turquoise,
@@ -1406,92 +1537,189 @@ class DialogFavoriteVerseWidget extends StatelessWidget {
               },
             ),
             Expanded(
-              child: Container(
-                child: ListView.builder(
-                  itemCount: _favoriteVerses.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      margin:
-                          EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                      padding: EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: currentTheme.backgroundColor,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: StyleColor.black.withValues(alpha: .25),
-                            spreadRadius: 2.0,
-                            offset: Offset(0, 2.0),
-                          )
-                        ],
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                  padding: EdgeInsets.zero,
-                                  iconSize: 25.0,
-                                  onPressed: () => copyToClipboard(
-                                      context, _favoriteVerses[index]),
-                                  icon: Icon(
-                                    Icons.file_copy_rounded,
-                                    color: currentTheme.buttonColor,
-                                  ),
-                                ),
-                                IconButton(
-                                  padding: EdgeInsets.zero,
-                                  iconSize: 25.0,
-                                  onPressed: () => shareVerse(
-                                      context, _favoriteVerses[index]),
-                                  icon: Icon(
-                                    Icons.share_rounded,
-                                    color: StyleColor.turquoise,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Column(
+              child: loading
+                  ? LoadingIndicator()
+                  : _favoriteVerses.isEmpty
+                      ? Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                textAlign: TextAlign.center,
-                                "${_favoriteVerses[index].book.modernName}",
-                                style: StylesApp(context)
-                                    .textStyleBody16
-                                    .copyWith(color: StyleColor.turquoise),
-                              ),
-                              Text(
-                                textAlign: TextAlign.center,
-                                "${_favoriteVerses[index].chapter.chapter}:${_favoriteVerses[index].verse.verse}",
-                                style: StylesApp(context)
-                                    .textStyleBody14
-                                    .copyWith(color: currentTheme.textColor),
-                              ),
-                              Text(
-                                textAlign: TextAlign.center,
-                                '"${_favoriteVerses[index].verse.text}"',
-                                style: StylesApp(context)
-                                    .textStyleBody12
-                                    .copyWith(color: currentTheme.textColor),
+                              Center(
+                                child: Text(
+                                  textAlign: TextAlign.center,
+                                  "No hay resultados...",
+                                  style: StylesApp(context)
+                                      .textStyleBody18
+                                      .copyWith(
+                                          color: widget.currentTheme.textColor),
+                                ),
                               )
                             ],
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
+                        )
+                      : ListView.builder(
+                          itemCount: _favoriteVerses.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Container(
+                              margin: EdgeInsets.only(
+                                  left: 4.0,right: 4.0, bottom: 12.0),
+                              padding: EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: widget.currentTheme.backgroundColor,
+                                borderRadius: BorderRadius.circular(8.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        StyleColor.black.withValues(alpha: .25),
+                                    spreadRadius: 2.0,
+                                    offset: Offset(0, 2.0),
+                                  )
+                                ],
+                              ),
+                              child: Stack(
+                                children: [
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        IconButton(
+                                          padding: EdgeInsets.zero,
+                                          iconSize: 25.0,
+                                          onPressed: () => copyToClipboard(
+                                              context, _favoriteVerses[index]),
+                                          icon: Icon(
+                                            Icons.file_copy_rounded,
+                                            color:
+                                                widget.currentTheme.buttonColor,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          padding: EdgeInsets.zero,
+                                          iconSize: 25.0,
+                                          onPressed: () => shareVerse(
+                                              context, _favoriteVerses[index]),
+                                          icon: Icon(
+                                            Icons.share_rounded,
+                                            color: StyleColor.turquoise,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          padding: EdgeInsets.zero,
+                                          iconSize: 25.0,
+                                          onPressed: () => deleteFavorite(
+                                              _favoriteVerses[index].verse.id),
+                                          icon: Icon(
+                                            Icons.delete_forever_outlined,
+                                            color: StyleColor.turquoise,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:CrossAxisAlignment.center
+                                    children: [
+                                      Text(
+                                        textAlign: TextAlign.center,
+                                        "${_favoriteVerses[index].book.modernName}",
+                                        style: StylesApp(context)
+                                            .textStyleBody16
+                                            .copyWith(
+                                                color: StyleColor.turquoise),
+                                      ),
+                                      Text(
+                                        textAlign: TextAlign.center,
+                                        "${_favoriteVerses[index].chapter.chapter}:${_favoriteVerses[index].verse.verse}",
+                                        style: StylesApp(context)
+                                            .textStyleBody14
+                                            .copyWith(
+                                                color: widget
+                                                    .currentTheme.textColor),
+                                      ),
+                                      Text(
+                                        textAlign: TextAlign.center,
+                                        '"${_favoriteVerses[index].verse.text}"',
+                                        style: StylesApp(context)
+                                            .textStyleBody12
+                                            .copyWith(
+                                                color: widget
+                                                    .currentTheme.textColor),
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+            ),
+            CustomPagination(
+              pagination: PaginationInfo(
+                  currentPage: pagination.currentPage,
+                  itemsPerPage: pagination.itemsPerPage,
+                  totalPages: pagination.totalPages,
+                  hasPreviousPage: pagination.hasPreviousPage,
+                  hasNextPage: pagination.hasNextPage,
+                  totalItems: pagination.totalItems),
+              itemPerPageValue: itemPerPageValue,
+              currentTheme: widget.currentTheme,
+              onPageChanged: (newPage, newPerPage) async {
+                setState(() {
+                  itemPerPageValue = newPerPage;
+                });
+                await _loadData(newPage, newPerPage);
+              },
+              itemsPerPage: itemsPerPage, // Opcional: personaliza los valores
             ),
           ],
         ),
       ),
     );
+  }
+
+  deleteFavorite(verseId) async {
+    LoadingService().showLoading(context);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userData = userProvider.currentUser;
+    final responseDelete = await deleteVerseFavorite(userData!.userId, verseId);
+    if (responseDelete.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(context,
+          message: responseDelete.error!, dialogType: DialogType.error);
+      return;
+    } else {
+      _loadData(pagination.currentPage, itemPerPageValue);
+    }
+
+    LoadingService().hideLoading();
+  }
+
+  _loadData(int newPage, int newPerPage) async {
+    setState(() {
+      _favoriteVerses = [];
+      loading = true;
+    });
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userData = userProvider.currentUser;
+    final responseFavorite =
+        await getFavoriteVerseByUser(newPage, newPerPage, userData!.userId);
+
+    if (responseFavorite.data != null && responseFavorite.data.length > 0) {
+      setState(() {
+        _favoriteVerses = responseFavorite.data['data']
+            .map<FavoriteVerse>((favorite) => FavoriteVerse.fromJson(favorite))
+            .toList();
+
+        pagination = PaginationInfo.fromJson(
+            removeTypename(responseFavorite.data["meta"]));
+      });
+    }
+    setState(() {
+      loading = false;
+    });
   }
 }
 

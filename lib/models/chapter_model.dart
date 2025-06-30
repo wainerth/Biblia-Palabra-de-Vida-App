@@ -16,15 +16,18 @@ class ChapterModel extends GridItem {
   });
 
   factory ChapterModel.fromJson(Map<String, dynamic> json) {
+    List<VerseModel> verses = [];
+    if (json['verses'] != null) {
+      verses = (json['verses'] as List)
+          .map((verse) => VerseModel.fromJson(verse))
+          .toList()
+        ..sort((a, b) => a.verse.compareTo(b.verse));
+    }
     return ChapterModel(
         id: json['id'],
         bookId: json['bookId'] ?? 0,
         chapter: json['chapter'],
-        verses: json['verses'] != null
-            ? (json['verses'] as List)
-                .map((book) => VerseModel.fromJson(book))
-                .toList()
-            : [],
+        verses: verses,
         status: json['status'] ?? 1);
   }
 

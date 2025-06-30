@@ -2246,7 +2246,7 @@ Future<ResponseData> getFavoriteVerseByUser(
     }
 
     return ResponseData(
-      data: data['getAllFavoritesByUser']['favoriteVerseId'],
+      data: data['getAllFavoritesByUser'],
       error: null,
     );
   } on TimeoutException catch (e) {

@@ -29,70 +29,72 @@ class CustomPagination extends StatelessWidget {
               color: currentTheme.textColor,
             );
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Botón de página anterior
-        IconButton(
-          onPressed: pagination.hasPreviousPage
-              ? () => onPageChanged(
-                    pagination.currentPage - 1,
-                    itemPerPageValue,
-                  )
-              : null,
-          icon: Icon(Icons.arrow_back),
-          color: currentTheme.buttonColor,
-        ),
-
-        // Indicador de página actual/total
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                style: effectiveTextStyle,
-                text:
-                    "${pagination.currentPage} de ${pagination.totalPages} páginas",
-              ),
-            ],
+    return Material(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Botón de página anterior
+          IconButton(
+            onPressed: pagination.hasPreviousPage
+                ? () => onPageChanged(
+                      pagination.currentPage - 1,
+                      itemPerPageValue,
+                    )
+                : null,
+            icon: Icon(Icons.arrow_back),
+            color: currentTheme.buttonColor,
           ),
-        ),
 
-        // Dropdown para items por página
-        DropdownButton<int>(
-          value: itemPerPageValue,
-          icon: const Icon(Icons.arrow_drop_down),
-          elevation: 16,
-          style: effectiveTextStyle,
-          dropdownColor: currentTheme.backgroundColor,
-          onChanged: (int? newValue) async {
-            if (newValue != null) {
-              await onPageChanged(1, newValue); // Resetear a primera página
-            }
-          },
-          items: itemsPerPage.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(
-                '$value items',
-                style: effectiveTextStyle,
-              ),
-            );
-          }).toList(),
-        ),
+          // Indicador de página actual/total
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  style: effectiveTextStyle,
+                  text:
+                      "${pagination.currentPage} de ${pagination.totalPages} páginas",
+                ),
+              ],
+            ),
+          ),
 
-        // Botón de página siguiente
-        IconButton(
-          disabledColor: currentTheme.disabledColor,
-          onPressed: pagination.hasNextPage
-              ? () => onPageChanged(
-                    pagination.currentPage + 1,
-                    itemPerPageValue,
-                  )
-              : null,
-          icon: Icon(Icons.arrow_forward),
-          color: currentTheme.buttonColor,
-        ),
-      ],
+          // Dropdown para items por página
+          DropdownButton<int>(
+            value: itemPerPageValue,
+            icon: const Icon(Icons.arrow_drop_down),
+            elevation: 16,
+            style: effectiveTextStyle,
+            dropdownColor: currentTheme.backgroundColor,
+            onChanged: (int? newValue) async {
+              if (newValue != null) {
+                await onPageChanged(1, newValue); // Resetear a primera página
+              }
+            },
+            items: itemsPerPage.map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text(
+                  '$value items',
+                  style: effectiveTextStyle,
+                ),
+              );
+            }).toList(),
+          ),
+
+          // Botón de página siguiente
+          IconButton(
+            disabledColor: currentTheme.disabledColor,
+            onPressed: pagination.hasNextPage
+                ? () => onPageChanged(
+                      pagination.currentPage + 1,
+                      itemPerPageValue,
+                    )
+                : null,
+            icon: Icon(Icons.arrow_forward),
+            color: currentTheme.buttonColor,
+          ),
+        ],
+      ),
     );
   }
 }

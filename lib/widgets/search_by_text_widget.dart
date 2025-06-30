@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
@@ -11,10 +12,10 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchByTextWidget extends StatefulWidget {
-  final  void Function(InputDataSearchModel data)? onActionTabText;
+  final void Function(InputDataSearchModel data)? onActionTabText;
   const SearchByTextWidget({
     super.key,
     this.onActionTabText,
@@ -202,13 +203,11 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                                         onTap: () {
                                           final InputDataSearchModel inputData =
                                               InputDataSearchModel(
-                                            bookId: searchResult[index]
-                                                .book
-                                                .id,
-                                            chapterId: searchResult[index]
-                                                .chapter
-                                                .id,
-                                            startVerseId: searchResult[index].verse.id,
+                                            bookId: searchResult[index].book.id,
+                                            chapterId:
+                                                searchResult[index].chapter.id,
+                                            startVerseId:
+                                                searchResult[index].verse.id,
                                             endVerseId: "",
                                             versionId: versionSelected!.value,
                                           );
@@ -216,7 +215,6 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                                             widget.onActionTabText!(inputData);
                                           }
                                           Navigator.pop(context);
-                                          
                                         },
                                       ),
                                       Divider(
@@ -254,7 +252,10 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                                         trailing: Icon(Icons.star_border,
                                             color: currentTheme.buttonColor,
                                             size: 25),
-                                        onTap: () {},
+                                        onTap: () {
+                                          addVerseFavorite(
+                                              context, searchResult[index]);
+                                        },
                                       ),
                                       Divider(
                                         color: StyleColor.grayMedium,
@@ -284,7 +285,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
             if (versionSelected!.value.isNotEmpty) {
               setState(() {
                 itemPerPageValue = newPerPage;
-              }); 
+              });
               await _loadData(
                 newPage,
                 newPerPage,
@@ -344,7 +345,8 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
       return;
     }
     setState(() {
-      if (responseResult.data['data'] != null && responseResult.data['data'].isNotEmpty) {
+      if (responseResult.data['data'] != null &&
+          responseResult.data['data'].isNotEmpty) {
         searchResult = responseResult.data['data']
             .map<WordSearchResult>(
                 (wordSearch) => WordSearchResult.fromJson(wordSearch))
@@ -373,8 +375,22 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
       dialogType: DialogType.info,
     );
   }
-  void addVerseFavorite(BuildContext context, WordSearchResult data ) async {
 
+  void addVerseFavorite(BuildContext context, WordSearchResult data) async {
+    LoadingService().showLoading(context);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userData = userProvider.currentUser;
+    final responseFavorite =
+        await createNewVerseFavoriteByUser(userData!.userId, data.verse.id);
+    if (responseFavorite.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(context,
+          message: responseFavorite.error!, dialogType: DialogType.error);
+    } else {
+      LoadingService().hideLoading();
+      await showCustomDialog(context,
+          message: "Versículo Agregado a Favoritos",
+          dialogType: DialogType.info);
+    }
   }
 }
-
