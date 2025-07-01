@@ -26,7 +26,7 @@ Future login(email, password) async {
         }
       '''),
     variables: <String, dynamic>{
-      "input": {"username": email, "password": password}
+      "input": {"usernameOrEmail": email, "password": password}
     },
     fetchPolicy: FetchPolicy.noCache,
   );
@@ -154,63 +154,6 @@ Future<ResponseData> loginGoogle() async {
     data: removeTypename(data['signUpGoogle']),
     error: null,
   );
-}
-
-Future<ResponseData> verifyToken(token) async {
-  final GraphQLClient _client = createClient();
-  final MutationOptions options = MutationOptions(
-    operationName: 'VerifyToken',
-    document: gql(r'''
-       mutation VerifyToken($token: String!) {
-          verifyToken(token: $token) {
-            user {
-              id
-              email
-              username
-              handleTimeFeeling
-              lastLogin
-              createdAt
-            }
-            success
-            isLogout
-          }
-          
-        }
-      '''),
-    variables: <String, dynamic>{
-      'token': token,
-    },
-    fetchPolicy: FetchPolicy.noCache,
-  );
-
-  try {
-    final QueryResult result = await _client.mutate(options);
-    if (result.hasException) {
-      print(ResponseData.fromQueryResult(result));
-      return ResponseData.fromQueryResult(result);
-    }
-
-    final data = result.data;
-    if (data == null || data['verifyToken'] == null) {
-      print("No data returned");
-      return ResponseData(data: false, error: "No data returned");
-      // return false;
-    }
-    return ResponseData(data: data['verifyToken'], error: null);
-  } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(data: null, error: "Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(data: null, error: "No Internet Connection");
-    } else if (e is FormatException) {
-      // Example: JSON parsing error
-      return ResponseData(data: null, error: "Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "An unexpected error occurred: $e"); // Generic error
-    }
-  }
 }
 
 Future updateUserProfile(token, UserProfile data) async {

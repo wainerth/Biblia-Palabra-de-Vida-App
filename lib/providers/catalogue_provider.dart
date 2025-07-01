@@ -387,7 +387,7 @@ class CatalogueProvider extends ChangeNotifier {
     } on FormatException catch (e) {
       throw Exception('Data format error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to load leagues: ${e.toString()}');
+      throw Exception('Failed to load all versions: ${e.toString()}');
     }
   }
 }

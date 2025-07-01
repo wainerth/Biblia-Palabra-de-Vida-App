@@ -94,4 +94,5 @@ export 'package:biblia_palabra_de_vida_app/widgets/dialog_internal_character.dar
 export 'package:biblia_palabra_de_vida_app/widgets/dialog_internal_teaching.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/custom_pagination.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/custom_verse_dialog.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/dialog_favorite_verse_widget.dart';
 

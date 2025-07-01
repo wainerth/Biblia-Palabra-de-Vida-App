@@ -66,47 +66,63 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
     await _loadData(1, itemPerPageValue, "");
   }
 
-  Future<void> _loadData(int page,int limit, filter) async {
-    setState(() {
-      loading = true;
-      characters = [];
-    });
-    final responseCharacter = await getAllCharacters(page, limit, filter, false);
-    if (responseCharacter.error != null) {
-      // await showCustomDialog(
-      //   context,
-      //   message: responseCharacter.error!,
-      //   dialogType: DialogType.error,
-      // );
-       await showCustomDialogWithAction(context,
-              message: responseCharacter.error!,
-              dialogType: DialogTypeAction.info,
-              buttonOk: 'Volver',
-              actionCallbackOk: () {
-                Navigator.pop(context);
-              },
-              showAction: true,
-              textButton: 'Reintentar',
-              actionCallback: () async {
-                Navigator.pop(context);
-               await _loadData(1,limit, "");
-              });
+  Future<void> _loadData(int page, int limit, filter) async {
+    try {
+      setState(() {
+        loading = true;
+        characters = [];
+      });
+      final responseCharacter =
+          await getAllCharacters(page, limit, filter, false);
+      if (responseCharacter.error != null) {
+        setState(() {
+          loading = false;
+        });
+        await showCustomDialogWithAction(context,
+            message: responseCharacter.error!,
+            dialogType: DialogTypeAction.info,
+            buttonOk: 'Volver',
+            actionCallbackOk: () {
+              Navigator.pop(context);
+            },
+            showAction: true,
+            textButton: 'Reintentar',
+            actionCallback: () async {
+              Navigator.pop(context);
+              await _loadData(1, limit, "");
+            });
+
+        return;
+      }
+      setState(() {
+        characters = responseCharacter.data['data']
+            .map((character) =>
+                CharacterModel.fromJson(removeTypename(character)))
+            .cast<CharacterModel>()
+            .toList();
+
+        pagination = PaginationInfo.fromJson(
+            removeTypename(responseCharacter.data["meta"]));
+        loading = false;
+      });
+    } catch (e) {
       setState(() {
         loading = false;
       });
-      return;
+      await showCustomDialogWithAction(context,
+          message: e.toString(),
+          dialogType: DialogTypeAction.info,
+          buttonOk: 'Volver',
+          actionCallbackOk: () {
+            Navigator.pop(context);
+          },
+          showAction: true,
+          textButton: 'Reintentar',
+          actionCallback: () async {
+            Navigator.pop(context);
+            await _loadData(1, limit, "");
+          });
     }
-    setState(() {
-      characters = responseCharacter.data['data']
-          .map(
-              (character) => CharacterModel.fromJson(removeTypename(character)))
-          .cast<CharacterModel>()
-          .toList();
-
-      pagination =
-          PaginationInfo.fromJson(removeTypename(responseCharacter.data["meta"]));
-      loading = false;
-    });
   }
 
   @override
@@ -160,108 +176,115 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
         Expanded(
           child: loading
               ? LoadingIndicator()
-              : characters.isEmpty ? 
-              Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Center(
-                      child: Text(
-                        textAlign:  TextAlign.center,
-                        "No hay resultados...", style: StylesApp(context).textStyleBody18.copyWith(
-                        color: currentTheme.textColor
-                      ),),
+              : characters.isEmpty
+                  ? Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Center(
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              "No hay resultados...",
+                              style: StylesApp(context)
+                                  .textStyleBody18
+                                  .copyWith(color: currentTheme.textColor),
+                            ),
+                          )
+                        ],
+                      ),
                     )
-                  ],
-                ),
-              )
-              : ListView.builder(
-                  itemCount: characters.length,
-                  itemBuilder: (context, int index) {
-                    return CardCharacterWidget(
-                      currentTheme: currentTheme,
-                      data: characters[index],
-                      onTap: () {
-                        if (characters[index].haveMoreCharacters) {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                final relatedCharacters = characters[index]
-                                    .relatedCharacters
-                                    .map((related) => CharacterModel(
-                                          id: related.id,
-                                          name: related.name,
-                                          description: related.description,
-                                          relatedCharacters: [],
-                                          color: related.color,
-                                          newTestament: false,
-                                          haveMoreCharacters:
-                                              related.haveMoreCharacters,
-                                          typeNameChar: related.typeNameChar,
-                                          img: Img(urlImg: related.img.urlImg),
-                                          // Mapea todas las propiedades necesarias
-                                        ))
-                                    .toList();
-                                return Column(
-                                  children: [
-                                    AppBarHeaderWidget(
-                                      backColor: StyleColor.turquoise,
-                                      buttonColor: StyleColor.orange,
-                                      textButtonColor: Colors.white,
-                                      title: 'Personajes',
-                                      styleText:
-                                          StylesApp(context).textStyleBody7,
-                                      onRoute: () {
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                    Expanded(
-                                      child: Container(
-                                        padding: EdgeInsets.only(top: 12.0),
-                                        color: currentTheme.backgroundColor,
-                                        child: ListView.builder(
-                                          itemCount: relatedCharacters.length,
-                                          itemBuilder: (context, int index) {
-                                            return CardCharacterWidget(
-                                              showTypeName: true,
-                                              currentTheme: currentTheme,
-                                              data: relatedCharacters[index],
-                                              onTap: () {
-                                                showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return DialogInternalCharacter(
-                                                          data:
-                                                              relatedCharacters[
-                                                                  index],
-                                                          currentTheme:
-                                                              currentTheme);
-                                                    });
-                                              },
-                                            );
+                  : ListView.builder(
+                      itemCount: characters.length,
+                      itemBuilder: (context, int index) {
+                        return CardCharacterWidget(
+                          currentTheme: currentTheme,
+                          data: characters[index],
+                          onTap: () {
+                            if (characters[index].haveMoreCharacters) {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    final relatedCharacters = characters[index]
+                                        .relatedCharacters
+                                        .map((related) => CharacterModel(
+                                              id: related.id,
+                                              name: related.name,
+                                              description: related.description,
+                                              relatedCharacters: [],
+                                              color: related.color,
+                                              newTestament: false,
+                                              haveMoreCharacters:
+                                                  related.haveMoreCharacters,
+                                              typeNameChar:
+                                                  related.typeNameChar,
+                                              img: Img(
+                                                  urlImg: related.img.urlImg),
+                                              // Mapea todas las propiedades necesarias
+                                            ))
+                                        .toList();
+                                    return Column(
+                                      children: [
+                                        AppBarHeaderWidget(
+                                          backColor: StyleColor.turquoise,
+                                          buttonColor: StyleColor.orange,
+                                          textButtonColor: Colors.white,
+                                          title: 'Personajes',
+                                          styleText:
+                                              StylesApp(context).textStyleBody7,
+                                          onRoute: () {
+                                            Navigator.pop(context);
                                           },
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              });
-                        } else {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return DialogInternalCharacter(
-                                    data: characters[index],
-                                    currentTheme: currentTheme);
-                              });
-                        }
+                                        Expanded(
+                                          child: Container(
+                                            padding: EdgeInsets.only(top: 12.0),
+                                            color: currentTheme.backgroundColor,
+                                            child: ListView.builder(
+                                              itemCount:
+                                                  relatedCharacters.length,
+                                              itemBuilder:
+                                                  (context, int index) {
+                                                return CardCharacterWidget(
+                                                  showTypeName: true,
+                                                  currentTheme: currentTheme,
+                                                  data:
+                                                      relatedCharacters[index],
+                                                  onTap: () {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return DialogInternalCharacter(
+                                                              data:
+                                                                  relatedCharacters[
+                                                                      index],
+                                                              currentTheme:
+                                                                  currentTheme);
+                                                        });
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  });
+                            } else {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return DialogInternalCharacter(
+                                        data: characters[index],
+                                        currentTheme: currentTheme);
+                                  });
+                            }
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
+                    ),
         ),
-         CustomPagination(
+        CustomPagination(
           pagination: PaginationInfo(
               currentPage: pagination.currentPage,
               itemsPerPage: pagination.itemsPerPage,
@@ -273,9 +296,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
           currentTheme: currentTheme,
           onPageChanged: (newPage, newPerPage) async {
             if (characters.isNotEmpty) {
-               setState(() {
+              setState(() {
                 itemPerPageValue = newPerPage;
-              }); 
+              });
               await _loadData(
                 newPage,
                 newPerPage,
@@ -324,7 +347,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
     if (query.isEmpty) return; // No buscar si está vacío
 
     try {
-      _loadData(1,itemPerPageValue, query);
+      _loadData(1, itemPerPageValue, query);
     } catch (e) {
       print("error al filtrar $e");
     }

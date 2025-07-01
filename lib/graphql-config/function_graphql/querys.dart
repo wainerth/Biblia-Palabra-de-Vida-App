@@ -103,6 +103,62 @@ Future<ResponseData> getProfileUser(token, idUser) async {
   }
 }
 
+Future<ResponseData> verifyToken(token) async {
+  final GraphQLClient _client = createClient();
+  final QueryOptions options = QueryOptions(
+    operationName: 'VerifyToken',
+    document: gql(r'''
+       query VerifyToken($token: String!) {
+          verifyToken(token: $token) {
+            user {
+              id
+              email
+              username
+              handleTimeFeeling
+              lastLogin
+              createdAt
+            }
+            success
+            isLogout
+          }
+          
+        }
+      '''),
+    variables: <String, dynamic>{
+      'token': token,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+
+  try {
+    final QueryResult result = await _client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['verifyToken'] == null) {
+      print("No data returned");
+      return ResponseData(data: false, error: "No data returned");
+      // return false;
+    }
+    return ResponseData(data: data['verifyToken'], error: null);
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
 Future<ResponseData> getAchievement(userId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');

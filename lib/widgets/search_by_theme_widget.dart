@@ -29,6 +29,8 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
   String _searchText = '';
   List<TeachingModel> teachings = [];
   int itemPerPageValue = 50;
+  bool loading = false;
+
   List<int> itemsPerPage = [
     5,
     10,
@@ -71,25 +73,53 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
   Future<void> _loadData(int page, int limit, filter) async {
     setState(() {
       teachings = [];
+      loading = true;
     });
-    final responseTeaching = await getAllTeaching(page, limit, filter, "");
-    if (responseTeaching.error != null) {
-      await showCustomDialog(
-        context,
-        message: responseTeaching.error!,
-        dialogType: DialogType.error,
-      );
-      return;
-    }
-    setState(() {
-      teachings = responseTeaching.data['data']
-          .map((teaching) => TeachingModel.fromJson(removeTypename(teaching)))
-          .cast<TeachingModel>()
-          .toList();
+    try {
+      final responseTeaching = await getAllTeaching(page, limit, filter, "");
+      if (responseTeaching.error != null) {
+        loading = false;
+        await showCustomDialogWithAction(context,
+            message: responseTeaching.error!,
+            dialogType: DialogTypeAction.error,
+            buttonOk: 'Cancelar',
+            actionCallbackOk: () {
+              Navigator.pop(context);
+            },
+            showAction: true,
+            textButton: 'Reintentar',
+            actionCallback: () async {
+              Navigator.pop(context);
+              _loadData(1, itemPerPageValue, _searchText);
+            });
+        return;
+      }
+      setState(() {
+        teachings = responseTeaching.data['data']
+            .map((teaching) => TeachingModel.fromJson(removeTypename(teaching)))
+            .cast<TeachingModel>()
+            .toList();
 
-      pagination = PaginationInfo.fromJson(
-          removeTypename(responseTeaching.data["meta"]));
-    });
+        pagination = PaginationInfo.fromJson(
+            removeTypename(responseTeaching.data["meta"]));
+        loading = false;
+      });
+    } catch (e) {
+      loading = false;
+      await showCustomDialogWithAction(context,
+          message: e.toString(),
+          dialogType: DialogTypeAction.error,
+          buttonOk: 'Cancelar',
+          actionCallbackOk: () {
+            Navigator.pop(context);
+          },
+          showAction: true,
+          textButton: 'Reintentar',
+          actionCallback: () async {
+            Navigator.pop(context);
+            _loadData(1, itemPerPageValue, _searchText);
+          });
+    }
   }
 
   @override
@@ -141,7 +171,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
         ),
         // body de los resultados de la búsqueda
         Expanded(
-          child: teachings.isEmpty
+          child: loading
               ? LoadingIndicator()
               : ListView.builder(
                   itemCount: teachings.length,
@@ -179,9 +209,9 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
           currentTheme: currentTheme,
           onPageChanged: (newPage, newPerPage) async {
             if (teachings.isNotEmpty) {
-               setState(() {
+              setState(() {
                 itemPerPageValue = newPerPage;
-              }); 
+              });
               await _loadData(
                 newPage,
                 newPerPage,
@@ -207,7 +237,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
     if (query.isEmpty) return; // No buscar si está vacío
 
     try {
-      _loadData(1,itemPerPageValue, query);
+      _loadData(1, itemPerPageValue, query);
     } catch (e) {
       print("error al filtrar $e");
     }

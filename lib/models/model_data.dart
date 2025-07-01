@@ -16,6 +16,14 @@ class ModelData {
     return other is ModelData && other.value == value; // Compara por el ID
   }
 
+  factory ModelData.fromJson(Map<String, dynamic> json) {
+    return ModelData(label: json['label'], value: json['value']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {"label": label, "value": value};
+  }
+
   @override
   int get hashCode => value.hashCode;
 }
