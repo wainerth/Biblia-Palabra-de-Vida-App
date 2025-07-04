@@ -295,12 +295,14 @@ Future register(dataToRegister) async {
         "input": {
           "username": dataToRegister.username,
           "email": dataToRegister.email,
-          "countryCode": dataToRegister.countryCode,
+          "codeAreaId": dataToRegister.codeAreaId,
           "password": dataToRegister.password,
           "name": dataToRegister.name,
           "lastname": dataToRegister.lastname,
           "birthdate": dataToRegister.birthdate,
-          "gender": dataToRegister.gender,
+            "gender": dataToRegister.gender != null && dataToRegister.gender.isNotEmpty
+              ? dataToRegister.gender.toUpperCase()
+              : dataToRegister.gender,
           "phoneNumber": dataToRegister.phoneNumber,
           "countryId": dataToRegister.countryId,
           "city": dataToRegister.city,
@@ -899,7 +901,7 @@ Future<ResponseData> setPrizeObtained(userId, courseId) async {
   }
 }
 
-Future<ResponseData> redeemedPrize(prizeId) async {
+Future<ResponseData> redeemedPrize(prizeId, userId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -912,7 +914,10 @@ Future<ResponseData> redeemedPrize(prizeId) async {
           redeemPrize(prizeId: $prizeId)
         }
       '''),
-    variables: <String, dynamic>{"prizeId": prizeId},
+    variables: <String, dynamic>{
+      "prizeId": prizeId,
+      "userId": userId,
+      },
     fetchPolicy: FetchPolicy.noCache,
   );
   try {

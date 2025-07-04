@@ -1,4 +1,3 @@
-import 'package:biblia_palabra_de_vida_app/models/highlight_range_model.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class VerseModel extends GridItem {

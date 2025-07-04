@@ -224,8 +224,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
 
   Future<dynamic> _dialogAwards(BuildContext context) async {
     // Variables locales para el estado del diálogo
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final userData = userProvider.currentUser;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userData = userProvider.currentUser;
     List awards = [];
     PaginationInfo pagination = PaginationInfo(
       currentPage: 0,
@@ -470,9 +470,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             style: StylesApp(context).textStyCalendar,
           ),
           Container(
-            constraints: BoxConstraints(
-              minHeight: 75
-            ),
+            constraints: BoxConstraints(minHeight: 75),
             height: 85.sp,
             decoration: BoxDecoration(
               color: Color(0XFFFFF2C2),
@@ -642,8 +640,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       child: Text(
                         textAlign: TextAlign.center,
                         item.redeemed
-                          ? "Este Premio ya fue canjeado"
-                          : "Puedes canjear esta gema por ${item.exchangeValue.toInt()}Lsm de energía",
+                            ? "Este Premio ya fue canjeado"
+                            : "Puedes canjear esta gema por ${item.exchangeValue.toInt()}Lsm de energía",
                         style: StylesApp(context)
                             .textStyleBody14
                             .copyWith(color: Colors.black),
@@ -658,9 +656,14 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                         onPressed: item.redeemed
                             ? null
                             : () async {
+                                final userProvider =
+                                    Provider.of<UserProvider>(context);
+                                final LoginUser? userData =
+                                    userProvider.currentUser;
                                 LoadingService().showLoading(context);
-                                final responseRedime =
-                                    await redeemedPrize(item.id);
+                                final responseRedime = await redeemedPrize(
+                                  item.id, userData!.userId
+                                );
                                 if (responseRedime.error != null) {
                                   LoadingService().hideLoading();
                                   await showCustomDialog(

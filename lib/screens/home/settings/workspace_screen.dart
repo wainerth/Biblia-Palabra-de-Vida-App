@@ -305,7 +305,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             backgroundColor: Colors.white,
             controlsColor: StyleColor.turquoise,
             fileName: reflection != null ? reflection.title : '',
-            pathUrl: reflection != null ? reflection.url : ''),
+            pathUrl: reflection != null
+                ? "${GraphQLConfig.urlServidor}${reflection.url}"
+                : ''),
       ],
     );
   }
@@ -619,7 +621,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         child: Center(
                           child: Column(
                             children: [
-                              Container(
+                              SizedBox(
                                 // width: double.infinity,
                                 height: StylesApp(context)
                                     .sizeContainerAvatar

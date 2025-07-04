@@ -3,7 +3,6 @@ import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
 
 class PageScreen extends StatefulWidget {
   const PageScreen({super.key});
@@ -16,7 +15,7 @@ class _PageScreenState extends State<PageScreen> {
   int _selectedIndex = 0;
   final List<Widget> _screens = [
     WorkspaceScreen(),
-    GraphQLConfig.development ? BibleScreen(): SoonScreen(),
+    BibleScreen(),
     GraphQLConfig.development ? PrayerScreen() : SoonScreen(),
     GraphQLConfig.development ? AudioScreen() : SoonScreen(),
     GraphQLConfig.development ? OfferingsScreen() : SoonScreen(),

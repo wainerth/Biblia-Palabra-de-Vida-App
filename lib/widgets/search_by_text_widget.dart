@@ -12,7 +12,6 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchByTextWidget extends StatefulWidget {
   final void Function(InputDataSearchModel data)? onActionTabText;

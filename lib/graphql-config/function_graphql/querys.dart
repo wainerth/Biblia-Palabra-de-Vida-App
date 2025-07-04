@@ -2237,8 +2237,10 @@ Future<ResponseData> getAllHighLighters(
 }
 
 Future<ResponseData> getFavoriteVerseByUser(
-  int page,
-  int limit,
+  int? page,
+  int? limit,
+  String? versionId,
+  String? chapterId,
   String userId,
 ) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -2249,40 +2251,43 @@ Future<ResponseData> getFavoriteVerseByUser(
   QueryOptions options = QueryOptions(
     // operationName: "GetOneReflectionRandom ",
     document: gql(r'''
-        query GetAllFavoritesByUser($userId: ID, $page: Int, $limit: Int) {
-        getAllFavoritesByUser(userId: $userId, page: $page, limit: $limit) {
-          data {
-            userId
-            book {
+       query GetFavoriteVersesByChapterId($chapterId: ID, $versionId: ID, $userId: ID, $page: Int, $limit: Int) {
+          getFavoriteVersesByChapterId(chapterId: $chapterId, versionId: $versionId, userId: $userId, page: $page, limit: $limit) {
+            data {
+              userId
+              book {
+                id
+                bibleId
+                numberBook
+                modernName
+                
+              }
+              chapter {
+                id
+                chapter
+              }
+              verse: favoriteVerseUser {
               id
-              numberBook
-              modernName
-              newTestament
+                verse
+                text
+              }
             }
-            chapter {
-              id
-              chapter
+            meta {
+              currentPage
+              totalPages
+              itemsPerPage
+              totalItems
+              hasPreviousPage
+              hasNextPage
             }
-            verse:favoriteVerseUser {
-              id
-              verse
-              text
-            }
-          }
-          meta {
-            currentPage
-            totalPages
-            itemsPerPage
-            totalItems
-            hasPreviousPage
-            hasNextPage
           }
         }
-      }
       '''),
     variables: <String, dynamic>{
       "page": page,
       "limit": limit,
+      "versionId": versionId,
+      "chapterId": chapterId,
       "userId": userId,
     },
     fetchPolicy: FetchPolicy.noCache,
@@ -2294,15 +2299,15 @@ Future<ResponseData> getFavoriteVerseByUser(
     }
 
     final data = removeTypename(result.data);
-    if (data['getAllFavoritesByUser'] == null) {
+    if (data['getFavoriteVersesByChapterId'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get All Favorites By User  failed: No data returned',
+        error: 'Get Favorite Verses By ChapterId  failed: No data returned',
       );
     }
 
     return ResponseData(
-      data: data['getAllFavoritesByUser'],
+      data: data['getFavoriteVersesByChapterId'],
       error: null,
     );
   } on TimeoutException catch (e) {
@@ -2310,7 +2315,8 @@ Future<ResponseData> getFavoriteVerseByUser(
       print('Timeout: $e');
     }
     return ResponseData(
-        data: null, error: 'Get All Favorites By User Timeout de conexión $e');
+        data: null,
+        error: 'Get Favorite Verses By ChapterId Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

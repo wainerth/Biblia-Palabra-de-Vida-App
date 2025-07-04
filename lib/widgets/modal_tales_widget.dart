@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -294,7 +295,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                       backgroundColor: Colors.white,
                       fileName: taleSelected != null ?  taleSelected!.name : '',
                       pathUrl:
-                          taleSelected != null ? taleSelected!.urlAudio : ''),
+                          taleSelected != null ? "${GraphQLConfig.urlServidor}${taleSelected!.urlAudio}" : ''),
                   SizedBox(height: 13.0)
                 ],
               ),

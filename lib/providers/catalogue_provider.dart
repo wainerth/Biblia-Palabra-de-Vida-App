@@ -104,7 +104,9 @@ class CatalogueProvider extends ChangeNotifier {
         allCountries.addAll(message);
         notifyListeners();
       } else if (message == 'completed') {
-        print("countries cargados...");
+        if (kDebugMode) {
+          print("countries cargados...");
+        }
         break;
       }
     }
@@ -294,7 +296,9 @@ class CatalogueProvider extends ChangeNotifier {
         allAreasCode.addAll(message);
         notifyListeners();
       } else if (message == 'completed') {
-        print("areas code cargados...");
+        if (kDebugMode) {
+          print("areas code cargados...");
+        }
         break;
       }
     }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -13,6 +14,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/class/bible_version_selector.dart';
@@ -30,7 +32,7 @@ class BibleScreen extends StatefulWidget {
 }
 
 class _BibleScreenState extends State<BibleScreen> {
-  late final userProvider;
+  late final UserProvider userProvider;
   LoginUser? userData;
   final ScrollController scrollController = ScrollController();
   SharedPreferences? prefs;
@@ -57,9 +59,18 @@ class _BibleScreenState extends State<BibleScreen> {
   final GlobalKey _selectableTextKey = GlobalKey();
   late BibleTheme currentTheme;
 
+  // Añade estas variables para TTS
+  late FlutterTts flutterTts;
+  bool isPlaying = false;
+  int? currentPlayingVerseIndex;
+// Añade estas variables a tu estado
+  double _speechRate = 0.5; // Velocidad por defecto
+
   @override
   void initState() {
     super.initState();
+    _initTTS(); // Inicializar TTS
+    _initSpeechRate();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       userData = userProvider.currentUser;
@@ -70,7 +81,176 @@ class _BibleScreenState extends State<BibleScreen> {
 
   @override
   void dispose() {
+    flutterTts.stop(); // Detener TTS al salir
     super.dispose();
+  }
+
+  void _initTTS() async {
+    flutterTts = FlutterTts();
+
+    await flutterTts.setLanguage("es-ES"); // Configurar idioma
+    await flutterTts.setVoice({"name": "es-es-x-ana-local", "locale": "es-ES"});
+    await flutterTts.setSpeechRate(0.5); // Velocidad de habla (0-1)
+    await flutterTts.setVolume(1.0); // Volumen (0-1)
+    await flutterTts.setPitch(1.0); // Tono (0.5-2.0)
+
+    // Configurar handlers para eventos
+    flutterTts.setStartHandler(() {
+      setState(() => isPlaying = true);
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        // isPlaying = false;
+        // currentPlayingVerseIndex = null;
+      });
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        isPlaying = false;
+        currentPlayingVerseIndex = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error en TTS: $msg")),
+      );
+    });
+  }
+
+// Método para inicializar la velocidad desde preferencias
+  Future<void> _initSpeechRate() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _speechRate = prefs.getDouble('tts_speech_rate') ?? 0.5;
+    });
+    await flutterTts.setSpeechRate(_speechRate);
+  }
+
+  String _getSpeedLabel(double speed) {
+    if (speed <= 0.4) return 'Lento';
+    if (speed <= 0.6) return 'Normal';
+    return 'Rápido';
+  }
+
+  // Método para leer un versículo
+  Future<void> _readVerse(VerseModel verse) async {
+    try {
+      if (isPlaying) {
+        await flutterTts.stop();
+      }
+
+      setState(() {
+        currentPlayingVerseIndex = verses.indexOf(verse);
+      });
+
+      await flutterTts.speak("Versículo ${verse.verse}. ${verse.text}");
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al leer versículo: ${e.toString()}")),
+        );
+      }
+    } finally {
+      setState(() {
+        isPlaying = false;
+      });
+      await flutterTts.stop();
+    }
+  }
+
+  // Método para leer todo el capítulo
+  Future<void> _readFullChapter() async {
+    try {
+      if (isPlaying) {
+        await flutterTts.stop();
+        return;
+      }
+
+      setState(() => isPlaying = true);
+
+      for (int i = 0; i < verses.length; i++) {
+        if (!isPlaying) break; // Si se detuvo la reproducción, salir
+
+        setState(() => currentPlayingVerseIndex = i);
+
+        // Scroll al versículo actual
+        if (_selectableTextKey.currentContext != null &&
+            scrollController.hasClients) {
+          try {
+            final renderBox =
+                _selectableTextKey.currentContext!.findRenderObject();
+            if (renderBox is RenderBox) {
+              final text = verses
+                  .sublist(0, i)
+                  .map((v) => "${v.verse} ${v.text}")
+                  .join(' ');
+              final tp = TextPainter(
+                text: TextSpan(
+                  text: text,
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        fontFamily: fontFamilySet.label,
+                        fontSize: fontSizeVerse,
+                      ),
+                ),
+                textDirection: TextDirection.ltr,
+                maxLines: null,
+              );
+              tp.layout(maxWidth: renderBox.size.width);
+              final offsetY = tp.height - 15;
+              await scrollController.animateTo(
+                offsetY,
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            }
+          } catch (_) {
+            final itemHeight = 40.0;
+            await scrollController.animateTo(
+              i * itemHeight,
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        }
+
+        // Esperar a que termine de hablar antes de continuar
+        await flutterTts
+            .speak("Versículo ${verses[i].verse}. ${verses[i].text}");
+        // Esperar a que termine el TTS antes de continuar
+        await _waitForTtsCompletion();
+        if (!isPlaying) break;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al leer capítulo: ${e.toString()}")),
+        );
+      }
+    } finally {
+      setState(() {
+        isPlaying = false;
+        currentPlayingVerseIndex = null;
+      });
+    }
+  }
+
+  // Espera a que el TTS termine de hablar
+  Future<void> _waitForTtsCompletion() async {
+    final completer = Completer<void>();
+    void onComplete() {
+      flutterTts
+          .setCompletionHandler(() {}); // Limpiar handler para evitar fugas
+      completer.complete();
+    }
+
+    flutterTts.setCompletionHandler(onComplete);
+
+    // Si el usuario detiene la reproducción, salir antes
+    while (isPlaying && !completer.isCompleted) {
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    await completer.future;
   }
 
   @override
@@ -204,7 +384,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                         showModalBottomSheet(
                                             context: context,
                                             builder: (BuildContext context) {
-                                              return modalTextFormatSizeWidget(
+                                              return ModalTextFormatSizeWidget(
                                                 fontSize: fontSizeVerse,
                                                 selectedItem: fontFamilySet,
                                                 onChangedFontSize: (fontSize) {
@@ -303,7 +483,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                                 onActionBook:
                                                     (InputDataSearchModel
                                                         data) async {
-                                                  await loadVersionAndVerseRange(
+                                                  await loadVersionAndChapter(
                                                       data);
                                                 },
                                                 onActionTabText:
@@ -342,6 +522,9 @@ class _BibleScreenState extends State<BibleScreen> {
                                     padding: EdgeInsets.zero,
                                     iconSize: 25.0,
                                     onPressed: () async {
+                                      String versionId = currentVersion != null
+                                          ? currentVersion!.id
+                                          : "0";
                                       LoadingService().showLoading(context);
                                       try {
                                         String userId = userData != null
@@ -351,7 +534,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                         PaginationInfo? objPagination;
                                         final responseFavorite =
                                             await getFavoriteVerseByUser(
-                                                1, 10, userId);
+                                                1, 10, versionId, null, userId);
                                         if (responseFavorite.error != null) {
                                           LoadingService().hideLoading();
                                           await showCustomDialog(context,
@@ -382,6 +565,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                               return DialogFavoriteVerseWidget(
                                                   currentTheme: currentTheme,
                                                   paginationInfo: objPagination,
+                                                  versionId: currentVersion!.id,
                                                   favoriteVerses: listFavorite,
                                                   onDeleted: (verseId) {
                                                     final indexToDelete =
@@ -457,18 +641,149 @@ class _BibleScreenState extends State<BibleScreen> {
                                     ),
                                   ),
                                   Expanded(
-                                    child: AudioPlayerWidget(
-                                      showImage: false,
-                                      pathUrl: audioChapter != null &&
-                                              audioChapter!.audioUrl.isNotEmpty
-                                          ? '${GraphQLConfig.urlServidor}${audioChapter!.audioUrl}'
-                                          : '',
-                                      backgroundColor:
-                                          currentTheme.backgroundColor,
-                                      controlsColor: currentTheme.buttonColor,
-                                      actionColor: currentTheme.textColor,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: currentTheme.backgroundColor,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      margin:
+                                          EdgeInsets.symmetric(horizontal: 8),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 4),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          // Slider para control de velocidad
+                                          Expanded(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    // Botón de stop
+                                                    IconButton(
+                                                      icon: Icon(Icons.stop,
+                                                          size: 24),
+                                                      color: currentTheme
+                                                          .buttonColor,
+                                                      onPressed: () async {
+                                                        await flutterTts.stop();
+                                                        setState(() {
+                                                          isPlaying = false;
+                                                          currentPlayingVerseIndex =
+                                                              null;
+                                                        });
+                                                      },
+                                                    ),
+                                                    // Botón de play/pause
+                                                    IconButton(
+                                                      icon: Icon(
+                                                        isPlaying
+                                                            ? Icons.pause
+                                                            : Icons.play_arrow,
+                                                        size: 28,
+                                                      ),
+                                                      color: currentTheme
+                                                          .buttonColor,
+                                                      onPressed:
+                                                          _togglePlayPause,
+                                                    ),
+                                                    Icon(Icons.speed,
+                                                        size: 18,
+                                                        color: currentTheme
+                                                            .textColor),
+                                                    SizedBox(width: 8),
+                                                    Expanded(
+                                                      child: Slider(
+                                                        value: _speechRate,
+                                                        min: 0.1,
+                                                        max: 1.0,
+                                                        divisions: 9,
+                                                        label: _getSpeedLabel(
+                                                            _speechRate),
+                                                        activeColor:
+                                                            currentTheme
+                                                                .buttonColor,
+                                                        inactiveColor:
+                                                            currentTheme
+                                                                .buttonColor
+                                                                .withOpacity(
+                                                                    0.3),
+                                                        onChanged:
+                                                            (value) async {
+                                                          final prefs =
+                                                              await SharedPreferences
+                                                                  .getInstance();
+                                                          setState(() {
+                                                            _speechRate = value;
+                                                          });
+                                                          await flutterTts
+                                                              .setSpeechRate(
+                                                                  value);
+                                                          await prefs.setDouble(
+                                                              'tts_speech_rate',
+                                                              value);
+                                                        },
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 8),
+                                                    Text(
+                                                      _getSpeedLabel(
+                                                          _speechRate),
+                                                      style: TextStyle(
+                                                        color: currentTheme
+                                                            .textColor,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Text(
+                                                  'Velocidad: ${(_speechRate * 100).round()}%',
+                                                  style: TextStyle(
+                                                    color:
+                                                        currentTheme.textColor,
+                                                    fontSize: 10,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          // Indicador de progreso (opcional)
+                                          // if (isPlaying &&
+                                          //     currentPlayingVerseIndex != null)
+                                          //   Padding(
+                                          //     padding: EdgeInsets.only(left: 8),
+                                          //     child: Text(
+                                          //       '${currentPlayingVerseIndex! + 1}/${verses.length}',
+                                          //       style: TextStyle(
+                                          //         color: currentTheme.textColor
+                                          //             .withOpacity(0.6),
+                                          //         fontSize: 12,
+                                          //       ),
+                                          //     ),
+                                          //   ),
+                                        ],
+                                      ),
                                     ),
                                   ),
+                                  // Expanded(
+                                  //   child: AudioPlayerWidget(
+                                  //     showImage: false,
+                                  //     pathUrl: audioChapter != null &&
+                                  //             audioChapter!.audioUrl.isNotEmpty
+                                  //         ? '${GraphQLConfig.urlServidor}${audioChapter!.audioUrl}'
+                                  //         : '',
+                                  //     backgroundColor:
+                                  //         currentTheme.backgroundColor,
+                                  //     controlsColor: currentTheme.buttonColor,
+                                  //     actionColor: currentTheme.textColor,
+                                  //   ),
+                                  // ),
                                   Container(
                                     width: 35,
                                     height: 35,
@@ -550,7 +865,11 @@ class _BibleScreenState extends State<BibleScreen> {
                                           fontFamily: fontFamilySet.label,
                                           fontSize: fontSizeNumber,
                                           fontWeight: FontWeight.bold,
-                                          color: currentTheme.textColor,
+                                          color: currentPlayingVerseIndex ==
+                                                  verses.indexOf(verse)
+                                              ? Colors
+                                                  .blue // Cambia color cuando se lee
+                                              : currentTheme.textColor,
                                         ),
                               ),
                             ),
@@ -651,6 +970,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
   void _showVersePopupMenu(BuildContext context, VerseModel verse) {
     final isFavorite = _isFavorite(verse);
+    final isCurrentPlaying = currentPlayingVerseIndex == verses.indexOf(verse);
 
     showModalBottomSheet(
       context: context,
@@ -663,6 +983,19 @@ class _BibleScreenState extends State<BibleScreen> {
                 isFavorite ? 'Remover de favoritos' : 'Agregar a favoritos'),
             onTap: () {
               _toggleFavorite(verse);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(isCurrentPlaying ? Icons.stop : Icons.volume_up),
+            title:
+                Text(isCurrentPlaying ? 'Detener lectura' : 'Leer versículo'),
+            onTap: () {
+              if (isCurrentPlaying) {
+                flutterTts.stop();
+              } else {
+                _readVerse(verse);
+              }
               Navigator.pop(context);
             },
           ),
@@ -690,9 +1023,15 @@ class _BibleScreenState extends State<BibleScreen> {
                   ? highlight.startIndex - 1
                   : highlight.startIndex)),
           style: StylesApp(context).textStyleBody14.copyWith(
+                decoration:
+                    _isFavorite(verse) ? TextDecoration.underline : null,
+                color: currentPlayingVerseIndex == verses.indexOf(verse)
+                    ? Colors.blue // Cambia color cuando se lee
+                    : currentTheme.textColor,
+                decorationThickness: 4.0,
+                decorationColor: StyleColor.yellowLight,
                 fontFamily: fontFamilySet.label,
                 fontSize: fontSizeVerse,
-                color: currentTheme.textColor,
                 fontWeight: FontWeight.w400,
               ),
         ));
@@ -716,12 +1055,17 @@ class _BibleScreenState extends State<BibleScreen> {
                 : highlight.endIndex),
         // highlight.endIndex < text.length-1 ? highlight.endIndex - 1: highlight.endIndex ),
         style: StylesApp(context).textStyleBody14.copyWith(
+              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+              color: currentPlayingVerseIndex == verses.indexOf(verse)
+                  ? Colors.blue // Cambia color cuando se lee
+                  : currentTheme.textColor,
+              decorationThickness: 4.0,
+              decorationColor: StyleColor.yellowLight,
               fontFamily: fontFamilySet.label,
               fontSize: fontSizeVerse,
               backgroundColor:
                   Color(int.parse('0XFF${formatColor(highlight.color)}'))
                       .withValues(alpha: 0.3),
-              color: currentTheme.textColor,
               fontWeight: FontWeight.w400,
             ),
       ));
@@ -736,34 +1080,42 @@ class _BibleScreenState extends State<BibleScreen> {
       spans.add(TextSpan(
         text: text.substring(currentPos),
         style: StylesApp(context).textStyleBody14.copyWith(
+              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+              color: currentPlayingVerseIndex == verses.indexOf(verse)
+                  ? Colors.blue // Cambia color cuando se lee
+                  : currentTheme.textColor,
+              decorationThickness: 4.0,
+              decorationColor: StyleColor.yellowLight,
               fontFamily: fontFamilySet.label,
               fontSize: fontSizeVerse,
-              color: currentTheme.textColor,
               fontWeight: FontWeight.w400,
             ),
       ));
     }
 
     // Aplica un estilo por defecto a todos los spans si no tienen uno
-    return spans.map((span) {
-      // if (span.style != null) {
-      //   return span;
-      // }
-      return TextSpan(
-        text: span.text,
-        children: span.children,
-        recognizer: span.recognizer,
-        style: StylesApp(context).textStyleBody14.copyWith(
-              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
-              fontFamily: fontFamilySet.label,
-              fontSize: fontSizeVerse,
-              color: currentTheme.textColor,
-              decorationThickness: 12.0,
-              decorationColor: StyleColor.yellowLight,
-              fontWeight: FontWeight.w400,
-            ),
-      );
-    }).toList();
+    return spans;
+    // .map((span) {
+    //   if (span.style != null) {
+    //     return span;
+    //   }
+    //   return TextSpan(
+    //     text: span.text,
+    //     children: span.children,
+    //     recognizer: span.recognizer,
+    //     style: StylesApp(context).textStyleBody14.copyWith(
+    //           decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+    //           fontFamily: fontFamilySet.label,
+    //           fontSize: fontSizeVerse,
+    //           color: currentPlayingVerseIndex == verses.indexOf(verse)
+    //               ? Colors.blue // Cambia color cuando se lee
+    //               : currentTheme.textColor,
+    //           decorationThickness: 4.0,
+    //           decorationColor: StyleColor.yellowLight,
+    //           fontWeight: FontWeight.w400,
+    //         ),
+    //   );
+    // }).toList();
   }
 
   /// Método que me muestra la modal bottom Sheet pata la elección del color de resaltado
@@ -1092,7 +1444,11 @@ class _BibleScreenState extends State<BibleScreen> {
         .loadSavedTheme();
     // cargar los favoritos
     String userId = userData != null ? userData!.userId : '';
-    final responseFavorite = await getFavoriteVerseByUser(1, 50, userId);
+    String? chapterId = currentChapter != null ? currentChapter!.id : null;
+    String versionId = currentVersion != null ? currentVersion!.id : "0";
+
+    final responseFavorite =
+        await getFavoriteVerseByUser(null, null, versionId, chapterId, userId);
     if (responseFavorite.data != null && responseFavorite.data.length > 0) {
       setState(() {
         _favoriteVerses = responseFavorite.data['data']
@@ -1106,7 +1462,6 @@ class _BibleScreenState extends State<BibleScreen> {
       await Provider.of<CatalogueProvider>(context, listen: false)
           .loadBibleVersions();
     }
-    prefs = await SharedPreferences.getInstance();
     if (prefs!.getDouble("fontSizeVerse") != null) {
       setState(() {
         fontSizeVerse = prefs!.getDouble("fontSizeVerse")!;
@@ -1125,17 +1480,17 @@ class _BibleScreenState extends State<BibleScreen> {
 
   /// Método de carga inicial de datos
   Future<void> _initDataLoad() async {
+    prefs = await SharedPreferences.getInstance();
     LoadingService().showLoading(context);
     setState(() {
       errorMessage = null;
     });
-    //leemos la data persistida
-    await _loadPersistedData();
-
     lastVersionsSelected =
         prefs!.getString(preferenceKey); //  cargo la version almacena en cache
+
     final loadBook =
         prefs!.getString('bookSelected'); // cargo el libro almacenado en cache
+    //leemos la data persistida
     try {
       // si hay version en cache
       setState(() {
@@ -1163,6 +1518,8 @@ class _BibleScreenState extends State<BibleScreen> {
       });
       //consulto todos los capítulos del libro actual con sus versículos
       await loadChapters(currentBook!, false);
+      await _loadPersistedData();
+
       _loadAudioChapters();
       // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
       validateNextAndPrevious();
@@ -1417,14 +1774,45 @@ class _BibleScreenState extends State<BibleScreen> {
               verses.indexWhere((v) => v.id == data.startVerseId);
           if (startIndex != -1) {
             // Esperar al siguiente frame para asegurar que el ListView esté construido
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              // Calcular la posición aproximada (ajusta el valor si usas un itemExtent fijo)
-              final itemHeight = 40.0; // Ajusta según el alto de tus items
-              scrollController.animateTo(
-                startIndex * itemHeight,
-                duration: Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
-              );
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              if (_selectableTextKey.currentContext != null &&
+                  scrollController.hasClients) {
+                try {
+                  final renderBox =
+                      _selectableTextKey.currentContext!.findRenderObject();
+                  if (renderBox is RenderBox) {
+                    final text = verses
+                        .sublist(0, startIndex)
+                        .map((v) => "${v.verse} ${v.text}")
+                        .join(' ');
+                    final tp = TextPainter(
+                      text: TextSpan(
+                        text: text,
+                        style: StylesApp(context).textStyleBody14.copyWith(
+                              fontFamily: fontFamilySet.label,
+                              fontSize: fontSizeVerse,
+                            ),
+                      ),
+                      textDirection: TextDirection.ltr,
+                      maxLines: null,
+                    );
+                    tp.layout(maxWidth: renderBox.size.width);
+                    final offsetY = tp.height - 15;
+                    await scrollController.animateTo(
+                      offsetY,
+                      duration: Duration(milliseconds: 400),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                } catch (_) {
+                  final itemHeight = 40.0;
+                  await scrollController.animateTo(
+                    startIndex * itemHeight,
+                    duration: Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              }
             });
           }
         }
@@ -1499,19 +1887,47 @@ class _BibleScreenState extends State<BibleScreen> {
           final startIndex =
               verses.indexWhere((v) => v.id == data.startVerseId);
           if (startIndex != -1) {
+            _scrolledVerseId = verses[startIndex].id;
             // Guardar el ID del versículo marcado por scroll
-            setState(() {
-              _scrolledVerseId = verses[startIndex].id;
-            });
-            // Esperar al siguiente frame para asegurar que el ListView esté construido
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              // Calcular la posición aproximada (ajusta el valor si usas un itemExtent fijo)
-              final itemHeight = 40.0; // Ajusta según el alto de tus items
-              scrollController.animateTo(
-                startIndex * itemHeight,
-                duration: Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
-              );
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+              if (_selectableTextKey.currentContext != null &&
+                  scrollController.hasClients) {
+                try {
+                  final renderBox =
+                      _selectableTextKey.currentContext!.findRenderObject();
+                  if (renderBox is RenderBox) {
+                    final text = verses
+                        .sublist(0, startIndex)
+                        .map((v) => "${v.verse} ${v.text}")
+                        .join(' ');
+                    final tp = TextPainter(
+                      text: TextSpan(
+                        text: text,
+                        style: StylesApp(context).textStyleBody14.copyWith(
+                              fontFamily: fontFamilySet.label,
+                              fontSize: fontSizeVerse,
+                            ),
+                      ),
+                      textDirection: TextDirection.ltr,
+                      maxLines: null,
+                    );
+                    tp.layout(maxWidth: renderBox.size.width);
+                    final offsetY = tp.height;
+                    await scrollController.animateTo(
+                      offsetY,
+                      duration: Duration(milliseconds: 400),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                } catch (_) {
+                  final itemHeight = 40.0;
+                  await scrollController.animateTo(
+                    startIndex * itemHeight,
+                    duration: Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              }
             });
           }
         } else {
@@ -1543,6 +1959,26 @@ class _BibleScreenState extends State<BibleScreen> {
     setState(() {
       audioChapter = AudioChapterModel.fromJson(audioChapterResponse.data);
     });
+  }
+
+  Future<void> _togglePlayPause() async {
+    if (isPlaying) {
+      await flutterTts.pause();
+      setState(() => isPlaying = false);
+    } else {
+      if (currentPlayingVerseIndex != null) {
+        // If your TTS plugin supports resume(), use it; otherwise, re-call speak() for the next verse.
+        await flutterTts.awaitSpeakCompletion(true);
+        if (currentPlayingVerseIndex != null &&
+            currentPlayingVerseIndex! < verses.length) {
+          await flutterTts.speak(
+              "Versículo ${verses[currentPlayingVerseIndex!].verse}. ${verses[currentPlayingVerseIndex!].text}");
+        }
+      } else {
+        _readFullChapter();
+      }
+      setState(() => isPlaying = true);
+    }
   }
 }
 

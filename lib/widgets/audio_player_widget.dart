@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -120,77 +121,85 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     Directory? internalDir;
 
     PermissionStatus storageStatus = PermissionStatus.denied;
-
-    // Obtengo los diferentes directorios dependiendo de la plataforma
-    if (Platform.isAndroid) {
-      final newStatus = await Permission.storage.request();
-      setState(() {
-        storageStatus = newStatus;
-      });
-      externalDir = await getExternalStorageDirectory();
-      internalDir = await getApplicationDocumentsDirectory();
-    } else {
-      internalDir = await getApplicationDocumentsDirectory();
-    }
-
-    // tomo el directorio de descarga si tengo permisos uso el externo si no el interno
-    Directory? savedDir;
-    if (Platform.isAndroid && storageStatus.isGranted && externalDir != null) {
-      savedDir = Directory(
-          '${externalDir.path}/Download'); //externalDir!.path + '/Download';
-    } else if (internalDir != null) {
-      savedDir = Directory('${internalDir.path}/Download');
-    }
-    if (savedDir != null && !await savedDir.exists()) {
-      await savedDir.create(recursive: true);
-    }
-
-    if (savedDir != null) {
-      Future.delayed(Duration(seconds: 1));
-      final taskId = await FlutterDownloader.enqueue(
-        url: url,
-        savedDir: savedDir.path,
-        fileName: "$fileName.mp3",
-        showNotification: true,
-        openFileFromNotification: Platform.isIOS ? false : true,
-      );
-
-      if (kDebugMode) {
-        print('Descarga iniciada con ID: $taskId');
+    try {
+      // Obtengo los diferentes directorios dependiendo de la plataforma
+      if (Platform.isAndroid) {
+        final newStatus = await Permission.storage.request();
+        setState(() {
+          storageStatus = newStatus;
+        });
+        externalDir = await getExternalStorageDirectory();
+        internalDir = await getApplicationDocumentsDirectory();
+      } else {
+        internalDir = await getApplicationDocumentsDirectory();
       }
-      if (taskId != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: StyleColor.turquoise,
-            content: Text(
-              'Descarga iniciada en ${savedDir == externalDir ? 'almacenamiento externo' : 'almacenamiento interno'}. Revisar notificaciones.',
-              style: StylesApp(context).textStyleBody12,
-            ),
-          ),
+
+      // tomo el directorio de descarga si tengo permisos uso el externo si no el interno
+      Directory? savedDir;
+      if (Platform.isAndroid &&
+          storageStatus.isGranted &&
+          externalDir != null) {
+        savedDir = Directory('${externalDir.path}/Download');
+      } else {
+        savedDir = Directory('${internalDir.path}/Download');
+      }
+      if (!await savedDir.exists()) {
+        await savedDir.create(recursive: true);
+      }
+
+      if (savedDir != null) {
+        Future.delayed(Duration(seconds: 1));
+        final taskId = await FlutterDownloader.enqueue(
+          url: url,
+          savedDir: savedDir.path,
+          fileName: "$fileName.mp3",
+          showNotification: true,
+          openFileFromNotification: Platform.isIOS ? false : true,
         );
+
+        if (kDebugMode) {
+          print('Descarga iniciada con ID: $taskId');
+        }
+        if (taskId != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: StyleColor.turquoise,
+              content: Text(
+                'Descarga iniciada en ${savedDir == externalDir ? 'almacenamiento externo' : 'almacenamiento interno'}. Revisar notificaciones.',
+                style: StylesApp(context).textStyleBody12,
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: StyleColor.redLight,
+              content: Text(
+                'Error al iniciar la descarga.',
+                style: StylesApp(context).textStyleBody12,
+              ),
+            ),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: StyleColor.redLight,
             content: Text(
-              'Error al iniciar la descarga.',
+              'No se pudo acceder al almacenamiento.',
               style: StylesApp(context).textStyleBody12,
             ),
           ),
         );
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: StyleColor.redLight,
-          content: Text(
-            'No se pudo acceder al almacenamiento.',
-            style: StylesApp(context).textStyleBody12,
-          ),
-        ),
-      );
+      LoadingService().hideLoading();
+    } catch (e) {
+      LoadingService().hideLoading();
+      await showCustomDialog(context,
+          message: e.toString(), dialogType: DialogType.error);
+    } finally {
+      LoadingService().hideLoading();
     }
-    LoadingService().hideLoading();
   }
 
   @override
@@ -336,90 +345,94 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       iconSize: 25.sp,
                       constraints: BoxConstraints(minHeight: 25.sp),
                       color: widget.actionColor,
-                      onPressed: widget.pathUrl.isEmpty ? null : () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                StatefulBuilder(builder: (context, setState) {
-                                  return ListTile(
-                                    leading: IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          if (volume > 0) {
-                                            volume = 0;
-                                          } else {
-                                            volume =
-                                                0.5; // Default volume level
-                                          }
-                                          player.setVolume(volume);
-                                        });
-                                      },
-                                      icon: Icon(volume > 0
-                                          ? Icons.volume_up
-                                          : Icons.volume_off),
-                                    ),
-                                    title: Slider(
-                                      value: volume,
-                                      onChanged: (newVolume) {
-                                        setState(() => volume = newVolume);
-                                        player.setVolume(volume);
-                                      },
-                                      min: 0.0,
-                                      max: 1.0,
-                                    ),
+                      onPressed: widget.pathUrl.isEmpty
+                          ? null
+                          : () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      StatefulBuilder(
+                                          builder: (context, setState) {
+                                        return ListTile(
+                                          leading: IconButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                if (volume > 0) {
+                                                  volume = 0;
+                                                } else {
+                                                  volume =
+                                                      0.5; // Default volume level
+                                                }
+                                                player.setVolume(volume);
+                                              });
+                                            },
+                                            icon: Icon(volume > 0
+                                                ? Icons.volume_up
+                                                : Icons.volume_off),
+                                          ),
+                                          title: Slider(
+                                            value: volume,
+                                            onChanged: (newVolume) {
+                                              setState(
+                                                  () => volume = newVolume);
+                                              player.setVolume(volume);
+                                            },
+                                            min: 0.0,
+                                            max: 1.0,
+                                          ),
+                                        );
+                                      }),
+                                      ListTile(
+                                        leading: Icon(Icons.download),
+                                        title: Text('Descargar'),
+                                        onTap: widget.pathUrl.isEmpty
+                                            ? null
+                                            : () async {
+                                                Navigator.pop(context);
+                                                downloadFile(
+                                                    context,
+                                                    widget.pathUrl,
+                                                    widget.fileName == null
+                                                        ? 'audio.mp3'
+                                                        : widget.fileName!);
+                                              },
+                                      ),
+                                      ListTile(
+                                        leading: Icon(Icons.share),
+                                        title: Text('Compartir'),
+                                        onTap: widget.pathUrl.isEmpty
+                                            ? null
+                                            : () async {
+                                                final directory =
+                                                    await getApplicationDocumentsDirectory();
+                                                final filePath =
+                                                    '${directory.path}/${widget.pathUrl}';
+                                                final file = File(filePath);
+                                                if (await file.exists()) {
+                                                  Share.shareXFiles([
+                                                    XFile(filePath)
+                                                  ], text: '¡Mira este audio!');
+                                                } else {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                        backgroundColor:
+                                                            StyleColor.redLight,
+                                                        content: Text(
+                                                            'Archivo de audio no encontrado')),
+                                                  );
+                                                }
+                                                Navigator.pop(context);
+                                              },
+                                      ),
+                                    ],
                                   );
-                                }),
-                                ListTile(
-                                  leading: Icon(Icons.download),
-                                  title: Text('Descargar'),
-                                  onTap: widget.pathUrl.isEmpty
-                                      ? null
-                                      : () async {
-                                          Navigator.pop(context);
-                                          downloadFile(
-                                              context,
-                                              widget.pathUrl,
-                                              widget.fileName == null
-                                                  ? 'audio.mp3'
-                                                  : widget.fileName!);
-                                        },
-                                ),
-                                ListTile(
-                                  leading: Icon(Icons.share),
-                                  title: Text('Compartir'),
-                                  onTap: widget.pathUrl.isEmpty
-                                      ? null
-                                      : () async {
-                                          final directory =
-                                              await getApplicationDocumentsDirectory();
-                                          final filePath =
-                                              '${directory.path}/${widget.pathUrl}';
-                                          final file = File(filePath);
-                                          if (await file.exists()) {
-                                            // Use the share package to share the file
-                                            Share.shareXFiles([XFile(filePath)],
-                                                text: '¡Mira este audio!');
-                                          } else {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  backgroundColor:
-                                                      StyleColor.redLight,
-                                                  content: Text(
-                                                      'Archivo de audio no encontrado')),
-                                            );
-                                          }
-                                          Navigator.pop(context);
-                                        },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                                },
+                              );
+                            },
                       icon: const Icon(
                         Icons.more_vert,
                       ),
@@ -470,13 +483,11 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         loading = false;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: StyleColor.redLight,
-          content: Text('Error al reproducir el audio: $e'),
-        ),
-      );
+      await showCustomDialog(context,
+          message: e.toString(), dialogType: DialogType.error);
+
       setState(() {
+        _isPlaying = false;
         loading = false;
       });
     }

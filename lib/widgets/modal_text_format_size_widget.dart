@@ -5,13 +5,13 @@ import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
-class modalTextFormatSizeWidget extends StatefulWidget {
+class ModalTextFormatSizeWidget extends StatefulWidget {
   final double fontSize;
   final ModelData selectedItem;
   final void Function(double?) onChangedFontSize;
   final void Function(ModelData?) onChangedFont;
 
-  const modalTextFormatSizeWidget({
+  const ModalTextFormatSizeWidget({
     super.key,
     required this.onChangedFontSize,
     required this.onChangedFont,
@@ -20,11 +20,11 @@ class modalTextFormatSizeWidget extends StatefulWidget {
   });
 
   @override
-  State<modalTextFormatSizeWidget> createState() =>
-      _modalTextFormatSizeWidgetState();
+  State<ModalTextFormatSizeWidget> createState() =>
+      _ModalTextFormatSizeWidgetState();
 }
 
-class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
+class _ModalTextFormatSizeWidgetState extends State<ModalTextFormatSizeWidget> {
   late double fontSizeValue;
   late ModelData selectedFont;
   late BibleThemeProvider themeProvider;
@@ -40,7 +40,7 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
     });
   }
 @override
-  void didUpdateWidget(covariant modalTextFormatSizeWidget oldWidget) {
+  void didUpdateWidget(covariant ModalTextFormatSizeWidget oldWidget) {
     setState(() {
       fontSizeValue = widget.fontSize;
       selectedFont = widget.selectedItem;
@@ -169,10 +169,11 @@ class _modalTextFormatSizeWidgetState extends State<modalTextFormatSizeWidget> {
           ),
           CustomDropdownBottomWidget(
             items: [
-              ModelData(label: "Roboto", value: "1"),
-              ModelData(label: "Erica One", value: "2"),
-              ModelData(label: "Aclonica", value: "3"),
-              ModelData(label: "All sane", value: "4"),
+              ModelData(label: "Aclonica", value: "1"),
+              ModelData(label: "All sane", value: "2"),
+              // ModelData(label: "Erica One", value: "3"),
+              ModelData(label: "Roboto", value: "3"),
+              ModelData(label: "Ysabeau Infant", value: "4"),
             ],
             selectedItem: selectedFont,
             onChanged: (ModelData? newValue) {

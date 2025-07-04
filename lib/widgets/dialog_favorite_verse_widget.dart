@@ -12,10 +12,12 @@ class DialogFavoriteVerseWidget extends StatefulWidget {
   final List<FavoriteVerse> favoriteVerses;
   final PaginationInfo? paginationInfo;
   final BibleTheme currentTheme;
+  final String versionId;
   final void Function(String verseId)? onDeleted;
   const DialogFavoriteVerseWidget(
       {super.key,
       required this.currentTheme,
+      required this.versionId,
       required this.favoriteVerses,
       required this.paginationInfo,
       this.onDeleted});
@@ -255,8 +257,8 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
     });
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userData = userProvider.currentUser;
-    final responseFavorite =
-        await getFavoriteVerseByUser(newPage, newPerPage, userData!.userId);
+    final responseFavorite = await getFavoriteVerseByUser(
+        newPage, newPerPage, widget.versionId, null, userData!.userId);
 
     if (responseFavorite.data != null && responseFavorite.data.length > 0) {
       setState(() {

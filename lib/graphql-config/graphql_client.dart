@@ -5,10 +5,10 @@ import 'graphql_config.dart';
 GraphQLClient createClient({String? authToken}) {
   final HttpLink httpLink = HttpLink(
     GraphQLConfig.baseUrl,
-    defaultHeaders: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
+    // defaultHeaders: {
+    //   'Content-Type': 'application/json',
+    //   'Accept': 'application/json',
+    // },
   );
 
   final AuthLink authLink = AuthLink(

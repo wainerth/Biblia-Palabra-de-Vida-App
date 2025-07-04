@@ -99,7 +99,9 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
           SizedBox(height: 15.0,),
           ButtonThemeWidget(
             text: "Referencias Bíblicas",
-            buttonStyle: StylesApp(context).btnWidgetSmall,
+            disabled: references.isEmpty ,
+            buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+            ),
             onPressed: references.isEmpty
                 ? null
                 : () {

@@ -1631,7 +1631,7 @@ final List<BottomNavItem> itemsPromises = [
   BottomNavItem(
       title: "Biblia",
       icon: Icons.book_outlined,
-      page: GraphQLConfig.development ? BibleScreen() : SoonScreen()),
+      page: BibleScreen()),
   BottomNavItem(title: "Promesas", icon: Icons.sync, page: PromisesScreen()),
   BottomNavItem(
       title: "Dudas",

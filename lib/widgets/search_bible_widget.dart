@@ -348,12 +348,47 @@ class CardSearchTextWidget extends StatelessWidget {
                             .textStyleBody14
                             .copyWith(color: StyleColor.orange),
                       ),
-                      Text(
-                        '"${data.verse.text}"',
-                        style: StylesApp(context)
+                        // Resalta las ocurrencias usando los índices start y end
+                        RichText(
+                        text: TextSpan(
+                          style: StylesApp(context)
                             .textStyleBody12
                             .copyWith(color: currentTheme.textColor),
-                      )
+                          children: () {
+                          final text = data.verse.text;
+                          final occurrences = data.verse.occurrence;
+                          if (occurrences.isEmpty) {
+                            return [TextSpan(text: '"$text"')];
+                          }
+                          List<TextSpan> spans = [];
+                          int currentIndex = 0;
+                          for (var occ in occurrences) {
+                            int start = occ.start;
+                            int end = occ.end +1;
+                            // Añade el texto antes de la ocurrencia
+                            if (currentIndex < start) {
+                            spans.add(TextSpan(text: text.substring(currentIndex, start)));
+                            }
+                            // Añade la ocurrencia resaltada
+                            spans.add(TextSpan(
+                            text: '"${text.substring(start, end)}"',
+                            style: TextStyle(backgroundColor: StyleColor.orange.withValues(alpha: 0.50), fontWeight: FontWeight.bold),
+                            ));
+                            currentIndex = end;
+                          }
+                          // Añade el texto restante después de la última ocurrencia
+                          if (currentIndex < text.length) {
+                            spans.add(TextSpan(text: text.substring(currentIndex)));
+                          }
+                          // Añade comillas al principio y final
+                          if (spans.isNotEmpty) {
+                            spans.insert(0, const TextSpan(text: '"'));
+                            spans.add(const TextSpan(text: '"'));
+                          }
+                          return spans;
+                          }(),
+                        ),
+                        )
                     ],
                   ),
                 ),

@@ -38,9 +38,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureTextRepeat = true;
   String setGender = '';
   bool setIsBaptized = false;
+  ModelData? _selectedDataArea;
   ModelData? _selectedData;
   Country? _selectedCountry;
+  AreaCode? _selectedPrefix;
   late List<Country> countries;
+  late List<AreaCode> prefixCodes;
+  late List<ModelData> dropDownListArea;
   late List<ModelData> dropDownList;
 
   // Método para validar campos obligatorios
@@ -77,6 +81,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() {
       countries = (catalogueProvider.allCountries as List)
           .map((i) => Country.fromJson(i.toJson()))
+          .toList();
+
+      prefixCodes = (catalogueProvider.allAreasCode as List)
+          .map((i) => AreaCode.fromJson(i.toJson()))
+          .toList();
+
+      dropDownListArea = prefixCodes
+          .map((area) => ModelData(value: area.id, label: area.code))
+          .cast<ModelData>()
           .toList();
       dropDownList = countries
           .map(
@@ -145,9 +158,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   selectedDate: _selectedDate,
                                   onDateSelected: (picked) =>
                                       setState(() => _selectedDate = picked),
+                                  dropDownListArea: dropDownListArea,
                                   dropDownList: dropDownList,
+                                  selectedDataArea: _selectedDataArea,
                                   selectedData: _selectedData,
                                   selectedCountry: _selectedCountry,
+                                  onPrefixSelected: (newValue) {
+                                    setState(() {
+                                      _selectedDataArea = newValue;
+
+                                      _selectedPrefix = prefixCodes.firstWhere(
+                                          (country) =>
+                                              country.id == newValue!.value);
+                                      _prefixNumberController.text =
+                                          _selectedCountry!.countryCode!.code;
+                                    });
+                                  },
                                   onCountrySelected: (newValue) {
                                     setState(() {
                                       _selectedData = newValue;
@@ -201,8 +227,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         email: _emailController.text,
                                         birthdate: _dateController.text,
                                         // city: _cityController ,
-                                        countryCode:
-                                            _selectedCountry?.countryCode!.code,
+                                        codeAreaId:
+                                            _selectedPrefix?.id,
                                         countryId: _selectedCountry?.id,
                                         identifier: _userIdController.text,
                                         password: _passwordController.text,

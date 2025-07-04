@@ -1,7 +1,7 @@
 class SignupInput {
   String? username;
   String? email;
-  String? countryCode;
+  String? codeAreaId;
   String? password;
   String? name;
   String? lastname;
@@ -16,7 +16,7 @@ class SignupInput {
   SignupInput({
     this.username,
     this.email,
-    this.countryCode,
+    this.codeAreaId,
     this.password,
     this.name,
     this.lastname,
@@ -33,7 +33,7 @@ class SignupInput {
   factory SignupInput.fromJson(Map<String, dynamic> json) => SignupInput(
         username: json['username'],
         email: json['email'],
-        countryCode: json['countryCode'],
+        codeAreaId: json['codeAreaId'],
         password: json['password'],
         name: json['name'],
         lastname: json['lastname'],
@@ -50,7 +50,7 @@ class SignupInput {
   Map<String, dynamic> toJson() => {
         'username': username,
         'email': email,
-        'countryCode': countryCode,
+        'codeAreaId': codeAreaId,
         'password': password,
         'name': name,
         'lastname': lastname,
@@ -66,6 +66,6 @@ class SignupInput {
   // A convenient method to print the object's values (for debugging)
   @override
   String toString() {
-    return 'SignupInput{username: $username, email: $email, countryCode: $countryCode, password: $password, name: $name, lastname: $lastname, birthdate: $birthdate, gender: $gender, phoneNumber: $phoneNumber, countryId: $countryId, city: $city, identifier: $identifier, isBaptized: $isBaptized}';
+    return 'SignupInput{username: $username, email: $email, codeAreaId: $codeAreaId, password: $password, name: $name, lastname: $lastname, birthdate: $birthdate, gender: $gender, phoneNumber: $phoneNumber, countryId: $countryId, city: $city, identifier: $identifier, isBaptized: $isBaptized}';
   }
 }

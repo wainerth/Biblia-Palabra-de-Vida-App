@@ -14,6 +14,7 @@ class ButtonThemeWidget extends StatelessWidget {
   final Color colorIcon;
   final bool textCenter;
   final bool loading;
+  final bool disabled;
   const ButtonThemeWidget(
       {super.key,
       this.onPressed,
@@ -28,7 +29,9 @@ class ButtonThemeWidget extends StatelessWidget {
       this.textCenter = false,
       this.textWithImage = false,
       this.image = '',
-      this.loading = false})
+      this.loading = false,
+      this.disabled = false
+      })
       : assert(!textWithImage || text != null,
             'Text is required when textWithImage is true');
 
@@ -53,7 +56,7 @@ class ButtonThemeWidget extends StatelessWidget {
       ),
       child: textWithImage
           ? TextButton(
-              onPressed: onPressed,
+              onPressed: loading || disabled ? null : onPressed,
               style: buttonStyle,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -70,7 +73,7 @@ class ButtonThemeWidget extends StatelessWidget {
                 ],
               ))
           : TextButton(
-              onPressed: loading ? null : onPressed,
+              onPressed: loading || disabled ? null : onPressed,
               style: buttonStyle,
               child: text != null
                   ? Row(

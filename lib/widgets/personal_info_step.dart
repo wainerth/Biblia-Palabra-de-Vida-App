@@ -1,8 +1,10 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class PersonalInfoStep extends StatefulWidget {
   final TextEditingController nameController;
@@ -12,9 +14,12 @@ class PersonalInfoStep extends StatefulWidget {
   final bool isBaptized;
   final DateTime? selectedDate;
   final ValueChanged<DateTime?> onDateSelected;
+  final List<ModelData> dropDownListArea;
   final List<ModelData> dropDownList;
+  final ModelData? selectedDataArea;
   final ModelData? selectedData;
   final Country? selectedCountry;
+  final ValueChanged<ModelData?> onPrefixSelected;
   final ValueChanged<ModelData?> onCountrySelected;
   final TextEditingController prefixNumberController;
   final TextEditingController phoneNumberController;
@@ -30,9 +35,12 @@ class PersonalInfoStep extends StatefulWidget {
     required this.isBaptized,
     required this.selectedDate,
     required this.onDateSelected,
+    required this.dropDownListArea,
     required this.dropDownList,
+    required this.selectedDataArea,
     required this.selectedData,
     required this.selectedCountry,
+    required this.onPrefixSelected,
     required this.onCountrySelected,
     required this.prefixNumberController,
     required this.phoneNumberController,
@@ -45,10 +53,10 @@ class PersonalInfoStep extends StatefulWidget {
 }
 
 class _PersonalInfoStepState extends State<PersonalInfoStep> {
+
   Future<void> _selectDate(BuildContext context) async {
     final DateFormat formatter = DateFormat.yMd('es_ES');
     final DateTime now = DateTime.now();
-
     final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: widget.selectedDate ?? now,
@@ -74,6 +82,12 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
 
   @override
   Widget build(BuildContext context) {
+    final catalogueProvider =
+        Provider.of<CatalogueProvider>(context, listen: false);
+    final List<ModelData> listPrefixCode = catalogueProvider.allAreasCode
+        .map((areaCode) => ModelData(value: areaCode.id, label: areaCode.code))
+        .cast<ModelData>()
+        .toList();
     return Column(children: [
       Container(
         constraints: BoxConstraints(
@@ -140,33 +154,32 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
         height: 23.0,
       ),
       Container(
-        constraints: BoxConstraints(
-          minWidth: 160.0,
-          maxWidth: StylesApp(context).sizeTextFormField.width,
-        ),
-        child: 
-        DatePickerFormField(
-        initialDate: DateTime.now().subtract(Duration(days: 15 * 365)),
-        onChanged: (value) {
-          widget.dateController.text = value;
-        },
-      )
-        // TextFormField(
-        //   controller: widget.dateController,
-        //   readOnly: true,
-        //   onTap: () => _selectDate(context),
-        //   decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-        //         hintText: "Fecha de nacimiento",
-        //         suffixIcon: const Icon(Icons.calendar_today),
-        //       ),
-        //   validator: (value) {
-        //     if (value == null || value.isEmpty) {
-        //       return "La Fecha de nacimiento es obligatoria";
-        //     }
-        //     return null;
-        //   },
-        // ),
-      ),
+          constraints: BoxConstraints(
+            minWidth: 160.0,
+            maxWidth: StylesApp(context).sizeTextFormField.width,
+          ),
+          child: DatePickerFormField(
+            initialDate: DateTime.now().subtract(Duration(days: 15 * 365)),
+            onChanged: (value) {
+              widget.dateController.text = value;
+            },
+          )
+          // TextFormField(
+          //   controller: widget.dateController,
+          //   readOnly: true,
+          //   onTap: () => _selectDate(context),
+          //   decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
+          //         hintText: "Fecha de nacimiento",
+          //         suffixIcon: const Icon(Icons.calendar_today),
+          //       ),
+          //   validator: (value) {
+          //     if (value == null || value.isEmpty) {
+          //       return "La Fecha de nacimiento es obligatoria";
+          //     }
+          //     return null;
+          //   },
+          // ),
+          ),
       const SizedBox(
         height: 23.0,
       ),
@@ -216,28 +229,19 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
         child: Row(
           children: [
             // Campo del código del país
-            Flexible(
-              flex: 2,
-              child: TextFormField(
-                controller: widget.prefixNumberController,
-                enabled: false, // Deshabilitado para que no pueda ser editado
-                decoration:
-                    StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                          filled: true,
-                        ),
-                style: const TextStyle(fontSize: 16),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Por favor, ingresa tu número de teléfono.";
-                  }
-                  return null;
-                },
+              Flexible(
+              flex: 3,
+              child: CustomDropdownBottomWidget<AreaCode>(
+                hintText: "código",
+                items: widget.dropDownListArea,
+                onChanged:widget.onPrefixSelected,
+                selectedItem:widget.selectedDataArea,
               ),
             ),
             const SizedBox(width: 10), // Espaciado entre los campos
             // Campo del número de teléfono
             Flexible(
-              flex: 8,
+              flex: 7,
               child: TextFormField(
                 controller: widget.phoneNumberController,
                 keyboardType: TextInputType.phone,

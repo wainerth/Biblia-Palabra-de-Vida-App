@@ -2,7 +2,6 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 final Map<String, WidgetBuilder> routes = {
   '/introPage': (BuildContext context) => const WelcomeScreen(),
@@ -16,7 +15,7 @@ final Map<String, WidgetBuilder> routes = {
   '/mapPage': (BuildContext context) => const MapScreen(),
   '/introAventurePage': (BuildContext context) => IntroAventureScreen(),
   '/aventurePage': (BuildContext context) => AventureScreen(),
-  '/bibliaPage': (BuildContext context) => GraphQLConfig.development ? BibleScreen() :  SoonScreen(),
+  '/bibliaPage': (BuildContext context) => BibleScreen(),
   '/communityPage': (BuildContext context) => GraphQLConfig.development ? CommunityScreen() : SoonScreen(), 
   '/profilePage': (BuildContext context) => ProfileScreen(),
   '/workspacePage': (BuildContext context) =>
