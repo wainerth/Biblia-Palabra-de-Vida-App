@@ -26,6 +26,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+         ChangeNotifierProvider(create: (_) => SocketClientProvider()),
         ChangeNotifierProvider<CatalogueProvider>(
             create: (_) => CatalogueProvider()),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
@@ -33,7 +34,7 @@ void main() async {
           create: (context) => AuthenticationProvider(
               context, context.read<CatalogueProvider>()),
         ),
-        ChangeNotifierProvider(create: (_) => BibleThemeProvider())
+        ChangeNotifierProvider(create: (_) => BibleThemeProvider()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690), // size base of design

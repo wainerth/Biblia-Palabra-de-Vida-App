@@ -30,6 +30,7 @@ class CustomPagination extends StatelessWidget {
             );
 
     return Material(
+      color: Colors.transparent,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

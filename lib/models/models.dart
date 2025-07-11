@@ -70,3 +70,4 @@ export 'package:biblia_palabra_de_vida_app/models/input_data_search_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/reference_biblical_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/audio_chapter_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/word_search_result.dart';
+export 'package:biblia_palabra_de_vida_app/models/notification_model.dart';

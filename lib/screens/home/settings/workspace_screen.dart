@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -56,8 +57,47 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           await getDailyProverb();
         }
         await loadGetOneReflection();
+        await loadAllNotifications();
+        final notificationProvider =
+            Provider.of<SocketClientProvider>(context, listen: false);
+
+        notificationProvider.listenToEvent("notification", (notify) {
+          if (kDebugMode) {
+            print(notify);
+          }
+          notificationProvider.notifications
+              .add(NotificationModel.fromJson(notify));
+        });
       }
     });
+  }
+
+  Future loadAllNotifications() async {
+    final userProvider = Provider.of<UserProvider>(context,
+        listen:
+            false); // listen: false para evitar reconstrucciones innecesarias
+    final useData = userProvider.currentUser;
+
+    try {
+      final responseNotification =
+          await getAllNotification(1, 10, useData!.userId);
+      if (responseNotification.error != null) {
+        await showCustomDialog(context,
+            message: responseNotification.error!, dialogType: DialogType.error);
+        return;
+      }
+
+      // almacenamos la notificaciones
+      List<NotificationModel> notifys = List<NotificationModel>.from(
+          responseNotification.data['data']
+              .map((n) => NotificationModel.fromJson(n)));
+      Provider.of<SocketClientProvider>(context, listen: false).notifications =
+          notifys;
+    } catch (e) {
+      String error = "Error al leer las notificaciones:  ${e.toString()}";
+      await showCustomDialog(context,
+          message: error, dialogType: DialogType.error);
+    }
   }
 
   Future<void> _loadProgress(BuildContext context) async {
@@ -117,61 +157,136 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: SingleChildScrollView(
-          child: Column(
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              SizedBox(height: 15.0),
-              _buildListCardSection(context, cardList),
-              SizedBox(
-                height: 12.0,
-              ),
-              dataUser != null
-                  ? _buildPositionSection(context, dataUser)
-                  : Container(),
-              SizedBox(
-                height: 12.0,
-              ),
-              _buildProverbsSection(
-                  context, loadingDaily, errorDaily, dailyWord),
-              _buildStoriesSection(context, reflection),
-              SizedBox(
-                height: 12.0,
-              ),
-              _buildGridViewSection(context),
-              SizedBox(
-                height: 22.0,
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/soonPage');
-                },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                  padding: EdgeInsets.symmetric(horizontal: 26.0),
-                  decoration: BoxDecoration(
-                      color: Color(0XFF5C9EDB),
-                      borderRadius: BorderRadius.circular(12.0)),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Librería Cristiana",
-                        style: StylesApp(context).textStyleBody7,
+              Positioned(
+                top: 0, // Puedes ajustar este valor
+                right: 0,
+                child: Visibility(
+                  visible: true,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                    ),
+                    child: IconButton(
+                      padding: EdgeInsets.all(0),
+                      iconSize: 40,
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (BuildContext context) {
+                            return NotificationListWidget();
+                          },
+                        );
+                      },
+                      icon: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(
+                            Icons.notifications,
+                            size: 40,
+                            color: StyleColor.redLight,
+                          ),
+                          Positioned(
+                            right: 12,
+                            top: 12,
+                            child: Container(
+                              padding: EdgeInsets.all(0),
+                              decoration: BoxDecoration(
+                                  // color: Colors.white,
+                                  // shape: BoxShape.circle,
+                                  ),
+                              constraints: BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  int.parse(getUnreadCountNotification()) > 0
+                                      ? getUnreadCountNotification()
+                                      : '',
+                                  style: StylesApp(context)
+                                      .textStyleBody10
+                                      .copyWith(
+                                        // color: StyleColor.redLight,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.asset(
-                          'assets/books.png',
-                          width: 52.sp,
-                        ),
-                      )
-                    ],
+                    ),
                   ),
                 ),
               ),
-              SizedBox(
-                height: kBottomNavigationBarHeight - 40,
-              )
+              Column(
+                children: [
+                  SizedBox(height: 15.0),
+                  _buildListCardSection(context, cardList),
+                  SizedBox(
+                    height: 12.0,
+                  ),
+                  dataUser != null
+                      ? _buildPositionSection(context, dataUser)
+                      : Container(),
+                  SizedBox(
+                    height: 12.0,
+                  ),
+                  _buildProverbsSection(
+                      context, loadingDaily, errorDaily, dailyWord),
+                  _buildStoriesSection(context, reflection),
+                  SizedBox(
+                    height: 12.0,
+                  ),
+                  _buildGridViewSection(context),
+                  SizedBox(
+                    height: 22.0,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/soonPage');
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                      padding: EdgeInsets.symmetric(horizontal: 26.0),
+                      decoration: BoxDecoration(
+                          color: Color(0XFF5C9EDB),
+                          borderRadius: BorderRadius.circular(12.0)),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Librería Cristiana",
+                            style: StylesApp(context).textStyleBody7,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.asset(
+                              'assets/books.png',
+                              width: 52.sp,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: kBottomNavigationBarHeight - 40,
+                  )
+                ],
+              ),
             ],
           ),
         ),
@@ -195,14 +310,17 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       child: GestureDetector(
         onTap: () async {
           await _loadProgress(context);
-          if (error) return;
-          if (progressUser != null && card['label'] == 'Aventura') {
-            Navigator.pushNamed(context, '/mapPage', arguments: {
-              'courseId': progressUser!.courseId,
-              'sectionId': progressUser!.sectionId
-            });
-          }
-          if (card['label'] == 'La Biblia') {
+          if (card['label'] == 'Aventura') {
+            if (error) return;
+            if (progressUser != null && card['label'] == 'Aventura') {
+              Navigator.pushNamed(context, '/mapPage', arguments: {
+                'courseId': progressUser!.courseId,
+                'sectionId': progressUser!.sectionId
+              });
+            } else {
+              Navigator.pushNamed(context, '/introAventurePage');
+            }
+          } else if (card['label'] == 'La Biblia') {
             Navigator.pushNamed(
               context,
               '/layoutPage',
@@ -779,5 +897,259 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
         ],
       ),
     );
+  }
+
+  String getUnreadCountNotification() {
+    final notificationProvider = Provider.of<SocketClientProvider>(context);
+    final notifications = notificationProvider.notifications.reversed.toList();
+    final unreadCount = notifications.where((n) => n.isRead == false).length;
+    return unreadCount > 0 ? unreadCount.toString() : '0';
+  }
+}
+
+// Formats a DateTime object to a readable string (e.g., "12/06/2024 14:30")
+String formatDateTime(String dateTimeStr) {
+  try {
+    // Remove spaces around 'T' if present
+    String cleaned = dateTimeStr.replaceAll(' ', '');
+    DateTime dateTime = DateTime.parse(cleaned.replaceFirst('T', 'T'));
+    return "${dateTime.day.toString().padLeft(2, '0')}/"
+        "${dateTime.month.toString().padLeft(2, '0')}/"
+        "${dateTime.year}  "
+        "${dateTime.hour.toString().padLeft(2, '0')}:"
+        "${dateTime.minute.toString().padLeft(2, '0')}";
+  } catch (e) {
+    return dateTimeStr;
+  }
+}
+
+class NotificationListWidget extends StatefulWidget {
+  const NotificationListWidget({super.key});
+
+  @override
+  State<NotificationListWidget> createState() => _NotificationListWidgetState();
+}
+
+class _NotificationListWidgetState extends State<NotificationListWidget> {
+  late List<NotificationModel> notifications;
+  late SocketClientProvider notificationProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    notificationProvider =
+        Provider.of<SocketClientProvider>(context, listen: false);
+    notifications = notificationProvider.notifications.reversed.toList();
+
+    // Listen for changes in notifications
+    notificationProvider.addListener(_onNotificationsChanged);
+  }
+
+  void _onNotificationsChanged() {
+    setState(() {
+      notifications = notificationProvider.notifications.reversed.toList();
+      // Optionally, sort by createdAt if needed
+      notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    });
+  }
+
+  @override
+  void dispose() {
+    notificationProvider.removeListener(_onNotificationsChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      height: MediaQuery.of(context).size.height * 0.7,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Text(
+            "Notificaciones",
+            style: StylesApp(context)
+                .textStyleBody5
+                .copyWith(color: StyleColor.black, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: notifications.isEmpty
+                ? Center(
+                    child: Text(
+                      "No tienes notificaciones.",
+                      style: StylesApp(context)
+                          .textStyleBody7
+                          .copyWith(color: StyleColor.black),
+                    ),
+                  )
+                : ListView.separated(
+                    itemCount: notifications.length,
+                    separatorBuilder: (_, __) => SizedBox(
+                      height: 20.0,
+                    ),
+                    itemBuilder: (context, index) {
+                      final notification = notifications[index];
+                      return Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: notification.isRead
+                                  ? Colors.white
+                                  : Colors.blueGrey[100],
+                              borderRadius: BorderRadius.circular(8.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: StyleColor.black.withAlpha(90),
+                                  offset: Offset(0, 4),
+                                  spreadRadius: 4.0,
+                                  blurRadius: 4.0,
+                                )
+                              ],
+                            ),
+                            child: ExpansionTile(
+                              tilePadding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              collapsedShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              leading: Icon(
+                                Icons.notifications,
+                                color: notification.isRead
+                                    ? StyleColor.grayMedium
+                                    : StyleColor.turquoise,
+                              ),
+                              title: Text(
+                                notification.title,
+                                style:
+                                    StylesApp(context).textStyleBody14.copyWith(
+                                          color: notification.isRead
+                                              ? StyleColor.grayMedium
+                                              : StyleColor.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                              ),
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 16.0, right: 8.0, bottom: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        notification.message,
+                                        style: StylesApp(context)
+                                            .textStyleBody10
+                                            .copyWith(
+                                              color: notification.isRead
+                                                  ? StyleColor.grayMedium
+                                                  : StyleColor.black,
+                                              fontWeight: notification.isRead
+                                                  ? FontWeight.normal
+                                                  : FontWeight.bold,
+                                            ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        formatDateTime(notification.createdAt),
+                                        style: StylesApp(context)
+                                            .textStyleBody10
+                                            .copyWith(
+                                                color: notification.isRead
+                                                    ? StyleColor.grayMedium
+                                                    : StyleColor.black),
+                                      ),
+                                      if (notification.actionLabel != null &&
+                                          notification.actionLabel.isNotEmpty)
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: TextButton(
+                                            onPressed: () async {
+                                              // if (notification.action
+                                              //     .contains('course')) {
+                                              //   final progress = await _loadProgress(context);
+                                              //   if (progress == null) return;
+                                              //   // if (progressUser != null && card['label'] == 'Aventura') {
+                                              //   Navigator.pushNamed(context,
+                                              //       '/mapPage', arguments: {
+                                              //     'courseId':
+                                              //         progressUser!.courseId,
+                                              //     'sectionId':
+                                              //         progressUser!.sectionId
+                                              //   });
+                                              //   // } else {
+                                              //   //   Navigator.pushNamed(context, '/introAventurePage');
+                                              //   // }
+                                              // }
+                                            },
+                                            style: TextButton.styleFrom(
+                                              foregroundColor:
+                                                  StyleColor.blueDark,
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                Text(notification.actionLabel),
+                                                Icon(Icons.arrow_forward)
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _loadProgress(BuildContext context) async {
+    LoadingService().showLoading(context);
+    final userProvider = Provider.of<UserProvider>(context,
+        listen:
+            false); // listen: false para evitar reconstrucciones innecesarias
+    final dataUser = userProvider.currentUser;
+    final progressResponse =
+        await userProvider.getProgressUser(dataUser?.userId, null);
+    if (progressResponse!.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(
+        context,
+        message: progressResponse.error!,
+        dialogType: DialogType.error,
+      );
+      return;
+    }
+    LoadingService().hideLoading();
+    return progressResponse.data;
   }
 }

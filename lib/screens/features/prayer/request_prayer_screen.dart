@@ -294,7 +294,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                         ),
                                         Text(
                                           textAlign: TextAlign.center,
-                                          "Por favor te pedimos que creas en el poder de Dios, si le buscamos el es bueno misericordioso para perdonarnos y darnos una respuesta que sea para bendicion de nuestras vidas.",
+                                          "Por favor te pedimos que creas en el poder de Dios, si le buscamos el es bueno misericordioso para perdonarnos y darnos una respuesta que sea para bendición de nuestras vidas.",
                                           style: StylesApp(context)
                                               .textStyleBody12
                                               .copyWith(

@@ -549,7 +549,7 @@ Future getDataMember(token, userId) async {
   }
 }
 
-Future loadCoursesByUserAndChurch(userId, churchId) async {
+Future loadCoursesByUserAndChurch(int? page,int? limit, String userId, String? churchId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -588,8 +588,8 @@ Future loadCoursesByUserAndChurch(userId, churchId) async {
     variables: <String, dynamic>{
       "churchId": churchId,
       "userId": userId,
-      "page": null,
-      "limit": null,
+      "page": page,
+      "limit": limit,
     },
     fetchPolicy: FetchPolicy.noCache,
   );
@@ -2756,3 +2756,87 @@ Future<ResponseData> getWordsConcordance(
     }
   }
 }
+
+Future<ResponseData> getAllNotification(
+    int page, int limit, String userId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    // operationName: "GetOneReflectionRandom ",
+    document: gql(r'''
+        query GetAllNotificationsByUserId($page: Int, $limit: Int, $userId: ID) {
+        getAllNotificationsByUserId(page: $page, limit: $limit, userId: $userId) {
+          data {
+           id
+           title
+           message
+           img
+           isRead
+           action
+           actionLabel
+           notificationType
+           notificationTypeName
+           createdAt
+          }
+          meta {
+            currentPage
+            totalPages
+            itemsPerPage
+            totalItems
+            hasPreviousPage
+            hasNextPage
+          }
+        }
+      }
+
+      '''),
+    variables: <String, dynamic>{
+      "page": page,
+      "limit": limit,
+      "userId": userId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllNotificationsByUserId'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get All Notifications By UserId  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllNotificationsByUserId'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get All Notifications By UserId Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+

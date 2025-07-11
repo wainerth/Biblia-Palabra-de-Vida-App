@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../main.dart';
+
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
@@ -70,6 +71,7 @@ class _MapScreenState extends State<MapScreen>
   void dispose() {
     _timer?.cancel();
     stopAudio();
+    _audioPlayerDisposed = true;
     audioPlayer.dispose();
     _animationController.dispose();
     super.dispose();
@@ -86,8 +88,12 @@ class _MapScreenState extends State<MapScreen>
     await audioPlayer.play(AssetSource('mar-aves.mp3'));
   }
 
+  bool _audioPlayerDisposed = false;
+
   Future<void> stopAudio() async {
-    await audioPlayer.stop();
+    if (!_audioPlayerDisposed) {
+      await audioPlayer.stop();
+    }
   }
 
   Future<void> muteAudio() async {
@@ -204,10 +210,11 @@ class _MapScreenState extends State<MapScreen>
 // función que se encarga de navegar entre las opciones
   void _onItemTapped(int index) {
     if (index.toString() == _selectedIndex.toString()) return;
-    Navigator.of(context).pushNamedAndRemoveUntil('/layoutPage', (route) => false);
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil('/layoutPage', (route) => false);
 
-    stopAudio();
-    audioPlayer.dispose();
+    // stopAudio();
+    // audioPlayer.dispose();
     setState(() {
       _selectedIndex = index;
     });
@@ -256,10 +263,12 @@ class _MapScreenState extends State<MapScreen>
       canPop:
           true, // Permite que la pantalla sea sacada de la pila de navegación
       onPopInvokedWithResult: (didPop, result) async {
-         if (navigatorKey.currentState?.canPop() ?? false) {
-          navigatorKey.currentState?.pop();
-           // Evita que el WillPopScope haga su retroceso
-        }
+        // No need to manually pop here; the system already handles the pop action.
+
+        //  if (navigatorKey.currentState?.canPop() ?? false) {
+        //   navigatorKey.currentState?.pop();
+        //    // Evita que el WillPopScope haga su retroceso
+        // }
       },
       child: Scaffold(
         body: NotificationListener<ScrollNotification>(
@@ -340,7 +349,9 @@ class _MapScreenState extends State<MapScreen>
                                 child: IconButton(
                                   iconSize: 25,
                                   icon: Icon(
-                                    isMuted ? Icons.volume_off : Icons.volume_up,
+                                    isMuted
+                                        ? Icons.volume_off
+                                        : Icons.volume_up,
                                     color: isMuted ? Colors.grey : Colors.white,
                                   ),
                                   onPressed: () async {
@@ -449,7 +460,8 @@ class _MapScreenState extends State<MapScreen>
                                                                 course?.id,
                                                             'levelId':
                                                                 grupo[i].id,
-                                                            'sectionId': stage!.id
+                                                            'sectionId':
+                                                                stage!.id
                                                           },
                                                         );
                                                       },
@@ -464,12 +476,12 @@ class _MapScreenState extends State<MapScreen>
                                                     children: [
                                                       Center(
                                                         child: StarStatusWidget(
-                                                          containerWidth: StylesApp(
-                                                                  context)
-                                                              .sizeContainerLevel
-                                                              .width,
-                                                          levelScore:
-                                                              grupo[i].levelScore,
+                                                          containerWidth:
+                                                              StylesApp(context)
+                                                                  .sizeContainerLevel
+                                                                  .width,
+                                                          levelScore: grupo[i]
+                                                              .levelScore,
                                                         ),
                                                       ),
                                                       Column(
@@ -492,30 +504,23 @@ class _MapScreenState extends State<MapScreen>
                                                                           context)
                                                                       .sizeContainer
                                                                       .height,
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                          color: Color(grupo[i].levelScore >
-                                                                                  0
-                                                                              ? getColorItem(grupo[i]
-                                                                                  .levelScore)
-                                                                              : int.tryParse('0xFF${grupo[i].color}') ??
-                                                                                  0XFF000000),
-                                                                          shape: BoxShape
-                                                                              .circle,
-                                                                          border:
-                                                                              Border.all(
-                                                                            color: grupo[i].levelScore > 0
-                                                                                ? Color(getColorItem(grupo[i].levelScore))
-                                                                                : Color.fromARGB(
-                                                                                    100, // Opacidad: 50%
-                                                                                    int.parse('0xFF${grupo[i].color}'.substring(2), radix: 16),
-                                                                                    int.parse('0xFF${grupo[i].color}'.substring(4, 6), radix: 16),
-                                                                                    int.parse('0xFF${grupo[i].color}'.substring(6), radix: 16),
-                                                                                  ),
-                                                                            width:
-                                                                                1,
-                                                                          ),
-                                                                          boxShadow: [
+                                                                  decoration: BoxDecoration(
+                                                                      color: Color(grupo[i].levelScore > 0 ? getColorItem(grupo[i].levelScore) : int.tryParse('0xFF${grupo[i].color}') ?? 0XFF000000),
+                                                                      shape: BoxShape.circle,
+                                                                      border: Border.all(
+                                                                        color: grupo[i].levelScore >
+                                                                                0
+                                                                            ? Color(getColorItem(grupo[i].levelScore))
+                                                                            : Color.fromARGB(
+                                                                                100, // Opacidad: 50%
+                                                                                int.parse('0xFF${grupo[i].color}'.substring(2), radix: 16),
+                                                                                int.parse('0xFF${grupo[i].color}'.substring(4, 6), radix: 16),
+                                                                                int.parse('0xFF${grupo[i].color}'.substring(6), radix: 16),
+                                                                              ),
+                                                                        width:
+                                                                            1,
+                                                                      ),
+                                                                      boxShadow: [
                                                                         BoxShadow(
                                                                             color: grupo[i].levelScore > 0
                                                                                 ? Color(getColorShadow(grupo[i].levelScore)).withValues(alpha: 0.5)
@@ -524,7 +529,8 @@ class _MapScreenState extends State<MapScreen>
                                                                             blurStyle: BlurStyle.outer)
                                                                       ]),
                                                                   child: Center(
-                                                                    child: Stack(
+                                                                    child:
+                                                                        Stack(
                                                                       alignment:
                                                                           Alignment
                                                                               .center,
@@ -551,8 +557,7 @@ class _MapScreenState extends State<MapScreen>
                                                                         },
                                                                         _buildItemLevel(
                                                                             context,
-                                                                            grupo[
-                                                                                i]),
+                                                                            grupo[i]),
                                                                       ],
                                                                     ),
                                                                   ),
@@ -560,23 +565,23 @@ class _MapScreenState extends State<MapScreen>
                                                                 if (grupo[i]
                                                                         .unLockLevel ==
                                                                     false)
-                                                                  Positioned.fill(
+                                                                  Positioned
+                                                                      .fill(
                                                                     child:
                                                                         Container(
                                                                       decoration:
                                                                           BoxDecoration(
                                                                         shape: BoxShape
                                                                             .circle,
-                                                                        color: const Color(
-                                                                                0xFFA9B8BE)
-                                                                            .withValues(
-                                                                                alpha: 0.9), // Ajusta la opacidad
+                                                                        color: const Color(0xFFA9B8BE).withValues(
+                                                                            alpha:
+                                                                                0.9), // Ajusta la opacidad
                                                                       ),
                                                                       width: StylesApp(
                                                                               context)
                                                                           .sizeContainer
                                                                           .width,
-      
+
                                                                       // color: Colors.black.withOpacity(
                                                                       //     0.5), // Ajusta la opacidad
                                                                     ),
@@ -588,8 +593,8 @@ class _MapScreenState extends State<MapScreen>
                                                             height: 10,
                                                           ),
                                                           Text(
-                                                            textAlign:
-                                                                TextAlign.center,
+                                                            textAlign: TextAlign
+                                                                .center,
                                                             "${grupo[i].levelNumber} ${grupo[i].name}",
                                                             style: StylesApp(
                                                                     context)

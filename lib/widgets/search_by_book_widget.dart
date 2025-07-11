@@ -9,8 +9,17 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class SearchByBookWidget extends StatefulWidget {
+  final version;
+  final book;
+  final chapter;
   final void Function(InputDataSearchModel searchData)? onActionBook;
-  const SearchByBookWidget({super.key, this.onActionBook});
+  const SearchByBookWidget({
+    super.key,
+    required this.version,
+    required this.book,
+    required this.chapter,
+    this.onActionBook,
+  });
 
   @override
   State<SearchByBookWidget> createState() => _SearchByBookWidgetState();
@@ -31,6 +40,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   ModelData? versionSelected = ModelData(label: "", value: "");
   ModelData? bookSelected = ModelData(label: "", value: "");
   ChapterModel? chapterSelected;
+  List<ChapterModel> initialChapter = [];
   bool loadingChapter = false;
   bool loadingVerses = false;
   bool verseRange = false;
@@ -41,17 +51,40 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final _catalogueProvider =
+          await Provider.of<CatalogueProvider>(context, listen: false);
       setState(() {
         listBibleVersions =
-            Provider.of<CatalogueProvider>(context, listen: false)
-                .allBibleVersion
-                .map((v) => v)
-                .toList();
-        bibleVersions = Provider.of<CatalogueProvider>(context, listen: false)
-            .allBibleVersion
+            _catalogueProvider.allBibleVersion.map((v) => v).toList();
+        bibleVersions = _catalogueProvider.allBibleVersion
             .map((v) => ModelData(value: v.id, label: v.version))
             .toList();
+      });
+      if (widget.version != null) {
+        setState(() {
+          versionSelected = ModelData(
+              label: widget.version.version, value: widget.version.id);
+        });
+        await loadBookByVersion(versionSelected!.value);
+      }
+      if (widget.book != null) {
+        setState(() {
+          bookSelected =
+              ModelData(label: widget.book.modernName, value: widget.book.id);
+        });
+      }
+      await getChapterByBook(bookSelected!.value);
+      if (widget.chapter != null) {
+        setState(() {
+          chapterSelected = widget.chapter;
+          initialChapter = [chapterSelected!];
+          _chaptersExpanded = false;
+        });
+      }
+      await loadVerses(chapterSelected!.id);
+      setState(() {
+        _versesExpanded = true;
       });
     });
   }
@@ -85,7 +118,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     }
                     setState(() {
                       versionSelected = version;
-                      _chaptersExpanded = false;
+                      _chaptersExpanded = true;
                       _versesExpanded = false;
                     });
                     await loadBookByVersion(version!.value);
@@ -111,7 +144,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                   items: books,
                   onChanged: (ModelData? book) async {
                     if (kDebugMode) {
-                      print("version seleccionada ${book!.value}");
+                      print("Libro seleccionada ${book!.value}");
                     }
                     setState(() {
                       bookSelected = book;
@@ -182,12 +215,14 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                           loading: loadingChapter,
                           data: chapters,
                           currentTheme: currentTheme,
+                          initiallySelected: initialChapter,
                           onTap: (chapter) async {
+                            if (chapter.isEmpty) return;
                             if (kDebugMode) {
                               print(
                                   'Capítulo seleccionado: ${chapter.first.id}');
                             }
-                           await loadVerses(chapter.first.id);
+                            await loadVerses(chapter.first.id);
                             setState(() {
                               chapterSelected = chapter.first;
                               _chaptersExpanded = false;
@@ -361,6 +396,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
             message: responseChapterWithVerses.error!,
             dialogType: DialogType.error);
       }
+      return;
     } else {
       setState(() {
         // guardamos los capítulos de un libro
@@ -368,6 +404,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
             .map<ChapterModel>((chapter) => ChapterModel.fromJson(chapter))
             .toList();
       });
+      chapters = chapters..sort((a, b) => a.chapter.compareTo(b.chapter));
       loadingChapter = false;
     }
   }

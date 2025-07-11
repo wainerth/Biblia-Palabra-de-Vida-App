@@ -24,7 +24,7 @@ class _AventureScreenState extends State<AventureScreen> {
   late BibleTheme currentTheme;
 
   String? errorMessage;
-  int itemPerPageValue = 50;
+  int itemPerPageValue = 10;
   List<int> itemsPerPage = [
     5,
     10,
@@ -34,7 +34,7 @@ class _AventureScreenState extends State<AventureScreen> {
     100,
   ];
   PaginationInfo pagination = PaginationInfo(
-    currentPage: 0,
+    currentPage: 1,
     totalPages: 0,
     itemsPerPage: 0,
     totalItems: 0,
@@ -47,11 +47,11 @@ class _AventureScreenState extends State<AventureScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _generateData(context);
+      _generateData(context, pagination.currentPage, itemPerPageValue);
     });
   }
 
-  Future<void> _generateData(BuildContext context) async {
+  Future<void> _generateData(BuildContext context, int page, int limit) async {
     LoadingService().showLoading(context);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     dataUser = userProvider.currentUser;
@@ -60,6 +60,8 @@ class _AventureScreenState extends State<AventureScreen> {
     });
     try {
       final result = await loadCoursesByUserAndChurch(
+          page,
+          limit,
           dataUser!.userId,
           dataUser!.userChurch.isNotEmpty
               ? dataUser!.userChurch.first.id
@@ -111,29 +113,37 @@ class _AventureScreenState extends State<AventureScreen> {
     currentTheme = themeProvider.themeData;
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              HeaderWidget(),
-              isLoading
+        child: Column(
+          children: [
+            HeaderWidget(),
+            Expanded(
+              child: isLoading
                   ? Container()
                   : errorMessage != null
                       ? Center(
                           child: BuildErrorWidget(
                             errorMessage: errorMessage!,
-                            onRetry: () async => _generateData(context),
+                            onRetry: () async => _generateData(context,
+                                pagination.currentPage, itemPerPageValue),
                             onBack: () => Navigator.pop(context),
                           ),
                         )
                       : listViewCardAventure(),
-              CustomPagination(
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom,
+                top: 8.0,
+              ),
+              child: CustomPagination(
                 pagination: PaginationInfo(
-                    currentPage: pagination.currentPage,
-                    itemsPerPage: pagination.itemsPerPage,
-                    totalPages: pagination.totalPages,
-                    hasPreviousPage: pagination.hasPreviousPage,
-                    hasNextPage: pagination.hasNextPage,
-                    totalItems: pagination.totalItems),
+                  currentPage: pagination.currentPage,
+                  itemsPerPage: pagination.itemsPerPage,
+                  totalPages: pagination.totalPages,
+                  hasPreviousPage: pagination.hasPreviousPage,
+                  hasNextPage: pagination.hasNextPage,
+                  totalItems: pagination.totalItems,
+                ),
                 itemPerPageValue: itemPerPageValue,
                 currentTheme: currentTheme,
                 onPageChanged: (newPage, newPerPage) async {
@@ -141,114 +151,92 @@ class _AventureScreenState extends State<AventureScreen> {
                     setState(() {
                       itemPerPageValue = newPerPage;
                     });
-                    await _generateData(context);
+                    await _generateData(context, newPage, newPerPage);
                   }
                 },
-                itemsPerPage: itemsPerPage, // Opcional: personaliza los valores
-              )
-            ],
-          ),
+                itemsPerPage: itemsPerPage,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   listViewCardAventure() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height - 30,
-            child: ListView.builder(
-              padding: EdgeInsets.only(bottom: 40.0),
-              itemCount: courses.length,
-              itemBuilder: (context, index) {
-                loadAventure.add(false);
-                return Column(
-                  children: [
-                    Stack(children: [
-                      CardAventureWidget(
-                        course: courses[index],
-                        loadingAction: loadAventure[index],
-                        onTap: () {
-                          Navigator.popAndPushNamed(
-                              context, '/detailCoursePage',
-                              arguments: courses[index].id);
-                        },
-                        goToMap: () async {
-                          setState(() {
-                            loadAventure[index] = true;
-                          });
-                          //consulto si el curso tiene niveles
-
-                          Stage stage = await loadStage(
-                              dataUser?.userId, courses[index].id);
-                          if (stage.levelCount > 0) {
-                            // consulto si el usuario tiene algún progreso para este curso?
-                            final userProvider = Provider.of<UserProvider>(
-                                context,
-                                listen: false);
-                            final progressResponse =
-                                await userProvider.getProgressUser(
-                                    dataUser?.userId, courses[index].id);
-                            if (progressResponse!.error != null) {
-                              await showCustomDialog(context,
-                                  message: progressResponse.error!,
-                                  dialogType: DialogType.error);
-                            }
-                            progressUser = progressResponse.data;
-                            if (progressUser != null) {
-                              Navigator.pushNamed(
-                                  context, '/mapPage', arguments: {
-                                'courseId': courses[index].id,
-                                'sectionId': progressUser!.sectionId ?? stage.id
-                              });
-                            } else {
-                              Navigator.pushNamed(context, '/mapPage',
-                                  arguments: {
-                                    'courseId': courses[index].id,
-                                    'sectionId': stage.id
-                                  });
-                            }
-                          } else {
-                            setState(() {
-                              loadAventure[index] = false;
-                            });
-                            await showCustomDialog(context,
-                                message: "¡Este curso no esta Disponible!",
-                                dialogType: DialogType.info);
-                          }
-                          setState(() {
-                            loadAventure[index] = false;
-                          });
-                        },
-                      ),
-                      if (loadAventure[index])
-                        Positioned(
-                            right: 20,
-                            bottom: 20,
-                            child: Container(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator.adaptive(
-                                strokeWidth: 4.0,
-                                strokeAlign: BorderSide.strokeAlignInside,
-                                backgroundColor: Colors.white,
-                              ),
-                            )),
-                    ]),
-                    if (index == courses.length - 1) ...{
-                      SizedBox(
-                        height: kBottomNavigationBarHeight + 80,
-                      )
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: 24.0),
+      itemCount: courses.length,
+      itemBuilder: (context, index) {
+        if (loadAventure.length <= index) loadAventure.add(false);
+        return Column(
+          children: [
+            Stack(children: [
+              CardAventureWidget(
+                course: courses[index],
+                loadingAction: loadAventure[index],
+                onTap: () {
+                  Navigator.popAndPushNamed(context, '/detailCoursePage',
+                      arguments: courses[index].id);
+                },
+                goToMap: () async {
+                  setState(() {
+                    loadAventure[index] = true;
+                  });
+                  Stage stage =
+                      await loadStage(dataUser?.userId, courses[index].id);
+                  if (stage.levelCount > 0) {
+                    final userProvider =
+                        Provider.of<UserProvider>(context, listen: false);
+                    final progressResponse = await userProvider.getProgressUser(
+                        dataUser?.userId, courses[index].id);
+                    if (progressResponse!.error != null) {
+                      await showCustomDialog(context,
+                          message: progressResponse.error!,
+                          dialogType: DialogType.error);
                     }
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                    progressUser = progressResponse.data;
+                    if (progressUser != null) {
+                      Navigator.pushNamed(context, '/mapPage', arguments: {
+                        'courseId': courses[index].id,
+                        'sectionId': progressUser!.sectionId ?? stage.id
+                      });
+                    } else {
+                      Navigator.pushNamed(context, '/mapPage', arguments: {
+                        'courseId': courses[index].id,
+                        'sectionId': stage.id
+                      });
+                    }
+                  } else {
+                    setState(() {
+                      loadAventure[index] = false;
+                    });
+                    await showCustomDialog(context,
+                        message: "¡Este curso no esta Disponible!",
+                        dialogType: DialogType.info);
+                  }
+                  setState(() {
+                    loadAventure[index] = false;
+                  });
+                },
+              ),
+              if (loadAventure[index])
+                Positioned(
+                    right: 20,
+                    bottom: 20,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator.adaptive(
+                        strokeWidth: 4.0,
+                        strokeAlign: BorderSide.strokeAlignInside,
+                        backgroundColor: Colors.white,
+                      ),
+                    )),
+            ]),
+          ],
+        );
+      },
     );
   }
 

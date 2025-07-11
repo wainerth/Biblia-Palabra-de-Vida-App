@@ -224,12 +224,13 @@ formatColor(String? color) {
 
 
 Future<String> copyChapter(ChapterModel? chapter) async {
+    final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
   if (chapter == null) return '';
   StringBuffer buffer = StringBuffer();
   for (var verse in chapter.verses) {
     buffer.write('${verse.verse} ${verse.text}\n');
   }
-  return buffer.toString();
+  return "${buffer.toString()} \n$baseUrl";
 }
 
 Future<void> copyToClipboard(BuildContext context, dynamic data) async {

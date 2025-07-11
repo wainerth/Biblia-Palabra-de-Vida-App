@@ -16,11 +16,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class SearchBibleWidget extends StatefulWidget {
+  final currentVersion;
+final currentBook;
+final currentChapter;
   final void Function(InputDataSearchModel searchData) onActionBook;
   final void Function(InputDataSearchModel searchData) onActionTabText;
   final void Function(InputDataSearchModel searchData) onActionTheme;
   const SearchBibleWidget({
     super.key,
+    required this.currentVersion,
+    required this.currentBook,
+    required this.currentChapter,
     required this.onActionBook,
     required this.onActionTabText,
     required this.onActionTheme,
@@ -165,6 +171,9 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
                   child: TabBarView(
                     children: [
                       SearchByBookWidget(
+                        version: widget.currentVersion,
+                        book: widget.currentBook,
+                        chapter: widget.currentChapter,
                         onActionBook: (InputDataSearchModel data) {
                           if (kDebugMode) {
                             print(data.versionId);

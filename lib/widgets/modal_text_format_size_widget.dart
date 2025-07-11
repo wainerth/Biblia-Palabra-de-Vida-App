@@ -243,7 +243,7 @@ class _ModalTextFormatSizeWidgetState extends State<ModalTextFormatSizeWidget> {
             ],
           ),
           SizedBox(
-            height: 30,
+            height: 50,
           )
         ],
       ),

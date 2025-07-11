@@ -65,9 +65,7 @@ class UserProvider extends ChangeNotifier {
       operationName: 'UpdateImageProfile',
       document: gql(r'''
         mutation UpdateImageProfile($userId: ID!, $images: String!) {
-          updateImageProfile(userId: $userId, images: $images) {
-            imgProfileUser
-          }
+          updateImageProfile(userId: $userId, images: $images)
         }
       '''),
       variables: {"userId": userId, "images": toBase64},
@@ -92,7 +90,7 @@ class UserProvider extends ChangeNotifier {
 
       // Actualiza la imagen del usuario si la mutación fue exitosa
       _user = _user?.copyWith(
-          imgProfileUser: data["updateImageProfile"]["imgProfileUser"]);
+          imgProfileUser: Img(urlImg: data["updateImageProfile"]));
       setUser(_user);
       notifyListeners();
 

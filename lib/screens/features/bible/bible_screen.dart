@@ -53,6 +53,9 @@ class _BibleScreenState extends State<BibleScreen> {
   double fontSizeVerse = 14.sp;
   ModelData fontFamilySet = ModelData(label: "Aclonica", value: "1");
   AudioChapterModel? audioChapter;
+  final video = {
+    "url":""
+  };
   //  Variable para controlar el overlay
   List<FavoriteVerse> _favoriteVerses = [];
   List<HighlightRangeModel> _highlights = [];
@@ -89,7 +92,7 @@ class _BibleScreenState extends State<BibleScreen> {
     flutterTts = FlutterTts();
 
     await flutterTts.setLanguage("es-ES"); // Configurar idioma
-    await flutterTts.setVoice({"name": "es-es-x-ana-local", "locale": "es-ES"});
+    // await flutterTts.setVoice({"name": "es-es-x-ana-local", "locale": "es-ES"});
     await flutterTts.setSpeechRate(0.5); // Velocidad de habla (0-1)
     await flutterTts.setVolume(1.0); // Volumen (0-1)
     await flutterTts.setPitch(1.0); // Tono (0.5-2.0)
@@ -215,7 +218,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
         // Esperar a que termine de hablar antes de continuar
         await flutterTts
-            .speak("Versículo ${verses[i].verse}. ${verses[i].text}");
+            .speak("${verses[i].verse}. ${verses[i].text}");
         // Esperar a que termine el TTS antes de continuar
         await _waitForTtsCompletion();
         if (!isPlaying) break;
@@ -282,10 +285,70 @@ class _BibleScreenState extends State<BibleScreen> {
                     versionName:
                         currentVersion != null ? currentVersion!.version : '',
                     title: currentBook != null ? currentBook!.modernName : '',
+                    showIconVideo:video != null &&  video['url']!.isNotEmpty!,
                     chapter: currentChapter != null
                         ? '${currentChapter!.chapter}'
                         : '',
-                    onAudioTap: () {},
+                    onVideoCollection: () async {
+                      await SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.portraitUp,
+                        DeviceOrientation.portraitDown,
+                      ]);
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Center(
+                              child: Stack(children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8)),
+                                    constraints: BoxConstraints(minHeight: 213),
+                                    // height: 213,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: video != null &&
+                                              (video["url"]!
+                                                      .contains('youtube.com') ||
+                                                  video["url"]!
+                                                      .contains('youtu.be'))
+                                          ? PlayerYoutubeWidget(
+                                              videoUrl: video["url"]!)
+                                          : playerNoYoutube(
+                                              url: video["url"]!),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  // Posiciona el botón de cerrar
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context)
+                                          .pop(); // Cierra el diálogo
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(
+                                            0.7), // Fondo semitransparente para el botón
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 20.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ]),
+                            );
+                          });
+                    },
                     onBack: () {
                       Navigator.pushNamed(
                         context,
@@ -377,53 +440,55 @@ class _BibleScreenState extends State<BibleScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
+                                  // CUSTOMIZE BUTTON
                                   IconButton(
-                                      padding: EdgeInsets.zero,
-                                      iconSize: 25.0,
-                                      onPressed: () {
-                                        showModalBottomSheet(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return ModalTextFormatSizeWidget(
-                                                fontSize: fontSizeVerse,
-                                                selectedItem: fontFamilySet,
-                                                onChangedFontSize: (fontSize) {
-                                                  if (kDebugMode) {
-                                                    print(
-                                                        'el nuevo tamaño de fuente $fontSize');
-                                                  }
-                                                  setState(() {
-                                                    // persistir tamaño de fuente
-                                                    fontSizeNumber =
-                                                        fontSize! + 2;
-                                                    fontSizeVerse = fontSize;
-                                                  });
-                                                  prefs!.setDouble(
-                                                      "fontSizeVerse",
-                                                      fontSize!);
-                                                },
-                                                onChangedFont: (newFont) {
-                                                  if (kDebugMode) {
-                                                    print(
-                                                        'la nueva fuente ${newFont!.label}');
-                                                  }
-                                                  // persistir familia de fuente
-                                                  setState(() {
-                                                    fontFamilySet = newFont!;
-                                                  });
-                                                  prefs!.setString(
-                                                    "fontFamilySet",
-                                                    jsonEncode(
-                                                        newFont!.toJson()),
-                                                  );
-                                                },
-                                              );
-                                            });
-                                      },
-                                      icon: Icon(
-                                        CupertinoIcons.textformat_size,
-                                        color: currentTheme.buttonColor,
-                                      )),
+                                    padding: EdgeInsets.zero,
+                                    iconSize: 25.0,
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return ModalTextFormatSizeWidget(
+                                              fontSize: fontSizeVerse,
+                                              selectedItem: fontFamilySet,
+                                              onChangedFontSize: (fontSize) {
+                                                if (kDebugMode) {
+                                                  print(
+                                                      'el nuevo tamaño de fuente $fontSize');
+                                                }
+                                                setState(() {
+                                                  // persistir tamaño de fuente
+                                                  fontSizeNumber =
+                                                      fontSize! + 2;
+                                                  fontSizeVerse = fontSize;
+                                                });
+                                                prefs!.setDouble(
+                                                    "fontSizeVerse", fontSize!);
+                                              },
+                                              onChangedFont: (newFont) {
+                                                if (kDebugMode) {
+                                                  print(
+                                                      'la nueva fuente ${newFont!.label}');
+                                                }
+                                                // persistir familia de fuente
+                                                setState(() {
+                                                  fontFamilySet = newFont!;
+                                                });
+                                                prefs!.setString(
+                                                  "fontFamilySet",
+                                                  jsonEncode(newFont!.toJson()),
+                                                );
+                                              },
+                                            );
+                                          });
+                                    },
+                                    icon: Icon(
+                                      CupertinoIcons.textformat_size,
+                                      color: currentTheme.buttonColor,
+                                    ),
+                                  ),
+
+                                  // COPY BUTTON
                                   IconButton(
                                     padding: EdgeInsets.zero,
                                     iconSize: 25.0,
@@ -443,6 +508,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                       color: currentTheme.buttonColor,
                                     ),
                                   ),
+                                  // SHARED BUTTON
                                   IconButton(
                                     padding: EdgeInsets.zero,
                                     iconSize: 25.0,
@@ -458,6 +524,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                       color: StyleColor.turquoise,
                                     ),
                                   ),
+                                  // MODAL ACTIONS BUTTON
                                   IconButton(
                                     padding: EdgeInsets.zero,
                                     iconSize: 25.0,
@@ -480,6 +547,9 @@ class _BibleScreenState extends State<BibleScreen> {
                                                   .size
                                                   .height,
                                               child: SearchBibleWidget(
+                                                currentVersion: currentVersion,
+                                                currentBook: currentBook,
+                                                currentChapter: currentChapter,
                                                 onActionBook:
                                                     (InputDataSearchModel
                                                         data) async {
@@ -518,6 +588,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                       color: currentTheme.buttonColor,
                                     ),
                                   ),
+                                  // FAVORITE BUTTON
                                   IconButton(
                                     padding: EdgeInsets.zero,
                                     iconSize: 25.0,
@@ -863,13 +934,13 @@ class _BibleScreenState extends State<BibleScreen> {
                                 style:
                                     StylesApp(context).textStyleBody16.copyWith(
                                           fontFamily: fontFamilySet.label,
-                                          fontSize: fontSizeNumber,
+                                          fontSize: fontSizeVerse, //fontSizeNumber,
                                           fontWeight: FontWeight.bold,
                                           color: currentPlayingVerseIndex ==
                                                   verses.indexOf(verse)
                                               ? Colors
                                                   .blue // Cambia color cuando se lee
-                                              : currentTheme.textColor,
+                                              : StyleColor.turquoise,
                                         ),
                               ),
                             ),
@@ -994,6 +1065,11 @@ class _BibleScreenState extends State<BibleScreen> {
               if (isCurrentPlaying) {
                 flutterTts.stop();
               } else {
+                setState(() {
+                  isPlaying = false;
+                });
+                flutterTts.stop();
+
                 _readVerse(verse);
               }
               Navigator.pop(context);
@@ -1456,12 +1532,6 @@ class _BibleScreenState extends State<BibleScreen> {
             .toList();
       });
     }
-    if (Provider.of<CatalogueProvider>(context, listen: false)
-        .allBibleVersion
-        .isEmpty) {
-      await Provider.of<CatalogueProvider>(context, listen: false)
-          .loadBibleVersions();
-    }
     if (prefs!.getDouble("fontSizeVerse") != null) {
       setState(() {
         fontSizeVerse = prefs!.getDouble("fontSizeVerse")!;
@@ -1482,6 +1552,12 @@ class _BibleScreenState extends State<BibleScreen> {
   Future<void> _initDataLoad() async {
     prefs = await SharedPreferences.getInstance();
     LoadingService().showLoading(context);
+    if (Provider.of<CatalogueProvider>(context, listen: false)
+        .allBibleVersion
+        .isEmpty) {
+      await Provider.of<CatalogueProvider>(context, listen: false)
+          .loadBibleVersions();
+    }
     setState(() {
       errorMessage = null;
     });
@@ -1520,7 +1596,6 @@ class _BibleScreenState extends State<BibleScreen> {
       await loadChapters(currentBook!, false);
       await _loadPersistedData();
 
-      _loadAudioChapters();
       // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
       validateNextAndPrevious();
     } catch (e) {
@@ -1539,6 +1614,10 @@ class _BibleScreenState extends State<BibleScreen> {
 
   /// Método para ir al siguiente capítulo
   Future<void> _goToPreviousChapter(String chapterNumber) async {
+    setState(() {
+      isPlaying = false;
+    });
+    flutterTts.stop;
     LoadingService().showLoading(context);
     if (currentChapter!.chapter > 1) {
       setState(() {
@@ -1583,6 +1662,10 @@ class _BibleScreenState extends State<BibleScreen> {
 
   /// Método para regresar al capítulo anterior
   Future<void> _goToNextChapter(String chapterNumber) async {
+    setState(() {
+      isPlaying = false;
+    });
+    flutterTts.stop;
     LoadingService().showLoading(context);
     if (currentChapter!.chapter < currentBook!.chapters) {
       setState(() {
@@ -1889,7 +1972,7 @@ class _BibleScreenState extends State<BibleScreen> {
           if (startIndex != -1) {
             _scrolledVerseId = verses[startIndex].id;
             // Guardar el ID del versículo marcado por scroll
-              WidgetsBinding.instance.addPostFrameCallback((_) async {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
               if (_selectableTextKey.currentContext != null &&
                   scrollController.hasClients) {
                 try {
@@ -1949,18 +2032,7 @@ class _BibleScreenState extends State<BibleScreen> {
     }
   }
 
-  void _loadAudioChapters() async {
-    final audioChapterResponse = await getAudioByChapter(currentChapter!.id);
-    if (audioChapterResponse.error != null) {
-      await showCustomDialog(context,
-          message: audioChapterResponse.error!, dialogType: DialogType.error);
-      return;
-    }
-    setState(() {
-      audioChapter = AudioChapterModel.fromJson(audioChapterResponse.data);
-    });
-  }
-
+ 
   Future<void> _togglePlayPause() async {
     if (isPlaying) {
       await flutterTts.pause();

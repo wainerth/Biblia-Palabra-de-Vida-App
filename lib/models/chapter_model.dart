@@ -43,4 +43,13 @@ class ChapterModel extends GridItem {
 
   @override
   String get displayText => chapter.toString();
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChapterModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

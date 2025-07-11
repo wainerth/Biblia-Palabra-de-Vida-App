@@ -54,8 +54,13 @@ class _GridButtonWidgetState<T extends GridItem>
             _initialVerse = null;
             _endVerse = null;
           }
+          // if (_selectedItems.isNotEmpty) {
+              _selectedItems = widget.initiallySelected ?? [];
+  
+          // }
         }
       });
+      print("selectedItem $_selectedItems");
     }
   }
 
@@ -99,7 +104,11 @@ class _GridButtonWidgetState<T extends GridItem>
     widget.onTap?.call(_selectedItems);
   }
 
-  bool _isSelected(T item) => _selectedItems.contains(item);
+  bool _isSelected(T item){
+    
+    
+    return _selectedItems.contains(item);
+  }
 
   @override
   Widget build(BuildContext context) {

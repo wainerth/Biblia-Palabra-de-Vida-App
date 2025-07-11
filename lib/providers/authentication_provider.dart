@@ -59,6 +59,15 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       token = userToken;
       final dataUserload = LoginUser.fromJson(jsonDecode(userDataString));
+      // llamar conexión con el socket
+      final socketProvider =
+          Provider.of<SocketClientProvider>(context, listen: false);
+      socketProvider.connectSocket(
+          deviceId: '856-32cd-89',
+          userId: dataUserload.userId,
+          username: dataUserload.username!,
+          email: dataUserload.email!);
+
       Provider.of<UserProvider>(context, listen: false)
           .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
       await loadProfileUser(dataUserload.userId, userToken);
@@ -87,7 +96,7 @@ class AuthenticationProvider extends ChangeNotifier {
       final userId = userResponse.data["id"];
       final token = userResponse.data["userJwtToken"]["token"];
       await prefs.setString("userToken", token);
-
+   
       // consultamos perfil del usuario
       final ResponseData response = await loadProfileUser(userId, token);
       error = response.error;
@@ -154,7 +163,15 @@ class AuthenticationProvider extends ChangeNotifier {
 
     Provider.of<UserProvider>(context, listen: false)
         .setUser(LoginUser.fromJson(userProfile.data));
-
+   // llamar conexión con el socket
+      final socketProvider =
+          Provider.of<SocketClientProvider>(context, listen: false);
+      socketProvider.connectSocket(
+          deviceId: '856-32cd-89',
+          userId: userProfile.data['userId'],
+          username: userProfile.data['username'],
+          email: userProfile.data['email']);
+    // leemos las notificaciones
     return ResponseData(data: userProfile, error: null);
   }
 

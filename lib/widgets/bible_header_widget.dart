@@ -7,29 +7,33 @@ class BibleHeaderWidget extends StatelessWidget {
   final String title;
   final String versionName;
   final String chapter;
+  final bool showIconVideo;
   final VoidCallback? onBack;
   final VoidCallback? onVersionTap;
-  final VoidCallback? onAudioTap;
+  final VoidCallback? onVideoCollection;
 
   const BibleHeaderWidget({
-    Key? key,
+    super.key,
     required this.title,
     required this.versionName,
     required this.chapter,
+    this.showIconVideo = false,
     this.onBack,
     this.onVersionTap,
-    this.onAudioTap,
-  }) : super(key: key);
+    this.onVideoCollection,
+  });
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<BibleThemeProvider>(context);
-   final  currentTheme = themeProvider.themeData;
+    final currentTheme = themeProvider.themeData;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
-          colorFilter: currentTheme.name != 'Claro' ? ColorFilter.mode(currentTheme.backgroundColor, BlendMode.color) : null,
+          colorFilter: currentTheme.name != 'Claro'
+              ? ColorFilter.mode(currentTheme.backgroundColor, BlendMode.color)
+              : null,
           image: const AssetImage("assets/elipsisTopColor.png"),
           fit: BoxFit.cover,
           alignment: Alignment.bottomCenter,
@@ -51,7 +55,9 @@ class BibleHeaderWidget extends StatelessWidget {
                 constraints: BoxConstraints(maxHeight: 35.0),
                 padding: EdgeInsets.all(0),
                 iconSize: 35.0,
-                color: currentTheme.name != 'Claro' ? currentTheme.textColor : currentTheme.backgroundColor,
+                color: currentTheme.name != 'Claro'
+                    ? currentTheme.textColor
+                    : currentTheme.backgroundColor,
                 onPressed: onBack ?? () => Navigator.pop(context),
                 icon: Icon(
                   Icons.arrow_back,
@@ -70,8 +76,9 @@ class BibleHeaderWidget extends StatelessWidget {
                   height: 27.0,
                   text: versionName,
                   buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                     foregroundColor: WidgetStateProperty.all<Color>(currentTheme.buttonTextColor),
-                  ),
+                        foregroundColor: WidgetStateProperty.all<Color>(
+                            currentTheme.buttonTextColor),
+                      ),
                   onPressed: onVersionTap,
                 ),
               ),
@@ -80,11 +87,11 @@ class BibleHeaderWidget extends StatelessWidget {
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: StylesApp(context)
-                      .textStyleTitleWithe
-                      .copyWith(
-                        color: currentTheme.name != 'Claro' ? currentTheme.textColor : currentTheme.backgroundColor,
-                        fontWeight: FontWeight.normal),
+                  style: StylesApp(context).textStyleTitleWithe.copyWith(
+                      color: currentTheme.name != 'Claro'
+                          ? currentTheme.textColor
+                          : currentTheme.backgroundColor,
+                      fontWeight: FontWeight.normal),
                 ),
               ),
               SizedBox(height: 10.0),
@@ -92,35 +99,36 @@ class BibleHeaderWidget extends StatelessWidget {
                 child: Text(
                   chapter,
                   textAlign: TextAlign.center,
-                  style: StylesApp(context)
-                      .textStyleTitleWithe
-                      .copyWith(
-                         color: currentTheme.name != 'Claro' ? currentTheme.textColor : currentTheme.backgroundColor,
-                        fontWeight: FontWeight.normal),
+                  style: StylesApp(context).textStyleTitleWithe.copyWith(
+                      color: currentTheme.name != 'Claro'
+                          ? currentTheme.textColor
+                          : currentTheme.backgroundColor,
+                      fontWeight: FontWeight.normal),
                 ),
               ),
             ],
           ),
-          Positioned(
-            top: 0,
-            bottom: 0,
-            right: 15,
-            child: Column(
-              children: [
-                IconButton(
-                  constraints: BoxConstraints(maxHeight: 35.0),
-                  padding: EdgeInsets.all(0),
-                  iconSize: 35.0,
-                  color: currentTheme.buttonColor,
-                  onPressed: onAudioTap,
-                  icon: Icon(
-                    Icons.volume_up_outlined,
-                    size: 35.0,
+          if (showIconVideo)
+            Positioned(
+              top: 0,
+              bottom: 0,
+              right: 15,
+              child: Column(
+                children: [
+                  IconButton(
+                    constraints: BoxConstraints(maxHeight: 35.0),
+                    padding: EdgeInsets.all(0),
+                    iconSize: 35.0,
+                    color: currentTheme.buttonTextColor,
+                    onPressed: onVideoCollection,
+                    icon: Icon(
+                      Icons.video_collection,
+                      size: 35.0,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

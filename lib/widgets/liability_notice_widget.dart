@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class LiabilityNoticeWidget extends StatefulWidget {
@@ -101,10 +102,13 @@ class _LiabilityNoticeWidgetState extends State<LiabilityNoticeWidget> {
                   Center(
                     child: ButtonThemeWidget(
                       text: "Aceptar",
-                      buttonStyle: StylesApp(context).btnWidgetSmall,
+                      buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                        backgroundColor:  !_isChecked ? MaterialStateProperty.all(StyleColor.grayMedium) : null
+                      ),
+                      disabled: !_isChecked,
                       width: 239.0,
                       height: 41.0,
-                      onPressed: () {
+                      onPressed: !_isChecked ? null : () {
                         if (_isChecked) {
                           Navigator.pop(context);
                           widget.openModalInfo();

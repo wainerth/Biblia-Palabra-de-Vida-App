@@ -627,7 +627,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                               LoadingService().hideLoading();
 
                               // si es la ultima sección del curso
-                              if (sendScore!.isLastStage) {
+                              if (sendScore!.isLastStage && !showReview) {
                                 setState(() {
                                   showStepCompleted = false;
                                   showTitleObtained = false;
@@ -901,7 +901,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   // mostrar si hay recompensa
                   if (sendScore!.isLastLevel &&
                       sendScore!.rewardObtained &&
-                      reward != null) {
+                      reward != null && !showReview) {
                     setState(() {
                       showStepCompleted = false;
                       showTitleObtained = false;
