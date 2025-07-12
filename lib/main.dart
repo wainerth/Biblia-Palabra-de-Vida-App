@@ -16,6 +16,8 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final socketProvider = SocketClientProvider();
+  await socketProvider.initializeNotifications();
   if (!kIsWeb) {
     await FlutterDownloader.initialize(
       debug: true, // Set to false in production
@@ -26,7 +28,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-         ChangeNotifierProvider(create: (_) => SocketClientProvider()),
+         ChangeNotifierProvider(create: (_) => socketProvider),
         ChangeNotifierProvider<CatalogueProvider>(
             create: (_) => CatalogueProvider()),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),

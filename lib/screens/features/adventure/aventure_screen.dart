@@ -183,9 +183,9 @@ class _AventureScreenState extends State<AventureScreen> {
                   setState(() {
                     loadAventure[index] = true;
                   });
-                  Stage stage =
+                  Stage? stage =
                       await loadStage(dataUser?.userId, courses[index].id);
-                  if (stage.levelCount > 0) {
+                  if ( stage != null && stage.levelCount > 0) {
                     final userProvider =
                         Provider.of<UserProvider>(context, listen: false);
                     final progressResponse = await userProvider.getProgressUser(

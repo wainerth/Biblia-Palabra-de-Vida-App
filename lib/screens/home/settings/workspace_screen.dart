@@ -56,18 +56,21 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
         } else {
           await getDailyProverb();
         }
-        await loadGetOneReflection();
         await loadAllNotifications();
-        final notificationProvider =
-            Provider.of<SocketClientProvider>(context, listen: false);
+        await loadGetOneReflection();
+        if (mounted) {
+          final notificationProvider =
+              Provider.of<SocketClientProvider>(context, listen: false);
 
-        notificationProvider.listenToEvent("notification", (notify) {
-          if (kDebugMode) {
-            print(notify);
-          }
-          notificationProvider.notifications
-              .add(NotificationModel.fromJson(notify));
-        });
+          notificationProvider.listenToEvent("notification", (notify) {
+            if (kDebugMode) {
+              print(notify);
+            }
+            final newNotification = NotificationModel.fromJson(notify);
+            notificationProvider.addNotification(newNotification);
+            notificationProvider.showNotification(newNotification);
+          });
+        }
       }
     });
   }
@@ -86,13 +89,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             message: responseNotification.error!, dialogType: DialogType.error);
         return;
       }
-
       // almacenamos la notificaciones
-      List<NotificationModel> notifys = List<NotificationModel>.from(
-          responseNotification.data['data']
-              .map((n) => NotificationModel.fromJson(n)));
-      Provider.of<SocketClientProvider>(context, listen: false).notifications =
-          notifys;
+      setState(() {
+        List<NotificationModel> notifies = responseNotification.data['data']
+            .map<NotificationModel>((notify) => NotificationModel.fromJson(notify)).toList();
+            for (NotificationModel notify in notifies) {
+            Provider.of<SocketClientProvider>(context, listen: false)
+                .addNotification(notify);
+
+            }
+      });
     } catch (e) {
       String error = "Error al leer las notificaciones:  ${e.toString()}";
       await showCustomDialog(context,
@@ -946,11 +952,15 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
   }
 
   void _onNotificationsChanged() {
+    final newNotifications = [...notificationProvider.notifications];
     setState(() {
-      notifications = notificationProvider.notifications.reversed.toList();
-      // Optionally, sort by createdAt if needed
+      notifications = newNotifications.reversed.toList();
       notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     });
+    // notifications = notificationProvider.notifications.reversed.toList();
+    // // Optionally, sort by createdAt if needed
+    // notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    // });
   }
 
   @override

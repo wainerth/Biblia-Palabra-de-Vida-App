@@ -6,17 +6,28 @@ plugins {
 }
 
 android {
+    dexOptions {
+        javaMaxHeapSize "1g"
+        preDexLibraries false
+    }
+    
     namespace = "com.example.biblia_palabra_de_vida_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
-
+    ndkVersion = "25.1.8937393"
+    defaultConfig {
+            // Required when setting minSdkVersion to 20 or lower
+            multiDexEnabled true
+        }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
-
+dependencies {
+        coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'  // Versión más reciente
+    }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = '1.8'
     }
 
     defaultConfig {
@@ -24,12 +35,19 @@ android {
         applicationId = "com.example.biblia_palabra_de_vida_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 24 // flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-
+    signingConfigs {
+        debug {
+            keyAlias "androiddebugkey"
+            keyPassword "123456"
+            storeFile file("myKey.jks")
+            storePassword "123456"
+        }
+    }
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
@@ -42,3 +60,7 @@ android {
 flutter {
     source = "../.."
 }
+
+// dependencies {
+//     implementation 'com.google.android.gms:play-services-auth:20.4.1'
+// }

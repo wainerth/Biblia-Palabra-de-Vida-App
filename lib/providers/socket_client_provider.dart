@@ -1,51 +1,119 @@
+import 'dart:io';
+
+import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class SocketClientProvider with ChangeNotifier {
   IO.Socket? _socket;
   bool _isConnected = false;
-
+  final FlutterLocalNotificationsPlugin notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  // final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  List<NotificationModel> _notifications = [];
   IO.Socket? get socket => _socket;
   bool get isConnected => _isConnected;
-  List<NotificationModel> notifications = [
-    // NotificationModel(
-    //     id: "1",
-    //     title: "Notificación de Prueba",
-    //     message: "El mensaje d ela Notificación",
-    //     isRead: false,
-    //     actionUrl: "/course",
-    //     actionLabel: "Courses",
-    //     notificationType: "Creación course",
-    //     notificationTypeName: "Creación course",
-    //     imageUrl: "/course/imagen.jpeg",
-    //     createdAt: "2025-07-09 T00:00:00",
-    //     ),
-    // NotificationModel(
-    //     id: "2",
-    //     title: "Notificación de Prueba 2",
-    //     message: "El mensaje d ela Notificación de la prueba 2",
-    //     isRead: false,
-    //     actionUrl: "/course",
-    //     actionLabel: "Courses",
-    //     notificationType: "Creación course",
-    //     notificationTypeName: "Creación course",
-    //     imageUrl: "/course/imagen.jpeg",
-    //     createdAt: "2025-07-09 T00:00:00",
-    //     ),
-    // NotificationModel(
-    //     id: "3",
-    //     title: "Notificación de Prueba 3",
-    //     message: "El mensaje d ela Notificación de la Prueba 3",
-    //     isRead: true,
-    //     actionUrl: "/course",
-    //     actionLabel: "Courses",
-    //     notificationType: "Creación course",
-    //     notificationTypeName: "Creación course",
-    //     imageUrl: "/course/imagen.jpeg",
-    //     createdAt: "2025-07-09 T00:00:00",
-    //     ),
-  ];
+
+  List<NotificationModel> get notifications => _notifications;
+// Método para inicializar notificaciones locales
+  Future<void> initializeNotifications() async {
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    final DarwinInitializationSettings iosSettings =
+        DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
+    final InitializationSettings settings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+
+    await notificationsPlugin.initialize(
+      settings,
+      onDidReceiveNotificationResponse: (response) {
+        _handleNotificationClick(response.payload);
+      },
+    );
+  }
+
+  // Método para mostrar notificaciones
+  Future<void> showNotification(NotificationModel notification) async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'notifications_channel',
+      'Notificaciones',
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: true,
+    );
+
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    await notificationsPlugin.show(
+      int.parse(notification.id), // Usamos el ID como notificationId
+      notification.title,
+      notification.message,
+      const NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      ),
+      payload: notification.action, // Usamos actionUrl para redirección
+    );
+  }
+
+  // Manejar clic en notificación
+  void _handleNotificationClick(String? payload) {
+    if (payload != null) {
+      // Aquí puedes manejar la navegación basada en el payload
+      // Ejemplo: navigatorKey.currentState?.pushNamed(payload);
+      print('Redirigiendo a: $payload');
+      navigatorKey.currentState?.pushNamed(payload);
+    }
+  }
+
+  void _showPermissionExplanation() {
+    navigatorKey.currentState?.push(
+      DialogRoute(
+        context: navigatorKey.currentContext!,
+        builder: (context) => AlertDialog(
+          title: const Text('Permiso requerido'),
+          content: const Text(
+              'Necesitamos permiso para mostrarte notificaciones importantes.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                openAppSettings(); // Abre ajustes de la app
+              },
+              child: const Text('Abrir ajustes'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void addNotification(NotificationModel notification) {
+    _notifications.add(notification);
+    notifyListeners(); // ¡Esto es crucial!
+  }
 
   // Método para conectar al socket
   void connectSocket({
@@ -53,9 +121,20 @@ class SocketClientProvider with ChangeNotifier {
     required String userId,
     required String username,
     required String email,
-  }) {
+  }) async {
     // Desconectar si ya hay una conexión existente
     disconnectSocket();
+    if (Platform.isAndroid) {
+      final deviceInfoPlugin = DeviceInfoPlugin();
+      final androidInfo = await deviceInfoPlugin.androidInfo;
+      if (androidInfo.version.sdkInt >= 33) {
+        final status = await Permission.notification.request();
+        if (status.isDenied) {
+          // Opcional: Mostrar explicación al usuario
+          _showPermissionExplanation();
+        }
+      }
+    }
 
     // Configuración del socket similar a tu implementación en React
     _socket = IO.io(
@@ -117,6 +196,7 @@ class SocketClientProvider with ChangeNotifier {
   void listenToEvent(String eventName, Function(dynamic) callback) {
     print(eventName);
     _socket?.on(eventName, callback);
+    notifyListeners();
   }
 
   // Emitir eventos
@@ -124,7 +204,7 @@ class SocketClientProvider with ChangeNotifier {
     print(eventName);
     _socket?.emit(eventName, data);
   }
-  
+
   @override
   void dispose() {
     disconnectSocket();
