@@ -324,7 +324,7 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
             answer: "",
             isCorrect: false,
             questionId: "",
-            orderInAnswer: 0,
+            // orderInAnswer: 0,
             status: 0));
   }
 

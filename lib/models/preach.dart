@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:biblia_palabra_de_vida_app/models/img.dart';
 
 class Preach {

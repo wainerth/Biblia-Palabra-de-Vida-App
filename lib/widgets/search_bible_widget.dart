@@ -16,9 +16,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class SearchBibleWidget extends StatefulWidget {
-  final currentVersion;
-final currentBook;
-final currentChapter;
+  final VersionModel currentVersion;
+  final BookModel currentBook;
+  final ChapterModel currentChapter;
   final void Function(InputDataSearchModel searchData) onActionBook;
   final void Function(InputDataSearchModel searchData) onActionTabText;
   final void Function(InputDataSearchModel searchData) onActionTheme;
@@ -265,7 +265,7 @@ class _DialogReferenceState extends State<DialogReference> {
             child: ListView.builder(
               itemCount: widget.data.length,
               itemBuilder: (context, int index) {
-                return Container(
+                return SizedBox(
                   // padding: EdgeInsets.all(8.0),
                   width: MediaQuery.sizeOf(context).width,
                   child: Column(
@@ -357,47 +357,52 @@ class CardSearchTextWidget extends StatelessWidget {
                             .textStyleBody14
                             .copyWith(color: StyleColor.orange),
                       ),
-                        // Resalta las ocurrencias usando los índices start y end
-                        RichText(
+                      // Resalta las ocurrencias usando los índices start y end
+                      RichText(
                         text: TextSpan(
                           style: StylesApp(context)
-                            .textStyleBody12
-                            .copyWith(color: currentTheme.textColor),
+                              .textStyleBody12
+                              .copyWith(color: currentTheme.textColor),
                           children: () {
-                          final text = data.verse.text;
-                          final occurrences = data.verse.occurrence;
-                          if (occurrences.isEmpty) {
-                            return [TextSpan(text: '"$text"')];
-                          }
-                          List<TextSpan> spans = [];
-                          int currentIndex = 0;
-                          for (var occ in occurrences) {
-                            int start = occ.start;
-                            int end = occ.end +1;
-                            // Añade el texto antes de la ocurrencia
-                            if (currentIndex < start) {
-                            spans.add(TextSpan(text: text.substring(currentIndex, start)));
+                            final text = data.verse.text;
+                            final occurrences = data.verse.occurrence;
+                            if (occurrences.isEmpty) {
+                              return [TextSpan(text: '"$text"')];
                             }
-                            // Añade la ocurrencia resaltada
-                            spans.add(TextSpan(
-                            text: '"${text.substring(start, end)}"',
-                            style: TextStyle(backgroundColor: StyleColor.orange.withValues(alpha: 0.50), fontWeight: FontWeight.bold),
-                            ));
-                            currentIndex = end;
-                          }
-                          // Añade el texto restante después de la última ocurrencia
-                          if (currentIndex < text.length) {
-                            spans.add(TextSpan(text: text.substring(currentIndex)));
-                          }
-                          // Añade comillas al principio y final
-                          if (spans.isNotEmpty) {
-                            spans.insert(0, const TextSpan(text: '"'));
-                            spans.add(const TextSpan(text: '"'));
-                          }
-                          return spans;
+                            List<TextSpan> spans = [];
+                            int currentIndex = 0;
+                            for (var occ in occurrences) {
+                              int start = occ.start;
+                              int end = occ.end + 1;
+                              // Añade el texto antes de la ocurrencia
+                              if (currentIndex < start) {
+                                spans.add(TextSpan(
+                                    text: text.substring(currentIndex, start)));
+                              }
+                              // Añade la ocurrencia resaltada
+                              spans.add(TextSpan(
+                                text: '"${text.substring(start, end)}"',
+                                style: TextStyle(
+                                    backgroundColor: StyleColor.orange
+                                        .withValues(alpha: 0.50),
+                                    fontWeight: FontWeight.bold),
+                              ));
+                              currentIndex = end;
+                            }
+                            // Añade el texto restante después de la última ocurrencia
+                            if (currentIndex < text.length) {
+                              spans.add(
+                                  TextSpan(text: text.substring(currentIndex)));
+                            }
+                            // Añade comillas al principio y final
+                            if (spans.isNotEmpty) {
+                              spans.insert(0, const TextSpan(text: '"'));
+                              spans.add(const TextSpan(text: '"'));
+                            }
+                            return spans;
                           }(),
                         ),
-                        )
+                      )
                     ],
                   ),
                 ),

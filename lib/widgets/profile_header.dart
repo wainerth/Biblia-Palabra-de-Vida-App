@@ -2,7 +2,6 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
@@ -11,10 +10,10 @@ class ProfileHeader extends StatefulWidget {
   final VoidCallback onSelectImage;
 
   const ProfileHeader({
-    Key? key,
+    super.key,
     required this.avatarImg,
     required this.onSelectImage,
-  }) : super(key: key);
+  });
 
   @override
   State<ProfileHeader> createState() => _ProfileHeaderState();
@@ -142,7 +141,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 children: [
                   Image.asset("assets/kawaii_fire.png"),
                   Text(
-                    "${dataUser!.energyPoints}",
+                    "${dataUser.energyPoints}",
                     style: StylesApp(context)
                         .textStyleBody4
                         .copyWith(color: Color(0XFFFD8C43)),

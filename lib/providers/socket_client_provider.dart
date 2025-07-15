@@ -54,6 +54,7 @@ class SocketClientProvider with ChangeNotifier {
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
+      // sound: RawResourceAndroidNotificationSound('turtle_sound')
     );
 
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
@@ -79,7 +80,9 @@ class SocketClientProvider with ChangeNotifier {
     if (payload != null) {
       // Aquí puedes manejar la navegación basada en el payload
       // Ejemplo: navigatorKey.currentState?.pushNamed(payload);
-      print('Redirigiendo a: $payload');
+      if (kDebugMode) {
+        print('Redirigiendo a: $payload');
+      }
       navigatorKey.currentState?.pushNamed(payload);
     }
   }
@@ -108,6 +111,10 @@ class SocketClientProvider with ChangeNotifier {
         ),
       ),
     );
+  }
+
+  void cleanNotification() {
+    _notifications.clear();
   }
 
   void addNotification(NotificationModel notification) {
@@ -194,14 +201,18 @@ class SocketClientProvider with ChangeNotifier {
 
   // Escuchar eventos específicos
   void listenToEvent(String eventName, Function(dynamic) callback) {
-    print(eventName);
+    if (kDebugMode) {
+      print(eventName);
+    }
     _socket?.on(eventName, callback);
     notifyListeners();
   }
 
   // Emitir eventos
   void emitEvent(String eventName, dynamic data) {
-    print(eventName);
+    if (kDebugMode) {
+      print(eventName);
+    }
     _socket?.emit(eventName, data);
   }
 

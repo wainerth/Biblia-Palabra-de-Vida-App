@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
@@ -171,7 +171,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 Expanded(
                   child: finalStory
-                      ? Container(
+                      ? SizedBox(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -598,8 +598,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     child: Container(
                                     padding: const EdgeInsets.all(8.0),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.withOpacity(
-                                        0.7), // Fondo semitransparente para el botón
+                                      color: Colors.grey.withValues( alpha: 0.7), // Fondo semitransparente para el botón
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -656,7 +655,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                       .contains('youtu.be'))
                                           ? PlayerYoutubeWidget(
                                               videoUrl: story.video!.url)
-                                          : playerNoYoutube(
+                                          : PlayerNoYoutube(
                                               url: story.video!.url),
                                     ),
                                   ),
@@ -673,8 +672,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(8.0),
                                       decoration: BoxDecoration(
-                                        color: Colors.grey.withOpacity(
-                                            0.7), // Fondo semitransparente para el botón
+                                        color: Colors.grey.withValues( alpha: 0.7), // Fondo semitransparente para el botón
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(

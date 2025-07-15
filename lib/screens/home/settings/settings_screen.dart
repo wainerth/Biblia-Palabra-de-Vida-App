@@ -2,22 +2,18 @@ import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dar
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _darkMode = false;
   bool showNotification = false;
-  double _fontSize = 16.0;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             HeadScreenNotAvatar(
               title: "Configuración",
               onRoute: () {
-                  Navigator.pushNamed(context, "/layoutPage");
+                Navigator.pushNamed(context, "/layoutPage");
               },
             ),
             ListTile(
@@ -41,9 +37,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: StylesApp(context).textStyleBody12,
               ),
               trailing: Switch(
-                value: true, // TODO: Obtener valor real
+                value: showNotification,
                 onChanged: (bool value) {
-                  bool showNotification = value;
+                  setState(() {
+                    showNotification = value;
+                  });
                 },
               ),
             ),
@@ -62,9 +60,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               trailing: Text(
                 'Español',
                 style: StylesApp(context).textStyleBody12,
-              ), // TODO: Implementar selección de idioma
+              ), 
               onTap: () {
-                // TODO: Implementar lógica para cambiar idioma
+                
               },
             ),
             Divider(

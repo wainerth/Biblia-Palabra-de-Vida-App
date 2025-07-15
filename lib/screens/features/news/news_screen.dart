@@ -1,5 +1,4 @@
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 
 class NewsScreen extends StatelessWidget {
   const NewsScreen({super.key});

@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +17,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/class/bible_version_selector.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -49,13 +48,11 @@ class _BibleScreenState extends State<BibleScreen> {
   bool hasNextChapter = false;
   Color? selectedColor;
   String preferenceKey = 'selectedBibleVersion';
-  double fontSizeNumber = 16.sp;
-  double fontSizeVerse = 14.sp;
+  double fontSizeNumber = 12;
+  double fontSizeVerse = 16;
   ModelData fontFamilySet = ModelData(label: "Aclonica", value: "1");
   AudioChapterModel? audioChapter;
-  final video = {
-    "url":""
-  };
+  Video video = Video(url: "");
   //  Variable para controlar el overlay
   List<FavoriteVerse> _favoriteVerses = [];
   List<HighlightRangeModel> _highlights = [];
@@ -217,8 +214,7 @@ class _BibleScreenState extends State<BibleScreen> {
         }
 
         // Esperar a que termine de hablar antes de continuar
-        await flutterTts
-            .speak("${verses[i].verse}. ${verses[i].text}");
+        await flutterTts.speak("${verses[i].text}.");
         // Esperar a que termine el TTS antes de continuar
         await _waitForTtsCompletion();
         if (!isPlaying) break;
@@ -282,10 +278,13 @@ class _BibleScreenState extends State<BibleScreen> {
                 } else ...{
                   // cabecera
                   BibleHeaderWidget(
+                    onSearchBible: () {
+                      openModal();
+                    },
                     versionName:
                         currentVersion != null ? currentVersion!.version : '',
                     title: currentBook != null ? currentBook!.modernName : '',
-                    showIconVideo:video != null &&  video['url']!.isNotEmpty!,
+                    showIconVideo: video.url.isNotEmpty,
                     chapter: currentChapter != null
                         ? '${currentChapter!.chapter}'
                         : '',
@@ -309,15 +308,12 @@ class _BibleScreenState extends State<BibleScreen> {
                                     // height: 213,
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
-                                      child: video != null &&
-                                              (video["url"]!
-                                                      .contains('youtube.com') ||
-                                                  video["url"]!
-                                                      .contains('youtu.be'))
+                                      child: (video.url
+                                                  .contains('youtube.com') ||
+                                              video.url.contains('youtu.be'))
                                           ? PlayerYoutubeWidget(
-                                              videoUrl: video["url"]!)
-                                          : playerNoYoutube(
-                                              url: video["url"]!),
+                                              videoUrl: video.url)
+                                          : PlayerNoYoutube(url: video.url),
                                     ),
                                   ),
                                 ),
@@ -333,8 +329,9 @@ class _BibleScreenState extends State<BibleScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(8.0),
                                       decoration: BoxDecoration(
-                                        color: Colors.grey.withOpacity(
-                                            0.7), // Fondo semitransparente para el botón
+                                        color: Colors.grey.withValues(
+                                            alpha:
+                                                0.7), // Fondo semitransparente para el botón
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
@@ -459,7 +456,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                                 setState(() {
                                                   // persistir tamaño de fuente
                                                   fontSizeNumber =
-                                                      fontSize! + 2;
+                                                      fontSize! - 4;
                                                   fontSizeVerse = fontSize;
                                                 });
                                                 prefs!.setDouble(
@@ -495,6 +492,8 @@ class _BibleScreenState extends State<BibleScreen> {
                                     onPressed: () async {
                                       Clipboard.setData(ClipboardData(
                                           text: await copyChapter(
+                                              currentVersion,
+                                              currentBook,
                                               currentChapter)));
                                       await showCustomDialog(
                                         context,
@@ -514,14 +513,15 @@ class _BibleScreenState extends State<BibleScreen> {
                                     iconSize: 25.0,
                                     onPressed: () async {
                                       await Share.share(
-                                        await copyChapter(currentChapter),
+                                        await copyChapter(currentVersion,
+                                            currentBook, currentChapter),
                                         subject:
                                             "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName} \n ver en:${GraphQLConfig.urlServidor}officialbible",
                                       );
                                     },
                                     icon: Icon(
                                       Icons.share_rounded,
-                                      color: StyleColor.turquoise,
+                                      color: currentTheme.buttonColor,
                                     ),
                                   ),
                                   // MODAL ACTIONS BUTTON
@@ -529,59 +529,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                     padding: EdgeInsets.zero,
                                     iconSize: 25.0,
                                     onPressed: () {
-                                      showGeneralDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        transitionDuration:
-                                            Duration(milliseconds: 500),
-                                        pageBuilder: (_, __, ___) {
-                                          return Dialog(
-                                            backgroundColor:
-                                                currentTheme.backgroundColor,
-                                            insetPadding: EdgeInsets.zero,
-                                            child: SizedBox(
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              height: MediaQuery.of(context)
-                                                  .size
-                                                  .height,
-                                              child: SearchBibleWidget(
-                                                currentVersion: currentVersion,
-                                                currentBook: currentBook,
-                                                currentChapter: currentChapter,
-                                                onActionBook:
-                                                    (InputDataSearchModel
-                                                        data) async {
-                                                  await loadVersionAndChapter(
-                                                      data);
-                                                },
-                                                onActionTabText:
-                                                    (InputDataSearchModel
-                                                        data) async {
-                                                  await loadVersionAndChapter(
-                                                      data);
-                                                },
-                                                onActionTheme:
-                                                    (InputDataSearchModel
-                                                        data) async {
-                                                  await loadVersionAndChapter(
-                                                      data);
-                                                },
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        transitionBuilder: (context, animation,
-                                            secondaryAnimation, child) {
-                                          return ScaleTransition(
-                                            scale: animation.drive(CurveTween(
-                                                curve: Curves
-                                                    .fastOutSlowIn)), // ← Solución segura
-                                            child: child,
-                                          );
-                                        },
-                                      );
+                                      openModal();
                                     },
                                     icon: Icon(
                                       Icons.search_rounded,
@@ -647,8 +595,11 @@ class _BibleScreenState extends State<BibleScreen> {
                                                                         .id ==
                                                                     verseId);
                                                     if (indexToDelete != -1) {
-                                                      _favoriteVerses.removeAt(
-                                                          indexToDelete);
+                                                      setState(() {
+                                                        _favoriteVerses
+                                                            .removeAt(
+                                                                indexToDelete);
+                                                      });
                                                     }
                                                   });
                                             });
@@ -661,7 +612,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                     },
                                     icon: Icon(
                                       Icons.star,
-                                      color: StyleColor.turquoise,
+                                      color: currentTheme.buttonColor,
                                     ),
                                   ),
                                 ],
@@ -781,8 +732,8 @@ class _BibleScreenState extends State<BibleScreen> {
                                                         inactiveColor:
                                                             currentTheme
                                                                 .buttonColor
-                                                                .withOpacity(
-                                                                    0.3),
+                                                                .withValues(
+                                                                    alpha: 0.3),
                                                         onChanged:
                                                             (value) async {
                                                           final prefs =
@@ -929,19 +880,23 @@ class _BibleScreenState extends State<BibleScreen> {
                                 left: verse.verse == 1 ? 4.0 : 4.0,
                                 right: 4.0,
                               ),
-                              child: Text(
-                                "${verse.verse}",
-                                style:
-                                    StylesApp(context).textStyleBody16.copyWith(
-                                          fontFamily: fontFamilySet.label,
-                                          fontSize: fontSizeVerse, //fontSizeNumber,
-                                          fontWeight: FontWeight.bold,
-                                          color: currentPlayingVerseIndex ==
-                                                  verses.indexOf(verse)
-                                              ? Colors
-                                                  .blue // Cambia color cuando se lee
-                                              : StyleColor.turquoise,
-                                        ),
+                              child: Transform.translate(
+                                offset: Offset(0, -4),
+                                child: Text(
+                                  "${verse.verse}",
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        fontFamily: fontFamilySet.label,
+                                        fontSize: fontSizeNumber,
+                                        fontWeight: FontWeight.bold,
+                                        color: currentPlayingVerseIndex ==
+                                                verses.indexOf(verse)
+                                            ? Colors
+                                                .blue // Cambia color cuando se lee
+                                            : currentTheme.verseHighlightColor,
+                                      ),
+                                ),
                               ),
                             ),
                           ),
@@ -979,7 +934,9 @@ class _BibleScreenState extends State<BibleScreen> {
               icon: Icons.content_copy,
               label: 'Copiar versículo',
               onPressed: () {
-                Clipboard.setData(ClipboardData(text: selectedText));
+                Clipboard.setData(ClipboardData(
+                    text:
+                        "{currentBook?.modernName}\n ${currentBook?.numberBook} \n  selectedText"));
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Versículo copiado')),
                 );
@@ -990,7 +947,7 @@ class _BibleScreenState extends State<BibleScreen> {
               label: 'Compartir versículo',
               onPressed: () {
                 Share.share(
-                  selectedText,
+                  "${currentBook?.modernName}\n ${currentBook?.numberBook} \n $selectedText",
                   subject: 'Versículo de ${currentBook?.modernName}',
                 );
               },
@@ -1169,29 +1126,7 @@ class _BibleScreenState extends State<BibleScreen> {
       ));
     }
 
-    // Aplica un estilo por defecto a todos los spans si no tienen uno
     return spans;
-    // .map((span) {
-    //   if (span.style != null) {
-    //     return span;
-    //   }
-    //   return TextSpan(
-    //     text: span.text,
-    //     children: span.children,
-    //     recognizer: span.recognizer,
-    //     style: StylesApp(context).textStyleBody14.copyWith(
-    //           decoration: _isFavorite(verse) ? TextDecoration.underline : null,
-    //           fontFamily: fontFamilySet.label,
-    //           fontSize: fontSizeVerse,
-    //           color: currentPlayingVerseIndex == verses.indexOf(verse)
-    //               ? Colors.blue // Cambia color cuando se lee
-    //               : currentTheme.textColor,
-    //           decorationThickness: 4.0,
-    //           decorationColor: StyleColor.yellowLight,
-    //           fontWeight: FontWeight.w400,
-    //         ),
-    //   );
-    // }).toList();
   }
 
   /// Método que me muestra la modal bottom Sheet pata la elección del color de resaltado
@@ -1242,8 +1177,10 @@ class _BibleScreenState extends State<BibleScreen> {
               children: colors.map((color) {
                 return GestureDetector(
                   onTap: () {
-                    final hexColor =
-                        '${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+                    final hexColor = color.value
+                        .toRadixString(16)
+                        .padLeft(8, '0')
+                        .toUpperCase();
                     final List<VerseModel> newVerses = [];
 
                     for (final verse in verses) {
@@ -1456,12 +1393,12 @@ class _BibleScreenState extends State<BibleScreen> {
               _favoriteVerses.indexWhere((f) => f.verse.id == verse.id));
         });
       } else {
-        final responseAddfavorite =
+        final responseAddFavorite =
             await createNewVerseFavoriteByUser(userData!.userId, verse.id);
 
-        if (responseAddfavorite.error != null) {
+        if (responseAddFavorite.error != null) {
           await showCustomDialog(context,
-              message: responseAddfavorite.error!,
+              message: responseAddFavorite.error!,
               dialogType: DialogType.error);
           LoadingService().hideLoading();
           return;
@@ -1520,7 +1457,7 @@ class _BibleScreenState extends State<BibleScreen> {
         .loadSavedTheme();
     // cargar los favoritos
     String userId = userData != null ? userData!.userId : '';
-    String? chapterId = currentChapter != null ? currentChapter!.id : null;
+    String? chapterId = currentChapter?.id;
     String versionId = currentVersion != null ? currentVersion!.id : "0";
 
     final responseFavorite =
@@ -1535,6 +1472,11 @@ class _BibleScreenState extends State<BibleScreen> {
     if (prefs!.getDouble("fontSizeVerse") != null) {
       setState(() {
         fontSizeVerse = prefs!.getDouble("fontSizeVerse")!;
+        fontSizeNumber = fontSizeVerse - 4;
+      });
+    } else {
+      setState(() {
+        fontSizeNumber = fontSizeVerse - 4;
       });
     }
     // Recuperar ModelData de SharedPreferences
@@ -1595,20 +1537,24 @@ class _BibleScreenState extends State<BibleScreen> {
       //consulto todos los capítulos del libro actual con sus versículos
       await loadChapters(currentBook!, false);
       await _loadPersistedData();
-
+      await loadVideoByChapter(currentChapter!.id);
       // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
       validateNextAndPrevious();
     } catch (e) {
       LoadingService().hideLoading();
       errorMessage = 'Error al cargar la biblia $e';
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     } finally {
       LoadingService().hideLoading();
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -2032,7 +1978,6 @@ class _BibleScreenState extends State<BibleScreen> {
     }
   }
 
- 
   Future<void> _togglePlayPause() async {
     if (isPlaying) {
       await flutterTts.pause();
@@ -2051,6 +1996,63 @@ class _BibleScreenState extends State<BibleScreen> {
       }
       setState(() => isPlaying = true);
     }
+  }
+
+  loadVideoByChapter(String id) async {
+    final responseVideo = await getVideoByChapter(id);
+    if (responseVideo.error != null) {
+      await showCustomDialogWithAction(context,
+          message: responseVideo.error!,
+          dialogType: DialogTypeAction.error,
+          buttonOk: "re intentar",
+          textButton: "Volver",
+          actionCallbackOk: () {},
+          actionCallback: () {});
+      return;
+    }
+
+    setState(() {
+      video = Video.fromJson(responseVideo.data);
+    });
+  }
+
+  void openModal() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: Duration(milliseconds: 500),
+      pageBuilder: (_, __, ___) {
+        return Dialog(
+          backgroundColor: currentTheme.backgroundColor,
+          insetPadding: EdgeInsets.zero,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: SearchBibleWidget(
+              currentVersion: currentVersion!,
+              currentBook: currentBook!,
+              currentChapter: currentChapter!,
+              onActionBook: (InputDataSearchModel data) async {
+                await loadVersionAndChapter(data);
+              },
+              onActionTabText: (InputDataSearchModel data) async {
+                await loadVersionAndChapter(data);
+              },
+              onActionTheme: (InputDataSearchModel data) async {
+                await loadVersionAndChapter(data);
+              },
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: animation.drive(
+              CurveTween(curve: Curves.fastOutSlowIn)), // ← Solución segura
+          child: child,
+        );
+      },
+    );
   }
 }
 

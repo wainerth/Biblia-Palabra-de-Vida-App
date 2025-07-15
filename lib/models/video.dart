@@ -5,7 +5,7 @@ class Video {
 
   factory Video.fromJson(Map<String, dynamic> json) {
     return Video(
-      url: json['url'],
+      url: json['url'] ?? '',
     );
   }
 

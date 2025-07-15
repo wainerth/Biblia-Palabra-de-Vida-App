@@ -1,10 +1,11 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -135,7 +136,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Container(
+        child: SizedBox(
           child: Column(
             children: [
               SimpleHeaderWidget(
@@ -194,7 +195,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Container(
+                  child: SizedBox(
                       child: Column(
                     children: [
                       if (isLoading) ...{
@@ -223,8 +224,10 @@ class _PromisesScreenState extends State<PromisesScreen> {
                                         setState(() {
                                           promises[index] = promises[index]
                                               .copyWith(hasViewed: value);
-                                          print(
+                                          if (kDebugMode) {
+                                            print(
                                               "cambio valor ${promises[index].hasViewed}");
+                                          }
                                           didChangeDependencies();
                                         });
                                       }
@@ -295,11 +298,11 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
           : () async {
               LoadingService().showLoading(context);
               final responseOpenPromise =
-                  await openOnePromise(widget.onePromise!.id);
+                  await openOnePromise(widget.onePromise.id);
               if (responseOpenPromise.error != null) {
                 LoadingService().hideLoading();
                 await showCustomDialog(context,
-                    message: responseOpenPromise!.error!,
+                    message: responseOpenPromise.error!,
                     dialogType: DialogType.error);
                 return;
               }
@@ -315,20 +318,17 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
               widget.updateData(responseOpenPromise.data);
             },
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          // Animación de fundido
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-        child: widget.onePromise.hasViewed
-            ? _buildRedeemedPromiseCard()
-            : widget.onePromise != null
-                ? _buildPromiseCard()
-                : Container(),
-      ),
+          duration: const Duration(milliseconds: 500),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            // Animación de fundido
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          child: widget.onePromise.hasViewed
+              ? _buildRedeemedPromiseCard()
+              : _buildPromiseCard()),
     );
   }
 
@@ -350,14 +350,15 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            Image.asset(
-                widget.onePromise != null ? widget.onePromise!.images : ''),
+            Image.asset(widget.onePromise.images.isNotEmpty
+                ? widget.onePromise.images
+                : ''),
             Text(
-              widget.onePromise != null ? widget.onePromise!.title : '',
+              widget.onePromise.title,
               style: StylesApp(context).textStyleBodyOrange15,
             ),
             Text(
-              widget.onePromise != null ? widget.onePromise!.description : '',
+              widget.onePromise.description,
               textAlign: TextAlign.center,
               style: StylesApp(context)
                   .textStyleBody12
@@ -426,7 +427,7 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
                 Image.asset("assets/star_complete.png"),
                 Text(
                   textAlign: TextAlign.center,
-                  "Haz gando una mini estrella\n ${widget.redeemedPromise!.energyPoint} Lms de energia",
+                  "Haz ganado una mini estrella\n ${widget.redeemedPromise!.energyPoint} Lms de energía",
                   style: StylesApp(context)
                       .textStyleBody12
                       .copyWith(color: StyleColor.yellowLight),

@@ -8,7 +8,7 @@ class UserChurch {
   UserChurch copyWith({String? id, String? name, bool? status}) {
     return UserChurch(
         id: id ?? this.id,
-        churchName: churchName ?? this.churchName,
+        churchName: churchName ?? churchName,
         status: status ?? this.status);
   }
 
@@ -131,13 +131,13 @@ class LoginUser {
             preachingsCreatedCount ?? this.preachingsCreatedCount,
         completedCourse: completedCourse ?? this.completedCourse,
         userChurch: userChurch ?? this.userChurch,
-        title: title ?? this.title,
-        league: league ?? this.league,
+        title: title ?? title,
+        league: league ?? league,
         birthdate: birthdate ?? this.birthdate,
         identifier: identifier ?? this.identifier,
         gender: gender ?? this.gender,
         isBaptized: isBaptized ?? this.isBaptized,
-        currentLeague: currentLeague ?? this.currentLeague);
+        currentLeague: currentLeague ?? currentLeague);
   }
 
   factory LoginUser.fromJson(Map<String, dynamic> json) {

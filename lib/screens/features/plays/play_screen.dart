@@ -13,6 +13,9 @@ class _PlayScreenState extends State<PlayScreen> {
     return Scaffold(
       body: SafeArea(
         child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white
+          ),
           child: Center(
             child: Text("Pantalla de juegos"),
           ),

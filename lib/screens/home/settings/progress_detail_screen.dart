@@ -1,5 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
@@ -18,7 +18,7 @@ class ProgressDetailScreen extends StatefulWidget {
 
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   List<UserTitle>? titles = [];
-  LastProgressUser? progressUser = null;
+  LastProgressUser? progressUser;
 
   Future<void> _loadProgress(BuildContext context) async {
     LoadingService().showLoading(context);
@@ -92,7 +92,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                     TextSpan(text: "Registro: "),
                                     TextSpan(
                                         text: userData!.createdAt.isNotEmpty
-                                            ? getFormatedDate(
+                                            ? getFormattedDate(
                                                 int.parse(userData.createdAt))
                                             : ""),
                                   ],

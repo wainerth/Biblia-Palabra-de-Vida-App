@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
@@ -98,7 +98,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
           ),
           child: Column(
             children: [
-              Container(
+              SizedBox(
                 child: CustomDropdownBottomWidget(
                   hintText: "Seleccione la version",
                   items: bibleVersions,
@@ -157,7 +157,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
           child: loading
               ? LoadingIndicator()
               : searchResult.isEmpty
-                  ? Container(
+                  ? SizedBox(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -314,7 +314,9 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
     try {
       _loadData(1, itemPerPageValue, versionSelected!.value, query);
     } catch (e) {
-      print("error al filtrar $e");
+      if (kDebugMode) {
+        print("error al filtrar $e");
+      }
     }
   }
 
@@ -363,7 +365,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
       BuildContext context, WordSearchResult data) async {
     final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
     final copyString =
-        "${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
+        "${data.book.modernName} ${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
     await Clipboard.setData(ClipboardData(text: copyString));
 
     // Mostrar diálogo de confirmación

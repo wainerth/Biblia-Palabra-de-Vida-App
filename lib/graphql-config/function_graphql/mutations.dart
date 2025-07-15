@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/models/response_data.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -32,9 +31,16 @@ Future login(email, password) async {
   );
   try {
     final QueryResult result = await _client.mutate(options);
-    print(result.hasException);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Login: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
     final data = result.data;
     if (data == null || data['loginUser'] == null) {
@@ -60,10 +66,6 @@ Future login(email, password) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -195,15 +197,20 @@ Future updateUserProfile(token, UserProfile data) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      print(ResponseData.fromQueryResult(result));
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Update Data Profile Users: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['updateDataProfileUsers'] == null) {
-      print("No data returned");
-      return ResponseData(data: false, error: "No data returned");
-      // return false;
+      return ResponseData(data: false, error: "Update Data Profile Users No data returned");
     }
     return ResponseData(data: data['updateDataProfileUsers'], error: null);
   } catch (e) {
@@ -239,7 +246,15 @@ Future updateChurchUser(token, userId, churchId) async {
     final QueryResult result = await _client.mutate(mutateGql);
 
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Update Church User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
@@ -247,7 +262,7 @@ Future updateChurchUser(token, userId, churchId) async {
     if (data == null || data['updateChurchUser'] == null) {
       return ResponseData(
         data: null,
-        error: 'No data return ',
+        error: 'Update Church User No data return ',
       );
     }
 
@@ -300,9 +315,10 @@ Future register(dataToRegister) async {
           "name": dataToRegister.name,
           "lastname": dataToRegister.lastname,
           "birthdate": dataToRegister.birthdate,
-            "gender": dataToRegister.gender != null && dataToRegister.gender.isNotEmpty
-              ? dataToRegister.gender.toUpperCase()
-              : dataToRegister.gender,
+          "gender":
+              dataToRegister.gender != null && dataToRegister.gender.isNotEmpty
+                  ? dataToRegister.gender.toUpperCase()
+                  : dataToRegister.gender,
           "phoneNumber": dataToRegister.phoneNumber,
           "countryId": dataToRegister.countryId,
           "city": dataToRegister.city,
@@ -316,14 +332,22 @@ Future register(dataToRegister) async {
     final QueryResult result = await _client.mutate(mutateGql);
 
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Register User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['registerUser'] == null) {
       return ResponseData(
         data: null,
-        error: "No data Result",
+        error: "Register User No data Result",
       );
     }
 
@@ -344,10 +368,6 @@ Future register(dataToRegister) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -368,14 +388,22 @@ Future<ResponseData> forgotPassword(email) async {
     final QueryResult result = await _client.mutate(mutateGql);
 
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Forgot Password: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['forgotPassword'] == null) {
       return ResponseData(
         data: null,
-        error: "No data Result",
+        error: "Forgot Password No data Result",
       );
     }
 
@@ -396,10 +424,6 @@ Future<ResponseData> forgotPassword(email) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -413,6 +437,7 @@ Future logout() async {
   await prefs.remove("selectedBibleVersion");
   await prefs.remove("bookSelected");
   await prefs.remove("chapterSelected");
+  await prefs.remove('current_custom_theme');
   return ResponseData(data: true, error: null);
 }
 
@@ -435,14 +460,22 @@ Future verifyPinPassword(email, code) async {
     final QueryResult result = await _client.mutate(mutateGql);
 
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Verify Pin For Password: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['verifyPinForPassword'] == null) {
       return ResponseData(
         data: null,
-        error: "No data Result",
+        error: "Verify Pin For Password No data Result",
       );
     }
 
@@ -463,10 +496,6 @@ Future verifyPinPassword(email, code) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -494,14 +523,22 @@ Future resetPassword(email, password) async {
     final QueryResult result = await _client.mutate(mutateGql);
 
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Reset Password: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['resetPassword'] == null) {
       return ResponseData(
         data: null,
-        error: "No data Result",
+        error: "Reset Password No data Result",
       );
     }
 
@@ -522,10 +559,6 @@ Future resetPassword(email, password) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(
-    //   data: null,
-    //   error: 'Connection error: $e',
-    // );
   }
 }
 
@@ -554,14 +587,22 @@ Future<ResponseData> sendResponsesUser(List responses) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Send Responses User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['sendResponsesUser'] == null) {
       return ResponseData(
         data: null,
-        error: 'send responses user failed: No data returned',
+        error: 'Send Responses User failed: No data returned',
       );
     }
 
@@ -575,14 +616,12 @@ Future<ResponseData> sendResponsesUser(List responses) async {
     } else if (e is SocketException) {
       return ResponseData(data: null, error: "No Internet Connection");
     } else if (e is FormatException) {
-      // Example: JSON parsing error
       return ResponseData(data: null, error: "Invalid data format");
     } else {
       return ResponseData(
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(data: null, error: "connection error $e");
   }
 }
 
@@ -617,14 +656,22 @@ Future<ResponseData> sendScoreUser(
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Send Score: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['sendScore'] == null) {
       return ResponseData(
         data: null,
-        error: 'send score failed: No data returned',
+        error: 'Send Score failed: No data returned',
       );
     }
 
@@ -633,7 +680,6 @@ Future<ResponseData> sendScoreUser(
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(data: null, error: 'Send score Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
@@ -648,7 +694,6 @@ Future<ResponseData> sendScoreUser(
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(data: null, error: "connection error $e");
   }
 }
 
@@ -675,14 +720,22 @@ Future<ResponseData> unlockedNextSection(userId, sectionId) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Unlock Next Section: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['unlockNextSection'] == null) {
       return ResponseData(
         data: null,
-        error: 'unlock Next Section failed: No data returned',
+        error: 'Unlock Next Section failed: No data returned',
       );
     }
 
@@ -691,7 +744,6 @@ Future<ResponseData> unlockedNextSection(userId, sectionId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null, error: 'unlock Next Section Timeout de conexión $e');
   } catch (e) {
@@ -707,7 +759,6 @@ Future<ResponseData> unlockedNextSection(userId, sectionId) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(data: null, error: "connection error $e");
   }
 }
 
@@ -734,14 +785,22 @@ Future<ResponseData> applyRewardToUser(userId, rewardId) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Apply Reward To User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['applyRewardToProfile'] == null) {
       return ResponseData(
         data: null,
-        error: 'apply Reward To user failed: No data returned',
+        error: 'Apply Reward To User failed: No data returned',
       );
     }
 
@@ -750,9 +809,8 @@ Future<ResponseData> applyRewardToUser(userId, rewardId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
-        data: null, error: 'apply Reward To user Timeout de conexión $e');
+        data: null, error: 'Apply Reward To User Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -766,7 +824,6 @@ Future<ResponseData> applyRewardToUser(userId, rewardId) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(data: null, error: "connection error $e");
   }
 }
 
@@ -798,14 +855,22 @@ Future<ResponseData> setTitleObtained(userId, courseId) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Set Title For User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['SetTitleToUser'] == null) {
       return ResponseData(
         data: null,
-        error: 'set Title for user failed: No data returned',
+        error: 'Set Title For User failed: No data returned',
       );
     }
 
@@ -814,9 +879,8 @@ Future<ResponseData> setTitleObtained(userId, courseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
-        data: null, error: 'set Title for user Timeout de conexión $e');
+        data: null, error: 'Set Title For User Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -830,7 +894,6 @@ Future<ResponseData> setTitleObtained(userId, courseId) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(data: null, error: "connection error $e");
   }
 }
 
@@ -865,14 +928,22 @@ Future<ResponseData> setPrizeObtained(userId, courseId) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Set Prize For User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['setPrizeToUser'] == null) {
       return ResponseData(
         data: null,
-        error: 'set Prize for user failed: No data returned',
+        error: 'Set Prize For User failed: No data returned',
       );
     }
 
@@ -883,7 +954,7 @@ Future<ResponseData> setPrizeObtained(userId, courseId) async {
   } on TimeoutException catch (e) {
     print('Timeout: $e');
     return ResponseData(
-        data: null, error: 'set Prize for user Timeout de conexión $e');
+        data: null, error: 'Set Prize For User Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -917,20 +988,28 @@ Future<ResponseData> redeemedPrize(prizeId, userId) async {
     variables: <String, dynamic>{
       "prizeId": prizeId,
       "userId": userId,
-      },
+    },
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Redeem Prize: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['redeemPrize'] == null) {
       return ResponseData(
         data: null,
-        error: 'redeem Prize failed: No data returned',
+        error: 'Redeem Prize Failed: No data returned',
       );
     }
 
@@ -941,7 +1020,7 @@ Future<ResponseData> redeemedPrize(prizeId, userId) async {
   } on TimeoutException catch (e) {
     print('Timeout: $e');
     return ResponseData(
-        data: null, error: 'redeem Prize Timeout de conexión $e');
+        data: null, error: 'Redeem Prize Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -955,7 +1034,6 @@ Future<ResponseData> redeemedPrize(prizeId, userId) async {
           data: null,
           error: "An unexpected error occurred: $e"); // Generic error
     }
-    // return ResponseData(data: null, error: "connection error $e");
   }
 }
 
@@ -978,14 +1056,22 @@ Future<ResponseData> openOnePromise(promiseId) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Open One Promise: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['openOnePromise'] == null) {
       return ResponseData(
         data: null,
-        error: 'open One Promise failed: No data returned',
+        error: 'Open One Promise failed: No data returned',
       );
     }
 
@@ -996,7 +1082,7 @@ Future<ResponseData> openOnePromise(promiseId) async {
   } on TimeoutException catch (e) {
     print('Timeout: $e');
     return ResponseData(
-        data: null, error: 'open One Promise Timeout de conexión $e');
+        data: null, error: 'Open One Promise Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -1033,14 +1119,22 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Add Predicate To Favorite: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
     if (data == null || data['addPredicateToFavorite'] == null) {
       return ResponseData(
         data: null,
-        error: 'add Predicate To Favorite failed: No data returned',
+        error: 'Add Predicate To Favorite failed: No data returned',
       );
     }
 
@@ -1051,7 +1145,7 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
   } on TimeoutException catch (e) {
     print('Timeout: $e');
     return ResponseData(
-        data: null, error: 'add Predicate To Favorite Timeout de conexión $e');
+        data: null, error: 'Add Predicate To Favorite Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -1077,13 +1171,12 @@ Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
   final GraphQLClient _client = createClient(authToken: userToken);
   List<Map<String, dynamic>> dataMap = [];
   for (final lighter in input) {
-
-  dataMap.add({
-    "verse": lighter.verse,
-    "startIndex": lighter.startIndex,
-    "endIndex": lighter.endIndex,
-    "color": lighter.color
-  });
+    dataMap.add({
+      "verse": lighter.verse,
+      "startIndex": lighter.startIndex,
+      "endIndex": lighter.endIndex,
+      "color": lighter.color
+    });
   }
 
   MutationOptions mutateGql = MutationOptions(
@@ -1113,7 +1206,15 @@ Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'App Create Highlighter: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
@@ -1146,7 +1247,8 @@ Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
     }
   }
 }
-Future<ResponseData>  removeHighLighters(String verseId) async {
+
+Future<ResponseData> removeHighLighters(String verseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -1159,15 +1261,21 @@ Future<ResponseData>  removeHighLighters(String verseId) async {
         removeHighlighter(verseId: $verseId)
       }
       '''),
-    variables: <String, dynamic>{
-      "verseId": verseId
-    },
+    variables: <String, dynamic>{"verseId": verseId},
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Remove Highlighter: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
@@ -1200,7 +1308,8 @@ Future<ResponseData>  removeHighLighters(String verseId) async {
     }
   }
 }
-Future<ResponseData>  updateFavoriteVerse(String userId ,String verseId) async {
+
+Future<ResponseData> updateFavoriteVerse(String userId, String verseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -1222,7 +1331,15 @@ Future<ResponseData>  updateFavoriteVerse(String userId ,String verseId) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Update Favorite Verse: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
@@ -1255,7 +1372,9 @@ Future<ResponseData>  updateFavoriteVerse(String userId ,String verseId) async {
     }
   }
 }
-Future<ResponseData>  createNewVerseFavoriteByUser(String userId ,String verseId) async {
+
+Future<ResponseData> createNewVerseFavoriteByUser(
+    String userId, String verseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -1280,7 +1399,15 @@ Future<ResponseData>  createNewVerseFavoriteByUser(String userId ,String verseId
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Create New Verse Favorite: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
@@ -1298,7 +1425,8 @@ Future<ResponseData>  createNewVerseFavoriteByUser(String userId ,String verseId
   } on TimeoutException catch (e) {
     print('Timeout: $e');
     return ResponseData(
-        data: null, error: 'Create New Verse Favorite By User Timeout de conexión $e');
+        data: null,
+        error: 'Create New Verse Favorite By User Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -1313,7 +1441,8 @@ Future<ResponseData>  createNewVerseFavoriteByUser(String userId ,String verseId
     }
   }
 }
-Future<ResponseData>  deleteVerseFavorite(String userId ,String verseId) async {
+
+Future<ResponseData> deleteVerseFavorite(String userId, String verseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -1338,7 +1467,15 @@ Future<ResponseData>  deleteVerseFavorite(String userId ,String verseId) async {
   try {
     final QueryResult result = await _client.mutate(mutateGql);
     if (result.hasException) {
-      return ResponseData.fromQueryResult(result);
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Delete Verse Favorite: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
 
     final data = result.data;
@@ -1357,6 +1494,72 @@ Future<ResponseData>  deleteVerseFavorite(String userId ,String verseId) async {
     print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Delete Verse Favorite Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> markAsReadOneNotification(String notificationId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient _client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "MarkAsReadNotification",
+    document: gql(r'''
+     mutation MarkAsReadNotification($userStatusNotificationId: ID) {
+        markAsReadNotification(userStatusNotificationId: $userStatusNotificationId) {
+          success
+          message
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "userStatusNotificationId": notificationId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await _client.mutate(mutateGql);
+    if (result.hasException) {
+       if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Mark As Read Notification: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['markAsReadNotification'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Mark As Read Notification failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['markAsReadNotification'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    return ResponseData(
+        data: null, error: 'Mark As Read Notification Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

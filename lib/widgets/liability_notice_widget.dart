@@ -103,7 +103,7 @@ class _LiabilityNoticeWidgetState extends State<LiabilityNoticeWidget> {
                     child: ButtonThemeWidget(
                       text: "Aceptar",
                       buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                        backgroundColor:  !_isChecked ? MaterialStateProperty.all(StyleColor.grayMedium) : null
+                        backgroundColor:  !_isChecked ? WidgetStateProperty.all(StyleColor.grayMedium) : null
                       ),
                       disabled: !_isChecked,
                       width: 239.0,

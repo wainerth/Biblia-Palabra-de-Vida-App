@@ -1,16 +1,14 @@
 import 'dart:async';
 
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../main.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -121,7 +119,7 @@ class _MapScreenState extends State<MapScreen>
     prefs.setBool('isMuted', isMuted);
   }
 
-  // función que hace scroll en la pantallax
+  // función que hace scroll en la pantalla
   onScrollPosition() {
     final int lastUnlockedIndex = gruposDeNiveles.lastIndexWhere(
       (grupo) => grupo.any((level) => level.unLockLevel == true),
@@ -170,7 +168,7 @@ class _MapScreenState extends State<MapScreen>
         final LoginUser? userData = userProvider.currentUser;
         // obtenemos curso
         final ResponseData courseResponse = await loadOneCourse(
-            userData != null ? userData.userId : null, courseId);
+            userData?.userId, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
         }
@@ -254,10 +252,10 @@ class _MapScreenState extends State<MapScreen>
     List coordBLeft = [0.40, 0.17, 0.01, 0.03, 0.05];
 
     List coordATopBarco = [0.25, 0.35, 0.45, 0.48, 0.65, 0.75, 0.75, 0.85];
-    List coordAleftBarco = [0.20, 0.10, -0.05, 0.35, 0.17, 0.35, 0.10, 0.25];
+    List coordALeftBarco = [0.20, 0.10, -0.05, 0.35, 0.17, 0.35, 0.10, 0.25];
 
     List coordBTopBarco = [0.05, 0.25, 0.35, 0.45, 0.45, 0.60, 0.75, 0.85];
-    List coordBleftBarco = [0.90, 0.85, 0.65, 0.80, 0.52, 0.87, 0.50, 0.90];
+    List coordBLeftBarco = [0.90, 0.85, 0.65, 0.80, 0.52, 0.87, 0.50, 0.90];
 
     return PopScope(
       canPop:
@@ -406,7 +404,7 @@ class _MapScreenState extends State<MapScreen>
                                             for (var j = 0; j < 8; j++) ...{
                                               InfiniteAnimation(
                                                 coordTop: coordATopBarco[j],
-                                                coordLeft: coordAleftBarco[j],
+                                                coordLeft: coordALeftBarco[j],
                                                 j: j,
                                                 index: index,
                                               ),
@@ -415,7 +413,7 @@ class _MapScreenState extends State<MapScreen>
                                             for (var j = 0; j < 8; j++) ...{
                                               InfiniteAnimation(
                                                 coordTop: coordBTopBarco[j],
-                                                coordLeft: coordBleftBarco[j],
+                                                coordLeft: coordBLeftBarco[j],
                                                 j: j,
                                                 index: index,
                                               ),
@@ -549,7 +547,7 @@ class _MapScreenState extends State<MapScreen>
                                                                                 height: StylesApp(context).sizeContainer.height + 10 * _animation.value,
                                                                                 decoration: BoxDecoration(
                                                                                   shape: BoxShape.circle,
-                                                                                  color: Colors.yellow.withOpacity(0.5 * (1 - _animation.value)),
+                                                                                  color: Colors.yellow.withValues( alpha: 0.5 * (1 - _animation.value)),
                                                                                 ),
                                                                               );
                                                                             },
@@ -686,6 +684,7 @@ class _MapScreenState extends State<MapScreen>
 _buildItemLevel(BuildContext context, Level grupo) {
   if (grupo.img.urlImg.isNotEmpty) {
     return Container(
+       clipBehavior: Clip.antiAlias,
       width: StylesApp(context)
           .sizeContainerSub
           .width, // Ajusta el tamaño según tus necesidades
@@ -838,7 +837,7 @@ class _InfiniteAnimationState extends State<InfiniteAnimation>
                   horizontalOffset
               : StylesApp(context).positionedLevels(widget.coordLeft).dx +
                   horizontalOffset,
-          child: Container(
+          child: SizedBox(
             width: 40,
             child: Image.asset(
               imageBarcos[widget.j],

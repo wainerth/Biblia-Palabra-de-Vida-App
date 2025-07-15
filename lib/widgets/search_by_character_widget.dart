@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class SearchByCharacterWidget extends StatefulWidget {
@@ -177,7 +178,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
           child: loading
               ? LoadingIndicator()
               : characters.isEmpty
-                  ? Container(
+                  ? SizedBox(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -349,7 +350,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
     try {
       _loadData(1, itemPerPageValue, query);
     } catch (e) {
-      print("error al filtrar $e");
+      if (kDebugMode) {
+        print("error al filtrar $e");
+      }
     }
   }
 

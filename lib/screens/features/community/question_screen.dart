@@ -2,7 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
@@ -50,9 +50,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
       id: "",
       question: "",
       difficulty: "",
-      level: LevelQuestion(
-        levelNumber: 0,
-      ),
+      // level: LevelQuestion(
+      //   levelNumber: 0,
+      // ),
       status: 0,
       answers: [],
       isOrdering: false);
@@ -130,7 +130,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
         // obtenemos curso
         final ResponseData courseResponse = await loadOneCourse(
-            userData != null ? userData!.userId : null, courseId);
+            userData?.userId, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
         }
@@ -660,7 +660,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       //si tiene Titulo por el curso
                       if (showTitleObtained) ...{
                         Expanded(
-                          child: _buildAchievementUnloked(context),
+                          child: _buildAchievementUnlocked(context),
                         )
                       },
                     },
@@ -901,7 +901,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   // mostrar si hay recompensa
                   if (sendScore!.isLastLevel &&
                       sendScore!.rewardObtained &&
-                      reward != null && !showReview) {
+                      reward != null &&
+                      !showReview) {
                     setState(() {
                       showStepCompleted = false;
                       showTitleObtained = false;
@@ -1112,7 +1113,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
             Text(
               textAlign: TextAlign.center,
-              "Cuando lo requieras puede canjearlo\n por ${prize?.exchangeValue.toInt()}lms de energia",
+              "Cuando lo requieras puede canjearlo\n por ${prize?.exchangeValue.toInt()}lms de energía",
               style: StylesApp(context)
                   .textStyleBody14
                   .copyWith(color: Colors.black),
@@ -1177,7 +1178,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // esta parte es para mostrar titulo obtenido
-  _buildAchievementUnloked(BuildContext context) {
+  _buildAchievementUnlocked(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,

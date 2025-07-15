@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
@@ -96,7 +96,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
   void _loadInitialMembers(BuildContext context) {
     final userData = Provider.of<UserProvider>(context, listen: false);
     // activeLeagueId = widget.ranking[DefaultTabController.of(context).index].id;
-    if (userData != null && userData.currentUser != null) {
+    if (userData.currentUser != null) {
       if (userData.currentUser!.currentLeague != null ) {
         activeLeagueId = userData.currentUser!.currentLeague!.id;
         loadMembers(activeLeagueId, userData.currentUser!.userId, context);
@@ -118,7 +118,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
           children: [
             // body
             Expanded(
-              child: Container(
+              child: SizedBox(
                 child: Column(
                   children: [
                     // Pestañas
@@ -141,7 +141,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                           ),
                         ],
                       ),
-                      child: Container(
+                      child: SizedBox(
                         width: MediaQuery.sizeOf(context).width,
                         height: 120,
                         child: ListView.builder(
@@ -178,7 +178,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                             ),
                                             SizedBox(height: 10),
                                             Text(
-                                              '${widget.ranking[index].description}',
+                                              widget.ranking[index].description,
                                               style: StylesApp(context)
                                                   .textStyleBody14
                                                   .copyWith(
@@ -186,7 +186,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                             ),
                                             SizedBox(height: 10),
                                             // Text(
-                                            //   'Maximo de Participantes: ${widget.ranking[index].maxMembers}',
+                                            //   'Máximo de Participantes: ${widget.ranking[index].maxMembers}',
                                             //   style: StylesApp(context)
                                             //       .textStyleBody14
                                             //       .copyWith(
@@ -402,7 +402,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                           alignment: Alignment.center,
                           children: [
                             Center(
-                              child: Container(
+                              child: SizedBox(
                                 width: 45,
                                 height: 45,
                                 child: Center(
@@ -487,7 +487,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                           alignment: Alignment.center,
                           children: [
                             Center(
-                              child: Container(
+                              child: SizedBox(
                                 width: 45,
                                 height: 45,
                                 child: Center(
@@ -550,7 +550,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                       alignment: Alignment.center,
                       children: [
                         Center(
-                          child: Container(
+                          child: SizedBox(
                             width: 45,
                             height: 45,
                             child: Center(

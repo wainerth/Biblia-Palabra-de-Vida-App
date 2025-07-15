@@ -1,10 +1,9 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +15,7 @@ class AventureScreen extends StatefulWidget {
 }
 
 class _AventureScreenState extends State<AventureScreen> {
-  late final userProvider;
+  late final UserProvider userProvider;
   LoginUser? dataUser;
   LastProgressUser? progressUser;
   bool isLoading = true;
@@ -224,7 +223,7 @@ class _AventureScreenState extends State<AventureScreen> {
                 Positioned(
                     right: 20,
                     bottom: 20,
-                    child: Container(
+                    child: SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator.adaptive(

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -28,11 +28,7 @@ class AuthenticationProvider extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userToken = prefs.getString('userToken');
     String? userDataString = prefs.getString('userData');
-    // if (kDebugMode) {
-    //   print(userToken);
-    // }
     if (userToken != null && userDataString != null) {
-      // final oldToken ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc4IiwidXNlcm5hbWUiOiJMZW9uYXJkb2ciLCJlbWFpbCI6Imxlb25hcmRvamdhcmNpYXBhcmFkYTIwMDVAZ21haWwuY29tIiwicm9sSWQiOiIyIiwiaWF0IjoxNzM4NDI2NDc3LCJleHAiOjE3NDE0NTA0Nzd9.q7LUJc2ELe1kSj1KyLWoWUo8aMrSJVT1mOlwbcpK1NA";
       final verifyTokenResponse = await verifyToken(userToken);
       if (verifyTokenResponse.data != null) {
         if (verifyTokenResponse.data["success"]) {
@@ -58,19 +54,19 @@ class AuthenticationProvider extends ChangeNotifier {
         }
       }
       token = userToken;
-      final dataUserload = LoginUser.fromJson(jsonDecode(userDataString));
+      final dataUserLoad = LoginUser.fromJson(jsonDecode(userDataString));
       // llamar conexión con el socket
       final socketProvider =
           Provider.of<SocketClientProvider>(context, listen: false);
       socketProvider.connectSocket(
           deviceId: '856-32cd-89',
-          userId: dataUserload.userId,
-          username: dataUserload.username!,
-          email: dataUserload.email!);
+          userId: dataUserLoad.userId,
+          username: dataUserLoad.username!,
+          email: dataUserLoad.email!);
 
       Provider.of<UserProvider>(context, listen: false)
           .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
-      await loadProfileUser(dataUserload.userId, userToken);
+      await loadProfileUser(dataUserLoad.userId, userToken);
       print('cargo nueva data de perfil');
     } else {
       isAuthenticated = false;
@@ -96,7 +92,7 @@ class AuthenticationProvider extends ChangeNotifier {
       final userId = userResponse.data["id"];
       final token = userResponse.data["userJwtToken"]["token"];
       await prefs.setString("userToken", token);
-   
+
       // consultamos perfil del usuario
       final ResponseData response = await loadProfileUser(userId, token);
       error = response.error;
@@ -106,8 +102,10 @@ class AuthenticationProvider extends ChangeNotifier {
 
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      print(
-          "Error during login: $e"); // Print the error for debugging.  Crucial!
+      if (kDebugMode) {
+        print(
+          "Error during login: $e");
+      } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
       if (e is TimeoutException) {
@@ -138,12 +136,12 @@ class AuthenticationProvider extends ChangeNotifier {
     }
 
     // llamamos a achievement
-    final UserTitle = await getUserTitle(userId);
-    error = UserTitle.error;
-    if (UserTitle.error != null) {
+    final userTitle = await getUserTitle(userId);
+    error = userTitle.error;
+    if (userTitle.error != null) {
       return ResponseData(data: null, error: error);
     }
-    userProfile.data['title'] = UserTitle.data;
+    userProfile.data['title'] = userTitle.data;
 
     // buscamos miembro si la liga es distinta de null
     if (userProfile.data["currentLeague"] != null) {
@@ -163,14 +161,14 @@ class AuthenticationProvider extends ChangeNotifier {
 
     Provider.of<UserProvider>(context, listen: false)
         .setUser(LoginUser.fromJson(userProfile.data));
-   // llamar conexión con el socket
-      final socketProvider =
-          Provider.of<SocketClientProvider>(context, listen: false);
-      socketProvider.connectSocket(
-          deviceId: '856-32cd-89',
-          userId: userProfile.data['userId'],
-          username: userProfile.data['username'],
-          email: userProfile.data['email']);
+    // llamar conexión con el socket
+    final socketProvider =
+        Provider.of<SocketClientProvider>(context, listen: false);
+    socketProvider.connectSocket(
+        deviceId: '856-32cd-89',
+        userId: userProfile.data['userId'],
+        username: userProfile.data['username'],
+        email: userProfile.data['email']);
     // leemos las notificaciones
     return ResponseData(data: userProfile, error: null);
   }
@@ -194,8 +192,10 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      print(
-          "Error during login: $e"); // Print the error for debugging.  Crucial!
+      if (kDebugMode) {
+        print(
+          "Error during login: $e");
+      } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
       if (e is TimeoutException) {
@@ -234,8 +234,10 @@ class AuthenticationProvider extends ChangeNotifier {
 
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      print(
-          "Error during Register User: $e"); // Print the error for debugging.  Crucial!
+      if (kDebugMode) {
+        print(
+          "Error during Register User: $e");
+      } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
       if (e is TimeoutException) {
@@ -264,8 +266,10 @@ class AuthenticationProvider extends ChangeNotifier {
 
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      print(
-          "Error during forgot password: $e"); // Print the error for debugging.  Crucial!
+      if (kDebugMode) {
+        print(
+          "Error during forgot password: $e");
+      } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
       if (e is TimeoutException) {
@@ -298,8 +302,10 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      print(
-          "Error during recovery Password  : $e"); // Print the error for debugging.  Crucial!
+      if (kDebugMode) {
+        print(
+          "Error during recovery Password  : $e");
+      } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
       if (e is TimeoutException) {
@@ -322,7 +328,6 @@ class AuthenticationProvider extends ChangeNotifier {
     if (result.error != null) {
       return false;
     }
-    // Usa navigatorKey.currentState para acceder al Navigator
     if (navigatorKey.currentState != null) {
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
       navigatorKey.currentState!.pushReplacementNamed('/homePage');

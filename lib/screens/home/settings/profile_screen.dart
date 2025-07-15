@@ -108,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ModelData(
         label: "Registro",
         value: dataUser!.createdAt.isNotEmpty
-            ? getFormatedDate(int.parse(dataUser!.createdAt))
+            ? getFormattedDate(int.parse(dataUser!.createdAt))
             : "",
       ),
       ModelData(
@@ -135,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           clave: "lastname"),
       ModelData(
         label: "Sexo",
-        value: "${userGender}",
+        value: userGender,
         clave: "gender",
       ),
       ModelData(
@@ -370,7 +370,7 @@ class CardColumnWidget extends StatelessWidget {
                                   TextSpan(
                                     text: data[i].value.isNotEmpty
                                         ? data[i].label == 'Tel.'
-                                            ? '${areaCode} ${phone}'
+                                            ? '$areaCode $phone'
                                             : data[i].value
                                         : '',
                                     style: StylesApp(context)

@@ -26,6 +26,6 @@ class HighlightRangeModel {
         verse: json['verse'],
         startIndex: json['startIndex'],
         endIndex: json['endIndex'],
-        color: json['color'] ?? null,
+        color: json['color'],
       );
 }

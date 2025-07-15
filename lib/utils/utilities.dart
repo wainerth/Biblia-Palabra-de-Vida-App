@@ -29,7 +29,7 @@ Map<String, dynamic> removeTypename(values) {
   return values;
 }
 
-String getFormatedDate(int dateTimeMiliseconds) {
+String getFormattedDate(int dateTimeMiliseconds) {
   DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(dateTimeMiliseconds);
   String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
   // Formatear la fecha como dd/mm/aaaa
@@ -215,6 +215,7 @@ obtainedStar(int maxScore, int sectionCompleted, int sectionCount) {
         : ''
   );
 }
+
 formatColor(String? color) {
   if (color!.contains('#')) {
     return color.split('#')[1];
@@ -222,15 +223,14 @@ formatColor(String? color) {
   return color;
 }
 
-
-Future<String> copyChapter(ChapterModel? chapter) async {
-    final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+Future<String> copyChapter(VersionModel? currentVersion, BookModel? currentBook, ChapterModel? chapter) async {
+  final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
   if (chapter == null) return '';
   StringBuffer buffer = StringBuffer();
   for (var verse in chapter.verses) {
     buffer.write('${verse.verse} ${verse.text}\n');
   }
-  return "${buffer.toString()} \n$baseUrl";
+  return "${currentVersion?.version}\n ${currentBook?.modernName}-${currentBook?.numberBook} \n  ${buffer.toString()} \n$baseUrl";
 }
 
 Future<void> copyToClipboard(BuildContext context, dynamic data) async {
@@ -257,4 +257,30 @@ Future<void> shareVerse(BuildContext context, dynamic data) async {
     subject:
         "Palabra de Vida - ${data.chapter.chapter} ${data.book.modernName}\nVer en: $baseUrl",
   );
+}
+
+RouteInfo getRouterScreen(action) {
+  switch (action) {
+    case 'Course':
+      // return   RouteInfo("/aventurePage");
+      return RouteInfo(
+        '/layoutPage1',
+        arguments: {'selectedIndex': 1},
+      );
+    case 'Section':
+      return RouteInfo(
+        '/layoutPage1',
+        arguments: {'selectedIndex': 1},
+      );
+    case 'Promises':
+      return RouteInfo("/promisePage");
+    case 'Preach':
+      return RouteInfo('/preachPage');
+    case 'Ranking':
+      return RouteInfo(
+        '/layoutPage1',
+        arguments: {'selectedIndex': 2},
+      );
+  }
+  return RouteInfo('/homePage');
 }

@@ -69,6 +69,7 @@ dependencies:
   socket_io_client: ^3.1.2
   flutter_local_notifications: ^19.3.0
   device_info_plus: ^11.3.0
+  flutter_colorpicker: ^1.1.0
 
 dev_dependencies:
   flutter_test:

@@ -2,15 +2,15 @@ import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:video_player/video_player.dart';
 
-class playerNoYoutube extends StatefulWidget {
+class PlayerNoYoutube extends StatefulWidget {
   final String url;
-  const playerNoYoutube({super.key, required this.url});
+  const PlayerNoYoutube({super.key, required this.url});
 
   @override
-  playerNoYoutubeState createState() => playerNoYoutubeState();
+  PlayerNoYoutubeState createState() => PlayerNoYoutubeState();
 }
 
-class playerNoYoutubeState extends State<playerNoYoutube> {
+class PlayerNoYoutubeState extends State<PlayerNoYoutube> {
   late VideoPlayerController _videoController;
   bool _isPlaying = false;
 

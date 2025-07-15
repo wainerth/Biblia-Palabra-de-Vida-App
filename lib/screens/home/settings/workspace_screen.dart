@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,7 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:share_plus/share_plus.dart';
 
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
@@ -31,9 +32,9 @@ class WorkspaceScreen extends StatefulWidget {
 
 class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   LoginUser? dataUser;
-  late final catalogueProvider;
+  late final CatalogueProvider catalogueProvider;
   PaginationInfo? paginate;
-  LastProgressUser? progressUser = null;
+  LastProgressUser? progressUser;
   bool error = false;
   bool errorDaily = false;
   bool loadingDaily = false;
@@ -56,8 +57,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
         } else {
           await getDailyProverb();
         }
+
+        if(GraphQLConfig.development) {
         await loadAllNotifications();
-        await loadGetOneReflection();
+
         if (mounted) {
           final notificationProvider =
               Provider.of<SocketClientProvider>(context, listen: false);
@@ -71,6 +74,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             notificationProvider.showNotification(newNotification);
           });
         }
+        }
+        await loadGetOneReflection();
       }
     });
   }
@@ -89,15 +94,19 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             message: responseNotification.error!, dialogType: DialogType.error);
         return;
       }
+      // limpiamos las notificaciones antiguas
+      Provider.of<SocketClientProvider>(context, listen: false)
+          .cleanNotification();
       // almacenamos la notificaciones
       setState(() {
         List<NotificationModel> notifies = responseNotification.data['data']
-            .map<NotificationModel>((notify) => NotificationModel.fromJson(notify)).toList();
-            for (NotificationModel notify in notifies) {
-            Provider.of<SocketClientProvider>(context, listen: false)
-                .addNotification(notify);
-
-            }
+            .map<NotificationModel>(
+                (notify) => NotificationModel.fromJson(notify))
+            .toList();
+        for (NotificationModel notify in notifies) {
+          Provider.of<SocketClientProvider>(context, listen: false)
+              .addNotification(notify);
+        }
       });
     } catch (e) {
       String error = "Error al leer las notificaciones:  ${e.toString()}";
@@ -166,6 +175,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
+              if(GraphQLConfig.development)
               Positioned(
                 top: 0, // Puedes ajustar este valor
                 right: 0,
@@ -1089,12 +1099,68 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
                                                     ? StyleColor.grayMedium
                                                     : StyleColor.black),
                                       ),
-                                      if (notification.actionLabel != null &&
-                                          notification.actionLabel.isNotEmpty)
+                                      if (notification.actionLabel.isNotEmpty)
                                         Align(
                                           alignment: Alignment.centerRight,
                                           child: TextButton(
                                             onPressed: () async {
+                                              final responseMarkReadNotification =
+                                                  await markAsReadOneNotification(
+                                                      notification.id);
+
+                                              if (responseMarkReadNotification
+                                                      .error !=
+                                                  null) {
+                                                await showCustomDialogWithAction(
+                                                  context,
+                                                  dialogType:
+                                                      DialogTypeAction.error,
+                                                  message:
+                                                      responseMarkReadNotification
+                                                          .error!,
+                                                  actionCallback: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  buttonOk: "Ok",
+                                                );
+                                                return;
+                                              } else {
+                                                if (responseMarkReadNotification
+                                                        .data !=
+                                                    null) {
+                                                  if (!responseMarkReadNotification
+                                                      .data['success']) {
+                                                    await showCustomDialog(
+                                                      context,
+                                                      dialogType:
+                                                          DialogType.error,
+                                                      message:
+                                                          responseMarkReadNotification
+                                                              .data['message'],
+                                                    );
+                                                    return;
+                                                  }
+                                                }
+                                              }
+                                              if (getRouterScreen(
+                                                          notification.action)
+                                                      .arguments !=
+                                                  null) {
+                                                Navigator.pushNamed(
+                                                    context,
+                                                    getRouterScreen(
+                                                            notification.action)
+                                                        .routeName,
+                                                    arguments: getRouterScreen(
+                                                            notification.action)
+                                                        .arguments);
+                                              } else {
+                                                Navigator.pushNamed(
+                                                    context,
+                                                    getRouterScreen(
+                                                            notification.action)
+                                                        .routeName);
+                                              }
                                               // if (notification.action
                                               //     .contains('course')) {
                                               //   final progress = await _loadProgress(context);
@@ -1142,24 +1208,24 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
     );
   }
 
-  Future<void> _loadProgress(BuildContext context) async {
-    LoadingService().showLoading(context);
-    final userProvider = Provider.of<UserProvider>(context,
-        listen:
-            false); // listen: false para evitar reconstrucciones innecesarias
-    final dataUser = userProvider.currentUser;
-    final progressResponse =
-        await userProvider.getProgressUser(dataUser?.userId, null);
-    if (progressResponse!.error != null) {
-      LoadingService().hideLoading();
-      await showCustomDialog(
-        context,
-        message: progressResponse.error!,
-        dialogType: DialogType.error,
-      );
-      return;
-    }
-    LoadingService().hideLoading();
-    return progressResponse.data;
-  }
+  // Future<void> _loadProgress(BuildContext context) async {
+  //   LoadingService().showLoading(context);
+  //   final userProvider = Provider.of<UserProvider>(context,
+  //       listen:
+  //           false); // listen: false para evitar reconstrucciones innecesarias
+  //   final dataUser = userProvider.currentUser;
+  //   final progressResponse =
+  //       await userProvider.getProgressUser(dataUser?.userId, null);
+  //   if (progressResponse!.error != null) {
+  //     LoadingService().hideLoading();
+  //     await showCustomDialog(
+  //       context,
+  //       message: progressResponse.error!,
+  //       dialogType: DialogType.error,
+  //     );
+  //     return;
+  //   }
+  //   LoadingService().hideLoading();
+  //   return progressResponse.data;
+  // }
 }

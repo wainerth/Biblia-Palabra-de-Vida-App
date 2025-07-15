@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -9,9 +9,9 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class SearchByBookWidget extends StatefulWidget {
-  final version;
-  final book;
-  final chapter;
+  final VersionModel version;
+  final BookModel book;
+  final ChapterModel chapter;
   final void Function(InputDataSearchModel searchData)? onActionBook;
   const SearchByBookWidget({
     super.key,
@@ -53,7 +53,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final _catalogueProvider =
-          await Provider.of<CatalogueProvider>(context, listen: false);
+          Provider.of<CatalogueProvider>(context, listen: false);
       setState(() {
         listBibleVersions =
             _catalogueProvider.allBibleVersion.map((v) => v).toList();
@@ -83,8 +83,10 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         });
       }
       await loadVerses(chapterSelected!.id);
+
       setState(() {
         _versesExpanded = true;
+        _selectedItems.add(verses.first);
       });
     });
   }

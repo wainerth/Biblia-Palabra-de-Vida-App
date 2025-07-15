@@ -22,7 +22,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
     {"label": "Espirituales", "value": "8"},
     {"label": "Otro", "value": "9"},
   ];
-  int _selectedIndex = 2;
+  // int _selectedIndex = 2;
   goToRequest(type) {
     Navigator.pushNamed(context, '/requestPage', arguments: type);
   }

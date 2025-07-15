@@ -139,7 +139,7 @@ class _VerseHighlighterState extends State<VerseHighlighter> {
       TextSpan(
         text: selected,
         style: TextStyle(
-          backgroundColor: Colors.lightBlue.withOpacity(0.3),
+          backgroundColor: Colors.lightBlue.withValues(alpha: 0.3),
         ),
       ),
       TextSpan(text: after),

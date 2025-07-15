@@ -2,6 +2,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 class SelectionQuestionWidget extends StatefulWidget {
   final Question currentQuestion;
@@ -34,6 +35,7 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
   bool _isAnswerSelected = false;
   int _selectedAnswerIndex = -1;
 
+  @override
   void dispose() {
     super.dispose();
   }
@@ -134,8 +136,10 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
         ],
       );
     } catch (e, st) {
-      print('Error en SelectionQuestionWidget: $e');
-      print('Stack Trace: $st'); // Imprime el Stack Trace completo
+      if (kDebugMode) {
+        print('Error en SelectionQuestionWidget: $e');
+        print('Stack Trace: $st'); // Imprime el Stack Trace completo
+      }
       return Center(child: Text("Error: $e"));
     }
   }

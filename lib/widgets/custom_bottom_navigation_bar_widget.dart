@@ -1,5 +1,3 @@
-import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:flutter/material.dart';
 
 class CustomBottomNavigationBarWidget extends StatelessWidget {
@@ -37,7 +35,7 @@ class CustomBottomNavigationBarWidget extends StatelessWidget {
         decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-          color: Colors.black.withOpacity(0.5),
+          color: Colors.black.withValues(alpha: 0.5),
           blurRadius: 10,
           offset: Offset(0, -2), // Shadow above the widget
           ),

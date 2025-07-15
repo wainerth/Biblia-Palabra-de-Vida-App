@@ -194,7 +194,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             fit: BoxFit.cover,
           ),
           Text(
-            'Ofertas',
+            'Ofrendas',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -218,7 +218,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             fit: BoxFit.cover,
           ),
           Text(
-            'Ofertas',
+            'Ofrendas',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -459,7 +459,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Ofertas',
+            'Ofrendas',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -483,7 +483,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Ofertas',
+            'Ofrendas',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -1548,7 +1548,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Ofertas',
+            'Ofrendas',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -1572,7 +1572,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Ofertas',
+            'Ofrendas',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),

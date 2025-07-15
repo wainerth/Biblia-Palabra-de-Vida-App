@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthGuard extends StatelessWidget {
   final Widget child;
 
-  const AuthGuard({required this.child});
+  const AuthGuard({super.key, required this.child});
 
   Future<bool> isAuthenticated() async {
     final prefs = await SharedPreferences.getInstance();

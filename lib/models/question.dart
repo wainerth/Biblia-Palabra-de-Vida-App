@@ -1,32 +1,42 @@
+
 class Question {
   final String id;
   final String question;
   final String difficulty;
-  final LevelQuestion level;
+  // final LevelQuestion level;
   final int status;
   final bool isOrdering;
   final List<Answer> answers;
+  final List<Answer>? timeline;
 
   Question({
     required this.id,
     required this.question,
     required this.difficulty,
-    required this.level,
+    // required this.level,
     required this.status,
     required this.answers,
+    this.timeline,
     required this.isOrdering,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
     // List<Answer> listAnswer = json['answers'].map((answer) =>  Answer.fromJson(answer) );
+    List<Answer> listAnswer = [];
+    if (json['isOrdering']) {
+      listAnswer =
+          (json['timeline'] as List).map((e) => Answer.fromJson(e)).toList();
+    } else {
+      listAnswer =
+          (json['answers'] as List).map((e) => Answer.fromJson(e)).toList();
+    }
     return Question(
       id: json['id'],
       question: json['question'],
       difficulty: json['difficulty'],
-      level: LevelQuestion.fromJson(json['level']),
+      // level: LevelQuestion.fromJson(json['level']),
       status: json['status'],
-      answers: (json['answers'] as List).map((e) =>
-       Answer.fromJson(e)).toList(), 
+      answers: listAnswer,
       isOrdering: json['isOrdering'],
     );
   }
@@ -47,17 +57,15 @@ class Answer {
   final String answer;
   final bool isCorrect;
   final String questionId;
-  final int? orderInAnswer;
   final int? correctOrder;
   String? option;
   final int status;
 
-  Answer(  {
+  Answer({
     required this.id,
     required this.answer,
     required this.isCorrect,
     required this.questionId,
-    this.orderInAnswer = 0,
     this.correctOrder = 0,
     required this.status,
     this.option = '',
@@ -69,7 +77,35 @@ class Answer {
       answer: json['answer'],
       isCorrect: json['isCorrect'],
       questionId: json['questionId'],
-      orderInAnswer: json['orderInAnswer'] ?? 0,
+      correctOrder: json['correctOrder'] ?? 0,
+      status: json['status'],
+      option: json['option'] ?? '',
+    );
+  }
+}
+
+class TimeLine {
+  final String id;
+  final String eventText;
+  final String questionId;
+  final int? correctOrder;
+  String? option;
+  final int status;
+
+  TimeLine({
+    required this.id,
+    required this.eventText,
+    required this.questionId,
+    this.correctOrder = 0,
+    required this.status,
+    this.option = '',
+  });
+
+  factory TimeLine.fromJson(Map<String, dynamic> json) {
+    return TimeLine(
+      id: json['id'],
+      eventText: json['eventText'],
+      questionId: json['questionId'],
       correctOrder: json['correctOrder'] ?? 0,
       status: json['status'],
       option: json['option'] ?? '',

@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/querys.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -85,16 +86,25 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
               child: loading
                   ? LoadingIndicator()
                   : _favoriteVerses.isEmpty
-                      ? Container(
+                      ? SizedBox(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Center(
                                 child: Text(
                                   textAlign: TextAlign.center,
-                                  "No hay resultados...",
+                                  "No hay Versículos agregados a favorito...",
                                   style: StylesApp(context)
                                       .textStyleBody18
+                                      .copyWith(
+                                          color: widget.currentTheme.textColor),
+                                ),
+                              ),
+                              Center(
+                                child: Text(
+                                  "Para agregar un versículo, presione sobre el \nnúmero del versículo",
+                                  style: StylesApp(context)
+                                      .textStyleBody10
                                       .copyWith(
                                           color: widget.currentTheme.textColor),
                                 ),
@@ -107,7 +117,8 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                           itemBuilder: (BuildContext context, int index) {
                             return Container(
                               margin: EdgeInsets.only(
-                                  left: 4.0, right: 4.0, bottom: 12.0),
+                                top: 6.0,
+                                  left: 4.0, right: 4.0, bottom: 6.0),
                               padding: EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
                                 color: widget.currentTheme.backgroundColor,
@@ -124,16 +135,17 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                               child: Stack(
                                 children: [
                                   Positioned(
-                                    top: 0,
+                                    top: -15,
                                     right: 0,
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         IconButton(
                                           padding: EdgeInsets.zero,
-                                          iconSize: 25.0,
+                                          iconSize: 20.0,
                                           onPressed: () => copyToClipboard(
-                                              context, _favoriteVerses[index]),
+                                              context,
+                                              "${_favoriteVerses[index].book.modernName} ${_favoriteVerses[index].book.numberBook}:${_favoriteVerses[index].verse.verse}\n ${_favoriteVerses[index].verse.text} \n ${GraphQLConfig.baseUrl}OfficialBible"),
                                           icon: Icon(
                                             Icons.file_copy_rounded,
                                             color:
@@ -142,9 +154,9 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                                         ),
                                         IconButton(
                                           padding: EdgeInsets.zero,
-                                          iconSize: 25.0,
-                                          onPressed: () => shareVerse(
-                                              context, _favoriteVerses[index]),
+                                          iconSize: 20.0,
+                                          onPressed: () => shareVerse(context,
+                                              "${_favoriteVerses[index].book.modernName} ${_favoriteVerses[index].book.numberBook}:${_favoriteVerses[index].verse.verse}\n ${_favoriteVerses[index].verse.text} \n ${GraphQLConfig.baseUrl}OfficialBible"),
                                           icon: Icon(
                                             Icons.share_rounded,
                                             color: StyleColor.turquoise,
@@ -152,7 +164,7 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                                         ),
                                         IconButton(
                                           padding: EdgeInsets.zero,
-                                          iconSize: 25.0,
+                                          iconSize: 20.0,
                                           onPressed: () => deleteFavorite(
                                               _favoriteVerses[index].verse.id),
                                           icon: Icon(
@@ -168,26 +180,50 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
+                                      SizedBox(height: 22,),
                                       Center(
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          "${_favoriteVerses[index].book.modernName}",
-                                          style: StylesApp(context)
-                                              .textStyleBody16
-                                              .copyWith(
-                                                  color: StyleColor.turquoise),
-                                        ),
+                                        child: Text.rich(TextSpan(children: [
+                                          TextSpan(
+                                            text: _favoriteVerses[index]
+                                                .book
+                                                .modernName,
+                                            style: StylesApp(context)
+                                                .textStyleBody16
+                                                .copyWith(
+                                                    color:
+                                                        StyleColor.turquoise),
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                "  ${_favoriteVerses[index].chapter.chapter}:${_favoriteVerses[index].verse.verse}",
+                                            style: StylesApp(context)
+                                                .textStyleBody14
+                                                .copyWith(
+                                                    color: widget.currentTheme
+                                                        .textColor),
+                                          )
+                                        ])
+                                            // textAlign: TextAlign.center,
+                                            // _favoriteVerses[index].book.modernName,
+                                            // style: StylesApp(context)
+                                            //     .textStyleBody16
+                                            //     .copyWith(
+                                            // color: StyleColor.turquoise),
+                                            ),
                                       ),
-                                      Center(
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          "${_favoriteVerses[index].chapter.chapter}:${_favoriteVerses[index].verse.verse}",
-                                          style: StylesApp(context)
-                                              .textStyleBody14
-                                              .copyWith(
-                                                  color: widget
-                                                      .currentTheme.textColor),
-                                        ),
+                                      // Center(
+                                      //   child: Text(
+                                      //     textAlign: TextAlign.center,
+                                      //     "${_favoriteVerses[index].chapter.chapter}:${_favoriteVerses[index].verse.verse}",
+                                      //     style: StylesApp(context)
+                                      //         .textStyleBody14
+                                      //         .copyWith(
+                                      //             color: widget
+                                      //                 .currentTheme.textColor),
+                                      //   ),
+                                      // ),
+                                      SizedBox(
+                                        height: 10,
                                       ),
                                       Center(
                                         child: Text(

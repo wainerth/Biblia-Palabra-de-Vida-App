@@ -14,10 +14,10 @@ class EditDetailDialogWidget extends StatefulWidget {
       {super.key, required this.data, required this.onSave});
 
   @override
-  State<EditDetailDialogWidget> createState() => _editDetailDialogWidget();
+  State<EditDetailDialogWidget> createState() => _EditDetailDialogWidget();
 }
 
-class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
+class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   late List<ModelData> _editingData;
   final List<TextEditingController> _controllers = [];
 
@@ -308,7 +308,7 @@ class _editDetailDialogWidget extends State<EditDetailDialogWidget> {
           },
           selectedItem: item.value.isNotEmpty
               ? dropDownList
-                  .firstWhere((element) => element.label == item.value)
+                  .firstWhere((element) => element.label == item.value,  orElse: null)
               : null,
         ),
       );

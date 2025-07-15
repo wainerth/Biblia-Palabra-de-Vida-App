@@ -3,7 +3,6 @@ import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:video_player/video_player.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final Preach data;
@@ -69,7 +68,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     child: widget.data.video!.url!.contains('youtube.com') ||
                             widget.data.video!.url!.contains('youtu.be')
                         ? PlayerYoutubeWidget(videoUrl: widget.data.video!.url!)
-                        : playerNoYoutube(url: widget.data.video!.url!),
+                        : PlayerNoYoutube(url: widget.data.video!.url!),
                   ),
                 ),
               ),
@@ -158,7 +157,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         showModalBottomSheet(
                             context: context,
                             builder: (BuildContext context) {
-                              return _buildModaldetails(context);
+                              return _buildModalDetails(context);
                             });
                       },
                     ),
@@ -175,7 +174,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         showModalBottomSheet(
                             context: context,
                             builder: (BuildContext context) {
-                              return _buildModaldetails(context);
+                              return _buildModalDetails(context);
                             });
                       },
                     ),
@@ -192,7 +191,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         showModalBottomSheet(
                             context: context,
                             builder: (BuildContext context) {
-                              return _buildModaldetails(context);
+                              return _buildModalDetails(context);
                             });
                       },
                     ),
@@ -209,7 +208,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         showModalBottomSheet(
                             context: context,
                             builder: (BuildContext context) {
-                              return _buildModaldetails(context);
+                              return _buildModalDetails(context);
                             });
                       },
                     ),
@@ -226,7 +225,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         showModalBottomSheet(
                             context: context,
                             builder: (BuildContext context) {
-                              return _buildModaldetails(context);
+                              return _buildModalDetails(context);
                             });
                       },
                     ),
@@ -240,7 +239,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     );
   }
 
-  Container _buildModaldetails(BuildContext context) {
+  Container _buildModalDetails(BuildContext context) {
     return Container(
       child: Padding(
         padding: const EdgeInsets.all(10.0),
