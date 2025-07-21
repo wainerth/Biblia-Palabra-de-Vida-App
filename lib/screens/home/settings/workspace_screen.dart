@@ -1,4 +1,3 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -1104,64 +1103,64 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
                                           alignment: Alignment.centerRight,
                                           child: TextButton(
                                             onPressed: () async {
-                                              final responseMarkReadNotification =
-                                                  await markAsReadOneNotification(
-                                                      notification.id);
+                                              // final responseMarkReadNotification =
+                                              //     await markAsReadOneNotification(
+                                              //         notification.id);
 
-                                              if (responseMarkReadNotification
-                                                      .error !=
-                                                  null) {
-                                                await showCustomDialogWithAction(
-                                                  context,
-                                                  dialogType:
-                                                      DialogTypeAction.error,
-                                                  message:
-                                                      responseMarkReadNotification
-                                                          .error!,
-                                                  actionCallback: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  buttonOk: "Ok",
-                                                );
-                                                return;
-                                              } else {
-                                                if (responseMarkReadNotification
-                                                        .data !=
-                                                    null) {
-                                                  if (!responseMarkReadNotification
-                                                      .data['success']) {
-                                                    await showCustomDialog(
-                                                      context,
-                                                      dialogType:
-                                                          DialogType.error,
-                                                      message:
-                                                          responseMarkReadNotification
-                                                              .data['message'],
-                                                    );
-                                                    return;
-                                                  }
-                                                }
-                                              }
+                                              // if (responseMarkReadNotification
+                                              //         .error !=
+                                              //     null) {
+                                              //   await showCustomDialogWithAction(
+                                              //     context,
+                                              //     dialogType:
+                                              //         DialogTypeAction.error,
+                                              //     message:
+                                              //         responseMarkReadNotification
+                                              //             .error!,
+                                              //     actionCallback: () {
+                                              //       Navigator.pop(context);
+                                              //     },
+                                              //     buttonOk: "Ok",
+                                              //   );
+                                              //   return;
+                                              // } else {
+                                              //   if (responseMarkReadNotification
+                                              //           .data !=
+                                              //       null) {
+                                              //     if (!responseMarkReadNotification
+                                              //         .data['success']) {
+                                              //       await showCustomDialog(
+                                              //         context,
+                                              //         dialogType:
+                                              //             DialogType.error,
+                                              //         message:
+                                              //             responseMarkReadNotification
+                                              //                 .data['message'],
+                                              //       );
+                                              //       return;
+                                              //     }
+                                              //   }
+                                              // }
                                               if (getRouterScreen(
-                                                          notification.action)
+                                                          notification.model)
                                                       .arguments !=
                                                   null) {
                                                 Navigator.pushNamed(
                                                     context,
                                                     getRouterScreen(
-                                                            notification.action)
+                                                            notification.model)
                                                         .routeName,
                                                     arguments: getRouterScreen(
-                                                            notification.action)
+                                                            notification.model)
                                                         .arguments);
                                               } else {
                                                 Navigator.pushNamed(
                                                     context,
                                                     getRouterScreen(
-                                                            notification.action)
+                                                            notification.model)
                                                         .routeName);
                                               }
-                                              // if (notification.action
+                                              // if (notification.model
                                               //     .contains('course')) {
                                               //   final progress = await _loadProgress(context);
                                               //   if (progress == null) return;

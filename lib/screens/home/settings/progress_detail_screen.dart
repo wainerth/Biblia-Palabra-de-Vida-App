@@ -8,6 +8,7 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProgressDetailScreen extends StatefulWidget {
   const ProgressDetailScreen({super.key});
@@ -19,6 +20,10 @@ class ProgressDetailScreen extends StatefulWidget {
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   List<UserTitle>? titles = [];
   LastProgressUser? progressUser;
+  late Map<String, dynamic> config;
+  int MAX_SCORE = 0;
+  int MEDIUM_SCORE = 0;
+  int LOW_SCORE = 0;
 
   Future<void> _loadProgress(BuildContext context) async {
     LoadingService().showLoading(context);
@@ -44,6 +49,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    config = Provider.of<CatalogueProvider>(context, listen: false).allConfig;
+    MAX_SCORE = config["highScore"];
+    MEDIUM_SCORE = config["mediumScore"];
+    LOW_SCORE = config["lowScore"];
     final userProvider = Provider.of<UserProvider>(context);
     final LoginUser? userData = userProvider.currentUser;
     titles = userData?.title;
@@ -493,51 +502,62 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                 itemBuilder: (BuildContext context, int index) {
                   return Row(
                     children: [
-                      Container(
-                        margin: EdgeInsets.only(right: 5.0),
-                        constraints: BoxConstraints(minWidth: 80.0),
-                        decoration: BoxDecoration(
-                          color: Color(0XFFC7AA34),
-                          borderRadius: BorderRadius.circular(8.0),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.25),
-                                offset: Offset(0, 4),
-                                blurRadius: 5)
-                          ],
-                        ),
-                        width: 80.0,
-                        height: 80.0,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 3.0, top: 6.0, right: 6.0),
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 60,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8),
-                                  ),
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                      '${GraphQLConfig.urlServidor}${titles![index].img.urlImg}',
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Center(
-                                  child: Text(
-                                    softWrap: true,
-                                    '${titles?[index].title}',
-                                    style: StylesApp(context).textStyleBody10,
-                                  ),
-                                ),
-                              ),
+                      GestureDetector(
+                        onTap: () {
+                          final userProvider = Provider.of<UserProvider>(
+                              context,
+                              listen:
+                                  false); // listen: false para evitar reconstrucciones innecesarias
+                          LoginUser? userData = userProvider.currentUser;
+                          _showTitleDetailModal(
+                              context, titles![index], userData!);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(right: 5.0),
+                          constraints: BoxConstraints(minWidth: 80.0),
+                          decoration: BoxDecoration(
+                            color: Color(0XFFC7AA34),
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.25),
+                                  offset: Offset(0, 4),
+                                  blurRadius: 5)
                             ],
+                          ),
+                          width: 80.0,
+                          height: 80.0,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 3.0, top: 6.0, right: 6.0),
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 60,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8),
+                                    ),
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                        '${GraphQLConfig.urlServidor}${titles![index].img.urlImg}',
+                                      ),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      softWrap: true,
+                                      '${titles?[index].title}',
+                                      style: StylesApp(context).textStyleBody10,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -662,8 +682,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                     userProvider.currentUser;
                                 LoadingService().showLoading(context);
                                 final responseRedime = await redeemedPrize(
-                                  item.id, userData!.userId
-                                );
+                                    item.id, userData!.userId);
                                 if (responseRedime.error != null) {
                                   LoadingService().hideLoading();
                                   await showCustomDialog(
@@ -748,5 +767,153 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
       "pagination":
           PaginationInfo.fromJson(removeTypename(responsePrize.data["meta"]))
     };
+  }
+
+// Método para mostrar el modal del título
+  void _showTitleDetailModal(
+      BuildContext context, UserTitle title, LoginUser userData) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled:
+          true, // Permite que el modal ocupe casi toda la pantalla
+      backgroundColor: Colors.transparent, // Fondo transparente para el modal
+      builder: (context) => _buildTitleDetailContent(context, title, userData),
+    );
+  }
+
+// Widget con el contenido del modal
+  Widget _buildTitleDetailContent(
+      BuildContext context, UserTitle title, LoginUser userData) {
+    return SingleChildScrollView(
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/boxOrange.png'),
+                  fit: BoxFit.fill,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+              child: Column(
+                children: [
+                  SizedBox(height: 27),
+                  Text(
+                    "Haz obtenido\n el titulo de\n ${title.title}!",
+                    textAlign: TextAlign.center,
+                    style: StylesApp(context)
+                        .textStyleCongratulation
+                        .copyWith(color: Colors.white),
+                  ),
+                  SizedBox(height: 29),
+                ],
+              ),
+            ),
+            SizedBox(height: 29),
+            Container(
+              width: 190,
+              decoration: BoxDecoration(
+                color: Color(0XFFC7AA34),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Image.network(
+                      GraphQLConfig.urlServidor + title.img.urlImg,
+                      height: 80,
+                    ),
+                    Text(
+                      title.title,
+                      style: StylesApp(context).textStyleBody12,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 29),
+            ButtonThemeWidget(
+              width: 245,
+              height: 32,
+              buttonStyle: StylesApp(context).btnPrimary,
+              text: "Descargar certificado",
+              onPressed: () {
+                // Lógica para descargar certificado
+              },
+            ),
+            SizedBox(height: 29),
+            ButtonThemeWidget(
+              showIcon: true,
+              icon: Icons.share,
+              width: 245,
+              height: 32,
+              colorIcon: Colors.white,
+              buttonStyle: StylesApp(context).btnPrimary,
+              text: "Compartir logro",
+              onPressed: () async {
+                await Share.share(
+                  "¡He obtenido el titulo de ${title.title}!",
+                  subject: "¡Felicita a ${userData.username}! ",
+                );
+              },
+            ),
+            SizedBox(height: 29),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Image.asset(
+                      "assets/kawaii_fire.png",
+                      height: calculateHeight(userData.energyPoints.toDouble()),
+                      fit: BoxFit.contain,
+                    ),
+                    Text(
+                      "${userData.energyPoints} lms",
+                      style: StylesApp(context)
+                          .textStyleBody12
+                          .copyWith(color: StyleColor.orange),
+                    ),
+                  ],
+                ),
+                ButtonThemeWidget(
+                  text: "Aceptar",
+                  width: 132,
+                  height: 32,
+                  buttonStyle: StylesApp(context).btnWidgetSmall,
+                  onPressed: () {
+                    Navigator.pop(context); // Cierra el modal
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+          ],
+        ),
+      ),
+    );
+  }
+
+  double calculateHeight(double score) {
+    score = score.abs();
+
+    double maxPossibleHeight = score / 1000 * 112;
+
+    if (score >= MAX_SCORE) {
+      return 112; // Alto fijo cuando los puntos son mayores o iguales a 1000
+    } else {
+      double width = ((maxPossibleHeight * 100)) / 112;
+
+      return width > 30 ? ((maxPossibleHeight * 100)) / 112 : 40;
+    }
   }
 }

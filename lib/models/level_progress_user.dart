@@ -1,3 +1,5 @@
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+
 class LevelProgressUser {
   final String id;
   final int score;
@@ -61,25 +63,25 @@ class LevelProgressUser {
   }
 }
 
-class Message {
-  final String resultDescription;
-  final String resultTitle;
-  final String difficulty;
+// class Message {
+//   final String resultDescription;
+//   final String resultTitle;
+//   final String difficulty;
 
-  Message({
-    required this.resultDescription,
-    required this.resultTitle,
-    required this.difficulty,
-  });
+//   Message({
+//     required this.resultDescription,
+//     required this.resultTitle,
+//     required this.difficulty,
+//   });
 
-  factory Message.fromJson(Map<String, dynamic> json) {
-    return Message(
-      resultDescription: json['resultDescription'],
-      resultTitle: json['resultTitle'],
-      difficulty: json['difficulty'],
-    );
-  }
-}
+//   factory Message.fromJson(Map<String, dynamic> json) {
+//     return Message(
+//       resultDescription: json['resultDescription'],
+//       resultTitle: json['resultTitle'],
+//       difficulty: json['difficulty'],
+//     );
+//   }
+// }
 
 class InfoUser {
   final String username;

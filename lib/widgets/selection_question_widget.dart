@@ -32,8 +32,6 @@ class SelectionQuestionWidget extends StatefulWidget {
 
 class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
   List currentAnswers = [];
-  bool _isAnswerSelected = false;
-  int _selectedAnswerIndex = -1;
 
   @override
   void dispose() {
@@ -70,10 +68,9 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
                                 ? StyleColor.turquoise.withValues(alpha: 0.30)
                                 : StyleColor.turquoise,
                         borderRadius: BorderRadius.circular(8.0),
-                        border: _selectedAnswerIndex == index &&
-                                !answer.isCorrect
-                            ? Border.all(color: Colors.redAccent, width: 3.0)
-                            : null,
+                        // border: !widget.isCorrect
+                        //     ? Border.all(color: Colors.redAccent, width: 3.0)
+                        //     : null,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.25),

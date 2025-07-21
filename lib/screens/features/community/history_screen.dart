@@ -28,8 +28,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   CourseModel? course;
   Level? level;
   Stage? stage;
-  bool _isPlayingAudio = false;
-  bool _isPlayingVideo = false;
   int _selectedButtonIndex = 1;
   String levelId = '';
   String sectionId = '';
@@ -127,8 +125,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void dispose() {
     // _controllerPage.removeListener(_pageListener);
     _controllerPage.dispose();
-    bool _isPlayingAudio = false;
-    bool _isPlayingVideo = false;
     super.dispose();
   }
 
@@ -282,10 +278,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             if (index < stories.length) {
                               final story = stories[index];
                               // Crear un nuevo ScrollController *dentro* del itemBuilder
-                              final ScrollController _pageScrollController =
+                              final ScrollController pageScrollController =
                                   ScrollController();
                               return _buildItemPageView(
-                                  story, context, _pageScrollController);
+                                  story, context, pageScrollController);
                             }
                             return Container();
                           },
@@ -530,8 +526,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   onPressed: () {
                     setState(() {
                       _selectedButtonIndex = 1;
-                      _isPlayingVideo = false;
-                      _isPlayingAudio = false;
                     });
                   },
                   icon: Icon(Icons.image),
@@ -545,8 +539,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       // Lógica para reproducir audio
                       setState(() {
                         _selectedButtonIndex = 2;
-                        _isPlayingVideo = false;
-                        _isPlayingAudio = true;
                       });
                       showDialog(
                           context: context,
@@ -626,8 +618,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     onPressed: () async {
                       setState(() {
                         _selectedButtonIndex = 3;
-                        _isPlayingVideo = true;
-                        _isPlayingAudio = false;
                       });
                       await SystemChrome.setPreferredOrientations([
                         DeviceOrientation.portraitUp,

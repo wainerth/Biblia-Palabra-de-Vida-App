@@ -1,4 +1,3 @@
-
 class Question {
   final String id;
   final String question;
@@ -21,7 +20,6 @@ class Question {
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
-    // List<Answer> listAnswer = json['answers'].map((answer) =>  Answer.fromJson(answer) );
     List<Answer> listAnswer = [];
     if (json['isOrdering']) {
       listAnswer =
@@ -34,8 +32,7 @@ class Question {
       id: json['id'],
       question: json['question'],
       difficulty: json['difficulty'],
-      // level: LevelQuestion.fromJson(json['level']),
-      status: json['status'],
+      status: json['status'] ?? 1,
       answers: listAnswer,
       isOrdering: json['isOrdering'],
     );
@@ -75,10 +72,10 @@ class Answer {
     return Answer(
       id: json['id'],
       answer: json['answer'],
-      isCorrect: json['isCorrect'],
+      isCorrect: json['isCorrect'] ?? false,
       questionId: json['questionId'],
       correctOrder: json['correctOrder'] ?? 0,
-      status: json['status'],
+      status: json['status'] ?? 1,
       option: json['option'] ?? '',
     );
   }

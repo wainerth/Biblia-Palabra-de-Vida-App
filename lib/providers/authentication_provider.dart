@@ -21,6 +21,9 @@ class AuthenticationProvider extends ChangeNotifier {
   // LoginUser? currentUser;
 
   AuthenticationProvider(this.context, this._catalogueProvider) {
+    if (kDebugMode) {
+      print(_catalogueProvider);
+    }
     //checkAuthentication(context);
   }
 

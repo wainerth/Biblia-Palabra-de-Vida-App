@@ -73,3 +73,7 @@ export 'package:biblia_palabra_de_vida_app/models/word_search_result.dart';
 export 'package:biblia_palabra_de_vida_app/models/notification_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/route_info.dart';
 export 'package:biblia_palabra_de_vida_app/models/custom_theme_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/memory_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/guess_character.dart';
+export 'package:biblia_palabra_de_vida_app/models/message_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/result_game_model.dart';

@@ -428,7 +428,7 @@ class _OrderingQuestionDraggableStateWidget
     List<Answer> sortedAnswers =
         List.from(widget.orderedAnswers); // Crea una copia de la lista
     sortedAnswers
-        .sort((a, b) => a.correctOrder!.compareTo(b!.correctOrder as num));
+        .sort((a, b) => a.correctOrder!.compareTo(b.correctOrder as num));
 
     String orderedText =
         sortedAnswers.map((answer) => answer.answer).join(', ');

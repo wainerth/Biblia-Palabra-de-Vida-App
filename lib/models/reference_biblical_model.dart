@@ -1,7 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/models/book_model.dart';
-import 'package:biblia_palabra_de_vida_app/models/chapter_model.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class ReferenceBiblicalModel {
   final String id;

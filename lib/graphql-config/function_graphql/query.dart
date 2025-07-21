@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/foundation.dart';
@@ -113,7 +112,7 @@ Future<ResponseData> getProfileUser(token, idUser) async {
 }
 
 Future<ResponseData> verifyToken(token) async {
-  final GraphQLClient _client = createClient();
+  final GraphQLClient client = createClient();
   final QueryOptions options = QueryOptions(
     operationName: 'VerifyToken',
     document: gql(r'''
@@ -140,7 +139,7 @@ Future<ResponseData> verifyToken(token) async {
   );
 
   try {
-    final QueryResult result = await _client.query(options);
+    final QueryResult result = await client.query(options);
     if (result.hasException) {
       if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
@@ -155,7 +154,9 @@ Future<ResponseData> verifyToken(token) async {
 
     final data = result.data;
     if (data == null || data['verifyToken'] == null) {
-      print("No data returned");
+      if (kDebugMode) {
+        print("No data returned");
+      }
       return ResponseData(data: false, error: "No data returned");
       // return false;
     }
@@ -364,12 +365,11 @@ Future<ResponseData> getTitleForUser(userId, courseId) async {
     }
 
     final data = removeTypename(result.data);
-    if (data == null ||
-        data['getTitleForUser'] == null ||
+    if (data['getTitleForUser'] == null ||
         data['getTitleForUser']["data"] == null) {
       return ResponseData(
         data: null,
-        error: data?['getTitleForUser']["message"] ??
+        error: data['getTitleForUser']["message"] ??
             'get title for user failed: No data returned',
       );
     }
@@ -1213,8 +1213,8 @@ Future loadQuestionByStory(levelId) async {
 
   final GraphQLClient client = createClient(authToken: userToken);
   QueryOptions? options = QueryOptions(
-      operationName: "GetQuestionsByLevelId",
-      document: gql(r'''
+    operationName: "GetQuestionsByLevelId",
+    document: gql(r'''
       query GetQuestionsByLevelId($levelId: ID) {
           getQuestionsByLevelId(levelId: $levelId) {
             id
@@ -1239,12 +1239,12 @@ Future loadQuestionByStory(levelId) async {
           }
         }
       '''),
-      variables: <String, dynamic>{
-        "levelId": levelId,
-      },
-      fetchPolicy: FetchPolicy.noCache,
-    );
-  
+    variables: <String, dynamic>{
+      "levelId": levelId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
@@ -2135,8 +2135,7 @@ Future<ResponseData> getChapterWithVerses(String bookId) async {
     }
 
     final data = removeTypename(result.data);
-    if (data == null ||
-        data['getOneBookByBookId'] == null ||
+    if (data['getOneBookByBookId'] == null ||
         data['getOneBookByBookId']['chapters'] == null) {
       return ResponseData(
         data: null,
@@ -3130,6 +3129,7 @@ Future<ResponseData> getAllNotification(
            actionLabel
            notificationType
            notificationTypeName
+           model
            createdAt
           }
           meta {
@@ -3184,6 +3184,337 @@ Future<ResponseData> getAllNotification(
     return ResponseData(
         data: null,
         error: 'Get All Notifications By UserId Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getMemory() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetMemory",
+    document: gql(r'''
+      query GetMemory {
+        getMemory {
+          id
+          pair
+          img {
+            urlImg
+          }
+          cardStatus
+          blocked
+        }
+      }
+      '''),
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get All Notifications By User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getMemory'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Memory  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getMemory'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(data: null, error: 'Get Memory Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getAllGuessCharacters(
+    int? page, int? limit, String difficulty, String? name) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetAllGuessCharacters",
+    document: gql(r'''
+     query GetAllGuessCharacters($page: Int, $limit: Int, $difficulty: String, $name: String) {
+        getAllGuessCharacters(page: $page, limit: $limit, difficulty: $difficulty, name: $name) {
+          data {
+            id
+            character {
+            id
+              name
+               img {
+              urlImg
+            }
+            }
+            difficulty
+            img {
+              urlImg
+            }
+            clues {
+              id
+              guessCharacterId
+              description
+              status
+            }
+            status
+          }
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "page": page,
+      "limit": limit,
+      "difficulty": difficulty,
+      "name": name
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get All Guess Characters: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllGuessCharacters'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get All Guess Characters  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllGuessCharacters'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get All Guess Characters Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+// query  for games
+Future<ResponseData> getAllResultGame(String? userId, String category) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "ResultByUser",
+    document: gql(r'''
+     query ResultByUser($userId: ID, $category: String) {
+        resultByUser(userId: $userId, category: $category) {
+          category
+          day
+          difficulty
+          id
+          message {
+            id
+            resultTitle
+            resultDescription
+            category
+            difficulty
+            status
+          }
+          score
+          user {
+            id
+            username
+          }
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "category": category,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Result ByUser: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['resultByUser'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Result ByUser  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['resultByUser'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Result ByUser Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getQuestionGameDifficulty(String difficulty) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetQuestionsByDifficulty",
+    document: gql(r'''
+     query GetQuestionsByDifficulty($difficulty: String) {
+        getQuestionsByDifficulty(difficulty: $difficulty) {
+          id
+          question
+          difficulty
+          answers {
+            id
+            answer
+            isCorrect
+            questionId
+          }
+          timeline {
+          id
+          questionId
+          answer:eventText,
+          correctOrder
+          }
+          isOrdering
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "difficulty": difficulty,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get Questions By Difficulty: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getQuestionsByDifficulty'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Questions By Difficulty  failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getQuestionsByDifficulty'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Result ByUser Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

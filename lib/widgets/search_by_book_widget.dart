@@ -52,12 +52,12 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final _catalogueProvider =
+      final catalogueProvider =
           Provider.of<CatalogueProvider>(context, listen: false);
       setState(() {
         listBibleVersions =
-            _catalogueProvider.allBibleVersion.map((v) => v).toList();
-        bibleVersions = _catalogueProvider.allBibleVersion
+            catalogueProvider.allBibleVersion.map((v) => v).toList();
+        bibleVersions = catalogueProvider.allBibleVersion
             .map((v) => ModelData(value: v.id, label: v.version))
             .toList();
       });

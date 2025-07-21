@@ -1,5 +1,5 @@
 class NotificationModel {
-  final String id;
+  final String? id;
   final String title;
   final String message;
   final bool isRead;
@@ -7,6 +7,7 @@ class NotificationModel {
   final String actionLabel;
   final String notificationType;
   final String notificationTypeName;
+  final String model;
   final String img;
   final String createdAt;
 
@@ -19,6 +20,7 @@ class NotificationModel {
     required this.actionLabel,
     required this.notificationType,
     required this.notificationTypeName,
+    required this.model,
     required this.img,
     required this.createdAt,
   });
@@ -33,6 +35,7 @@ class NotificationModel {
       actionLabel: json['actionLabel'] ?? '',
       notificationType: json['notificationType'],
       notificationTypeName: json['notificationTypeName'],
+      model: json['model'] ?? '',
       img: json['img'] ?? '',
       createdAt: json['createdAt'],
     );
@@ -48,6 +51,7 @@ class NotificationModel {
       "actionLabel": actionLabel,
       "notificationType": notificationType,
       "notificationTypeName": notificationTypeName,
+      "model": model,
       "img": img,
       "createdAt": createdAt,
     };

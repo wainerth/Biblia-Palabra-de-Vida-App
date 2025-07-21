@@ -1,4 +1,5 @@
-import 'package:biblia_palabra_de_vida_app/models/img.dart';
+
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class CharacterModel {
   final String id;
@@ -25,19 +26,20 @@ class CharacterModel {
   factory CharacterModel.fromJson(Map<String, dynamic> json) {
     return CharacterModel(
       id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      newTestament: json['newTestament'],
-      haveMoreCharacters: json['haveMoreCharacters'],
-      color: json['color'],
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      newTestament: json['newTestament'] ?? false,
+      haveMoreCharacters: json['haveMoreCharacters'] ?? false,
+      color: json['color'] ?? '',
       img: Img.fromJson(json['img']),
       typeNameChar: json['typeNameChar'] ?? '',
-      relatedCharacters: json['relatedCharacters'].isNotEmpty
-          ? (json['relatedCharacters'] as List)
-              .map((ralated) => RelatedCharacters.fromJson(ralated))
-              .toList()
+      relatedCharacters: json['relatedCharacters'] != null
+          ? json['relatedCharacters'].isNotEmpty
+              ? (json['relatedCharacters'] as List)
+                  .map((ralated) => RelatedCharacters.fromJson(ralated))
+                  .toList()
+              : []
           : [],
-      // RelatedCharacters.fromJson(json['relatedCharacters'])
     );
   }
 

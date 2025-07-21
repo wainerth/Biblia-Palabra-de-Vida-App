@@ -1,5 +1,4 @@
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 
 class LoadingService {
   static final LoadingService _instance = LoadingService._internal();
@@ -26,7 +25,7 @@ class LoadingService {
       ),
     );
 
-    Overlay.of(context)?.insert(_overlayEntry!);
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
   void hideLoading() {

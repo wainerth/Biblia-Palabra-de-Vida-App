@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_io/io.dart';
 
 Future login(email, password) async {
-  final GraphQLClient _client = createClient();
+  final GraphQLClient client = createClient();
 
   final MutationOptions options = MutationOptions(
     operationName: 'LoginUser',
@@ -30,9 +30,9 @@ Future login(email, password) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(options);
+    final QueryResult result = await client.mutate(options);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -70,7 +70,7 @@ Future login(email, password) async {
 }
 
 Future<ResponseData> loginGoogle() async {
-  final GraphQLClient _client = createClient();
+  final GraphQLClient client = createClient();
 
   final GoogleSignIn googleSignIn;
 
@@ -140,7 +140,7 @@ Future<ResponseData> loginGoogle() async {
     fetchPolicy: FetchPolicy.noCache,
   );
 
-  final QueryResult result = await _client.mutate(options);
+  final QueryResult result = await client.mutate(options);
   if (result.hasException) {
     throw Exception(result.exception.toString());
   }
@@ -159,7 +159,7 @@ Future<ResponseData> loginGoogle() async {
 }
 
 Future updateUserProfile(token, UserProfile data) async {
-  final GraphQLClient _client = createClient(authToken: token);
+  final GraphQLClient client = createClient(authToken: token);
 
   final MutationOptions mutateGql = MutationOptions(
       operationName: "UpdateDataProfileUsers",
@@ -195,9 +195,9 @@ Future updateUserProfile(token, UserProfile data) async {
       fetchPolicy: FetchPolicy.noCache);
 
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -210,7 +210,8 @@ Future updateUserProfile(token, UserProfile data) async {
 
     final data = result.data;
     if (data == null || data['updateDataProfileUsers'] == null) {
-      return ResponseData(data: false, error: "Update Data Profile Users No data returned");
+      return ResponseData(
+          data: false, error: "Update Data Profile Users No data returned");
     }
     return ResponseData(data: data['updateDataProfileUsers'], error: null);
   } catch (e) {
@@ -231,7 +232,7 @@ Future updateUserProfile(token, UserProfile data) async {
 }
 
 Future updateChurchUser(token, userId, churchId) async {
-  final GraphQLClient _client = createClient(authToken: token);
+  final GraphQLClient client = createClient(authToken: token);
   final MutationOptions mutateGql = MutationOptions(
       operationName: "UpdateChurchUser",
       document: gql(r'''
@@ -243,10 +244,10 @@ Future updateChurchUser(token, userId, churchId) async {
       fetchPolicy: FetchPolicy.noCache);
 
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
 
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -287,7 +288,7 @@ Future updateChurchUser(token, userId, churchId) async {
 }
 
 Future register(dataToRegister) async {
-  final GraphQLClient _client = createClient();
+  final GraphQLClient client = createClient();
 
   // var data = dataToRegister.toJson();
   final MutationOptions mutateGql = MutationOptions(
@@ -329,10 +330,10 @@ Future register(dataToRegister) async {
       fetchPolicy: FetchPolicy.noCache);
 
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
 
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -372,7 +373,7 @@ Future register(dataToRegister) async {
 }
 
 Future<ResponseData> forgotPassword(email) async {
-  final GraphQLClient _client = createClient();
+  final GraphQLClient client = createClient();
   final MutationOptions mutateGql = MutationOptions(
       operationName: "ForgotPassword",
       document: gql(r'''
@@ -385,10 +386,10 @@ Future<ResponseData> forgotPassword(email) async {
       variables: <String, dynamic>{'email': email},
       fetchPolicy: FetchPolicy.noCache);
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
 
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -428,8 +429,8 @@ Future<ResponseData> forgotPassword(email) async {
 }
 
 Future logout() async {
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  await _googleSignIn.signOut();
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  await googleSignIn.signOut();
   // delete credentials in the local stores
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove('userData');
@@ -442,7 +443,7 @@ Future logout() async {
 }
 
 Future verifyPinPassword(email, code) async {
-  final GraphQLClient _client = createClient();
+  final GraphQLClient client = createClient();
   final MutationOptions mutateGql = MutationOptions(
       operationName: "VerifyPinForPassword",
       document: gql(r'''
@@ -457,10 +458,10 @@ Future verifyPinPassword(email, code) async {
       variables: <String, dynamic>{'email': email, 'code': code},
       fetchPolicy: FetchPolicy.noCache);
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
 
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -500,7 +501,7 @@ Future verifyPinPassword(email, code) async {
 }
 
 Future resetPassword(email, password) async {
-  final GraphQLClient _client = createClient();
+  final GraphQLClient client = createClient();
   final MutationOptions mutateGql = MutationOptions(
       operationName: "ResetPassword",
       document: gql(r'''
@@ -520,10 +521,10 @@ Future resetPassword(email, password) async {
       variables: <String, dynamic>{'email': email, 'password': password},
       fetchPolicy: FetchPolicy.noCache);
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
 
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -566,7 +567,7 @@ Future<ResponseData> sendResponsesUser(List responses) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "SendResponsesUser",
@@ -585,9 +586,9 @@ Future<ResponseData> sendResponsesUser(List responses) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -630,7 +631,7 @@ Future<ResponseData> sendScoreUser(
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "SendScore",
@@ -654,9 +655,9 @@ Future<ResponseData> sendScoreUser(
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -702,7 +703,7 @@ Future<ResponseData> unlockedNextSection(userId, sectionId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "UnlockNextSection",
@@ -718,9 +719,9 @@ Future<ResponseData> unlockedNextSection(userId, sectionId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -767,7 +768,7 @@ Future<ResponseData> applyRewardToUser(userId, rewardId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "ApplyRewardToProfile",
@@ -783,9 +784,9 @@ Future<ResponseData> applyRewardToUser(userId, rewardId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -831,7 +832,7 @@ Future<ResponseData> setTitleObtained(userId, courseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "SetTitleToUser",
@@ -853,9 +854,9 @@ Future<ResponseData> setTitleObtained(userId, courseId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -901,7 +902,7 @@ Future<ResponseData> setPrizeObtained(userId, courseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "SetPrizeToUser",
@@ -926,9 +927,9 @@ Future<ResponseData> setPrizeObtained(userId, courseId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -952,7 +953,6 @@ Future<ResponseData> setPrizeObtained(userId, courseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Set Prize For User Timeout de conexión $e');
   } catch (e) {
@@ -976,7 +976,7 @@ Future<ResponseData> redeemedPrize(prizeId, userId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "RedeemPrize",
@@ -992,9 +992,9 @@ Future<ResponseData> redeemedPrize(prizeId, userId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -1018,7 +1018,6 @@ Future<ResponseData> redeemedPrize(prizeId, userId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Redeem Prize Timeout de conexión $e');
   } catch (e) {
@@ -1041,7 +1040,7 @@ Future<ResponseData> openOnePromise(promiseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "OpenOnePromise",
@@ -1054,9 +1053,9 @@ Future<ResponseData> openOnePromise(promiseId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -1080,7 +1079,6 @@ Future<ResponseData> openOnePromise(promiseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Open One Promise Timeout de conexión $e');
   } catch (e) {
@@ -1104,7 +1102,7 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "AddPredicateToFavorite",
@@ -1117,9 +1115,9 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -1143,7 +1141,6 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Add Predicate To Favorite Timeout de conexión $e');
   } catch (e) {
@@ -1168,7 +1165,7 @@ Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
   List<Map<String, dynamic>> dataMap = [];
   for (final lighter in input) {
     dataMap.add({
@@ -1204,9 +1201,9 @@ Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -1230,7 +1227,6 @@ Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null, error: 'App Create Highlighter Timeout de conexión $e');
   } catch (e) {
@@ -1252,7 +1248,7 @@ Future<ResponseData> removeHighLighters(String verseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "RemoveHighlighter",
@@ -1265,9 +1261,9 @@ Future<ResponseData> removeHighLighters(String verseId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -1291,7 +1287,6 @@ Future<ResponseData> removeHighLighters(String verseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Remove Highlighter Timeout de conexión $e');
   } catch (e) {
@@ -1313,7 +1308,7 @@ Future<ResponseData> updateFavoriteVerse(String userId, String verseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "UpdateFavoriteVerse",
@@ -1329,9 +1324,9 @@ Future<ResponseData> updateFavoriteVerse(String userId, String verseId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -1355,7 +1350,6 @@ Future<ResponseData> updateFavoriteVerse(String userId, String verseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Update Favorite Verse Timeout de conexión $e');
   } catch (e) {
@@ -1378,7 +1372,7 @@ Future<ResponseData> createNewVerseFavoriteByUser(
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "CreateNewVerseFavoriteByUser",
@@ -1397,9 +1391,9 @@ Future<ResponseData> createNewVerseFavoriteByUser(
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -1423,7 +1417,6 @@ Future<ResponseData> createNewVerseFavoriteByUser(
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null,
         error: 'Create New Verse Favorite By User Timeout de conexión $e');
@@ -1446,7 +1439,7 @@ Future<ResponseData> deleteVerseFavorite(String userId, String verseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "DeleteVerseFavorite",
@@ -1465,9 +1458,9 @@ Future<ResponseData> deleteVerseFavorite(String userId, String verseId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -1491,7 +1484,7 @@ Future<ResponseData> deleteVerseFavorite(String userId, String verseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
+   
     return ResponseData(
         data: null, error: 'Delete Verse Favorite Timeout de conexión $e');
   } catch (e) {
@@ -1513,7 +1506,7 @@ Future<ResponseData> markAsReadOneNotification(String notificationId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
-  final GraphQLClient _client = createClient(authToken: userToken);
+  final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "MarkAsReadNotification",
@@ -1531,9 +1524,9 @@ Future<ResponseData> markAsReadOneNotification(String notificationId) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
-    final QueryResult result = await _client.mutate(mutateGql);
+    final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {
         return ResponseData(
@@ -1557,9 +1550,76 @@ Future<ResponseData> markAsReadOneNotification(String notificationId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-    print('Timeout: $e');
     return ResponseData(
         data: null, error: 'Mark As Read Notification Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+/// Mutation para los juegos
+Future<ResponseData> saveResultPlay(
+    String userId, String difficulty, String category) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "SaveResultByUser",
+    document: gql(r'''
+     mutation SaveResultByUser($userId: ID, $difficulty: String, $category: String) {
+        saveResultByUser(userId: $userId, difficulty: $difficulty, category: $category) {
+          achievementUnlocked
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "difficulty": difficulty,
+      "category": category,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Save Result By User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['saveResultByUser'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Save Result By User failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['saveResultByUser'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    return ResponseData(
+        data: null, error: 'Save Result By User Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

@@ -1,5 +1,6 @@
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
@@ -9,7 +10,6 @@ import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
@@ -89,7 +89,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   int currentIndex = 0;
   int failedAttempts = 0;
-  int _selectedAnswerIndex = -1;
 
   double score = 0;
 //draggable variables
@@ -129,8 +128,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
         final LoginUser? userData = userProvider.currentUser;
 
         // obtenemos curso
-        final ResponseData courseResponse = await loadOneCourse(
-            userData?.userId, courseId);
+        final ResponseData courseResponse =
+            await loadOneCourse(userData?.userId, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
         }
@@ -190,11 +189,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
     setState(() {
       _isAnswerSelected = true;
       _suggestionSelected = false;
-      _selectedAnswerIndex = index;
     });
-    _isCorrect = (currentAnswers != null && currentAnswers.isNotEmpty)
-        ? currentAnswers[index].isCorrect
-        : false;
+    _isCorrect =
+        (currentAnswers.isNotEmpty) ? currentAnswers[index].isCorrect : false;
     if (userData != null) {
       responses.add(UserResponses(
         answerId: currentAnswers[index].id,
@@ -244,7 +241,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 setState(() {
                   _isAnswerSelected = false;
                   _suggestionSelected = false;
-                  _selectedAnswerIndex = -1;
                 });
                 // });
               },
@@ -433,7 +429,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
     setState(() {
       _isAnswerSelected = false;
       _suggestionSelected = false;
-      _selectedAnswerIndex = -1;
     });
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userToken = prefs.getString('userToken');
@@ -638,7 +633,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                 Navigator.popAndPushNamed(context, '/mapPage',
                                     arguments: {
                                       'courseId': courseId,
-                                      'sectionId': '$nextSectionId'
+                                      'sectionId': nextSectionId
                                     });
                               }
                             },
@@ -707,7 +702,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   onContinue: funcAnswerValidate,
                 )
               } else ...{
-                if (currentQuestion != null && options.isNotEmpty)
+                if (options.isNotEmpty)
                   Expanded(
                     flex: 3,
                     child: SelectionQuestionWidget(
@@ -868,7 +863,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               if (showReview) ...{
                 Text(
                   textAlign: TextAlign.center,
-                  "Mejor puntaje : ${bestScore}",
+                  "Mejor puntaje : $bestScore",
                   style: StylesApp(context).textStyleBodyAso20.copyWith(
                         color: Color(0XFFFD8C43),
                         letterSpacing: data.score > 0 ? 0.0 : 1,
@@ -944,7 +939,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 Text(
                   textAlign: TextAlign.center,
-                  "Etapa ${sectionId} Completada",
+                  "Etapa $sectionId Completada",
                   style: StylesApp(context)
                       .textStyleCongratulation
                       .copyWith(color: Colors.white),
@@ -954,7 +949,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 Text(
                   textAlign: TextAlign.center,
-                  'El esfuerzo valió la pena  completaste la Etapa ${sectionId} \n “${stage?.sectionName}” \n fue completada con éxito"',
+                  'El esfuerzo valió la pena  completaste la Etapa $sectionId \n “${stage?.sectionName}” \n fue completada con éxito"',
                   style: StylesApp(context).textStyleBody20,
                 ),
                 SizedBox(
@@ -987,7 +982,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               text: "Compartir logro",
               onPressed: () async {
                 await Share.share(
-                  "¡Etapa ${sectionId}-${stage?.sectionName} completada",
+                  "¡Etapa $sectionId-${stage?.sectionName} completada",
                   subject: "¡Felicita a ${userData!.username}! ",
                 );
               }),

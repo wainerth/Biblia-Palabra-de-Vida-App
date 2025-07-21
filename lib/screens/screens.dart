@@ -4,7 +4,11 @@
 
 export 'package:biblia_palabra_de_vida_app/screens/soon/soon_screen.dart';
 
+// play pages
 export 'package:biblia_palabra_de_vida_app/screens/features/plays/play_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/plays/memory_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/plays/reddle_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/plays/quiz_screen.dart';
 
 export 'package:biblia_palabra_de_vida_app/screens/features/promises/promises_screen.dart';
 
@@ -63,6 +67,7 @@ export 'package:biblia_palabra_de_vida_app/screens/features/prayer/detail_reques
 
 // theme editor
 export 'package:biblia_palabra_de_vida_app/screens/features/theme_editor/theme_editor_screen.dart';
+
 //404
 export 'package:biblia_palabra_de_vida_app/screens/404/unknown_screen.dart';
 

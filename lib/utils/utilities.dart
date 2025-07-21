@@ -29,8 +29,8 @@ Map<String, dynamic> removeTypename(values) {
   return values;
 }
 
-String getFormattedDate(int dateTimeMiliseconds) {
-  DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(dateTimeMiliseconds);
+String getFormattedDate(int dateTimeMilliseconds) {
+  DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(dateTimeMilliseconds);
   String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
   // Formatear la fecha como dd/mm/aaaa
   return formattedDate;
@@ -193,21 +193,17 @@ obtainedStar(int maxScore, int sectionCompleted, int sectionCount) {
 (String, String) parsePhoneNumberSimple(BuildContext context, String value) {
   if (value.isEmpty) return ('', '');
   String code = '';
-  String phone = '';
   final parts = value.trim().split(RegExp(r'\s+'));
   if (parts.length == 2) {
     code = Provider.of<CatalogueProvider>(context, listen: false)
         .allAreasCode
         .firstWhere((areaCode) => areaCode.id == parts[0])
         .code;
-    phone = parts[1];
-  } else {
-    phone = parts[0];
   }
 
   return (
     parts.length >= 2 ? code : '',
-    parts.length >= 1
+    parts.isNotEmpty
         ? parts
             .sublist(parts.length >= 2 ? 1 : 0)
             .join('')
@@ -223,7 +219,8 @@ formatColor(String? color) {
   return color;
 }
 
-Future<String> copyChapter(VersionModel? currentVersion, BookModel? currentBook, ChapterModel? chapter) async {
+Future<String> copyChapter(VersionModel? currentVersion, BookModel? currentBook,
+    ChapterModel? chapter) async {
   final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
   if (chapter == null) return '';
   StringBuffer buffer = StringBuffer();
@@ -261,17 +258,13 @@ Future<void> shareVerse(BuildContext context, dynamic data) async {
 
 RouteInfo getRouterScreen(action) {
   switch (action) {
-    case 'Course':
-      // return   RouteInfo("/aventurePage");
+    case 'courses':
       return RouteInfo(
         '/layoutPage1',
         arguments: {'selectedIndex': 1},
       );
-    case 'Section':
-      return RouteInfo(
-        '/layoutPage1',
-        arguments: {'selectedIndex': 1},
-      );
+    case 'sections':
+      return RouteInfo('/detailCoursePage', arguments: {"courseId": "1"});
     case 'Promises':
       return RouteInfo("/promisePage");
     case 'Preach':
@@ -281,6 +274,10 @@ RouteInfo getRouterScreen(action) {
         '/layoutPage1',
         arguments: {'selectedIndex': 2},
       );
+    case 'title':
+      return RouteInfo('/detailsProgressPage');
+    case 'streak':
+      return RouteInfo('/detailsProgressPage');
   }
-  return RouteInfo('/homePage');
+  return RouteInfo('/layoutPage');
 }

@@ -1,20 +1,18 @@
 import 'dart:math';
 
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:simple_animations/simple_animations.dart' as animation;
 
-
 class RewardWidget extends StatefulWidget {
-
-  final rewardInfo;
+  final Reward? rewardInfo;
   final void Function()? onPressed;
   const RewardWidget({super.key, this.rewardInfo, this.onPressed});
 
-
   @override
-  _RewardWidgetState createState() => _RewardWidgetState();
+  State<RewardWidget> createState() => _RewardWidgetState();
 }
 
 class _RewardWidgetState extends State<RewardWidget>
@@ -60,45 +58,52 @@ class _RewardWidgetState extends State<RewardWidget>
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: Text(
                     textAlign: TextAlign.center,
-                    "${widget.rewardInfo != null ? widget.rewardInfo.title : ''}",
+                    "${widget.rewardInfo != null ? widget.rewardInfo?.title : ''}",
                     softWrap: true,
-                    style:StylesApp(context).textStyleBody20.copyWith(
-                      color: Colors.white
-                    ),
+                    style: StylesApp(context)
+                        .textStyleBody20
+                        .copyWith(color: Colors.white),
                   ),
                 ),
-
                 SizedBox(height: 10),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: Text(
                     textAlign: TextAlign.center,
-                    widget.rewardInfo != null ? widget.rewardInfo.description : '',
-                    style:StylesApp(context).textStyleBody12.copyWith(
-                      color: Colors.white
-                    ) ,
+                    widget.rewardInfo != null
+                        ? widget.rewardInfo!.description
+                        : '',
+                    style: StylesApp(context)
+                        .textStyleBody12
+                        .copyWith(color: Colors.white),
                   ),
                 ),
-                SizedBox(height: 30,),
-                Text.rich(
-                  textAlign: TextAlign.center,
-                  style: StylesApp(context).textStyleBody18.copyWith(
-                    color: Colors.white
-                  ) ,
-                  TextSpan(children: [
-                    TextSpan(text: "${widget.rewardInfo != null ? widget.rewardInfo.earnedExperience : 0} Exp.  "),
-                    TextSpan(text: "${widget.rewardInfo != null ? widget.rewardInfo.earnedEnergy: 0} LMS"),
-                  ])
+                SizedBox(
+                  height: 30,
                 ),
-                SizedBox(height: 30,),
-                  ButtonThemeWidget(
-                text: "Continuar",
-                width: 132.0,
-                height: 32.0,
-                buttonStyle: StylesApp(context).btnWidgetSmall,
-                onPressed: widget.onPressed,
-              )
+                Text.rich(
+                    textAlign: TextAlign.center,
+                    style: StylesApp(context)
+                        .textStyleBody18
+                        .copyWith(color: Colors.white),
+                    TextSpan(children: [
+                      TextSpan(
+                          text:
+                              "${widget.rewardInfo != null ? widget.rewardInfo?.earnedExperience : 0} Exp.  "),
+                      TextSpan(
+                          text:
+                              "${widget.rewardInfo != null ? widget.rewardInfo?.earnedEnergy : 0} LMS"),
+                    ])),
+                SizedBox(
+                  height: 30,
+                ),
+                ButtonThemeWidget(
+                  text: "Continuar",
+                  width: 132.0,
+                  height: 32.0,
+                  buttonStyle: StylesApp(context).btnWidgetSmall,
+                  onPressed: widget.onPressed,
+                )
               ],
             ),
           ),
@@ -131,7 +136,8 @@ class ParticlePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final random = Random();
-    final paint = Paint()..color = const Color.fromARGB(255, 252, 248, 248).withValues(alpha:  0.5);
+    final paint = Paint()
+      ..color = const Color.fromARGB(255, 252, 248, 248).withValues(alpha: 0.5);
 
     for (int i = 0; i < 50; i++) {
       final x = random.nextDouble() * size.width;

@@ -37,14 +37,14 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
 
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final courseId = ModalRoute.of(context)!.settings.arguments as String;
+      final courseParam = ModalRoute.of(context)!.settings.arguments;
       final LoginUser? userData = userProvider.currentUser;
       errorMessage = null;
       progressUser = userProvider.progressUser;
 
       // obtenemos curso
       final ResponseData courseResponse =
-          await loadOneCourse(userData!.userId, courseId);
+          await loadOneCourse(userData!.userId, (courseParam as Map<String, dynamic>)["courseId"]);
       if (courseResponse.error != null) {
         errorMessage = courseResponse.error;
       }

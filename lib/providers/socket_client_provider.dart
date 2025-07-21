@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -20,70 +22,137 @@ class SocketClientProvider with ChangeNotifier {
   bool get isConnected => _isConnected;
 
   List<NotificationModel> get notifications => _notifications;
+
+  @pragma('vm:entry-point')
+  static void backgroundNotificationHandler(NotificationResponse response) {
+    print("Notificación en segundo plano: ${response.payload}");
+    
+  }
+
 // Método para inicializar notificaciones locales
   Future<void> initializeNotifications() async {
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    try {
+      const AndroidInitializationSettings androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    final DarwinInitializationSettings iosSettings =
-        DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+      final DarwinInitializationSettings iosSettings =
+          DarwinInitializationSettings(
+              requestAlertPermission: true,
+              requestBadgePermission: true,
+              requestSoundPermission: true);
 
-    final InitializationSettings settings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
+      final InitializationSettings settings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
 
-    await notificationsPlugin.initialize(
-      settings,
-      onDidReceiveNotificationResponse: (response) {
-        _handleNotificationClick(response.payload);
-      },
-    );
+      await notificationsPlugin.initialize(
+        settings,
+        onDidReceiveNotificationResponse: (response) {
+          _handleNotificationClick(response.payload);
+        },
+        onDidReceiveBackgroundNotificationResponse: backgroundNotificationHandler // _handleNotificationClick(response.payload);
+        ,
+      );
+
+      // Solicitar permisos explícitamente para iOS
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        await notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>()
+            ?.requestPermissions(
+              alert: true,
+              badge: true,
+              sound: true,
+            );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error initializing notifications: $e');
+      }
+    }
   }
 
   // Método para mostrar notificaciones
   Future<void> showNotification(NotificationModel notification) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'notifications_channel',
-      'Notificaciones',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-      // sound: RawResourceAndroidNotificationSound('turtle_sound')
-    );
+    try {
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+        'notifications_channel',
+        'Notificaciones',
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+        visibility: NotificationVisibility.public,
+        // sound: RawResourceAndroidNotificationSound('turtle_sound'),
+        // styleInformation: BigTextStyleInformation(''),
+      );
 
-    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    await notificationsPlugin.show(
-      int.parse(notification.id), // Usamos el ID como notificationId
-      notification.title,
-      notification.message,
-      const NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      ),
-      payload: notification.action, // Usamos actionUrl para redirección
-    );
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true
+          );
+     
+      await notificationsPlugin.show(
+        int.tryParse(notification.id!)!, // Usamos el ID como notificationId
+        notification.title,
+        notification.message,
+        const NotificationDetails(
+          android: androidDetails,
+          iOS: iosDetails,
+        ),
+        payload: jsonEncode(
+            notification.toJson()), // Usamos actionUrl para redirección
+      );
+      if (kDebugMode) {
+        print('Notification shown successfully with ID: ${notification.id!}');
+      }
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('Error showing notification: $e');
+        print('Stack trace: $stackTrace');
+      }
+    }
   }
 
   // Manejar clic en notificación
   void _handleNotificationClick(String? payload) {
-    if (payload != null) {
-      // Aquí puedes manejar la navegación basada en el payload
-      // Ejemplo: navigatorKey.currentState?.pushNamed(payload);
-      if (kDebugMode) {
-        print('Redirigiendo a: $payload');
+    try {
+      if (payload != null && payload.isNotEmpty) {
+        if (kDebugMode) {
+          print('Notification payload received: $payload');
+        }
+
+        // Deserializamos el payload
+        final notificationData = jsonDecode(payload);
+        final notification = NotificationModel.fromJson(notificationData);
+
+        // Navegación más robusta
+        final routeInfo = getRouterScreen(notification.model);
+
+        // WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (navigatorKey.currentState != null) {
+          if (routeInfo.arguments != null) {
+            navigatorKey.currentState?.pushNamed(
+              routeInfo.routeName,
+              arguments: routeInfo.arguments,
+            );
+          } else {
+            navigatorKey.currentState?.pushNamed(routeInfo.routeName);
+          }
+        }
+        // });
+      } else {
+        if (kDebugMode) {
+          print('Notification clicked but payload was empty');
+        }
       }
-      navigatorKey.currentState?.pushNamed(payload);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error handling notification click: $e');
+      }
     }
   }
 

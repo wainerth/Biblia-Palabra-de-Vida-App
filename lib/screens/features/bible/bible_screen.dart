@@ -1798,7 +1798,7 @@ class _BibleScreenState extends State<BibleScreen> {
           chapters: allChapters.length - 1,
         );
         // Mover el scroll al versículo de inicio si está presente
-        if (data.startVerseId != null && verses.isNotEmpty) {
+        if ( verses.isNotEmpty) {
           final startIndex =
               verses.indexWhere((v) => v.id == data.startVerseId);
           if (startIndex != -1) {
@@ -1861,8 +1861,6 @@ class _BibleScreenState extends State<BibleScreen> {
   }
 
   // Variable para almacenar el ID del versículo marcado por scroll
-  String? _scrolledVerseId;
-
   loadVersionAndChapter(InputDataSearchModel data) async {
     final bibleVersions = Provider.of<CatalogueProvider>(context, listen: false)
         .allBibleVersion
@@ -1912,11 +1910,10 @@ class _BibleScreenState extends State<BibleScreen> {
           chapters: allChapters.length - 1,
         );
         // Mover el scroll al versículo de inicio si está presente
-        if (data.startVerseId != null && verses.isNotEmpty) {
+        if ( verses.isNotEmpty) {
           final startIndex =
               verses.indexWhere((v) => v.id == data.startVerseId);
           if (startIndex != -1) {
-            _scrolledVerseId = verses[startIndex].id;
             // Guardar el ID del versículo marcado por scroll
             WidgetsBinding.instance.addPostFrameCallback((_) async {
               if (_selectableTextKey.currentContext != null &&
@@ -1961,7 +1958,6 @@ class _BibleScreenState extends State<BibleScreen> {
           }
         } else {
           // Si no hay startVerseId, limpiar el marcador
-          _scrolledVerseId = null;
         }
       });
     } catch (e) {

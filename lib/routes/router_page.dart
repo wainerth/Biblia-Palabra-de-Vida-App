@@ -1,7 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
 
 final Map<String, WidgetBuilder> routes = {
   '/introPage': (BuildContext context) => const WelcomeScreen(),
@@ -10,13 +9,14 @@ final Map<String, WidgetBuilder> routes = {
   '/registerPage': (BuildContext context) => const RegisterScreen(),
   '/forgotPasswordPage': (BuildContext context) => const RecoverPassScreen(),
   '/changePasswordPage': (BuildContext context) => const ChangePassScreen(),
-  '/layoutPage': (BuildContext context) => const PageScreen(),
+  '/layoutPage': (BuildContext context) => AuthGuard(child: PageScreen()),
   '/layoutPage1': (BuildContext context) => const LayoutScreen(),
   '/mapPage': (BuildContext context) => const MapScreen(),
   '/introAventurePage': (BuildContext context) => IntroAventureScreen(),
   '/aventurePage': (BuildContext context) => AventureScreen(),
   '/bibliaPage': (BuildContext context) => BibleScreen(),
-  '/communityPage': (BuildContext context) => GraphQLConfig.development ? CommunityScreen() : SoonScreen(), 
+  '/communityPage': (BuildContext context) =>
+      GraphQLConfig.development ? CommunityScreen() : SoonScreen(),
   '/profilePage': (BuildContext context) => ProfileScreen(),
   '/workspacePage': (BuildContext context) =>
       AuthGuard(child: WorkspaceScreen()),
@@ -30,9 +30,13 @@ final Map<String, WidgetBuilder> routes = {
   '/soonPage': (BuildContext context) => SoonScreen(),
   '/preachPage': (BuildContext context) => PreachScreen(),
   '/promisePage': (BuildContext context) => PromisesScreen(), //SoonScreen(),
-  '/playPage': (BuildContext context) => GraphQLConfig.development ? PlayScreen() : SoonScreen(), 
+  '/playPage': (BuildContext context) =>
+      GraphQLConfig.development ? PlayScreen() : SoonScreen(),
   '/settingPage': (BuildContext context) => AuthGuard(child: SettingsScreen()),
   '/leaguePage': (BuildContext context) => RankingScreen(),
+  '/memoryPage': (BuildContext context) => MemoryScreen(),
+  '/reddlePage': (BuildContext context) => ReddleScreen(),
+  '/quizPage': (BuildContext context) => QuizScreen(),
 };
 
 Route<dynamic> generateRoute(RouteSettings settings) {

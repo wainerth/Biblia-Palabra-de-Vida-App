@@ -30,23 +30,23 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
   void initState() {
     super.initState();
     // WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (widget.existingTheme != null) {
-        _nameController.text = widget.existingTheme!.name;
-        _backgroundColor = widget.existingTheme!.backgroundColor;
-        _textColor = widget.existingTheme!.textColor;
-        _appBarColor = widget.existingTheme!.appBarColor;
-        _buttonColor = widget.existingTheme!.buttonColor;
-        _buttonTextColor = widget.existingTheme!.buttonTextColor;
-        _verseHighlightColor = widget.existingTheme!.verseHighlightColor;
-      } else {
-        _nameController = TextEditingController(text: "Tema Personalizado");
-        _backgroundColor = Colors.white;
-        _textColor = Colors.black;
-        _appBarColor = Colors.blue;
-        _buttonColor = Colors.blue;
-        _buttonTextColor = Colors.white;
-        _verseHighlightColor = Colors.yellow[200]!;
-      }
+    if (widget.existingTheme != null) {
+      _nameController.text = widget.existingTheme!.name;
+      _backgroundColor = widget.existingTheme!.backgroundColor;
+      _textColor = widget.existingTheme!.textColor;
+      _appBarColor = widget.existingTheme!.appBarColor;
+      _buttonColor = widget.existingTheme!.buttonColor;
+      _buttonTextColor = widget.existingTheme!.buttonTextColor;
+      _verseHighlightColor = widget.existingTheme!.verseHighlightColor;
+    } else {
+      _nameController = TextEditingController(text: "Tema Personalizado");
+      _backgroundColor = Colors.white;
+      _textColor = Colors.black;
+      _appBarColor = Colors.blue;
+      _buttonColor = Colors.blue;
+      _buttonTextColor = Colors.white;
+      _verseHighlightColor = Colors.yellow[200]!;
+    }
     // });
   }
 
@@ -59,7 +59,10 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
         centerTitle: true,
         leading: IconButton.filled(
           style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(currentTheme.name != 'light' ? currentTheme.buttonColor : StyleColor.orange ),
+              backgroundColor: WidgetStatePropertyAll(
+                  currentTheme.name != 'light'
+                      ? currentTheme.buttonColor
+                      : StyleColor.orange),
               foregroundColor:
                   WidgetStatePropertyAll(currentTheme.buttonTextColor)),
           padding: EdgeInsets.all(0),
@@ -102,15 +105,15 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
         child: Column(
           children: [
             TextField(
-              controller:  _nameController,
-              style: StylesApp(context).textStyleBody12.copyWith(
-                color: currentTheme.textColor
-              ),
-              decoration: InputDecoration(                
+              controller: _nameController,
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: currentTheme.textColor),
+              decoration: InputDecoration(
                 labelText: 'Nombre del tema',
-                labelStyle: StylesApp(context).textStyleBody14.copyWith(
-                  color: currentTheme.textColor
-                ),
+                labelStyle: StylesApp(context)
+                    .textStyleBody14
+                    .copyWith(color: currentTheme.textColor),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -119,7 +122,6 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               setState(() {
                 _backgroundColor = color;
               });
-              print(_backgroundColor);
             }),
             _buildColorPicker(
               'Color de texto',
@@ -150,7 +152,9 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
             _buildPreview(),
             SizedBox(height: 30),
             ButtonThemeWidget(
-              text:  widget.existingTheme != null ? "MODIFICAR TEMA" : "GUARDAR TEMA",
+              text: widget.existingTheme != null
+                  ? "MODIFICAR TEMA"
+                  : "GUARDAR TEMA",
               buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                   backgroundColor: WidgetStatePropertyAll(
                     currentTheme.buttonColor,
@@ -181,9 +185,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
           ),
           GestureDetector(
             onTap: () async {
-              final color = await showDialog<Color>(
+              await showDialog<Color>(
                 context: context,
-
                 builder: (context) => AlertDialog(
                   backgroundColor: currentTheme.backgroundColor,
                   title: Text(
@@ -226,7 +229,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                   ],
                 ),
               );
-              if (currentColor != null) onChanged(currentColor);
+              // if (currentColor != null)
+              onChanged(currentColor);
             },
             child: Container(
               width: 50,

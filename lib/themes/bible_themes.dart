@@ -43,7 +43,7 @@ class BibleTheme {
       appBarColor: Colors.grey[900]!,
       buttonColor: StyleColor.turquoise,
       buttonTextColor: StyleColor.white,
-      verseHighlightColor: const Color.fromARGB(255, 104, 191, 235)!,
+      verseHighlightColor: const Color.fromARGB(255, 104, 191, 235),
     ),
     BibleThemeType.sepia: BibleTheme(
       name: "Café Elegante",

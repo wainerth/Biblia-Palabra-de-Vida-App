@@ -176,7 +176,7 @@ class _AventureScreenState extends State<AventureScreen> {
                 loadingAction: loadAventure[index],
                 onTap: () {
                   Navigator.popAndPushNamed(context, '/detailCoursePage',
-                      arguments: courses[index].id);
+                      arguments: {"courseId": courses[index].id});
                 },
                 goToMap: () async {
                   setState(() {
@@ -184,7 +184,7 @@ class _AventureScreenState extends State<AventureScreen> {
                   });
                   Stage? stage =
                       await loadStage(dataUser?.userId, courses[index].id);
-                  if ( stage != null && stage.levelCount > 0) {
+                  if (stage != null && stage.levelCount > 0) {
                     final userProvider =
                         Provider.of<UserProvider>(context, listen: false);
                     final progressResponse = await userProvider.getProgressUser(

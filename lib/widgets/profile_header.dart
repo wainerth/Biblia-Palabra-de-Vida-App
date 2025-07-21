@@ -26,9 +26,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     } else {
       setState(() {});
       return NetworkImage(
-        GraphQLConfig.urlServidor +
-            widget.avatarImg +
-            '?timestamp=${DateTime.now().millisecondsSinceEpoch}',
+        '${GraphQLConfig.urlServidor}${widget.avatarImg}?timestamp=${DateTime.now().millisecondsSinceEpoch}',
       );
     }
   }

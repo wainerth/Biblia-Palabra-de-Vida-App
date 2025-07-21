@@ -27,7 +27,6 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
   late AnimationController _controller;
   late Animation<double> _animation;
 
-  bool _isRecorderInitialized = false;
   bool _isRecording = false;
   bool _isPlaying = false;
   double volume = 0.5;
@@ -64,7 +63,6 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
       }
     }
     setState(() {
-      _isRecorderInitialized = true;
     });
   }
 

@@ -101,8 +101,10 @@ flutter:
   assets:
     - assets/
     - assets/barcos/
+    - assets/plays/
     # - assets/premios/lñ
     - assets/packages/youtube_player_flutter/assets/speedometer.webp
+    - assets/sounds/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
