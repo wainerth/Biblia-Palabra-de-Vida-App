@@ -1,7 +1,14 @@
+import 'dart:io';
 
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 
 class RequestPrayerScreen extends StatefulWidget {
   final Map<String, dynamic> args;
@@ -15,143 +22,69 @@ class RequestPrayerScreen extends StatefulWidget {
 }
 
 class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
+  LoginUser? userData;
+    final ScrollController _scrollController = ScrollController();
   final TextEditingController requestController = TextEditingController();
   final TextEditingController _recipientName = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final FocusNode focusNode = FocusNode();
-  List<DropdownMenuEntry> options = [];
-  List<Map<String, dynamic>> peticiones = [
-    {
-      "id": "1",
-      'options': [
-        "Sanidad de enfermedad",
-        "Quitar dolencias",
-        "Recuperación tras una operación",
-        "Recuperación tras un accidente",
-        "Libre de depresión",
-        "Libre de ansiedad ",
-        "Otro",
-      ],
-    },
-    {
-      "id": "2",
-      'options': [
-        "Estoy desesperado necesito paz",
-        "Me siento muy depresivo necesito paz",
-        "A veces me siento depresivo necesito paz",
-        "Por Liberación",
-        "Por Libertad",
-        "Otro"
-      ]
-    },
-    {
-      "id": "3",
-      'options': [
-        "Unidad y armonía familiar",
-        "Protección y seguridad de la familia",
-        "Sabiduría en la crianza ",
-        "Salvación y vida espiritual de la familia",
-        "Provisión y bienestar familia",
-        "Reconciliación familiar",
-        "Libertad de un familiar",
-        "Otro"
-      ],
-    },
-    {
-      "id": "4",
-      "options": [
-        "Protección por seguridad física",
-        "Protección Riesgo de contagio",
-        "Protección de enemigos",
-        "Protección de la iglesia",
-        "Protección de la familia",
-        "Libertad",
-        "Otro"
-      ]
-    },
-    {
-      "id": "5",
-      "options": [
-        "Librar de problemas en el trabajo",
-        "conseguir empleo estable",
-        "Por un asenso laboral",
-        "Dirección ante cambio de empleo",
-        "sabiduría en el trabajo",
-        "Otro"
-      ]
-    },
-    {
-      "id": "6",
-      "options": [
-        "Mejora en las finanzas ",
-        "Ayuda para salir de deudas",
-        "Sabiduría en la administración",
-        "Bendición en negocios y proyectos",
-        "Protección y estabilidad financiera",
-        "Otro"
-      ]
-    },
-    {
-      "id": "7",
-      "options": [
-        "Liberación de la adicción",
-        "Fortaleza para resistir la tentación",
-        "Restauración emocional y espiritual",
-        "Apoyo para reconstruir relaciones",
-        "Perseverancia en la recuperación",
-        "Otro"
-      ]
-    },
-    {
-      "id": "8",
-      "options": [
-        "Liberación espiritual",
-        "Crecimiento espiritual",
-        "Fortaleza en la fe",
-        "Dirección y propósito",
-        "Protección espiritual",
-        "Avivamiento y servicio",
-        "Otro"
-      ]
-    },
-    {
-      "id": "9",
-      "options": [
-        "Fortaleza en momentos duelo",
-        "Relaciones interpersonales",
-        "Por éxito en metas personales",
-        "Gratitud y dirección futura",
-        "Otro"
-      ]
-    }
-  ];
+  File? audioFile;
+  List<ModelData> options = []; // lista formateada para el dropdown
+  ModelData subtypeSelected =
+      ModelData(label: "Seleccione una opción", value: "");
 
-  List<DropdownMenuEntry> generarOpcionesDropdown(String id) {
-    final categoria = peticiones.firstWhere((p) => p['id'] == id);
+  generarOpcionesDropdown(String id) async {
+    LoadingService().showLoading(context);
+    try {
+      final responseSubTypes = await getAllPrayerRequestSubTypes(id);
+      if (responseSubTypes.error != null) {
+        LoadingService().hideLoading();
+        await showCustomDialog(
+          context,
+          message: responseSubTypes.error!,
+          dialogType: DialogType.error,
+        );
+        return;
+      }
+      setState(() {
+        final List<PrayerSubTypeModel> subTypes = responseSubTypes.data
+            .map<PrayerSubTypeModel>(
+                (json) => PrayerSubTypeModel.fromJson(json))
+            .toList();
 
-    // Convertir JSArray<dynamic> a List<String>
-    final options = List<String>.from(categoria["options"]);
-
-    return options.map((key) {
-      return DropdownMenuEntry(
-        style: ButtonStyle(iconSize: WidgetStatePropertyAll(25.0)),
-        label: key,
-        value: key.toLowerCase().replaceAll(' ', '_'),
+        options = subTypes
+            .map<ModelData>((subType) => ModelData(
+                  label: subType.name,
+                  value: subType.id,
+                ))
+            .toList();
+      });
+      LoadingService().hideLoading();
+    } catch (e) {
+      LoadingService().hideLoading();
+      await showCustomDialog(
+        context,
+        message: e.toString(),
+        dialogType: DialogType.error,
       );
-    }).toList();
+    } finally {
+      LoadingService().hideLoading();
+    }
   }
 
   @override
   void initState() {
-    options = generarOpcionesDropdown(widget.args["value"]);
-    if (kDebugMode) {
-      print(options);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Cargar los datos iniciales
+      await generarOpcionesDropdown(widget.args["value"]);
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userData = userProvider.currentUser;
     if (kDebugMode) {
       print(widget.args);
     }
@@ -174,7 +107,31 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 26.0),
-                  child: _buildDropdown(context),
+                  child: Container(
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    decoration: BoxDecoration(
+                        color: StyleColor.white,
+                        // border: Border.all(color: StyleColor.orange, width: 2.0),
+                        borderRadius: BorderRadius.circular(25.0)),
+                    child: CustomDropdownBottomWidget<PrayerSubTypeModel>(
+                      hintText: "Tipo de Pedido",
+                      items: options,
+                      border: false,
+                      onChanged: (ModelData? newValue) {
+                        setState(() {
+                          subtypeSelected = newValue!;
+                        });
+                      },
+                      selectedItem: subtypeSelected.value.isNotEmpty
+                          ? options.firstWhere(
+                              (element) =>
+                                  element.value == subtypeSelected.value,
+                              orElse: () => ModelData(
+                                  label: "Seleccione una opción", value: ""),
+                            )
+                          : null,
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: 16.0,
@@ -212,9 +169,11 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Scrollbar(
+                      controller: _scrollController,
                       thumbVisibility: true,
                       thickness: 6.0,
                       child: SingleChildScrollView(
+                         controller: _scrollController,
                         child: TextField(
                           controller: _descriptionController,
                           maxLines: null,
@@ -235,7 +194,13 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 26.0),
-                  child: AudioRecorderWidget(),
+                  child: AudioRecorderWidget(
+                    onAudioRecorded: (File file) {
+                      setState(() {
+                        audioFile = file;
+                      });
+                    },
+                  ),
                 ),
                 SizedBox(
                   height: 10,
@@ -245,100 +210,41 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                   buttonStyle: StylesApp(context).btnWidgetSmall,
                   width: 239.0,
                   height: 41.0,
-                  onPressed: () {
-                    showDialog(
-                      barrierDismissible: false,
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Dialog(
-                          insetPadding: EdgeInsets.only(
-                              left: 12.0, right: 12.0, top: 0.0, bottom: 0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: SingleChildScrollView(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Color(0XFFFFF8DD),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        top: 27,
-                                        bottom: 39.0,
-                                        left: 16.0,
-                                        right: 16.0),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                            textAlign: TextAlign.center,
-                                            "Petición Enviada con Éxito ",
-                                            style: StylesApp(context)
-                                                .textStyleTitleOrange),
-                                        SizedBox(
-                                          height: 21.0,
-                                        ),
-                                        Text(
-                                          textAlign: TextAlign.center,
-                                          "Tu petición de oración ha sido enviada a la comunidad de oración, quienes van a orar por tu petición.",
-                                          style: StylesApp(context)
-                                              .textStyleBody12
-                                              .copyWith(
-                                                color: Colors.black,
-                                              ),
-                                        ),
-                                        SizedBox(
-                                          height: 21.0,
-                                        ),
-                                        Text(
-                                          textAlign: TextAlign.center,
-                                          "Por favor te pedimos que creas en el poder de Dios, si le buscamos el es bueno misericordioso para perdonarnos y darnos una respuesta que sea para bendición de nuestras vidas.",
-                                          style: StylesApp(context)
-                                              .textStyleBody12
-                                              .copyWith(
-                                                color: Colors.black,
-                                              ),
-                                        ),
-                                        SizedBox(
-                                          height: 21.0,
-                                        ),
-                                        Text(
-                                          textAlign: TextAlign.center,
-                                          'Juan 3:16 "De tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna"',
-                                          style: StylesApp(context)
-                                              .textStyleBody12
-                                              .copyWith(
-                                                color: Colors.black,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Center(
-                                    child: ButtonThemeWidget(
-                                      text: "Aceptar",
-                                      buttonStyle:
-                                          StylesApp(context).btnWidgetSmall,
-                                      width: 239.0,
-                                      height: 41.0,
-                                      onPressed: () {
-                                        Navigator.popAndPushNamed(
-                                            context, '/prayerPage');
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 34.0,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
+                  onPressed: () async {
+                    LoadingService().showLoading(context);
+
+                    try {
+                      // almaceno en Model para formatear
+                      final requestData = RequestPrayerModel(
+                          audio: audioFile!,
+                          description: _descriptionController.text,
+                          prayerFor: _recipientName.text,
+                          prayerSubTypeId: subtypeSelected.value,
+                          userId: userData!.userId);
+
+                      // llamo al servicio de crear una solicitud
+                      final responseCreatedRequest =
+                          await sendPrayerRequest(requestData);
+
+                      // si hay error lo muestro
+                      if (responseCreatedRequest.error != null) {
+                        // cierro el loading
+                        LoadingService().hideLoading();
+                        await showCustomDialog(context,
+                            message: responseCreatedRequest.error!,
+                            dialogType: DialogType.error);
+                        return;
+                      }
+                      // cierro el loading
+                      LoadingService().hideLoading();
+                      openModalSendSuccessfully(context);
+                    } catch (e) {
+                      LoadingService().hideLoading();
+                      await showCustomDialog(context,
+                          message: e.toString(), dialogType: DialogType.error);
+                    } finally {
+                      LoadingService().hideLoading();
+                    }
                   },
                 )
               ],
@@ -349,39 +255,87 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
     );
   }
 
-  DropdownMenu _buildDropdown(BuildContext context) {
-    return DropdownMenu(
-      initialSelection: "Seleccione una opción",
-      controller: requestController,
-      dropdownMenuEntries: options,
-      enableFilter: true,
-      requestFocusOnTap: true,
-      hintText: "Tipo de Pedido",
-      inputDecorationTheme: InputDecorationTheme(
-        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-        hintStyle: StylesApp(context).textStyleHintText,
-        filled: true,
-        fillColor: Color(0XFFFFFFFF),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.0),
-          borderSide: BorderSide.none,
-        ),
-      ),
-      width: double.infinity,
-      onSelected: (option) {
-        setState(() {
-          if (kDebugMode) {
-            print(option);
-          }
-        });
+  Future<dynamic> openModalSendSuccessfully(BuildContext context) {
+    return showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding:
+              EdgeInsets.only(left: 12.0, right: 12.0, top: 0.0, bottom: 0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: SingleChildScrollView(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0XFFFFF8DD),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: 27, bottom: 39.0, left: 16.0, right: 16.0),
+                    child: Column(
+                      children: [
+                        Text(
+                            textAlign: TextAlign.center,
+                            "Petición Enviada con Éxito ",
+                            style: StylesApp(context).textStyleTitleOrange),
+                        SizedBox(
+                          height: 21.0,
+                        ),
+                        Text(
+                          textAlign: TextAlign.center,
+                          "Tu petición de oración ha sido enviada a la comunidad de oración, quienes van a orar por tu petición.",
+                          style: StylesApp(context).textStyleBody12.copyWith(
+                                color: Colors.black,
+                              ),
+                        ),
+                        SizedBox(
+                          height: 21.0,
+                        ),
+                        Text(
+                          textAlign: TextAlign.center,
+                          "Por favor te pedimos que creas en el poder de Dios, si le buscamos el es bueno misericordioso para perdonarnos y darnos una respuesta que sea para bendición de nuestras vidas.",
+                          style: StylesApp(context).textStyleBody12.copyWith(
+                                color: Colors.black,
+                              ),
+                        ),
+                        SizedBox(
+                          height: 21.0,
+                        ),
+                        Text(
+                          textAlign: TextAlign.center,
+                          'Juan 3:16 "De tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna"',
+                          style: StylesApp(context).textStyleBody12.copyWith(
+                                color: Colors.black,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Center(
+                    child: ButtonThemeWidget(
+                      text: "Aceptar",
+                      buttonStyle: StylesApp(context).btnWidgetSmall,
+                      width: 239.0,
+                      height: 41.0,
+                      onPressed: () {
+                        Navigator.popAndPushNamed(context, '/prayerPage');
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: 34.0,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
       },
-      textStyle: StylesApp(context).textStyleBody4,
-      menuStyle: MenuStyle(
-        backgroundColor: WidgetStatePropertyAll(Color(0XFFFFFFFF)),
-        elevation: WidgetStatePropertyAll(4.0),
-        padding: WidgetStatePropertyAll(
-            EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
-      ),
     );
   }
 }

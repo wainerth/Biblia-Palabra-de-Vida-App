@@ -106,7 +106,7 @@ class _QuizScreenState extends State<QuizScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "F";
+              difficulty = "Facil";
             });
             await loadQuestions();
           },
@@ -147,7 +147,7 @@ class _QuizScreenState extends State<QuizScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "I";
+              difficulty = "Medio";
             });
             await loadQuestions();
           },
@@ -188,7 +188,7 @@ class _QuizScreenState extends State<QuizScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "D";
+              difficulty = "Difícil";
             });
             await loadQuestions();
           },

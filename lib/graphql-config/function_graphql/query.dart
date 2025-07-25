@@ -3530,3 +3530,289 @@ Future<ResponseData> getQuestionGameDifficulty(String difficulty) async {
     }
   }
 }
+
+/// Queries de prayer
+// Obtener tipos de Pedidos de Oración
+Future<ResponseData> getAllPrayerRequestTypes() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetAllPrayerRequestTypes",
+    document: gql(r'''
+      query GetAllPrayerRequestTypes {
+        getAllPrayerRequestTypes {
+          id
+          name
+          description
+        }
+      }
+      '''),
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get All Prayer Request Types: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllPrayerRequestTypes'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get All Prayer Request Types failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllPrayerRequestTypes'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'Get All Prayer Request Types Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+// obtener los sub tipos de un tipo de pedido de oración
+Future<ResponseData> getAllPrayerRequestSubTypes(String prayerTypeId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetAllPrayerSubType",
+    document: gql(r'''
+      query GetAllPrayerSubType($prayerTypeId: ID!) {
+        getAllPrayerSubType(prayerTypeId: $prayerTypeId) {
+          id
+          name
+          description
+          prayerTypeId
+        }
+      }
+      '''),
+      variables: <String, dynamic>{
+        "prayerTypeId": prayerTypeId,
+      },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get All Prayer Sub Type: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllPrayerSubType'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get All Prayer Sub Type failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllPrayerSubType'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'Get ALl Prayer Sub Type Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+// saber si el usuario forma parte de un grupo de oración
+Future<ResponseData> isMemberPrayerGroup(String userId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "IsUserPrayerGroupMember",
+    document: gql(r'''
+      query IsUserPrayerGroupMember($userId: ID!) {
+        isUserPrayerGroupMember(userId: $userId){
+          successful
+          message
+          id
+        }
+      }
+      '''),
+      variables: <String, dynamic>{
+        "userId": userId,
+      },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Is User Prayer Group Member: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['isUserPrayerGroupMember'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Is User Prayer Group Member failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['isUserPrayerGroupMember'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'Is User Prayer Group Member Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+// Obtener las solicitudes de Oración de asignadas a un grupo de oración
+Future<ResponseData> getAllRequestPreachByGroupId(String groupId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "IsUserPrayerGroupMember",
+    document: gql(r'''
+      query IsUserPrayerGroupMember($userId: ID!) {
+        isUserPrayerGroupMember(userId: $userId){
+          successful
+          message
+          id
+        }
+      }
+      '''),
+      variables: <String, dynamic>{
+        "userId": groupId,
+      },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Is User Prayer Group Member: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['isUserPrayerGroupMember'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Is User Prayer Group Member failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['isUserPrayerGroupMember'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'Is User Prayer Group Member Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}

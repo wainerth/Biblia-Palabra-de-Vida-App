@@ -16,7 +16,7 @@ class DetailCourseScreen extends StatefulWidget {
 }
 
 class _DetailCorseScreenState extends State<DetailCourseScreen> {
-  late final CourseModel course;
+  CourseModel? course;
   List<Stage> stages = [];
   bool loadAventure = false;
   bool isLoading = true;
@@ -49,7 +49,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
         errorMessage = courseResponse.error;
       }
       course = CourseModel.fromJson(courseResponse.data);
-      final result = await loadStageByCourse(userData.userId, course.id);
+      final result = await loadStageByCourse(userData.userId, course?.id);
       if (result.error != null) {
         errorMessage = result.error;
       } else {
@@ -355,7 +355,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                                   Navigator.pushNamed(
                                                       context, '/mapPage',
                                                       arguments: {
-                                                        'courseId': course.id,
+                                                        'courseId': course?.id,
                                                         'sectionId': stage.id
                                                       });
                                                 },
@@ -388,7 +388,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                         onPressed: () {
                                           Navigator.pushNamed(
                                               context, '/mapPage', arguments: {
-                                            'courseId': course.id,
+                                            'courseId': course?.id,
                                             'sectionId': stage.id
                                           });
                                         },

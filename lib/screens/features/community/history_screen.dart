@@ -7,6 +7,7 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,11 +34,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String sectionId = '';
   String courseId = '';
   bool finalStory = false;
+  int storyIndex = 0;
+  // variables para TTS
+  late FlutterTts flutterTts;
+  bool isPlaying = false;
+  double _speechRate = 0.5; // Velocidad por defecto
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initTTS(); // Inicializar TTS
       _generateData(context);
       // _controllerPage.addListener(_pageListener);
       getFontSizeText();
@@ -110,6 +117,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               .cast<History>()
               .toList();
         });
+        _togglePlayPause(stories[0]);
       } catch (e) {
         errorMessage = "An error occurred: $e";
       } finally {
@@ -123,7 +131,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   void dispose() {
-    // _controllerPage.removeListener(_pageListener);
+    flutterTts.stop(); // Detener TTS al salir
     _controllerPage.dispose();
     super.dispose();
   }
@@ -262,7 +270,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         )
                       : PageView.builder(
                           controller: _controllerPage,
-                          onPageChanged: (index) {
+                          onPageChanged: (index) async {
                             if (index > stories.length - 1) {
                               setState(() {
                                 finalStory = true;
@@ -272,6 +280,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 isPage = index.toDouble();
                               });
                             }
+                            setState(() {
+                              isPlaying = false;
+                            });
+                            await flutterTts.stop();
+                            _togglePlayPause(stories[index]);
                           },
                           itemCount: stories.length + 1,
                           itemBuilder: (context, index) {
@@ -377,7 +390,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     iconSize: 45.0,
                                     onPressed: isPage == 0
                                         ? null
-                                        : () {
+                                        : () async {
                                             _controllerPage.previousPage(
                                               duration:
                                                   Duration(milliseconds: 300),
@@ -385,7 +398,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             );
                                             setState(() {
                                               isPage = _controllerPage.page!;
+                                              storyIndex -= 1;
+                                              isPlaying = false;
                                             });
+                                            await flutterTts.stop();
+                                            _togglePlayPause(
+                                                stories[storyIndex]);
                                           },
                                     icon: Icon(
                                       Icons.arrow_left_sharp,
@@ -415,7 +433,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   child: IconButton(
                                     padding: EdgeInsets.all(0),
                                     iconSize: 45.0,
-                                    onPressed: () {
+                                    onPressed: () async {
                                       _controllerPage.nextPage(
                                         duration: Duration(milliseconds: 350),
                                         curve: Curves.easeIn,
@@ -424,7 +442,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       if (isPage < stories.length - 1) {
                                         setState(() {
                                           isPage = _controllerPage.page! + 1;
+                                          storyIndex += 1;
+                                          isPlaying = false;
                                         });
+                                        await flutterTts.stop();
+                                        _togglePlayPause(stories[storyIndex]);
                                       } else {
                                         setState(
                                           () {
@@ -545,65 +567,67 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           builder: (BuildContext context) {
                             return Center(
                               child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Stack(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius:
-                                        BorderRadius.circular(8)),
-                                    constraints:
-                                      BoxConstraints(minHeight: 213),
-                                    child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.transparent),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                    height: 50,
-                                    width: MediaQuery.sizeOf(context)
-                                      .width,
-                                    child: AudioPlayerWidget(
-                                      showImage: false,
-                                      inactiveColor: StyleColor.orange,
-                                      backgroundColor: Colors.white,
-                                      controlsColor:
-                                        StyleColor.turquoise,
-                                      pathUrl: story.audio == null
-                                        ? "reflexion2.mp3"
-                                        : story.audio!.url,
-                                    ),
-                                    ),
-                                  ),
-                                  ),
-                                  Positioned(
-                                  top: 0,
-                                  right: 0,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                    Navigator.of(context)
-                                      .pop(); // Cierra el diálogo
-                                    },
-                                    child: Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.withValues( alpha: 0.7), // Fondo semitransparente para el botón
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                      size: 20.0,
-                                    ),
-                                    ),
-                                  ),
+                                  Stack(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(8)),
+                                          constraints:
+                                              BoxConstraints(minHeight: 213),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.transparent),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 10),
+                                            height: 50,
+                                            width: MediaQuery.sizeOf(context)
+                                                .width,
+                                            child: AudioPlayerWidget(
+                                              showImage: false,
+                                              inactiveColor: StyleColor.orange,
+                                              backgroundColor: Colors.white,
+                                              controlsColor:
+                                                  StyleColor.turquoise,
+                                              pathUrl: story.audio == null
+                                                  ? "reflexion2.mp3"
+                                                  : story.audio!.url,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context)
+                                                .pop(); // Cierra el diálogo
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8.0),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.withValues(
+                                                  alpha:
+                                                      0.7), // Fondo semitransparente para el botón
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                              size: 20.0,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
-                                ),
-                              ],
                               ),
                             );
                           });
@@ -639,8 +663,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: story.video != null &&
-                                              (story.video!.url
-                                                      .contains('youtube.com') ||
+                                              (story.video!.url.contains(
+                                                      'youtube.com') ||
                                                   story.video!.url
                                                       .contains('youtu.be'))
                                           ? PlayerYoutubeWidget(
@@ -662,7 +686,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(8.0),
                                       decoration: BoxDecoration(
-                                        color: Colors.grey.withValues( alpha: 0.7), // Fondo semitransparente para el botón
+                                        color: Colors.grey.withValues(
+                                            alpha:
+                                                0.7), // Fondo semitransparente para el botón
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
@@ -682,6 +708,113 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ? StyleColor.turquoise
                         : StyleColor.twilightBlue,
                   ),
+                // lector de la historia
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: StyleColor.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    margin: EdgeInsets.symmetric(horizontal: 8),
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Slider para control de velocidad
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  // Botón de stop
+                                  IconButton(
+                                    icon: Icon(Icons.stop, size: 24),
+                                    color: StyleColor.turquoise,
+                                    onPressed: () async {
+                                      await flutterTts.stop();
+                                      setState(() {
+                                        isPlaying = false;
+                                      });
+                                    },
+                                  ),
+                                  // Botón de play/pause
+                                  IconButton(
+                                      icon: Icon(
+                                        isPlaying
+                                            ? Icons.pause
+                                            : Icons.play_arrow,
+                                        size: 28,
+                                      ),
+                                      color: StyleColor.turquoise,
+                                      onPressed: () {
+                                        _togglePlayPause(story);
+                                      }),
+                                  Icon(Icons.speed,
+                                      size: 18, color: StyleColor.black),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Slider(
+                                      value: _speechRate,
+                                      min: 0.1,
+                                      max: 1.0,
+                                      divisions: 9,
+                                      label: _getSpeedLabel(_speechRate),
+                                      activeColor: StyleColor.turquoise,
+                                      inactiveColor: StyleColor.turquoise
+                                          .withValues(alpha: 0.3),
+                                      onChanged: (value) async {
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+                                        setState(() {
+                                          _speechRate = value;
+                                        });
+                                        await flutterTts.setSpeechRate(value);
+                                        await prefs.setDouble(
+                                            'tts_speech_rate', value);
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    _getSpeedLabel(_speechRate),
+                                    style: TextStyle(
+                                      color: StyleColor.black,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                'Velocidad: ${(_speechRate * 100).round()}%',
+                                style: TextStyle(
+                                  color: StyleColor.black,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Indicador de progreso (opcional)
+                        // if (isPlaying &&
+                        //     currentPlayingVerseIndex != null)
+                        //   Padding(
+                        //     padding: EdgeInsets.only(left: 8),
+                        //     child: Text(
+                        //       '${currentPlayingVerseIndex! + 1}/${verses.length}',
+                        //       style: TextStyle(
+                        //         color: currentTheme.textColor
+                        //             .withOpacity(0.6),
+                        //         fontSize: 12,
+                        //       ),
+                        //     ),
+                        //   ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -748,5 +881,53 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
       ),
     );
+  }
+
+  void _initTTS() async {
+    flutterTts = FlutterTts();
+
+    await flutterTts.setLanguage("es-ES"); // Configurar idioma
+    // await flutterTts.setVoice({"name": "es-es-x-ana-local", "locale": "es-ES"});
+    await flutterTts.setSpeechRate(0.5); // Velocidad de habla (0-1)
+    await flutterTts.setVolume(1.0); // Volumen (0-1)
+    await flutterTts.setPitch(1.0); // Tono (0.5-2.0)
+
+    // Configurar handlers para eventos
+    flutterTts.setStartHandler(() {
+      setState(() => isPlaying = true);
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isPlaying = false;
+        // currentPlayingVerseIndex = null;
+      });
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        isPlaying = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error en TTS: $msg")),
+      );
+    });
+  }
+
+  String _getSpeedLabel(double speed) {
+    if (speed <= 0.4) return 'Lento';
+    if (speed <= 0.6) return 'Normal';
+    return 'Rápido';
+  }
+
+  Future<void> _togglePlayPause(story) async {
+    if (isPlaying) {
+      await flutterTts.pause();
+      setState(() => isPlaying = false);
+    } else {
+      await flutterTts.awaitSpeakCompletion(true);
+      await flutterTts.speak("${story.text}");
+      setState(() => isPlaying = true);
+    }
   }
 }

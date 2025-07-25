@@ -1,14 +1,13 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'graphql_config.dart';
 
-
 GraphQLClient createClient({String? authToken}) {
   final HttpLink httpLink = HttpLink(
-    GraphQLConfig.baseUrl,
-    // defaultHeaders: {
-    //   'Content-Type': 'application/json',
-    //   'Accept': 'application/json',
-    // },
+    "${GraphQLConfig.baseUrl}/graphql",
+    defaultHeaders: {
+      'Content-Type': 'application/json', // Fuerza JSON
+      'apollo-require-preflight': 'true', // Indica que es una solicitud segura
+    },
   );
 
   final AuthLink authLink = AuthLink(

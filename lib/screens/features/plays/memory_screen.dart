@@ -125,12 +125,15 @@ class _MemoryScreenState extends State<MemoryScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             setState(() {
-              difficulty = "F";
+              difficulty = "Facil";
               flippedCards = List<bool>.filled(lisMemory.length, false);
               matchedCards = List<bool>.filled(lisMemory.length, false);
             });
+            print('DEBUG: Dificultad seleccionada: F. Iniciando precarga...');
+            await _preloadImages(); // <-- Asegúrate de que este await termine.
+            print('DEBUG: Precarga de imágenes completada para dificultad F.');
           },
           child: Container(
             padding: EdgeInsets.all(8.0),
@@ -167,12 +170,15 @@ class _MemoryScreenState extends State<MemoryScreen>
           height: 15,
         ),
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             setState(() {
-              difficulty = "I";
+              difficulty = "Medio";
               flippedCards = List<bool>.filled(lisMemory.length, false);
               matchedCards = List<bool>.filled(lisMemory.length, false);
             });
+            print('DEBUG: Dificultad seleccionada: I. Iniciando precarga...');
+            await _preloadImages(); // <-- Asegúrate de que este await termine.
+            print('DEBUG: Precarga de imágenes completada para dificultad I.');
           },
           child: Container(
             padding: EdgeInsets.all(8.0),
@@ -209,12 +215,15 @@ class _MemoryScreenState extends State<MemoryScreen>
           height: 15,
         ),
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             setState(() {
-              difficulty = "D";
+              difficulty = "Difícil";
               flippedCards = List<bool>.filled(lisMemory.length, false);
               matchedCards = List<bool>.filled(lisMemory.length, false);
             });
+            print('DEBUG: Dificultad seleccionada: D. Iniciando precarga...');
+            await _preloadImages(); // <-- Asegúrate de que este await termine.
+            print('DEBUG: Precarga de imágenes completada para dificultad D.');
           },
           child: Container(
             padding: EdgeInsets.all(8.0),
@@ -319,7 +328,7 @@ class _MemoryScreenState extends State<MemoryScreen>
       final userData =
           Provider.of<UserProvider>(context, listen: false).currentUser;
       final responseSaveResult =
-          await saveResultPlay(userData!.userId, difficulty, 'memorias');
+          await saveResultPlay(userData!.userId, difficulty, 'memoria');
       if (responseSaveResult.error != null) {
         LoadingService().hideLoading();
         await showCustomDialogWithAction(context,
@@ -336,8 +345,7 @@ class _MemoryScreenState extends State<MemoryScreen>
         return;
       }
 
-      final responseResult =
-          await getAllResultGame(userData.userId, 'adivinanza');
+      final responseResult = await getAllResultGame(userData.userId, 'memoria');
       if (responseResult.error != null) {
         LoadingService().hideLoading();
         await showCustomDialogWithAction(context,
@@ -360,18 +368,37 @@ class _MemoryScreenState extends State<MemoryScreen>
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("${infoResult.message.resultTitle}"),
+          title: Text(
+            textAlign: TextAlign.center,
+            "${infoResult.message.resultTitle}",
+            style: StylesApp(context)
+                .textStyleBody18
+                .copyWith(color: StyleColor.black),
+          ),
           content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
+                textAlign: TextAlign.center,
                 "${infoResult.message.resultDescription}",
                 style: StylesApp(context)
                     .textStyleBody16
                     .copyWith(color: StyleColor.black),
               ),
               Text(
-                  "Categoría:  ${infoResult.message.category} Dificultad: ${infoResult.message.difficulty}"),
-              Text("Puntaje obtenido:  ${infoResult.score}")
+                textAlign: TextAlign.center,
+                "Dificultad: ${infoResult.message.difficulty}",
+                style: StylesApp(context)
+                    .textStyleBody12
+                    .copyWith(color: StyleColor.grayMedium),
+              ),
+              Text(
+                textAlign: TextAlign.center,
+                "Puntaje obtenido:  ${infoResult.score}",
+                style: StylesApp(context)
+                    .textStyleBody12
+                    .copyWith(color: StyleColor.grayMedium),
+              )
             ],
           ),
           actions: [
@@ -474,8 +501,7 @@ class _MemoryScreenState extends State<MemoryScreen>
         _audioService.stopBackgroundMusic();
       }
     } else {
-        _audioService.playBackgroundMusic();
-
+      _audioService.playBackgroundMusic();
     }
     setState(() {
       isBackgroundPlaying = prefs.getBool('isBackgroundPlaying') ?? true;
@@ -518,9 +544,9 @@ class _MemoryScreenState extends State<MemoryScreen>
     }
   }
 
-  void _handleCardTap(int index) {
+  void _handleCardTap(int index) async {
     if (!canFlip || flippedCards[index] || matchedCards[index]) return;
-    _audioService.playCardTapSound();
+    await _audioService.playCardTapSound();
     setState(() {
       flippedCards[index] = true;
     });
@@ -536,7 +562,7 @@ class _MemoryScreenState extends State<MemoryScreen>
       // Verificar si hay coincidencia
       if (lisMemory[firstSelectedIndex!].pair == lisMemory[secondIndex].pair) {
         // Coincidencia encontrada
-        _audioService.playMatchSound(); // Sonido de coincidencia
+        await _audioService.playMatchSound(); // Sonido de coincidencia
         setState(() {
           matchedCards[firstSelectedIndex!] = true;
           matchedCards[secondIndex] = true;
@@ -550,14 +576,14 @@ class _MemoryScreenState extends State<MemoryScreen>
         if (matchedCards.every((matched) => matched)) {
           setState(() {
             _playWin = true;
-            _audioService.stopBackgroundMusic();
-            _audioService.playWinSound();
           });
+            await _audioService.stopBackgroundMusic();
+            await _audioService.playWinSound();
           _showDialogFinallyPlay();
         }
       } else {
         // No hay coincidencia, voltear de nuevo después de un retraso
-        _audioService.playNoMatchSound(); // Sonido de no coincidencia
+        await _audioService.playNoMatchSound(); // Sonido de no coincidencia
         Future.delayed(const Duration(milliseconds: 1000), () {
           setState(() {
             flippedCards[firstSelectedIndex!] = false;
@@ -571,13 +597,35 @@ class _MemoryScreenState extends State<MemoryScreen>
   }
 
   int getTimeLevel(String difficulty) {
-    if (difficulty == 'F') {
+    if (difficulty == 'Facil') {
       return 90;
-    } else if (difficulty == 'I') {
+    } else if (difficulty == 'Medio') {
       return 60;
     } else {
       return 40;
     }
+  }
+
+  Future<void> _preloadImages() async {
+    // Muestra un indicador de carga mientras precargas las imágenes
+    LoadingService().showLoading(context);
+
+    // Iterar sobre todas las MemoryModel y precargar sus imágenes
+    final List<Future<void>> precacheFutures = [];
+    for (final memoryItem in lisMemory) {
+      final imageUrl = "${GraphQLConfig.urlServidor}${memoryItem.img.urlImg}";
+      // print('DEBUG: Preloading image: $imageUrl');
+      precacheFutures.add(precacheImage(
+        NetworkImage(imageUrl),
+        context,
+      ));
+    }
+
+    // Esperar a que TODAS las imágenes se precarguen
+    await Future.wait(precacheFutures);
+    LoadingService().hideLoading();
+    // Aquí podrías agregar un pequeño delay si quieres que el usuario vea un "cargando"
+    // o simplemente que el juego empiece instantáneamente después de la carga.
   }
 }
 
@@ -619,9 +667,8 @@ class _CountDownWidgetState extends State<CountDownWidget> {
   Widget build(BuildContext context) {
     return Text(
       "$_currentCount",
-      style: StylesApp(context)
-          .textStyCompleteLevelTitle
-          .copyWith(color:_currentCount <= 10 ? StyleColor.redDark : StyleColor.black),
+      style: StylesApp(context).textStyCompleteLevelTitle.copyWith(
+          color: _currentCount <= 10 ? StyleColor.redDark : StyleColor.black),
     );
   }
 

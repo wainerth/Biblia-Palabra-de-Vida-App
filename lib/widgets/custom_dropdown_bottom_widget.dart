@@ -7,14 +7,15 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
   final ModelData? selectedItem;
   final ValueChanged<ModelData?> onChanged;
   final String hintText;
+  final bool border;
 
-  const CustomDropdownBottomWidget({
-    super.key,
-    required this.items,
-    required this.selectedItem,
-    required this.onChanged,
-    required this.hintText,
-  });
+  const CustomDropdownBottomWidget(
+      {super.key,
+      required this.items,
+      required this.selectedItem,
+      required this.onChanged,
+      required this.hintText,
+      this.border = true});
 
   @override
   State<CustomDropdownBottomWidget<T>> createState() =>
@@ -33,78 +34,90 @@ class _CustomDropdownBottomWidgetState<T>
 
   cleanSearch() {
     setState(() {
-    _searchText = '';
-      
+      _searchText = '';
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.items.isEmpty ? null : () {
-      FocusScope.of(context).unfocus();
-        showModalBottomSheet(
-          backgroundColor: Colors.white,
-          context: context,
-          builder: (BuildContext context) {
-            return StatefulBuilder(
-              builder: (context, setState) {
-                return SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                  ),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 10),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8.0),
-                        child: TextFormField(
-                          // controller: searchTextController,Z
-                          style: StylesApp(context).textStyleSmallBlack,
-                          decoration: StylesApp(context)
-                              .inputDecorationOutlineStyle
-                              .copyWith(
-                                hintText: 'Buscar...',
-                                border: OutlineInputBorder(),
-                                suffixIcon: _searchText.isNotEmpty
-                                    ? IconButton(
-                                        icon: Icon(Icons.clear),
-                                        onPressed: () {
-                                          setState(() {
-                                           cleanSearch();
-                                          });
-                                        },
-                                      )
-                                    : null,
-                              ),
-                          onChanged: (value) {
-                            setState(() {
-                              _searchText = value;
-                            });
-                          },
+      onTap: widget.items.isEmpty
+          ? null
+          : () {
+              FocusScope.of(context).unfocus();
+              showModalBottomSheet(
+                backgroundColor: Colors.white,
+                context: context,
+                builder: (BuildContext context) {
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      return SingleChildScrollView(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
                         ),
-                      ),
-                      SizedBox(height: 10),
-                      _buildFilteredList(),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
+                        child: Column(
+                          children: [
+                            SizedBox(height: 10),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 8.0),
+                              child: TextFormField(
+                                // controller: searchTextController,Z
+                                style: StylesApp(context).textStyleSmallBlack,
+                                decoration: StylesApp(context)
+                                    .inputDecorationOutlineStyle
+                                    .copyWith(
+                                      hintText: 'Buscar...',
+                                      border: OutlineInputBorder(),
+                                      suffixIcon: _searchText.isNotEmpty
+                                          ? IconButton(
+                                              icon: Icon(Icons.clear),
+                                              onPressed: () {
+                                                setState(() {
+                                                  cleanSearch();
+                                                });
+                                              },
+                                            )
+                                          : null,
+                                    ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _searchText = value;
+                                  });
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            _buildFilteredList(),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
       child: AbsorbPointer(
         child: TextFormField(
           focusNode: _focusNode,
           textAlign: TextAlign.left,
-          style: StylesApp(context).textStyleBody14.copyWith(
-            color: Colors.black
-          ),
-          decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-            
-                hintText: widget.hintText,
-                suffixIcon: const Icon(Icons.arrow_drop_down),
+          style:
+              StylesApp(context).textStyleBody14.copyWith(color: Colors.black),
+            decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
+              border: widget.border
+                ? null
+                : OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(0),
+                  borderSide: BorderSide.none,
+                  ),
+              enabledBorder: widget.border
+                ? null
+                : OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(0),
+                  borderSide: BorderSide.none,
+                  ),
+              hintText: widget.hintText,
+              suffixIcon: const Icon(Icons.arrow_drop_down),
               ),
           controller: TextEditingController(
               text: widget.selectedItem?.label ??

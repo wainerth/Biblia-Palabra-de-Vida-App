@@ -29,16 +29,16 @@ class AudioService {
   // --- Efectos de Sonido (SFX) ---
   Future<void> playCardTapSound() async {
     // Usar play(AssetSource) directamente para sonidos cortos
-    await _sfxPlayer.play(AssetSource('sounds/card_tap.mp3'), mode: PlayerMode.lowLatency);
+    await AudioPlayer().play(AssetSource('sounds/card_tap.mp3'), mode: PlayerMode.lowLatency);
   }
 
 
   Future<void> playMatchSound() async {
-    await _sfxPlayer.play(AssetSource('sounds/match_success.mp3'), mode: PlayerMode.lowLatency);
+    await  AudioPlayer().play(AssetSource('sounds/match_success.mp3'), mode: PlayerMode.lowLatency);
   }
 
   Future<void> playNoMatchSound() async {
-    await _sfxPlayer.play(AssetSource('sounds/match_fail.mp3'), mode: PlayerMode.lowLatency);
+    await  AudioPlayer().play(AssetSource('sounds/match_fail.mp3'), mode: PlayerMode.lowLatency);
   }
 
   Future<void> playTimeUpSound() async {
@@ -66,7 +66,12 @@ class AudioService {
   Future<void> playWinSound() async {
     await _sfxPlayer.play(AssetSource('sounds/win_game.mp3'), mode: PlayerMode.lowLatency);
   }
-
+  Future<void> playBackgroundMusicMap() async {
+    await _backgroundPlayer.play(AssetSource('mar-aves.mp3'));
+  }
+  Future<void> stopBackgroundMusicMap() async {
+    await _backgroundPlayer.stop();
+  }
   // Liberar recursos
   void dispose() {
     _backgroundPlayer.dispose();

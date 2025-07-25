@@ -1,14 +1,20 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class AudioRecorderWidget extends StatefulWidget {
+  final bool saveToDevice;
+  final Function(File) onAudioRecorded;
   const AudioRecorderWidget({
     super.key,
+    this.saveToDevice = false,
+    required this.onAudioRecorded,
   });
 
   @override
@@ -62,8 +68,7 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
         print(e);
       }
     }
-    setState(() {
-    });
+    setState(() {});
   }
 
   Future<void> startRecording() async {
@@ -73,6 +78,7 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
         _recordingDuration = Duration.zero;
       });
       await _soundRecorder.startRecorder(toFile: 'audio.aac');
+      
       _recordingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
         setState(() {
           _recordingDuration += Duration(seconds: 1);
@@ -110,6 +116,18 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
 
   Future<void> stopRecording() async {
     final path = await _soundRecorder.stopRecorder();
+    // final String? pathFile = await _soundRecorder.getRecordURL(path: path!);
+      if (path != null) {
+        final file = File(path);
+        if (widget.saveToDevice == true) {
+          // Ejemplo de almacenamiento en el directorio de documentos
+          final directory = await getApplicationDocumentsDirectory();
+          final newPath =
+              '${directory.path}/audio_${DateTime.now().millisecondsSinceEpoch}.aac';
+          final savedFile = await file.copy(newPath);
+        }
+        widget.onAudioRecorded.call(file);
+      }
     _recordingTimer?.cancel();
     if (kDebugMode) {
       print('Record finished: $path');
@@ -220,7 +238,7 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
                             borderRadius: BorderRadius.circular(100)),
                         child: IconButton(
                           iconSize: 30.sp,
-                          onPressed:null,
+                          onPressed: null,
                           icon: Icon(
                             Icons.mic,
                             color: Colors.white,

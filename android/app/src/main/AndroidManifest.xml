@@ -9,12 +9,25 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
+    
+    <!-- <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" /> -->
+    <!-- <uses-permission android:name="android.permission.GET_INSTALLED_APPS" /> -->
+    <queries>
+        <!-- Necesario para Android 11+ -->
+        <package android:name="amistad.online2" /> <!-- Ejemplo -->
+        <!-- Agrega aquí los paquetes que quieras verificar -->
+        <!-- O usa este enfoque más amplio: -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="amistad.online2" />
+        </intent>
+    </queries>
     <application
-        android:label="biblia_palabra_de_vida_app"
+        android:label="Biblia Palabra de vida"
         android:name="${applicationName}"
         android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true">
 
         <activity

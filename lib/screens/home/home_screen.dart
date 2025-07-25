@@ -15,13 +15,13 @@ class _HomeScreenState extends State<HomeScreen> {
    @override
   void initState() {
     super.initState();
-    _initializeCatalogues();
+    // _initializeCatalogues();
   }
 
-  void _initializeCatalogues() async {
-    final catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
-    catalogueProvider.initialize();
-  }
+  // void _initializeCatalogues() async {
+  //   final catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
+  //   catalogueProvider.initialize();
+  // }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -168,7 +168,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "F";
+              difficulty = "Facil";
             });
             await loadCharacters();
           },
@@ -209,7 +209,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "I";
+              difficulty = "Medio";
             });
             await loadCharacters();
           },
@@ -250,7 +250,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "D";
+              difficulty = "Difícil";
             });
             await loadCharacters();
           },

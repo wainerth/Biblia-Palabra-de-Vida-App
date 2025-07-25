@@ -6,6 +6,8 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_io/io.dart';
 
@@ -1484,7 +1486,6 @@ Future<ResponseData> deleteVerseFavorite(String userId, String verseId) async {
       error: null,
     );
   } on TimeoutException catch (e) {
-   
     return ResponseData(
         data: null, error: 'Delete Verse Favorite Timeout de conexión $e');
   } catch (e) {
@@ -1620,6 +1621,99 @@ Future<ResponseData> saveResultPlay(
   } on TimeoutException catch (e) {
     return ResponseData(
         data: null, error: 'Save Result By User Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+// mutación para Prayer
+Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+  // Prepara el archivo como MultipartFile si existe
+  // final List<MapEntry<String, MultipartFile>> files = [];
+  // if (prayer.audio != null) {
+  //   files.add(
+  //     MapEntry(
+  //       'audio', // Nombre del campo en GraphQL (debe coincidir con el esquema)
+  //       await MultipartFile.fromPath(
+  //         'audio', // Nombre del archivo en el formulario
+  //         prayer.audio.path,
+  //         contentType: MediaType('audio', 'aac'), // Ajusta según el formato
+  //       ),
+  //     ),
+  //   );
+  // }
+  // 2. Prepara el archivo como MultipartFile
+  final multipartFile = await MultipartFile.fromPath(
+    'audio', // Nombre del campo en GraphQL (mutation)
+    prayer.audio.path,
+    contentType: MediaType('audio', 'aac'), // Ajusta según tu formato
+  );
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "CreateRequestPrayer",
+    document: gql(r'''
+     mutation CreateRequestPrayer($inputData: OnePrayer!) {
+        createRequestPrayer(inputData: $inputData) {
+          successful
+          message
+          id
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "inputData": {
+        "audio": multipartFile,
+        "description": prayer.description,
+        "prayerFor": prayer.prayerFor,
+        "prayerSubTypeId": prayer.prayerSubTypeId,
+        "userId": prayer.userId
+      }
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Create Request Prayer: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['createRequestPrayer'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Create Request Prayer failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['createRequestPrayer'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    return ResponseData(
+        data: null, error: 'Create Request Prayer Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

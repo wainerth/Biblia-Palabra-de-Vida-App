@@ -4,7 +4,7 @@ class ResultGameModel {
   final String id;
   final String day;
   final Message message;
-  final double score;
+  final int score;
 
   ResultGameModel(
       {required this.id,
@@ -17,7 +17,7 @@ class ResultGameModel {
         id: json['id'],
         day: json['day'],
         message: Message.fromJson(json['message']),
-        score: json['score']);
+        score: json['score'] ?? 0);
   }
 
   Map<String, dynamic> toJson() {
