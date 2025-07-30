@@ -33,7 +33,7 @@ class SoonScreen extends StatelessWidget {
                             padding: EdgeInsets.all(0),
                             iconSize: 30.0,
                             onPressed: () {
-                              Navigator.pop(context);
+                              Navigator.pushNamed(context, '/layoutPage');
                             },
                             icon: Icon(
                               Icons.arrow_back,
@@ -57,10 +57,9 @@ class SoonScreen extends StatelessWidget {
                     Container(
                       height: 250,
                       width: 250,
-                      decoration:BoxDecoration(
-                        color:Colors.black,
-                        borderRadius: BorderRadius.circular(200)
-                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(200)),
                       child: Image.asset(
                         "assets/comingSoon.gif", // GIF animado
                         height: 200,

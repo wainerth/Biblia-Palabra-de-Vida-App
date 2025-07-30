@@ -330,6 +330,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
   Future<void> _loadData(
       int page, int limit, String versionId, String searchWord) async {
     setState(() {
+      searchResult = [];
       loading = true;
     });
     final responseResult =

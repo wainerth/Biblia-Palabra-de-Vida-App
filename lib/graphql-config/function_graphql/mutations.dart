@@ -1642,21 +1642,7 @@ Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
   String? userToken = prefs.getString('userToken');
 
   final GraphQLClient client = createClient(authToken: userToken);
-  // Prepara el archivo como MultipartFile si existe
-  // final List<MapEntry<String, MultipartFile>> files = [];
-  // if (prayer.audio != null) {
-  //   files.add(
-  //     MapEntry(
-  //       'audio', // Nombre del campo en GraphQL (debe coincidir con el esquema)
-  //       await MultipartFile.fromPath(
-  //         'audio', // Nombre del archivo en el formulario
-  //         prayer.audio.path,
-  //         contentType: MediaType('audio', 'aac'), // Ajusta según el formato
-  //       ),
-  //     ),
-  //   );
-  // }
-  // 2. Prepara el archivo como MultipartFile
+  //  Prepara el archivo como MultipartFile
   final multipartFile = await MultipartFile.fromPath(
     'audio', // Nombre del campo en GraphQL (mutation)
     prayer.audio.path,
@@ -1714,6 +1700,72 @@ Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
   } on TimeoutException catch (e) {
     return ResponseData(
         data: null, error: 'Create Request Prayer Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+Future<ResponseData> deleteRequestPrayer(String prayerId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "DeleteRequestPrayer",
+    document: gql(r'''
+     mutation DeleteRequestPrayer($prayerId: ID!) {
+        deleteRequestPrayer(prayerId: $prayerId) {
+          successful
+          message
+          id
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "prayerId": prayerId
+      },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Delete Request Prayer: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['deleteRequestPrayer'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Delete Request Prayer failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['deleteRequestPrayer'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    return ResponseData(
+        data: null, error: 'Delete Request Prayer Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

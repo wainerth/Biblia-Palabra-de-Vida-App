@@ -94,7 +94,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               fit: BoxFit.cover,
                               height: 160,
                               width: 160,
-                              alignment: Alignment.topCenter,
+                              alignment: Alignment.center,
                             ),
                           ),
                         ),

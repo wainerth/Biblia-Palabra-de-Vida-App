@@ -763,19 +763,24 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                     .sizeContainerAvatar
                                     .width,
                                 child: ClipOval(
-                                  child: CachedNetworkImage(
-                                      fit: BoxFit.cover,
-                                      alignment: Alignment.topCenter,
-                                      imageUrl: userData != null &&
-                                              userData!.imgProfileUser != null
-                                          ? GraphQLConfig.urlServidor +
+                                  child: (userData != null &&
+                                          userData!.imgProfileUser != null)
+                                      ? CachedNetworkImage(
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment.topCenter,
+                                          imageUrl: GraphQLConfig.urlServidor +
                                               userData.imgProfileUser.urlImg +
-                                              '?timestamp=${DateTime.now().millisecondsSinceEpoch}'
-                                          : 'assets/no-image.jpg',
-                                      placeholder: (context, url) =>
-                                          Image.asset('assets/no-image.jpg'),
-                                      errorWidget: (context, url, error) =>
-                                          Image.asset('assets/no-image.jpg')),
+                                              '?timestamp=${DateTime.now().millisecondsSinceEpoch}',
+                                          placeholder: (context, url) =>
+                                              Image.asset('assets/no-image.jpg'),
+                                          errorWidget: (context, url, error) =>
+                                              Image.asset('assets/no-image.jpg'),
+                                        )
+                                      : Image.asset(
+                                          'assets/no-image.jpg',
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment.center,
+                                        ),
                                 ),
                               ),
                             ],

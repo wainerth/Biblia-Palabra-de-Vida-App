@@ -41,10 +41,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
   LevelProgressUser? levelProgress;
   SendScoreModel? sendScore = SendScoreModel(
     isLastLevel: false,
-    // titleUnlocked: false,
     isLastStage: false,
     rewardObtained: false,
-    // prizeWon: false
   );
   Question currentQuestion = Question(
       id: "",

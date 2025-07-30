@@ -1,8 +1,10 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class InfoModalWidget extends StatefulWidget {
-  final dynamic dataSeleccionada;
+  final PrayerModel dataSeleccionada;
   const InfoModalWidget({
     super.key,
     required this.dataSeleccionada,
@@ -57,8 +59,8 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                           style: StylesApp(context)
                                               .textStyleBody2_14),
                                       TextSpan(
-                                          text:
-                                              "${widget.dataSeleccionada["dateAndTime"]}",
+                                          text: widget
+                                              .dataSeleccionada.requestDate,
                                           style: StylesApp(context)
                                               .textStyleBody2_14
                                               .copyWith(color: Colors.black)),
@@ -74,7 +76,7 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                               .textStyleBody2_14),
                                       TextSpan(
                                         text:
-                                            "${widget.dataSeleccionada["applicant"]}",
+                                            widget.dataSeleccionada.requestedBy,
                                         style: StylesApp(context)
                                             .textStyleBody2_14
                                             .copyWith(color: Colors.black),
@@ -90,8 +92,7 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                           style: StylesApp(context)
                                               .textStyleBody2_14),
                                       TextSpan(
-                                        text:
-                                            "${widget.dataSeleccionada["addressee"]}",
+                                        text: widget.dataSeleccionada.prayedFor,
                                         style: StylesApp(context)
                                             .textStyleBody2_14
                                             .copyWith(color: Colors.black),
@@ -100,6 +101,7 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                   ),
                                 ),
                                 Text.rich(
+                                  softWrap: true, 
                                   TextSpan(
                                     children: [
                                       TextSpan(
@@ -107,28 +109,23 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                           style: StylesApp(context)
                                               .textStyleBody2_14),
                                       TextSpan(
-                                        text:
-                                            "${widget.dataSeleccionada["typeOfPrayer"]}",
+                                        text: widget.dataSeleccionada
+                                            .prayerCategory.name.trim(),
                                         style: StylesApp(context)
                                             .textStyleBody2_14
                                             .copyWith(color: Colors.black),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                          text: "",
-                                          style: StylesApp(context)
+                                        TextSpan(
+                                          text: " / ",
+                                          style:  StylesApp(context)
                                               .textStyleBody2_14),
                                       TextSpan(
-                                          text:
-                                              "${widget.dataSeleccionada["prayer"]}",
-                                          style: StylesApp(context)
-                                              .textStyleBody2_14
-                                              .copyWith(color: Colors.black)),
+                                        text: widget.dataSeleccionada
+                                            .prayerSubType.name,
+                                        style: StylesApp(context)
+                                            .textStyleBody2_14
+                                            .copyWith(color: Colors.black),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -140,8 +137,8 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                           style: StylesApp(context)
                                               .textStyleBody2_14),
                                       TextSpan(
-                                          text:
-                                              "${widget.dataSeleccionada["description"]}",
+                                          text: widget
+                                              .dataSeleccionada.prayerDetails,
                                           style: StylesApp(context)
                                               .textStyleBody2_14
                                               .copyWith(color: Colors.black)),
@@ -151,7 +148,10 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                               ],
                             ),
                             AudioPlayerWidget(
-                              pathUrl: widget.dataSeleccionada["audio"],
+                              pathUrl: widget.dataSeleccionada.audioPrayer !=
+                                      null
+                                  ? "${GraphQLConfig.urlServidor}${widget.dataSeleccionada.audioPrayer!.url}"
+                                  : '',
                               showImage: false,
                             ),
                             SizedBox(
@@ -182,10 +182,11 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                     child: Container(
                                       constraints: BoxConstraints(
                                         minHeight: 73.0,
-                                        maxHeight:
-                                            widget.dataSeleccionada["status"]
-                                                ? 194.0
-                                                : 73.0,
+                                        maxHeight: widget.dataSeleccionada
+                                                    .statusRequest !=
+                                                null
+                                            ? 194.0
+                                            : 73.0,
                                       ),
                                       height: double.infinity,
                                       decoration: BoxDecoration(
@@ -201,10 +202,15 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                           controller: _scrollController,
                                           child: Column(
                                             children: [
-                                              if (widget
-                                                  .dataSeleccionada["status"])
+                                              if (widget.dataSeleccionada
+                                                      .statusRequest !=
+                                                  null)
                                                 Text(
-                                                  "El grupo de oración oro por tu pedido.",
+                                                  widget
+                                                      .dataSeleccionada
+                                                      .statusRequest
+                                                      .messageSystems!
+                                                      .message,
                                                   style: StylesApp(context)
                                                       .textStyleBody15
                                                       .copyWith(
@@ -212,19 +218,6 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                                 ),
                                               SizedBox(
                                                 height: 21.0,
-                                              ),
-                                              Text(
-                                                widget.dataSeleccionada[
-                                                        "status"]
-                                                    ? widget.dataSeleccionada[
-                                                            "message"]
-                                                        .replaceAll('"', '\n"')
-                                                    : "Tu pedido fue enviado al grupo de oración para clamar a Dios en tu favor.",
-                                                textAlign: TextAlign.left,
-                                                style: StylesApp(context)
-                                                    .textStyleBody15
-                                                    .copyWith(
-                                                        color: Colors.black),
                                               ),
                                             ],
                                           ),

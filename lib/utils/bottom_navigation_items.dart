@@ -152,7 +152,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             color: StyleColor.blueDark,
           ),
           Text(
-            'Audio',
+            'Radio',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -175,7 +175,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             color: StyleColor.blueDark,
           ),
           Text(
-            'Audio',
+            'Radio',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -417,7 +417,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Audio',
+            'Radio',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -440,7 +440,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Audio',
+            'Radio',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -1243,7 +1243,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Audio',
+            'Radio',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -1266,7 +1266,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Audio',
+            'Radio',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -1506,7 +1506,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Audio',
+            'Radio',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -1529,7 +1529,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Audio',
+            'Radio',
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),

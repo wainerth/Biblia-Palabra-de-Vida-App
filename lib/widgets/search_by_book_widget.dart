@@ -123,7 +123,28 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                       _chaptersExpanded = true;
                       _versesExpanded = false;
                     });
+                    // leemos los libros de esta version y tomamos el primero
                     await loadBookByVersion(version!.value);
+                    setState(() {
+                      bookSelected = ModelData(
+                          label: books.first.label, value: books.first.value);
+                      _chaptersExpanded = true;
+                      _versesExpanded = false;
+                    });
+                    // leemos los capítulos de esta version y tomamos el primero
+                    await getChapterByBook(bookSelected!.value);
+                    setState(() {
+                      chapterSelected = chapters.first;
+                      initialChapter = [chapterSelected!];
+                      _chaptersExpanded = false;
+                    });
+                    // leemos los versículos y seleccionamos el primero
+                    await loadVerses(chapterSelected!.id);
+
+                    setState(() {
+                      _versesExpanded = true;
+                      _selectedItems.add(verses.first);
+                    });
                   },
                   selectedItem: versionSelected!.value.isNotEmpty
                       ? bibleVersions.firstWhere((element) =>

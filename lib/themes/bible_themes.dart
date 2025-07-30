@@ -90,7 +90,7 @@ class BibleTheme {
       backgroundColor: StyleColor.black,
       disabledColor: StyleColor.grayMedium,
       textColor: StyleColor.white,
-      appBarColor: StyleColor.black,
+      appBarColor: const Color.fromARGB(255, 46, 45, 45),
       buttonColor: StyleColor.turquoise,
       buttonTextColor: StyleColor.white,
       verseHighlightColor: Colors.yellow,

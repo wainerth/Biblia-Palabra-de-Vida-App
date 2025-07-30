@@ -1,7 +1,15 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
+import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
+import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/info_modal_widget.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class ListRequestScreen extends StatefulWidget {
   const ListRequestScreen({super.key});
@@ -12,184 +20,81 @@ class ListRequestScreen extends StatefulWidget {
 
 class _ListRequestScreenState extends State<ListRequestScreen> {
   dynamic dataSeleccionada = {};
-  List listRequest = [
-    {
-      "id": "1",
-      "dateAndTime": "07/01/2025  20:30",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "addressee": "Juan Ramirez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "2",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": true,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "3",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "4",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "5",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "6",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "7",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "8",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "9",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "10",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
-    {
-      "id": "11",
-      "dateAndTime": "07/01/2025  20:30",
-      "addressee": "Juan Ramirez",
-      "applicant": "Pedro Alfonzo Ramírez Perez",
-      "typeOfPrayer": "Libertad de los vicios",
-      "prayer": "Fortaleza para resistir la tentación",
-      "description":
-          "Mi hijo esta en las drogas quiero verlo libre de ese vicio que Dios lo libre de esa situación, no se como ayudarlo",
-      "status": false,
-      "audio": "/audio.mp4",
-      "message":
-          "Juan 8:36: \"Así que, si el Hijo os libertare, seréis verdaderamente libres.\""
-    },
+  String? errorMessage;
+  bool isLoading = true;
+  List<PrayerModel> listRequest = [];
+  int itemPerPageValue = 10;
+  List<int> itemsPerPage = [
+    5,
+    10,
+    15,
+    25,
+    50,
+    100,
   ];
+  PaginationInfo pagination = PaginationInfo(
+    currentPage: 1,
+    totalPages: 0,
+    itemsPerPage: 0,
+    totalItems: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  );
 
   _deleteItem(String id) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Confirmación"),
-          content: Text("¿Está seguro de que desea eliminar esta petición?"),
+          title: Text(
+            "Confirmación",
+            style: StylesApp(context)
+                .textStyleBody2
+                .copyWith(color: StyleColor.black),
+          ),
+          content: Text(
+            "¿Está seguro de que desea eliminar esta petición?",
+            style: StylesApp(context)
+                .textStyleBody16
+                .copyWith(color: StyleColor.black),
+          ),
           actions: [
             TextButton(
-              child: Text("No"),
+              child: Text(
+                "No",
+                style: StylesApp(context)
+                    .textStyleBody10
+                    .copyWith(color: StyleColor.lavenderMist),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text("Sí"),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  listRequest.removeWhere((item) => item["id"] == id);
-                });
+              child: Text(
+                "Sí",
+                style: StylesApp(context)
+                    .textStyleBody10
+                    .copyWith(color: StyleColor.lavenderMist),
+              ),
+              onPressed: () async {
+                try {
+                  final responseDelete = await deleteRequestPrayer(id);
+                  if (responseDelete.error != null) {
+                    await showCustomDialog(context,
+                        message: responseDelete.error!,
+                        dialogType: DialogType.error);
+                    return;
+                  }
+                  Navigator.of(context).pop();
+                  setState(() {
+                    listRequest.removeWhere((item) => item.requestId == id);
+                  });
+                } catch (e) {
+                  await showCustomDialog(context,
+                      message: e.toString(), dialogType: DialogType.error);
+                  return;
+                }
               },
             ),
           ],
@@ -199,7 +104,18 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
   }
 
   @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generateData(context, pagination.currentPage, itemPerPageValue);
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<BibleThemeProvider>(context);
+    final currentTheme = themeProvider.themeData;
+
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -217,13 +133,55 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
               SizedBox(
                 height: 16.0,
               ),
-              Expanded(
-                child: ListView.builder(
-                    itemCount: listRequest.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return _cardListItem(context, index);
-                    }),
-              ),
+              if (isLoading) ...{
+                Center(
+                  child: LoadingIndicator(),
+                )
+              } else ...{
+                if (errorMessage != null) ...{
+                  BuildErrorWidget(
+                    errorMessage: errorMessage!,
+                    onRetry: () async => _generateData(
+                        context, pagination.currentPage, itemPerPageValue),
+                    onBack: () => Navigator.pop(context),
+                  )
+                } else ...{
+                  Expanded(
+                    child: ListView.builder(
+                        itemCount: listRequest.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return _cardListItem(context, index);
+                        }),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).padding.bottom,
+                      top: 8.0,
+                    ),
+                    child: CustomPagination(
+                      pagination: PaginationInfo(
+                        currentPage: pagination.currentPage,
+                        itemsPerPage: pagination.itemsPerPage,
+                        totalPages: pagination.totalPages,
+                        hasPreviousPage: pagination.hasPreviousPage,
+                        hasNextPage: pagination.hasNextPage,
+                        totalItems: pagination.totalItems,
+                      ),
+                      itemPerPageValue: itemPerPageValue,
+                      onPageChanged: (newPage, newPerPage) async {
+                        if (listRequest.isNotEmpty) {
+                          setState(() {
+                            itemPerPageValue = newPerPage;
+                          });
+                          await _generateData(context, newPage, newPerPage);
+                        }
+                      },
+                      itemsPerPage: itemsPerPage,
+                      currentTheme: currentTheme,
+                    ),
+                  ),
+                }
+              }
             ],
           ),
         ),
@@ -234,7 +192,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
   Container _cardListItem(BuildContext context, int index) {
     return Container(
       constraints: BoxConstraints(
-        minHeight: 89.0,
+        minHeight: 100.0,
       ),
       margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10),
       decoration: BoxDecoration(
@@ -242,7 +200,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
         borderRadius: BorderRadius.circular(8.0),
       ),
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
       child: Stack(
         children: [
           Column(
@@ -256,7 +214,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                         text: "Fecha hora: ",
                         style: StylesApp(context).textStyleBody2_14),
                     TextSpan(
-                        text: "${listRequest[index]["dateAndTime"]}",
+                        text: listRequest[index].requestDate,
                         style: StylesApp(context)
                             .textStyleBody2_14
                             .copyWith(color: Colors.black)),
@@ -270,7 +228,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                         text: "Por: ",
                         style: StylesApp(context).textStyleBody2_14),
                     TextSpan(
-                        text: "${listRequest[index]["addressee"]}",
+                        text: listRequest[index].requestedBy,
                         style: StylesApp(context)
                             .textStyleBody2_14
                             .copyWith(color: Colors.black)),
@@ -278,26 +236,23 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                 ),
               ),
               Text.rich(
+                softWrap: true,
                 TextSpan(
                   children: [
                     TextSpan(
                         text: "Oración por: ",
                         style: StylesApp(context).textStyleBody2_14),
                     TextSpan(
-                        text: "${listRequest[index]["typeOfPrayer"]}",
-                        style: StylesApp(context)
-                            .textStyleBody2_14
-                            .copyWith(color: Colors.black)),
-                  ],
-                ),
-              ),
-              Text.rich(
-                TextSpan(
-                  children: [
+                      text: "${listRequest[index].prayerCategory.name.trim()}",
+                      style: StylesApp(context)
+                          .textStyleBody2_14
+                          .copyWith(color: Colors.black),
+                    ),
                     TextSpan(
-                        text: "", style: StylesApp(context).textStyleBody2_14),
+                        text: " / ",
+                        style: StylesApp(context).textStyleBody2_14),
                     TextSpan(
-                        text: "${listRequest[index]["prayer"]}",
+                        text: listRequest[index].prayerSubType.name,
                         style: StylesApp(context)
                             .textStyleBody2_14
                             .copyWith(color: Colors.black)),
@@ -323,11 +278,11 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
             ),
           ),
           Positioned(
-              bottom: -10,
+              bottom: -15,
               right: 0,
               child: IconButton(
                   onPressed: () {
-                    _deleteItem(listRequest[index]["id"]);
+                    _deleteItem(listRequest[index].requestId);
                   },
                   icon: Icon(Icons.delete_outline)))
         ],
@@ -357,5 +312,41 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
         return InfoModalWidget(dataSeleccionada: infoData);
       },
     );
+  }
+
+  Future<void> _generateData(BuildContext context, int page, int limit) async {
+    setState(() {
+      errorMessage = null;
+      isLoading = true;
+    });
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userData = userProvider.currentUser;
+    try {
+      final responseListRequest =
+          await getAllRequestPrayerByUser(userData?.userId);
+      if (responseListRequest.error != null) {
+        setState(() {
+          errorMessage = responseListRequest.error!;
+          isLoading = false;
+        });
+        return;
+      }
+
+      setState(() {
+        listRequest = responseListRequest.data['data']
+            .map<PrayerModel>((request) => PrayerModel.fromJson(request))
+            .toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }

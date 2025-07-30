@@ -1,6 +1,11 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/models/prayer_model.dart';
+import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class TakePrayerScreen extends StatefulWidget {
   const TakePrayerScreen({super.key});
@@ -11,11 +16,13 @@ class TakePrayerScreen extends StatefulWidget {
 
 class _TakePrayerScreenState extends State<TakePrayerScreen> {
   String? groupId;
-
+  String? errorMessage;
+  bool isLoading = true;
+  List<PrayerModel> listRequest = [];
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData(context);
+      _generateData(context);
     });
     super.initState();
   }
@@ -41,12 +48,6 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
           ),
         ),
         backgroundColor: StyleColor.turquoise,
-        title: Text(
-          'Pedidos de Oración',
-          style: StylesApp(context)
-              .textStyleBody16
-              .copyWith(color: StyleColor.white),
-        ),
         actions: [
           Image.asset(
             "assets/kawaii_fire.png",
@@ -56,16 +57,80 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
         ],
       ),
       backgroundColor: StyleColor.turquoise,
-      body: Container(
-        child: Text("$groupId"),
+      body: Column(
+        children: [
+           Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: const AssetImage("assets/elipsisTop.png"),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 48.0,
+                        ),
+                        Center(
+                          child: Text(
+                            textAlign: TextAlign.center,
+                            'Pedidos de Oración',
+                            style: StylesApp(context).textStyleTitleOrange,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 35.sp,
+                        )
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+          Container(
+            child: Text("$groupId"),
+          ),
+        ],
       ),
     );
   }
 
-  void _loadData(BuildContext context) {
-    final prayerParam = ModalRoute.of(context)!.settings.arguments;
+  void _generateData(BuildContext context) async {
     setState(() {
-      groupId = (prayerParam as Map<String, dynamic>)['groupId'];
+      errorMessage = null;
+      isLoading = true;
     });
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userData = userProvider.currentUser;
+    try {
+      final responseListRequest =
+          await getAllRequestPrayerByGroupId(userData?.userId);
+      if (responseListRequest.error != null) {
+        setState(() {
+          errorMessage = responseListRequest.error!;
+          isLoading = false;
+        });
+        return;
+      }
+
+      setState(() {
+        listRequest = responseListRequest.data['data']
+            .map<PrayerModel>((request) => PrayerModel.fromJson(request))
+            .toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }

@@ -381,7 +381,7 @@ class CardSearchTextWidget extends StatelessWidget {
                               }
                               // Añade la ocurrencia resaltada
                               spans.add(TextSpan(
-                                text: '"${text.substring(start, end)}"',
+                                text: text.substring(start, end),
                                 style: TextStyle(
                                     backgroundColor: StyleColor.orange
                                         .withValues(alpha: 0.50),
@@ -394,11 +394,11 @@ class CardSearchTextWidget extends StatelessWidget {
                               spans.add(
                                   TextSpan(text: text.substring(currentIndex)));
                             }
-                            // Añade comillas al principio y final
-                            if (spans.isNotEmpty) {
-                              spans.insert(0, const TextSpan(text: '"'));
-                              spans.add(const TextSpan(text: '"'));
-                            }
+                            // // Añade comillas al principio y final
+                            // if (spans.isNotEmpty) {
+                            //  spans.insert(0, const TextSpan(text: '"'));
+                            //   spans.add(const TextSpan(text: '"'));
+                            // } 
                             return spans;
                           }(),
                         ),

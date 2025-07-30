@@ -3600,6 +3600,7 @@ Future<ResponseData> getAllPrayerRequestTypes() async {
     }
   }
 }
+
 // obtener los sub tipos de un tipo de pedido de oración
 Future<ResponseData> getAllPrayerRequestSubTypes(String prayerTypeId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -3619,9 +3620,9 @@ Future<ResponseData> getAllPrayerRequestSubTypes(String prayerTypeId) async {
         }
       }
       '''),
-      variables: <String, dynamic>{
-        "prayerTypeId": prayerTypeId,
-      },
+    variables: <String, dynamic>{
+      "prayerTypeId": prayerTypeId,
+    },
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
@@ -3655,8 +3656,7 @@ Future<ResponseData> getAllPrayerRequestSubTypes(String prayerTypeId) async {
       print('Timeout: $e');
     }
     return ResponseData(
-        data: null,
-        error: 'Get ALl Prayer Sub Type Timeout de conexión $e');
+        data: null, error: 'Get ALl Prayer Sub Type Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -3691,9 +3691,9 @@ Future<ResponseData> isMemberPrayerGroup(String userId) async {
         }
       }
       '''),
-      variables: <String, dynamic>{
-        "userId": userId,
-      },
+    variables: <String, dynamic>{
+      "userId": userId,
+    },
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
@@ -3746,26 +3746,64 @@ Future<ResponseData> isMemberPrayerGroup(String userId) async {
 }
 
 // Obtener las solicitudes de Oración de asignadas a un grupo de oración
-Future<ResponseData> getAllRequestPreachByGroupId(String groupId) async {
+Future<ResponseData> getAllRequestPrayerByGroupId(String? groupId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
   final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
-    operationName: "IsUserPrayerGroupMember",
+    operationName: "GetPrayerRequestByPrayerGroup",
     document: gql(r'''
-      query IsUserPrayerGroupMember($userId: ID!) {
-        isUserPrayerGroupMember(userId: $userId){
-          successful
-          message
-          id
+      query GetPrayerRequestByPrayerGroup($page: Int, $limit: Int, $prayerGroupId: ID, $text: String) {
+        getPrayerRequestByPrayerGroup(page: $page, limit: $limit, prayerGroupId: $prayerGroupId, text: $text) {
+          data {
+            requestId
+            prayedFor
+            prayerCategory {
+              id
+              name
+            }
+            prayerSubType {
+              id
+              name
+            }
+            requestDate
+            prayerDetails
+            audioPrayer {
+              url
+            }
+            verse {
+              chapter {
+                chapter
+              }
+              verse {
+                verse
+                text
+              }
+            }
+            statusRequest {
+              id
+              name
+              messageSystems {
+                message
+              }
+            }
+          }
+          meta {
+            currentPage
+            totalPages
+            itemsPerPage
+            totalItems
+            hasPreviousPage
+            hasNextPage
+          }
         }
       }
       '''),
-      variables: <String, dynamic>{
-        "userId": groupId,
-      },
+    variables: <String, dynamic>{
+      "userId": groupId,
+    },
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
@@ -3777,21 +3815,21 @@ Future<ResponseData> getAllRequestPreachByGroupId(String groupId) async {
         return ResponseData(
           data: null,
           error:
-              'Is User Prayer Group Member: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+              'Get Prayer Request By Prayer Group: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
         );
       }
     }
 
     final data = removeTypename(result.data);
-    if (data['isUserPrayerGroupMember'] == null) {
+    if (data['getPrayerRequestByPrayerGroup'] == null) {
       return ResponseData(
         data: null,
-        error: 'Is User Prayer Group Member failed: No data returned',
+        error: 'Get Prayer Request By Prayer Group failed: No data returned',
       );
     }
 
     return ResponseData(
-      data: data['isUserPrayerGroupMember'],
+      data: data['getPrayerRequestByPrayerGroup'],
       error: null,
     );
   } on TimeoutException catch (e) {
@@ -3800,7 +3838,128 @@ Future<ResponseData> getAllRequestPreachByGroupId(String groupId) async {
     }
     return ResponseData(
         data: null,
-        error: 'Is User Prayer Group Member Timeout de conexión $e');
+        error: 'Get Prayer Request By Prayer Group Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+// Obtener las solicitudes de Oración de asignadas a un grupo de oración
+Future<ResponseData> getAllRequestPrayerByUser(String? userId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetPrayerRequestByUserId",
+    document: gql(r'''
+     query GetPrayerRequestByUserId($page: Int, $limit: Int, $userId: ID, $text: String) {
+        getPrayerRequestByUserId(page: $page, limit: $limit, userId: $userId, text: $text) {
+          data {
+            requestId
+            prayedFor
+            requestedBy
+            requestDate
+            prayerDetails
+            audioPrayer {
+              url
+              id
+            }
+             prayerCategory {
+              name
+              id
+            }
+            prayerSubType {
+                id
+                name
+              }
+               verse {
+              book {
+                id
+                numberBook
+                modernName
+              }
+              chapter {
+                chapter
+                id
+              }
+              verse {
+                verse
+                text
+              }
+            }
+            statusRequest {
+              name
+              messageSystems {
+                message
+              }
+            }
+          }
+          meta {
+            currentPage
+            totalPages
+            itemsPerPage
+            totalItems
+            hasPreviousPage
+            hasNextPage
+          }
+        }
+      }
+  
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "page": null,
+      "limit": null,
+      "text": null
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get Prayer Request By User Id: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getPrayerRequestByUserId'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Prayer Request By User Id failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getPrayerRequestByUserId'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'Get Prayer Request By User Id Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

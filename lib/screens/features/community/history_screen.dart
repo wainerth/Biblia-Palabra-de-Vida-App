@@ -595,7 +595,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                               controlsColor:
                                                   StyleColor.turquoise,
                                               pathUrl: story.audio == null
-                                                  ? "reflexion2.mp3"
+                                                  ? ""
                                                   : story.audio!.url,
                                             ),
                                           ),

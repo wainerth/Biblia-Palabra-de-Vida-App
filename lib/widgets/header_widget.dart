@@ -42,20 +42,19 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   child: SizedBox(
                     height: 50.0,
                     width: 50.0,
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(
-                        "${GraphQLConfig.urlServidor}${userData?.imgProfileUser!.urlImg}",
-                      ),
-                    ),
+                    child: userData?.imgProfileUser != null
+                        ? CircleAvatar(
+                            radius: 50,
+                            backgroundImage: NetworkImage(
+                              "${GraphQLConfig.urlServidor}${userData?.imgProfileUser?.urlImg}",
+                            ),
+                          )
+                        : CircleAvatar(
+                            radius: 50,
+                            backgroundImage: AssetImage('assets/icon.png'),
+                          ),
                   ),
                 ),
-                // Center(
-                //   child: Text(
-                //     "${userData?.user.username}",
-                //     style: StylesApp(context).textStyleBody12,
-                //   ),
-                // )
               ],
             ),
           ),

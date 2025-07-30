@@ -320,7 +320,7 @@ class _MapScreenState extends State<MapScreen>
                                 onShowInfoCourse: () {
                                   Navigator.popAndPushNamed(
                                       context, '/detailCoursePage',
-                                      arguments: course!.id);
+                                      arguments:{"courseId": course!.id});
                                 },
                                 onShowInfoStage: () {
                                   showDialog(

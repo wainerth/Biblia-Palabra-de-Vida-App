@@ -106,7 +106,7 @@ class _QuizScreenState extends State<QuizScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "Facil";
+              difficulty = "F";
             });
             await loadQuestions();
           },
@@ -147,7 +147,7 @@ class _QuizScreenState extends State<QuizScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "Medio";
+              difficulty = "I";
             });
             await loadQuestions();
           },
@@ -188,7 +188,7 @@ class _QuizScreenState extends State<QuizScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "Difícil";
+              difficulty = "D";
             });
             await loadQuestions();
           },
@@ -430,7 +430,7 @@ class _QuizScreenState extends State<QuizScreen> {
         (currentAnswers.isNotEmpty) ? currentAnswers[index].isCorrect : false;
 
     if (!_isCorrect) {
-       await _audioService.playWrongAnswer();
+      await _audioService.playWrongAnswer();
       setState(() {
         _suggestionSelected = true;
         failedAttempts -= 1;
@@ -439,7 +439,7 @@ class _QuizScreenState extends State<QuizScreen> {
       setState(() {
         _suggestionSelected = true;
       });
-     await  _audioService.playCorrectAnswer();
+      await _audioService.playCorrectAnswer();
     }
     setState(() {
       _selectionCompleted = true;
@@ -574,10 +574,17 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _showDialogFinallyPlay() async {
     LoadingService().showLoading(context);
-
+    String tipo = '';
+    if (difficulty == 'F') {
+      tipo = 'Facil';
+    } else if (difficulty == 'I') {
+      tipo = 'Medio';
+    } else {
+      tipo = 'Difícil';
+    }
     try {
       final responseSaveResult =
-          await saveResultPlay(userData!.userId, difficulty, 'preguntas');
+          await saveResultPlay(userData!.userId, tipo, 'preguntas');
       if (responseSaveResult.error != null) {
         LoadingService().hideLoading();
         await showCustomDialogWithAction(context,

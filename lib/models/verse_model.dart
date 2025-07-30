@@ -5,8 +5,8 @@ class VerseModel extends GridItem {
   final int chapterId;
   final int verse;
   final String text;
-  final String colorHighlight;
-  final List<HighlightRangeModel?> highlights;
+  final String? colorHighlight;
+  final List<HighlightRangeModel?>? highlights;
   final int? posIni;
   final int? posFin;
   final int status;

@@ -105,17 +105,16 @@ class _PrayerScreenState extends State<PrayerScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 15,),
+                  SizedBox(
+                    height: 15,
+                  ),
                   Expanded(
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height - 40,
                       decoration: BoxDecoration(
                         color: Color(0XFF12CBC4),
-                        // border: Border.all(
-                        //   color: StyleColor.white,
-                        //   width: 2.sp,
-                        // ),
+              
                       ),
                       child: Center(
                           child: isPrayerGroup && !showRequestPrayer
@@ -134,75 +133,83 @@ class _PrayerScreenState extends State<PrayerScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          ButtonThemeWidget(
-            text: "Ver respuestas de tus Pedidos de oración",
-            width: 264.sp,
-            height: 52.sp,
-            buttonStyle: StylesApp(context).btnWidgetSmall,
-            textCenter: true,
-            onPressed: () {
-              Navigator.popAndPushNamed(context, "/listRequestPage");
-            },
-          ),
-          SizedBox(
-            height: 84.0,
-          ),
-          Text(
-            "Hacer Pedido de Oración",
-            style: StylesApp(context).textStyleBody5,
-          ),
-          SizedBox(
-            height: 5.0,
-          ),
-          isWideScreen
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10.sp,
-                      mainAxisSpacing: 10.sp,
-                      childAspectRatio: 3,
-                    ),
-                    itemCount: requestTypes.length,
-                    itemBuilder: (context, index) {
-                      return ButtonThemeWidget(
-                        text: requestTypes[index].label,
-                        buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                              backgroundColor:
-                                  WidgetStatePropertyAll(generateColor(index)),
-                            ),
-                        width: 285.sp,
-                        height: 30,
-                        onPressed: () => goToRequest(requestTypes[index]),
-                      );
-                    },
-                  ),
-                )
-              : Column(
-                  children: [
-                    for (var index = 0;
-                        index < requestTypes.length;
-                        index++) ...{
-                      ButtonThemeWidget(
-                        textCenter: true,
-                        text: requestTypes[index].label,
-                        buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                              backgroundColor:
-                                  WidgetStatePropertyAll(generateColor(index)),
-                            ),
-                        width: 285.sp,
-                        height: StylesApp(context).btnHeight.height,
-                        onPressed: () => goToRequest(requestTypes[index]),
+          if (isLoading) ...{
+            Center(
+              child: LoadingIndicator(),
+            )
+          } else ...{
+            ButtonThemeWidget(
+              text: "Ver respuestas de tus Pedidos de oración",
+              width: 264.sp,
+              height: 52.sp,
+              buttonStyle: StylesApp(context).btnWidgetSmall,
+              textCenter: true,
+              onPressed: () {
+                Navigator.pushNamed(context, "/listRequestPage");
+              },
+            ),
+            SizedBox(
+              height: 84.0,
+            ),
+            Text(
+              "Hacer Pedido de Oración",
+              style: StylesApp(context).textStyleBody5,
+            ),
+            SizedBox(
+              height: 5.0,
+            ),
+            isWideScreen
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10.sp,
+                        mainAxisSpacing: 10.sp,
+                        childAspectRatio: 3,
                       ),
-                      SizedBox(
-                        height: 8.sp,
-                      )
-                    }
-                  ],
-                ),
+                      itemCount: requestTypes.length,
+                      itemBuilder: (context, index) {
+                        return ButtonThemeWidget(
+                          text: requestTypes[index].label,
+                          buttonStyle:
+                              StylesApp(context).btnWidgetSmall.copyWith(
+                                    backgroundColor: WidgetStatePropertyAll(
+                                        generateColor(index)),
+                                  ),
+                          width: 285.sp,
+                          height: 30,
+                          onPressed: () => goToRequest(requestTypes[index]),
+                        );
+                      },
+                    ),
+                  )
+                : Column(
+                    children: [
+                      for (var index = 0;
+                          index < requestTypes.length;
+                          index++) ...{
+                        ButtonThemeWidget(
+                          textCenter: true,
+                          text: requestTypes[index].label,
+                          buttonStyle:
+                              StylesApp(context).btnWidgetSmall.copyWith(
+                                    backgroundColor: WidgetStatePropertyAll(
+                                        generateColor(index)),
+                                  ),
+                          width: 285.sp,
+                          height: StylesApp(context).btnHeight.height,
+                          onPressed: () => goToRequest(requestTypes[index]),
+                        ),
+                        SizedBox(
+                          height: 8.sp,
+                        )
+                      }
+                    ],
+                  ),
+          }
         ],
       ),
     );

@@ -17,7 +17,7 @@ class _PageScreenState extends State<PageScreen> {
     WorkspaceScreen(),
     BibleScreen(),
     GraphQLConfig.development ? PrayerScreen() : SoonScreen(),
-    GraphQLConfig.development ? AudioScreen() : SoonScreen(),
+    AudioScreen(),
     GraphQLConfig.development ? OfferingsScreen() : SoonScreen(),
     SettingsScreen(),
   ];

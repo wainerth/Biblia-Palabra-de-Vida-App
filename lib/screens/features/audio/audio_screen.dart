@@ -3,7 +3,6 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 // import 'package:installed_apps/installed_apps.dart';
 
@@ -84,7 +83,7 @@ class _AudioScreenState extends State<AudioScreen> {
           actionCallbackOk: () async {
             Navigator.pop(context);
             // Si no funciona, intentar abrir Play Store directamente
-            bool canLaunchStore = await canLaunchUrl(Uri.parse(playStoreUrl));
+            // bool canLaunchStore = await canLaunchUrl(Uri.parse(playStoreUrl));
 
             // if (canLaunchStore) {
             //   await launchUrl(Uri.parse(playStoreUrl),
@@ -152,7 +151,7 @@ class _AudioScreenState extends State<AudioScreen> {
               foregroundColor: WidgetStatePropertyAll(StyleColor.white)),
           padding: EdgeInsets.all(0),
           onPressed: () {
-            Navigator.pushNamed(context, '/layout');
+            Navigator.pushNamed(context, '/layoutPage');
           },
           splashColor: StyleColor.orange,
           color: StyleColor.white,

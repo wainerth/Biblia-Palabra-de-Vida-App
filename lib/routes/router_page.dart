@@ -21,7 +21,7 @@ final Map<String, WidgetBuilder> routes = {
   '/workspacePage': (BuildContext context) =>
       AuthGuard(child: WorkspaceScreen()),
   '/detailsProgressPage': (BuildContext context) => ProgressDetailScreen(),
-  '/prayerPage': (BuildContext context) => PrayerScreen(),
+  '/prayerPage': (BuildContext context) => GraphQLConfig.development ?  PrayerScreen() : SoonScreen() ,
   '/listRequestPage': (BuildContext context) => ListRequestScreen(),
   '/takePrayerPage': (BuildContext context) => TakePrayerScreen(),
   '/detailPrayerPage': (BuildContext context) => DetailRequestScreen(),
@@ -31,8 +31,7 @@ final Map<String, WidgetBuilder> routes = {
   '/soonPage': (BuildContext context) => SoonScreen(),
   '/preachPage': (BuildContext context) => PreachScreen(),
   '/promisePage': (BuildContext context) => PromisesScreen(), //SoonScreen(),
-  '/playPage': (BuildContext context) =>
-      GraphQLConfig.development ? PlayScreen() : SoonScreen(),
+  '/playPage': (BuildContext context) => PlayScreen(),
   '/settingPage': (BuildContext context) => AuthGuard(child: SettingsScreen()),
   '/leaguePage': (BuildContext context) => RankingScreen(),
   '/memoryPage': (BuildContext context) => MemoryScreen(),

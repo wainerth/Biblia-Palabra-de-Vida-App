@@ -1044,9 +1044,9 @@ class _BibleScreenState extends State<BibleScreen> {
     int currentPos = 0;
 
     // Ordenar resaltados por posición de inicio (opcional, pero recomendado)
-    verse.highlights.sort((a, b) => a!.startIndex.compareTo(b!.startIndex));
+    verse.highlights!.sort((a, b) => a!.startIndex.compareTo(b!.startIndex));
 
-    for (final highlight in verse.highlights) {
+    for (final highlight in verse.highlights!) {
       // 1. Texto antes del resaltado (si hay espacio no cubierto)
       if (currentPos < highlight!.startIndex) {
         spans.add(TextSpan(
@@ -1252,7 +1252,7 @@ class _BibleScreenState extends State<BibleScreen> {
       _highlights.add(lighter); // actualizo local
       final encontrado = verses.indexWhere((verse) => verse.id == lighter.id);
       if (encontrado != -1) {
-        verses[encontrado].highlights.add(lighter); // actualizo verses
+        verses[encontrado].highlights?.add(lighter); // actualizo verses
       }
     }
 
@@ -1262,7 +1262,7 @@ class _BibleScreenState extends State<BibleScreen> {
   /// Método que verifica si ya esta resaltado la elección
   bool _selectionOverlapsHighlights(TextSelection selection, String fullText) {
     for (final verse in verses) {
-      for (final highlight in verse.highlights) {
+      for (final highlight in verse.highlights!) {
         // Calcular las posiciones globales del resaltado en el texto completo
         final verseStart = _getVerseGlobalStart(verse, fullText);
         final highlightStart = verseStart + highlight!.startIndex;
@@ -1366,7 +1366,7 @@ class _BibleScreenState extends State<BibleScreen> {
     setState(() {
       _highlights.remove(highlight);
       for (final verse in verses) {
-        verse.highlights.removeWhere((h) =>
+        verse.highlights?.removeWhere((h) =>
             h!.id == highlight.id &&
             h.startIndex == highlight.startIndex &&
             h.endIndex == highlight.endIndex);
@@ -1442,8 +1442,8 @@ class _BibleScreenState extends State<BibleScreen> {
                   color: h['color']))
               .toList();
           for (final verse in verses) {
-            verse.highlights.clear();
-            verse.highlights.addAll(_highlights.where((h) => h.id == verse.id));
+            verse.highlights?.clear();
+            verse.highlights?.addAll(_highlights.where((h) => h.id == verse.id));
           }
         });
       }

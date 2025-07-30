@@ -80,3 +80,4 @@ export 'package:biblia_palabra_de_vida_app/models/result_game_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/prayer_type_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/prayer_sub_type_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/request_prayer_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/prayer_model.dart';

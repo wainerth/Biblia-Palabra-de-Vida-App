@@ -32,14 +32,15 @@ class CatalogueProvider extends ChangeNotifier {
 
   Future<void> initialize() async {
     if (_isLoading) return;
-
+    print("inicializando el catalogo");
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       // Verificar conexión a internet primero
-      await _checkInternetConnection();
+
+      // await _checkInternetConnection();
 
       _client = await _createClientWithRetry();
 
@@ -54,25 +55,42 @@ class CatalogueProvider extends ChangeNotifier {
       ]);
 
       _isInitialized = true;
+      print("Catalogo inicializado");
     } catch (e) {
+      print("Catalogo error");
       _errorMessage = e.toString();
       if (kDebugMode) {
         print('Error initializing CatalogueProvider: $e');
       }
       rethrow;
     } finally {
+      print("Catalogo error");
       _isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> _checkInternetConnection() async {
+    // En web, InternetAddress.lookup no está soportado.
+    // Usamos un método compatible con ambas plataformas.
     try {
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isEmpty || result[0].rawAddress.isEmpty) {
-        throw SocketException('No Internet connection');
+      if (kIsWeb) {
+        // En web, intentamos hacer una petición fetch a un recurso público.
+        final uri = Uri.parse('https://www.google.com/favicon.ico');
+        final request = await HttpClient().getUrl(uri);
+        final response = await request.close();
+        if (response.statusCode != 200) {
+          throw Exception('No Internet connection');
+        }
+      } else {
+        final result = await InternetAddress.lookup('google.com');
+        if (result.isEmpty || result[0].rawAddress.isEmpty) {
+          throw SocketException('No Internet connection');
+        }
       }
     } on SocketException catch (_) {
+      throw Exception('No Internet connection');
+    } catch (_) {
       throw Exception('No Internet connection');
     }
   }
@@ -153,6 +171,7 @@ class CatalogueProvider extends ChangeNotifier {
 
     sendPort.send('completed');
   }
+
   Future<void> _loadChurches() async {
     try {
       final options = QueryOptions(
@@ -193,7 +212,7 @@ class CatalogueProvider extends ChangeNotifier {
       throw Exception('Data format error: ${e.message}');
     } catch (e) {
       throw Exception('Failed to load leagues: ${e.toString()}');
-    } 
+    }
   }
 
   Future<void> _loadLeagues() async {
@@ -276,7 +295,7 @@ class CatalogueProvider extends ChangeNotifier {
       allConfig =
           Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
       notifyListeners();
-    }  on TimeoutException catch (e) {
+    } on TimeoutException catch (e) {
       throw Exception('Request timeout: ${e.message}');
     } on FormatException catch (e) {
       throw Exception('Data format error: ${e.message}');
@@ -380,8 +399,7 @@ class CatalogueProvider extends ChangeNotifier {
       allBibleVersion = (data['getAllVersion'] as List)
           .map((version) => VersionModel.fromJson(version))
           .toList();
-     
-      
+
       if (kDebugMode) {
         print('all versions loaded');
       }
