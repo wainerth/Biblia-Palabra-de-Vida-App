@@ -3,9 +3,7 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
-import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/info_modal_widget.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -243,7 +241,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                         text: "Oración por: ",
                         style: StylesApp(context).textStyleBody2_14),
                     TextSpan(
-                      text: "${listRequest[index].prayerCategory.name.trim()}",
+                      text: listRequest[index].prayerCategory.name.trim(),
                       style: StylesApp(context)
                           .textStyleBody2_14
                           .copyWith(color: Colors.black),

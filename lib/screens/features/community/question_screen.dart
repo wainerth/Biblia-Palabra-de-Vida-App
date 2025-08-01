@@ -10,6 +10,7 @@ import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
@@ -31,7 +32,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   LoginUser? userData;
   late Map<String, dynamic> config;
-  CourseModel? course;
+  CourseDetail? course;
   Stage? stage;
   Level? level;
   UserAchievement? achievement;
@@ -43,6 +44,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
     isLastLevel: false,
     isLastStage: false,
     rewardObtained: false,
+    hasBeenPlayedSection: false,
+    hasBeenPlayedLevel: false,
+    prizeAwarded: false,
+    rewardData: null,
+    titleAwarded: false,
   );
   Question currentQuestion = Question(
       id: "",
@@ -131,7 +137,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
         }
-        course = CourseModel.fromJson(courseResponse.data);
+        course = CourseDetail.fromJson(courseResponse.data);
         // obtenemos sección
         final ResponseData stageResponse = await loadStageById(levelId);
 
@@ -319,15 +325,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
           showStepCompleted = true;
         });
       } else {
+        // Proceso de comprobación
+
         LoadingService().showLoading(context);
-        //llamamos servicio  registrar las respuestas enviadas
-        // responseSend = await sendResponsesUser(responses!);
-        // if (responseSend?.error != null) {
-        //   LoadingService().hideLoading();
-        //   await showCustomDialog(context,
-        //       message: responseSend!.error!, dialogType: DialogType.error);
-        //   return;
-        // }
         // lamamos al servicios que nos registra el score
         final ResponseData sendScoreResponse = await sendScoreUser(
             userData != null ? userData!.userId : '',
@@ -371,9 +371,16 @@ class _QuestionScreenState extends State<QuestionScreen> {
           energy = 0;
           setState(() {
             bestScore = levelProgress!.scoreLastAttempt;
+          });
+        }
+
+        // si ya se jugo ese nivel o sección esta repitiendo
+        if (sendScore!.hasBeenPlayedLevel) {
+          setState(() {
             showReview = true;
           });
         }
+
         // actualizar variable local de los datos del perfil
         setState(() {
           userData = userData!.copyWith(
@@ -384,34 +391,41 @@ class _QuestionScreenState extends State<QuestionScreen> {
         print('${userData!.expTotalUser}  ${userData!.energyPoints}');
         Provider.of<UserProvider>(context, listen: false).setUser(userData);
 
-        // si es el ultimo nivel
-        if (sendScore!.isLastLevel) {
-          // si Obtuvo una recompensa
-          if (sendScore!.rewardObtained) {
-            await loadRewardForUser();
-          }
-          // desbloquear la proxima sección
-          final responseUnlockSection =
-              await unlockedNextSection(userData!.userId, sectionId);
-          if (responseUnlockSection.error != null) {
-            LoadingService().hideLoading();
-            await showCustomDialog(context,
-                message: responseUnlockSection.error!,
-                dialogType: DialogType.error);
-            return;
-          }
-          nextSectionId = responseUnlockSection.data["nextSectionId"] ?? '';
+        // si Obtuvo una recompensa
+        if (sendScore!.rewardObtained && !sendScore!.hasBeenPlayedLevel) {
+          setState(() {
+            reward = sendScore!.rewardData;
+          });
+          updateLocalProfile(reward!);
         }
+
+        // obtener la proxima sección desbloqueada
+        final responseUnlockSection =
+            await getNextSectionUnlocked(userData!.userId, sectionId);
+        if (responseUnlockSection.error != null) {
+          LoadingService().hideLoading();
+          await showCustomDialog(context,
+              message: responseUnlockSection.error!,
+              dialogType: DialogType.error);
+          return;
+        }
+        nextSectionId = responseUnlockSection.data != null
+            ? responseUnlockSection.data["unlockedSectionId"] != null
+                ? responseUnlockSection.data["unlockedSectionId"]
+                : ''
+            : '';
 
         // si es la ultima etapa del curso
         if (sendScore!.isLastStage) {
           // si se desbloqueo un titulo buscamos el Titulo
-
-          await loadTitleForUser();
+          if (sendScore!.titleAwarded) {
+            await loadTitleForUser();
+          }
 
           // si obtuvo un premio
-
-          await loadPrizeForUser();
+          if (sendScore!.prizeAwarded) {
+            await loadPrizeForUser();
+          }
         }
         LoadingService().hideLoading();
         // habilitamos mostrar paso completado
@@ -451,7 +465,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   loadPrizeForUser() async {
-    final responsePrizeWon = await setPrizeObtained(userData!.userId, courseId);
+    final responsePrizeWon = await getPrizeByUserId(userData!.userId, courseId);
     if (responsePrizeWon.error != null) {
       // si desbloqueo un titulo
       LoadingService().hideLoading();
@@ -463,20 +477,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
     prize = PrizeModel.fromJson(removeTypename(responsePrizeWon.data));
   }
 
-  loadRewardForUser() async {
-    final responseRewardObtained = await getRewardObtained(sectionId);
-    if (responseRewardObtained.error != null) {
-      LoadingService().hideLoading();
-      await showCustomDialog(context,
-          message: responseRewardObtained.error!, dialogType: DialogType.error);
-      return;
-    }
-    reward = Reward.fromJson(removeTypename(responseRewardObtained.data));
-  }
-
-  updateLocalProfile(data) {
-    final int experience = data['earnedExperience'];
-    final int energy = data['earnedEnergy'];
+  updateLocalProfile(Reward data) {
+    final int experience = data.earnedExperience;
+    final int energy = data.earnedEnergy;
     setState(() {
       userData = userData!.copyWith(
           expTotalUser: userData!.expTotalUser + experience,
@@ -524,7 +527,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                               !showRewardObtained &&
                               !showPrizeWon,
                           title:
-                              "Conoce el ${course != null ? course!.title : ''}",
+                              "Conoce el ${course != null ? course!.titleName : ''}",
                           stage: stage != null ? stage!.id : '',
                           subtitle: stage != null ? stage!.sectionName : '',
                           details: stage,
@@ -553,10 +556,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           style: StylesApp(context).textStyleBody5,
                         ),
                       ),
+                      SizedBox(
+                        height: 19.0,
+                      ),
                     },
-                    SizedBox(
-                      height: 19.0,
-                    ),
                     if (!activityIsCompleted) ...{
                       // we show  question and answer or ordering
                       Container(
@@ -604,21 +607,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           child: RewardWidget(
                             rewardInfo: reward,
                             onPressed: () async {
-                              LoadingService().showLoading(context);
-                              // aplico recompensa a usuario
-                              final responseApply = await applyRewardToUser(
-                                  userData!.userId, reward?.id);
-                              if (responseApply.error != null) {
-                                LoadingService().hideLoading();
-                                await showCustomDialog(context,
-                                    message: responseApply.error!,
-                                    dialogType: DialogType.error);
-                                return;
-                              }
-                              // actualizo datos local de perfil de usuario
-                              updateLocalProfile(responseApply.data);
-                              LoadingService().hideLoading();
-
                               // si es la ultima sección del curso
                               if (sendScore!.isLastStage && !showReview) {
                                 setState(() {
@@ -741,7 +729,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   LinearProgressIndicator(
                     borderRadius: BorderRadius.circular(6.0),
                     minHeight: 14.0,
-                    value: currentIndex / (questions.length - 1),
+                    value: currentIndex /
+                        (questions.length > 1
+                            ? questions.length - 1
+                            : questions.length),
                     backgroundColor: Color(0xFFC4C4C4),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Color(0XFFF27728),
@@ -892,7 +883,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 buttonStyle: StylesApp(context).btnWidgetSmall,
                 onPressed: () {
                   // mostrar si hay recompensa
-                  if (sendScore!.isLastLevel &&
+                  if (!sendScore!.hasBeenPlayedSection &&
                       sendScore!.rewardObtained &&
                       reward != null &&
                       !showReview) {
@@ -1172,6 +1163,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   // esta parte es para mostrar titulo obtenido
   _buildAchievementUnlocked(BuildContext context) {
+    ResponseCertificateCreated? certificateCreated;
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,
@@ -1237,7 +1229,44 @@ class _QuestionScreenState extends State<QuestionScreen> {
               height: 32,
               buttonStyle: StylesApp(context).btnPrimary,
               text: "Descargar certificado",
-              onPressed: () {},
+              onPressed: () async {
+                try {
+                  final responseCreateCertificate =
+                      await createCertificate(userData?.userId, courseId);
+                  if (responseCreateCertificate.error != null) {
+                    await showCustomDialog(
+                      context,
+                      message: responseCreateCertificate.error!,
+                      dialogType: DialogType.error,
+                    );
+                    return;
+                  }
+                  certificateCreated = ResponseCertificateCreated.fromJson(
+                      responseCreateCertificate.data);
+                  if (certificateCreated != null &&
+                      certificateCreated!.rutaArchivo != null) {
+                    final url =
+                        "${GraphQLConfig.urlServidor}${certificateCreated!.rutaArchivo}";
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url),
+                          mode: LaunchMode.externalApplication);
+                    } else {
+                      await showCustomDialog(
+                        context,
+                        message: "No se pudo abrir el enlace de descarga.",
+                        dialogType: DialogType.error,
+                      );
+                    }
+                  }
+                } catch (e) {
+                  await showCustomDialog(
+                    context,
+                    message: e.toString(),
+                    dialogType: DialogType.error,
+                  );
+                  return;
+                }
+              },
             ),
             SizedBox(
               height: 29,
@@ -1291,9 +1320,35 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     width: 132,
                     height: 32,
                     buttonStyle: StylesApp(context).btnWidgetSmall,
-                    onPressed: () {
-                      Navigator.popAndPushNamed(context, '/layoutPage1');
-                      // Navigator.popAndPushNamed(context, '/aventurePage');
+                    onPressed: () async {
+                      if (certificateCreated != null) {
+                        Navigator.popAndPushNamed(context, '/layoutPage1');
+                      } else {
+                        try {
+                          final responseCreateCertificate =
+                              await createCertificate(
+                                  userData?.userId, courseId);
+                          if (responseCreateCertificate.error != null) {
+                            await showCustomDialog(
+                              context,
+                              message: responseCreateCertificate.error!,
+                              dialogType: DialogType.error,
+                            );
+                            return;
+                          }
+                          certificateCreated =
+                              ResponseCertificateCreated.fromJson(
+                                  responseCreateCertificate.data);
+                        } catch (e) {
+                          await showCustomDialog(
+                            context,
+                            message: e.toString(),
+                            dialogType: DialogType.error,
+                          );
+                          return;
+                        }
+                        Navigator.popAndPushNamed(context, '/layoutPage1');
+                      }
                     },
                   ),
                 ),

@@ -57,22 +57,22 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           await getDailyProverb();
         }
 
-        if(GraphQLConfig.development) {
-        await loadAllNotifications();
+        if (GraphQLConfig.development) {
+          await loadAllNotifications();
 
-        if (mounted) {
-          final notificationProvider =
-              Provider.of<SocketClientProvider>(context, listen: false);
+          if (mounted) {
+            final notificationProvider =
+                Provider.of<SocketClientProvider>(context, listen: false);
 
-          notificationProvider.listenToEvent("notification", (notify) {
-            if (kDebugMode) {
-              print(notify);
-            }
-            final newNotification = NotificationModel.fromJson(notify);
-            notificationProvider.addNotification(newNotification);
-            notificationProvider.showNotification(newNotification);
-          });
-        }
+            notificationProvider.listenToEvent("notification", (notify) {
+              if (kDebugMode) {
+                print(notify);
+              }
+              final newNotification = NotificationModel.fromJson(notify);
+              notificationProvider.addNotification(newNotification);
+              notificationProvider.showNotification(newNotification);
+            });
+          }
         }
         await loadGetOneReflection();
       }
@@ -109,8 +109,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       });
     } catch (e) {
       String error = "Error al leer las notificaciones:  ${e.toString()}";
-      await showCustomDialog(context,
-          message: error, dialogType: DialogType.error);
+      if (mounted) {
+        await showCustomDialog(context,
+            message: error, dialogType: DialogType.error);
+      }
     }
   }
 
@@ -174,77 +176,77 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              if(GraphQLConfig.development)
-              Positioned(
-                top: 0, // Puedes ajustar este valor
-                right: 0,
-                child: Visibility(
-                  visible: true,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                    ),
-                    child: IconButton(
-                      padding: EdgeInsets.all(0),
-                      iconSize: 40,
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          builder: (BuildContext context) {
-                            return NotificationListWidget();
-                          },
-                        );
-                      },
-                      icon: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Icon(
-                            Icons.notifications,
-                            size: 40,
-                            color: StyleColor.redLight,
-                          ),
-                          Positioned(
-                            right: 12,
-                            top: 12,
-                            child: Container(
-                              padding: EdgeInsets.all(0),
-                              decoration: BoxDecoration(
-                                  // color: Colors.white,
-                                  // shape: BoxShape.circle,
+              if (GraphQLConfig.development)
+                Positioned(
+                  top: 0, // Puedes ajustar este valor
+                  right: 0,
+                  child: Visibility(
+                    visible: true,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.all(0),
+                        iconSize: 40,
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20)),
+                            ),
+                            builder: (BuildContext context) {
+                              return NotificationListWidget();
+                            },
+                          );
+                        },
+                        icon: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Icon(
+                              Icons.notifications,
+                              size: 40,
+                              color: StyleColor.redLight,
+                            ),
+                            Positioned(
+                              right: 12,
+                              top: 12,
+                              child: Container(
+                                padding: EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    // color: Colors.white,
+                                    // shape: BoxShape.circle,
+                                    ),
+                                constraints: BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    int.parse(getUnreadCountNotification()) > 0
+                                        ? getUnreadCountNotification()
+                                        : '',
+                                    style: StylesApp(context)
+                                        .textStyleBody10
+                                        .copyWith(
+                                          // color: StyleColor.redLight,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                    textAlign: TextAlign.center,
                                   ),
-                              constraints: BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  int.parse(getUnreadCountNotification()) > 0
-                                      ? getUnreadCountNotification()
-                                      : '',
-                                  style: StylesApp(context)
-                                      .textStyleBody10
-                                      .copyWith(
-                                        // color: StyleColor.redLight,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
               Column(
                 children: [
                   SizedBox(height: 15.0),
@@ -772,9 +774,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                               userData.imgProfileUser.urlImg +
                                               '?timestamp=${DateTime.now().millisecondsSinceEpoch}',
                                           placeholder: (context, url) =>
-                                              Image.asset('assets/no-image.jpg'),
+                                              Image.asset(
+                                                  'assets/no-image.jpg'),
                                           errorWidget: (context, url, error) =>
-                                              Image.asset('assets/no-image.jpg'),
+                                              Image.asset(
+                                                  'assets/no-image.jpg'),
                                         )
                                       : Image.asset(
                                           'assets/no-image.jpg',

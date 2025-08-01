@@ -635,18 +635,42 @@ Future<ResponseData> sendScoreUser(
 
   final GraphQLClient client = createClient(authToken: userToken);
 
+  // mutation SendScore($courseId: ID, $levelId: ID, $failedAttempts: Int, $userId: ID) {
+  //   sendScore(courseId: $courseId, levelId: $levelId, failedAttempts: $failedAttempts, userId: $userId) {
+  //     isLastLevel #es ultimo nivel se la sección
+  //     isLastStage #es ultima etapa del curso
+  //     #prizeWon #premio ganado
+  //     #titleUnlocked #titulo ganado
+  //     rewardObtained #recompensa ganada
+  //   }
+  // }
   MutationOptions mutateGql = MutationOptions(
     operationName: "SendScore",
     document: gql(r'''
-      mutation SendScore($courseId: ID, $levelId: ID, $failedAttempts: Int, $userId: ID) {
-        sendScore(courseId: $courseId, levelId: $levelId, failedAttempts: $failedAttempts, userId: $userId) {
-          isLastLevel #es ultimo nivel se la sección
-          isLastStage #es ultima etapa del curso
-          #prizeWon #premio ganado
-          #titleUnlocked #titulo ganado
-          rewardObtained #recompensa ganada
+      mutation SendScore($userId: ID, $courseId: ID, $levelId: ID, $failedAttempts: Int) {
+          sendScore(
+            userId: $userId
+            courseId: $courseId
+            levelId: $levelId
+            failedAttempts: $failedAttempts
+          ) {
+            rewardObtained
+            hasBeenPlayedSection
+            hasBeenPlayedLevel
+            prizeAwarded
+            rewardData {
+              description
+              earnedEnergy
+              earnedExperience
+              id
+              sectionId
+              status
+              title
+            }
+            titleAwarded
+            isLastStage
+          }
         }
-      }
       '''),
     variables: <String, dynamic>{
       "userId": userId,
@@ -1714,12 +1738,12 @@ Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
     }
   }
 }
+
 Future<ResponseData> deleteRequestPrayer(String prayerId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
   final GraphQLClient client = createClient(authToken: userToken);
-
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "DeleteRequestPrayer",
@@ -1732,9 +1756,7 @@ Future<ResponseData> deleteRequestPrayer(String prayerId) async {
         }
       }
       '''),
-    variables: <String, dynamic>{
-      "prayerId": prayerId
-      },
+    variables: <String, dynamic>{"prayerId": prayerId},
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
@@ -1766,6 +1788,145 @@ Future<ResponseData> deleteRequestPrayer(String prayerId) async {
   } on TimeoutException catch (e) {
     return ResponseData(
         data: null, error: 'Delete Request Prayer Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> answerPrayerRequest(String? message, String requestId,
+    String responderId, String? verseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "AnswerPrayerRequest",
+    document: gql(r'''
+     mutation AnswerPrayerRequest($input: AnswerPrayerInput!) {
+        answerPrayerRequest(input: $input) {
+          successful
+          message
+          id
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "input": {
+        "message": null,
+        "requestId": null,
+        "responderId": null,
+        "verseId": null
+      }
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Answer Prayer Request: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['answerPrayerRequest'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Answer Prayer Request failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['answerPrayerRequest'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    return ResponseData(
+        data: null, error: 'Answer Prayer Request Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+Future<ResponseData> createCertificate(String? userId, String courseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "CreateCertificate",
+    document: gql(r'''
+     mutation CreateCertificate($userId: ID, $courseId: ID) {
+        createCertificate(userId: $userId, courseId: $courseId) {
+          success
+          rutaArchivo
+          nombreArchivo
+          mensaje
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+        "userId": userId,
+        "courseId": courseId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Create Certificate: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['createCertificate'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Create Certificate failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['createCertificate'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    return ResponseData(
+        data: null, error: 'Create Certificate Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

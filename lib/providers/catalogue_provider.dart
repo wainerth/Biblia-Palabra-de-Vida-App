@@ -15,7 +15,6 @@ class CatalogueProvider extends ChangeNotifier {
   List<AreaCode> allAreasCode = [];
   List<Church> allChurches = [];
   List<League> allLeagues = [];
-  List<CourseModel> allCourses = [];
   List<VersionModel> allBibleVersion = [];
 
   bool _isInitialized = false;
@@ -40,7 +39,7 @@ class CatalogueProvider extends ChangeNotifier {
     try {
       // Verificar conexión a internet primero
 
-      // await _checkInternetConnection();
+      await _checkInternetConnection();
 
       _client = await _createClientWithRetry();
 
@@ -294,6 +293,9 @@ class CatalogueProvider extends ChangeNotifier {
 
       allConfig =
           Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
+          if (kDebugMode) {
+            print("all configuration loaded");
+          }
       notifyListeners();
     } on TimeoutException catch (e) {
       throw Exception('Request timeout: ${e.message}');

@@ -5,6 +5,7 @@ import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -26,7 +27,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<History> stories = [];
   bool isLoading = true;
   String? errorMessage;
-  CourseModel? course;
+  CourseDetail? course;
   Level? level;
   Stage? stage;
   int _selectedButtonIndex = 1;
@@ -88,7 +89,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         if (responseCourse.error != null) {
           errorMessage = responseCourse.error;
         }
-        course = CourseModel.fromJson(removeTypename(responseCourse.data));
+        course = CourseDetail.fromJson(removeTypename(responseCourse.data));
 
         // obtenemos sección
         final ResponseData stageResponse = await loadStageById(sectionId);
@@ -116,6 +117,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
               .map((story) => History.fromJson(removeTypename(story)))
               .cast<History>()
               .toList();
+
+          stories.insert(
+            0,
+            History(
+                id: "122",
+                text:
+                    "esta es la historia que tendrá la prueba {(Juan 1:4-5 /RVR95)} para validar si se puede levantar una modal {(Apocalipsis 1:4-5 /RVR05)}",
+                orderCard: 1,
+                level: IntermediateLevel(
+                    levelNumber: 1, unLockLevel: true, countLevelNumber: 1),
+                img: Img(urlImg: "images/achievement/expA.png"),
+                audio: Audio(url: "url"),
+                video: Video(url: " url"),
+                status: 1),
+          );
         });
         _togglePlayPause(stories[0]);
       } catch (e) {
@@ -153,7 +169,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 )
               } else ...{
                 HeaderNotDetailsStageWidget(
-                  title: "Conoce el ${course?.title}",
+                  title: "Conoce el ${course?.titleName}",
                   stage: stage != null ? stage!.id : '',
                   subtitle: stage != null ? stage!.sectionName : '',
                   details: stage,
@@ -236,11 +252,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                           StylesApp(context).btnWidgetSmall,
                                       height: null,
                                       width: 180,
-                                      onPressed: () {
+                                      onPressed: () async {
                                         setState(() {
                                           finalStory = false;
                                           isPage = 0;
+                                          isPlaying = false;
                                         });
+                                        await flutterTts.stop();
                                       },
                                     ),
                                     ButtonThemeWidget(
@@ -474,12 +492,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             child: IconButton(
                               padding: EdgeInsets.all(0),
                               iconSize: 25.0,
-                              onPressed: () {
+                              onPressed: () async {
                                 setState(
                                   () {
+                                    isPlaying = false;
                                     finalStory = true;
                                   },
                                 );
+                                await flutterTts.stop();
                               },
                               icon: Icon(
                                 Icons.skip_next_outlined,
@@ -796,21 +816,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ],
                           ),
                         ),
-
-                        // Indicador de progreso (opcional)
-                        // if (isPlaying &&
-                        //     currentPlayingVerseIndex != null)
-                        //   Padding(
-                        //     padding: EdgeInsets.only(left: 8),
-                        //     child: Text(
-                        //       '${currentPlayingVerseIndex! + 1}/${verses.length}',
-                        //       style: TextStyle(
-                        //         color: currentTheme.textColor
-                        //             .withOpacity(0.6),
-                        //         fontSize: 12,
-                        //       ),
-                        //     ),
-                        //   ),
                       ],
                     ),
                   ),
@@ -862,14 +867,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           SizedBox(
                             height: 21.0,
                           ),
-                          Text(
-                            story.text,
-                            textAlign: TextAlign.left,
-                            style: StylesApp(context).textStyleBody5.copyWith(
-                                  color: Colors.black,
-                                  fontSize: fontSizeText,
-                                ),
-                          ),
+                          _buildRichTextWithLinks(story.text, context),
                         ],
                       ),
                     ),
@@ -926,8 +924,146 @@ class _HistoryScreenState extends State<HistoryScreen> {
       setState(() => isPlaying = false);
     } else {
       await flutterTts.awaitSpeakCompletion(true);
-      await flutterTts.speak("${story.text}");
+      // Eliminar los textos que están dentro de {( ... )} incluyendo desde / hasta )}
+      // Ejemplo: {(Juan 1:4-5 /RVR95)} -> elimina " /RVR95" y deja "Juan 1:4-5"
+      String cleanText = story.text.replaceAllMapped(
+        RegExp(r'\{\(([^\/\)]+)(?:\/[^\)]*)?\)\}'),
+        (Match match) => (match.group(1) ?? '').trim(),
+      );
+      await flutterTts.speak(cleanText);
       setState(() => isPlaying = true);
     }
+  }
+
+  _buildRichTextWithLinks(String text, BuildContext context) {
+    // Busca las partes de la cadena que coincidan con {( )} y las resalta.
+    final curlyRegExp = RegExp(r'\{\((.*?)\)\}'); // Coincide con {( ... )}
+
+    final matches = curlyRegExp.allMatches(text).toList();
+
+    List<TextSpan> spans = [];
+    int lastMatchEnd = 0;
+
+    for (final match in matches) {
+      // Texto antes del match
+      if (match.start > lastMatchEnd) {
+        spans.add(TextSpan(
+          text: text.substring(lastMatchEnd, match.start),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: fontSizeText,
+          ),
+        ));
+      }
+      // Texto del match (enlace)
+      final matchedText = match.group(0)!;
+      spans.add(
+        TextSpan(
+          text: matchedText.replaceFirstMapped(
+            RegExp(r'\/.*(?=\)\})'),
+            (m) => '', // Oculta visualmente lo que sigue después de /
+          ),
+          style: TextStyle(
+            color: Colors.blue,
+            decoration: TextDecoration.underline,
+            fontSize: fontSizeText,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              print(matchedText);
+              _buildModalShowDetailLink(matchedText);
+              // abrirá una modal
+            },
+        ),
+      );
+      lastMatchEnd = match.end;
+    }
+    // Texto restante después del último match
+    if (lastMatchEnd < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(lastMatchEnd),
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: fontSizeText,
+        ),
+      ));
+    }
+
+    return RichText(
+      text: TextSpan(
+        children: spans,
+        style: StylesApp(context).textStyleBody5.copyWith(
+              color: Colors.black,
+              fontSize: fontSizeText,
+            ),
+      ),
+    );
+  }
+
+  void _buildModalShowDetailLink(String? text) {
+    if (text == null) return;
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 5,
+                margin: EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              Text(
+                "Detalle del enlace",
+                style: StylesApp(context).textStyleBody18.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                text,
+                style: StylesApp(context).textStyleBody5.copyWith(
+                      color: Colors.blue,
+                      fontSize: fontSizeText,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: StyleColor.turquoise,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  minimumSize: Size(double.infinity, 44),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  "Cerrar",
+                  style: StylesApp(context).textStyleBody5.copyWith(
+                        color: Colors.white,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

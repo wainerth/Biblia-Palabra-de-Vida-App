@@ -5,7 +5,7 @@ class Img {
 
   factory Img.fromJson(Map<String, dynamic> json) {
     return Img(
-      urlImg: json['urlImg'],
+      urlImg: json['urlImg'] ?? '',
     );
   }
 

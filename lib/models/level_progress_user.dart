@@ -56,7 +56,7 @@ class LevelProgressUser {
       user: InfoUser.fromJson(json['user']),
       failedAttempts: json['failedAttempts'],
       scoreLastAttempt: json['scoreLastAttempt'] ?? 0,
-      completed: json['completed'],
+      completed: json['completed'] ?? false,
       level: LevelUser.fromJson(json['level']),
       status: json['status'] > 0 ? true : false,
     );

@@ -63,7 +63,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    LoginUser? userData = userProvider.currentUser;
+    userData = userProvider.currentUser;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -444,43 +444,45 @@ class _QuizScreenState extends State<QuizScreen> {
     setState(() {
       _selectionCompleted = true;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: Duration(hours: 24),
         content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
           children: [
-            Row(
-              children: [
-                Icon(
-                  _isCorrect ? Icons.check_circle : Icons.error,
-                  color: Colors.white,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  _isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!',
-                  style: StylesApp(context).textStyleBody12,
-                ),
-              ],
+            Icon(
+            _isCorrect ? Icons.check_circle : Icons.error,
+            color: Colors.white,
             ),
-            // botón de siguiente
-            TextButton(
-              onPressed: () async {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                await funcAnswerValidate();
-              },
-              child: Text(
-                'Siguiente',
-                style: StylesApp(context)
-                    .textStyleBody12
-                    .copyWith(color: Colors.white),
-              ),
+            SizedBox(width: 8),
+            Text(
+            _isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!',
+            style: StylesApp(context).textStyleBody12,
             ),
           ],
+          ),
+          // botón de siguiente
+          TextButton(
+          onPressed: () async {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            await funcAnswerValidate();
+          },
+          child: Text(
+            'Siguiente',
+            style: StylesApp(context)
+              .textStyleBody12
+              .copyWith(color: Colors.white),
+          ),
+          ),
+        ],
         ),
         backgroundColor: _isCorrect ? Colors.green : Colors.red,
       ),
-    );
+      );
+    }
   }
 
   Future<void> loadQuestions() async {

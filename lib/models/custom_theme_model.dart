@@ -26,12 +26,12 @@ class CustomTheme {
     return {
       'id': id,
       'name': name,
-      'backgroundColor': backgroundColor.value,
-      'textColor': textColor.value,
-      'appBarColor': appBarColor.value,
-      'buttonColor': buttonColor.value,
-      'buttonTextColor': buttonTextColor.value,
-      'verseHighlightColor': verseHighlightColor.value,
+      'backgroundColor': backgroundColor,
+      'textColor': textColor,
+      'appBarColor': appBarColor,
+      'buttonColor': buttonColor,
+      'buttonTextColor': buttonTextColor,
+      'verseHighlightColor': verseHighlightColor,
     };
   }
 

@@ -26,7 +26,7 @@ class PrizeModel {
   factory PrizeModel.fromJson(Map<String, dynamic> json) {
     return PrizeModel(
       id: json['id'],
-      courseId: json['courseId'],
+      courseId: json['courseId'] ?? '',
       biblicalName: json['biblicalName'] ,
       typeStone: json['typeStone'] ,
       description: json['description'] ,

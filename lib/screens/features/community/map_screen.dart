@@ -20,7 +20,7 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen>
     with SingleTickerProviderStateMixin {
   late final UserProvider userProvider;
-  CourseModel? course;
+  CourseDetail? course;
   Stage? stage;
   List<Level> levels = [];
   List<List<Level>> gruposDeNiveles = [];
@@ -172,7 +172,7 @@ class _MapScreenState extends State<MapScreen>
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
         }
-        course = CourseModel.fromJson(courseResponse.data);
+        course = CourseDetail.fromJson(courseResponse.data);
         // obtenemos sección
         final ResponseData stageResponse = await loadStageById(sectionId);
 
@@ -310,7 +310,7 @@ class _MapScreenState extends State<MapScreen>
                           } else ...{
                             Stack(children: [
                               HeaderMapWidget(
-                                title: course!.title,
+                                title: course!.titleCourse,
                                 subtitleStage: stage!.sectionName,
                                 indexStage: stage!.orderCard,
                                 onRouteBack: () {

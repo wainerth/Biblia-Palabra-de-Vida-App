@@ -5,7 +5,6 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class AudioRecorderWidget extends StatefulWidget {
@@ -121,10 +120,10 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
         final file = File(path);
         if (widget.saveToDevice == true) {
           // Ejemplo de almacenamiento en el directorio de documentos
-          final directory = await getApplicationDocumentsDirectory();
-          final newPath =
-              '${directory.path}/audio_${DateTime.now().millisecondsSinceEpoch}.aac';
-          final savedFile = await file.copy(newPath);
+          // final directory = await getApplicationDocumentsDirectory();
+          // final newPath =
+          //     '${directory.path}/audio_${DateTime.now().millisecondsSinceEpoch}.aac';
+          // final savedFile = await file.copy(newPath);
         }
         widget.onAudioRecorded.call(file);
       }

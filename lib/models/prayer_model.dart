@@ -38,7 +38,7 @@ class PrayerModel {
       prayerSubType: PrayerSubTypeModel.fromJson(json['prayerSubType']),
       prayerDetails: json['prayerDetails'],
       requestDate: json['requestDate'],
-      requestedBy: json['requestedBy'],
+      requestedBy: json['requestedBy']?? '',
     );
   }
   Map<String, dynamic> toJson() {

@@ -255,7 +255,19 @@ class _PrayerScreenState extends State<PrayerScreen> {
         message: e.toString(),
         dialogType: DialogType.error,
       );
+    } finally {
+
+      setState(() {
+        isLoading = false;
+      });
     }
+
+
+
+
+
+
+    
   }
 
   Future<void> funcIsPrayerGroup() async {

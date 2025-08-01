@@ -474,6 +474,74 @@ Future<ResponseData> getPrizeWon(userId) async {
   }
 }
 
+Future<ResponseData> getNextSectionUnlocked(
+    String userId, String sectionId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+  final GraphQLClient client = createClient(authToken: userToken);
+  final QueryOptions options = QueryOptions(
+    operationName: "GetProgressSectionUser",
+    document: gql(r'''
+   query GetProgressSectionUser($userId: ID, $sectionId: ID) {
+      getProgressSectionUser(userId: $userId, sectionId: $sectionId) {
+        unlockedSectionId
+      }
+    }
+    '''),
+    variables: <String, dynamic>{"userId": userId, "sectionId": sectionId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (kDebugMode) {
+      print(result.data);
+    }
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get Progress Section User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Progress Section User failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getProgressSectionUser'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get Progress Section User Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
 Future<ResponseData> getRewardObtained(sectionId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
@@ -531,6 +599,87 @@ Future<ResponseData> getRewardObtained(sectionId) async {
     }
     return ResponseData(
         data: null, error: 'Get One reward Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getPrizeByUserId(String userId, String courseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+  final GraphQLClient client = createClient(authToken: userToken);
+  final QueryOptions options = QueryOptions(
+    operationName: "GetPrizeByUserId",
+    document: gql(r'''
+      query GetPrizeByUserId($userId: ID, $courseId: ID) {
+          getPrizeByUserId(userId: $userId, courseId: $courseId) {
+            id
+            courseId
+            biblicalName
+            typeStone
+            description
+            img {
+              urlImg
+            }
+            exchangeValue
+            unLockPrize
+            redeemed
+            status
+          }
+        }
+    '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "courseId": courseId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (kDebugMode) {
+      print(result.data);
+    }
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get Prize By User Id: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['getPrizeByUserId'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Prize By User Id failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getPrizeByUserId'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get Prize By User Id Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");
@@ -716,23 +865,21 @@ Future loadOneCourse(userId, courseId) async {
   QueryOptions options = QueryOptions(
     operationName: "GetOneCourse",
     document: gql(r'''
-    query GetOneCourse($userId: ID, $courseId: ID) {
-          getOneCourse(userId: $userId, courseId: $courseId) {
+    query GetOneCourse($courseId: ID) {
+          getOneCourse(courseId: $courseId) {
             id
-            title
+            titleCourse
             color
             introduction
-            status
-            img {
-              urlImg
-            }
-            sectionCount
-            sectionCompletedCount
+            imgCourseUrl
+            titleDescription
+            titleImgId
+            titleImgUrl
+            titleName
           }
         }
       '''),
     variables: <String, dynamic>{
-      "userId": userId,
       "courseId": courseId,
     },
     fetchPolicy: FetchPolicy.noCache,
@@ -3746,7 +3893,8 @@ Future<ResponseData> isMemberPrayerGroup(String userId) async {
 }
 
 // Obtener las solicitudes de Oración de asignadas a un grupo de oración
-Future<ResponseData> getAllRequestPrayerByGroupId(String? groupId) async {
+Future<ResponseData> getAllRequestPrayerByGroupId(
+    String? page, String? limit, String? groupId, String? text) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -3755,38 +3903,43 @@ Future<ResponseData> getAllRequestPrayerByGroupId(String? groupId) async {
   QueryOptions options = QueryOptions(
     operationName: "GetPrayerRequestByPrayerGroup",
     document: gql(r'''
-      query GetPrayerRequestByPrayerGroup($page: Int, $limit: Int, $prayerGroupId: ID, $text: String) {
+     query GetPrayerRequestByPrayerGroup($page: Int, $limit: Int, $prayerGroupId: ID, $text: String) {
         getPrayerRequestByPrayerGroup(page: $page, limit: $limit, prayerGroupId: $prayerGroupId, text: $text) {
           data {
             requestId
+            requestDate
+            requestedBy
             prayedFor
             prayerCategory {
-              id
               name
+              id
             }
             prayerSubType {
-              id
               name
+              id
             }
-            requestDate
             prayerDetails
+            statusRequest {
+              name
+              messageSystems {
+                message
+              }
+            }
             audioPrayer {
               url
             }
             verse {
+              book {
+                modernName
+                numberBook
+              }
               chapter {
                 chapter
+                id
               }
               verse {
                 verse
                 text
-              }
-            }
-            statusRequest {
-              id
-              name
-              messageSystems {
-                message
               }
             }
           }
@@ -3802,7 +3955,10 @@ Future<ResponseData> getAllRequestPrayerByGroupId(String? groupId) async {
       }
       '''),
     variables: <String, dynamic>{
-      "userId": groupId,
+      "page": page,
+      "limit": limit,
+      "prayerGroupId": groupId,
+      "text": text
     },
     fetchPolicy: FetchPolicy.noCache,
   );

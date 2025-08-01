@@ -22,7 +22,7 @@ class Reward {
   factory Reward.fromJson(Map<String, dynamic> json) {
     return Reward(
       id: json['id'],
-      sectionId: json['sectionId'],
+      sectionId: json['sectionId'] ?? '',
       title: json['title'],
       description: json['description'],
       earnedExperience: json['earnedExperience'],
