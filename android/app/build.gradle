@@ -1,7 +1,6 @@
 plugins {
     id "com.android.application"
     id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -14,32 +13,41 @@ android {
     namespace = "com.example.biblia_palabra_de_vida_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "25.1.8937393"
-    defaultConfig {
-            // Required when setting minSdkVersion to 20 or lower
-            multiDexEnabled true
-        }
+
     compileOptions {
         coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-dependencies {
-        coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'  // Versión más reciente
-    }
+    
     kotlinOptions {
         jvmTarget = '1.8'
     }
 
+    // // Configuración para diferentes ambientes
+    // flavorDimensions "environment"
+    // productFlavors {
+    //     dev {
+    //         dimension "environment"
+    //         applicationId "com.example.biblia_palabra_de_vida_app.dev"
+    //         versionNameSuffix "-DEV"
+    //         resValue "string", "app_name", "Biblia Dev"
+    //     }
+    //     prod {
+    //         dimension "environment"
+    //         applicationId "com.example.biblia_palabra_de_vida_app"
+    //         resValue "string", "app_name", "Biblia Palabra de Vida"
+    //     }
+    // }
+
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.biblia_palabra_de_vida_app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 24 // flutter.minSdkVersion
+        multiDexEnabled true
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
+
     signingConfigs {
         debug {
             keyAlias "androiddebugkey"
@@ -47,20 +55,41 @@ dependencies {
             storeFile file("myKey.jks")
             storePassword "123456"
         }
-    }
-    buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            keyAlias "androiddebugkey"
+            keyPassword "123456"
+            storeFile file("myKey.jks")
+            storePassword "123456"
         }
     }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // // Configuración para nombres de archivos de salida
+    // applicationVariants.all { variant ->
+    //     variant.outputs.all { output ->
+    //         def flavor = variant.flavorName
+    //         def versionName = variant.versionName
+    //         def buildType = variant.buildType.name
+    //         output.outputFileName = "biblia_${flavor}_${buildType}_${versionName}.apk"
+    //     }
+    // }
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }
 
 flutter {
     source = "../.."
 }
-
-// dependencies {
-//     implementation 'com.google.android.gms:play-services-auth:20.4.1'
-// }

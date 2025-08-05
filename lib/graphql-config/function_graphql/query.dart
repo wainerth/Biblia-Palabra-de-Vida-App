@@ -4131,3 +4131,82 @@ Future<ResponseData> getAllRequestPrayerByUser(String? userId) async {
     }
   }
 }
+
+Future<ResponseData> getReferencesBibleByName(
+    String? bibleReferencePattern) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetVerseByChapterBookNameAndCodeBible",
+    document: gql(r'''
+     query GetVerseByChapterBookNameAndCodeBible($bibleReferencePattern: String) {
+      getVerseByChapterBookNameAndCodeBible(bibleReferencePattern: $bibleReferencePattern) {
+        bibleName
+          bookName
+          chapterNumber
+          verses {
+            id
+            verse
+            text
+          }
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "bibleReferencePattern": bibleReferencePattern,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get Verse By Chapter Book Name And Code Bible: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getVerseByChapterBookNameAndCodeBible'] == null) {
+      return ResponseData(
+        data: null,
+        error:
+            'Get Verse By Chapter Book Name And Code Bible failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getVerseByChapterBookNameAndCodeBible'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error:
+            'Get Verse By Chapter Book Name And Code Bible Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}

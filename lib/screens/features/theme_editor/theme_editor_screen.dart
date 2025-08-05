@@ -118,6 +118,12 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               ),
             ),
             SizedBox(height: 20),
+              // Appbar
+             _buildColorPicker(
+              'Color de AppBar',
+              _appBarColor,
+              (color) => setState(() => _appBarColor = color),
+            ),
             _buildColorPicker('Color de fondo', _backgroundColor, (color) {
               setState(() {
                 _backgroundColor = color;
@@ -128,11 +134,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               _textColor,
               (color) => setState(() => _textColor = color),
             ),
-            _buildColorPicker(
-              'Color de AppBar',
-              _appBarColor,
-              (color) => setState(() => _appBarColor = color),
-            ),
+           
             _buildColorPicker(
               'Color de botones',
               _buttonColor,

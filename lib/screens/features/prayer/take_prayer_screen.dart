@@ -2,10 +2,7 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutat
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/models/pagination_info.dart';
-import 'package:biblia_palabra_de_vida_app/models/prayer_model.dart';
 import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
-import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -20,6 +17,8 @@ class TakePrayerScreen extends StatefulWidget {
 }
 
 class _TakePrayerScreenState extends State<TakePrayerScreen> {
+  List<ModelData> versions = [];
+  ModelData? versionSelected;
   String? groupId;
   String? errorMessage;
   bool isLoading = true;
@@ -44,7 +43,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await loadVersions();
       _generateData(context, pagination.currentPage, itemPerPageValue);
     });
     super.initState();
@@ -302,9 +302,6 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
   }
 
   Future<void> _buildModalAskedRequest(PrayerModel listRequest) {
-    // final currentVers = Provider.of<CatalogueProvider>(context, listen: false)
-    //       .allBibleVersion;
-    //       currentVers.map((version) => ModelData())
     return showGeneralDialog(
       context: context,
       barrierDismissible: false,
@@ -520,17 +517,19 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                           ),
                         ),
                         SizedBox(height: 16),
-                        // Padding(
-                        //   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        //   child: CustomDropdownBottomWidget(
-                        //     items: [],
-                        //   onChanged: (ModelData newValeu) {
-                           
-                        //    print("version Seleccionada")
-                        //   },
-                        //   selectedItem: verseController,
-                        //   ),
-                        // ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: CustomDropdownBottomWidget(
+                            items: versions,
+                            hintText: "Seleccione una versión",
+                            onChanged: (ModelData? newValue) {
+                              setState(() {
+                                versionSelected = newValue;
+                              });
+                            },
+                            selectedItem: versionSelected,
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: TextField(
@@ -591,5 +590,21 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
         );
       },
     );
+  }
+
+  Future<void> loadVersions() async {
+    try {
+      setState(() {
+        versions = Provider.of<CatalogueProvider>(context, listen: false)
+            .allBibleVersion
+            .map<ModelData>((version) =>
+                ModelData(label: version.version, value: version.id))
+            .toList();
+      });
+
+      //
+    } catch (e) {
+      print(e.toString());
+    }
   }
 }

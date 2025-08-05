@@ -117,8 +117,7 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                           itemBuilder: (BuildContext context, int index) {
                             return Container(
                               margin: EdgeInsets.only(
-                                top: 6.0,
-                                  left: 4.0, right: 4.0, bottom: 6.0),
+                                  top: 6.0, left: 4.0, right: 4.0, bottom: 6.0),
                               padding: EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
                                 color: widget.currentTheme.backgroundColor,
@@ -180,7 +179,9 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      SizedBox(height: 22,),
+                                      SizedBox(
+                                        height: 22,
+                                      ),
                                       Center(
                                         child: Text.rich(TextSpan(children: [
                                           TextSpan(
@@ -202,26 +203,8 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                                                     color: widget.currentTheme
                                                         .textColor),
                                           )
-                                        ])
-                                            // textAlign: TextAlign.center,
-                                            // _favoriteVerses[index].book.modernName,
-                                            // style: StylesApp(context)
-                                            //     .textStyleBody16
-                                            //     .copyWith(
-                                            // color: StyleColor.turquoise),
-                                            ),
+                                        ])),
                                       ),
-                                      // Center(
-                                      //   child: Text(
-                                      //     textAlign: TextAlign.center,
-                                      //     "${_favoriteVerses[index].chapter.chapter}:${_favoriteVerses[index].verse.verse}",
-                                      //     style: StylesApp(context)
-                                      //         .textStyleBody14
-                                      //         .copyWith(
-                                      //             color: widget
-                                      //                 .currentTheme.textColor),
-                                      //   ),
-                                      // ),
                                       SizedBox(
                                         height: 10,
                                       ),

@@ -123,7 +123,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             History(
                 id: "122",
                 text:
-                    "esta es la historia que tendrá la prueba {(Juan 1:4-5 /RVR95)} para validar si se puede levantar una modal {(Apocalipsis 1:4-5 /RVR05)}",
+                    "esta es la historia que tendrá la prueba {(Juan 1:4-5 /RVR60)} para validar si se puede levantar una modal {(Apocalipsis 1:4-5 /RVR09)}",
                 orderCard: 1,
                 level: IntermediateLevel(
                     levelNumber: 1, unLockLevel: true, countLevelNumber: 1),
@@ -969,10 +969,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
             fontSize: fontSizeText,
           ),
           recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              print(matchedText);
-              _buildModalShowDetailLink(matchedText);
-              // abrirá una modal
+            ..onTap = () async {
+              LoadingService().showLoading(context);
+              try {
+                final ResponseData responseDetailLink =
+                    await getReferencesBibleByName(matchedText);
+                if (responseDetailLink.error != null) {
+                  LoadingService().hideLoading();
+                  await showCustomDialog(context,
+                      message: responseDetailLink.error!,
+                      dialogType: DialogType.error);
+                  return;
+                }
+                setState(() {
+                  // mapeamos datos
+                  final ResponseReferenceBiblicalModel reference =
+                      ResponseReferenceBiblicalModel.fromJson(
+                          responseDetailLink.data);
+                  _buildModalShowDetailLink(reference);
+                });
+                LoadingService().hideLoading();
+              } catch (e) {
+                LoadingService().hideLoading();
+                await showCustomDialog(context,
+                    message: e.toString(), dialogType: DialogType.error);
+              } finally {
+                LoadingService().hideLoading();
+              }
             },
         ),
       );
@@ -1000,8 +1023,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  void _buildModalShowDetailLink(String? text) {
-    if (text == null) return;
+  void _buildModalShowDetailLink(ResponseReferenceBiblicalModel reference) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -1016,51 +1038,132 @@ class _HistoryScreenState extends State<HistoryScreen> {
             top: 20,
             bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 5,
-                margin: EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(10),
+          child: Container(
+            height: MediaQuery.sizeOf(context).height * .50,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  textAlign: TextAlign.center,
+                  "Biblia  Version\n ${reference.bibleName}",
+                  style: StylesApp(context)
+                      .textStyleBody18
+                      .copyWith(color: StyleColor.black),
                 ),
-              ),
-              Text(
-                "Detalle del enlace",
-                style: StylesApp(context).textStyleBody18.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                text,
-                style: StylesApp(context).textStyleBody5.copyWith(
-                      color: Colors.blue,
-                      fontSize: fontSizeText,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: StyleColor.turquoise,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: reference.verses.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                        margin: EdgeInsets.only(
+                            top: 6.0, left: 4.0, right: 4.0, bottom: 6.0),
+                        padding: EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: StyleColor.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: StyleColor.black.withValues(alpha: .25),
+                              spreadRadius: 2.0,
+                              offset: Offset(0, 2.0),
+                            )
+                          ],
+                        ),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              top: -15,
+                              right: 0,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    iconSize: 20.0,
+                                    onPressed: () => copyToClipboard(context,
+                                        "${reference.bookName} ${reference.chapterNumber}:${reference.verses[index].verse}\n ${reference.verses[index].text} \n ${GraphQLConfig.baseUrl}OfficialBible"),
+                                    icon: Icon(
+                                      Icons.file_copy_rounded,
+                                      color: StyleColor.turquoise,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    iconSize: 20.0,
+                                    onPressed: () => shareVerse(context,
+                                        "${reference.bookName} ${reference.chapterNumber}:${reference.verses[index].verse}\n ${reference.verses[index].text} \n ${GraphQLConfig.baseUrl}OfficialBible"),
+                                    icon: Icon(
+                                      Icons.share_rounded,
+                                      color: StyleColor.turquoise,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  height: 22,
+                                ),
+                                Center(
+                                  child: Text.rich(TextSpan(children: [
+                                    TextSpan(
+                                      text: reference.bookName,
+                                      style: StylesApp(context)
+                                          .textStyleBody16
+                                          .copyWith(
+                                              color: StyleColor.turquoise),
+                                    ),
+                                    TextSpan(
+                                      text:
+                                          "  ${reference.chapterNumber}:${reference.verses[index].verse}",
+                                      style: StylesApp(context)
+                                          .textStyleBody14
+                                          .copyWith(color: StyleColor.black),
+                                    )
+                                  ])),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Center(
+                                  child: Text(
+                                    textAlign: TextAlign.center,
+                                    '"${reference.verses[index].text}"',
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(color: StyleColor.black),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  minimumSize: Size(double.infinity, 44),
                 ),
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  "Cerrar",
-                  style: StylesApp(context).textStyleBody5.copyWith(
-                        color: Colors.white,
-                      ),
+                SizedBox(height: 24),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: StyleColor.turquoise,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    minimumSize: Size(double.infinity, 44),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    "Cerrar",
+                    style: StylesApp(context).textStyleBody5.copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
