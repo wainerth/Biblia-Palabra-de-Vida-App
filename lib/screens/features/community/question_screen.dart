@@ -1231,22 +1231,21 @@ class _QuestionScreenState extends State<QuestionScreen> {
               text: "Descargar certificado",
               onPressed: () async {
                 try {
-                  final responseCreateCertificate =
-                      await createCertificate(userData?.userId, courseId);
-                  if (responseCreateCertificate.error != null) {
+                  final responseDownloadCertificate =
+                      await getUrlCertificate(userData!.userId, courseId);
+                  await createCertificate(userData?.userId, courseId);
+                  if (responseDownloadCertificate.error != null) {
                     await showCustomDialog(
                       context,
-                      message: responseCreateCertificate.error!,
+                      message: responseDownloadCertificate.error!,
                       dialogType: DialogType.error,
                     );
                     return;
                   }
-                  certificateCreated = ResponseCertificateCreated.fromJson(
-                      responseCreateCertificate.data);
-                  if (certificateCreated != null &&
-                      certificateCreated!.rutaArchivo != null) {
+                  if (responseDownloadCertificate != null &&
+                      responseDownloadCertificate.data != null) {
                     final url =
-                        "${GraphQLConfig.urlServidor}${certificateCreated!.rutaArchivo}";
+                        "${GraphQLConfig.urlServidor}${responseDownloadCertificate.data['url']}";
                     if (await canLaunchUrl(Uri.parse(url))) {
                       await launchUrl(Uri.parse(url),
                           mode: LaunchMode.externalApplication);
@@ -1321,34 +1320,34 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     height: 32,
                     buttonStyle: StylesApp(context).btnWidgetSmall,
                     onPressed: () async {
-                      if (certificateCreated != null) {
-                        Navigator.popAndPushNamed(context, '/layoutPage1');
-                      } else {
-                        try {
-                          final responseCreateCertificate =
-                              await createCertificate(
-                                  userData?.userId, courseId);
-                          if (responseCreateCertificate.error != null) {
-                            await showCustomDialog(
-                              context,
-                              message: responseCreateCertificate.error!,
-                              dialogType: DialogType.error,
-                            );
-                            return;
-                          }
-                          certificateCreated =
-                              ResponseCertificateCreated.fromJson(
-                                  responseCreateCertificate.data);
-                        } catch (e) {
-                          await showCustomDialog(
-                            context,
-                            message: e.toString(),
-                            dialogType: DialogType.error,
-                          );
-                          return;
-                        }
-                        Navigator.popAndPushNamed(context, '/layoutPage1');
-                      }
+                      // if (certificateCreated != null) {
+                      Navigator.popAndPushNamed(context, '/layoutPage1');
+                      // } else {
+                      //   try {
+                      //     final responseCreateCertificate =
+                      //         await createCertificate(
+                      //             userData?.userId, courseId);
+                      //     if (responseCreateCertificate.error != null) {
+                      //       await showCustomDialog(
+                      //         context,
+                      //         message: responseCreateCertificate.error!,
+                      //         dialogType: DialogType.error,
+                      //       );
+                      //       return;
+                      //     }
+                      //     certificateCreated =
+                      //         ResponseCertificateCreated.fromJson(
+                      //             responseCreateCertificate.data);
+                      //   } catch (e) {
+                      //     await showCustomDialog(
+                      //       context,
+                      //       message: e.toString(),
+                      //       dialogType: DialogType.error,
+                      //     );
+                      //     return;
+                      //   }
+                      //   Navigator.popAndPushNamed(context, '/layoutPage1');
+                      // }
                     },
                   ),
                 ),

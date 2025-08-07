@@ -2,7 +2,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class PrayerModel {
   final String requestId;
-  final VerseDetail? verse;
+  final PrayerResponse? responser;
   final StatusRequest statusRequest;
   final Audio? audioPrayer;
   final String prayedFor;
@@ -14,7 +14,7 @@ class PrayerModel {
 
   PrayerModel({
     required this.requestId,
-    required this.verse,
+    required this.responser,
     required this.statusRequest,
     required this.audioPrayer,
     required this.prayedFor,
@@ -28,7 +28,8 @@ class PrayerModel {
   factory PrayerModel.fromJson(Map<String, dynamic> json) {
     return PrayerModel(
       requestId: json['requestId'],
-      verse: json['verse'] != null ? VerseDetail.fromJson(json['verse']) : null,
+      responser:
+          json['responser'] != null ? PrayerResponse.fromJson(json['responser']) : null,
       statusRequest: StatusRequest.fromJson(json['statusRequest']),
       audioPrayer: json['audioPrayer'] != null
           ? Audio.fromJson(json['audioPrayer'])
@@ -38,13 +39,13 @@ class PrayerModel {
       prayerSubType: PrayerSubTypeModel.fromJson(json['prayerSubType']),
       prayerDetails: json['prayerDetails'],
       requestDate: json['requestDate'],
-      requestedBy: json['requestedBy']?? '',
+      requestedBy: json['requestedBy'] ?? '',
     );
   }
   Map<String, dynamic> toJson() {
     return {
       "requestId": requestId,
-      "verse": verse,
+      "responser": responser,
       "statusRequest": statusRequest,
       "audioPrayer": audioPrayer,
       "prayedFor": prayedFor,
@@ -92,30 +93,55 @@ class MessageSystem {
   }
 }
 
-class VerseDetail {
-  final VerseModel? verse;
-  final ChapterModel? chapter;
-  final BookModel? book;
+class PrayerResponse {
+  final String id;
+  final String message;
+  final String responder;
+  final String bookName;
+  final String chapter;
+  final String verse;
+  final String text;
+  final Audio? audioResponse;
+  final String createdAt;
 
-  VerseDetail({
+  PrayerResponse({
+    required this.id,
+    required this.message,
+    required this.responder,
+    required this.bookName,
+    required this.text,
+    required this.createdAt,
     required this.verse,
     required this.chapter,
-    required this.book,
+    required this.audioResponse
   });
 
-  factory VerseDetail.fromJson(Map<String, dynamic> json) {
-    return VerseDetail(
-      verse: json['verse'] != null ? VerseModel.fromJson(json['verse']) : null,
+  factory PrayerResponse.fromJson(Map<String, dynamic> json) {
+    return PrayerResponse(
+      id: json['id'],
+      message: json['message'],
+      responder: json['responder'],
+      bookName: json['bookName'],
+      text: json['text'],
+      verse: json['verse'],
       chapter: json['chapter'],
-      book: json['book'],
+       audioResponse: json['audioResponse'] != null
+          ? Audio.fromJson(json['audioResponse'])
+          : null,
+      createdAt: json['createdAt'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      "id": id,
+      "message": message,
+      "responder": responder,
+      "bookName": bookName,
+      "text": text,
       "verse": verse,
       "chapter": chapter,
-      "book": book,
+      "createdAt": createdAt
     };
   }
 }

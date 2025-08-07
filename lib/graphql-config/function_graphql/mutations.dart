@@ -1804,11 +1804,20 @@ Future<ResponseData> deleteRequestPrayer(String prayerId) async {
 }
 
 Future<ResponseData> answerPrayerRequest(String? message, String requestId,
-    String responderId, String? verseId) async {
+    String responderId, String? verseId, File? audio) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
   final GraphQLClient client = createClient(authToken: userToken);
+  //  Prepara el archivo como MultipartFile
+  MultipartFile? multipartFile;
+  if (audio != null) {
+    multipartFile = await MultipartFile.fromPath(
+      'audio', // Nombre del campo en GraphQL (mutation)
+      audio.path,
+      contentType: MediaType('audio', 'aac'), // Ajusta según tu formato
+    );
+  }
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "AnswerPrayerRequest",
@@ -1823,14 +1832,16 @@ Future<ResponseData> answerPrayerRequest(String? message, String requestId,
       '''),
     variables: <String, dynamic>{
       "input": {
-        "message": null,
-        "requestId": null,
-        "responderId": null,
-        "verseId": null
+        "audio": multipartFile,
+        "message": message,
+        "requestId": requestId,
+        "responderId": responderId,
+        "verseId": verseId
       }
     },
     fetchPolicy: FetchPolicy.noCache,
   );
+
   try {
     final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
@@ -1874,6 +1885,75 @@ Future<ResponseData> answerPrayerRequest(String? message, String requestId,
     }
   }
 }
+
+Future<ResponseData> changeStatusRequest(
+    String? prayerId, String statusLabel) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "ChangeStatusRequest",
+    document: gql(r'''
+     mutation ChangeStatusRequest($prayerId: ID!, $statusLabel: String) {
+      changeStatusRequest(prayerId: $prayerId, statusLabel: $statusLabel) {
+          successful
+          message
+          id
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "prayerId": prayerId,
+      "statusLabel": statusLabel,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Change Status Request: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['changeStatusRequest'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Change Status Request failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['changeStatusRequest'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    return ResponseData(
+        data: null, error: 'Change Status Request Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
 Future<ResponseData> createCertificate(String? userId, String courseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
@@ -1893,8 +1973,8 @@ Future<ResponseData> createCertificate(String? userId, String courseId) async {
       }
       '''),
     variables: <String, dynamic>{
-        "userId": userId,
-        "courseId": courseId,
+      "userId": userId,
+      "courseId": courseId,
     },
     fetchPolicy: FetchPolicy.noCache,
   );

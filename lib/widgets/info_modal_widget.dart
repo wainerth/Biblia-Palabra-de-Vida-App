@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class InfoModalWidget extends StatefulWidget {
@@ -101,7 +102,7 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                   ),
                                 ),
                                 Text.rich(
-                                  softWrap: true, 
+                                  softWrap: true,
                                   TextSpan(
                                     children: [
                                       TextSpan(
@@ -110,14 +111,15 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                               .textStyleBody2_14),
                                       TextSpan(
                                         text: widget.dataSeleccionada
-                                            .prayerCategory.name.trim(),
+                                            .prayerCategory.name
+                                            .trim(),
                                         style: StylesApp(context)
                                             .textStyleBody2_14
                                             .copyWith(color: Colors.black),
                                       ),
-                                        TextSpan(
+                                      TextSpan(
                                           text: " / ",
-                                          style:  StylesApp(context)
+                                          style: StylesApp(context)
                                               .textStyleBody2_14),
                                       TextSpan(
                                         text: widget.dataSeleccionada
@@ -219,6 +221,34 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                               SizedBox(
                                                 height: 21.0,
                                               ),
+                                              if (widget.dataSeleccionada
+                                                      .responser !=
+                                                  null)
+                                                Text(
+                                                  widget.dataSeleccionada
+                                                      .responser!.message,
+                                                  style: StylesApp(context)
+                                                      .textStyleBody15
+                                                      .copyWith(
+                                                          color: Colors.black),
+                                                ),
+                                              SizedBox(
+                                                height: 12.0,
+                                              ),
+                                              if (widget.dataSeleccionada
+                                                      .responser !=
+                                                  null)
+                                                Text.rich(
+                                                  TextSpan(
+                                                    style: StylesApp(context)
+                                                        .textStyleBody12
+                                                        .copyWith(
+                                                            color: StyleColor
+                                                                .grayMedium),
+                                                    text:
+                                                        '${widget.dataSeleccionada.responser?.bookName} ${widget.dataSeleccionada.responser?.chapter}:${widget.dataSeleccionada.responser?.verse} \n "${widget.dataSeleccionada.responser?.text}"',
+                                                  ),
+                                                ),
                                             ],
                                           ),
                                         ),
@@ -228,6 +258,18 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                 ],
                               ),
                             ),
+                            SizedBox(
+                              height: 12.0,
+                            ),
+                            if (widget.dataSeleccionada.responser != null)
+                              AudioPlayerWidget(
+                                pathUrl: widget.dataSeleccionada.responser!
+                                            .audioResponse !=
+                                        null
+                                    ? "${GraphQLConfig.urlServidor}${widget.dataSeleccionada.responser?.audioResponse!.url}"
+                                    : '',
+                                showImage: false,
+                              ),
                           ],
                         ),
                       ),

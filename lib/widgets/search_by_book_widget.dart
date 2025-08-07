@@ -9,15 +9,19 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class SearchByBookWidget extends StatefulWidget {
-  final VersionModel version;
-  final BookModel book;
-  final ChapterModel chapter;
-  final void Function(InputDataSearchModel searchData)? onActionBook;
+  final VersionModel? version;
+  final BookModel? book;
+  final ChapterModel? chapter;
+  final bool showSelectedRange;
+  final void Function(
+    InputDataSearchModel searchData,
+  )? onActionBook;
   const SearchByBookWidget({
     super.key,
-    required this.version,
-    required this.book,
-    required this.chapter,
+    this.version,
+    this.book,
+    this.chapter,
+    this.showSelectedRange = true,
     this.onActionBook,
   });
 
@@ -58,36 +62,40 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         listBibleVersions =
             catalogueProvider.allBibleVersion.map((v) => v).toList();
         bibleVersions = catalogueProvider.allBibleVersion
-            .map((v) => ModelData(value: v.id, label: v.version))
+            .map((v) =>
+                ModelData(value: v.id, label: v.version, originalData: v))
             .toList();
       });
       if (widget.version != null) {
         setState(() {
           versionSelected = ModelData(
-              label: widget.version.version, value: widget.version.id);
+              label: widget.version!.version,
+              value: widget.version!.id,
+              originalData: widget.version);
         });
         await loadBookByVersion(versionSelected!.value);
       }
       if (widget.book != null) {
         setState(() {
-          bookSelected =
-              ModelData(label: widget.book.modernName, value: widget.book.id);
+          bookSelected = ModelData(
+              label: widget.book!.modernName,
+              value: widget.book!.id,
+              originalData: widget.book);
         });
+        await getChapterByBook(bookSelected!.value);
       }
-      await getChapterByBook(bookSelected!.value);
       if (widget.chapter != null) {
         setState(() {
           chapterSelected = widget.chapter;
           initialChapter = [chapterSelected!];
           _chaptersExpanded = false;
         });
+        await loadVerses(chapterSelected!.id);
+        setState(() {
+          _versesExpanded = true;
+          _selectedItems.add(verses.first);
+        });
       }
-      await loadVerses(chapterSelected!.id);
-
-      setState(() {
-        _versesExpanded = true;
-        _selectedItems.add(verses.first);
-      });
     });
   }
 
@@ -127,12 +135,15 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     await loadBookByVersion(version!.value);
                     setState(() {
                       bookSelected = ModelData(
-                          label: books.first.label, value: books.first.value);
+                          label: books.first.label,
+                          value: books.first.value,
+                          originalData: books.first.originalData);
                       _chaptersExpanded = true;
                       _versesExpanded = false;
                     });
                     // leemos los capítulos de esta version y tomamos el primero
                     await getChapterByBook(bookSelected!.value);
+                    if (chapters.isEmpty) return;
                     setState(() {
                       chapterSelected = chapters.first;
                       initialChapter = [chapterSelected!];
@@ -322,36 +333,37 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                   ),
                 ],
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.sizeOf(context).width,
-                    child: ListTile(
-                      title: Text(
-                        'Rango de versículos',
-                        style: StylesApp(context)
-                            .textStyleBody12
-                            .copyWith(color: currentTheme.textColor),
-                      ),
-                      trailing: Switch(
-                        activeColor: currentTheme.buttonColor,
-                        thumbColor:
-                            WidgetStatePropertyAll(currentTheme.buttonColor),
-                        trackOutlineColor:
-                            WidgetStatePropertyAll(StyleColor.grayMedium),
-                        value: verseRange,
-                        onChanged: (bool value) {
-                          setState(() {
-                            verseRange = value;
-                            _selectedItems = [];
-                          });
-                        },
+              if (widget.showSelectedRange)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: ListTile(
+                        title: Text(
+                          'Rango de versículos',
+                          style: StylesApp(context)
+                              .textStyleBody12
+                              .copyWith(color: currentTheme.textColor),
+                        ),
+                        trailing: Switch(
+                          activeColor: currentTheme.buttonColor,
+                          thumbColor:
+                              WidgetStatePropertyAll(currentTheme.buttonColor),
+                          trackOutlineColor:
+                              WidgetStatePropertyAll(StyleColor.grayMedium),
+                          value: verseRange,
+                          onChanged: (bool value) {
+                            setState(() {
+                              verseRange = value;
+                              _selectedItems = [];
+                            });
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
           Row(
@@ -370,12 +382,17 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                         dialogType: DialogType.error);
                     return;
                   }
+
                   final data = InputDataSearchModel(
+                    version: versionSelected!.originalData,
+                    book: bookSelected!.originalData,
+                    chapter: chapterSelected,
                     versionId: versionSelected!.value,
                     bookId: bookSelected!.value,
                     chapterId: chapterSelected!.id,
                     startVerseId: _selectedItems.first.id,
                     endVerseId: _selectedItems.last.id,
+                    verses: _selectedItems
                   );
                   widget.onActionBook!(data);
                 },
@@ -397,7 +414,8 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           listBibleVersions.firstWhere((x) => x.id == versionId);
 
       books = currenVersion.books
-          .map((book) => ModelData(label: book.modernName, value: book.id))
+          .map((book) => ModelData(
+              label: book.modernName, value: book.id, originalData: book))
           .toList();
     });
   }

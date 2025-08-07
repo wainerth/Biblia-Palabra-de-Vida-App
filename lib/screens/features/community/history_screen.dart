@@ -973,7 +973,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               LoadingService().showLoading(context);
               try {
                 final ResponseData responseDetailLink =
-                    await getReferencesBibleByName(matchedText);
+                    await getReferencesBibleByName(matchedText, null);
                 if (responseDetailLink.error != null) {
                   LoadingService().hideLoading();
                   await showCustomDialog(context,

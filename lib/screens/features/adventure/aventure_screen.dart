@@ -193,6 +193,7 @@ class _AventureScreenState extends State<AventureScreen> {
                       await showCustomDialog(context,
                           message: progressResponse.error!,
                           dialogType: DialogType.error);
+                          return;
                     }
                     progressUser = progressResponse.data;
                     if (progressUser != null) {

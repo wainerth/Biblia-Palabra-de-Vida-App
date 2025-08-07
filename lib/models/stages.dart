@@ -8,7 +8,7 @@ class Stage {
   int? countCards;
   int orderCard;
   String color;
-  Img img;
+  Img? img;
   String? churchId;
   int status;
   int levelCount;
@@ -38,7 +38,7 @@ class Stage {
       countCards: json['countCards'],
       orderCard: json['orderCard'] ?? 0,
       color: json['color'],
-      img: Img.fromJson(json['img']),
+      img: json['img'] != null ? Img.fromJson(json['img']) : null,
       churchId: json['churchId'],
       levelCount: json["levelCount"] ?? 0,
       levelCompletedCount: json["levelCompletedCount"] ?? 0,
@@ -55,7 +55,7 @@ class Stage {
     data['countCards'] = countCards;
     data['orderCard'] = orderCard;
     data['color'] = color;
-    data['img'] = img.toJson();
+    data['img'] = img;
     data['churchId'] = churchId;
     data['levelCount'] = levelCount;
     data['levelCompletedCount'] = levelCompletedCount;

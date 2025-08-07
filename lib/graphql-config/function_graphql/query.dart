@@ -3928,20 +3928,6 @@ Future<ResponseData> getAllRequestPrayerByGroupId(
             audioPrayer {
               url
             }
-            verse {
-              book {
-                modernName
-                numberBook
-              }
-              chapter {
-                chapter
-                id
-              }
-              verse {
-                verse
-                text
-              }
-            }
           }
           meta {
             currentPage
@@ -4025,42 +4011,39 @@ Future<ResponseData> getAllRequestPrayerByUser(String? userId) async {
         getPrayerRequestByUserId(page: $page, limit: $limit, userId: $userId, text: $text) {
           data {
             requestId
-            prayedFor
-            requestedBy
             requestDate
-            prayerDetails
-            audioPrayer {
-              url
+            requestedBy
+            prayedFor
+            prayerCategory {
               id
-            }
-             prayerCategory {
               name
-              id
             }
             prayerSubType {
-                id
-                name
-              }
-               verse {
-              book {
-                id
-                numberBook
-                modernName
-              }
-              chapter {
-                chapter
-                id
-              }
-              verse {
-                verse
-                text
-              }
+              id
+              name
             }
+            prayerDetails
             statusRequest {
               name
               messageSystems {
                 message
               }
+            }
+            audioPrayer {
+              url
+            }
+            responser {
+              id
+              message
+              responder
+              bookName
+              chapter
+              verse
+              text
+              audioResponse {
+                url
+              }
+              createdAt
             }
           }
           meta {
@@ -4073,7 +4056,6 @@ Future<ResponseData> getAllRequestPrayerByUser(String? userId) async {
           }
         }
       }
-  
       '''),
     variables: <String, dynamic>{
       "userId": userId,
@@ -4133,7 +4115,7 @@ Future<ResponseData> getAllRequestPrayerByUser(String? userId) async {
 }
 
 Future<ResponseData> getReferencesBibleByName(
-    String? bibleReferencePattern) async {
+    String? bibleReferencePattern, String? version) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -4142,21 +4124,22 @@ Future<ResponseData> getReferencesBibleByName(
   QueryOptions options = QueryOptions(
     operationName: "GetVerseByChapterBookNameAndCodeBible",
     document: gql(r'''
-     query GetVerseByChapterBookNameAndCodeBible($bibleReferencePattern: String) {
-      getVerseByChapterBookNameAndCodeBible(bibleReferencePattern: $bibleReferencePattern) {
-        bibleName
+     query GetVerseByChapterBookNameAndCodeBible($bibleReferencePattern: String, $version: String) {
+        getVerseByChapterBookNameAndCodeBible(bibleReferencePattern: $bibleReferencePattern, version: $version) {
+          bibleName
           bookName
           chapterNumber
           verses {
-            id
             verse
             text
+            id
           }
         }
       }
       '''),
     variables: <String, dynamic>{
       "bibleReferencePattern": bibleReferencePattern,
+      "version": version,
     },
     fetchPolicy: FetchPolicy.noCache,
   );
@@ -4195,6 +4178,76 @@ Future<ResponseData> getReferencesBibleByName(
         data: null,
         error:
             'Get Verse By Chapter Book Name And Code Bible Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getUrlCertificate(String userId, String? courseId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userToken = prefs.getString('userToken');
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetUrlCertificateByUser",
+    document: gql(r'''
+     query GetUrlCertificateByUser($userId: ID!, $courseId: ID!) {
+      getUrlCertificateByUser(userId: $userId, courseId: $courseId) {
+          url
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "courseId": courseId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get Url Certificate By User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getUrlCertificateByUser'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get Url Certificate By User failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getUrlCertificateByUser'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null,
+        error: 'Get Url Certificate By User Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

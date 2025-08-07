@@ -96,4 +96,6 @@ export 'package:biblia_palabra_de_vida_app/widgets/custom_pagination.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/custom_verse_dialog.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/dialog_favorite_verse_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/infinite_animation.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/search_by_book_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/prayer_request_modal.dart';
 
