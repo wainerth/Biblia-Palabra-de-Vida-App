@@ -84,3 +84,4 @@ export 'package:biblia_palabra_de_vida_app/models/prayer_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/courses_detail.dart';
 export 'package:biblia_palabra_de_vida_app/models/response_certificate_created.dart';
 export 'package:biblia_palabra_de_vida_app/models/response_reference_biblical_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/copy_model_verse.dart';

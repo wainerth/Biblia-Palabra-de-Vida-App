@@ -90,7 +90,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           initialChapter = [chapterSelected!];
           _chaptersExpanded = false;
         });
-        await loadVerses(chapterSelected!.id);
+        await loadVerses(chapterSelected!.id!);
         setState(() {
           _versesExpanded = true;
           _selectedItems.add(verses.first);
@@ -150,7 +150,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                       _chaptersExpanded = false;
                     });
                     // leemos los versículos y seleccionamos el primero
-                    await loadVerses(chapterSelected!.id);
+                    await loadVerses(chapterSelected!.id!);
 
                     setState(() {
                       _versesExpanded = true;
@@ -256,7 +256,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                               print(
                                   'Capítulo seleccionado: ${chapter.first.id}');
                             }
-                            await loadVerses(chapter.first.id);
+                            await loadVerses(chapter.first.id!);
                             setState(() {
                               chapterSelected = chapter.first;
                               _chaptersExpanded = false;
@@ -389,9 +389,9 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     chapter: chapterSelected,
                     versionId: versionSelected!.value,
                     bookId: bookSelected!.value,
-                    chapterId: chapterSelected!.id,
-                    startVerseId: _selectedItems.first.id,
-                    endVerseId: _selectedItems.last.id,
+                    chapterId: chapterSelected!.id!,
+                    startVerseId: _selectedItems.first.id!,
+                    endVerseId: _selectedItems.last.id!,
                     verses: _selectedItems
                   );
                   widget.onActionBook!(data);
@@ -455,7 +455,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       loadingVerses = true;
       verses = chapters
           .firstWhere((ch) => ch.id == id)
-          .verses
+          .verses!
           .map((verse) => verse)
           .toList();
 

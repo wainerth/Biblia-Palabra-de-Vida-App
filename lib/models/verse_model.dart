@@ -1,26 +1,26 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class VerseModel extends GridItem {
-  final String id;
-  final int chapterId;
+  final String? id;
+  final int? chapterId;
   final int verse;
   final String text;
   final String? colorHighlight;
   final List<HighlightRangeModel?>? highlights;
   final int? posIni;
   final int? posFin;
-  final int status;
+  final int? status;
 
   VerseModel({
-    required this.id,
-    required this.chapterId,
+    this.id,
+    this.chapterId,
     required this.verse,
     required this.text,
-    required this.colorHighlight,
+    this.colorHighlight,
     this.posIni,
     this.posFin,
-    required this.highlights,
-    required this.status,
+    this.highlights,
+    this.status,
   });
   @override
   bool operator ==(Object other) =>
@@ -51,7 +51,7 @@ class VerseModel extends GridItem {
 
   factory VerseModel.fromJson(Map<String, dynamic> json) {
     return VerseModel(
-      id: json['id'],
+      id: json['id'] ?? '',
       chapterId: json['chapterId'] ?? 0,
       verse: json['verse'] ?? 0,
       text: json['text'] ?? '',

@@ -1229,7 +1229,7 @@ class _BibleScreenState extends State<BibleScreen> {
     final List<HighlightRangeModel> inputHighlight = [];
     for (final verse in listVerses) {
       final newHighlight = HighlightRangeModel(
-        id: verse.id,
+        id: verse.id!,
         verse: verse.verse,
         startIndex: verse.posIni!,
         endIndex: verse.posFin!,
@@ -1239,7 +1239,7 @@ class _BibleScreenState extends State<BibleScreen> {
     }
     LoadingService().showLoading(context);
     final responseCreate = await crateHighLighters(inputHighlight,
-        userData!.userId, int.parse(currentVersion!.id), currentChapter!.id);
+        userData!.userId, int.parse(currentVersion!.id), currentChapter!.id!);
     if (responseCreate.error != null) {
       LoadingService().hideLoading();
       // ignore: use_build_context_synchronously
@@ -1380,7 +1380,7 @@ class _BibleScreenState extends State<BibleScreen> {
     try {
       if (_favoriteVerses.any((f) => f.verse.id == verse.id)) {
         final responseRemove =
-            await deleteVerseFavorite(userData!.userId, verse.id);
+            await deleteVerseFavorite(userData!.userId, verse.id!);
         if (responseRemove.error != null) {
           await showCustomDialog(context,
               message: responseRemove.error!, dialogType: DialogType.error);
@@ -1394,7 +1394,7 @@ class _BibleScreenState extends State<BibleScreen> {
         });
       } else {
         final responseAddFavorite =
-            await createNewVerseFavoriteByUser(userData!.userId, verse.id);
+            await createNewVerseFavoriteByUser(userData!.userId, verse.id!);
 
         if (responseAddFavorite.error != null) {
           await showCustomDialog(context,
@@ -1425,7 +1425,7 @@ class _BibleScreenState extends State<BibleScreen> {
   Future<void> _loadHighlights() async {
     if (userData != null && currentVersion != null && currentChapter != null) {
       final responseHighLighter = await getAllHighLighters(
-          userData!.userId, int.parse(currentVersion!.id), currentChapter!.id);
+          userData!.userId, int.parse(currentVersion!.id), currentChapter!.id!);
       if (responseHighLighter.error != null) {
         errorMessage = responseHighLighter.error;
         return;
@@ -1537,7 +1537,7 @@ class _BibleScreenState extends State<BibleScreen> {
       //consulto todos los capítulos del libro actual con sus versículos
       await loadChapters(currentBook!, false);
       await _loadPersistedData();
-      await loadVideoByChapter(currentChapter!.id);
+      await loadVideoByChapter(currentChapter!.id!);
       // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
       validateNextAndPrevious();
     } catch (e) {
@@ -1569,7 +1569,7 @@ class _BibleScreenState extends State<BibleScreen> {
       setState(() {
         currentChapter = allChapters.firstWhere((chapter) =>
             chapter.chapter.toString() == chapterNumber.toString());
-        verses = currentChapter!.verses;
+        verses = currentChapter!.verses!;
         verses.sort((a, b) {
           // Convertir a números si son strings (ejemplo: "1" -> 1)
           final verseA = a.verse;
@@ -1617,7 +1617,7 @@ class _BibleScreenState extends State<BibleScreen> {
       setState(() {
         currentChapter = allChapters.firstWhere((chapter) =>
             chapter.chapter.toString() == chapterNumber.toString());
-        verses = currentChapter!.verses;
+        verses = currentChapter!.verses!;
         verses.sort((a, b) {
           // Convertir a números si son strings (ejemplo: "1" -> 1)
           final verseA = a.verse;
@@ -1691,7 +1691,7 @@ class _BibleScreenState extends State<BibleScreen> {
         }
 
         if (currentChapter != null) {
-          verses = currentChapter!.verses
+          verses = currentChapter!.verses!
               .map<VerseModel>((verse) => VerseModel.fromJson(verse.toJson()))
               .toList();
           //ordenamos los versículos de menor a mayor
@@ -1791,7 +1791,7 @@ class _BibleScreenState extends State<BibleScreen> {
             allChapters.firstWhere((chapter) => chapter.id == data.chapterId);
 
         verses = getVersesInRange(
-            currentChapter!.verses, data.startVerseId, data.endVerseId);
+            currentChapter!.verses!, data.startVerseId, data.endVerseId);
       });
       setState(() {
         currentBook = currentBook!.copyWith(
@@ -1903,7 +1903,7 @@ class _BibleScreenState extends State<BibleScreen> {
         currentChapter =
             allChapters.firstWhere((chapter) => chapter.id == data.chapterId);
 
-        verses = currentChapter!.verses;
+        verses = currentChapter!.verses!;
       });
       setState(() {
         currentBook = currentBook!.copyWith(
@@ -2065,7 +2065,7 @@ List<VerseModel> getVersesInRange(
 
     // Buscar los versículos en el rango
     final result = verses.where((verse) {
-      final verseNumber = int.parse(verse.id);
+      final verseNumber = int.parse(verse.id!);
       return verseNumber >= start && verseNumber <= end;
     }).toList();
 

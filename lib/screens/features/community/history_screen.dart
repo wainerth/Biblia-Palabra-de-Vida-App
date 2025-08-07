@@ -5,6 +5,7 @@ import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -960,8 +961,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
       spans.add(
         TextSpan(
           text: matchedText.replaceFirstMapped(
-            RegExp(r'\/.*(?=\)\})'),
-            (m) => '', // Oculta visualmente lo que sigue después de /
+            RegExp(
+                r'^\{\(\s*([^\/]+)\s*\/.*\)\}'), // Captura solo la referencia
+            (match) =>
+                match.group(1)?.trim() ??
+                matchedText, // Extrae el grupo 1 (la referencia)
           ),
           style: TextStyle(
             color: Colors.blue,
@@ -986,7 +990,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   final ResponseReferenceBiblicalModel reference =
                       ResponseReferenceBiblicalModel.fromJson(
                           responseDetailLink.data);
-                  _buildModalShowDetailLink(reference);
+                  _buildModalShowDetailLink(matchedText, reference);
                 });
                 LoadingService().hideLoading();
               } catch (e) {
@@ -1023,149 +1027,254 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  void _buildModalShowDetailLink(ResponseReferenceBiblicalModel reference) {
+  void _buildModalShowDetailLink(
+      String matchedText, ResponseReferenceBiblicalModel reference) {
+    // Mover las variables al nivel superior del widget Stateful
+    final versions = Provider.of<CatalogueProvider>(context, listen: false)
+        .allBibleVersion
+        .map<ModelData>((version) => ModelData<VersionModel>(
+            label: version.version, value: version.id, originalData: version))
+        .toList();
+
+    // Inicializar con la versión de la referencia
+    ModelData? versionSelected = versions.firstWhere(
+      (v) => v.originalData.version == reference.bibleName,
+      orElse: () => ModelData(label: "", value: ""),
+    );
+
     showModalBottomSheet(
+      backgroundColor: StyleColor.white,
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       isScrollControlled: true,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Container(
-            height: MediaQuery.sizeOf(context).height * .50,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  textAlign: TextAlign.center,
-                  "Biblia  Version\n ${reference.bibleName}",
-                  style: StylesApp(context)
-                      .textStyleBody18
-                      .copyWith(color: StyleColor.black),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: reference.verses.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.only(
-                            top: 6.0, left: 4.0, right: 4.0, bottom: 6.0),
-                        padding: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: StyleColor.white,
-                          borderRadius: BorderRadius.circular(8.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: StyleColor.black.withValues(alpha: .25),
-                              spreadRadius: 2.0,
-                              offset: Offset(0, 2.0),
-                            )
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              top: -15,
-                              right: 0,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          ResponseReferenceBiblicalModel? _localReference = reference;
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            ),
+            child: Container(
+              height: MediaQuery.sizeOf(context).height * .85,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    textAlign: TextAlign.center,
+                    "Biblia  Version\n ${_localReference.bibleName}",
+                    style: StylesApp(context)
+                        .textStyleBody18
+                        .copyWith(color: StyleColor.black),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0),
+                      constraints: BoxConstraints(
+                        minWidth: 160.0,
+                        maxWidth: StylesApp(context).sizeTextFormField.width,
+                      ),
+                      child: CustomDropdownBottomWidget(
+                        hintText: "Seleccione la Versión",
+                        items: versions,
+                        onChanged: (ModelData? newVersion) async {
+                          if (newVersion == null) return;
+
+                          setModalState(() {
+                            versionSelected = newVersion;
+                          });
+
+                          LoadingService().showLoading(context);
+                          try {
+                            final ResponseData responseDetailLink =
+                                await getReferencesBibleByName(
+                                    matchedText, newVersion.originalData.code);
+
+                            if (responseDetailLink.error != null) {
+                              LoadingService().hideLoading();
+                              await showCustomDialog(context,
+                                  message: responseDetailLink.error!,
+                                  dialogType: DialogType.error);
+                              return;
+                            }
+
+                            setModalState(() {
+                              _localReference =
+                                  ResponseReferenceBiblicalModel.fromJson(
+                                      responseDetailLink.data);
+                            });
+                          } catch (e) {
+                            await showCustomDialog(context,
+                                message: e.toString(),
+                                dialogType: DialogType.error);
+                          } finally {
+                            LoadingService().hideLoading();
+                          }
+                        },
+                        selectedItem: versionSelected,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _localReference?.verses.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                          margin: EdgeInsets.only(
+                              top: 6.0, left: 4.0, right: 4.0, bottom: 6.0),
+                          padding: EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: StyleColor.white,
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: StyleColor.black.withValues(alpha: .25),
+                                spreadRadius: 2.0,
+                                offset: Offset(0, 2.0),
+                              )
+                            ],
+                          ),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                top: -15,
+                                right: 0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      padding: EdgeInsets.zero,
+                                      iconSize: 20.0,
+                                      onPressed: () {
+                                        copyToClipboard(
+                                          context,
+                                          CopyModelVerse(
+                                            book: Book(
+                                              modernName:
+                                                  _localReference?.bookName,
+                                            ),
+                                            chapter: ChapterModel(
+                                              chapter: int.parse(
+                                                  _localReference!
+                                                      .chapterNumber),
+                                            ),
+                                            verse: VerseModel(
+                                              verse: _localReference!
+                                                  .verses[index].verse!,
+                                              text: _localReference!
+                                                  .verses[index].text!,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      icon: Icon(
+                                        Icons.file_copy_rounded,
+                                        color: StyleColor.turquoise,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      padding: EdgeInsets.zero,
+                                      iconSize: 20.0,
+                                      onPressed: () => shareVerse(
+                                        context,
+                                        CopyModelVerse(
+                                          book: Book(
+                                            modernName:
+                                                _localReference?.bookName,
+                                          ),
+                                          chapter: ChapterModel(
+                                            chapter: int.parse(
+                                                _localReference!.chapterNumber),
+                                          ),
+                                          verse: VerseModel(
+                                            verse: _localReference!
+                                                .verses[index].verse!,
+                                            text: _localReference!
+                                                .verses[index].text!,
+                                          ),
+                                        ),
+                                      ),
+                                      icon: Icon(
+                                        Icons.share_rounded,
+                                        color: StyleColor.turquoise,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 20.0,
-                                    onPressed: () => copyToClipboard(context,
-                                        "${reference.bookName} ${reference.chapterNumber}:${reference.verses[index].verse}\n ${reference.verses[index].text} \n ${GraphQLConfig.baseUrl}OfficialBible"),
-                                    icon: Icon(
-                                      Icons.file_copy_rounded,
-                                      color: StyleColor.turquoise,
-                                    ),
+                                  SizedBox(
+                                    height: 22,
                                   ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 20.0,
-                                    onPressed: () => shareVerse(context,
-                                        "${reference.bookName} ${reference.chapterNumber}:${reference.verses[index].verse}\n ${reference.verses[index].text} \n ${GraphQLConfig.baseUrl}OfficialBible"),
-                                    icon: Icon(
-                                      Icons.share_rounded,
-                                      color: StyleColor.turquoise,
-                                    ),
+                                  Center(
+                                    child: Text.rich(TextSpan(children: [
+                                      TextSpan(
+                                        text: _localReference?.bookName,
+                                        style: StylesApp(context)
+                                            .textStyleBody16
+                                            .copyWith(
+                                                color: StyleColor.turquoise),
+                                      ),
+                                      TextSpan(
+                                        text:
+                                            "  ${_localReference?.chapterNumber}:${_localReference?.verses[index].verse}",
+                                        style: StylesApp(context)
+                                            .textStyleBody14
+                                            .copyWith(color: StyleColor.black),
+                                      )
+                                    ])),
                                   ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Center(
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      '"${_localReference?.verses[index].text}"',
+                                      style: StylesApp(context)
+                                          .textStyleBody12
+                                          .copyWith(color: StyleColor.black),
+                                    ),
+                                  )
                                 ],
                               ),
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  height: 22,
-                                ),
-                                Center(
-                                  child: Text.rich(TextSpan(children: [
-                                    TextSpan(
-                                      text: reference.bookName,
-                                      style: StylesApp(context)
-                                          .textStyleBody16
-                                          .copyWith(
-                                              color: StyleColor.turquoise),
-                                    ),
-                                    TextSpan(
-                                      text:
-                                          "  ${reference.chapterNumber}:${reference.verses[index].verse}",
-                                      style: StylesApp(context)
-                                          .textStyleBody14
-                                          .copyWith(color: StyleColor.black),
-                                    )
-                                  ])),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Center(
-                                  child: Text(
-                                    textAlign: TextAlign.center,
-                                    '"${reference.verses[index].text}"',
-                                    style: StylesApp(context)
-                                        .textStyleBody12
-                                        .copyWith(color: StyleColor.black),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                SizedBox(height: 24),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: StyleColor.turquoise,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    minimumSize: Size(double.infinity, 44),
                   ),
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    "Cerrar",
-                    style: StylesApp(context).textStyleBody5.copyWith(
-                          color: Colors.white,
-                        ),
+                  SizedBox(height: 24),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: StyleColor.turquoise,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      minimumSize: Size(double.infinity, 44),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      "Cerrar",
+                      style: StylesApp(context).textStyleBody5.copyWith(
+                            color: Colors.white,
+                          ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        });
       },
     );
   }

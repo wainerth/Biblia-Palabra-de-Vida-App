@@ -1,18 +1,18 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class ChapterModel extends GridItem {
-  final String id;
-  final int bookId;
+  final String? id;
+  final int? bookId;
   final int chapter;
-  final List<VerseModel> verses;
-  final int status;
+  final List<VerseModel>? verses;
+  final int? status;
 
   ChapterModel({
-    required this.id,
-    required this.bookId,
+    this.id,
+    this.bookId,
     required this.chapter,
-    required this.verses,
-    required this.status,
+    this.verses,
+    this.status,
   });
 
   factory ChapterModel.fromJson(Map<String, dynamic> json) {
@@ -24,7 +24,7 @@ class ChapterModel extends GridItem {
         ..sort((a, b) => a.verse.compareTo(b.verse));
     }
     return ChapterModel(
-        id: json['id'],
+        id: json['id'] ?? '',
         bookId: json['bookId'] ?? 0,
         chapter: json['chapter'],
         verses: verses,

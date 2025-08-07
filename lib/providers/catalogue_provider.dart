@@ -63,7 +63,6 @@ class CatalogueProvider extends ChangeNotifier {
       }
       rethrow;
     } finally {
-      print("Catalogo error");
       _isLoading = false;
       notifyListeners();
     }
@@ -371,6 +370,7 @@ class CatalogueProvider extends ChangeNotifier {
         query GetAllVersion {
             getAllVersion {
               id
+              code
               version
               books {
                 id

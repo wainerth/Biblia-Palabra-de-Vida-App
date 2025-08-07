@@ -143,8 +143,28 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                                           padding: EdgeInsets.zero,
                                           iconSize: 20.0,
                                           onPressed: () => copyToClipboard(
-                                              context,
-                                              "${_favoriteVerses[index].book.modernName} ${_favoriteVerses[index].book.numberBook}:${_favoriteVerses[index].verse.verse}\n ${_favoriteVerses[index].verse.text} \n ${GraphQLConfig.baseUrl}OfficialBible"),
+                                            context,
+                                            CopyModelVerse(
+                                              book: Book(
+                                                  modernName:
+                                                      _favoriteVerses[index]
+                                                          .book
+                                                          .modernName),
+                                              chapter: ChapterModel(
+                                                chapter: _favoriteVerses[index]
+                                                    .chapter
+                                                    .chapter,
+                                              ),
+                                              verse: VerseModel(
+                                                verse: _favoriteVerses[index]
+                                                    .verse
+                                                    .verse,
+                                                text: _favoriteVerses[index]
+                                                    .verse
+                                                    .text,
+                                              ),
+                                            ),
+                                          ),
                                           icon: Icon(
                                             Icons.file_copy_rounded,
                                             color:

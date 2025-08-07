@@ -286,8 +286,8 @@ class _DialogReferenceState extends State<DialogReference> {
                                   versionId: widget.data[index].book.bibleId
                                       .toString(),
                                   bookId: widget.data[index].book.id,
-                                  chapterId: widget.data[index].chapter.id,
-                                  startVerseId: widget.data[index].verse.id,
+                                  chapterId: widget.data[index].chapter.id!,
+                                  startVerseId: widget.data[index].verse.id!,
                                   endVerseId: widget.data[index].numberEndVerse
                                       .toString(),
                                 );

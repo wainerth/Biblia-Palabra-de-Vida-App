@@ -1,11 +1,8 @@
-import 'dart:async';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 
 class CustomVerseDialog extends StatelessWidget {
   final ReferenceBiblicalModel data;
@@ -119,8 +116,8 @@ class CustomVerseDialog extends StatelessWidget {
                           final dataToSend = InputDataSearchModel(
                             versionId: data.book.bibleId.toString(),
                             bookId: data.book.id,
-                            chapterId: data.chapter.id,
-                            startVerseId: data.verse.id,
+                            chapterId: data.chapter.id!,
+                            startVerseId: data.verse.id!,
                             endVerseId: data.numberEndVerse.toString(),
                           );
                           onActionReferences(dataToSend);

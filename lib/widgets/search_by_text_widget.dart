@@ -204,7 +204,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                                               InputDataSearchModel(
                                             bookId: searchResult[index].book.id,
                                             chapterId:
-                                                searchResult[index].chapter.id,
+                                                searchResult[index].chapter.id!,
                                             startVerseId:
                                                 searchResult[index].verse.id,
                                             endVerseId: "",

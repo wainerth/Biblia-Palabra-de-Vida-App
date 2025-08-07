@@ -224,7 +224,7 @@ Future<String> copyChapter(VersionModel? currentVersion, BookModel? currentBook,
   final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
   if (chapter == null) return '';
   StringBuffer buffer = StringBuffer();
-  for (var verse in chapter.verses) {
+  for (var verse in chapter.verses!) {
     buffer.write('${verse.verse} ${verse.text}\n');
   }
   return "${currentVersion?.version}\n ${currentBook?.modernName}-${currentBook?.numberBook} \n  ${buffer.toString()} \n$baseUrl";
