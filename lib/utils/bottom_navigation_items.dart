@@ -4,6 +4,7 @@ import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 List<BottomNavigationBarItem> getBottomNavigationBarItems(
     BuildContext context) {
@@ -1629,9 +1630,7 @@ final List<BottomNavItem> itemsPromises = [
   BottomNavItem(
       title: "Inicio", icon: Icons.home_outlined, page: WorkspaceScreen()),
   BottomNavItem(
-      title: "Biblia",
-      icon: Icons.book_outlined,
-      page: BibleScreen()),
+      title: "Biblia", icon: Icons.book_outlined, page: BibleScreen()),
   BottomNavItem(title: "Promesas", icon: Icons.sync, page: PromisesScreen()),
   BottomNavItem(
       title: "Dudas",
@@ -1646,3 +1645,235 @@ final List<BottomNavItem> itemsPromises = [
       icon: Icons.notifications_none_rounded,
       page: GraphQLConfig.development ? NewsScreen() : SoonScreen())
 ];
+
+List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
+  return [
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          Image.asset(
+            'assets/home.png',
+            color: StyleColor.violetDream,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Inicio',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.violetDream,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.violetDream,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          Image.asset(
+            'assets/home.png',
+            color: StyleColor.violetDream,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Inicio',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.violetDream,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          SvgPicture.asset(
+            'assets/Shop.svg',
+            colorFilter:
+                ColorFilter.mode(StyleColor.lavenderMist, BlendMode.srcIn),
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Librería',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.black,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.black,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          SvgPicture.asset(
+            'assets/book.png',
+            color: StyleColor.black,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Librería',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.black,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          SvgPicture.asset(
+            'assets/audioBooks.svg',
+            color: StyleColor.greenDark,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'AudioLibros',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.greenDark,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.greenDark,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          SvgPicture.asset(
+            'assets/audioBooks.svg',
+            color: StyleColor.greenDark,
+            width: StylesApp(context).sizeIconBottomBar,
+            height: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.fitHeight,
+          ),
+          Text(
+            'AudioLibros',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.greenDark,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          SvgPicture.asset(
+            'assets/pdf.svg',
+            color: StyleColor.redDark,
+            width: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Libros',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.redDark,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.redDark,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          SvgPicture.asset(
+            'assets/pdf.svg',
+            color: StyleColor.redDark,
+            width: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Libros',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.redDark,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          SvgPicture.asset(
+            'assets/Bag.svg',
+            color: StyleColor.grayMedium,
+            width: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Icon(
+            Icons.settings,
+            size: StylesApp(context).sizeIconBottomBar,
+            color: StyleColor.grayMedium,
+          ),
+          Text(
+            'Mis compras',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.grayMedium,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.grayMedium,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          SvgPicture.asset(
+            'assets/Bag.svg',
+            color: StyleColor.grayMedium,
+            width: StylesApp(context).sizeIconBottomBar,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            'Mis compras',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.grayMedium,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+  ];
+}

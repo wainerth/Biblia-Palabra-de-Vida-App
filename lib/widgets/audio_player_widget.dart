@@ -55,14 +55,17 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   void initState() {
     super.initState();
     // FlutterDownloader.initialize is already called in main.dart
-    _initStreams();
-    getDirectory();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _initStreams();
+      getDirectory();
+    });
     // _play(); // Start playing audio on initialization
   }
 
   getDirectory() async {
     final externalDir = await getExternalStorageDirectory();
     final internalDir = await getApplicationDocumentsDirectory();
+    if (!mounted) return;
     setState(() {
       externalStorage = externalDir;
       internalStorage = internalDir;

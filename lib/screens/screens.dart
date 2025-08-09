@@ -64,6 +64,11 @@ export 'package:biblia_palabra_de_vida_app/screens/features/prayer/list_request_
 export 'package:biblia_palabra_de_vida_app/screens/features/prayer/take_prayer_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/prayer/detail_request_screen.dart';
 
+// library
+export 'package:biblia_palabra_de_vida_app/screens/library/library_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/library/audio_book_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/library/pdf_book_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/library/cart_screen.dart';
 // theme editor
 export 'package:biblia_palabra_de_vida_app/screens/features/theme_editor/theme_editor_screen.dart';
 

@@ -58,9 +58,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
         }
 
         if (GraphQLConfig.development) {
-          await loadAllNotifications();
-
           if (mounted) {
+            await loadAllNotifications();
             final notificationProvider =
                 Provider.of<SocketClientProvider>(context, listen: false);
 
@@ -86,8 +85,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     final useData = userProvider.currentUser;
 
     try {
-      final responseNotification =
-          await getAllNotification(1, 10, useData!.userId);
+      final responseNotification = await getAllNotification(
+          1, 10, useData != null ? useData.userId : '');
       if (responseNotification.error != null) {
         await showCustomDialog(context,
             message: responseNotification.error!, dialogType: DialogType.error);
@@ -272,7 +271,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/soonPage');
+                      Navigator.pushNamed(context, '/layoutLibrary');
                     },
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 10.0),

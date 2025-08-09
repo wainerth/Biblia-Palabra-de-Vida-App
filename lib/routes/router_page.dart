@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/screens/layoutScreen/layout_library.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
@@ -11,6 +12,7 @@ final Map<String, WidgetBuilder> routes = {
   '/changePasswordPage': (BuildContext context) => const ChangePassScreen(),
   '/layoutPage': (BuildContext context) => AuthGuard(child: PageScreen()),
   '/layoutPage1': (BuildContext context) => const LayoutScreen(),
+  '/layoutLibrary': (BuildContext context) => const LayoutLibrary(),
   '/mapPage': (BuildContext context) => const MapScreen(),
   '/introAventurePage': (BuildContext context) => IntroAventureScreen(),
   '/aventurePage': (BuildContext context) => AventureScreen(),
@@ -21,7 +23,8 @@ final Map<String, WidgetBuilder> routes = {
   '/workspacePage': (BuildContext context) =>
       AuthGuard(child: WorkspaceScreen()),
   '/detailsProgressPage': (BuildContext context) => ProgressDetailScreen(),
-  '/prayerPage': (BuildContext context) => GraphQLConfig.development ?  PrayerScreen() : SoonScreen() ,
+  '/prayerPage': (BuildContext context) =>
+      GraphQLConfig.development ? PrayerScreen() : SoonScreen(),
   '/listRequestPage': (BuildContext context) => ListRequestScreen(),
   '/takePrayerPage': (BuildContext context) => TakePrayerScreen(),
   '/detailPrayerPage': (BuildContext context) => DetailRequestScreen(),
