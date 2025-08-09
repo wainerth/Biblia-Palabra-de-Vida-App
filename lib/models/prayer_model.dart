@@ -118,8 +118,8 @@ class PrayerResponse {
 
   factory PrayerResponse.fromJson(Map<String, dynamic> json) {
     return PrayerResponse(
-      id: json['id'],
-      message: json['message'],
+      id: json['id'] ?? '',
+      message: json['message'] ?? '',
       responder: json['responder'],
       bookName: json['bookName'],
       text: json['text'],

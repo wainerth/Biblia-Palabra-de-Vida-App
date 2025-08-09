@@ -9,6 +9,7 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProgressDetailScreen extends StatefulWidget {
   const ProgressDetailScreen({super.key});
@@ -846,8 +847,42 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               height: 32,
               buttonStyle: StylesApp(context).btnPrimary,
               text: "Descargar certificado",
-              onPressed: () {
-                // Lógica para descargar certificado
+              onPressed: () async {
+                 try {
+                  final responseDownloadCertificate =
+                      await getUrlCertificate(userData!.userId,title.courseId);
+                      
+                  if (responseDownloadCertificate.error != null) {
+                    await showCustomDialog(
+                      context,
+                      message: responseDownloadCertificate.error!,
+                      dialogType: DialogType.error,
+                    );
+                    return;
+                  }
+                  if (responseDownloadCertificate != null &&
+                      responseDownloadCertificate.data != null) {
+                    final url =
+                        "${GraphQLConfig.urlServidor}${responseDownloadCertificate.data['url']}";
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url),
+                          mode: LaunchMode.externalApplication);
+                    } else {
+                      await showCustomDialog(
+                        context,
+                        message: "No se pudo abrir el enlace de descarga.",
+                        dialogType: DialogType.error,
+                      );
+                    }
+                  }
+                } catch (e) {
+                  await showCustomDialog(
+                    context,
+                    message: e.toString(),
+                    dialogType: DialogType.error,
+                  );
+                  return;
+                }
               },
             ),
             SizedBox(height: 29),

@@ -236,6 +236,13 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         return;
                       }
                       // cierro el loading
+                      if( !responseCreatedRequest.data['successful']) {
+                        LoadingService().hideLoading();
+                        await showCustomDialog(context,
+                            message: responseCreatedRequest.data['message'],
+                            dialogType: DialogType.error);
+                        return;
+                      }
                       LoadingService().hideLoading();
                       openModalSendSuccessfully(context);
                     } catch (e) {

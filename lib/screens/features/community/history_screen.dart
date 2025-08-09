@@ -124,7 +124,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             History(
                 id: "122",
                 text:
-                    "esta es la historia que tendrá la prueba {(Juan 1:4-5 /RVR60)} para validar si se puede levantar una modal {(Apocalipsis 1:4-5 /RVR09)}",
+                    "esta es la historia que tendrá la prueba {(Génesis 1:1-4 /RVR60)} para validar si se puede levantar una modal {(Apocalipsis 1:4-5 /RVR09)}",
                 orderCard: 1,
                 level: IntermediateLevel(
                     levelNumber: 1, unLockLevel: true, countLevelNumber: 1),
@@ -1042,6 +1042,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       orElse: () => ModelData(label: "", value: ""),
     );
 
+    ResponseReferenceBiblicalModel? _localReference = reference;
     showModalBottomSheet(
       backgroundColor: StyleColor.white,
       context: context,
@@ -1052,7 +1053,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       builder: (context) {
         return StatefulBuilder(
             builder: (BuildContext context, StateSetter setModalState) {
-          ResponseReferenceBiblicalModel? _localReference = reference;
           return Padding(
             padding: EdgeInsets.only(
               left: 20,
@@ -1067,7 +1067,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 children: [
                   Text(
                     textAlign: TextAlign.center,
-                    "Biblia  Version\n ${_localReference.bibleName}",
+                    "Biblia  Version\n ${_localReference!.bibleName}",
                     style: StylesApp(context)
                         .textStyleBody18
                         .copyWith(color: StyleColor.black),

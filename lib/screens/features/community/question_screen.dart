@@ -1233,7 +1233,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 try {
                   final responseDownloadCertificate =
                       await getUrlCertificate(userData!.userId, courseId);
-                  await createCertificate(userData?.userId, courseId);
                   if (responseDownloadCertificate.error != null) {
                     await showCustomDialog(
                       context,

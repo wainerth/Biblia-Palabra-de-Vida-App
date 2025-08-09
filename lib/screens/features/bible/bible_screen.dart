@@ -294,57 +294,127 @@ class _BibleScreenState extends State<BibleScreen> {
                         DeviceOrientation.portraitDown,
                       ]);
                       showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Center(
-                              child: Stack(children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(8)),
-                                    constraints: BoxConstraints(minHeight: 213),
-                                    // height: 213,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: (video.url
-                                                  .contains('youtube.com') ||
-                                              video.url.contains('youtu.be'))
-                                          ? PlayerYoutubeWidget(
-                                              videoUrl: video.url)
-                                          : PlayerNoYoutube(url: video.url),
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  // Posiciona el botón de cerrar
-                                  top: 0,
-                                  right: 0,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.of(context)
-                                          .pop(); // Cierra el diálogo
-                                    },
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Center(
+                            child: Container(
+                              constraints: BoxConstraints(
+                                minHeight:
+                                    MediaQuery.sizeOf(context).height * 0.50,
+                                    maxHeight: MediaQuery.sizeOf(context).height * 0.50,
+                              ),
+                              child: Stack(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Container(
-                                      padding: const EdgeInsets.all(8.0),
                                       decoration: BoxDecoration(
-                                        color: Colors.grey.withValues(
-                                            alpha:
-                                                0.7), // Fondo semitransparente para el botón
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                        size: 20.0,
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
+                                      constraints:
+                                          BoxConstraints(minHeight: 213),
+                                      // height: 213,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: (video.url
+                                                    .contains('youtube.com') ||
+                                                video.url.contains('youtu.be'))
+                                            ? PlayerYoutubeWidget(
+                                                videoUrl: video.url)
+                                            : PlayerNoYoutube(
+                                                url:
+                                                    "${GraphQLConfig.urlServidor}${video.url}"),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ]),
-                            );
-                          });
+                                  Positioned(
+                                    // Posiciona el botón de cerrar
+                                    top: 0,
+                                    right: 0,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .pop(); // Cierra el diálogo
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.withValues(
+                                              alpha:
+                                                  0.7), // Fondo semitransparente para el botón
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 20.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                      // await SystemChrome.setPreferredOrientations([
+                      //   DeviceOrientation.portraitUp,
+                      //   DeviceOrientation.portraitDown,
+                      // ]);
+                      // showDialog(
+                      //     context: context,
+                      //     builder: (BuildContext context) {
+                      //       return Center(
+                      //         child: Stack(children: [
+                      //           Padding(
+                      //             padding: const EdgeInsets.all(8.0),
+                      //             child: Container(
+                      //               decoration: BoxDecoration(
+                      //                   color: Colors.white,
+                      //                   borderRadius: BorderRadius.circular(8)),
+                      //               constraints: BoxConstraints(minHeight: 213),
+                      //               // height: 213,
+                      //               child: ClipRRect(
+                      //                 borderRadius: BorderRadius.circular(8),
+                      //                 child: (video.url
+                      //                             .contains('youtube.com') ||
+                      //                         video.url.contains('youtu.be'))
+                      //                     ? PlayerYoutubeWidget(
+                      //                         videoUrl: video.url)
+                      //                     : PlayerNoYoutube(url: "${GraphQLConfig.urlServidor}${video.url}"),
+                      //               ),
+                      //             ),
+                      //           ),
+                      //           Positioned(
+                      //             // Posiciona el botón de cerrar
+                      //             top: 0,
+                      //             right: 0,
+                      //             child: GestureDetector(
+                      //               onTap: () {
+                      //                 Navigator.of(context)
+                      //                     .pop(); // Cierra el diálogo
+                      //               },
+                      //               child: Container(
+                      //                 padding: const EdgeInsets.all(8.0),
+                      //                 decoration: BoxDecoration(
+                      //                   color: Colors.grey.withValues(
+                      //                       alpha:
+                      //                           0.7), // Fondo semitransparente para el botón
+                      //                   shape: BoxShape.circle,
+                      //                 ),
+                      //                 child: const Icon(
+                      //                   Icons.close,
+                      //                   color: Colors.white,
+                      //                   size: 20.0,
+                      //                 ),
+                      //               ),
+                      //             ),
+                      //           ),
+                      //         ]),
+                      //       );
+                      //     });
                     },
                     onBack: () {
                       Navigator.pushNamed(
@@ -1443,7 +1513,8 @@ class _BibleScreenState extends State<BibleScreen> {
               .toList();
           for (final verse in verses) {
             verse.highlights?.clear();
-            verse.highlights?.addAll(_highlights.where((h) => h.id == verse.id));
+            verse.highlights
+                ?.addAll(_highlights.where((h) => h.id == verse.id));
           }
         });
       }
@@ -1798,7 +1869,7 @@ class _BibleScreenState extends State<BibleScreen> {
           chapters: allChapters.length - 1,
         );
         // Mover el scroll al versículo de inicio si está presente
-        if ( verses.isNotEmpty) {
+        if (verses.isNotEmpty) {
           final startIndex =
               verses.indexWhere((v) => v.id == data.startVerseId);
           if (startIndex != -1) {
@@ -1910,7 +1981,7 @@ class _BibleScreenState extends State<BibleScreen> {
           chapters: allChapters.length - 1,
         );
         // Mover el scroll al versículo de inicio si está presente
-        if ( verses.isNotEmpty) {
+        if (verses.isNotEmpty) {
           final startIndex =
               verses.indexWhere((v) => v.id == data.startVerseId);
           if (startIndex != -1) {
