@@ -28,10 +28,10 @@ class CourseDetail {
       color: json['color'] as String,
       imgCourseUrl: json['imgCourseUrl'],
       introduction: json['introduction'],
-      titleDescription: json['titleDescription'],
-      titleImgId: json['titleImgId'],
-      titleImgUrl: json['titleImgUrl'],
-      titleName: json['titleName'],
+      titleDescription: json['titleDescription'] ?? '',
+      titleImgId: json['titleImgId'] ?? '',
+      titleImgUrl: json['titleImgUrl'] ?? '',
+      titleName: json['titleName'] ?? '',
     );
   }
 
