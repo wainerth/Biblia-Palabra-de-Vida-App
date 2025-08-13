@@ -865,8 +865,8 @@ Future loadOneCourse(userId, courseId) async {
   QueryOptions options = QueryOptions(
     operationName: "GetOneCourse",
     document: gql(r'''
-    query GetOneCourse($courseId: ID) {
-          getOneCourse(courseId: $courseId) {
+    query GetOneCourse($userId: ID, $courseId: ID) {
+          getOneCourse(userId: $userId, courseId: $courseId) {
             id
             titleCourse
             color
@@ -876,10 +876,13 @@ Future loadOneCourse(userId, courseId) async {
             titleImgId
             titleImgUrl
             titleName
+            sectionCount
+            sectionCompletedCount
           }
         }
       '''),
     variables: <String, dynamic>{
+      "userId": userId,
       "courseId": courseId,
     },
     fetchPolicy: FetchPolicy.noCache,

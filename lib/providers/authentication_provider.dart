@@ -7,6 +7,7 @@ import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,56 +27,97 @@ class AuthenticationProvider extends ChangeNotifier {
     }
     //checkAuthentication(context);
   }
+  Future<void> clearAllSharedPreferences() async {
+    try {
+      // 1. Limpia en memoria
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      // 2. Elimina el archivo físico (definitivo)
+      final appDir = await getApplicationSupportDirectory();
+      final prefsFile =
+          File('${appDir.path}/shared_prefs/flutterSharedPreferences.xml');
+      if (await prefsFile.exists()) {
+        await prefsFile.delete();
+      }
+
+      debugPrint('✅ Datos corruptos eliminados completamente');
+    } catch (e) {
+      debugPrint('⚠️ Error en limpieza: $e');
+    }
+  }
 
   Future<void> checkAuthentication(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userToken = prefs.getString('userToken');
     String? userDataString = prefs.getString('userData');
-    if (userToken != null && userDataString != null) {
-      final verifyTokenResponse = await verifyToken(userToken);
-      if (verifyTokenResponse.data != null) {
-        if (verifyTokenResponse.data["success"]) {
-          isAuthenticated = true;
-        } else if (!verifyTokenResponse.data["success"] &&
-            verifyTokenResponse.data["isLogout"]) {
-          //Logout voluntario → no mostrar modal
-          isAuthenticated = false;
-          logoutUser(navigatorKey.currentContext!);
-          LoadingService().hideLoading();
-          return;
-        } else {
-          isAuthenticated = false;
-          LoadingService().hideLoading();
-          await showCustomDialogWithAction(navigatorKey.currentContext!,
-              message:
-                  "Tu sesión ha expirado o fue cerrada. Por favor, inicia sesión nuevamente.",
-              dialogType: DialogTypeAction.info,
-              buttonOk: "Ok", actionCallbackOk: () async {
-            await logoutUser(navigatorKey.currentContext!);
-          });
-          return;
+    try {
+      if (userToken != null && userDataString != null) {
+        final verifyTokenResponse = await verifyToken(userToken);
+        if (verifyTokenResponse.data != null) {
+          if (verifyTokenResponse.data["success"]) {
+            isAuthenticated = true;
+          } else if (!verifyTokenResponse.data["success"] &&
+              verifyTokenResponse.data["isLogout"]) {
+            //Logout voluntario → no mostrar modal
+            isAuthenticated = false;
+            logoutUser(navigatorKey.currentContext!);
+            LoadingService().hideLoading();
+            return;
+          } else {
+            isAuthenticated = false;
+            LoadingService().hideLoading();
+            await showCustomDialogWithAction(navigatorKey.currentContext!,
+                message:
+                    "Tu sesión ha expirado o fue cerrada. Por favor, inicia sesión nuevamente.",
+                dialogType: DialogTypeAction.info,
+                buttonOk: "Ok", actionCallbackOk: () async {
+              await logoutUser(navigatorKey.currentContext!);
+            });
+            return;
+          }
         }
-      }
-      token = userToken;
-      final dataUserLoad = LoginUser.fromJson(jsonDecode(userDataString));
-      // llamar conexión con el socket
-      final socketProvider =
-          Provider.of<SocketClientProvider>(context, listen: false);
-      socketProvider.connectSocket(
-          deviceId: '856-32cd-89',
-          userId: dataUserLoad.userId,
-          username: dataUserLoad.username!,
-          email: dataUserLoad.email!);
+        token = userToken;
+        final dataUserLoad = LoginUser.fromJson(jsonDecode(userDataString));
+        // llamar conexión con el socket
+        final socketProvider =
+            Provider.of<SocketClientProvider>(context, listen: false);
+        socketProvider.connectSocket(
+            deviceId: '856-32cd-89',
+            userId: dataUserLoad.userId,
+            username: dataUserLoad.username!,
+            email: dataUserLoad.email!);
 
-      Provider.of<UserProvider>(context, listen: false)
-          .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
-      await loadProfileUser(dataUserLoad.userId, userToken);
-      print('cargo nueva data de perfil');
-    } else {
-      isAuthenticated = false;
-      token = userToken;
-      Provider.of<UserProvider>(context, listen: false).setUser(null);
+        Provider.of<UserProvider>(context, listen: false)
+            .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
+        await loadProfileUser(dataUserLoad.userId, userToken);
+        print('cargo nueva data de perfil');
+      } else {
+        isAuthenticated = false;
+        token = userToken;
+        Provider.of<UserProvider>(context, listen: false).setUser(null);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('⚠️ Error en auth: $e');
+      debugPrint('🔍 StackTrace: $stackTrace'); // Para depuración
+
+      // Mensaje más amigable:
+      String errorMessage = 'Ocurrió un error inesperado';
+      if (e is SocketException) {
+        errorMessage = 'Error de conexión. Verifica tu internet.';
+      } else if (e is TimeoutException) {
+        errorMessage = 'Tiempo de espera agotado. Intenta nuevamente.';
+      } else if (e is FormatException) {
+        errorMessage = 'Error en los datos recibidos.';
+      }
+
+      await showCustomDialog(
+        context,
+        message: errorMessage,
+        dialogType: DialogType.error,
+      );
     }
+
     notifyListeners();
   }
 
@@ -106,8 +148,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: response.data, error: error);
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error during login: $e");
+        print("Error during login: $e");
       } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
@@ -196,8 +237,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: response.data, error: error);
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error during login: $e");
+        print("Error during login: $e");
       } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
@@ -238,8 +278,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: response.data, error: error);
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error during Register User: $e");
+        print("Error during Register User: $e");
       } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
@@ -270,8 +309,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: response.data, error: error);
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error during forgot password: $e");
+        print("Error during forgot password: $e");
       } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
@@ -306,8 +344,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: response.data, error: error);
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error during recovery Password  : $e");
+        print("Error during recovery Password  : $e");
       } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:

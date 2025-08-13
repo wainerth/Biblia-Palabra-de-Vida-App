@@ -1062,7 +1062,7 @@ Future<ResponseData> redeemedPrize(prizeId, userId) async {
   }
 }
 
-Future<ResponseData> openOnePromise(promiseId) async {
+Future<ResponseData> openOnePromise(String userId, String promiseId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userToken = prefs.getString('userToken');
 
@@ -1071,11 +1071,11 @@ Future<ResponseData> openOnePromise(promiseId) async {
   MutationOptions mutateGql = MutationOptions(
     operationName: "OpenOnePromise",
     document: gql(r'''
-      mutation OpenOnePromise($promiseId: ID) {
-        openOnePromise(promiseId: $promiseId)
+      mutation OpenOnePromise($userId: ID,  $promiseId: ID) {
+        openOnePromise(userId: $userId, promiseId: $promiseId)
       }
       '''),
-    variables: <String, dynamic>{"promiseId": promiseId},
+    variables: <String, dynamic>{"userId": userId, "promiseId": promiseId},
     fetchPolicy: FetchPolicy.noCache,
   );
   try {

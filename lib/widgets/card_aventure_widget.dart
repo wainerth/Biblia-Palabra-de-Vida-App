@@ -6,7 +6,7 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CardAventureWidget extends StatelessWidget {
-  final CourseModel course;
+  final CourseDetail course;
   final bool loadingAction;
   final void Function() onTap;
   final void Function() goToMap;
@@ -64,7 +64,7 @@ class CardAventureWidget extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(100.0),
                                     image: DecorationImage(
-                                      image: NetworkImage (GraphQLConfig.urlServidor + course.img.urlImg),
+                                      image: NetworkImage (GraphQLConfig.urlServidor + course.imgCourseUrl),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -95,7 +95,7 @@ class CardAventureWidget extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: Text(
-                      course.title,
+                      course.titleCourse,
                       style: StylesApp(context).textStyleBody5,
                     ),
                   ),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
@@ -400,25 +401,70 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                         onTap: widget.pathUrl.isEmpty
                                             ? null
                                             : () async {
-                                                final directory =
-                                                    await getApplicationDocumentsDirectory();
-                                                final filePath =
-                                                    '${directory.path}/${widget.pathUrl}';
-                                                final file = File(filePath);
-                                                if (await file.exists()) {
-                                                  Share.shareXFiles([
-                                                    XFile(filePath)
-                                                  ], text: '¡Mira este audio!');
-                                                } else {
+                                                // final directory =
+                                                //     await getApplicationDocumentsDirectory();
+                                                // final filePath =
+                                                //     '${widget.pathUrl}';
+                                                // final file = File(filePath);
+                                                // // if (await file.exists()) {
+                                                // try {
+
+                                                //   Share.shareXFiles([
+                                                //     XFile(filePath)
+                                                //   ], text: '¡Mira este audio!');
+                                                // } catch (e) {
+                                                //   ScaffoldMessenger.of(context)
+                                                //       .showSnackBar(
+                                                //     SnackBar(
+                                                //         backgroundColor:
+                                                //             StyleColor.redLight,
+                                                //         content: Text(
+                                                //             'Error al compartir ${e.toString()}')),
+                                                //   );
+
+                                                // }
+                                                final String audioUrl = widget
+                                                    .pathUrl; // Tu URL del audio
+
+                                                try {
+                                                  // 1. Descargar el archivo temporalmente
+                                                  final response =
+                                                      await Dio().get(
+                                                    audioUrl,
+                                                    options: Options(
+                                                        responseType:
+                                                            ResponseType.bytes),
+                                                  );
+
+                                                  // 2. Crear archivo temporal
+                                                  final tempDir =
+                                                      await getTemporaryDirectory();
+                                                  final tempFile = File(
+                                                      '${tempDir.path}/audio_temp.mp3');
+                                                  await tempFile.writeAsBytes(
+                                                      response.data);
+
+                                                  // 3. Compartir el archivo
+                                                  await Share.shareXFiles(
+                                                    [XFile(tempFile.path)],
+                                                    text:
+                                                        '¡Escucha este audio!',
+                                                  );
+
+                                                  // 4. Opcional: Eliminar el temporal después de compartir
+                                                  tempFile.delete();
+                                                } catch (e) {
+                                                  print(
+                                                      'Error al compartir: $e');
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(
                                                     SnackBar(
-                                                        backgroundColor:
-                                                            StyleColor.redLight,
                                                         content: Text(
-                                                            'Archivo de audio no encontrado')),
+                                                            'Error al compartir el audio')),
                                                   );
                                                 }
+                                                // } else {
+                                                // }
                                                 Navigator.pop(context);
                                               },
                                       ),

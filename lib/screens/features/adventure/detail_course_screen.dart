@@ -16,7 +16,7 @@ class DetailCourseScreen extends StatefulWidget {
 }
 
 class _DetailCorseScreenState extends State<DetailCourseScreen> {
-  CourseModel? course;
+  CourseDetail? course;
   List<Stage> stages = [];
   bool loadAventure = false;
   bool isLoading = true;
@@ -48,7 +48,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
       if (courseResponse.error != null) {
         errorMessage = courseResponse.error;
       }
-      course = CourseModel.fromJson(courseResponse.data);
+      course = CourseDetail.fromJson(courseResponse.data);
       final result = await loadStageByCourse(userData.userId, course?.id);
       if (result.error != null) {
         errorMessage = result.error;
@@ -200,7 +200,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                     context: context,
                     builder: (BuildContext context) {
                       return CustomModalWidget(
-                        title: course.title,
+                        title: course.titleCourse,
                         content: course.introduction,
                         buttonText: 'Aceptar',
                         id: course.id,
