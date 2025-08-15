@@ -29,9 +29,8 @@ export 'package:biblia_palabra_de_vida_app/widgets/profile_header.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/loading_indicator.dart';
 
-export 'package:biblia_palabra_de_vida_app/widgets/authguard/auth_guard.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/authGuard/auth_guard.dart';
 
-export 'package:biblia_palabra_de_vida_app/widgets/video_player_widget.dart';
 
 export 'package:biblia_palabra_de_vida_app/widgets/app_bar_header_widget.dart';
 

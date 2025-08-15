@@ -24,7 +24,7 @@ class CatalogueProvider extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-
+  Future<void> loadLeagues() => _loadLeagues();
   CatalogueProvider() {
     initialize();
   }

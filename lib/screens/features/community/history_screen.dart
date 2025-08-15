@@ -1,17 +1,17 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
-import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
-import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
+import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -54,17 +54,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   getFontSizeText() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    double? fontSize = sharedPreferences.getDouble('fontSizeText');
-    if (fontSize != null) {
-      setState(() {
-        fontSizeText = fontSize;
-      });
-    } else {
-      setState(() {
-        fontSizeText = 16.sp;
-      });
-    }
+    double? fontSize = await PreferencesManager().getFontSizeVerse();
+    setState(() => fontSizeText = fontSize);
   }
 
   Future<void> _generateData(BuildContext context) async {
@@ -119,20 +110,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
               .cast<History>()
               .toList();
 
-          stories.insert(
-            0,
-            History(
-                id: "122",
-                text:
-                    "esta es la historia que tendrá la prueba {(Génesis 1:1-4 /RVR60)} para validar si se puede levantar una modal {(Apocalipsis 1:4-5 /RVR09)}",
-                orderCard: 1,
-                level: IntermediateLevel(
-                    levelNumber: 1, unLockLevel: true, countLevelNumber: 1),
-                img: Img(urlImg: "images/achievement/expA.png"),
-                audio: Audio(url: "url"),
-                video: Video(url: " url"),
-                status: 1),
-          );
+          // stories.insert(
+          //   0,
+          //   History(
+          //       id: "122",
+          //       text:
+          //           "esta es la historia que tendrá la prueba {(Génesis 1:1-4 /RVR60)} para validar si se puede levantar una modal {(Apocalipsis 1:4-5 /RVR09)}",
+          //       orderCard: 1,
+          //       level: IntermediateLevel(
+          //           levelNumber: 1, unLockLevel: true, countLevelNumber: 1),
+          //       img: Img(urlImg: "images/achievement/expA.png"),
+          //       audio: Audio(url: "url"),
+          //       video: Video(url: " url"),
+          //       status: 1),
+          // );
+          isPlaying = true;
         });
         _togglePlayPause(stories[0]);
       } catch (e) {
@@ -300,7 +292,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               });
                             }
                             setState(() {
-                              isPlaying = false;
+                              isPlaying = true;
                             });
                             await flutterTts.stop();
                             _togglePlayPause(stories[index]);
@@ -337,13 +329,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             max: 20.0,
                             value: fontSizeText,
                             onChanged: (value) async {
-                              final sharedPreferences =
-                                  await SharedPreferences.getInstance();
-                              await sharedPreferences.setDouble(
-                                  'fontSizeText', value);
-                              setState(() {
-                                fontSizeText = value;
-                              });
+                              await PreferencesManager()
+                                  .setFontSizeVerse(value);
+                              setState(() => fontSizeText = value);
                             },
                             secondaryTrackValue: 20.0,
                           ),
@@ -770,6 +758,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ),
                                       color: StyleColor.turquoise,
                                       onPressed: () {
+                                        setState(() => isPlaying =!isPlaying);
                                         _togglePlayPause(story);
                                       }),
                                   Icon(Icons.speed,
@@ -786,14 +775,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       inactiveColor: StyleColor.turquoise
                                           .withValues(alpha: 0.3),
                                       onChanged: (value) async {
-                                        final prefs = await SharedPreferences
-                                            .getInstance();
-                                        setState(() {
-                                          _speechRate = value;
-                                        });
+                                        setState(() => _speechRate = value);
                                         await flutterTts.setSpeechRate(value);
-                                        await prefs.setDouble(
-                                            'tts_speech_rate', value);
+                                        await PreferencesManager()
+                                            .setTtsSpeechRate(value);
                                       },
                                     ),
                                   ),
@@ -920,9 +905,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _togglePlayPause(story) async {
-    if (isPlaying) {
+    if (!isPlaying) {
+      // setState(() => isPlaying = false);
       await flutterTts.pause();
-      setState(() => isPlaying = false);
     } else {
       await flutterTts.awaitSpeakCompletion(true);
       // Eliminar los textos que están dentro de {( ... )} incluyendo desde / hasta )}
@@ -931,8 +916,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
         RegExp(r'\{\(([^\/\)]+)(?:\/[^\)]*)?\)\}'),
         (Match match) => (match.group(1) ?? '').trim(),
       );
-      await flutterTts.speak(cleanText);
-      setState(() => isPlaying = true);
+
+      // // 2. Formatear referencias (ej: "Juan 8:4-36" → "Juan capítulo 8 versículo 4 al 36")
+      String ttsText = cleanText.replaceAllMapped(
+        RegExp(r'(\w+) (\d+):(\d+)(?:-(\d+))?'),
+        (Match match) {
+          final book = match.group(1); // "Juan"
+          final chapter = match.group(2); // "8"
+          final verseStart = match.group(3); // "4"
+          final verseEnd = match.group(4); // "36" (opcional)
+
+          if (verseEnd != null) {
+            return '$book capítulo $chapter versículo $verseStart al $verseEnd';
+          } else {
+            return '$book capítulo $chapter versículo $verseStart';
+          }
+        },
+      );
+
+      await flutterTts.speak(ttsText);
+      // setState(() => isPlaying = true);
     }
   }
 
@@ -958,15 +961,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
       // Texto del match (enlace)
       final matchedText = match.group(0)!;
+      final textRead = matchedText.replaceFirstMapped(
+        RegExp(
+            r'^\{\(\s*([^\/\)]+)\s*(?:\/[^\)]*)?\)\}'), // Captura solo la referencia
+        (match) =>
+            match.group(1)?.trim() ??
+            matchedText, // Extrae el grupo 1 (la referencia)
+      );
+
       spans.add(
         TextSpan(
-          text: matchedText.replaceFirstMapped(
-            RegExp(
-                r'^\{\(\s*([^\/]+)\s*\/.*\)\}'), // Captura solo la referencia
-            (match) =>
-                match.group(1)?.trim() ??
-                matchedText, // Extrae el grupo 1 (la referencia)
-          ),
+          text: textRead,
           style: TextStyle(
             color: Colors.blue,
             decoration: TextDecoration.underline,

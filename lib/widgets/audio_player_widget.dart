@@ -401,28 +401,6 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                         onTap: widget.pathUrl.isEmpty
                                             ? null
                                             : () async {
-                                                // final directory =
-                                                //     await getApplicationDocumentsDirectory();
-                                                // final filePath =
-                                                //     '${widget.pathUrl}';
-                                                // final file = File(filePath);
-                                                // // if (await file.exists()) {
-                                                // try {
-
-                                                //   Share.shareXFiles([
-                                                //     XFile(filePath)
-                                                //   ], text: '¡Mira este audio!');
-                                                // } catch (e) {
-                                                //   ScaffoldMessenger.of(context)
-                                                //       .showSnackBar(
-                                                //     SnackBar(
-                                                //         backgroundColor:
-                                                //             StyleColor.redLight,
-                                                //         content: Text(
-                                                //             'Error al compartir ${e.toString()}')),
-                                                //   );
-
-                                                // }
                                                 final String audioUrl = widget
                                                     .pathUrl; // Tu URL del audio
 
@@ -463,8 +441,6 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                                             'Error al compartir el audio')),
                                                   );
                                                 }
-                                                // } else {
-                                                // }
                                                 Navigator.pop(context);
                                               },
                                       ),

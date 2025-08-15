@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../graphql-config/function_graphql/mutations.dart';
 import '../main.dart';
 
 class AuthenticationProvider extends ChangeNotifier {
@@ -19,38 +19,17 @@ class AuthenticationProvider extends ChangeNotifier {
   final BuildContext context;
   String? token;
   bool isAuthenticated = false;
-  // LoginUser? currentUser;
 
   AuthenticationProvider(this.context, this._catalogueProvider) {
     if (kDebugMode) {
       print(_catalogueProvider);
     }
-    //checkAuthentication(context);
-  }
-  Future<void> clearAllSharedPreferences() async {
-    try {
-      // 1. Limpia en memoria
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-
-      // 2. Elimina el archivo físico (definitivo)
-      final appDir = await getApplicationSupportDirectory();
-      final prefsFile =
-          File('${appDir.path}/shared_prefs/flutterSharedPreferences.xml');
-      if (await prefsFile.exists()) {
-        await prefsFile.delete();
-      }
-
-      debugPrint('✅ Datos corruptos eliminados completamente');
-    } catch (e) {
-      debugPrint('⚠️ Error en limpieza: $e');
-    }
   }
 
   Future<void> checkAuthentication(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userToken = prefs.getString('userToken');
-    String? userDataString = prefs.getString('userData');
+    String? userToken = await PreferencesManager().getUserToken();
+    String? userDataString = await PreferencesManager().getUserData();
+
     try {
       if (userToken != null && userDataString != null) {
         final verifyTokenResponse = await verifyToken(userToken);
@@ -91,7 +70,9 @@ class AuthenticationProvider extends ChangeNotifier {
         Provider.of<UserProvider>(context, listen: false)
             .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
         await loadProfileUser(dataUserLoad.userId, userToken);
-        print('cargo nueva data de perfil');
+        if (kDebugMode) {
+          print('cargo nueva data de perfil');
+        }
       } else {
         isAuthenticated = false;
         token = userToken;
@@ -124,7 +105,6 @@ class AuthenticationProvider extends ChangeNotifier {
   ///Creamos método para inicio de sesión
   Future loginUser(BuildContext context, String email, String password) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
       // llamamos query de login
       final userResponse = await login(email, password);
       var error = userResponse.error;
@@ -136,7 +116,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       final userId = userResponse.data["id"];
       final token = userResponse.data["userJwtToken"]["token"];
-      await prefs.setString("userToken", token);
+      await PreferencesManager().setUserToken(token);
 
       // consultamos perfil del usuario
       final ResponseData response = await loadProfileUser(userId, token);
@@ -147,11 +127,6 @@ class AuthenticationProvider extends ChangeNotifier {
 
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      if (kDebugMode) {
-        print("Error during login: $e");
-      } // Print the error for debugging.  Crucial!
-
-      // More specific error handling if needed:
       if (e is TimeoutException) {
         return ResponseData(data: null, error: "Request timed out");
       } else if (e is SocketException) {
@@ -219,7 +194,6 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future<ResponseData> loginWithGoogle(BuildContext context) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
       final userResponse = await loginGoogle();
       var error = userResponse.error;
       if (error != null) {
@@ -227,7 +201,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       final userId = userResponse.data["id"];
       final token = userResponse.data["userJwtToken"]["token"];
-      await prefs.setString("userToken", token);
+      await PreferencesManager().setUserToken(token);
       // consultamos perfil del usuario
       final ResponseData response = await loadProfileUser(userId, token);
       error = response.error;
@@ -266,8 +240,8 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       final userId = registerResponse.data["id"];
       final token = registerResponse.data["userJwtToken"]["token"];
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('userToken', token);
+      await PreferencesManager().setUserToken(token);
+
       // consultamos perfil del usuario
       final ResponseData response = await loadProfileUser(userId, token);
       error = response.error;

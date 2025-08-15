@@ -1,10 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
-
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -12,9 +5,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:async';
+import 'dart:math';
 
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/class/bible_version_selector.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
@@ -34,7 +32,6 @@ class _BibleScreenState extends State<BibleScreen> {
   late final UserProvider userProvider;
   LoginUser? userData;
   final ScrollController scrollController = ScrollController();
-  SharedPreferences? prefs;
   String? errorMessage;
   bool isLoading = true;
   VersionModel? currentVersion;
@@ -119,9 +116,9 @@ class _BibleScreenState extends State<BibleScreen> {
 
 // Método para inicializar la velocidad desde preferencias
   Future<void> _initSpeechRate() async {
-    final prefs = await SharedPreferences.getInstance();
+    final rate = await PreferencesManager().getTtsSpeechRate();
     setState(() {
-      _speechRate = prefs.getDouble('tts_speech_rate') ?? 0.5;
+      _speechRate = rate;
     });
     await flutterTts.setSpeechRate(_speechRate);
   }
@@ -301,7 +298,8 @@ class _BibleScreenState extends State<BibleScreen> {
                               constraints: BoxConstraints(
                                 minHeight:
                                     MediaQuery.sizeOf(context).height * 0.50,
-                                    maxHeight: MediaQuery.sizeOf(context).height * 0.50,
+                                maxHeight:
+                                    MediaQuery.sizeOf(context).height * 0.50,
                               ),
                               child: Stack(
                                 children: [
@@ -416,7 +414,7 @@ class _BibleScreenState extends State<BibleScreen> {
                       //       );
                       //     });
                     },
-                    onBack: () {
+                    onBack: () async {
                       Navigator.pushNamed(
                         context,
                         '/layoutPage',
@@ -443,15 +441,13 @@ class _BibleScreenState extends State<BibleScreen> {
                           print(
                               'Versión seleccionada: ${selectedVersion.label}');
                         }
-                        setState(() {
-                          lastVersionsSelected = selectedVersion
-                              .value; // actualizo la version de la biblia
-
-                          // removemos los datos de la cache para iniciar de nuevo
-                          prefs!.remove('bookSelected');
-                          prefs!.remove('chapterSelected');
-                        });
-                        prefs!.setString(preferenceKey, lastVersionsSelected!);
+                        setState(() => lastVersionsSelected = selectedVersion
+                            .value); // actualizo la version de la biblia
+                        // removemos los datos de la cache para iniciar de nuevo
+                        await PreferencesManager().clearOne('bookSelected');
+                        await PreferencesManager().clearOne('chapterSelected');
+                        await PreferencesManager()
+                            .setSelectedBibleVersion(lastVersionsSelected!);
                         _initDataLoad();
                       }
                     },
@@ -518,21 +514,19 @@ class _BibleScreenState extends State<BibleScreen> {
                                             return ModalTextFormatSizeWidget(
                                               fontSize: fontSizeVerse,
                                               selectedItem: fontFamilySet,
-                                              onChangedFontSize: (fontSize) {
-                                                if (kDebugMode) {
-                                                  print(
-                                                      'el nuevo tamaño de fuente $fontSize');
-                                                }
+                                              onChangedFontSize:
+                                                  (fontSize) async {
                                                 setState(() {
                                                   // persistir tamaño de fuente
                                                   fontSizeNumber =
                                                       fontSize! - 4;
                                                   fontSizeVerse = fontSize;
                                                 });
-                                                prefs!.setDouble(
-                                                    "fontSizeVerse", fontSize!);
+                                                await PreferencesManager()
+                                                    .setFontSizeVerse(
+                                                        fontSize!);
                                               },
-                                              onChangedFont: (newFont) {
+                                              onChangedFont: (newFont) async {
                                                 if (kDebugMode) {
                                                   print(
                                                       'la nueva fuente ${newFont!.label}');
@@ -541,10 +535,9 @@ class _BibleScreenState extends State<BibleScreen> {
                                                 setState(() {
                                                   fontFamilySet = newFont!;
                                                 });
-                                                prefs!.setString(
-                                                  "fontFamilySet",
-                                                  jsonEncode(newFont!.toJson()),
-                                                );
+                                                await PreferencesManager()
+                                                    .setFontFamilySet(
+                                                        newFont!.toJson());
                                               },
                                             );
                                           });
@@ -806,18 +799,16 @@ class _BibleScreenState extends State<BibleScreen> {
                                                                     alpha: 0.3),
                                                         onChanged:
                                                             (value) async {
-                                                          final prefs =
-                                                              await SharedPreferences
-                                                                  .getInstance();
-                                                          setState(() {
-                                                            _speechRate = value;
-                                                          });
+                                                          setState(() =>
+                                                              _speechRate =
+                                                                  value);
                                                           await flutterTts
                                                               .setSpeechRate(
                                                                   value);
-                                                          await prefs.setDouble(
-                                                              'tts_speech_rate',
-                                                              value);
+
+                                                          await PreferencesManager()
+                                                              .setTtsSpeechRate(
+                                                                  value);
                                                         },
                                                       ),
                                                     ),
@@ -1540,30 +1531,22 @@ class _BibleScreenState extends State<BibleScreen> {
             .toList();
       });
     }
-    if (prefs!.getDouble("fontSizeVerse") != null) {
-      setState(() {
-        fontSizeVerse = prefs!.getDouble("fontSizeVerse")!;
-        fontSizeNumber = fontSizeVerse - 4;
-      });
-    } else {
-      setState(() {
-        fontSizeNumber = fontSizeVerse - 4;
-      });
-    }
+    final fontSize = await PreferencesManager().getFontSizeVerse();
+    setState(() {
+      fontSizeVerse = fontSize;
+      fontSizeNumber = fontSizeVerse - 4;
+    });
+
     // Recuperar ModelData de SharedPreferences
-    if (prefs!.getString("fontFamilySet") != null) {
-      setState(() {
-        fontFamilySet = ModelData.fromJson(
-          jsonDecode(prefs!.getString("fontFamilySet")!),
-        );
-      });
-    }
+    final fontFamily = await PreferencesManager().getFontFamilySet();
+    setState(() {
+      fontFamilySet = ModelData.fromJson(fontFamily);
+    });
     if (mounted) setState(() {});
   }
 
   /// Método de carga inicial de datos
   Future<void> _initDataLoad() async {
-    prefs = await SharedPreferences.getInstance();
     LoadingService().showLoading(context);
     if (Provider.of<CatalogueProvider>(context, listen: false)
         .allBibleVersion
@@ -1574,11 +1557,11 @@ class _BibleScreenState extends State<BibleScreen> {
     setState(() {
       errorMessage = null;
     });
-    lastVersionsSelected =
-        prefs!.getString(preferenceKey); //  cargo la version almacena en cache
+    lastVersionsSelected = await PreferencesManager()
+        .getSelectedBibleVersion(); //  cargo la version almacena en cache
 
-    final loadBook =
-        prefs!.getString('bookSelected'); // cargo el libro almacenado en cache
+    final loadBook = await PreferencesManager()
+        .getBookSelected(); // cargo el libro almacenado en cache
     //leemos la data persistida
     try {
       // si hay version en cache
@@ -1648,8 +1631,8 @@ class _BibleScreenState extends State<BibleScreen> {
 
           return verseA.compareTo(verseB); // Orden ascendente
         });
-        prefs!.setString('chapterSelected', chapterNumber);
       });
+      await PreferencesManager().setChapterSelected(chapterNumber);
     } else if (currentBook!.numberBook > 1) {
       // Ir al último capítulo del libro anterior
       final prevBook = currentVersion!.books
@@ -1658,14 +1641,15 @@ class _BibleScreenState extends State<BibleScreen> {
         // actualizo libro actual con el anterior
         currentBook = prevBook;
       });
-      prefs!.setString('bookSelected', prevBook.id);
+      await PreferencesManager().setBookSelected(prevBook.id);
 
       /// consultamos los capítulos con sus versículos del libro anterior y le indicamos
       /// que es el primer capítulo del libro que se esta abandonando
       await loadChapters(prevBook, true);
 
       // actualizamos el storage del capítulo seleccionado
-      prefs!.setString('chapterSelected', currentChapter!.chapter.toString());
+      await PreferencesManager()
+          .setChapterSelected(currentChapter!.chapter.toString());
     }
 
     // cargamos los resaltados
@@ -1696,8 +1680,8 @@ class _BibleScreenState extends State<BibleScreen> {
 
           return verseA.compareTo(verseB); // Orden ascendente
         });
-        prefs!.setString('chapterSelected', chapterNumber);
       });
+      await PreferencesManager().setChapterSelected(chapterNumber);
     } else if (currentBook!.numberBook < currentVersion!.books.length) {
       // Ir al primer capítulo del siguiente libro
       final nextBook = currentVersion!.books
@@ -1708,10 +1692,10 @@ class _BibleScreenState extends State<BibleScreen> {
       });
 
       // actualizamos el storage de libro seleccionado
-      prefs!.setString('bookSelected', nextBook.id);
+      await PreferencesManager().setBookSelected(nextBook.id);
 
       // removemos el storage de capítulo seleccionado
-      prefs!.remove('chapterSelected');
+      await PreferencesManager().clearOne('chapterSelected');
 
       /// consultamos los capítulos con sus versículos del libro siguiente y le indicamos
       /// en false el parámetro firstChapter
@@ -1748,20 +1732,26 @@ class _BibleScreenState extends State<BibleScreen> {
 
           return chapterA.compareTo(chapterB); // Orden ascendente
         });
-        //si no es el el primer capítulo del libro
-        if (!firstChapter) {
-          // verificamos si hay capítulo en cache
-          if (prefs!.getString('chapterSelected') != null) {
-            currentChapter = allChapters.firstWhere((ch) =>
-                ch.chapter.toString() == prefs!.getString('chapterSelected'));
-          } else {
-            currentChapter = allChapters.first;
-          }
-        } else {
-          currentChapter = allChapters.last;
-        }
+      });
 
-        if (currentChapter != null) {
+      //si no es el el primer capítulo del libro
+      if (!firstChapter) {
+        // verificamos si hay capítulo en cache
+          final chapterNumber = await PreferencesManager().getChapterSelected();
+        if (chapterNumber != null) {
+          setState(() {
+            currentChapter = allChapters
+                .firstWhere((ch) => ch.chapter.toString() == chapterNumber);
+          });
+        } else {
+          setState(() => currentChapter = allChapters.first);
+        }
+      } else {
+        setState(() => currentChapter = allChapters.last);
+      }
+
+      if (currentChapter != null) {
+        setState(() {
           verses = currentChapter!.verses!
               .map<VerseModel>((verse) => VerseModel.fromJson(verse.toJson()))
               .toList();
@@ -1772,8 +1762,8 @@ class _BibleScreenState extends State<BibleScreen> {
 
             return verseA.compareTo(verseB); // Orden ascendente
           });
-        }
-      });
+        });
+      }
       // actualizamos la propiedad chapters con la cantidad de capítulos del libro
       setState(() {
         currentBook = book.copyWith(

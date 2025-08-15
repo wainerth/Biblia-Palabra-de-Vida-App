@@ -1,6 +1,6 @@
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthGuard extends StatelessWidget {
   final Widget child;
@@ -8,8 +8,8 @@ class AuthGuard extends StatelessWidget {
   const AuthGuard({super.key, required this.child});
 
   Future<bool> isAuthenticated() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('userToken') != null;
+    final user = await PreferencesManager().getUserData();
+    return user != null;
   }
 
   @override

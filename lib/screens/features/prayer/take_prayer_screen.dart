@@ -1,17 +1,15 @@
+import 'dart:async';
+
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:provider/provider.dart';
-import 'package:universal_io/io.dart';
 
 class TakePrayerScreen extends StatefulWidget {
   const TakePrayerScreen({super.key});
@@ -45,6 +43,12 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
     hasPreviousPage: false,
     hasNextPage: false,
   );
+  Timer? _debounceTimer;
+
+  bool loading = false;
+  TextEditingController searchTextController = TextEditingController();
+  String searchText = '';
+
   bool itemExpanded = false;
   List<ModelData> books = [];
   ModelData? bookSelected;
@@ -142,6 +146,35 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                 onBack: () => Navigator.pop(context),
               )
             } else ...{
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.0),
+                child: TextFormField(
+                  readOnly: listRequest.isEmpty || loading,
+                  controller: searchTextController,
+                  style: StylesApp(context).textStyleSmallBlack,
+                  decoration:
+                      StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                            hintText: 'Buscar...',
+                            border: OutlineInputBorder(),
+                            suffixIcon: searchText.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(Icons.clear),
+                                    onPressed: () {
+                                      setState(() {
+                                        cleanSearch();
+                                      });
+                                    },
+                                  )
+                                : Icon(Icons.search),
+                          ),
+                  onChanged: (value) {
+                    setState(() {
+                      searchText = value;
+                    });
+                    _onSearchChanged(value);
+                  },
+                ),
+              ),
               Expanded(
                 child: ListView.builder(
                     itemCount: listRequest.length,
@@ -197,7 +230,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
 
     try {
       final responseListRequest =
-          await getAllRequestPrayerByGroupId(null, null, groupId, null);
+          await getAllRequestPrayerByGroupId(page, limit, groupId, searchText);
       if (responseListRequest.error != null) {
         setState(() {
           errorMessage = responseListRequest.error!;
@@ -346,5 +379,31 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
         ],
       ),
     );
+  }
+
+  void cleanSearch() {
+    setState(() {
+      searchText = '';
+      searchTextController.text = '';
+    });
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+
+    _debounceTimer = Timer(Duration(milliseconds: 800), () {
+      FocusScope.of(context).unfocus();
+      _performSearch(value);
+    });
+  }
+
+  void _performSearch(String query) async {
+    if (query.isEmpty) return; // No buscar si está vacío
+
+    try {
+      _generateData(context, pagination.currentPage, pagination.currentPage);
+    } catch (e) {
+      debugPrint("error al filtrar $e");
+    }
   }
 }

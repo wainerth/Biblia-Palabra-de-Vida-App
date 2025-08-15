@@ -36,12 +36,12 @@ class ModelData<T> {
       "label": label,
       "value": value,
       "originalData":
-          originalData != null ? _serializeOriginal(originalData!) : null,
+          originalData != null ? _serializeOriginal(originalData) : null,
     };
   }
 
-  // Helper para serializar el objeto original (implementa según tus necesidades)
-  dynamic _serializeOriginal(T data) {
+  // Helper para serializer el objeto original (implementa según tus necesidades)
+  dynamic _serializeOriginal(T? data) {
     if (data is dynamic && data.toJson != null) {
       // Verifica en tiempo de ejecución
       return data.toJson();

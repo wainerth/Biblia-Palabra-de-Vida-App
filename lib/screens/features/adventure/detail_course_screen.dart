@@ -1,6 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -43,8 +43,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
       progressUser = userProvider.progressUser;
 
       // obtenemos curso
-      final ResponseData courseResponse =
-          await loadOneCourse(userData!.userId, (courseParam as Map<String, dynamic>)["courseId"]);
+      final ResponseData courseResponse = await loadOneCourse(
+          userData!.userId, (courseParam as Map<String, dynamic>)["courseId"]);
       if (courseResponse.error != null) {
         errorMessage = courseResponse.error;
       }
@@ -211,7 +211,15 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                     },
                   );
                 },
-                course: course,
+                course: CourseModel(
+                    id: course.id,
+                    title: course.titleCourse,
+                    color: course.color,
+                    status: 1,
+                    img: Img(urlImg: course.imgCourseUrl),
+                    introduction: course.introduction,
+                    sectionCount: course.sectionCount,
+                    sectionCompletedCount: course.sectionCompletedCount),
               ),
               if (loadAventure)
                 Positioned(

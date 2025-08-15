@@ -1,11 +1,10 @@
-// bible_theme_provider.dart
+import 'package:flutter/material.dart';
 import 'dart:convert';
 
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/models/custom_theme_model.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BibleThemeProvider with ChangeNotifier {
   BibleThemeType _currentTheme = BibleThemeType.light;
@@ -36,20 +35,19 @@ class BibleThemeProvider with ChangeNotifier {
   }
 
   Future<void> loadSavedTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-
     // cargar tema Predeterminado
-    final savedThemeIndex = prefs.getInt('saved_bible_theme') ?? 0;
+    final savedThemeIndex = await PreferencesManager().getSavedBibleTheme();
     _currentTheme = BibleThemeType.values[savedThemeIndex];
 
     // Cargar temas personalizados
-    final customThemeJson = prefs.getStringList('custom_themes') ?? [];
+    final customThemeJson = await PreferencesManager().getCustomThemes();
     _customThemes = customThemeJson
         .map((theme) => CustomTheme.fromJson(jsonDecode(theme)))
         .toList();
 
     // cargar tema personalizado actual  si existe
-    final currentCustomThemeJson = prefs.getString('current_custom_theme');
+    final currentCustomThemeJson =
+        await PreferencesManager().getCurrentCustomTheme();
     if (currentCustomThemeJson != null) {
       _currentCustomTheme =
           CustomTheme.fromJson(jsonDecode(currentCustomThemeJson));
@@ -64,9 +62,8 @@ class BibleThemeProvider with ChangeNotifier {
     _isCustomTheme = false;
     _currentCustomTheme = null;
 
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt('saved_bible_theme', newTheme.index);
-    prefs.remove('current_custom_theme');
+    await PreferencesManager().setSavedBibleTheme(newTheme.index);
+    await PreferencesManager().clearOne('current_custom_theme');
 
     notifyListeners();
   }
@@ -82,8 +79,8 @@ class BibleThemeProvider with ChangeNotifier {
     _currentCustomTheme = theme;
     _isCustomTheme = true;
 
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('current_custom_theme', jsonEncode(theme.toJson()));
+    await PreferencesManager()
+        .setCurrentCustomTheme(jsonEncode(theme.toJson()));
 
     notifyListeners();
   }
@@ -94,8 +91,8 @@ class BibleThemeProvider with ChangeNotifier {
     if (_isCustomTheme && _currentCustomTheme?.id == id) {
       _isCustomTheme = false;
       _currentCustomTheme = null;
-      final prefs = await SharedPreferences.getInstance();
-      prefs.remove('current_custom_theme');
+
+      await PreferencesManager().clearOne('current_custom_theme');
     }
 
     await _saveCustomThemes();
@@ -103,10 +100,8 @@ class BibleThemeProvider with ChangeNotifier {
   }
 
   Future<void> _saveCustomThemes() async {
-    final prefs = await SharedPreferences.getInstance();
     final customThemeJson =
         _customThemes.map((theme) => jsonEncode(theme.toJson())).toList();
-
-    prefs.setStringList('custom_themes', customThemeJson);
+    await PreferencesManager().setCustomThemes(customThemeJson);
   }
 }

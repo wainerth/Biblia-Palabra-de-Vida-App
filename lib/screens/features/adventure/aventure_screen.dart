@@ -41,7 +41,7 @@ class _AventureScreenState extends State<AventureScreen> {
     hasNextPage: false,
   );
 
-  List<CourseDetail> courses = [];
+  List<CourseModel> courses = [];
   @override
   void initState() {
     super.initState();
@@ -87,8 +87,8 @@ class _AventureScreenState extends State<AventureScreen> {
       } else {
         setState(() {
           courses = result.data
-              .map((course) => CourseDetail.fromJson(removeTypename(course)))
-              .cast<CourseDetail>()
+              .map((course) => CourseModel.fromJson(removeTypename(course)))
+              .cast<CourseModel>()
               .toList();
         });
       }

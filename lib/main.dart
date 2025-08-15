@@ -1,44 +1,36 @@
-import 'dart:io';
-
-import 'package:biblia_palabra_de_vida_app/class/error_reporter.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
-import 'package:biblia_palabra_de_vida_app/routes/router_page.dart';
-import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/text_with_gradient.dart';
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
+import 'package:biblia_palabra_de_vida_app/routes/router_page.dart';
+import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/text_with_gradient.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar
+  await PreferencesManager().init();
+
   final socketProvider = SocketClientProvider();
   await socketProvider.initializeNotifications();
   if (!kIsWeb) {
     await FlutterDownloader.initialize(
-      debug: true, // Set to false in production
-      ignoreSsl: true, // Set to false for secure connections
+      debug: kDebugMode, // Set to false in production
+      ignoreSsl: kDebugMode, // Set to false for secure connections
     );
   }
-  // Manejo de errores global
-  // FlutterError.onError = (details) {
-  //   ErrorReporter.sendError(
-  //     nameFunction: "Error Global",
-  //     error: details.exception,
-  //     stackTrace: details.stack ?? StackTrace.current,
-  //   );
-  //   // También puedes mostrar un diálogo al usuario
-  //   debugPrint('Error: ${details.exception}');
-  // };
   runApp(
     MultiProvider(
       providers: [
@@ -79,18 +71,16 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _loadDataPreferences() async {
-    SharedPreferences? prefs;
     try {
-      prefs = await SharedPreferences.getInstance();
-      setState(() {
-        _hasSeenIntro = prefs!.getBool('hasSeenIntro') ?? false;
-      });
+      // Verificar si ya vio el intro
+      final hasSeen = await PreferencesManager().hasSeenIntro();
+
+      setState(() => _hasSeenIntro = hasSeen);
     } catch (e) {
       if (e.toString().contains('StreamCorruptedException')) {
         try {
           // 1. Limpia en memoria
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.clear();
+        await PreferencesManager().clearAll();
 
           // 2. Elimina el archivo físico (definitivo)
           final appDir = await getApplicationSupportDirectory();
@@ -105,11 +95,6 @@ class _MyAppState extends State<MyApp> {
           debugPrint('⚠️ Error en limpieza: $e');
         }
       }
-      // await ErrorReporter.sendError(
-      //     nameFunction: "_loadDataPreferences", error: e, stackTrace: stack);
-      // setState(() {
-      //   _hasSeenIntro = false; // Valor por defecto si hay error
-      // });
     }
   }
 
@@ -118,12 +103,8 @@ class _MyAppState extends State<MyApp> {
     final authProvider = context.read<AuthenticationProvider>();
     try {
       await authProvider.checkAuthentication(context);
-    } catch (e, stack) {
-      await ErrorReporter.sendError(
-          nameFunction: "_loadTokenAndInitializeAuth",
-          error: e,
-          stackTrace: stack);
-      // authProvider.clearAllSharedPreferences();
+    } catch (e) {
+      debugPrint('⚠️ Error en _loadTokenAndInitializeAuth: $e');
     }
   }
 
@@ -162,19 +143,16 @@ class _MyAppState extends State<MyApp> {
       );
     }
     if (_hasSeenIntro!) {
-      context.read<AuthenticationProvider>();
-
+      final authProvider = context.read<AuthenticationProvider>();
       return FutureBuilder(
         future:
-            _loadTokenAndInitializeAuth().timeout(const Duration(seconds: 10)),
+            _loadTokenAndInitializeAuth(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return LoadMaskedWidget();
-          } else if (snapshot.hasError) {
-            return const HomeScreen(); // Fallback seguro
           } else {
             LoadingService().hideLoading();
-            final authProvider = context.read<AuthenticationProvider>();
+
             if (authProvider.token != null) {
               return PageScreen();
             } else {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
@@ -91,19 +92,14 @@ class _MemoryScreenState extends State<MemoryScreen>
           IconButton(
             icon: Icon(Icons.volume_up, color: StyleColor.white),
             onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
               if (isBackgroundPlaying) {
                 _audioService.stopBackgroundMusic();
-                prefs.setBool('isBackgroundPlaying', false);
-                setState(() {
-                  isBackgroundPlaying = false;
-                });
+                setState(() => isBackgroundPlaying = false);
+                await PreferencesManager().setBackgroundPlaying(false);
               } else {
                 _audioService.playBackgroundMusic();
-                prefs.setBool('isBackgroundPlaying', true);
-                setState(() {
-                  isBackgroundPlaying = true;
-                });
+                await PreferencesManager().setBackgroundPlaying(true);
+                setState(() => isBackgroundPlaying = true);
               }
             },
           ),
@@ -493,19 +489,15 @@ class _MemoryScreenState extends State<MemoryScreen>
   }
 
   Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool('isBackgroundPlaying') != null) {
-      if (prefs.getBool('isBackgroundPlaying') == true) {
-        _audioService.playBackgroundMusic();
-      } else {
-        _audioService.stopBackgroundMusic();
-      }
-    } else {
+    final musicBackground = await PreferencesManager().getIsBackgroundPlaying();
+    if (musicBackground == true) {
       _audioService.playBackgroundMusic();
+    } else {
+      _audioService.stopBackgroundMusic();
     }
-    setState(() {
-      isBackgroundPlaying = prefs.getBool('isBackgroundPlaying') ?? true;
-    });
+
+    setState(() => isBackgroundPlaying = musicBackground);
+
     LoadingService().showLoading(context);
     try {
       final memoryResponse = await getMemory();
@@ -577,8 +569,8 @@ class _MemoryScreenState extends State<MemoryScreen>
           setState(() {
             _playWin = true;
           });
-            await _audioService.stopBackgroundMusic();
-            await _audioService.playWinSound();
+          await _audioService.stopBackgroundMusic();
+          await _audioService.playWinSound();
           _showDialogFinallyPlay();
         }
       } else {
