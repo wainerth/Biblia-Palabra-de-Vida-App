@@ -1,5 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';

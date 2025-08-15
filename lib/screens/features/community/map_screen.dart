@@ -1,5 +1,7 @@
+import 'package:provider/provider.dart';
 import 'dart:async';
 
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
@@ -7,8 +9,6 @@ import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -108,15 +108,12 @@ class _MapScreenState extends State<MapScreen>
   }
 
   _loadMutePreference() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isMuted = prefs.getBool('isMuted') ?? false;
-    });
+    final mute = await PreferencesManager().getIsMuted();
+    setState(() => isMuted = mute);
   }
 
   _saveMutePreference() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isMuted', isMuted);
+    await PreferencesManager().setMuted(isMuted);
   }
 
   // función que hace scroll en la pantalla
@@ -320,7 +317,7 @@ class _MapScreenState extends State<MapScreen>
                                 onShowInfoCourse: () {
                                   Navigator.popAndPushNamed(
                                       context, '/detailCoursePage',
-                                      arguments:{"courseId": course!.id});
+                                      arguments: {"courseId": course!.id});
                                 },
                                 onShowInfoStage: () {
                                   showDialog(
@@ -632,18 +629,23 @@ class _MapScreenState extends State<MapScreen>
           builder: (context, value, child) {
             return AnimatedContainer(
               duration: Duration(milliseconds: 300),
-              height: value ? kBottomNavigationBarHeight + 20 : 0,
-              child: CustomBottomNavigationBarWidget(
-                type: BottomNavigationBarType.fixed,
-                showUnselectedLabels: true,
-                backgroundColor: Colors.white,
-                selectedItemColor: Color(0XFF12CBC4),
-                unselectedItemColor: Colors.white,
-                selectedLabelStyle: StylesApp(context).textStyleBody10,
-                unselectedLabelStyle: StylesApp(context).textStyleBody10,
-                items: getItemsMap(context),
-                currentIndex: _selectedIndex,
-                onTap: _onItemTapped,
+              height: value ? kBottomNavigationBarHeight : 0,
+              child: OverflowBox(
+                maxHeight: kBottomNavigationBarHeight +
+                    20, // Permite overflow controlado
+                alignment: Alignment.bottomCenter,
+                child: CustomBottomNavigationBarWidget(
+                  type: BottomNavigationBarType.fixed,
+                  showUnselectedLabels: true,
+                  backgroundColor: Colors.white,
+                  selectedItemColor: Color(0XFF12CBC4),
+                  unselectedItemColor: Colors.white,
+                  selectedLabelStyle: StylesApp(context).textStyleBody10,
+                  unselectedLabelStyle: StylesApp(context).textStyleBody10,
+                  items: getItemsMap(context),
+                  currentIndex: _selectedIndex,
+                  onTap: _onItemTapped,
+                ),
               ),
             );
           },

@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:flutter/material.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProvider extends ChangeNotifier {
   LoginUser? _user;
@@ -24,8 +23,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<void> _initializeClient() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.getString('userToken');
+
   }
 
   void setUser(LoginUser? user) {
@@ -44,15 +42,12 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<void> updateStorage(LoginUser? user) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
     // Guardar los datos actualizados en SharedPreferences
-    await prefs.setString('userData', jsonEncode(user!.toJson()));
+    await PreferencesManager().setLoginUser(user);
   }
 
   Future<ResponseData> updateAvatarUser(String userId, String toBase64) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userToken = prefs.getString('userToken');
+    final String? userToken = await PreferencesManager().getUserToken();
     final GraphQLClient client = createClient(authToken: userToken);
     if (userId.isEmpty || toBase64.isEmpty) {
       return ResponseData(
@@ -73,7 +68,6 @@ class UserProvider extends ChangeNotifier {
     );
 
     try {
-      // print(toBase64);
       final QueryResult result = await client.mutate(options);
 
       if (result.hasException) {
@@ -114,8 +108,7 @@ class UserProvider extends ChangeNotifier {
 
   Future<ResponseData> updateProfile(UserProfile data) async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? userToken = prefs.getString('userToken');
+      final String? userToken = await PreferencesManager().getUserToken();
       final response = await updateUserProfile(userToken, data);
       if (response.error != null) {
         return ResponseData(data: null, error: response.error);
@@ -138,30 +131,24 @@ class UserProvider extends ChangeNotifier {
       setUser(_user);
       return ResponseData(data: response.data, error: null);
     } catch (e) {
-      print(
-          "Error Update profile : $e"); // Print the error for debugging.  Crucial!
 
-      // More specific error handling if needed:
       if (e is TimeoutException) {
         return ResponseData(data: null, error: "Request timed out");
       } else if (e is SocketException) {
         return ResponseData(data: null, error: "No Internet Connection");
       } else if (e is FormatException) {
-        // Example: JSON parsing error
-
         return ResponseData(data: null, error: "Invalid data format");
       } else {
         return ResponseData(
             data: null,
-            error: "An unexpected error occurred: $e"); // Generic error
+            error: "An unexpected error occurred: $e");
       }
     }
   }
 
   Future updateUserChurch(userId, churchId, churches) async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? userToken = prefs.getString('userToken');
+      final String? userToken = await PreferencesManager().getUserToken();
       final response = await updateChurchUser(userToken, userId, churchId);
       if (response.error != null) {
         return ResponseData(data: null, error: null);
@@ -227,21 +214,16 @@ class UserProvider extends ChangeNotifier {
       setUser(_user);
       return ResponseData(data: response.data, error: null);
     } catch (e) {
-      print(
-          "Error during update church: $e"); // Print the error for debugging.  Crucial!
-
-      // More specific error handling if needed:
       if (e is TimeoutException) {
         return ResponseData(data: null, error: "Request timed out");
       } else if (e is SocketException) {
         return ResponseData(data: null, error: "No Internet Connection");
       } else if (e is FormatException) {
-        // Example: JSON parsing error
         return ResponseData(data: null, error: "Invalid data format");
       } else {
         return ResponseData(
             data: null,
-            error: "An unexpected error occurred: $e"); // Generic error
+            error: "An unexpected error occurred: $e");
       }
     }
   }

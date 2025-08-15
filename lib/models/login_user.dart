@@ -141,11 +141,6 @@ class LoginUser {
   }
 
   factory LoginUser.fromJson(Map<String, dynamic> json) {
-    List<UserTitle> title = [];
-    if (json['title'] != null) {
-      title =
-          (json['title'] as List).map((i) => UserTitle.fromJson(i)).toList();
-    }
     return LoginUser(
       userId: json['userId'],
       identifier: json['identifier'],
@@ -158,9 +153,13 @@ class LoginUser {
       isBaptized: json['isBaptized'] ?? false,
       expTotalUser: json['expTotalUser'],
       energyPoints: json['energyPoints'] ?? 0,
-      imgProfileUser: json['imgProfileUser'] != null ? Img.fromJson(json['imgProfileUser']) : null,
+      imgProfileUser: json['imgProfileUser'] != null
+          ? Img.fromJson(json['imgProfileUser'])
+          : null,
       phoneNumber: json['phoneNumber'] ?? '',
-      profileAreaCode: json['profileAreaCode'] != null ? AreaCode.fromJson(json['profileAreaCode']) : null,
+      profileAreaCode: json['profileAreaCode'] != null
+          ? AreaCode.fromJson(json['profileAreaCode'])
+          : null,
       country:
           json['country'] != null ? Country.fromJson(json['country']) : null,
       city: json['city'],
@@ -171,13 +170,17 @@ class LoginUser {
       streakDaysCount: json['streakDaysCount'],
       preachingsCreatedCount: json['preachingsCreatedCount'],
       completedCourse: json['completedCourse'] ?? 0,
-      currentLeague: json['currentLeague'] != null ? League.fromJson(json['currentLeague']) : null,
+      currentLeague: json['currentLeague'] != null
+          ? League.fromJson(json['currentLeague'])
+          : null,
       userChurch: json['userChurch'] != null
-          ?  (json['userChurch'] as List)
-          .map((i) => UserChurch.fromJson(i))
-          .toList()
+          ? (json['userChurch'] as List)
+              .map((i) => UserChurch.fromJson(i))
+              .toList()
           : [],
-      title: title,
+      title: json['title'] != null
+          ? (json['title'] as List).map((i) => UserTitle.fromJson(i)).toList()
+          : [],
       league:
           json['league'] != null ? UserRanking.fromJson(json['league']) : null,
     );
@@ -196,7 +199,7 @@ class LoginUser {
         'expTotalUser': expTotalUser,
         'energyPoints': energyPoints,
         'imgProfileUser': imgProfileUser?.toJson(),
-        'profileAreaCode': profileAreaCode,
+        'profileAreaCode': profileAreaCode?.toJson(),
         'phoneNumber': phoneNumber,
         'country': country?.toJson(),
         'city': city,
@@ -209,7 +212,7 @@ class LoginUser {
         'completedCourse': completedCourse,
         'currentLeague': currentLeague?.toJson(),
         'userChurch': userChurch.map((e) => e.toJson()).toList(),
-        'title': title,
-        'league': league,
+        'title': title?.map((t) => t.toJson()).toList(),
+        'league': league?.toJson(),
       };
 }

@@ -1,6 +1,6 @@
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BibleVersionSelector {
   static Future<ModelData?> show(
@@ -26,8 +26,7 @@ class BibleVersionSelector {
 
     // Guardar si se seleccionó una versión
     if (selected != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(preferenceKey, selected.value);
+      await PreferencesManager().setSelectedBibleVersion(selected.value);
     }
 
     return selected;

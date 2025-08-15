@@ -1,15 +1,15 @@
-import 'dart:async';
-
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
-import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_io/io.dart';
+import 'dart:async';
+
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 
 Future login(email, password) async {
   final GraphQLClient client = createClient();
@@ -434,13 +434,12 @@ Future logout() async {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   await googleSignIn.signOut();
   // delete credentials in the local stores
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('userData');
-  await prefs.remove('userToken');
-  await prefs.remove("selectedBibleVersion");
-  await prefs.remove("bookSelected");
-  await prefs.remove("chapterSelected");
-  await prefs.remove('current_custom_theme');
+  await PreferencesManager().clearOne('userData');
+  await PreferencesManager().clearOne('userToken');
+  await PreferencesManager().clearOne("selectedBibleVersion");
+  await PreferencesManager().clearOne("bookSelected");
+  await PreferencesManager().clearOne("chapterSelected");
+  await PreferencesManager().clearOne('current_custom_theme');
   return ResponseData(data: true, error: null);
 }
 
@@ -566,8 +565,7 @@ Future resetPassword(email, password) async {
 }
 
 Future<ResponseData> sendResponsesUser(List responses) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -630,8 +628,7 @@ Future<ResponseData> sendResponsesUser(List responses) async {
 
 Future<ResponseData> sendScoreUser(
     userId, courseId, levelId, failedIntents) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -726,8 +723,7 @@ Future<ResponseData> sendScoreUser(
 
 /// unlocked next section
 Future<ResponseData> unlockedNextSection(userId, sectionId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -791,8 +787,7 @@ Future<ResponseData> unlockedNextSection(userId, sectionId) async {
 
 /// unlocked next section
 Future<ResponseData> applyRewardToUser(userId, rewardId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -855,8 +850,7 @@ Future<ResponseData> applyRewardToUser(userId, rewardId) async {
 }
 
 Future<ResponseData> setTitleObtained(userId, courseId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -925,8 +919,7 @@ Future<ResponseData> setTitleObtained(userId, courseId) async {
 }
 
 Future<ResponseData> setPrizeObtained(userId, courseId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -999,8 +992,7 @@ Future<ResponseData> setPrizeObtained(userId, courseId) async {
 }
 
 Future<ResponseData> redeemedPrize(prizeId, userId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1062,20 +1054,19 @@ Future<ResponseData> redeemedPrize(prizeId, userId) async {
   }
 }
 
-Future<ResponseData> openOnePromise(promiseId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+Future<ResponseData> openOnePromise(String userId, String promiseId) async {
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
     operationName: "OpenOnePromise",
     document: gql(r'''
-      mutation OpenOnePromise($promiseId: ID) {
-        openOnePromise(promiseId: $promiseId)
+      mutation OpenOnePromise($userId: ID,  $promiseId: ID) {
+        openOnePromise(userId: $userId, promiseId: $promiseId)
       }
       '''),
-    variables: <String, dynamic>{"promiseId": promiseId},
+    variables: <String, dynamic>{"userId": userId, "promiseId": promiseId},
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
@@ -1125,8 +1116,7 @@ Future<ResponseData> openOnePromise(promiseId) async {
 }
 
 Future<ResponseData> addToFavoritePreach(userId, preachId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1188,8 +1178,7 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
 
 Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
     String userId, int bibleVersion, String chapterId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
   List<Map<String, dynamic>> dataMap = [];
@@ -1271,8 +1260,7 @@ Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
 }
 
 Future<ResponseData> removeHighLighters(String verseId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1331,8 +1319,7 @@ Future<ResponseData> removeHighLighters(String verseId) async {
 }
 
 Future<ResponseData> updateFavoriteVerse(String userId, String verseId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1395,8 +1382,7 @@ Future<ResponseData> updateFavoriteVerse(String userId, String verseId) async {
 
 Future<ResponseData> createNewVerseFavoriteByUser(
     String userId, String verseId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1462,8 +1448,7 @@ Future<ResponseData> createNewVerseFavoriteByUser(
 }
 
 Future<ResponseData> deleteVerseFavorite(String userId, String verseId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1528,8 +1513,7 @@ Future<ResponseData> deleteVerseFavorite(String userId, String verseId) async {
 }
 
 Future<ResponseData> markAsReadOneNotification(String notificationId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1595,8 +1579,7 @@ Future<ResponseData> markAsReadOneNotification(String notificationId) async {
 /// Mutation para los juegos
 Future<ResponseData> saveResultPlay(
     String userId, String difficulty, String category) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1662,8 +1645,7 @@ Future<ResponseData> saveResultPlay(
 
 // mutación para Prayer
 Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
   //  Prepara el archivo como MultipartFile
@@ -1740,8 +1722,7 @@ Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
 }
 
 Future<ResponseData> deleteRequestPrayer(String prayerId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1805,8 +1786,7 @@ Future<ResponseData> deleteRequestPrayer(String prayerId) async {
 
 Future<ResponseData> answerPrayerRequest(String? message, String requestId,
     String responderId, String? verseId, File? audio) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
   //  Prepara el archivo como MultipartFile
@@ -1888,8 +1868,7 @@ Future<ResponseData> answerPrayerRequest(String? message, String requestId,
 
 Future<ResponseData> changeStatusRequest(
     String? prayerId, String statusLabel) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
@@ -1955,8 +1934,7 @@ Future<ResponseData> changeStatusRequest(
 }
 
 Future<ResponseData> createCertificate(String? userId, String courseId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userToken = prefs.getString('userToken');
+  String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 

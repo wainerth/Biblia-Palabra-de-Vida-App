@@ -21,6 +21,10 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="amistad.online2" />
         </intent>
+         <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
     </queries>
     <application
         android:label="Biblia Palabra de vida"
@@ -64,9 +68,9 @@
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
         android:exported="false"
         >
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-            </intent-filter>
+        <intent-filter>
+            <action android:name="android.intent.action.BOOT_COMPLETED"/>
+        </intent-filter>
         </receiver>
 
         <service

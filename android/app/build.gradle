@@ -5,43 +5,21 @@ plugins {
 }
 
 android {
-    dexOptions {
-        javaMaxHeapSize "1g"
-        preDexLibraries false
-    }
-    
     namespace = "com.example.biblia_palabra_de_vida_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "25.1.8937393"
 
     compileOptions {
         coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-    
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = 17
     }
-
-    // // Configuración para diferentes ambientes
-    // flavorDimensions "environment"
-    // productFlavors {
-    //     dev {
-    //         dimension "environment"
-    //         applicationId "com.example.biblia_palabra_de_vida_app.dev"
-    //         versionNameSuffix "-DEV"
-    //         resValue "string", "app_name", "Biblia Dev"
-    //     }
-    //     prod {
-    //         dimension "environment"
-    //         applicationId "com.example.biblia_palabra_de_vida_app"
-    //         resValue "string", "app_name", "Biblia Palabra de Vida"
-    //     }
-    // }
 
     defaultConfig {
-        multiDexEnabled true
+        applicationId = "com.example.biblia_palabra_de_vida_app"
         minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -62,34 +40,19 @@ android {
             storePassword "123456"
         }
     }
-
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
             signingConfig signingConfigs.release
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-    // // Configuración para nombres de archivos de salida
-    // applicationVariants.all { variant ->
-    //     variant.outputs.all { output ->
-    //         def flavor = variant.flavorName
-    //         def versionName = variant.versionName
-    //         def buildType = variant.buildType.name
-    //         output.outputFileName = "biblia_${flavor}_${buildType}_${versionName}.apk"
-    //     }
-    // }
 }
-
 dependencies {
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'  // <-- AQUÍ
 }
-
 flutter {
     source = "../.."
 }

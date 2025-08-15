@@ -1,7 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -35,6 +35,13 @@ class _RankingScreenState extends State<RankingScreen> {
     });
 
     try {
+      // si no hay ligas en catalogoProvider consultar servicios
+      if(Provider.of<CatalogueProvider>(context, listen: false)
+          .allLeagues.isEmpty) {
+            Provider.of<CatalogueProvider>(context, listen: false)
+          .loadLeagues();
+          }
+
       leagues = Provider.of<CatalogueProvider>(context, listen: false)
           .allLeagues
           .map((league) => league)

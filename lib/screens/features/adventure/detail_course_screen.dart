@@ -1,6 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -16,7 +16,7 @@ class DetailCourseScreen extends StatefulWidget {
 }
 
 class _DetailCorseScreenState extends State<DetailCourseScreen> {
-  CourseModel? course;
+  CourseDetail? course;
   List<Stage> stages = [];
   bool loadAventure = false;
   bool isLoading = true;
@@ -43,12 +43,12 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
       progressUser = userProvider.progressUser;
 
       // obtenemos curso
-      final ResponseData courseResponse =
-          await loadOneCourse(userData!.userId, (courseParam as Map<String, dynamic>)["courseId"]);
+      final ResponseData courseResponse = await loadOneCourse(
+          userData!.userId, (courseParam as Map<String, dynamic>)["courseId"]);
       if (courseResponse.error != null) {
         errorMessage = courseResponse.error;
       }
-      course = CourseModel.fromJson(courseResponse.data);
+      course = CourseDetail.fromJson(courseResponse.data);
       final result = await loadStageByCourse(userData.userId, course?.id);
       if (result.error != null) {
         errorMessage = result.error;
@@ -200,7 +200,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                     context: context,
                     builder: (BuildContext context) {
                       return CustomModalWidget(
-                        title: course.title,
+                        title: course.titleCourse,
                         content: course.introduction,
                         buttonText: 'Aceptar',
                         id: course.id,
@@ -211,7 +211,15 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                     },
                   );
                 },
-                course: course,
+                course: CourseModel(
+                    id: course.id,
+                    title: course.titleCourse,
+                    color: course.color,
+                    status: 1,
+                    img: Img(urlImg: course.imgCourseUrl),
+                    introduction: course.introduction,
+                    sectionCount: course.sectionCount,
+                    sectionCompletedCount: course.sectionCompletedCount),
               ),
               if (loadAventure)
                 Positioned(

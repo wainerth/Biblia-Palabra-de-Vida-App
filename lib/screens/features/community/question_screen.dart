@@ -1,16 +1,16 @@
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
@@ -442,8 +442,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       _isAnswerSelected = false;
       _suggestionSelected = false;
     });
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userToken = prefs.getString('userToken');
+    String? userToken = await PreferencesManager().getUserToken();
     await Provider.of<AuthenticationProvider>(context, listen: false)
         .loadProfileUser(userData!.userId, userToken);
   }
@@ -1163,7 +1162,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   // esta parte es para mostrar titulo obtenido
   _buildAchievementUnlocked(BuildContext context) {
-    ResponseCertificateCreated? certificateCreated;
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,
@@ -1241,8 +1239,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     );
                     return;
                   }
-                  if (responseDownloadCertificate != null &&
-                      responseDownloadCertificate.data != null) {
+                  if (responseDownloadCertificate.data != null) {
                     final url =
                         "${GraphQLConfig.urlServidor}${responseDownloadCertificate.data['url']}";
                     if (await canLaunchUrl(Uri.parse(url))) {

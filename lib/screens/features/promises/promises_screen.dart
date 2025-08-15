@@ -1,7 +1,8 @@
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -226,7 +227,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
                                               .copyWith(hasViewed: value);
                                           if (kDebugMode) {
                                             print(
-                                              "cambio valor ${promises[index].hasViewed}");
+                                                "cambio valor ${promises[index].hasViewed}");
                                           }
                                           didChangeDependencies();
                                         });
@@ -297,25 +298,33 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
           ? null
           : () async {
               LoadingService().showLoading(context);
-              final responseOpenPromise =
-                  await openOnePromise(widget.onePromise.id);
-              if (responseOpenPromise.error != null) {
-                LoadingService().hideLoading();
-                await showCustomDialog(context,
-                    message: responseOpenPromise.error!,
-                    dialogType: DialogType.error);
-                return;
-              }
               final userProvider =
                   Provider.of<UserProvider>(context, listen: false);
               final userData = userProvider.currentUser;
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              String? userToken = prefs.getString('userToken');
+              try {
+                final responseOpenPromise = await openOnePromise(
+                    userData!.userId, widget.onePromise.id);
+                if (responseOpenPromise.error != null) {
+                  LoadingService().hideLoading();
+                  await showCustomDialog(context,
+                      message: responseOpenPromise.error!,
+                      dialogType: DialogType.error);
+                  return;
+                }
 
-              await Provider.of<AuthenticationProvider>(context, listen: false)
-                  .loadProfileUser(userData!.userId, userToken);
-              LoadingService().hideLoading();
-              widget.updateData(responseOpenPromise.data);
+                String? userToken = await PreferencesManager().getUserToken();
+
+                await Provider.of<AuthenticationProvider>(context,
+                        listen: false)
+                    .loadProfileUser(userData.userId, userToken);
+                LoadingService().hideLoading();
+                widget.updateData(responseOpenPromise.data);
+              } catch (e) {
+                LoadingService().hideLoading();
+                await showCustomDialog(context,
+                    message: e.toString(), dialogType: DialogType.error);
+                return;
+              }
             },
       child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 500),

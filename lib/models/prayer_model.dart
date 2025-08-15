@@ -97,10 +97,10 @@ class PrayerResponse {
   final String id;
   final String message;
   final String responder;
-  final String bookName;
-  final String chapter;
-  final String verse;
-  final String text;
+  final String? bookName;
+  final String? chapter;
+  final String? verse;
+  final String? text;
   final Audio? audioResponse;
   final String createdAt;
 
@@ -121,10 +121,10 @@ class PrayerResponse {
       id: json['id'] ?? '',
       message: json['message'] ?? '',
       responder: json['responder'],
-      bookName: json['bookName'],
-      text: json['text'],
-      verse: json['verse'],
-      chapter: json['chapter'],
+      bookName: json['bookName'] ?? '',
+      text: json['text'] ?? '',
+      verse: json['verse'] ?? '',
+      chapter: json['chapter'] ?? '',
        audioResponse: json['audioResponse'] != null
           ? Audio.fromJson(json['audioResponse'])
           : null,

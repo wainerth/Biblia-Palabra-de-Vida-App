@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
-import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+
 import '../main.dart';
 
 class AuthenticationProvider extends ChangeNotifier {
@@ -18,71 +19,92 @@ class AuthenticationProvider extends ChangeNotifier {
   final BuildContext context;
   String? token;
   bool isAuthenticated = false;
-  // LoginUser? currentUser;
 
   AuthenticationProvider(this.context, this._catalogueProvider) {
     if (kDebugMode) {
       print(_catalogueProvider);
     }
-    //checkAuthentication(context);
   }
 
   Future<void> checkAuthentication(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userToken = prefs.getString('userToken');
-    String? userDataString = prefs.getString('userData');
-    if (userToken != null && userDataString != null) {
-      final verifyTokenResponse = await verifyToken(userToken);
-      if (verifyTokenResponse.data != null) {
-        if (verifyTokenResponse.data["success"]) {
-          isAuthenticated = true;
-        } else if (!verifyTokenResponse.data["success"] &&
-            verifyTokenResponse.data["isLogout"]) {
-          //Logout voluntario → no mostrar modal
-          isAuthenticated = false;
-          logoutUser(navigatorKey.currentContext!);
-          LoadingService().hideLoading();
-          return;
-        } else {
-          isAuthenticated = false;
-          LoadingService().hideLoading();
-          await showCustomDialogWithAction(navigatorKey.currentContext!,
-              message:
-                  "Tu sesión ha expirado o fue cerrada. Por favor, inicia sesión nuevamente.",
-              dialogType: DialogTypeAction.info,
-              buttonOk: "Ok", actionCallbackOk: () async {
-            await logoutUser(navigatorKey.currentContext!);
-          });
-          return;
-        }
-      }
-      token = userToken;
-      final dataUserLoad = LoginUser.fromJson(jsonDecode(userDataString));
-      // llamar conexión con el socket
-      final socketProvider =
-          Provider.of<SocketClientProvider>(context, listen: false);
-      socketProvider.connectSocket(
-          deviceId: '856-32cd-89',
-          userId: dataUserLoad.userId,
-          username: dataUserLoad.username!,
-          email: dataUserLoad.email!);
+    String? userToken = await PreferencesManager().getUserToken();
+    String? userDataString = await PreferencesManager().getUserData();
 
-      Provider.of<UserProvider>(context, listen: false)
-          .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
-      await loadProfileUser(dataUserLoad.userId, userToken);
-      print('cargo nueva data de perfil');
-    } else {
-      isAuthenticated = false;
-      token = userToken;
-      Provider.of<UserProvider>(context, listen: false).setUser(null);
+    try {
+      if (userToken != null && userDataString != null) {
+        final verifyTokenResponse = await verifyToken(userToken);
+        if (verifyTokenResponse.data != null) {
+          if (verifyTokenResponse.data["success"]) {
+            isAuthenticated = true;
+          } else if (!verifyTokenResponse.data["success"] &&
+              verifyTokenResponse.data["isLogout"]) {
+            //Logout voluntario → no mostrar modal
+            isAuthenticated = false;
+            logoutUser(navigatorKey.currentContext!);
+            LoadingService().hideLoading();
+            return;
+          } else {
+            isAuthenticated = false;
+            LoadingService().hideLoading();
+            await showCustomDialogWithAction(navigatorKey.currentContext!,
+                message:
+                    "Tu sesión ha expirado o fue cerrada. Por favor, inicia sesión nuevamente.",
+                dialogType: DialogTypeAction.info,
+                buttonOk: "Ok", actionCallbackOk: () async {
+              await logoutUser(navigatorKey.currentContext!);
+            });
+            return;
+          }
+        }
+        token = userToken;
+        final dataUserLoad = LoginUser.fromJson(jsonDecode(userDataString));
+        // llamar conexión con el socket
+        final socketProvider =
+            Provider.of<SocketClientProvider>(context, listen: false);
+        socketProvider.connectSocket(
+            deviceId: '856-32cd-89',
+            userId: dataUserLoad.userId,
+            username: dataUserLoad.username!,
+            email: dataUserLoad.email!);
+
+        Provider.of<UserProvider>(context, listen: false)
+            .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
+        await loadProfileUser(dataUserLoad.userId, userToken);
+        if (kDebugMode) {
+          print('cargo nueva data de perfil');
+        }
+      } else {
+        isAuthenticated = false;
+        token = userToken;
+        Provider.of<UserProvider>(context, listen: false).setUser(null);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('⚠️ Error en auth: $e');
+      debugPrint('🔍 StackTrace: $stackTrace'); // Para depuración
+
+      // Mensaje más amigable:
+      String errorMessage = 'Ocurrió un error inesperado';
+      if (e is SocketException) {
+        errorMessage = 'Error de conexión. Verifica tu internet.';
+      } else if (e is TimeoutException) {
+        errorMessage = 'Tiempo de espera agotado. Intenta nuevamente.';
+      } else if (e is FormatException) {
+        errorMessage = 'Error en los datos recibidos.';
+      }
+
+      await showCustomDialog(
+        context,
+        message: errorMessage,
+        dialogType: DialogType.error,
+      );
     }
+
     notifyListeners();
   }
 
   ///Creamos método para inicio de sesión
   Future loginUser(BuildContext context, String email, String password) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
       // llamamos query de login
       final userResponse = await login(email, password);
       var error = userResponse.error;
@@ -94,7 +116,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       final userId = userResponse.data["id"];
       final token = userResponse.data["userJwtToken"]["token"];
-      await prefs.setString("userToken", token);
+      await PreferencesManager().setUserToken(token);
 
       // consultamos perfil del usuario
       final ResponseData response = await loadProfileUser(userId, token);
@@ -105,12 +127,6 @@ class AuthenticationProvider extends ChangeNotifier {
 
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      if (kDebugMode) {
-        print(
-          "Error during login: $e");
-      } // Print the error for debugging.  Crucial!
-
-      // More specific error handling if needed:
       if (e is TimeoutException) {
         return ResponseData(data: null, error: "Request timed out");
       } else if (e is SocketException) {
@@ -178,7 +194,6 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future<ResponseData> loginWithGoogle(BuildContext context) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
       final userResponse = await loginGoogle();
       var error = userResponse.error;
       if (error != null) {
@@ -186,7 +201,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       final userId = userResponse.data["id"];
       final token = userResponse.data["userJwtToken"]["token"];
-      await prefs.setString("userToken", token);
+      await PreferencesManager().setUserToken(token);
       // consultamos perfil del usuario
       final ResponseData response = await loadProfileUser(userId, token);
       error = response.error;
@@ -196,8 +211,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: response.data, error: error);
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error during login: $e");
+        print("Error during login: $e");
       } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
@@ -226,8 +240,8 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       final userId = registerResponse.data["id"];
       final token = registerResponse.data["userJwtToken"]["token"];
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('userToken', token);
+      await PreferencesManager().setUserToken(token);
+
       // consultamos perfil del usuario
       final ResponseData response = await loadProfileUser(userId, token);
       error = response.error;
@@ -238,8 +252,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: response.data, error: error);
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error during Register User: $e");
+        print("Error during Register User: $e");
       } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
@@ -270,8 +283,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: response.data, error: error);
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error during forgot password: $e");
+        print("Error during forgot password: $e");
       } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:
@@ -306,8 +318,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return ResponseData(data: response.data, error: error);
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error during recovery Password  : $e");
+        print("Error during recovery Password  : $e");
       } // Print the error for debugging.  Crucial!
 
       // More specific error handling if needed:

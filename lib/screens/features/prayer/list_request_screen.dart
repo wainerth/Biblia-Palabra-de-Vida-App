@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
@@ -38,6 +40,11 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
     hasPreviousPage: false,
     hasNextPage: false,
   );
+  Timer? _debounceTimer;
+
+  bool loading = false;
+  TextEditingController searchTextController = TextEditingController();
+  String searchText = '';
 
   _deleteItem(String id) {
     showDialog(
@@ -110,6 +117,13 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
   }
 
   @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    searchTextController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<BibleThemeProvider>(context);
     final currentTheme = themeProvider.themeData;
@@ -144,6 +158,36 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     onBack: () => Navigator.pop(context),
                   )
                 } else ...{
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4.0),
+                    child: TextFormField(
+                      readOnly: listRequest.isEmpty || loading,
+                      controller: searchTextController,
+                      style: StylesApp(context).textStyleSmallBlack,
+                      decoration: StylesApp(context)
+                          .inputDecorationOutlineStyle
+                          .copyWith(
+                            hintText: 'Buscar...',
+                            border: OutlineInputBorder(),
+                            suffixIcon: searchText.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(Icons.clear),
+                                    onPressed: () {
+                                      setState(() {
+                                        cleanSearch();
+                                      });
+                                    },
+                                  )
+                                : Icon(Icons.search),
+                          ),
+                      onChanged: (value) {
+                        setState(() {
+                          searchText = value;
+                        });
+                        _onSearchChanged(value);
+                      },
+                    ),
+                  ),
                   Expanded(
                     child: ListView.builder(
                         itemCount: listRequest.length,
@@ -320,8 +364,8 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userData = userProvider.currentUser;
     try {
-      final responseListRequest =
-          await getAllRequestPrayerByUser(userData?.userId);
+      final responseListRequest = await getAllRequestPrayerByUser(
+          userData?.userId, page, limit, searchText);
       if (responseListRequest.error != null) {
         setState(() {
           errorMessage = responseListRequest.error!;
@@ -345,6 +389,32 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  void cleanSearch() {
+    setState(() {
+      searchText = '';
+      searchTextController.text = '';
+    });
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+
+    _debounceTimer = Timer(Duration(milliseconds: 800), () {
+      FocusScope.of(context).unfocus();
+      _performSearch(value);
+    });
+  }
+
+  void _performSearch(String query) async {
+    if (query.isEmpty) return; // No buscar si está vacío
+
+    try {
+      _generateData(context, pagination.currentPage, pagination.currentPage);
+    } catch (e) {
+      debugPrint("error al filtrar $e");
     }
   }
 }

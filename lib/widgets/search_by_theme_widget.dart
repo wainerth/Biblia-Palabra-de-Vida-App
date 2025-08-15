@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -79,17 +79,22 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
       final responseTeaching = await getAllTeaching(page, limit, filter, "");
       if (responseTeaching.error != null) {
         loading = false;
+        if (!mounted) return;
+
+        // Guardar el contexto localmente para usar después de async
+        final currentContext = context;
+        
         await showCustomDialogWithAction(context,
             message: responseTeaching.error!,
             dialogType: DialogTypeAction.error,
             buttonOk: 'Cancelar',
             actionCallbackOk: () {
-              Navigator.pop(context);
+              Navigator.pop(currentContext);
             },
             showAction: true,
             textButton: 'Reintentar',
             actionCallback: () async {
-              Navigator.pop(context);
+              Navigator.pop(currentContext);
               _loadData(1, itemPerPageValue, _searchText);
             });
         return;
@@ -106,17 +111,22 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
       });
     } catch (e) {
       loading = false;
+      if (!mounted) return;
+
+      // Guardar el contexto localmente para usar después de async
+      final currentContext = context;
+
       await showCustomDialogWithAction(context,
           message: e.toString(),
           dialogType: DialogTypeAction.error,
           buttonOk: 'Cancelar',
           actionCallbackOk: () {
-            Navigator.pop(context);
+            Navigator.pop(currentContext);
           },
           showAction: true,
           textButton: 'Reintentar',
           actionCallback: () async {
-            Navigator.pop(context);
+            Navigator.pop(currentContext);
             _loadData(1, itemPerPageValue, _searchText);
           });
     }
