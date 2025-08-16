@@ -760,10 +760,54 @@ Future loadCoursesByUserAndChurch(
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
+  // Map<String, dynamic> getCoursesInputbody = {
+  //   "userId": userId,
+  //   "page": page,
+  //   "limit": limit,
+  //   "churchId": churchId
+  // };
 
-  QueryOptions options = QueryOptions(
-    // operationName: "GetAllCourses",
-    document: gql(r'''
+  // QueryOptions? options;
+  // if (kDebugMode) {
+  //   options = QueryOptions(
+  //     // operationName: "GetAllCourses",
+  //     document: gql(r'''
+  //    query GetAllCourses($input: GetCoursesInput) {
+  //     getAllCourses(input: $input) {
+  //       data {
+  //         id
+  //         title
+  //         color
+  //         introduction
+  //         status
+  //         img {
+  //           urlImg
+  //         }
+  //         visibility
+  //         statusContent
+  //         sectionCount
+  //         sectionCompletedCount
+  //       }
+  //       meta {
+  //         currentPage
+  //         totalPages
+  //         itemsPerPage
+  //         totalItems
+  //         hasPreviousPage
+  //         hasNextPage
+  //       }
+  //     }
+  //   }
+  //     '''),
+  //     variables: <String, dynamic>{
+  //       "input": getCoursesInputbody,
+  //     },
+  //     fetchPolicy: FetchPolicy.noCache,
+  //   );
+  // } else {
+  QueryOptions  options = QueryOptions(
+      // operationName: "GetAllCourses",
+      document: gql(r'''
      query GetAllCourses($churchId: ID, $userId: ID, $page: Int, $limit: Int) {
       getAllCourses(churchId: $churchId, userId: $userId, page: $page, limit: $limit) {
         data {
@@ -791,14 +835,15 @@ Future loadCoursesByUserAndChurch(
       }
     }
       '''),
-    variables: <String, dynamic>{
-      "churchId": churchId,
-      "userId": userId,
-      "page": page,
-      "limit": limit,
-    },
-    fetchPolicy: FetchPolicy.noCache,
-  );
+      variables: <String, dynamic>{
+        "churchId": churchId,
+        "userId": userId,
+        "page": page,
+        "limit": limit,
+      },
+      fetchPolicy: FetchPolicy.noCache,
+    );
+  // }
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {

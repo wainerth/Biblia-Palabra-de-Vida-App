@@ -440,9 +440,7 @@ class CardColumnWidget extends StatelessWidget {
                                     profileAreaCode: user?.profileAreaCode,
                                     phoneNumber: user?.phoneNumber ?? '',
                                     church: user!.userChurch.isNotEmpty
-                                        ? user.userChurch.firstWhere(
-                                            (ch) => ch.status == true,
-                                          )
+                                        ? user.userChurch.where((ch) => ch.status == true).firstOrNull
                                         : null,
                                   );
                                   final UserProfile dataEnviar = UserProfile(

@@ -124,9 +124,12 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
         nuevosDatos["isBaptized"] = item.value == 'Bautizado' ? true : false;
         break;
       case 'church':
-        var church = churches.firstWhere((church) => church.name == item.value);
-        nuevosDatos["church"] = UserChurch(
-            id: church.id, churchName: church.name, status: church.status);
+        var church =
+            churches.where((church) => church.name == item.value).firstOrNull;
+        if (church != null) {
+          nuevosDatos["church"] = UserChurch(
+              id: church.id, churchName: church.name, status: church.status);
+        }
         break;
     }
 
