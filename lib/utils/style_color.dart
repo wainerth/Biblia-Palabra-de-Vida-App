@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class StyleColor {
   static const Color white = Color(0xFFFFFFFF);
   static const Color skyBlue = Color(0xFF4B6BD3);
+  static const Color blueMedium = Color(0xFF217FEA);
   static const Color oceanDepth = Color(0xFF5973C4);
   static const Color lavenderMist = Color(0xFF7056B2);
   static const Color violetDream = Color(0xFF8670BF);
@@ -17,10 +18,13 @@ class StyleColor {
   static const Color redLight = Color(0XFFE85151);
   static const Color yellowLight = Color(0XFFFFCF25);
   static const Color black = Color(0XFF000000);
+  static const Color greenLight = Color(0XFF8ADF85);
   static const Color greenMedium = Color(0XFF2E8C39);
   static const Color greenDark = Color(0xFF1B5E20);
   static const Color blueDark = Color(0XFF1D1CBD);
   static const Color redDark = Color(0XFFBF0000);
   static const Color grayMedium = Color(0XFF868784);
+  static const Color grayDark = Color(0XFF5C5A5A);
   static const Color brownMedium =  Color(0xFF5B4636);
+  static const Color cyanMedium =  Color(0xFFC341F3);
 }

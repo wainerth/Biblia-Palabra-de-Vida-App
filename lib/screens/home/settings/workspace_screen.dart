@@ -59,9 +59,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
         if (GraphQLConfig.development) {
           if (mounted) {
-            await loadAllNotifications();
             final notificationProvider =
                 Provider.of<SocketClientProvider>(context, listen: false);
+
+            if (notificationProvider.notifications.isEmpty) {
+              await loadAllNotifications();
+            }
 
             notificationProvider.listenToEvent("notification", (notify) {
               if (kDebugMode) {
