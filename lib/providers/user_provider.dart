@@ -22,9 +22,7 @@ class UserProvider extends ChangeNotifier {
     _initializeClient();
   }
 
-  Future<void> _initializeClient() async {
-
-  }
+  Future<void> _initializeClient() async {}
 
   void setUser(LoginUser? user) {
     _user = user;
@@ -116,7 +114,6 @@ class UserProvider extends ChangeNotifier {
       _user = _user?.copyWith(
           name: data.dataProfiles.name,
           lastname: data.dataProfiles.lastname,
-          city: data.dataProfiles.city,
           gender: data.dataProfiles.gender,
           birthdate: data.dataProfiles.birthdate,
           identifier: data.dataProfiles.identifier,
@@ -127,11 +124,12 @@ class UserProvider extends ChangeNotifier {
               : null,
           phoneNumber: data.dataProfiles.phoneNumber,
           country: data.dataProfiles.country,
+          state: data.dataProfiles.state,
+          city: data.dataProfiles.city,
           isBaptized: data.dataProfiles.isBaptized);
       setUser(_user);
       return ResponseData(data: response.data, error: null);
     } catch (e) {
-
       if (e is TimeoutException) {
         return ResponseData(data: null, error: "Request timed out");
       } else if (e is SocketException) {
@@ -140,8 +138,7 @@ class UserProvider extends ChangeNotifier {
         return ResponseData(data: null, error: "Invalid data format");
       } else {
         return ResponseData(
-            data: null,
-            error: "An unexpected error occurred: $e");
+            data: null, error: "An unexpected error occurred: $e");
       }
     }
   }
@@ -159,9 +156,7 @@ class UserProvider extends ChangeNotifier {
         final findChurch = churches.firstWhere((ch) => ch.id == churchId);
         List<UserChurch> newChurch = [];
         newChurch.add(UserChurch(
-            id: findChurch.id,
-            churchName: findChurch!.churchName,
-            status: true));
+            id: findChurch.id, churchName: findChurch!.name, status: true));
         current = current.copyWith(userChurch: newChurch);
       } else {
         // search churches and set value status in false and church selected en true
@@ -222,8 +217,7 @@ class UserProvider extends ChangeNotifier {
         return ResponseData(data: null, error: "Invalid data format");
       } else {
         return ResponseData(
-            data: null,
-            error: "An unexpected error occurred: $e");
+            data: null, error: "An unexpected error occurred: $e");
       }
     }
   }

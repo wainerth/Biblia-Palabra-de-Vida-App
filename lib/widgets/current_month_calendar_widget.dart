@@ -176,7 +176,9 @@ class _CurrentMonthCalendarWidgetState
                           padding: EdgeInsets.zero,
                           iconSize: 20.0,
                           icon: const Icon(Icons.arrow_back),
-                          onPressed: _isLoading ? null : previousMonth,
+                            onPressed: _isLoading 
+                              ? null 
+                              : previousMonth,
                           color: Colors.white,
                         ),
                       ),
@@ -200,7 +202,7 @@ class _CurrentMonthCalendarWidgetState
                           padding: EdgeInsets.zero,
                           iconSize: 20.0,
                           icon: const Icon(Icons.arrow_forward),
-                          onPressed: _isLoading ? null : nextMonth,
+                          onPressed: _isLoading   ? null : nextMonth,
                           color: Colors.white,
                         ),
                       ),

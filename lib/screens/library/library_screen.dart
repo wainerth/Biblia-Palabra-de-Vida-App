@@ -30,9 +30,9 @@ class _LibraryScreenState extends State<LibraryScreen>
   String phoneNumber = '';
   List<ModelData> _listCountries = [];
   List<ModelData> _listAreasCode = [];
-  List<ModelData> _lisCities = [];
+  final List<ModelData> _lisCities = [];
 
-  List<ModelData> _lisCurrencies = [
+  final List<ModelData> _lisCurrencies = [
     ModelData(label: "USD", value: "1"),
     ModelData(label: "UYU", value: "2"),
     ModelData(label: "COP", value: "3"),
@@ -150,8 +150,8 @@ class _LibraryScreenState extends State<LibraryScreen>
       "publisher": "Editorial Mundo Hispano",
       "description":
           "Obra que explora reflexiones espirituales y filosóficas en un mensaje poético sobre la vida, el amor y la naturaleza.",
-      "categoria": "Espiritualidad",
-      "subcategoria": "Poesía Espiritual",
+      "category": "Espiritualidad",
+      "subcategory": "Poesía Espiritual",
       "tags": ["espiritualidad", "poesía", "naturaleza", "reflexión"],
       "image": "https://i.ibb.co/abc123/creacion-dios-colorida.jpg",
       "weight": 0.35,
@@ -529,8 +529,8 @@ class _LibraryScreenState extends State<LibraryScreen>
       "publisher": "Editorial Mundo Hispano",
       "description":
           "Obra que explora reflexiones espirituales y filosóficas en un mensaje poético sobre la vida, el amor y la naturaleza.",
-      "categoria": "Espiritualidad",
-      "subcategoria": "Poesía Espiritual",
+      "category": "Espiritualidad",
+      "subcategory": "Poesía Espiritual",
       "tags": ["espiritualidad", "poesía", "naturaleza", "reflexión"],
       "image": "https://i.ibb.co/abc123/creacion-dios-colorida.jpg",
       "weight": 0.35,
@@ -863,16 +863,16 @@ class _LibraryScreenState extends State<LibraryScreen>
   Future<void> getAllItemCart() async {}
 
   Widget _buildSectionTab(dataBooks) {
-    final ScrollController _scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
 
     return Scrollbar(
-      controller: _scrollController,
+      controller: scrollController,
       thumbVisibility: true,
       trackVisibility: true,
       thickness: 5.0,
       radius: Radius.circular(3.0),
       child: ListView.builder(
-        controller: _scrollController,
+        controller: scrollController,
         itemCount: dataBooks.length,
         itemBuilder: (context, index) {
           String category = dataBooks.keys.elementAt(index);
@@ -913,7 +913,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                         },
                         child: Hero(
                           tag:
-                              "book-image-${category}-${booksCategories[indexLibro]['id'].toString()}",
+                              "book-image-$category-${booksCategories[indexLibro]['id'].toString()}",
                           child: Container(
                             width:
                                 100, // Ancho fijo para cada item del carrusel
@@ -1091,7 +1091,7 @@ class _LibraryScreenState extends State<LibraryScreen>
             child: ListView.builder(
               itemCount: dataBooks.length,
               itemBuilder: (context, index) {
-                TextEditingController _quantityNumber =
+                TextEditingController quantityNumber =
                     TextEditingController(text: "1");
 
                 return Padding(
@@ -1175,8 +1175,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                                                 borderRadius:
                                                     BorderRadius.circular(8.0)),
                                             child: Text(
-                                              '${dataBooks[index]['price']} USD' ??
-                                                  "15,00 USD",
+                                              '${dataBooks[index]['price']} USD',
                                               style: StylesApp(context)
                                                   .textStyleBody12,
                                               textAlign: TextAlign.center,
@@ -1251,8 +1250,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                                           borderRadius:
                                               BorderRadius.circular(8.0)),
                                       child: Text(
-                                        '${dataBooks[index]['original_price']} USD' ??
-                                            "25,00 USD",
+                                        '${dataBooks[index]['original_price']} USD',
                                         style:
                                             StylesApp(context).textStyleBody12,
                                       ),
@@ -1274,10 +1272,10 @@ class _LibraryScreenState extends State<LibraryScreen>
                                             icon: Icon(Icons.remove, size: 20),
                                             onPressed: () {
                                               int currentValue = int.tryParse(
-                                                      _quantityNumber.text) ??
+                                                      quantityNumber.text) ??
                                                   1;
                                               if (currentValue > 1) {
-                                                _quantityNumber.text =
+                                                quantityNumber.text =
                                                     (currentValue - 1)
                                                         .toString();
                                               }
@@ -1288,7 +1286,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                                           SizedBox(
                                             width: 25,
                                             child: TextField(
-                                              controller: _quantityNumber,
+                                              controller: quantityNumber,
                                               textAlign: TextAlign.center,
                                               keyboardType:
                                                   TextInputType.number,
@@ -1302,9 +1300,9 @@ class _LibraryScreenState extends State<LibraryScreen>
                                             icon: Icon(Icons.add, size: 20),
                                             onPressed: () {
                                               int currentValue = int.tryParse(
-                                                      _quantityNumber.text) ??
+                                                      quantityNumber.text) ??
                                                   1;
-                                              _quantityNumber.text =
+                                              quantityNumber.text =
                                                   (currentValue + 1).toString();
                                             },
                                             padding: EdgeInsets.zero,

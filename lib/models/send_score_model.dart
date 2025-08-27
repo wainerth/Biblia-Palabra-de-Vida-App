@@ -9,6 +9,8 @@ class SendScoreModel {
   final bool prizeAwarded;
   final Reward? rewardData;
   final bool titleAwarded;
+  final String? devMessageLevel;
+  final String? devMessageSection;
   // final bool prizeWon;
   // final bool titleUnlocked;
 
@@ -20,9 +22,9 @@ class SendScoreModel {
       required this.hasBeenPlayedLevel,
       required this.prizeAwarded,
       required this.rewardData,
-      required this.titleAwarded
-      // required this.prizeWon,
-      // required this.titleUnlocked
+      required this.titleAwarded,
+      this.devMessageLevel = '',
+      this.devMessageSection = '',
       });
 
   SendScoreModel copyWith(bool? isLastLevel, bool titleUnlocked) {
@@ -36,14 +38,14 @@ class SendScoreModel {
       prizeAwarded: prizeAwarded,
       rewardData: rewardData,
       titleAwarded: titleAwarded,
-      // prizeWon: prizeWon,
+      devMessageLevel: devMessageLevel,
+      devMessageSection: devMessageSection,
     );
   }
 
   factory SendScoreModel.fromJson(Map<String, dynamic> json) {
     return SendScoreModel(
       isLastLevel: json['isLastLevel'] ?? false,
-      // titleUnlocked: json['titleUnlocked'],
       isLastStage: json['isLastStage'],
       rewardObtained: json['rewardObtained'],
       hasBeenPlayedSection: json['hasBeenPlayedSection'],
@@ -53,7 +55,8 @@ class SendScoreModel {
           ? Reward.fromJson(json['rewardData'])
           : null,
       titleAwarded: json['titleAwarded'],
-      // prizeWon: json['prizeWon']
+      devMessageLevel: json['devMessageLevel'] ?? '',
+      devMessageSection: json['devMessageSection'] ?? '',
     );
   }
 
@@ -67,8 +70,8 @@ class SendScoreModel {
       "prizeAwarded": prizeAwarded,
       "rewardData": rewardData,
       "titleAwarded": titleAwarded,
-      // "prizeWon": prizeWon,
-      // 'titleUnlocked': titleUnlocked
+      "devMessageLevel": devMessageLevel,
+      "devMessageSection": devMessageSection,
     };
   }
 }

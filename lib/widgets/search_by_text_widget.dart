@@ -342,7 +342,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
         message: responseResult.error!,
         dialogType: DialogType.error,
       );
-      setState(() => loading = false );
+      setState(() => loading = false);
       return;
     }
     setState(() {
@@ -367,15 +367,19 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
     final copyString =
         "${data.book.modernName} ${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
     await Clipboard.setData(ClipboardData(text: copyString));
-    if (!mounted) return;
-    
-    // Mostrar diálogo de confirmación
-    await showCustomDialog(
-      context,
-      message:
-          "El capítulo ${data.chapter.chapter} del libro ${data.book.modernName}\nse ha copiado con éxito al portapapeles",
-      dialogType: DialogType.info,
-    );
+    if (mounted) {
+      final currentContext = context;
+
+      if (currentContext.mounted) {
+        // Mostrar diálogo de confirmación
+        await showCustomDialog(
+          currentContext,
+          message:
+              "El capítulo ${data.chapter.chapter} del libro ${data.book.modernName}\nse ha copiado con éxito al portapapeles",
+          dialogType: DialogType.info,
+        );
+      }
+    }
   }
 
   void addVerseFavorite(BuildContext context, WordSearchResult data) async {
@@ -386,15 +390,25 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
         await createNewVerseFavoriteByUser(userData!.userId, data.verse.id);
     if (responseFavorite.error != null) {
       LoadingService().hideLoading();
-    if (!mounted) return;
+      if (mounted) {
+        final currentContext = context;
 
-      await showCustomDialog(context,
-          message: responseFavorite.error!, dialogType: DialogType.error);
+        if (currentContext.mounted) {
+          await showCustomDialog(currentContext,
+              message: responseFavorite.error!, dialogType: DialogType.error);
+        }
+      }
     } else {
       LoadingService().hideLoading();
-      await showCustomDialog(context,
-          message: "Versículo Agregado a Favoritos",
-          dialogType: DialogType.info);
+      if (mounted) {
+        final currentContext = context;
+
+        if (currentContext.mounted) {
+          await showCustomDialog(currentContext,
+              message: "Versículo Agregado a Favoritos",
+              dialogType: DialogType.info);
+        }
+      }
     }
   }
 }

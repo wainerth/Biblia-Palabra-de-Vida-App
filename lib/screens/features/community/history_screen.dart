@@ -80,6 +80,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             await loadOneCourse(userData!.userId, courseId);
         if (responseCourse.error != null) {
           errorMessage = responseCourse.error;
+          return;
         }
         course = CourseDetail.fromJson(removeTypename(responseCourse.data));
 
@@ -88,6 +89,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
         if (stageResponse.error != null) {
           errorMessage = stageResponse.error;
+          return;
         }
         stage = Stage.fromJson(stageResponse.data);
         // obtenemos el nivel
@@ -95,6 +97,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
         if (levelResponse.error != null) {
           errorMessage = levelResponse.error;
+          return;
         }
         level = Level.fromJson(removeTypename(levelResponse.data));
 
@@ -103,6 +106,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
         if (historyResponse.error != null) {
           errorMessage = historyResponse.error;
+          return;
+        }
+        if (historyResponse.data == null ||
+            (historyResponse.data is List && historyResponse.data.isEmpty)) {
+          errorMessage = "No hay historias disponibles.";
+          return;
         }
         setState(() {
           stories = historyResponse.data
@@ -110,20 +119,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
               .cast<History>()
               .toList();
 
-          // stories.insert(
-          //   0,
-          //   History(
-          //       id: "122",
-          //       text:
-          //           "esta es la historia que tendrá la prueba {(Génesis 1:1-4 /RVR60)} para validar si se puede levantar una modal {(Apocalipsis 1:4-5 /RVR09)}",
-          //       orderCard: 1,
-          //       level: IntermediateLevel(
-          //           levelNumber: 1, unLockLevel: true, countLevelNumber: 1),
-          //       img: Img(urlImg: "images/achievement/expA.png"),
-          //       audio: Audio(url: "url"),
-          //       video: Video(url: " url"),
-          //       status: 1),
-          // );
           isPlaying = true;
         });
         _togglePlayPause(stories[0]);
@@ -162,8 +157,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 )
               } else ...{
                 HeaderNotDetailsStageWidget(
-                  title: "Conoce el ${course?.titleName}",
-                  stage: stage != null ? stage!.id : '',
+                  title: "Conoce el ${course?.titleCourse}",
+                  stage: stage != null ? stage!.sectionNumber.toString() : '',
                   subtitle: stage != null ? stage!.sectionName : '',
                   details: stage,
                   onPressed: () {
@@ -425,7 +420,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 child: LinearProgressIndicator(
                                   borderRadius: BorderRadius.circular(6.0),
                                   minHeight: 14.0,
-                                  value: isPage / (stories.length - 1),
+                                  value: isPage /
+                                      (stories.length > 1
+                                          ? stories.length - 1
+                                          : stories.length),
                                   backgroundColor: Color(0xFFC4C4C4),
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                     Color(0XFFF27728),
@@ -758,7 +756,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ),
                                       color: StyleColor.turquoise,
                                       onPressed: () {
-                                        setState(() => isPlaying =!isPlaying);
+                                        setState(() => isPlaying = !isPlaying);
                                         _togglePlayPause(story);
                                       }),
                                   Icon(Icons.speed,
@@ -837,6 +835,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     minHeight: 73.0,
                     maxHeight: 230.0,
                   ),
+                  width: MediaQuery.sizeOf(context).width,
                   height: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -1065,7 +1064,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               top: 20,
               bottom: MediaQuery.of(context).viewInsets.bottom + 20,
             ),
-            child: Container(
+            child: SizedBox(
               height: MediaQuery.sizeOf(context).height * .85,
               child: Column(
                 mainAxisSize: MainAxisSize.min,

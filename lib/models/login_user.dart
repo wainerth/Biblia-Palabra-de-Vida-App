@@ -4,7 +4,8 @@ class UserChurch {
   final String id;
   final String? churchName;
   final bool status;
-  UserChurch({required this.id, required this.churchName, required this.status});
+  UserChurch(
+      {required this.id, required this.churchName, required this.status});
   UserChurch copyWith({String? id, String? name, bool? status}) {
     return UserChurch(
         id: id ?? this.id,
@@ -13,16 +14,18 @@ class UserChurch {
   }
 
   factory UserChurch.fromJson(Map<String, dynamic> json) {
-  
     return UserChurch(
-      id: json['id'],
-      churchName: json['churchName'],
-      status: json['status'] is bool ? json['status'] : (json['status'] > 0 ? true : false)
-    );
+        id: json['id'],
+        churchName: json['churchName'],
+        status: json['status'] is bool
+            ? json['status']
+            : (json['status'] > 0 ? true : false));
   }
 
-  Map<String, dynamic> toJson() => {'id': id, 'churchName': churchName, 'status': status};
+  Map<String, dynamic> toJson() =>
+      {'id': id, 'churchName': churchName, 'status': status};
 }
+
 class LoginUser {
   final String userId;
   final String name;
@@ -35,7 +38,8 @@ class LoginUser {
   final AreaCode? profileAreaCode;
   final String? phoneNumber;
   final Country? country;
-  final String? city;
+  final StateModel? state;
+  final CityModel? city;
   final String favoriteVerseId;
   final bool notifications;
   final String? birthdate;
@@ -80,6 +84,7 @@ class LoginUser {
     this.isBaptized,
     this.currentLeague,
     this.city,
+    this.state,
   });
 
   LoginUser copyWith({
@@ -91,13 +96,14 @@ class LoginUser {
     String? gender,
     int? expTotalUser,
     int? energyPoints,
-    String? city,
     Img? imgProfileUser,
     String? birthdate,
     String? identifier,
     AreaCode? profileAreaCode,
     String? phoneNumber,
     Country? country,
+    CityModel? city,
+    StateModel? state,
     bool? isBaptized,
     List<UserChurch>? userChurch,
     String? favoriteVerseId,
@@ -114,11 +120,12 @@ class LoginUser {
         username: username ?? this.username,
         lastname: lastname ?? this.lastname,
         email: email ?? this.email,
-        city: city ?? this.city,
-        imgProfileUser: imgProfileUser ?? this.imgProfileUser,
         expTotalUser: expTotalUser ?? this.expTotalUser,
         energyPoints: energyPoints ?? this.energyPoints,
         country: country ?? this.country,
+        state: state ?? this.state,
+        city: city ?? this.city,
+        imgProfileUser: imgProfileUser ?? this.imgProfileUser,
         profileAreaCode: profileAreaCode ?? this.profileAreaCode,
         phoneNumber: phoneNumber ?? this.phoneNumber,
         favoriteVerseId: favoriteVerseId ?? this.favoriteVerseId,
@@ -162,7 +169,8 @@ class LoginUser {
           : null,
       country:
           json['country'] != null ? Country.fromJson(json['country']) : null,
-      city: json['city'],
+      state: json['state'] != null ? StateModel.fromJson(json['state']) : null,
+      city: json['city'] != null ? CityModel.fromJson(json['city']) : null,
       favoriteVerseId: json['favoriteVerseId'].toString(),
       notifications: json['notifications'] ?? false,
       createdAt: json['createdAt'],
@@ -202,7 +210,8 @@ class LoginUser {
         'profileAreaCode': profileAreaCode?.toJson(),
         'phoneNumber': phoneNumber,
         'country': country?.toJson(),
-        'city': city,
+        'state': state?.toJson(),
+        'city': city?.toJson(),
         'favoriteVerseId': favoriteVerseId,
         'notifications': notifications,
         'createdAt': createdAt,

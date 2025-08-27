@@ -190,6 +190,7 @@ class _AventureScreenState extends State<AventureScreen> {
                     final progressResponse = await userProvider.getProgressUser(
                         dataUser?.userId, courses[index].id);
                     if (progressResponse!.error != null) {
+                      setState(() =>loadAventure[index] = false );
                       await showCustomDialog(context,
                           message: progressResponse.error!,
                           dialogType: DialogType.error);

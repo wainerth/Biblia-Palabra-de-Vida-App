@@ -25,6 +25,7 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
 class _CustomDropdownBottomWidgetState<T>
     extends State<CustomDropdownBottomWidget<T>> {
   final FocusNode _focusNode = FocusNode();
+   final Color disabledColor = Colors.grey[400]!;
   String _searchText = '';
 
   @override
@@ -117,7 +118,9 @@ class _CustomDropdownBottomWidgetState<T>
                   borderSide: BorderSide.none,
                   ),
               hintText: widget.hintText,
-              suffixIcon: const Icon(Icons.arrow_drop_down),
+              suffixIcon:  Icon(Icons.arrow_drop_down, color: widget.items.isEmpty ? disabledColor : null  ,),
+              fillColor: widget.items.isEmpty ? Colors.grey[100] : null,
+              filled: widget.items.isEmpty
               ),
           controller: TextEditingController(
               text: widget.selectedItem?.label ??

@@ -110,7 +110,7 @@ class _HeaderNotDetailsStageWidgetState
                                       title: widget.details!.sectionName,
                                       content: widget.details.introduction,
                                       buttonText: 'Aceptar',
-                                      id: widget.details.id,
+                                      id: widget.details.sectionNumber.toString() ,
                                       itemCount: widget.details.levelCount,
                                       itemsCompleted:
                                           widget.details.levelCompletedCount,

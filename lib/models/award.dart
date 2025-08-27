@@ -35,8 +35,8 @@ class Award {
       description: json['description'] as String,
       img: Img.fromJson(json['img'] as Map<String, dynamic>),
       exchangeValue: (json['exchangeValue'] as num).toDouble(),
-      unLockPrize: json['unLockPrize'] as bool,
-      redeemed: json['redeemed'] as bool,
+      unLockPrize: json['unLockPrize'] ?? false,
+      redeemed: json['redeemed'] ?? false,
       status: json['status'],
     );
   }

@@ -9,7 +9,6 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PromisesScreen extends StatefulWidget {
   const PromisesScreen({super.key});

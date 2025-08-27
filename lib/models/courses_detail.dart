@@ -10,6 +10,8 @@ class CourseDetail {
   final String titleName;
   final int sectionCount;
   final int sectionCompletedCount;
+  final int? numberOfSections;
+
 
   CourseDetail({
     required this.id,
@@ -23,6 +25,7 @@ class CourseDetail {
     required this.titleName,
     required this.sectionCount,
     required this.sectionCompletedCount,
+    required this.numberOfSections,
   });
 
   factory CourseDetail.fromJson(Map<String, dynamic> json) {
@@ -38,6 +41,7 @@ class CourseDetail {
       titleName: json['titleName'] ?? '',
       sectionCount: json['sectionCount'] ?? 0,
       sectionCompletedCount: json['sectionCompletedCount'] ?? 0,
+        numberOfSections: json['numberOfSections'] ?? 0,
     );
   }
 
@@ -54,6 +58,7 @@ class CourseDetail {
     data['titleName'] = titleName;
     data['sectionCount'];
     data['sectionCompletedCount'];
+    data['numberOfSections'];
     return data;
   }
 }

@@ -27,7 +27,7 @@ class _QuestionScreenDraggableState extends State<QuestionScreenDraggable> {
       introduction:
           "¿Te gustaría conocer el origen de todo lo que existe, desde el universo hasta la humanidad? En Génesis encontrarás relatos fascinantes sobre la creación, el diluvio, la torre de Babel, la llamada de Abraham, el sacrificio de Isaac, la traición de Jacob, el sueño de José, y mucho más. También se demuestra el carácter de Dios, su amor, su justicia, su fidelidad y su poder. Este es solo el comienzo de grandes historias que continúan en el resto de la Biblia y que te motiva a ser parte de ella. Te invito a leerlo y a descubrir cómo Dios te habla a través de su palabra, ¿Estás listo?",
       unLockSection: true,
-      orderCard: 1,
+      sectionNumber: 1,
       color: "3ae4e4",
       img: Img(urlImg: "assets/assetStories.png"),
       levelCount: 12,

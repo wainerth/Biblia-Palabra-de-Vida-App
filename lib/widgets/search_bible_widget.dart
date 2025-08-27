@@ -6,7 +6,6 @@ import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/search_by_book_widget.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/search_by_character_widget.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/search_by_text_widget.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/search_by_theme_widget.dart';

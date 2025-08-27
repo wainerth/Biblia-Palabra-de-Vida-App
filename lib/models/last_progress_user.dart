@@ -3,7 +3,7 @@ import 'dart:convert';
 class LastProgressUser {
   final String? courseId;
   final String? sectionId;
-  final String levelId;
+  final String? levelId;
 
   LastProgressUser({
     required this.courseId,

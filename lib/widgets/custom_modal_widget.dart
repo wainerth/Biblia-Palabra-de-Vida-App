@@ -137,6 +137,7 @@ class CustomModalWidget extends StatelessWidget {
                     maxHeight: 302.0,
                   ),
                   height: double.infinity,
+                  width: MediaQuery.sizeOf(context).width,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12.0),

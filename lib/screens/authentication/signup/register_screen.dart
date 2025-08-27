@@ -124,9 +124,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         title: "¡La Biblia\n  Palabra De\n Vida!",
                         subtitle: "Registro",
                       ),
-                      const SizedBox(
-                        height: 42,
-                      ),
+                      if (_currentStep == 1) ...{
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _currentStep--;
+                              });
+                            },
+                            child: AnimatedContainer(
+                              margin: EdgeInsets.only(left: 20),
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: StyleColor.orange,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.arrow_back,
+                                color: StyleColor.white,
+                                size: 24,
+                              ),
+                            ),
+                          ),
+                        ),
+                      } else ...{
+                        const SizedBox(
+                          height: 42,
+                        ),
+                      },
                       Form(
                         key: _formKey,
                         child: Padding(
@@ -134,6 +169,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               const EdgeInsets.only(left: 29.0, right: 29.0),
                           child: Column(
                             children: [
+                              SizedBox(
+                                height: 25,
+                              ),
                               if (_currentStep == 0) ...[
                                 UserInfoStep(
                                   userIdController: _userIdController,
@@ -227,8 +265,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         email: _emailController.text,
                                         birthdate: _dateController.text,
                                         // city: _cityController ,
-                                        codeAreaId:
-                                            _selectedPrefix?.id,
+                                        codeAreaId: _selectedPrefix?.id,
                                         countryId: _selectedCountry?.id,
                                         identifier: _userIdController.text,
                                         password: _passwordController.text,
@@ -336,5 +373,3 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
-
-// // Step Widgets

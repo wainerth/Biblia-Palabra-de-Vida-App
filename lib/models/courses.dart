@@ -10,6 +10,7 @@ class CourseModel {
   final String introduction;
   final int sectionCount;
   final int sectionCompletedCount;
+  final int numberOfSections;
 
   CourseModel({
     required this.id,
@@ -21,6 +22,7 @@ class CourseModel {
     required this.introduction,
     required this.sectionCount,
     required this.sectionCompletedCount,
+    required this.numberOfSections,
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,7 @@ class CourseModel {
       introduction: json['introduction'],
       sectionCount: json['sectionCount'] ?? 0,
       sectionCompletedCount: json['sectionCompletedCount'] ?? 0,
+      numberOfSections: json['numberOfSections'] ?? 0,
     );
   }
 
@@ -48,6 +51,7 @@ class CourseModel {
     data['introduction'];
     data['sectionCount'];
     data['sectionCompletedCount'];
+    data['numberOfSections'];
     return data;
   }
 }

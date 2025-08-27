@@ -77,6 +77,8 @@ class AuthenticationProvider extends ChangeNotifier {
         isAuthenticated = false;
         token = userToken;
         Provider.of<UserProvider>(context, listen: false).setUser(null);
+        logoutUser(navigatorKey.currentContext!);
+        LoadingService().hideLoading();
       }
     } catch (e, stackTrace) {
       debugPrint('⚠️ Error en auth: $e');

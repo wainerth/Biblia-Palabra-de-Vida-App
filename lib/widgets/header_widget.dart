@@ -46,8 +46,13 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                         ? CircleAvatar(
                             radius: 50,
                             backgroundImage: NetworkImage(
-                              "${GraphQLConfig.urlServidor}${userData?.imgProfileUser?.urlImg}",
+                              "${GraphQLConfig.urlServidor}${userData?.imgProfileUser?.urlImg}?timestamp=${DateTime.now().millisecondsSinceEpoch}",
                             ),
+                            onBackgroundImageError: (_, __) {
+                              setState(() {
+                                
+                              });
+                            },
                           )
                         : CircleAvatar(
                             radius: 50,
@@ -94,19 +99,19 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      "3",
-                      style: StylesApp(context).textStyleBody12,
-                    ),
-                    Icon(
-                      size: 16.sp,
-                      Icons.star,
-                      color: Colors.white,
-                    )
-                  ],
-                ),
+                // Row(
+                //   children: [
+                //     // Text(
+                //     //   "3",
+                //     //   style: StylesApp(context).textStyleBody12,
+                //     // ),
+                //     // Icon(
+                //     //   size: 16.sp,
+                //     //   Icons.star,
+                //     //   color: Colors.white,
+                //     // )
+                //   ],
+                // ),
                 IconButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/profilePage');

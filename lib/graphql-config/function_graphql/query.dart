@@ -44,7 +44,14 @@ Future<ResponseData> getProfileUser(token, idUser) async {
           id
           country
         }
-        city
+        state {
+          id
+          name
+        }
+        city {
+          id
+          name
+        }
         birthdate
         gender
         identifier
@@ -760,54 +767,8 @@ Future loadCoursesByUserAndChurch(
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-  // Map<String, dynamic> getCoursesInputbody = {
-  //   "userId": userId,
-  //   "page": page,
-  //   "limit": limit,
-  //   "churchId": churchId
-  // };
-
-  // QueryOptions? options;
-  // if (kDebugMode) {
-  //   options = QueryOptions(
-  //     // operationName: "GetAllCourses",
-  //     document: gql(r'''
-  //    query GetAllCourses($input: GetCoursesInput) {
-  //     getAllCourses(input: $input) {
-  //       data {
-  //         id
-  //         title
-  //         color
-  //         introduction
-  //         status
-  //         img {
-  //           urlImg
-  //         }
-  //         visibility
-  //         statusContent
-  //         sectionCount
-  //         sectionCompletedCount
-  //       }
-  //       meta {
-  //         currentPage
-  //         totalPages
-  //         itemsPerPage
-  //         totalItems
-  //         hasPreviousPage
-  //         hasNextPage
-  //       }
-  //     }
-  //   }
-  //     '''),
-  //     variables: <String, dynamic>{
-  //       "input": getCoursesInputbody,
-  //     },
-  //     fetchPolicy: FetchPolicy.noCache,
-  //   );
-  // } else {
-  QueryOptions  options = QueryOptions(
-      // operationName: "GetAllCourses",
-      document: gql(r'''
+  QueryOptions options = QueryOptions(
+    document: gql(r'''
      query GetAllCourses($churchId: ID, $userId: ID, $page: Int, $limit: Int) {
       getAllCourses(churchId: $churchId, userId: $userId, page: $page, limit: $limit) {
         data {
@@ -823,6 +784,7 @@ Future loadCoursesByUserAndChurch(
           statusContent
           sectionCount
           sectionCompletedCount
+          numberOfSections
         }
         meta {
           currentPage
@@ -835,15 +797,14 @@ Future loadCoursesByUserAndChurch(
       }
     }
       '''),
-      variables: <String, dynamic>{
-        "churchId": churchId,
-        "userId": userId,
-        "page": page,
-        "limit": limit,
-      },
-      fetchPolicy: FetchPolicy.noCache,
-    );
-  // }
+    variables: <String, dynamic>{
+      "churchId": churchId,
+      "userId": userId,
+      "page": page,
+      "limit": limit,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
@@ -914,6 +875,7 @@ Future loadOneCourse(userId, courseId) async {
             titleName
             sectionCount
             sectionCompletedCount
+            numberOfSections
           }
         }
       '''),
@@ -986,7 +948,7 @@ Future loadStageById(sectionId) async {
         sectionName
         introduction
         unLockSection
-        orderCard
+        sectionNumber
         color
         img {
           urlImg
@@ -995,6 +957,7 @@ Future loadStageById(sectionId) async {
         levelCount
         levelCompletedCount
         countCards
+        numberOfLevels
       }
     }
       '''),
@@ -1070,7 +1033,7 @@ Future loadStageByCourse(userId, courseId) async {
           levelCount
           levelCompletedCount
           countCards
-          orderCard
+          sectionNumber
           color
           img {
             urlImg
@@ -1722,7 +1685,6 @@ Future getAllPrize(page, limit, userId) async {
             getAllPrize(page: $page, limit: $limit, userId: $userId) {
               data {
                 id
-                courseId
                 biblicalName
                 typeStone
                 description
@@ -4248,6 +4210,150 @@ Future<ResponseData> getUrlCertificate(String userId, String? courseId) async {
     return ResponseData(
         data: null,
         error: 'Get Url Certificate By User Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getStatesByCountry(
+    String countryId, int? limit, int? offset, String? search) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetAllStatesByCountry",
+    document: gql(r'''
+     query GetAllStatesByCountry($countryId: ID!, $limit: Int, $offset: Int, $search: String) {
+        getAllStatesByCountry(countryId: $countryId, limit: $limit, offset: $offset, search: $search) {
+          id
+          name
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "countryId": countryId,
+      "limit": limit,
+      "offset": offset,
+      "search": search,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get All States By Country: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllStatesByCountry'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get All States By Country failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllStatesByCountry'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get All States By Country Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+  }
+}
+
+Future<ResponseData> getCitiesByState(
+    String stateId, int? limit, int? offset, String? search) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  QueryOptions options = QueryOptions(
+    operationName: "GetAllCitiesByState",
+    document: gql(r'''
+     query GetAllCitiesByState($stateId: ID!, $limit: Int, $offset: Int, $search: String) {
+        getAllCitiesByState(stateId: $stateId, limit: $limit, offset: $offset, search: $search) {
+          name
+          id
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "stateId": stateId,
+      "limit": limit,
+      "offset": offset,
+      "search": search,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Get All Cities By State: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllCitiesByState'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Get All Cities By State failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['getAllCitiesByState'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    if (kDebugMode) {
+      print('Timeout: $e');
+    }
+    return ResponseData(
+        data: null, error: 'Get All Cities By State Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

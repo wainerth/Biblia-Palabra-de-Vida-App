@@ -241,6 +241,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   Container _buildModalDetails(BuildContext context) {
     return Container(
+      padding: EdgeInsets.all(0),
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(

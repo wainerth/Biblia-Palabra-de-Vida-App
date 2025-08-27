@@ -575,12 +575,13 @@ class _BibleScreenState extends State<BibleScreen> {
                                     padding: EdgeInsets.zero,
                                     iconSize: 25.0,
                                     onPressed: () async {
-                                      await Share.share(
-                                        await copyChapter(currentVersion,
+                                      await SharePlus.instance
+                                          .share(ShareParams(
+                                        text: await copyChapter(currentVersion,
                                             currentBook, currentChapter),
                                         subject:
                                             "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName} \n ver en:${GraphQLConfig.urlServidor}officialbible",
-                                      );
+                                      ));
                                     },
                                     icon: Icon(
                                       Icons.share_rounded,
@@ -1007,10 +1008,11 @@ class _BibleScreenState extends State<BibleScreen> {
               icon: Icons.share,
               label: 'Compartir versículo',
               onPressed: () {
-                Share.share(
-                  "${currentBook?.modernName}\n ${currentBook?.numberBook} \n $selectedText",
+                SharePlus.instance.share(ShareParams(
+                  text:
+                      "${currentBook?.modernName}\n ${currentBook?.numberBook} \n $selectedText",
                   subject: 'Versículo de ${currentBook?.modernName}',
-                );
+                ));
               },
             ),
             if (!overlapsHighlights)
@@ -1737,7 +1739,7 @@ class _BibleScreenState extends State<BibleScreen> {
       //si no es el el primer capítulo del libro
       if (!firstChapter) {
         // verificamos si hay capítulo en cache
-          final chapterNumber = await PreferencesManager().getChapterSelected();
+        final chapterNumber = await PreferencesManager().getChapterSelected();
         if (chapterNumber != null) {
           setState(() {
             currentChapter = allChapters

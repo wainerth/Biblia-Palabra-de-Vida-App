@@ -32,15 +32,15 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
   bool isLoading = false;
   String? errorMessage;
   String? verseId;
-  ScrollController _scrollMessage = ScrollController();
-  ScrollController _scrollverse = ScrollController();
+  final ScrollController _scrollMessage = ScrollController();
+  final ScrollController _scrollVerse = ScrollController();
   int intents = 0;
   @override
   void dispose() {
     messageController.dispose();
     verseController.dispose();
     _scrollMessage.dispose();
-    _scrollverse.dispose();
+    _scrollVerse.dispose();
     super.dispose();
   }
 
@@ -243,7 +243,7 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
                             borderRadius: BorderRadius.circular(16.0)),
                         height: 100,
                         child: Scrollbar(
-                          controller: _scrollverse,
+                          controller: _scrollVerse,
                           thumbVisibility:
                               true, // Hace visible la barra permanentemente
                           trackVisibility:
@@ -251,7 +251,7 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
                           thickness: 6.0, // Grosor de la barra
                           radius: Radius.circular(3), // Bordes redondeados
                           child: SingleChildScrollView(
-                            controller: _scrollverse,
+                            controller: _scrollVerse,
                             child: TextField(
                               controller: verseController,
                               decoration: StylesApp(context)
@@ -295,17 +295,17 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
                               children: [
                                 Checkbox.adaptive(
                                   fillColor:
-                                      MaterialStateProperty.resolveWith<Color>(
+                                      WidgetStateProperty.resolveWith<Color>(
                                           (states) {
                                     if (states
-                                        .contains(MaterialState.selected)) {
+                                        .contains(WidgetState.selected)) {
                                       return StyleColor
                                           .orange; // Color cuando está seleccionado
                                     }
                                     return Colors
                                         .transparent; // Color cuando no está seleccionado
                                   }),
-                                  side: MaterialStateBorderSide.resolveWith(
+                                  side: WidgetStateBorderSide.resolveWith(
                                     (states) => BorderSide(
                                       color: StyleColor
                                           .white, // Color del borde (blanco)

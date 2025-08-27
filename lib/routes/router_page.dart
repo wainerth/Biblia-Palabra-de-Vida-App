@@ -40,6 +40,7 @@ final Map<String, WidgetBuilder> routes = {
   '/memoryPage': (BuildContext context) => MemoryScreen(),
   '/reddlePage': (BuildContext context) => ReddleScreen(),
   '/quizPage': (BuildContext context) => QuizScreen(),
+  '/aboutScreen': (BuildContext context) => AboutScreen(),
 };
 
 Route<dynamic> generateRoute(RouteSettings settings) {

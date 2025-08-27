@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -54,9 +55,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
       id: "",
       question: "",
       difficulty: "",
-      // level: LevelQuestion(
-      //   levelNumber: 0,
-      // ),
       status: 0,
       answers: [],
       isOrdering: false);
@@ -136,13 +134,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
             await loadOneCourse(userData?.userId, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
+          return;
         }
         course = CourseDetail.fromJson(courseResponse.data);
         // obtenemos sección
-        final ResponseData stageResponse = await loadStageById(levelId);
+        final ResponseData stageResponse = await loadStageById(sectionId);
 
         if (stageResponse.error != null) {
           errorMessage = stageResponse.error;
+          return;
         }
         stage = Stage.fromJson(stageResponse.data);
         // obtenemos el nivel
@@ -150,6 +150,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
         if (levelResponse.error != null) {
           errorMessage = levelResponse.error;
+          return;
         }
         level = Level.fromJson(levelResponse.data);
 
@@ -159,6 +160,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
         if (questionResponse.error != null) {
           errorMessage = questionResponse.error;
+          return;
         }
         setState(() {
           questions = questionResponse.data
@@ -242,6 +244,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               onPressed: () async {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 await funcAnswerValidate();
+                if (!mounted) return;
                 setState(() {
                   _isAnswerSelected = false;
                   _suggestionSelected = false;
@@ -388,7 +391,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
               energyPoints: userData!.energyPoints + energy);
         });
 
-        print('${userData!.expTotalUser}  ${userData!.energyPoints}');
+        if (kDebugMode) {
+          print('${userData!.expTotalUser}  ${userData!.energyPoints}');
+        }
         Provider.of<UserProvider>(context, listen: false).setUser(userData);
 
         // si Obtuvo una recompensa
@@ -400,20 +405,20 @@ class _QuestionScreenState extends State<QuestionScreen> {
         }
 
         // obtener la proxima sección desbloqueada
-        final responseUnlockSection =
-            await getNextSectionUnlocked(userData!.userId, sectionId);
-        if (responseUnlockSection.error != null) {
-          LoadingService().hideLoading();
-          await showCustomDialog(context,
-              message: responseUnlockSection.error!,
-              dialogType: DialogType.error);
-          return;
+        if (sendScore!.isLastLevel == true) {
+          final responseUnlockSection =
+              await getNextSectionUnlocked(userData!.userId, sectionId);
+          if (responseUnlockSection.error != null) {
+            LoadingService().hideLoading();
+            await showCustomDialog(context,
+                message: responseUnlockSection.error!,
+                dialogType: DialogType.error);
+            return;
+          }
+          nextSectionId = responseUnlockSection.data != null
+              ? responseUnlockSection.data["unlockedSectionId"] ?? ''
+              : '';
         }
-        nextSectionId = responseUnlockSection.data != null
-            ? responseUnlockSection.data["unlockedSectionId"] != null
-                ? responseUnlockSection.data["unlockedSectionId"]
-                : ''
-            : '';
 
         // si es la ultima etapa del curso
         if (sendScore!.isLastStage) {
@@ -526,8 +531,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                               !showRewardObtained &&
                               !showPrizeWon,
                           title:
-                              "Conoce el ${course != null ? course!.titleName : ''}",
-                          stage: stage != null ? stage!.id : '',
+                              "Conoce el ${course != null ? course!.titleCourse : ''}",
+                          stage: stage != null
+                              ? (stage!.sectionNumber).toString()
+                              : '',
                           subtitle: stage != null ? stage!.sectionName : '',
                           details: stage,
                           onPressed: () {
@@ -618,7 +625,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                 Navigator.popAndPushNamed(context, '/mapPage',
                                     arguments: {
                                       'courseId': courseId,
-                                      'sectionId': nextSectionId
+                                      'sectionId': nextSectionId.isEmpty
+                                          ? sectionId
+                                          : nextSectionId
                                     });
                               }
                             },
@@ -880,8 +889,26 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 width: 132.0,
                 height: 32.0,
                 buttonStyle: StylesApp(context).btnWidgetSmall,
-                onPressed: () {
+                onPressed: () async {
                   // mostrar si hay recompensa
+                  if (sendScore!.devMessageLevel != null &&
+                      sendScore!.devMessageLevel!.isNotEmpty) {
+                    await showCustomDialog(
+                      context,
+                      message: sendScore!.devMessageLevel!,
+                      dialogType: DialogType.info,
+                    );
+                  }
+
+                  if (sendScore!.isLastLevel == true &&
+                      sendScore!.devMessageSection != null &&
+                      sendScore!.devMessageSection!.isNotEmpty) {
+                    await showCustomDialog(
+                      context,
+                      message: sendScore!.devMessageSection!,
+                      dialogType: DialogType.info,
+                    );
+                  }
                   if (!sendScore!.hasBeenPlayedSection &&
                       sendScore!.rewardObtained &&
                       reward != null &&
@@ -969,10 +996,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
               buttonStyle: StylesApp(context).btnPrimary,
               text: "Compartir logro",
               onPressed: () async {
-                await Share.share(
-                  "¡Etapa $sectionId-${stage?.sectionName} completada",
+                await SharePlus.instance.share(ShareParams(
+                  text: "¡Etapa $sectionId-${stage?.sectionName} completada",
                   subject: "¡Felicita a ${userData!.username}! ",
-                );
+                ));
               }),
           SizedBox(height: 43),
           ButtonThemeWidget(
@@ -1275,10 +1302,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
               buttonStyle: StylesApp(context).btnPrimary,
               text: "Compartir logro",
               onPressed: () async {
-                await Share.share(
-                  "¡He obtenido el titulo de ${title?.title}!",
+                await SharePlus.instance.share(ShareParams(
+                  text: "¡He obtenido el titulo de ${title?.title}!",
                   subject: "¡Felicita a ${userData!.username}! ",
-                );
+                ));
               },
             ),
             SizedBox(

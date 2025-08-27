@@ -23,6 +23,44 @@ class Country {
       };
 }
 
+class StateModel {
+  final String id;
+  final String name;
+  StateModel({
+    required this.id,
+    required this.name,
+  });
+
+  factory StateModel.fromJson(Map<String, dynamic> json) => StateModel(
+        id: json['id'] as String,
+        name: json['name'] as String,
+      );
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'name': name,
+      };
+}
+
+class CityModel {
+  final String id;
+  final String name;
+  CityModel({
+    required this.id,
+    required this.name,
+  });
+
+  factory CityModel.fromJson(Map<String, dynamic> json) => CityModel(
+        id: json['id'] as String,
+        name: json['name'] as String,
+      );
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'name': name,
+      };
+}
+
 class AreaCode {
   final String id;
   final String code;

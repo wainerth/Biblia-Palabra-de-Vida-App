@@ -219,6 +219,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                     img: Img(urlImg: course.imgCourseUrl),
                     introduction: course.introduction,
                     sectionCount: course.sectionCount,
+                    numberOfSections: course.numberOfSections ?? 0,
                     sectionCompletedCount: course.sectionCompletedCount),
               ),
               if (loadAventure)
@@ -262,207 +263,261 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   _listOfStages(BuildContext context) {
     return Expanded(
       child: ListView.builder(
-        itemCount: stages.length,
+        padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+        itemCount: course?.numberOfSections ?? 0,
         itemBuilder: (context, index) {
-          final stage = stages[index];
-          return Column(
-            children: [
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 4.0, vertical: 9.0),
-                padding: EdgeInsets.symmetric(vertical: 4.0),
-                constraints: BoxConstraints(
-                  minHeight: 65.0,
-                ),
-                decoration: BoxDecoration(
-                    color: Color(
-                      int.parse('0XFF${stage.color}'),
-                    ),
-                    borderRadius: BorderRadius.circular(12.0)),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        spacing: 10.0,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 0,
-                            child: Column(
-                              spacing: 10.0,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                      color: Color(0XFFF4C622),
-                                      borderRadius:
-                                          BorderRadius.circular(28.0)),
-                                  height: 28.0,
-                                  constraints: BoxConstraints(
-                                      minHeight: 28.0, minWidth: 101.0),
-                                  child: Center(
-                                    child: Text(
-                                      "Etapa ${index + 1}",
-                                      style: StylesApp(context)
-                                          .textStyleBody12
-                                          .copyWith(color: Colors.black),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 10.0),
-                                  decoration: BoxDecoration(
-                                    color: Color(0XFFF4C622),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black
-                                            .withValues(alpha: 0.75),
-                                        offset: Offset(4.0, 4.0),
-                                        blurRadius: 4.0,
-                                        spreadRadius: -4.0,
-                                        blurStyle: BlurStyle.inner,
-                                      )
-                                    ],
-                                    borderRadius: BorderRadius.circular(28.0),
-                                  ),
-                                  height: 20.0,
-                                  constraints: BoxConstraints(minHeight: 22.0),
-                                  child: Center(
-                                    child: Text(
-                                      "${stage.levelCompletedCount} / ${stage.levelCount}",
-                                      style: StylesApp(context)
-                                          .textStyleBody12
-                                          .copyWith(color: Colors.black),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              spacing: 10.0,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  textAlign: TextAlign.left,
-                                  stage.sectionName,
-                                  style: StylesApp(context).textStyleBody12,
-                                ),
-                                Row(
-                                  children: [
-                                    ButtonThemeWidget(
-                                      height: 27.0,
-                                      width: 150.0,
-                                      onPressed:
-                                          (getStatus(stage) == "Pendiente")
-                                              ? null
-                                              : () {
-                                                  Navigator.pushNamed(
-                                                      context, '/mapPage',
-                                                      arguments: {
-                                                        'courseId': course?.id,
-                                                        'sectionId': stage.id
-                                                      });
-                                                },
-                                      textStyle:
-                                          StylesApp(context).textStyleBody14,
-                                      buttonStyle: StylesApp(context)
-                                          .btnWidgetSmall
-                                          .copyWith(
-                                        backgroundColor: WidgetStateProperty
-                                            .resolveWith<Color?>(
-                                          (Set<WidgetState> states) {
-                                            if (states.contains(
-                                                WidgetState.disabled)) {
-                                              return Colors
-                                                  .grey; // Color when the button is disabled
-                                            }
-                                            return (getStatus(stage) ==
-                                                    "Completado")
-                                                ? Color(0XFFC7AA34)
-                                                : Color(
-                                                    0XFF12CBC4); // Use the component's default.
-                                          },
-                                        ),
+          if (index < stages.length) {
+            final stage = stages[index];
+            return Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 4.0, vertical: 9.0),
+                  padding: EdgeInsets.symmetric(vertical: 4.0),
+                  constraints: BoxConstraints(
+                    minHeight: 65.0,
+                  ),
+                  decoration: BoxDecoration(
+                      color: Color(
+                        int.parse('0XFF${stage.color}'),
+                      ),
+                      borderRadius: BorderRadius.circular(12.0)),
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          spacing: 10.0,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 0,
+                              child: Column(
+                                spacing: 10.0,
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Color(0XFFF4C622),
+                                        borderRadius:
+                                            BorderRadius.circular(28.0)),
+                                    height: 28.0,
+                                    constraints: BoxConstraints(
+                                        minHeight: 28.0, minWidth: 101.0),
+                                    child: Center(
+                                      child: Text(
+                                        "Etapa ${stage.sectionNumber }",//index + 1
+                                        style: StylesApp(context)
+                                            .textStyleBody12
+                                            .copyWith(color: Colors.black),
                                       ),
-                                      text: getStatus(stage),
                                     ),
-                                    if (getStatus(stage) != "Pendiente") ...{
-                                      SizedBox(width: 8.0),
+                                  ),
+                                  Container(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 10.0),
+                                    decoration: BoxDecoration(
+                                      color: Color(0XFFF4C622),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withValues(alpha: 0.75),
+                                          offset: Offset(4.0, 4.0),
+                                          blurRadius: 4.0,
+                                          spreadRadius: -4.0,
+                                          blurStyle: BlurStyle.inner,
+                                        )
+                                      ],
+                                      borderRadius: BorderRadius.circular(28.0),
+                                    ),
+                                    height: 20.0,
+                                    constraints:
+                                        BoxConstraints(minHeight: 22.0),
+                                    child: Center(
+                                      child: Text(
+                                        "${stage.levelCompletedCount} / ${stage.levelCount}",
+                                        style: StylesApp(context)
+                                            .textStyleBody12
+                                            .copyWith(color: Colors.black),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                spacing: 10.0,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    textAlign: TextAlign.left,
+                                    stage.sectionName,
+                                    style: StylesApp(context).textStyleBody12,
+                                  ),
+                                  Row(
+                                    children: [
                                       ButtonThemeWidget(
-                                        onPressed: () {
-                                          Navigator.pushNamed(
-                                              context, '/mapPage', arguments: {
-                                            'courseId': course?.id,
-                                            'sectionId': stage.id
-                                          });
-                                        },
+                                        height: 27.0,
+                                        width: 150.0,
+                                        onPressed: (getStatus(stage) ==
+                                                "Pendiente")
+                                            ? null
+                                            : () {
+                                                Navigator.pushNamed(
+                                                    context, '/mapPage',
+                                                    arguments: {
+                                                      'courseId': course?.id,
+                                                      'sectionId': stage.id
+                                                    });
+                                              },
                                         textStyle:
                                             StylesApp(context).textStyleBody14,
-                                        width: 50.sp,
-                                        height: 27.0,
-                                        text: "Ir",
-                                        buttonStyle:
-                                            StylesApp(context).btnWidgetSmall,
-                                      )
-                                    }
-                                  ],
-                                )
-                              ],
+                                        buttonStyle: StylesApp(context)
+                                            .btnWidgetSmall
+                                            .copyWith(
+                                          backgroundColor: WidgetStateProperty
+                                              .resolveWith<Color?>(
+                                            (Set<WidgetState> states) {
+                                              if (states.contains(
+                                                  WidgetState.disabled)) {
+                                                return Colors
+                                                    .grey; // Color when the button is disabled
+                                              }
+                                              return (getStatus(stage) ==
+                                                      "Completado")
+                                                  ? Color(0XFFC7AA34)
+                                                  : Color(
+                                                      0XFF12CBC4); // Use the component's default.
+                                            },
+                                          ),
+                                        ),
+                                        text: getStatus(stage),
+                                      ),
+                                      if (getStatus(stage) != "Pendiente") ...{
+                                        SizedBox(width: 8.0),
+                                        ButtonThemeWidget(
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                                context, '/mapPage',
+                                                arguments: {
+                                                  'courseId': course?.id,
+                                                  'sectionId': stage.id
+                                                });
+                                          },
+                                          textStyle: StylesApp(context)
+                                              .textStyleBody14,
+                                          width: 50.sp,
+                                          height: 27.0,
+                                          text: "Ir",
+                                          buttonStyle:
+                                              StylesApp(context).btnWidgetSmall,
+                                        )
+                                      }
+                                    ],
+                                  )
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: SizedBox(
-                        width: 28.sp,
-                        height: 28.sp,
-                        child: IconButton(
-                          padding: EdgeInsets.all(0),
-                          icon: Icon(Icons.info_outline, color: Colors.white),
-                          onPressed: () {
-                            showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return CustomModalWidget(
-                                  title: stage.sectionName,
-                                  content: stage.introduction,
-                                  buttonText: 'Aceptar',
-                                  id: "${index + 1}",
-                                  itemCount: stage.levelCount,
-                                  itemsCompleted: stage.levelCompletedCount,
-                                );
-                              },
-                            );
-                          },
+                          ],
                         ),
                       ),
-                    ),
-                    if (getStatus(stage) == "En Proceso")
                       Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Image.asset(
-                            "assets/kawaii_fire.png",
-                            width: 28.0,
-                          ))
-                  ],
+                        top: 0,
+                        right: 0,
+                        child: SizedBox(
+                          width: 28.sp,
+                          height: 28.sp,
+                          child: IconButton(
+                            padding: EdgeInsets.all(0),
+                            icon: Icon(Icons.info_outline, color: Colors.white),
+                            onPressed: () {
+                              showDialog(
+                                barrierDismissible: false,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CustomModalWidget(
+                                    title: stage.sectionName,
+                                    content: stage.introduction,
+                                    buttonText: 'Aceptar',
+                                    id: "${stage.sectionNumber} ",
+                                    itemCount: stage.levelCount,
+                                    itemsCompleted: stage.levelCompletedCount,
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      if (getStatus(stage) == "En Proceso")
+                        Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Image.asset(
+                              "assets/kawaii_fire.png",
+                              width: 28.0,
+                            ))
+                    ],
+                  ),
                 ),
-              ),
-              if (index == stages.length - 1) ...{
-                SizedBox(
-                  height: kBottomNavigationBarHeight,
-                )
-              }
-            ],
-          );
+              ],
+            );
+          } else {
+            // Render a visually enhanced placeholder card for future sections
+            return Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 4.0, vertical: 9.0),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
+                  constraints: BoxConstraints(
+                    minHeight: 80.0,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.grey.shade300, Colors.grey.shade400],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        offset: Offset(2.0, 4.0),
+                        blurRadius: 6.0,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.lock_outline,
+                        color: Colors.black54,
+                        size: 28.0,
+                      ),
+                      SizedBox(width: 12.0),
+                      Expanded(
+                        child: Text(
+                          "Etapa ${index + 1} - Próximamente",
+                          style: StylesApp(context).textStyleBody14.copyWith(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (index == (course?.numberOfSections ?? 0) - 1) ...{
+                  SizedBox(
+                    height: kBottomNavigationBarHeight,
+                  )
+                }
+              ],
+            );
+          }
+          
         },
       ),
     );

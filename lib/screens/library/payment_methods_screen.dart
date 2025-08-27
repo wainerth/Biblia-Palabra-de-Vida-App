@@ -119,9 +119,9 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               const SizedBox(height: 16),
 
               // Otras opciones de pago
-              _buildMetodoPago('Transferencia Bancaria'),
-              _buildMetodoPago('Prometeo'),
-              _buildMetodoPago('Pago con tarjeta de Credito'),
+              _buildMethodPay('Transferencia Bancaria'),
+              _buildMethodPay('Prometo'),
+              _buildMethodPay('Pago con tarjeta de Crédito'),
             ],
           ),
         ),
@@ -137,17 +137,6 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     );
   }
 
-  Widget _buildTextField(String hintText) {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: hintText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-    );
-  }
 
   Widget _buildProductoItem(String nombre, String precio) {
     return Padding(
@@ -198,7 +187,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     );
   }
 
-  Widget _buildMetodoPago(String metodo) {
+  Widget _buildMethodPay(String method) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -214,7 +203,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
           ),
           const SizedBox(width: 12),
           Text(
-            metodo,
+            method,
             style: const TextStyle(fontSize: 14),
           ),
         ],

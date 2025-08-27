@@ -36,11 +36,11 @@ class _RankingScreenState extends State<RankingScreen> {
 
     try {
       // si no hay ligas en catalogoProvider consultar servicios
-      if(Provider.of<CatalogueProvider>(context, listen: false)
-          .allLeagues.isEmpty) {
-            Provider.of<CatalogueProvider>(context, listen: false)
-          .loadLeagues();
-          }
+      if (Provider.of<CatalogueProvider>(context, listen: false)
+          .allLeagues
+          .isEmpty) {
+        Provider.of<CatalogueProvider>(context, listen: false).loadLeagues();
+      }
 
       leagues = Provider.of<CatalogueProvider>(context, listen: false)
           .allLeagues
@@ -104,7 +104,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     final userData = Provider.of<UserProvider>(context, listen: false);
     // activeLeagueId = widget.ranking[DefaultTabController.of(context).index].id;
     if (userData.currentUser != null) {
-      if (userData.currentUser!.currentLeague != null ) {
+      if (userData.currentUser!.currentLeague != null) {
         activeLeagueId = userData.currentUser!.currentLeague!.id;
         loadMembers(activeLeagueId, userData.currentUser!.userId, context);
       } else {
@@ -179,8 +179,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                             SizedBox(height: 10),
                                             Image.network(
                                               GraphQLConfig.urlServidor +
-                                                  widget.ranking[index].img
-                                                      !.urlImg,
+                                                  widget.ranking[index].img!
+                                                      .urlImg,
                                               height: 120,
                                             ),
                                             SizedBox(height: 10),
@@ -191,23 +191,6 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                                   .copyWith(
                                                       color: StyleColor.black),
                                             ),
-                                            SizedBox(height: 10),
-                                            // Text(
-                                            //   'Máximo de Participantes: ${widget.ranking[index].maxMembers}',
-                                            //   style: StylesApp(context)
-                                            //       .textStyleBody14
-                                            //       .copyWith(
-                                            //           color: StyleColor.black),
-                                            // ),
-                                            // SizedBox(height: 10),
-                                            // Text(
-                                            //   'ID de Liga: ${widget.ranking[index].id}',
-                                            //   style: StylesApp(context)
-                                            //       .textStyleBody14
-                                            //       .copyWith(
-                                            //           color: StyleColor
-                                            //               .black),
-                                            // ),
                                             SizedBox(height: 20),
                                           ],
                                         ),
@@ -247,10 +230,10 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                           color: Color(int.parse(
                                               "0xFF${widget.ranking[index].colorFront}")),
                                         ),
-                                        child: Image.network(GraphQLConfig
-                                                .urlServidor +
-                                            widget.ranking[index].img!.urlImg,
-                                            ),
+                                        child: Image.network(
+                                          GraphQLConfig.urlServidor +
+                                              widget.ranking[index].img!.urlImg,
+                                        ),
                                       ),
                                     ),
                                     if (widget.ranking[index].id ==
@@ -407,6 +390,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                       children: [
                         Stack(
                           alignment: Alignment.center,
+                          clipBehavior: Clip.none,
                           children: [
                             Center(
                               child: SizedBox(
@@ -436,7 +420,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                                   .profilePicture), // Reemplaza con la imagen del usuario
                         ),
                         SizedBox(
-                          width: 130,
+                          width: 120,
                           child: Text(
                             members[index].username,
                             overflow: TextOverflow.ellipsis,
@@ -449,6 +433,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                     ),
 
                     Text(
+                      maxLines: 2,
+                      softWrap: true,
                       'exp ${members[index].currentPoints}',
                       style: StylesApp(context)
                           .textStyleBody18
@@ -534,6 +520,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                     ),
 
                     Text(
+                      maxLines: 2,
+                      softWrap: true,
                       'exp ${members[index].currentPoints}',
                       style: StylesApp(context)
                           .textStyleBody18
@@ -625,6 +613,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                             ),
                       )
                     : Text(
+                        maxLines: 2,
+                        softWrap: true,
                         'exp ${members[index].currentPoints}',
                         style: StylesApp(context)
                             .textStyleBody18

@@ -1,5 +1,7 @@
+import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,17 +11,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-   @override
+  @override
   void initState() {
     super.initState();
-    // _initializeCatalogues();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeCatalogues();
+    });
   }
 
-  // void _initializeCatalogues() async {
-  //   final catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
-  //   catalogueProvider.initialize();
-  // }
+  void _initializeCatalogues() async {
+    final catalogueProvider =
+        Provider.of<CatalogueProvider>(context, listen: false);
+    catalogueProvider.initialize();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,8 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           Center(
                             child: Container(
-                              constraints:  BoxConstraints(
-                                  maxHeight: StylesApp(context).sizeImgLogin.height, minHeight:StylesApp(context).sizeImgLogin.height),
+                              constraints: BoxConstraints(
+                                  maxHeight:
+                                      StylesApp(context).sizeImgLogin.height,
+                                  minHeight:
+                                      StylesApp(context).sizeImgLogin.height),
                               child: Image.asset(
                                 "assets/bibleLogo.png",
                                 fit: BoxFit.cover,
@@ -72,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       children: [
                         ButtonThemeWidget(
-                          text: "Crea un cuenta",
+                          text: "Crear una cuenta",
                           buttonStyle: StylesApp(context).btnPrimary,
                           onPressed: () {
                             Navigator.pushNamed(context, '/registerPage');
@@ -83,11 +91,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(
                           height: 28,
                         ),
-                          ButtonThemeWidget(
+                        ButtonThemeWidget(
                           text: "Iniciar Sesión",
                           buttonStyle: StylesApp(context).btnSecondary,
                           onPressed: () {
-                              Navigator.pushNamed(context, '/loginPage');
+                            Navigator.pushNamed(context, '/loginPage');
                           },
                           width: StylesApp(context).btnHeight.width,
                           height: StylesApp(context).btnHeight.height,
@@ -119,7 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.pushNamed(context, '/introPage');
                         },
                         style: ElevatedButton.styleFrom(
-                          
                           backgroundColor:
                               Colors.transparent, // Transparent background
                           shape: RoundedRectangleBorder(
@@ -138,7 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                   onEnd: () {
-                    // No need to handle `onEnd` since TweenAnimationBuilder loops implicitly
                     setState(() {});
                   },
                 ),

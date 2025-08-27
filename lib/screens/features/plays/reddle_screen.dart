@@ -59,18 +59,30 @@ class _ReddleScreenState extends State<ReddleScreen> {
         });
         return;
       }
-
-      setState(() {
-        personajes = guessResponse.data['data']
-            .map<GuessCharacter>((guess) => GuessCharacter.fromJson(guess))
-            .toList();
-        // List<GuessCharacter> randomCharacter = personajes..shuffle();
-        personajeActual = personajes.first;
-        respuestaSeleccionada = null;
-        mostrarImagen = false;
-        respuestaCorrecta = false;
-      });
-      LoadingService().hideLoading();
+      if (guessResponse.data['data'].isNotEmpty) {
+        setState(() {
+          personajes = guessResponse.data['data']
+              .map<GuessCharacter>((guess) => GuessCharacter.fromJson(guess))
+              .toList();
+          // List<GuessCharacter> randomCharacter = personajes..shuffle();
+          personajeActual = personajes.first;
+          respuestaSeleccionada = null;
+          mostrarImagen = false;
+          respuestaCorrecta = false;
+        });
+      } else {
+        LoadingService().hideLoading();
+        await showCustomDialogWithAction(context,
+            message: "No hay personajes disponibles para esta dificultad",
+            dialogType: DialogTypeAction.info,
+            buttonOk: "Ok", actionCallbackOk: () {
+          Navigator.pop(context);
+        });
+        setState(() {
+          difficulty = '';
+        });
+        return;
+      }
     } catch (e) {
       LoadingService().hideLoading();
       await showCustomDialogWithAction(context,
@@ -119,11 +131,13 @@ class _ReddleScreenState extends State<ReddleScreen> {
       nameCharacter.text = '';
     });
   }
- @override
+
+  @override
   void dispose() {
     _audioService.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,7 +182,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "Facil";
+              difficulty = "F";
             });
             await loadCharacters();
           },
@@ -209,7 +223,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "Medio";
+              difficulty = "I";
             });
             await loadCharacters();
           },
@@ -250,7 +264,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
         GestureDetector(
           onTap: () async {
             setState(() {
-              difficulty = "Difícil";
+              difficulty = "D";
             });
             await loadCharacters();
           },

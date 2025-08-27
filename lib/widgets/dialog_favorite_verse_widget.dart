@@ -1,6 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -174,8 +173,30 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                                         IconButton(
                                           padding: EdgeInsets.zero,
                                           iconSize: 20.0,
-                                          onPressed: () => shareVerse(context,
-                                              "${_favoriteVerses[index].book.modernName} ${_favoriteVerses[index].book.numberBook}:${_favoriteVerses[index].verse.verse}\n ${_favoriteVerses[index].verse.text} \n ${GraphQLConfig.baseUrl}OfficialBible"),
+                                          onPressed: () => shareVerse(
+                                            context,
+                                            CopyModelVerse(
+                                              book: Book(
+                                                modernName:
+                                                    _favoriteVerses[index]
+                                                        .book
+                                                        .modernName,
+                                              ),
+                                              chapter: ChapterModel(
+                                                chapter: _favoriteVerses[index]
+                                                    .chapter
+                                                    .chapter,
+                                              ),
+                                              verse: VerseModel(
+                                                verse: _favoriteVerses[index]
+                                                    .verse
+                                                    .verse,
+                                                text: _favoriteVerses[index]
+                                                    .verse
+                                                    .text,
+                                              ),
+                                            ),
+                                          ),
                                           icon: Icon(
                                             Icons.share_rounded,
                                             color: StyleColor.turquoise,

@@ -11,7 +11,7 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Container(
+      child: SizedBox(
         child: Center(
           child: Text('Mis compras'),
         ),

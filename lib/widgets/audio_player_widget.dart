@@ -75,11 +75,11 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   void dispose() {
+    player.stop();
     _durationSubscription?.cancel();
     _positionSubscription?.cancel();
     _playerCompleteSubscription?.cancel();
     _playerStateChangeSubscription?.cancel();
-    player.stop();
     player.dispose();
     super.dispose();
   }
@@ -159,42 +159,50 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           print('Descarga iniciada con ID: $taskId');
         }
         if (taskId != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: StyleColor.turquoise,
-              content: Text(
-                'Descarga iniciada en ${savedDir == externalDir ? 'almacenamiento externo' : 'almacenamiento interno'}. Revisar notificaciones.',
-                style: StylesApp(context).textStyleBody12,
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: StyleColor.turquoise,
+                content: Text(
+                  'Descarga iniciada en ${savedDir == externalDir ? 'almacenamiento externo' : 'almacenamiento interno'}. Revisar notificaciones.',
+                  style: StylesApp(context).textStyleBody12,
+                ),
               ),
-            ),
-          );
+            );
+          }
         } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: StyleColor.redLight,
+                content: Text(
+                  'Error al iniciar la descarga.',
+                  style: StylesApp(context).textStyleBody12,
+                ),
+              ),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: StyleColor.redLight,
               content: Text(
-                'Error al iniciar la descarga.',
+                'No se pudo acceder al almacenamiento.',
                 style: StylesApp(context).textStyleBody12,
               ),
             ),
           );
         }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: StyleColor.redLight,
-            content: Text(
-              'No se pudo acceder al almacenamiento.',
-              style: StylesApp(context).textStyleBody12,
-            ),
-          ),
-        );
       }
       LoadingService().hideLoading();
     } catch (e) {
       LoadingService().hideLoading();
-      await showCustomDialog(context,
-          message: e.toString(), dialogType: DialogType.error);
+      if (mounted) {
+        await showCustomDialog(context,
+            message: e.toString(), dialogType: DialogType.error);
+      }
     } finally {
       LoadingService().hideLoading();
     }
@@ -435,16 +443,30 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                                   // 4. Opcional: Eliminar el temporal después de compartir
                                                   tempFile.delete();
                                                 } catch (e) {
-                                                  print(
-                                                      'Error al compartir: $e');
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                        content: Text(
-                                                            'Error al compartir el audio')),
-                                                  );
+                                                  if (mounted) {
+                                                    final currentContext =
+                                                        context;
+                                                    if (currentContext
+                                                        .mounted) {
+                                                      ScaffoldMessenger.of(
+                                                              currentContext)
+                                                          .showSnackBar(
+                                                        SnackBar(
+                                                            content: Text(
+                                                                'Error al compartir el audio')),
+                                                      );
+                                                    }
+                                                  }
                                                 }
-                                                Navigator.pop(context);
+
+                                                if (mounted) {
+                                                  final currentContext =
+                                                      context;
+                                                  if (currentContext.mounted) {
+                                                    Navigator.pop(
+                                                        currentContext);
+                                                  }
+                                                }
                                               },
                                       ),
                                     ],

@@ -77,7 +77,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 'Acerca de',
                 style: StylesApp(context).textStyleBody12,
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context, "/aboutScreen");
+              },
             ),
             Divider(
               height: 2,

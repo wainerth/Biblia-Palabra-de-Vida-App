@@ -295,7 +295,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             // La llamada inicial ahora se realiza fuera del StatefulBuilder,
-            // pero necesitamos la referencia al setState del builder para las paginaciones.
+            // pero necesitamos la referencia al setState del builder para las pagination.
 
             return Dialog(
               insetPadding:
@@ -848,10 +848,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               buttonStyle: StylesApp(context).btnPrimary,
               text: "Descargar certificado",
               onPressed: () async {
-                 try {
+                try {
                   final responseDownloadCertificate =
-                      await getUrlCertificate(userData!.userId,title.courseId);
-                      
+                      await getUrlCertificate(userData.userId, title.courseId);
+
                   if (responseDownloadCertificate.error != null) {
                     await showCustomDialog(
                       context,
@@ -860,8 +860,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                     );
                     return;
                   }
-                  if (responseDownloadCertificate != null &&
-                      responseDownloadCertificate.data != null) {
+                  if (responseDownloadCertificate.data != null) {
                     final url =
                         "${GraphQLConfig.urlServidor}${responseDownloadCertificate.data['url']}";
                     if (await canLaunchUrl(Uri.parse(url))) {
@@ -895,10 +894,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               buttonStyle: StylesApp(context).btnPrimary,
               text: "Compartir logro",
               onPressed: () async {
-                await Share.share(
-                  "¡He obtenido el titulo de ${title.title}!",
+                await SharePlus.instance.share(ShareParams(
+                  text: "¡He obtenido el titulo de ${title.title}!",
                   subject: "¡Felicita a ${userData.username}! ",
-                );
+                ));
               },
             ),
             SizedBox(height: 29),

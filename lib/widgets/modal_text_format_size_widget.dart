@@ -1,4 +1,3 @@
-import 'package:biblia_palabra_de_vida_app/models/model_data.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';

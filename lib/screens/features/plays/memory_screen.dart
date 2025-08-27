@@ -11,6 +11,7 @@ import 'package:biblia_palabra_de_vida_app/services/audio_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class MemoryScreen extends StatefulWidget {
@@ -89,7 +90,7 @@ class _MemoryScreenState extends State<MemoryScreen>
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.volume_up, color: StyleColor.white),
+            icon: Icon( isBackgroundPlaying ?  Icons.volume_up : Icons.volume_off, color: StyleColor.white),
             onPressed: () async {
               if (isBackgroundPlaying) {
                 _audioService.stopBackgroundMusic();
@@ -126,9 +127,13 @@ class _MemoryScreenState extends State<MemoryScreen>
               flippedCards = List<bool>.filled(lisMemory.length, false);
               matchedCards = List<bool>.filled(lisMemory.length, false);
             });
-            print('DEBUG: Dificultad seleccionada: F. Iniciando precarga...');
+            if (kDebugMode) {
+              print('DEBUG: Dificultad seleccionada: F. Iniciando precarga...');
+            }
             await _preloadImages(); // <-- Asegúrate de que este await termine.
-            print('DEBUG: Precarga de imágenes completada para dificultad F.');
+            if (kDebugMode) {
+              print('DEBUG: Precarga de imágenes completada para dificultad F.');
+            }
           },
           child: Container(
             padding: EdgeInsets.all(8.0),
@@ -171,9 +176,13 @@ class _MemoryScreenState extends State<MemoryScreen>
               flippedCards = List<bool>.filled(lisMemory.length, false);
               matchedCards = List<bool>.filled(lisMemory.length, false);
             });
-            print('DEBUG: Dificultad seleccionada: I. Iniciando precarga...');
+            if (kDebugMode) {
+              print('DEBUG: Dificultad seleccionada: I. Iniciando precarga...');
+            }
             await _preloadImages(); // <-- Asegúrate de que este await termine.
-            print('DEBUG: Precarga de imágenes completada para dificultad I.');
+            if (kDebugMode) {
+              print('DEBUG: Precarga de imágenes completada para dificultad I.');
+            }
           },
           child: Container(
             padding: EdgeInsets.all(8.0),
@@ -216,9 +225,13 @@ class _MemoryScreenState extends State<MemoryScreen>
               flippedCards = List<bool>.filled(lisMemory.length, false);
               matchedCards = List<bool>.filled(lisMemory.length, false);
             });
-            print('DEBUG: Dificultad seleccionada: D. Iniciando precarga...');
+            if (kDebugMode) {
+              print('DEBUG: Dificultad seleccionada: D. Iniciando precarga...');
+            }
             await _preloadImages(); // <-- Asegúrate de que este await termine.
-            print('DEBUG: Precarga de imágenes completada para dificultad D.');
+            if (kDebugMode) {
+              print('DEBUG: Precarga de imágenes completada para dificultad D.');
+            }
           },
           child: Container(
             padding: EdgeInsets.all(8.0),
@@ -509,7 +522,7 @@ class _MemoryScreenState extends State<MemoryScreen>
             actionCallback: () => _loadData(),
             buttonOk: "Volver",
             actionCallbackOk: () => {
-                  Navigator.pushNamed(context, "/layout"),
+                  Navigator.pushNamed(context, "/layoutPage"),
                   _audioService.stopBackgroundMusic(),
                 });
         return;
@@ -598,10 +611,10 @@ class _MemoryScreenState extends State<MemoryScreen>
   }
 
   Future<void> _preloadImages() async {
-    // Muestra un indicador de carga mientras precargas las imágenes
+    // Muestra un indicador de carga mientras precarga las imágenes
     LoadingService().showLoading(context);
 
-    // Iterar sobre todas las MemoryModel y precargar sus imágenes
+    // Iterar sobre todas las MemoryModel y precarga sus imágenes
     final List<Future<void>> precacheFutures = [];
     for (final memoryItem in lisMemory) {
       final imageUrl = "${GraphQLConfig.urlServidor}${memoryItem.img.urlImg}";
@@ -612,7 +625,7 @@ class _MemoryScreenState extends State<MemoryScreen>
       ));
     }
 
-    // Esperar a que TODAS las imágenes se precarguen
+    // Esperar a que TODAS las imágenes se carguen
     await Future.wait(precacheFutures);
     LoadingService().hideLoading();
     // Aquí podrías agregar un pequeño delay si quieres que el usuario vea un "cargando"

@@ -1,5 +1,6 @@
 //Authentication
 
+
 export 'package:biblia_palabra_de_vida_app/screens/soon/soon_screen.dart';
 
 // play pages
@@ -35,6 +36,7 @@ export 'package:biblia_palabra_de_vida_app/screens/home/settings/workspace_scree
 export 'package:biblia_palabra_de_vida_app/screens/home/settings/profile_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/home/settings/settings_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/home/settings/progress_detail_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/settings/about_screen.dart';
 
 //Features
 export 'package:biblia_palabra_de_vida_app/screens/features/bible/bible_screen.dart';

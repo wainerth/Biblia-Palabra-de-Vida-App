@@ -34,7 +34,8 @@ class UpdateDataProfile {
   final AreaCode? profileAreaCode;
   final String? phoneNumber;
   final Country? country;
-  final String? city;
+  final StateModel? state;
+  final CityModel? city;
   final String? gender;
   final bool? isBaptized;
   final UserChurch? church;
@@ -48,6 +49,7 @@ class UpdateDataProfile {
     this.phoneNumber,
     this.country,
     this.city,
+    this.state,
     this.gender,
     this.isBaptized,
     this.church,
@@ -61,7 +63,8 @@ class UpdateDataProfile {
     AreaCode? profileAreaCode,
     String? phoneNumber,
     Country? country,
-    String? city,
+    StateModel? state,
+    CityModel? city,
     String? gender,
     bool? isBaptized,
     UserChurch? church,
@@ -71,6 +74,7 @@ class UpdateDataProfile {
         name: name,
         lastname: lastname ?? '',
         birthdate: birthdate,
+        state: state,
         city: city,
         country: country,
         gender: gender,
@@ -88,8 +92,9 @@ class UpdateDataProfile {
           identifier: json["identifier"],
           profileAreaCode: AreaCode.fromJson(json['profileAreaCode']),
           phoneNumber: json["phoneNumber"],
-          country: json["country"],
-          city: json["city"],
+          country: json['country'] != null ?  Country.fromJson(json["country"]) : null,
+          state: json["state"] != null ?  StateModel.fromJson(json["state"]) : null,
+          city: json["city"] != null ? CityModel.fromJson(json["city"]) : null,
           gender: json["gender"],
           isBaptized: json["isBaptized"],
           church: json['church']);
@@ -101,8 +106,9 @@ class UpdateDataProfile {
         "identifier": identifier,
         'profileAreaCode': profileAreaCode,
         "phoneNumber": phoneNumber,
-        "country": country,
-        "city": city,
+        "country": country?.toJson(),
+        "state": state?.toJson(),
+        "city": city?.toJson(),
         "gender": gender,
         "isBaptized": isBaptized,
         "church": church
@@ -110,6 +116,6 @@ class UpdateDataProfile {
 
   @override
   String toString() {
-    return 'DataProfiles{lastname: $lastname, name: $name, birthdate: $birthdate, identifier: $identifier, profileAreaCode: $profileAreaCode, phoneNumber: $phoneNumber, country: $country, city: $city, gender: $gender, isBaptized: $isBaptized, church: $church}';
+    return 'DataProfiles{lastname: $lastname, name: $name, birthdate: $birthdate, identifier: $identifier, profileAreaCode: $profileAreaCode, phoneNumber: $phoneNumber, country: $country, state: $state,city: $city, gender: $gender, isBaptized: $isBaptized, church: $church}';
   }
 }

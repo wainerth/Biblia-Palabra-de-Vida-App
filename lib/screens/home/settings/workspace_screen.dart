@@ -156,7 +156,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       // Replace with your actual asset paths and route names
       {
         'label': 'Aventura',
-        'img': 'assets/aventura.png',
+        'img': 'assets/aventure.gif',
         'route': '/introAventurePage',
       },
       {
@@ -354,13 +354,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             Container(
               width: StylesApp(context).sizeContainerCard.width,
               height: StylesApp(context).sizeContainerCard.height,
-              clipBehavior: Clip.antiAlias,
+              clipBehavior: Clip.none,
               decoration: BoxDecoration(
+                // border: Border.all(
+                //   color: const Color(0xFFFD8C43), ),
                 borderRadius: BorderRadius.circular(
                     StylesApp(context).sizeContainerCard.width),
                 image: DecorationImage(
+                  alignment: Alignment.center,
                   image: AssetImage(card['img']!),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                 ),
               ),
             ),
@@ -461,10 +464,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               if (error) return;
 
               if (progressUser != null) {
-                Navigator.pushNamed(context, '/mapPage', arguments: {
-                  'courseId': progressUser!.courseId,
-                  'sectionId': progressUser!.sectionId
-                });
+                if (mounted) {
+                  final currentContext = context;
+
+                  if (currentContext.mounted) {
+                    Navigator.pushNamed(currentContext, '/mapPage', arguments: {
+                      'courseId': progressUser!.courseId,
+                      'sectionId': progressUser!.sectionId
+                    });
+                  }
+                }
               } else {
                 Navigator.pushNamed(context, '/introAventurePage');
               }
@@ -678,10 +687,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                 size: 16.sp,
                               ),
                               onPressed: () async {
-                                await Share.share(
-                                  "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible",
+                                await SharePlus.instance.share(ShareParams(
+                                  text:
+                                      "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible",
                                   subject: "Proverbio del día",
-                                );
+                                ));
                               },
                             ),
                           ),

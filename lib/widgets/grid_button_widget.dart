@@ -3,6 +3,7 @@ import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 class GridButtonWidget<T extends GridItem> extends StatefulWidget {
   final List<T> data;
@@ -58,7 +59,9 @@ class _GridButtonWidgetState<T extends GridItem>
           // }
         }
       });
-      print("selectedItem $_selectedItems");
+      if (kDebugMode) {
+        print("selectedItem $_selectedItems");
+      }
     }
   }
 

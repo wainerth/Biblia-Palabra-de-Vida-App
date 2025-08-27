@@ -194,6 +194,9 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                       if (value == null || value.isEmpty) {
                                         return "La contraseña es obligatoria";
                                       }
+                                      if (value.length < 6) {
+                                        return "la contraseña debe contener al menos 6 caracteres";
+                                      }
                                       return null;
                                     },
                                   ),
@@ -281,6 +284,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                               __recoveryCodeController.text,
                                               _passwordController.text);
                                       if (response.error != null) {
+                                        LoadingService().hideLoading();
                                         await showCustomDialog(context,
                                             message: response.error!,
                                             dialogType: DialogType.error);

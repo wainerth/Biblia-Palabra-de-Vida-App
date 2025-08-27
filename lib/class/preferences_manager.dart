@@ -197,7 +197,7 @@ class PreferencesManager {
   Future<bool> getIsBackgroundPlaying() async {
     await _ensureInitialized();
 
-    return _prefs!.getBool(_isBackgroundPlayingKey) ?? false;
+    return _prefs!.getBool(_isBackgroundPlayingKey) ?? true;
   }
 
   Future<void> setBackgroundPlaying(bool playing) async {

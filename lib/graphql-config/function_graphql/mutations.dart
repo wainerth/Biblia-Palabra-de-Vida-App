@@ -167,7 +167,10 @@ Future updateUserProfile(token, UserProfile data) async {
       operationName: "UpdateDataProfileUsers",
       document: gql(r'''
      mutation UpdateDataProfileUsers($userId: ID, $dataProfiles: DataProfiles) {
-      updateDataProfileUsers(userId: $userId, dataProfiles: $dataProfiles)
+      updateDataProfileUsers(userId: $userId, dataProfiles: $dataProfiles){
+      message
+      success
+      }
     }
  '''),
       variables: <String, dynamic>{
@@ -186,8 +189,8 @@ Future updateUserProfile(token, UserProfile data) async {
               ? null
               : data.dataProfiles.phoneNumber,
           "countryId": data.dataProfiles.country?.id,
-          "city":
-              data.dataProfiles.city!.isEmpty ? null : data.dataProfiles.city,
+          "stateId": data.dataProfiles.state?.id,
+          "cityId": data.dataProfiles.city?.id,
           "gender": data.dataProfiles.gender!.isEmpty
               ? null
               : data.dataProfiles.gender,
@@ -655,6 +658,8 @@ Future<ResponseData> sendScoreUser(
             hasBeenPlayedSection
             hasBeenPlayedLevel
             prizeAwarded
+            devMessageLevel
+            devMessageSection
             rewardData {
               description
               earnedEnergy
@@ -666,6 +671,7 @@ Future<ResponseData> sendScoreUser(
             }
             titleAwarded
             isLastStage
+            isLastLevel
           }
         }
       '''),

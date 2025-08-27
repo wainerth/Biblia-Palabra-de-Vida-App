@@ -6,11 +6,12 @@ class Stage {
   String introduction;
   bool unLockSection;
   int? countCards;
-  int orderCard;
+  int sectionNumber;
   String color;
   Img? img;
   String? churchId;
   int status;
+  int? numberOfLevels;
   int levelCount;
   int levelCompletedCount;
 
@@ -20,11 +21,12 @@ class Stage {
     required this.introduction,
     required this.unLockSection,
     this.countCards,
-    required this.orderCard,
+    required this.sectionNumber,
     required this.color,
     required this.img,
     this.churchId,
     required this.levelCount,
+    this.numberOfLevels = 0,
     required this.levelCompletedCount,
     required this.status,
   });
@@ -36,11 +38,12 @@ class Stage {
       introduction: json['introduction'],
       unLockSection: json['unLockSection'],
       countCards: json['countCards'],
-      orderCard: json['orderCard'] ?? 0,
+      sectionNumber: json['sectionNumber'] ?? 0,
       color: json['color'],
       img: json['img'] != null ? Img.fromJson(json['img']) : null,
       churchId: json['churchId'],
       levelCount: json["levelCount"] ?? 0,
+      numberOfLevels: json["numberOfLevels"] ?? 0,
       levelCompletedCount: json["levelCompletedCount"] ?? 0,
       status: json['status'],
     );
@@ -53,11 +56,12 @@ class Stage {
     data['introduction'] = introduction;
     data['unLockSection'] = unLockSection;
     data['countCards'] = countCards;
-    data['orderCard'] = orderCard;
+    data['sectionNumber'] = sectionNumber;
     data['color'] = color;
     data['img'] = img;
     data['churchId'] = churchId;
     data['levelCount'] = levelCount;
+    data['numberOfLevels'] = numberOfLevels;
     data['levelCompletedCount'] = levelCompletedCount;
     data['status'] = status;
     return data;

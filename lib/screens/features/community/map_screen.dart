@@ -31,7 +31,6 @@ class _MapScreenState extends State<MapScreen>
   late AnimationController _animationController;
   late Animation<double> _animation;
 
-  // int _selectedIndex = 0;
   final List<String> imagePaths = [
     'assets/mapa1.png',
     'assets/mapa2.png',
@@ -163,37 +162,97 @@ class _MapScreenState extends State<MapScreen>
         setState(() {});
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         final LoginUser? userData = userProvider.currentUser;
+
         // obtenemos curso
         final ResponseData courseResponse =
             await loadOneCourse(userData?.userId, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
+          return;
+        } else {
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //       backgroundColor: Colors.green,
+          //       content: Text(
+          //           'Datos del curso cargados correctamente id del curso ${courseResponse.data['id']}')),
+          // );
         }
         course = CourseDetail.fromJson(courseResponse.data);
+
         // obtenemos sección
         final ResponseData stageResponse = await loadStageById(sectionId);
-
         if (stageResponse.error != null) {
           errorMessage = stageResponse.error;
+          return;
+        } else {
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //       backgroundColor: Colors.green,
+          //       content: Text(
+          //           'Datos de la sección cargados correctamente id de sección ${stageResponse.data['id']}')),
+          // );
         }
         stage = Stage.fromJson(stageResponse.data);
+
         // obtenemos los niveles
         final result = await loadLevelsByCourse(userData?.userId, sectionId);
-
         if (result.error != null) {
           errorMessage = result.error;
+          return;
         } else {
+          //  ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //       backgroundColor: Colors.green,
+          //       content: Text('Datos de los niveles cargados correctamente')),
+          // );
           setState(() {
             levels = result.data
                 .map((level) => Level.fromJson(removeTypename(level)))
                 .cast<Level>()
                 .toList();
+
+            // Completar la lista de niveles con los que
+            if (stage != null && stage!.numberOfLevels != null) {
+              final int levelsOfNumbers =
+                  stage!.numberOfLevels!; // Número total de niveles esperados
+              for (int i = 1; i <= levelsOfNumbers; i++) {
+                if (!levels.any((level) => level.levelNumber == i)) {
+                  levels.add(Level(
+                    id: 'pending_$i',
+                    name: 'Próximamente',
+                    isUnderConstruction: true,
+                    unLockLevel: false,
+                    color: 'A9B8BE', // Color gris para niveles bloqueados
+                    section: Section(sectionName: ''),
+                    img: Img(urlImg: ''),
+                    score: 0,
+                    levelScore: 0,
+                    levelNumber: i,
+                  ));
+                }
+              }
+            }
+
+            // Ordenar los niveles por número
+            levels.sort((a, b) => a.levelNumber.compareTo(b.levelNumber));
             gruposDeNiveles = chunked(levels, 5);
           });
         }
       } catch (e) {
         errorMessage = "An error occurred: $e";
+        return;
       } finally {
+        final int unlockedIndex = levels
+            .indexWhere((level) => level.unLockLevel && level.levelScore == 0);
+        if (unlockedIndex != -1) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            scrollController.animateTo(
+              unlockedIndex * StylesApp(context).sizeContainerLevel.height,
+              duration: const Duration(seconds: 2),
+              curve: Curves.easeInOut,
+            );
+          });
+        }
         LoadingService().hideLoading();
         setState(() {
           isLoading = false;
@@ -257,14 +316,7 @@ class _MapScreenState extends State<MapScreen>
     return PopScope(
       canPop:
           true, // Permite que la pantalla sea sacada de la pila de navegación
-      onPopInvokedWithResult: (didPop, result) async {
-        // No need to manually pop here; the system already handles the pop action.
-
-        //  if (navigatorKey.currentState?.canPop() ?? false) {
-        //   navigatorKey.currentState?.pop();
-        //    // Evita que el WillPopScope haga su retroceso
-        // }
-      },
+      onPopInvokedWithResult: (didPop, result) async {},
       child: Scaffold(
         body: NotificationListener<ScrollNotification>(
           onNotification: (notification) {
@@ -309,7 +361,7 @@ class _MapScreenState extends State<MapScreen>
                               HeaderMapWidget(
                                 title: course!.titleCourse,
                                 subtitleStage: stage!.sectionName,
-                                indexStage: stage!.orderCard,
+                                indexStage: stage!.sectionNumber,
                                 onRouteBack: () {
                                   Navigator.popAndPushNamed(
                                       context, '/layoutPage1');
@@ -328,7 +380,7 @@ class _MapScreenState extends State<MapScreen>
                                         title: stage!.sectionName,
                                         content: stage!.introduction,
                                         buttonText: 'Aceptar',
-                                        id: stage!.id,
+                                        id: stage!.sectionNumber.toString(),
                                         itemCount: stage!.levelCount,
                                         itemsCompleted:
                                             stage!.levelCompletedCount,
@@ -444,21 +496,34 @@ class _MapScreenState extends State<MapScreen>
                                                 onTap: grupo[i].unLockLevel ==
                                                         false
                                                     ? null
-                                                    : () {
+                                                    : () async {
                                                         stopAudio();
-                                                        //aaaa
-                                                        Navigator.pushNamed(
-                                                          context,
-                                                          '/historyPage',
-                                                          arguments: {
-                                                            'courseId':
-                                                                course?.id,
-                                                            'levelId':
-                                                                grupo[i].id,
-                                                            'sectionId':
-                                                                stage!.id
-                                                          },
-                                                        );
+                                                        if (grupo[i]
+                                                                .isUnderConstruction ==
+                                                            true) {
+                                                          await showCustomDialog(
+                                                              context,
+                                                              message:
+                                                                  "Este Nivel Esta en Construcción,\n al Estar disponible Te llagara un Notificación",
+                                                              dialogType:
+                                                                  DialogType
+                                                                      .info);
+                                                          return;
+                                                        } else {
+                                                          //aaaa
+                                                          Navigator.pushNamed(
+                                                            context,
+                                                            '/historyPage',
+                                                            arguments: {
+                                                              'courseId':
+                                                                  course?.id,
+                                                              'levelId':
+                                                                  grupo[i].id,
+                                                              'sectionId':
+                                                                  stage!.id
+                                                            },
+                                                          );
+                                                        }
                                                       },
                                                 child: Container(
                                                   // decoration: BoxDecoration(border: Border.all(color: Colors.white)),
@@ -576,9 +641,6 @@ class _MapScreenState extends State<MapScreen>
                                                                               context)
                                                                           .sizeContainer
                                                                           .width,
-
-                                                                      // color: Colors.black.withOpacity(
-                                                                      //     0.5), // Ajusta la opacidad
                                                                     ),
                                                                   ),
                                                               ],
@@ -588,6 +650,18 @@ class _MapScreenState extends State<MapScreen>
                                                             height: 10,
                                                           ),
                                                           Text(
+                                                            overflow: grupo[i]
+                                                                        .isUnderConstruction ==
+                                                                    true
+                                                                ? TextOverflow
+                                                                    .ellipsis
+                                                                : TextOverflow
+                                                                    .clip,
+                                                            maxLines:
+                                                                grupo[i].isUnderConstruction ==
+                                                                        true
+                                                                    ? 1
+                                                                    : 3,
                                                             textAlign: TextAlign
                                                                 .center,
                                                             "${grupo[i].levelNumber} ${grupo[i].name}",
@@ -626,15 +700,13 @@ class _MapScreenState extends State<MapScreen>
         ),
         bottomNavigationBar: ValueListenableBuilder<bool>(
           valueListenable: _isVisible,
-          builder: (context, value, child) {
+          builder: (context, isVisible, child) {
             return AnimatedContainer(
               duration: Duration(milliseconds: 300),
-              height: value ? kBottomNavigationBarHeight : 0,
-              child: OverflowBox(
-                maxHeight: kBottomNavigationBarHeight +
-                    20, // Permite overflow controlado
-                alignment: Alignment.bottomCenter,
-                child: CustomBottomNavigationBarWidget(
+              height: isVisible ? kBottomNavigationBarHeight : 0,
+              curve: Curves.easeInOut,
+              child: Wrap(children: [
+                CustomBottomNavigationBarWidget(
                   type: BottomNavigationBarType.fixed,
                   showUnselectedLabels: true,
                   backgroundColor: Colors.white,
@@ -646,7 +718,7 @@ class _MapScreenState extends State<MapScreen>
                   currentIndex: _selectedIndex,
                   onTap: _onItemTapped,
                 ),
-              ),
+              ]),
             );
           },
         ),
@@ -736,20 +808,27 @@ _buildItemLevel(BuildContext context, Level grupo) {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-            Text(
-              textAlign: TextAlign.center,
-              "${grupo.levelNumber}",
-              style: StylesApp(context).textStyleLevelNumber.copyWith(
-                    height: 1,
-                    color: Colors.white,
-                  ),
-            ),
-            Text(
-              "paso",
-              style: StylesApp(context).textStyleLevelNumber.copyWith(
-                  fontSize: StylesApp(context).fontSizeBody10,
-                  color: Colors.white),
-            )
+            if (grupo.isUnderConstruction == true) ...{
+              Icon(
+                Icons.construction,
+                size: 30,
+              )
+            } else ...{
+              Text(
+                textAlign: TextAlign.center,
+                "${grupo.levelNumber}",
+                style: StylesApp(context).textStyleLevelNumber.copyWith(
+                      height: 1,
+                      color: Colors.white,
+                    ),
+              ),
+              Text(
+                "paso",
+                style: StylesApp(context).textStyleLevelNumber.copyWith(
+                    fontSize: StylesApp(context).fontSizeBody10,
+                    color: Colors.white),
+              )
+            },
           ],
         ),
       ),

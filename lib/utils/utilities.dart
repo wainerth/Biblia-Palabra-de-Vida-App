@@ -114,8 +114,19 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
         }
 
         break;
+      case 'state':
+        if (item.value.isNotEmpty) {
+          nuevosDatos["state"] = item.originalData;
+        } else {
+          nuevosDatos["state"] = null;
+        }
+        break;
       case 'city':
-        nuevosDatos["city"] = item.value as String?;
+        if (item.value.isNotEmpty) {
+          nuevosDatos["city"] = item.originalData;
+        } else {
+          nuevosDatos["city"] = null;
+        }
         break;
       case 'gender':
         nuevosDatos["gender"] = item.value.isNotEmpty ? item.value[0] : null;
@@ -141,6 +152,7 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
       profileAreaCode: nuevosDatos["profileAreaCode"] ?? datos.profileAreaCode,
       phoneNumber: nuevosDatos["phoneNumber"] ?? datos.phoneNumber,
       country: nuevosDatos["country"] ?? datos.country,
+      state: nuevosDatos["state"] ?? datos.state,
       city: nuevosDatos["city"] ?? datos.city,
       gender: nuevosDatos["gender"] ?? datos.gender,
       isBaptized: nuevosDatos["isBaptized"] ?? datos.isBaptized,
@@ -252,11 +264,11 @@ Future<void> shareVerse(BuildContext context, dynamic data) async {
   final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
   final shareText =
       "${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
-  await Share.share(
-    shareText,
+  await SharePlus.instance.share(ShareParams(
+    text: shareText,
     subject:
         "Palabra de Vida - ${data.chapter.chapter} ${data.book.modernName}\nVer en: $baseUrl",
-  );
+  ));
 }
 
 RouteInfo getRouterScreen(action) {

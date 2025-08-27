@@ -25,7 +25,9 @@ class SocketClientProvider with ChangeNotifier {
 
   @pragma('vm:entry-point')
   static void backgroundNotificationHandler(NotificationResponse response) {
-    print("Notificación en segundo plano: ${response.payload}");
+    if (kDebugMode) {
+      print("Notificación en segundo plano: ${response.payload}");
+    }
     
   }
 
@@ -125,7 +127,7 @@ class SocketClientProvider with ChangeNotifier {
           print('Notification payload received: $payload');
         }
 
-        // Deserializamos el payload
+        // Deserializable el payload
         final notificationData = jsonDecode(payload);
         final notification = NotificationModel.fromJson(notificationData);
 

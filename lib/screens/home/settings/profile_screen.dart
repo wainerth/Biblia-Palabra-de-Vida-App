@@ -157,12 +157,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         value: dataUser!.email!,
         showLabel: false,
       ),
-      // ModelData(
-      //     label: "Tel.",
-      //     value: dataUser != null && dataUser!.profileAreaCode != null
-      //         ? dataUser!.profileAreaCode!.id
-      //         : '',
-      //     clave: "profileAreaCode"),
       ModelData(
           label: "Tel.",
           value:
@@ -175,9 +169,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           value: dataUser!.country?.country ?? '',
           clave: "country"),
       ModelData(
+        label: "Estado",
+        value: dataUser!.state?.name ?? '',
+        clave: "state",
+        originalData: dataUser!.state,
+      ),
+      ModelData(
         label: "Ciudad",
-        value: dataUser!.city ?? '',
+        value: dataUser!.city?.name ?? '',
         clave: "city",
+        originalData: dataUser!.city,
       ),
       ModelData(
         label: "Iglesia",
@@ -409,6 +410,7 @@ class CardColumnWidget extends StatelessWidget {
                       if (route != null) {
                         Navigator.popAndPushNamed(context, route!);
                       } else {
+                        // Abrir el diálogo de edición
                         showDialog(
                             useSafeArea: true,
                             context: context,
@@ -431,16 +433,19 @@ class CardColumnWidget extends StatelessWidget {
                                     name: user?.name ?? '',
                                     lastname: user?.lastname ?? '',
                                     birthdate: user?.birthdate ?? '',
-                                    city: '',
                                     country: user?.country != null
                                         ? user!.country
                                         : null,
+                                    state: user?.state,
+                                    city: user?.city,
                                     gender: user?.gender ?? '',
                                     isBaptized: user?.isBaptized,
                                     profileAreaCode: user?.profileAreaCode,
                                     phoneNumber: user?.phoneNumber ?? '',
                                     church: user!.userChurch.isNotEmpty
-                                        ? user.userChurch.where((ch) => ch.status == true).firstOrNull
+                                        ? user.userChurch
+                                            .where((ch) => ch.status == true)
+                                            .firstOrNull
                                         : null,
                                   );
                                   final UserProfile dataEnviar = UserProfile(
@@ -464,6 +469,15 @@ class CardColumnWidget extends StatelessWidget {
                                     );
                                     return;
                                   }
+                                  // if (!responseUpdateProfile.data['success']) {
+                                  //   LoadingService().hideLoading();
+                                  //   await showCustomDialog(
+                                  //     context,
+                                  //     message:
+                                  //         responseUpdateProfile.data['message'],
+                                  //     dialogType: DialogType.error,
+                                  //   );
+                                  // }
                                   if (dataEnviar.dataProfiles.church != null) {
                                     final response =
                                         await userProvider.updateUserChurch(

@@ -840,13 +840,13 @@ class StylesApp {
 
   Size get sizeContainerCard {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(80.0, 80.0);
+      return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(80.0, 80.0);
+      return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(80.0, 80.0);
+      return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(80.0, 80.0);
+      return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().lg) {

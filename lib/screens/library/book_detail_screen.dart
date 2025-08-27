@@ -1,10 +1,10 @@
-import 'dart:ui';
 
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +20,7 @@ class BookDetailScreen extends StatefulWidget {
 class _BookDetailScreenState extends State<BookDetailScreen> {
   final ScrollController _scrollController = ScrollController();
   List<ModelData> _listCountries = [];
-  List<ModelData> _lisCurrencies = [
+  final List<ModelData> _lisCurrencies = [
     ModelData(label: "USD", value: "1"),
     ModelData(label: "UYU", value: "2"),
     ModelData(label: "COP", value: "3"),
@@ -91,7 +91,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 ),
                 SizedBox(width: 8.0),
                 Expanded(
-                  child: Container(
+                  child: SizedBox(
                     // padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,11 +270,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     price: '2.04 USD',
                     onAddToCart: () {
                       // Lógica para agregar audiolibro al carrito
-                      print('Agregar audiolibro al carrito');
+                      if (kDebugMode) {
+                          print('Agregar audiolibro al carrito');
+                      }
                     },
                     onBuy: () {
                       // Lógica para comprar audiolibro
-                      print('Comprar audiolibro');
+                      if (kDebugMode) {
+                        print('Comprar audiolibro');
+                      }
                     },
                   ),
                   SizedBox(height: 9),
@@ -286,11 +290,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     price: '2.04 USD',
                     onAddToCart: () {
                       // Lógica para agregar versión online al carrito
-                      print('Agregar versión online al carrito');
+                      if (kDebugMode) {
+                        print('Agregar versión online al carrito');
+                      }
                     },
                     onBuy: () {
                       // Lógica para comprar versión online
-                      print('Comprar versión online');
+                      if (kDebugMode) {
+                        print('Comprar versión online');
+                      }
                     },
                   ),
                   SizedBox(height: 9),
@@ -303,11 +311,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     hasShippingCosts: true,
                     onAddToCart: () {
                       // Lógica para agregar libro físico al carrito
-                      print('Agregar libro físico al carrito');
+                      if (kDebugMode) {
+                        print('Agregar libro físico al carrito');
+                      }
                     },
                     onBuy: () {
                       // Lógica para comprar libro físico
-                      print('Comprar libro físico');
+                        if (kDebugMode) {
+                          print('Comprar libro físico');
+                      }
                     },
                   ),
                 ],
@@ -460,7 +472,7 @@ class BookFormatCard extends StatelessWidget {
                 ),
                 // Botones
                 Expanded(flex: 4,
-                  child: Container(
+                  child: SizedBox(
                    
                     child: Column(
                       children: [

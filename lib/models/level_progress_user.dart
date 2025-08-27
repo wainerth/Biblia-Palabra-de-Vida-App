@@ -54,7 +54,7 @@ class LevelProgressUser {
       message: Message.fromJson(json['message']),
       newRecord: json['newRecord'],
       user: InfoUser.fromJson(json['user']),
-      failedAttempts: json['failedAttempts'],
+      failedAttempts: json['failedAttempts'] ?? 0, 
       scoreLastAttempt: json['scoreLastAttempt'] ?? 0,
       completed: json['completed'] ?? false,
       level: LevelUser.fromJson(json['level']),

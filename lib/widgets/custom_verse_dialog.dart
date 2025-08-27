@@ -89,7 +89,7 @@ class CustomVerseDialog extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     textAlign: TextAlign.center,
-                    "${data.chapter.chapter}:${data.verse.verse}-${data.numberEndVerse}",
+                    "${data.chapter.chapter}:${data.verse.verse}${data.numberEndVerse > 0 ? '-' : ''}${data.numberEndVerse > 0 ? data.numberEndVerse : ''}",
                     style: StylesApp(context).textStyleBody16.copyWith(
                           color: currentTheme.textColor,
                         ),

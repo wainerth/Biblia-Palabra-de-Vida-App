@@ -31,6 +31,8 @@ class CatalogueProvider extends ChangeNotifier {
 
   Future<void> initialize() async {
     if (_isLoading) return;
+    if (_isInitialized) return;
+
     print("inicializando el catalogo");
     _isLoading = true;
     _errorMessage = null;
@@ -38,7 +40,6 @@ class CatalogueProvider extends ChangeNotifier {
 
     try {
       // Verificar conexión a internet primero
-
       await _checkInternetConnection();
 
       _client = await _createClientWithRetry();
@@ -54,9 +55,13 @@ class CatalogueProvider extends ChangeNotifier {
       ]);
 
       _isInitialized = true;
-      print("Catalogo inicializado");
+      if (kDebugMode) {
+        print("Catalogo inicializado");
+      }
     } catch (e) {
-      print("Catalogo error");
+      if (kDebugMode) {
+        print("Catalogo error");
+      }
       _errorMessage = e.toString();
       if (kDebugMode) {
         print('Error initializing CatalogueProvider: $e');
@@ -120,8 +125,10 @@ class CatalogueProvider extends ChangeNotifier {
         allCountries.addAll(message);
         notifyListeners();
       } else if (message == 'completed') {
-        if (kDebugMode) {
-          print("countries cargados...");
+        if (kDebugMode && allCountries.isNotEmpty) {
+          if (kDebugMode) {
+            print("countries cargados...");
+          }
         }
         break;
       }
@@ -202,7 +209,11 @@ class CatalogueProvider extends ChangeNotifier {
       allChurches = (data['getAllChurches'] as List)
           .map((i) => Church.fromJson(i))
           .toList();
-
+      if (kDebugMode && allChurches.isNotEmpty) {
+        if (kDebugMode) {
+          print("all Churches  loaded...");
+        }
+      }
       notifyListeners();
     } on TimeoutException catch (e) {
       throw Exception('Request timeout: ${e.message}');
@@ -292,9 +303,9 @@ class CatalogueProvider extends ChangeNotifier {
 
       allConfig =
           Map<String, dynamic>.from(removeTypename(data['getConfigurations']));
-          if (kDebugMode) {
-            print("all configuration loaded");
-          }
+      if (kDebugMode) {
+        print("all configuration loaded");
+      }
       notifyListeners();
     } on TimeoutException catch (e) {
       throw Exception('Request timeout: ${e.message}');

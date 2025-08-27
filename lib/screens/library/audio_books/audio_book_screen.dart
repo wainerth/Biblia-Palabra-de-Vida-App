@@ -11,7 +11,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Container(
+      child: SizedBox(
         child: Center(
           child: Text('Audio Libros'),
         ),
