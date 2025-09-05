@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -405,7 +408,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         }
 
         // obtener la proxima sección desbloqueada
-        if (sendScore!.isLastLevel == true) {
+        if (sendScore!.isLastLevel == true && !sendScore!.hasBeenPlayedLevel) {
           final responseUnlockSection =
               await getNextSectionUnlocked(userData!.userId, sectionId);
           if (responseUnlockSection.error != null) {
@@ -997,7 +1000,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
               text: "Compartir logro",
               onPressed: () async {
                 await SharePlus.instance.share(ShareParams(
-                  text: "¡Etapa $sectionId-${stage?.sectionName} completada",
+                  text:
+                      "¡Etapa $stage.sectionNumber-${stage?.sectionName} completada",
                   subject: "¡Felicita a ${userData!.username}! ",
                 ));
               }),
@@ -1269,17 +1273,70 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   if (responseDownloadCertificate.data != null) {
                     final url =
                         "${GraphQLConfig.urlServidor}${responseDownloadCertificate.data['url']}";
-                    if (await canLaunchUrl(Uri.parse(url))) {
-                      await launchUrl(Uri.parse(url),
-                          mode: LaunchMode.externalApplication);
-                    } else {
+                    try {
+                      final response = await http.get(Uri.parse(url));
+                      if (response.statusCode == 200) {
+                        final directory =
+                            Directory("/storage/emulated/0/Download");
+                        if (!directory.existsSync()) {
+                          directory.createSync(recursive: true);
+                        }
+                        final filePath = "${directory.path}/certificado.pdf";
+                        final file = File(filePath);
+                        await file.writeAsBytes(response.bodyBytes);
+
+                        await showCustomDialogWithAction(
+                          context,
+                          message:
+                              "Certificado descargado exitosamente en: $filePath",
+                          dialogType: DialogTypeAction.info,
+                          buttonOk: "Ok",
+                          actionCallbackOk: () {
+                            Navigator.pop(context);
+                          },
+                          textButton: "Abrir directorio",
+                          actionCallback: () async {
+                            try {
+                              await launchUrl(Uri.file(directory.path));
+                            } catch (e) {
+                              await showCustomDialog(
+                                context,
+                                message:
+                                    "No se pudo abrir la carpeta de descargas.",
+                                dialogType: DialogType.error,
+                              );
+                            }
+                          },
+                        );
+                      } else {
+                        await showCustomDialog(
+                          context,
+                          message: "No se pudo descargar el certificado.",
+                          dialogType: DialogType.error,
+                        );
+                      }
+                    } catch (e) {
                       await showCustomDialog(
                         context,
-                        message: "No se pudo abrir el enlace de descarga.",
+                        message: "Error al descargar el certificado: $e",
                         dialogType: DialogType.error,
                       );
                     }
                   }
+                  // if (responseDownloadCertificate.data != null) {
+                  //   final url =
+                  //       "${GraphQLConfig.urlServidor}${responseDownloadCertificate.data['url']}";
+                  //   if (await canLaunchUrl(Uri.parse(url))) {
+                  //     await launchUrl(Uri.parse(url),
+                  //         mode: LaunchMode.externalApplication);
+                  //   } else {
+                  //     await showCustomDialog(
+                  //       context,
+                  //       message: "No se pudo abrir el enlace de descarga.",
+                  //       dialogType: DialogType.error,
+                  //     );
+                  //   }
+                  // }
                 } catch (e) {
                   await showCustomDialog(
                     context,

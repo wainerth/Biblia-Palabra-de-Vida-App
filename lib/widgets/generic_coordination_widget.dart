@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class GenericCoordinationWidget<T> extends StatelessWidget {
@@ -10,6 +13,7 @@ class GenericCoordinationWidget<T> extends StatelessWidget {
   final bool showCity;
   final bool showRecipientName;
   final bool showPhoneNumber;
+  final bool showLabel;
   final String recipientNameLabel;
   final String phoneNumberLabel;
   final EdgeInsetsGeometry? padding;
@@ -30,6 +34,7 @@ class GenericCoordinationWidget<T> extends StatelessWidget {
     this.showCity = false,
     this.showRecipientName = false,
     this.showPhoneNumber = false,
+    this.showLabel = false,
     this.recipientNameLabel = "Nombre de la persona a entregarle",
     this.phoneNumberLabel = "Número de teléfono",
     this.padding,
@@ -98,6 +103,7 @@ class GenericCoordinationWidget<T> extends StatelessWidget {
               label: recipientNameLabel,
               icon: Icons.person,
               textStyle: defaultTextStyle,
+              showLabel: showLabel,
               labelStyle: defaultLabelStyle,
               iconColor: defaultIconColor,
               onChanged: onRecipientNameChanged,
@@ -121,6 +127,7 @@ class GenericCoordinationWidget<T> extends StatelessWidget {
                     textInputType: TextInputType.phone,
                     icon: Icons.phone,
                     textStyle: defaultTextStyle,
+                    showLabel: showLabel,
                     labelStyle: defaultLabelStyle,
                     iconColor: defaultIconColor,
                     onChanged: onPhoneNumberChanged,
@@ -173,37 +180,51 @@ class GenericCoordinationWidget<T> extends StatelessWidget {
     required TextStyle textStyle,
     required TextStyle labelStyle,
     required Color iconColor,
+    bool showLabel = true,
     TextInputType textInputType = TextInputType.text,
     ValueChanged<String>? onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: labelStyle),
-          SizedBox(height: 4),
-          Row(
-            children: [
-              Icon(icon, color: iconColor, size: 20),
-              SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  keyboardType: textInputType,
-                  style: textStyle,
-                  onChanged: onChanged,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                    border: InputBorder.none,
-                    hintText: label,
+      child: Container(
+        constraints: BoxConstraints(
+          minHeight: 48,
+        ),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: StyleColor.grayMedium,
+          ),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (showLabel) Text(label, style: labelStyle),
+            SizedBox(height: 4),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(icon, color: iconColor, size: 20),
+                SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    keyboardType: textInputType,
+                    style: textStyle,
+                    onChanged: onChanged,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                      border: InputBorder.none,
+                      hintText: label,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          // Divider(height: 16, thickness: 1),
-        ],
+              ],
+            ),
+            // Divider(height: 16, thickness: 1),
+          ],
+        ),
       ),
     );
   }

@@ -50,7 +50,6 @@ class LoginUser {
   final String createdAt;
   final int achievementsReachedCount;
   final int streakDaysCount;
-  final int preachingsCreatedCount;
   final int completedCourse;
   final List<UserChurch> userChurch;
   final List<UserTitle>? title;
@@ -72,7 +71,6 @@ class LoginUser {
     required this.createdAt,
     required this.achievementsReachedCount,
     required this.streakDaysCount,
-    required this.preachingsCreatedCount,
     required this.completedCourse,
     required this.userChurch,
     required this.title,
@@ -111,7 +109,6 @@ class LoginUser {
     String? createdAt,
     int? achievementsReachedCount,
     int? streakDaysCount,
-    int? preachingsCreatedCount,
     int? completedCourse,
   }) {
     return LoginUser(
@@ -134,8 +131,6 @@ class LoginUser {
         achievementsReachedCount:
             achievementsReachedCount ?? this.achievementsReachedCount,
         streakDaysCount: streakDaysCount ?? this.streakDaysCount,
-        preachingsCreatedCount:
-            preachingsCreatedCount ?? this.preachingsCreatedCount,
         completedCourse: completedCourse ?? this.completedCourse,
         userChurch: userChurch ?? this.userChurch,
         title: title ?? title,
@@ -176,7 +171,6 @@ class LoginUser {
       createdAt: json['createdAt'],
       achievementsReachedCount: json['achievementsReachedCount'],
       streakDaysCount: json['streakDaysCount'],
-      preachingsCreatedCount: json['preachingsCreatedCount'],
       completedCourse: json['completedCourse'] ?? 0,
       currentLeague: json['currentLeague'] != null
           ? League.fromJson(json['currentLeague'])
@@ -217,7 +211,6 @@ class LoginUser {
         'createdAt': createdAt,
         'achievementsReachedCount': achievementsReachedCount,
         'streakDaysCount': streakDaysCount,
-        'preachingsCreatedCount': preachingsCreatedCount,
         'completedCourse': completedCourse,
         'currentLeague': currentLeague?.toJson(),
         'userChurch': userChurch.map((e) => e.toJson()).toList(),

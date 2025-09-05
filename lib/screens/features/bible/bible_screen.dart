@@ -71,8 +71,28 @@ class _BibleScreenState extends State<BibleScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       userData = userProvider.currentUser;
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
       await _initDataLoad();
+
       _loadHighlights();
+
+      if (args != null) {
+        if (args['bibleId'] != null) {
+          final bibleId = args['bibleId'];
+          final bookId = args['bookId'];
+          final chapterId = args['chapterId'];
+          final verseId = args['verseId'];
+          await loadVersionAndChapter(InputDataSearchModel(
+              versionId: bibleId,
+              bookId: bookId,
+              chapterId: chapterId,
+              startVerseId: verseId,
+              endVerseId: verseId));
+
+          args.clear();
+        }
+      }
     });
   }
 
@@ -1811,118 +1831,6 @@ class _BibleScreenState extends State<BibleScreen> {
     }
   }
 
-  loadVersionAndVerseRange(InputDataSearchModel data) async {
-    final bibleVersions = Provider.of<CatalogueProvider>(context, listen: false)
-        .allBibleVersion
-        .map((v) => ModelData(value: v.id, label: v.version))
-        .toList();
-    setState(() {
-      lastVersionsSelected = bibleVersions
-          .firstWhere((version) => version.value == data.versionId)
-          .value;
-      final currentVers = Provider.of<CatalogueProvider>(context, listen: false)
-          .allBibleVersion
-          .firstWhere((version) => version.id == lastVersionsSelected);
-      currentVersion = currentVers;
-      currentBook =
-          currentVers.books.firstWhere((book) => book.id == data.bookId);
-    });
-    LoadingService().showLoading(context);
-    try {
-      //consulto todos los capítulos del libro actual con sus versículos
-      final responseChapterByBook = await getChapterWithVerses(currentBook!.id);
-      if (responseChapterByBook.error != null) {
-        setState(() {
-          errorMessage = responseChapterByBook.error;
-        });
-        return;
-      }
-      setState(() {
-        allChapters = responseChapterByBook.data
-            .map<ChapterModel>((chapter) => ChapterModel.fromJson(chapter))
-            .toList();
-
-        allChapters.sort((a, b) {
-          // Convertir a números si son strings (ejemplo: "1" -> 1)
-          final chapterA = a.chapter;
-          final chapterB = b.chapter;
-
-          return chapterA.compareTo(chapterB); // Orden ascendente
-        });
-        //si no es el el primer capítulo del libro
-        currentChapter =
-            allChapters.firstWhere((chapter) => chapter.id == data.chapterId);
-
-        verses = getVersesInRange(
-            currentChapter!.verses!, data.startVerseId, data.endVerseId);
-      });
-      setState(() {
-        currentBook = currentBook!.copyWith(
-          chapters: allChapters.length - 1,
-        );
-        // Mover el scroll al versículo de inicio si está presente
-        if (verses.isNotEmpty) {
-          final startIndex =
-              verses.indexWhere((v) => v.id == data.startVerseId);
-          if (startIndex != -1) {
-            // Esperar al siguiente frame para asegurar que el ListView esté construido
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              if (_selectableTextKey.currentContext != null &&
-                  scrollController.hasClients) {
-                try {
-                  final renderBox =
-                      _selectableTextKey.currentContext!.findRenderObject();
-                  if (renderBox is RenderBox) {
-                    final text = verses
-                        .sublist(0, startIndex)
-                        .map((v) => "${v.verse} ${v.text}")
-                        .join(' ');
-                    final tp = TextPainter(
-                      text: TextSpan(
-                        text: text,
-                        style: StylesApp(context).textStyleBody14.copyWith(
-                              fontFamily: fontFamilySet.label,
-                              fontSize: fontSizeVerse,
-                            ),
-                      ),
-                      textDirection: TextDirection.ltr,
-                      maxLines: null,
-                    );
-                    tp.layout(maxWidth: renderBox.size.width);
-                    final offsetY = tp.height - 15;
-                    await scrollController.animateTo(
-                      offsetY,
-                      duration: Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                } catch (_) {
-                  final itemHeight = 40.0;
-                  await scrollController.animateTo(
-                    startIndex * itemHeight,
-                    duration: Duration(milliseconds: 400),
-                    curve: Curves.easeInOut,
-                  );
-                }
-              }
-            });
-          }
-        }
-      });
-    } catch (e) {
-      LoadingService().hideLoading();
-      errorMessage = 'Error al cargar el capítulo $e';
-      setState(() {
-        isLoading = false;
-      });
-    } finally {
-      LoadingService().hideLoading();
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
   // Variable para almacenar el ID del versículo marcado por scroll
   loadVersionAndChapter(InputDataSearchModel data) async {
     final bibleVersions = Provider.of<CatalogueProvider>(context, listen: false)
@@ -2004,7 +1912,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     final offsetY = tp.height;
                     await scrollController.animateTo(
                       offsetY,
-                      duration: Duration(milliseconds: 400),
+                      duration: Duration(milliseconds: 200),
                       curve: Curves.easeInOut,
                     );
                   }

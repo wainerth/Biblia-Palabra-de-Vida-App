@@ -33,7 +33,9 @@ class CatalogueProvider extends ChangeNotifier {
     if (_isLoading) return;
     if (_isInitialized) return;
 
-    print("inicializando el catalogo");
+    if (kDebugMode) {
+      print("inicializando el catalogo");
+    }
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();

@@ -17,7 +17,7 @@ class AventureScreen extends StatefulWidget {
 class _AventureScreenState extends State<AventureScreen> {
   late final UserProvider userProvider;
   LoginUser? dataUser;
-  LastProgressUser? progressUser;
+  ResponseProgress? progressUser;
   bool isLoading = true;
   List<bool> loadAventure = [];
   late BibleTheme currentTheme;
@@ -174,9 +174,20 @@ class _AventureScreenState extends State<AventureScreen> {
               CardAventureWidget(
                 course: courses[index],
                 loadingAction: loadAventure[index],
-                onTap: () {
-                  Navigator.popAndPushNamed(context, '/detailCoursePage',
-                      arguments: {"courseId": courses[index].id});
+                onTap: () async {
+                  Stage? stage =
+                      await loadStage(dataUser?.userId, courses[index].id);
+                  if (stage != null && stage.levelCount > 0) {
+                    Navigator.popAndPushNamed(context, '/detailCoursePage',
+                        arguments: {"courseId": courses[index].id});
+                  } else {
+                    setState(() {
+                      loadAventure[index] = false;
+                    });
+                    await showCustomDialog(context,
+                        message: "¡Este curso no esta Disponible!",
+                        dialogType: DialogType.info);
+                  }
                 },
                 goToMap: () async {
                   setState(() {
@@ -190,18 +201,45 @@ class _AventureScreenState extends State<AventureScreen> {
                     final progressResponse = await userProvider.getProgressUser(
                         dataUser?.userId, courses[index].id);
                     if (progressResponse!.error != null) {
-                      setState(() =>loadAventure[index] = false );
+                      setState(() => loadAventure[index] = false);
                       await showCustomDialog(context,
                           message: progressResponse.error!,
                           dialogType: DialogType.error);
-                          return;
+                      return;
                     }
                     progressUser = progressResponse.data;
-                    if (progressUser != null) {
-                      Navigator.pushNamed(context, '/mapPage', arguments: {
-                        'courseId': courses[index].id,
-                        'sectionId': progressUser!.sectionId ?? stage.id
-                      });
+                    if (progressUser?.success == true) {
+                      if (progressUser!.message
+                          .contains('El curso ya fue finalizado')) {
+                        await showCustomDialogWithAction(
+                          context,
+                          message: progressUser!.message,
+                          dialogType: DialogTypeAction.info,
+                          buttonOk: "Cerrar",
+                          textButton: "ir Al curso",
+                          showAction: true,
+                          actionCallbackOk: () {
+                            setState(() {
+                              loadAventure[index] = false;
+                            });
+                            Navigator.pop(context);
+                          },
+                          actionCallback: () {
+                            Navigator.pushNamed(context, '/mapPage',
+                                arguments: {
+                                  'courseId': progressUser?.data?.courseId,
+                                  'sectionId':
+                                      progressUser?.data?.sectionId ?? stage.id
+                                });
+                          },
+                        );
+                        return;
+                      } else {
+                        Navigator.pushNamed(context, '/mapPage', arguments: {
+                          'courseId': courses[index].id,
+                          'sectionId': progressUser?.data?.sectionId ?? stage.id
+                        });
+                      }
                     } else {
                       Navigator.pushNamed(context, '/mapPage', arguments: {
                         'courseId': courses[index].id,

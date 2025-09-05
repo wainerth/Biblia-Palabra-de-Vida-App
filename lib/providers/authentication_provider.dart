@@ -69,15 +69,25 @@ class AuthenticationProvider extends ChangeNotifier {
 
         Provider.of<UserProvider>(context, listen: false)
             .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
-        await loadProfileUser(dataUserLoad.userId, userToken);
+        final profileResponse = await loadProfileUser(dataUserLoad.userId, userToken);
+        if(profileResponse.error != null) {
+          await showCustomDialogWithAction(
+            context, message: profileResponse.error!, dialogType: DialogTypeAction.error, 
+            buttonOk: "Reintentar", actionCallbackOk: () {
+               checkAuthentication(context);
+            });
+            
+        } else {
         if (kDebugMode) {
           print('cargo nueva data de perfil');
+        }
+
         }
       } else {
         isAuthenticated = false;
         token = userToken;
         Provider.of<UserProvider>(context, listen: false).setUser(null);
-        logoutUser(navigatorKey.currentContext!);
+         logoutUser(navigatorKey.currentContext!);
         LoadingService().hideLoading();
       }
     } catch (e, stackTrace) {

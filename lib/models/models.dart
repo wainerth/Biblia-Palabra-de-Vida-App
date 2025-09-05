@@ -1,3 +1,4 @@
+
 export 'package:biblia_palabra_de_vida_app/models/audio.dart';
 export 'package:biblia_palabra_de_vida_app/models/video.dart';
 
@@ -85,3 +86,5 @@ export 'package:biblia_palabra_de_vida_app/models/courses_detail.dart';
 export 'package:biblia_palabra_de_vida_app/models/response_certificate_created.dart';
 export 'package:biblia_palabra_de_vida_app/models/response_reference_biblical_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/copy_model_verse.dart';
+export 'package:biblia_palabra_de_vida_app/models/currency_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/delivery_option.dart';

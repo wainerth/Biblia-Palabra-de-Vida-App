@@ -350,7 +350,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
         }
         Color color;
         if (index < 5) {
-          color = Colors.green;
+          color = StyleColor.orange;
         } else if (index > 15) {
           color = Colors.red;
         } else {
@@ -367,16 +367,16 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.arrow_upward_rounded, color: Colors.green),
+                      Icon(Icons.arrow_upward_rounded, color: StyleColor.turquoise),
                       Text(
                         'Zona de Ascenso',
                         style: StylesApp(context).textStyleBody15.copyWith(
-                              color: StyleColor.greenDark,
+                              color: StyleColor.turquoise,
                               fontWeight: FontWeight.bold,
                             ),
                         textAlign: TextAlign.center,
                       ),
-                      Icon(Icons.arrow_upward_rounded, color: Colors.green),
+                      Icon(Icons.arrow_upward_rounded, color: StyleColor.turquoise),
                     ],
                   ),
                 ),

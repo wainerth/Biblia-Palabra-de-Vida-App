@@ -1,5 +1,23 @@
 import 'dart:convert';
 
+class ResponseProgress {
+  final String message;
+  final bool success;
+  final LastProgressUser? data;
+
+  ResponseProgress(
+      {required this.message, required this.success, required this.data});
+
+  factory ResponseProgress.fromJson(Map<String, dynamic> json) {
+    return ResponseProgress(
+      message: json['message'] ?? '',
+      success: json['success'] ?? false,
+      data:
+          json['data'] != null ? LastProgressUser.fromJson(json['data']) : null,
+    );
+  }
+}
+
 class LastProgressUser {
   final String? courseId;
   final String? sectionId;
@@ -23,20 +41,25 @@ class LastProgressUser {
   // Método para crear un objeto LastProgressUser desde un Map (para leer desde SharedPreferences, por ejemplo)
   factory LastProgressUser.fromMap(Map<String, dynamic> map) {
     return LastProgressUser(
-      courseId: map['courseId'] ,
-      sectionId: map['sectionId'] ,
+      courseId: map['courseId'],
+      sectionId: map['sectionId'],
       levelId: map['levelId'],
     );
   }
 
-    // Método opcional para convertir a JSON
+  // Método opcional para convertir a JSON
   String toJson() => json.encode(toMap());
 
   // Método opcional para crear desde JSON
-  factory LastProgressUser.fromJson(String source) => 
-  LastProgressUser.fromMap(json.decode(source));
-
+  factory LastProgressUser.fromJson(Map<String, dynamic> json) {
+    return LastProgressUser(
+      courseId: json['courseId'],
+      sectionId: json['sectionId'],
+      levelId: json['levelId'],
+    );
+  }
 
   @override
-  String toString() => 'LastProgressUser{courseId: $courseId, sectionId: $sectionId, levelId: $levelId}';
+  String toString() =>
+      'LastProgressUser{courseId: $courseId, sectionId: $sectionId, levelId: $levelId}';
 }

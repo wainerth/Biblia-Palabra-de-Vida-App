@@ -21,7 +21,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   bool loadAventure = false;
   bool isLoading = true;
   String? errorMessage;
-  LastProgressUser? progressUser;
+  ResponseProgress? progressUser;
   int _selectedIndex = 1;
 
   @override
@@ -173,11 +173,36 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                         dialogType: DialogType.error);
                   }
                   progressUser = progressResponse.data;
-                  if (progressUser != null) {
-                    Navigator.pushNamed(context, '/mapPage', arguments: {
-                      'courseId': course.id,
-                      'sectionId': progressUser!.sectionId ?? stages.first.id
-                    });
+                  if (progressUser?.success == true) {
+                    if (progressUser!.message
+                        .contains('El curso ya fue finalizado')) {
+                      await showCustomDialogWithAction(
+                        context,
+                        message: progressUser!.message,
+                        dialogType: DialogTypeAction.info,
+                        buttonOk: "Ver más cursos",
+                        textButton: "ir Al curso",
+                        showAction: true,
+                        actionCallbackOk: () {
+                          Navigator.pushNamed(context, '/layoutPage',
+                              arguments: {'selectedIndex': 1});
+                        },
+                        actionCallback: () {
+                          Navigator.pushNamed(context, '/mapPage', arguments: {
+                            'courseId': progressUser?.data?.courseId,
+                            'sectionId':
+                                progressUser?.data?.sectionId ?? stages.first.id
+                          });
+                        },
+                      );
+                      return;
+                    } else {
+                      Navigator.pushNamed(context, '/mapPage', arguments: {
+                        'courseId': course.id,
+                        'sectionId':
+                            progressUser?.data?.sectionId ?? stages.first.id
+                      });
+                    }
                   } else {
                     if (stages.first.levelCount > 0) {
                       Navigator.pushNamed(context, '/mapPage', arguments: {
@@ -304,7 +329,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                         minHeight: 28.0, minWidth: 101.0),
                                     child: Center(
                                       child: Text(
-                                        "Etapa ${stage.sectionNumber }",//index + 1
+                                        "Etapa ${stage.sectionNumber}", //index + 1
                                         style: StylesApp(context)
                                             .textStyleBody12
                                             .copyWith(color: Colors.black),
@@ -517,7 +542,6 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
               ],
             );
           }
-          
         },
       ),
     );

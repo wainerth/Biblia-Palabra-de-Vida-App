@@ -39,7 +39,6 @@ Future<ResponseData> getProfileUser(token, idUser) async {
         createdAt
         achievementsReachedCount
         streakDaysCount
-        preachingsCreatedCount
         country {
           id
           country
@@ -1448,6 +1447,7 @@ Future getLastProgressUser(userId, courseId) async {
     query GetLastProgressUser($courseId: ID, $userId: ID) {
         getLastProgressUser(courseId: $courseId, userId: $userId) {
           message
+          success
           data {
             levelId
             sectionId
@@ -1843,11 +1843,15 @@ Future<ResponseData> getDailyWord() async {
           getDailyWord {
             book {
               modernName
+              id
+              bibleId
             }
             chapter {
               chapter
+              id
             }
             verse {
+            id
               verse
               text
             }

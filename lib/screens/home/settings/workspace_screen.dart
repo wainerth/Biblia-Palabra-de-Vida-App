@@ -33,7 +33,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   LoginUser? dataUser;
   late final CatalogueProvider catalogueProvider;
   PaginationInfo? paginate;
-  LastProgressUser? progressUser;
+  ResponseProgress? progressUser;
   bool error = false;
   bool errorDaily = false;
   bool loadingDaily = false;
@@ -185,14 +185,14 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                   child: Visibility(
                     visible: true,
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 35,
+                      height: 35,
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                       ),
                       child: IconButton(
                         padding: EdgeInsets.all(0),
-                        iconSize: 40,
+                        iconSize: 35,
                         onPressed: () {
                           showModalBottomSheet(
                             context: context,
@@ -331,11 +331,34 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           await _loadProgress(context);
           if (card['label'] == 'Aventura') {
             if (error) return;
-            if (progressUser != null && card['label'] == 'Aventura') {
-              Navigator.pushNamed(context, '/mapPage', arguments: {
-                'courseId': progressUser!.courseId,
-                'sectionId': progressUser!.sectionId
-              });
+            if (progressUser!.success == true) {
+              if (progressUser!.message
+                  .contains('El curso ya fue finalizado')) {
+                await showCustomDialogWithAction(
+                  context,
+                  message: progressUser!.message,
+                  dialogType: DialogTypeAction.info,
+                  buttonOk: "Ver más cursos",
+                  textButton: "ir Al curso",
+                  showAction: true,
+                  actionCallbackOk: () {
+                    Navigator.pushNamed(context, '/layoutPage1',
+                        arguments: {'selectedIndex': 1});
+                  },
+                  actionCallback: () {
+                    Navigator.pushNamed(context, '/mapPage', arguments: {
+                      'courseId': progressUser!.data?.courseId,
+                      'sectionId': progressUser?.data?.sectionId
+                    });
+                  },
+                );
+                return;
+              } else {
+                Navigator.pushNamed(context, '/mapPage', arguments: {
+                  'courseId': progressUser!.data?.courseId,
+                  'sectionId': progressUser!.data?.sectionId
+                });
+              }
             } else {
               Navigator.pushNamed(context, '/introAventurePage');
             }
@@ -463,15 +486,39 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               await _loadProgress(context);
               if (error) return;
 
-              if (progressUser != null) {
-                if (mounted) {
-                  final currentContext = context;
+              if (progressUser!.success == true) {
+                if (progressUser!.message
+                    .contains('El curso ya fue finalizado')) {
+                  await showCustomDialogWithAction(
+                    context,
+                    message: progressUser!.message,
+                    dialogType: DialogTypeAction.info,
+                    buttonOk: "Ver más cursos",
+                    textButton: "ir Al curso",
+                    showAction: true,
+                    actionCallbackOk: () {
+                      Navigator.pushNamed(context, '/layoutPage1',
+                          arguments: {'selectedIndex': 1});
+                    },
+                    actionCallback: () {
+                      Navigator.pushNamed(context, '/mapPage', arguments: {
+                        'courseId': progressUser?.data?.courseId,
+                        'sectionId': progressUser?.data?.sectionId
+                      });
+                    },
+                  );
+                  return;
+                } else {
+                  if (mounted) {
+                    final currentContext = context;
 
-                  if (currentContext.mounted) {
-                    Navigator.pushNamed(currentContext, '/mapPage', arguments: {
-                      'courseId': progressUser!.courseId,
-                      'sectionId': progressUser!.sectionId
-                    });
+                    if (currentContext.mounted) {
+                      Navigator.pushNamed(currentContext, '/mapPage',
+                          arguments: {
+                            'courseId': progressUser!.data?.courseId,
+                            'sectionId': progressUser!.data?.sectionId
+                          });
+                    }
                   }
                 }
               } else {
@@ -604,46 +651,59 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                       Padding(
                         padding: const EdgeInsets.only(left: 45.0),
                         child: dailyWord.book!.modernName!.isNotEmpty
-                            ? Row(
-                                spacing: 10,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    constraints: BoxConstraints(maxWidth: 180),
-                                    width: double.infinity,
-                                    child: Text(
-                                      maxLines: 1,
-                                      softWrap: true,
-                                      overflow: TextOverflow.ellipsis,
-                                      "${dailyWord.book!.modernName}",
-                                      style: StylesApp(context)
-                                          .textStyleBody15
-                                          .copyWith(
-                                            color: Colors.white,
-                                          ),
+                            ? GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(context, "/layoutPage",
+                                      arguments: {
+                                        'selectedIndex': 1,
+                                        'bibleId': dailyWord.book!.bibleId,
+                                        'bookId': dailyWord.book!.id,
+                                        'chapterId': dailyWord.chapter!.id,
+                                        'verseId': dailyWord.verse!.id,
+                                      });
+                                },
+                                child: Row(
+                                  spacing: 10,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      constraints:
+                                          BoxConstraints(maxWidth: 180),
+                                      width: double.infinity,
+                                      child: Text(
+                                        maxLines: 1,
+                                        softWrap: true,
+                                        overflow: TextOverflow.ellipsis,
+                                        "${dailyWord.book!.modernName}",
+                                        style: StylesApp(context)
+                                            .textStyleBody15
+                                            .copyWith(
+                                              color: Colors.white,
+                                            ),
+                                      ),
                                     ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "${dailyWord.chapter!.chapter}:",
-                                        style: StylesApp(context)
-                                            .textStyleBody15
-                                            .copyWith(
-                                              color: Colors.white,
-                                            ),
-                                      ),
-                                      Text(
-                                        "${dailyWord.verse!.verse}",
-                                        style: StylesApp(context)
-                                            .textStyleBody15
-                                            .copyWith(
-                                              color: Colors.white,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "${dailyWord.chapter!.chapter}:",
+                                          style: StylesApp(context)
+                                              .textStyleBody15
+                                              .copyWith(
+                                                color: Colors.white,
+                                              ),
+                                        ),
+                                        Text(
+                                          "${dailyWord.verse!.verse}",
+                                          style: StylesApp(context)
+                                              .textStyleBody15
+                                              .copyWith(
+                                                color: Colors.white,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               )
                             : Text(""),
                       ),
@@ -825,14 +885,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                 child: Center(
                                   child: Text(
                                     textAlign: TextAlign.center,
-                                    "${userData?.league != null ? userData.league.leagueName : 'necesitas experiencia para Entrar a una liga'}",
+                                    "${userData?.league != null ? userData.league.leagueName : 'El rebaño te espera!'}",
                                     style: userData?.league != null
                                         ? StylesApp(context)
                                             .textStyleBody6
                                             .copyWith(color: Colors.white)
                                         : StylesApp(context)
                                             .textStyleBody10
-                                            .copyWith(color: Colors.white),
+                                            .copyWith(
+                                                color: Colors.white,
+                                                fontSize: 14.0),
                                   ),
                                 ),
                               ),

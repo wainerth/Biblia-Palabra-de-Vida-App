@@ -11,12 +11,12 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 class UserProvider extends ChangeNotifier {
   LoginUser? _user;
-  LastProgressUser? _progressUser;
+  ResponseProgress? _progressUser;
   LoginUser? get currentUser => _user;
   DailyWord? dailyProverb;
   DailyWord? get getDailyProverb => dailyProverb;
 
-  LastProgressUser? get progressUser => _progressUser;
+  ResponseProgress? get progressUser => _progressUser;
 
   UserProvider() {
     _initializeClient();
@@ -33,7 +33,7 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setProgressUser(LastProgressUser? progress) {
+  void setProgressUser(ResponseProgress? progress) {
     _progressUser = progress;
     // actualizamos localStorage
     notifyListeners();
@@ -203,7 +203,6 @@ class UserProvider extends ChangeNotifier {
           achievementsReachedCount: _user?.achievementsReachedCount,
           favoriteVerseId: _user?.favoriteVerseId,
           notifications: _user?.notifications,
-          preachingsCreatedCount: _user?.preachingsCreatedCount,
           streakDaysCount: _user?.streakDaysCount,
           userChurch: current.userChurch);
       setUser(_user);
@@ -223,7 +222,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<ResponseData?> getProgressUser(userId, courseId) async {
-    LastProgressUser? userProgress;
+    ResponseProgress? userProgress;
     final progress = await getLastProgressUser(userId, courseId);
     if (progress.error != null) {
       return ResponseData(error: progress.error, data: null);
@@ -232,7 +231,7 @@ class UserProvider extends ChangeNotifier {
     if (progress.data == null || progress.data['data'] == null) {
       return ResponseData(error: null, data: null);
     } else {
-      userProgress = LastProgressUser.fromMap(progress.data['data']);
+      userProgress = ResponseProgress.fromJson(progress.data);
       setProgressUser(userProgress);
       return ResponseData(error: null, data: userProgress);
     }

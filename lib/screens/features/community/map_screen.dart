@@ -117,33 +117,44 @@ class _MapScreenState extends State<MapScreen>
 
   // función que hace scroll en la pantalla
   onScrollPosition() {
-    final int lastUnlockedIndex = gruposDeNiveles.lastIndexWhere(
-      (grupo) => grupo.any((level) => level.unLockLevel == true),
-    );
-    if (lastUnlockedIndex != -1) {
-      String? lastLockedId = gruposDeNiveles[lastUnlockedIndex]
-          .lastWhere((level) => level.unLockLevel == true,
-              orElse: () => Level(
-                    id: '',
-                    name: '',
-                    unLockLevel: false,
-                    color: '',
-                    section: Section(sectionName: ''),
-                    img: Img(urlImg: ''),
-                    score: 0,
-                    levelScore: 0,
-                  ))
-          .id;
-
-      scrollController.animateTo(
-        int.parse(lastLockedId) *
-            StylesApp(context)
-                .sizeContainerLevel
-                .height, //50.0, // Ajusta según el tamaño del nivel
-        duration: Duration(seconds: 2),
-        curve: Curves.easeInOut,
-      );
+    final int unlockedIndex = levels
+        .indexWhere((level) => level.unLockLevel && level.levelScore == 0);
+    if (unlockedIndex != -1) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollController.animateTo(
+          unlockedIndex * StylesApp(context).sizeContainerLevel.height,
+          duration: const Duration(seconds: 2),
+          curve: Curves.easeInOut,
+        );
+      });
     }
+    // final int lastUnlockedIndex = gruposDeNiveles.lastIndexWhere(
+    //   (grupo) => grupo.any((level) => level.unLockLevel == true),
+    // );
+    // if (lastUnlockedIndex != -1) {
+    //   int? lastLockedId = gruposDeNiveles[lastUnlockedIndex]
+    //       .lastWhere((level) => level.unLockLevel == true,
+    //           orElse: () => Level(
+    //                 id: '',
+    //                 name: '',
+    //                 unLockLevel: false,
+    //                 color: '',
+    //                 section: Section(sectionName: ''),
+    //                 img: Img(urlImg: ''),
+    //                 score: 0,
+    //                 levelScore: 0,
+    //               ))
+    //       .levelNumber;
+
+    //   scrollController.animateTo(
+    //     lastLockedId *
+    //         StylesApp(context)
+    //             .sizeContainerLevel
+    //             .height, //50.0, // Ajusta según el tamaño del nivel
+    //     duration: Duration(seconds: 2),
+    //     curve: Curves.easeInOut,
+    //   );
+    // }
   }
 
   Future<void> _generateData(BuildContext context) async {
@@ -279,6 +290,12 @@ class _MapScreenState extends State<MapScreen>
         context,
         '/layoutPage1',
         arguments: {'selectedIndex': 2},
+      );
+    } else if (_selectedIndex.toString() == 5.toString()) {
+      Navigator.pushNamed(
+        context,
+        '/layoutPage1',
+        arguments: {'selectedIndex': 4},
       );
     } else {
       Navigator.pushNamed(
