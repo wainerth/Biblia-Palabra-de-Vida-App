@@ -66,6 +66,8 @@ dependencies:
   open_filex: ^4.7.0
   selectable: ^0.3.1
   flutter_tts: ^3.6.3
+  firebase_core: ^2.24.0
+  firebase_messaging: ^14.7.0
   socket_io_client: ^3.1.2
   flutter_local_notifications: ^19.3.0
   device_info_plus: ^11.3.0

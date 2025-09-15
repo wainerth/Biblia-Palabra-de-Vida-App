@@ -23,12 +23,27 @@ class SocketClientProvider with ChangeNotifier {
 
   List<NotificationModel> get notifications => _notifications;
 
+  String? _fcmToken;
+
   @pragma('vm:entry-point')
   static void backgroundNotificationHandler(NotificationResponse response) {
     if (kDebugMode) {
       print("Notificación en segundo plano: ${response.payload}");
     }
-    
+  }
+
+  // Método para inicializar TODO el sistema de notificaciones
+  Future<void> initializeNotificationSystem() async {
+    await FCMService.initialize();
+    await initializeNotifications(); // Tu método existente
+
+    // Obtener token FCM
+    _fcmToken = await FCMService.getFCMToken();
+    print('Token FCM obtenido: $_fcmToken');
+
+    if (_fcmToken != null) {
+      _sendFcmTokenToServer(_fcmToken!);
+    }
   }
 
 // Método para inicializar notificaciones locales
@@ -53,7 +68,8 @@ class SocketClientProvider with ChangeNotifier {
         onDidReceiveNotificationResponse: (response) {
           _handleNotificationClick(response.payload);
         },
-        onDidReceiveBackgroundNotificationResponse: backgroundNotificationHandler // _handleNotificationClick(response.payload);
+        onDidReceiveBackgroundNotificationResponse:
+            backgroundNotificationHandler // _handleNotificationClick(response.payload);
         ,
       );
 
@@ -92,11 +108,8 @@ class SocketClientProvider with ChangeNotifier {
       );
 
       const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true
-          );
-     
+          presentAlert: true, presentBadge: true, presentSound: true);
+
       await notificationsPlugin.show(
         int.tryParse(notification.id!)!, // Usamos el ID como notificationId
         notification.title,
@@ -132,7 +145,8 @@ class SocketClientProvider with ChangeNotifier {
         final notification = NotificationModel.fromJson(notificationData);
 
         // Navegación más robusta
-        final routeInfo = getRouterScreen(notification.model, notification.variables);
+        final routeInfo =
+            getRouterScreen(notification.model, notification.variables);
 
         // WidgetsBinding.instance.addPostFrameCallback((_) {
         if (navigatorKey.currentState != null) {
@@ -200,8 +214,12 @@ class SocketClientProvider with ChangeNotifier {
     required String username,
     required String email,
   }) async {
+    // Inicializar sistema de notificaciones primero
+    await initializeNotificationSystem();
+
     // Desconectar si ya hay una conexión existente
     disconnectSocket();
+
     if (Platform.isAndroid) {
       final deviceInfoPlugin = DeviceInfoPlugin();
       final androidInfo = await deviceInfoPlugin.androidInfo;
@@ -225,6 +243,7 @@ class SocketClientProvider with ChangeNotifier {
             'userId': userId,
             'username': username,
             'email': email,
+            'fcmToken': _fcmToken,
           }) // query
           .enableReconnection() // reconnection
           .setReconnectionDelay(1000) // reconnectionDelay
@@ -257,6 +276,10 @@ class SocketClientProvider with ChangeNotifier {
         print('Socket error: $error');
       }
     });
+    // Escuchar evento para notificaciones push
+    _socket?.on('push_notification', (data) {
+      _handlePushNotification(data);
+    });
   }
 
   // Método para desconectar
@@ -285,6 +308,25 @@ class SocketClientProvider with ChangeNotifier {
       print(eventName);
     }
     _socket?.emit(eventName, data);
+  }
+
+  void _sendFcmTokenToServer(String token) {
+    // Enviar token a tu backend
+    print('Enviando token FCM al servidor: $token');
+    // Ejemplo: _socket?.emit('register_fcm_token', { 'token': token });
+  }
+
+  void _handlePushNotification(dynamic data) {
+    try {
+      final notification = NotificationModel.fromJson(data);
+      // Mostrar notificación local
+      showNotification(notification);
+
+      // También agregar a la lista de notificaciones
+      addNotification(notification);
+    } catch (e) {
+      print('Error manejando notificación push: $e');
+    }
   }
 
   @override
