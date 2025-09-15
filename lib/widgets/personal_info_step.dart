@@ -188,6 +188,9 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
             minWidth: 160.0,
             maxWidth: StylesApp(context).sizeTextFormField.width,
           ),
+          decoration: BoxDecoration(
+              color: StyleColor.white,
+              borderRadius: BorderRadius.circular(8.0)),
           child: CustomDropdownBottomWidget<Country>(
             hintText: "Seleccione un país",
             items: widget.dropDownList,
@@ -208,11 +211,17 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               // Campo del código del país
               Flexible(
                 flex: 3,
-                child: CustomDropdownBottomWidget<AreaCode>(
-                  hintText: "código",
-                  items: widget.dropDownListArea,
-                  onChanged: widget.onPrefixSelected,
-                  selectedItem: widget.selectedDataArea,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: StyleColor.white,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: CustomDropdownBottomWidget<AreaCode>(
+                    hintText: "código",
+                    items: widget.dropDownListArea,
+                    onChanged: widget.onPrefixSelected,
+                    selectedItem: widget.selectedDataArea,
+                  ),
                 ),
               ),
               const SizedBox(width: 10), // Espaciado entre los campos

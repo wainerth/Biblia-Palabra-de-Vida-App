@@ -271,16 +271,18 @@ Future<void> shareVerse(BuildContext context, dynamic data) async {
   ));
 }
 
-RouteInfo getRouterScreen(action) {
+RouteInfo getRouterScreen(action, args) {
   switch (action) {
-    case 'courses':
+    case 'course':
       return RouteInfo(
         '/layoutPage1',
         arguments: {'selectedIndex': 1},
       );
-    case 'sections':
-      return RouteInfo('/detailCoursePage', arguments: {"courseId": "1"});
-    case 'Promises':
+    case 'section':
+      return RouteInfo('/detailCoursePage', arguments: args);
+    case 'level':
+      return RouteInfo('/detailCoursePage', arguments: args);
+    case 'Promise':
       return RouteInfo("/promisePage");
     case 'Preach':
       return RouteInfo('/preachPage');

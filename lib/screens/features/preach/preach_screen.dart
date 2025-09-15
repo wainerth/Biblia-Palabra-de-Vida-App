@@ -80,6 +80,7 @@ class _PreachScreenState extends State<PreachScreen> {
   }
 
   _getSuggestions(value, String filter) {
+    
     switch (filter) {
       case "Mensaje":
         return preaches
@@ -168,6 +169,20 @@ class _PreachScreenState extends State<PreachScreen> {
     }
     setState(() {
       favorites.add(preach);
+    });
+  }
+
+  Future<void> removeFavorite(preach) async {
+    
+    final responseRemoveFavorite =
+        await removePreachFavorite(userData!.userId, preach.id);
+    if (responseRemoveFavorite.error != null) {
+      await showCustomDialog(context,
+          message: responseRemoveFavorite.error!, dialogType: DialogType.error);
+      return;
+    }
+    setState(() {
+      favorites.removeWhere((x) => x.id == preach.id);
     });
   }
 
@@ -350,6 +365,7 @@ class _PreachScreenState extends State<PreachScreen> {
                                           title: preach.title!,
                                           author: preach.preachers!,
                                           date: preach.createdAt!,
+                                          references: preach.references,
                                           iconFavorite: Icon(
                                             favorites.any((element) =>
                                                     element.id == preach.id)
@@ -365,6 +381,8 @@ class _PreachScreenState extends State<PreachScreen> {
                                               if (!favorites.any((element) =>
                                                   element.id == preach.id)) {
                                                 addToFavorite(preach);
+                                              } else {
+                                                removeFavorite(preach);
                                               }
                                             });
                                           },
@@ -411,6 +429,7 @@ class _PreachScreenState extends State<PreachScreen> {
                                           urlVideo: preach.video!.url!,
                                           title: preach.title!,
                                           author: preach.preachers!,
+                                          references: preach.references,
                                           date: preach.createdAt!,
                                           iconFavorite: Icon(
                                             favorites.any((element) =>
@@ -474,6 +493,7 @@ class _PreachScreenState extends State<PreachScreen> {
                                           urlVideo: preach.video!.url!,
                                           title: preach.title!,
                                           author: preach.preachers!,
+                                          references: preach.references,
                                           date: preach.createdAt!,
                                           iconFavorite: Icon(
                                             Icons.favorite,
@@ -519,6 +539,7 @@ class MessageCard extends StatefulWidget {
   final String title;
   final String author;
   final String date;
+  final List<ReferenceModel>? references;
   final Icon iconFavorite;
   final void Function()? onPressed;
 
@@ -528,6 +549,7 @@ class MessageCard extends StatefulWidget {
     required this.title,
     required this.author,
     required this.date,
+    this.references,
     required this.urlVideo,
     this.onPressed,
     required this.iconFavorite,
@@ -546,6 +568,7 @@ class _MessageCardState extends State<MessageCard> {
       title: widget.title,
       video: VideoPreach(img: null, url: widget.urlVideo),
       preachers: widget.author,
+      references: widget.references,
       createdAt: widget.date,
     );
     return Card(

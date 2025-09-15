@@ -10,6 +10,7 @@ class SelectionQuestionWidget extends StatefulWidget {
   final bool selectionCompleted;
   final bool isAnswerSelected;
   final bool isCorrect;
+  final double fontSize;
   final List<Map<String, String>> options;
   final Function(BuildContext context, int) answerSelected;
 
@@ -23,7 +24,9 @@ class SelectionQuestionWidget extends StatefulWidget {
       required this.selectionCompleted,
       required this.isCorrect,
       required this.callBackContinue,
-      required this.isAnswerSelected});
+      required this.isAnswerSelected,
+      this.fontSize = 14.0
+      });
 
   @override
   State<SelectionQuestionWidget> createState() =>
@@ -108,7 +111,9 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
                         child: Text(
                           textAlign: TextAlign.center,
                           widget.currentQuestion.answers[index].answer,
-                          style: StylesApp(context).textStyleBody12,
+                          style: StylesApp(context).textStyleBody12.copyWith(
+                            fontSize: widget.fontSize
+                          ),
                         ),
                       ),
                     ), // Display the answer text

@@ -62,9 +62,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             final notificationProvider =
                 Provider.of<SocketClientProvider>(context, listen: false);
 
-            if (notificationProvider.notifications.isEmpty) {
-              await loadAllNotifications();
-            }
+            // if (notificationProvider.notifications.isEmpty) {
+            await loadAllNotifications();
+            // }
 
             notificationProvider.listenToEvent("notification", (notify) {
               if (kDebugMode) {
@@ -82,6 +82,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   }
 
   Future loadAllNotifications() async {
+    // limpiamos las notificaciones antiguas
+
+    Provider.of<SocketClientProvider>(context, listen: false)
+        .cleanNotification();
     final userProvider = Provider.of<UserProvider>(context,
         listen:
             false); // listen: false para evitar reconstrucciones innecesarias
@@ -95,10 +99,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             message: responseNotification.error!, dialogType: DialogType.error);
         return;
       }
-      // limpiamos las notificaciones antiguas
-      Provider.of<SocketClientProvider>(context, listen: false)
-          .cleanNotification();
-      // almacenamos la notificaciones
       setState(() {
         List<NotificationModel> notifies = responseNotification.data['data']
             .map<NotificationModel>(
@@ -215,7 +215,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                               color: StyleColor.redLight,
                             ),
                             Positioned(
-                              right: 12,
+                              right: 6,
                               top: 12,
                               child: Container(
                                 padding: EdgeInsets.all(0),
@@ -331,7 +331,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           await _loadProgress(context);
           if (card['label'] == 'Aventura') {
             if (error) return;
-            if (progressUser!.success == true) {
+            if (progressUser != null && progressUser!.success == true) {
               if (progressUser!.message
                   .contains('El curso ya fue finalizado')) {
                 await showCustomDialogWithAction(
@@ -486,7 +486,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               await _loadProgress(context);
               if (error) return;
 
-              if (progressUser!.success == true) {
+              if (progressUser != null && progressUser!.success == true) {
                 if (progressUser!.message
                     .contains('El curso ya fue finalizado')) {
                   await showCustomDialogWithAction(
@@ -909,7 +909,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                           children: [
                             SizedBox(
                               width:
-                                  StylesApp(context).sizeContainerAvatar.width,
+                                  StylesApp(context).sizeContainerAvatar.width -
+                                      10,
                               child: Image.asset(
                                 'assets/kawaii_fire.png',
                                 alignment: Alignment.center,
@@ -1070,220 +1071,251 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       height: MediaQuery.of(context).size.height * 0.7,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/notificationPage');
+              },
+              child: Text("Ver Todas...", style: StylesApp(context).textStyleBody14.copyWith(
+                color: StyleColor.turquoise
+              )),
             ),
           ),
-          Text(
-            "Notificaciones",
-            style: StylesApp(context)
-                .textStyleBody5
-                .copyWith(color: StyleColor.black, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: notifications.isEmpty
-                ? Center(
-                    child: Text(
-                      "No tienes notificaciones.",
-                      style: StylesApp(context)
-                          .textStyleBody7
-                          .copyWith(color: StyleColor.black),
-                    ),
-                  )
-                : ListView.separated(
-                    itemCount: notifications.length,
-                    separatorBuilder: (_, __) => SizedBox(
-                      height: 20.0,
-                    ),
-                    itemBuilder: (context, index) {
-                      final notification = notifications[index];
-                      return Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: notification.isRead
-                                  ? Colors.white
-                                  : Colors.blueGrey[100],
-                              borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: StyleColor.black.withAlpha(90),
-                                  offset: Offset(0, 4),
-                                  spreadRadius: 4.0,
-                                  blurRadius: 4.0,
-                                )
-                              ],
-                            ),
-                            child: ExpansionTile(
-                              tilePadding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              collapsedShape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              leading: Icon(
-                                Icons.notifications,
-                                color: notification.isRead
-                                    ? StyleColor.grayMedium
-                                    : StyleColor.turquoise,
-                              ),
-                              title: Text(
-                                notification.title,
-                                style:
-                                    StylesApp(context).textStyleBody14.copyWith(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text(
+                "Notificaciones",
+                style: StylesApp(context).textStyleBody5.copyWith(
+                    color: StyleColor.black, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: notifications.isEmpty
+                    ? Center(
+                        child: Text(
+                          "No tienes notificaciones.",
+                          style: StylesApp(context)
+                              .textStyleBody7
+                              .copyWith(color: StyleColor.black),
+                        ),
+                      )
+                    : ListView.separated(
+                        itemCount: notifications.length,
+                        separatorBuilder: (_, __) => SizedBox(
+                          height: 20.0,
+                        ),
+                        itemBuilder: (context, index) {
+                          final notification = notifications[index];
+                          return Column(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: notification.isRead
+                                      ? Colors.white
+                                      : Colors.blueGrey[100],
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: StyleColor.black.withAlpha(90),
+                                      offset: Offset(0, 4),
+                                      spreadRadius: 4.0,
+                                      blurRadius: 4.0,
+                                    )
+                                  ],
+                                ),
+                                child: ExpansionTile(
+                                  tilePadding: EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  collapsedShape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  leading: Icon(
+                                    Icons.notifications,
+                                    color: notification.isRead
+                                        ? StyleColor.grayMedium
+                                        : StyleColor.turquoise,
+                                  ),
+                                  title: Text(
+                                    notification.title,
+                                    style: StylesApp(context)
+                                        .textStyleBody14
+                                        .copyWith(
                                           color: notification.isRead
                                               ? StyleColor.grayMedium
                                               : StyleColor.black,
                                           fontWeight: FontWeight.bold,
                                         ),
-                              ),
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 16.0, right: 8.0, bottom: 8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        notification.message,
-                                        style: StylesApp(context)
-                                            .textStyleBody10
-                                            .copyWith(
-                                              color: notification.isRead
-                                                  ? StyleColor.grayMedium
-                                                  : StyleColor.black,
-                                              fontWeight: notification.isRead
-                                                  ? FontWeight.normal
-                                                  : FontWeight.bold,
-                                            ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        formatDateTime(notification.createdAt),
-                                        style: StylesApp(context)
-                                            .textStyleBody10
-                                            .copyWith(
-                                                color: notification.isRead
-                                                    ? StyleColor.grayMedium
-                                                    : StyleColor.black),
-                                      ),
-                                      if (notification.actionLabel.isNotEmpty)
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: TextButton(
-                                            onPressed: () async {
-                                              // final responseMarkReadNotification =
-                                              //     await markAsReadOneNotification(
-                                              //         notification.id);
-
-                                              // if (responseMarkReadNotification
-                                              //         .error !=
-                                              //     null) {
-                                              //   await showCustomDialogWithAction(
-                                              //     context,
-                                              //     dialogType:
-                                              //         DialogTypeAction.error,
-                                              //     message:
-                                              //         responseMarkReadNotification
-                                              //             .error!,
-                                              //     actionCallback: () {
-                                              //       Navigator.pop(context);
-                                              //     },
-                                              //     buttonOk: "Ok",
-                                              //   );
-                                              //   return;
-                                              // } else {
-                                              //   if (responseMarkReadNotification
-                                              //           .data !=
-                                              //       null) {
-                                              //     if (!responseMarkReadNotification
-                                              //         .data['success']) {
-                                              //       await showCustomDialog(
-                                              //         context,
-                                              //         dialogType:
-                                              //             DialogType.error,
-                                              //         message:
-                                              //             responseMarkReadNotification
-                                              //                 .data['message'],
-                                              //       );
-                                              //       return;
-                                              //     }
-                                              //   }
-                                              // }
-                                              if (getRouterScreen(
-                                                          notification.model)
-                                                      .arguments !=
-                                                  null) {
-                                                Navigator.pushNamed(
-                                                    context,
-                                                    getRouterScreen(
-                                                            notification.model)
-                                                        .routeName,
-                                                    arguments: getRouterScreen(
-                                                            notification.model)
-                                                        .arguments);
-                                              } else {
-                                                Navigator.pushNamed(
-                                                    context,
-                                                    getRouterScreen(
-                                                            notification.model)
-                                                        .routeName);
-                                              }
-                                              // if (notification.model
-                                              //     .contains('course')) {
-                                              //   final progress = await _loadProgress(context);
-                                              //   if (progress == null) return;
-                                              //   // if (progressUser != null && card['label'] == 'Aventura') {
-                                              //   Navigator.pushNamed(context,
-                                              //       '/mapPage', arguments: {
-                                              //     'courseId':
-                                              //         progressUser!.courseId,
-                                              //     'sectionId':
-                                              //         progressUser!.sectionId
-                                              //   });
-                                              //   // } else {
-                                              //   //   Navigator.pushNamed(context, '/introAventurePage');
-                                              //   // }
-                                              // }
-                                            },
-                                            style: TextButton.styleFrom(
-                                              foregroundColor:
-                                                  StyleColor.blueDark,
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Text(notification.actionLabel),
-                                                Icon(Icons.arrow_forward)
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                    ],
                                   ),
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 16.0, right: 8.0, bottom: 8.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            notification.message,
+                                            style: StylesApp(context)
+                                                .textStyleBody10
+                                                .copyWith(
+                                                  color: notification.isRead
+                                                      ? StyleColor.grayMedium
+                                                      : StyleColor.black,
+                                                  fontWeight:
+                                                      notification.isRead
+                                                          ? FontWeight.normal
+                                                          : FontWeight.bold,
+                                                ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            formatDateTime(
+                                                notification.createdAt),
+                                            style: StylesApp(context)
+                                                .textStyleBody10
+                                                .copyWith(
+                                                    color: notification.isRead
+                                                        ? StyleColor.grayMedium
+                                                        : StyleColor.black),
+                                          ),
+                                          if (notification
+                                              .actionLabel.isNotEmpty)
+                                            Align(
+                                              alignment: Alignment.centerRight,
+                                              child: TextButton(
+                                                onPressed: () async {
+                                                  // final responseMarkReadNotification =
+                                                  //     await markAsReadOneNotification(
+                                                  //         notification.id);
+
+                                                  // if (responseMarkReadNotification
+                                                  //         .error !=
+                                                  //     null) {
+                                                  //   await showCustomDialogWithAction(
+                                                  //     context,
+                                                  //     dialogType:
+                                                  //         DialogTypeAction.error,
+                                                  //     message:
+                                                  //         responseMarkReadNotification
+                                                  //             .error!,
+                                                  //     actionCallback: () {
+                                                  //       Navigator.pop(context);
+                                                  //     },
+                                                  //     buttonOk: "Ok",
+                                                  //   );
+                                                  //   return;
+                                                  // } else {
+                                                  //   if (responseMarkReadNotification
+                                                  //           .data !=
+                                                  //       null) {
+                                                  //     if (!responseMarkReadNotification
+                                                  //         .data['success']) {
+                                                  //       await showCustomDialog(
+                                                  //         context,
+                                                  //         dialogType:
+                                                  //             DialogType.error,
+                                                  //         message:
+                                                  //             responseMarkReadNotification
+                                                  //                 .data['message'],
+                                                  //       );
+                                                  //       return;
+                                                  //     }
+                                                  //   }
+                                                  // }
+                                                  if (getRouterScreen(
+                                                              notification.model
+                                                                  .toLowerCase(),
+                                                              notification
+                                                                  .variables)
+                                                          .arguments !=
+                                                      null) {
+                                                    Navigator.pushNamed(
+                                                        context,
+                                                        getRouterScreen(
+                                                                notification
+                                                                    .model,
+                                                                notification
+                                                                    .variables)
+                                                            .routeName,
+                                                        arguments: getRouterScreen(
+                                                                notification
+                                                                    .model,
+                                                                notification
+                                                                    .variables)
+                                                            .arguments);
+                                                  } else {
+                                                    Navigator.pushNamed(
+                                                        context,
+                                                        getRouterScreen(
+                                                                notification
+                                                                    .model,
+                                                                null)
+                                                            .routeName);
+                                                  }
+                                                  // if (notification.model
+                                                  //     .contains('course')) {
+                                                  //   final progress = await _loadProgress(context);
+                                                  //   if (progress == null) return;
+                                                  //   // if (progressUser != null && card['label'] == 'Aventura') {
+                                                  //   Navigator.pushNamed(context,
+                                                  //       '/mapPage', arguments: {
+                                                  //     'courseId':
+                                                  //         progressUser!.courseId,
+                                                  //     'sectionId':
+                                                  //         progressUser!.sectionId
+                                                  //   });
+                                                  //   // } else {
+                                                  //   //   Navigator.pushNamed(context, '/introAventurePage');
+                                                  //   // }
+                                                  // }
+                                                },
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor:
+                                                      StyleColor.blueDark,
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    Text(notification
+                                                        .actionLabel),
+                                                    Icon(Icons.arrow_forward)
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          )
-                        ],
-                      );
-                    },
-                  ),
+                              )
+                            ],
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
         ],
       ),

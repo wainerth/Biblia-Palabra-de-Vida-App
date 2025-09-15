@@ -35,6 +35,7 @@ class PreferencesManager {
   static const String _bookSelectedKey = 'bookSelected';
   static const String _chapterSelectedKey = 'chapterSelected';
   static const String _fontSizeVerseKey = 'fontSizeVerse';
+  static const String _fontSizeQuestionKey = 'fontSizeQuestion';
   static const String _fontFamilySetKey = 'fontFamilySet';
 
   // Métodos para userToken
@@ -219,6 +220,17 @@ class PreferencesManager {
     await _prefs!.setBool(_hasSeenIntroKey, seen);
   }
 
+  Future<void> setFontSizeQuestion(double size) async {
+    await _ensureInitialized();
+
+    await _prefs!.setDouble(_fontSizeQuestionKey, size);
+  }
+
+  Future<double> getFontSizeQuestion() async {
+    await _ensureInitialized();
+    return _prefs!.getDouble(_fontSizeQuestionKey) ?? 16.0;
+  }
+
   // Métodos para manejo de modelos complejos
   Future<LoginUser?> getLoginUser() async {
     final json = await getUserData();
@@ -238,6 +250,7 @@ class PreferencesManager {
     await _ensureInitialized();
     await _prefs!.clear();
   }
+
   // Limpiar una preferencia
   Future<void> clearOne(String key) async {
     await _ensureInitialized();

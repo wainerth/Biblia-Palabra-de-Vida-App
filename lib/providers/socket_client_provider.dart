@@ -132,7 +132,7 @@ class SocketClientProvider with ChangeNotifier {
         final notification = NotificationModel.fromJson(notificationData);
 
         // Navegación más robusta
-        final routeInfo = getRouterScreen(notification.model);
+        final routeInfo = getRouterScreen(notification.model, notification.variables);
 
         // WidgetsBinding.instance.addPostFrameCallback((_) {
         if (navigatorKey.currentState != null) {

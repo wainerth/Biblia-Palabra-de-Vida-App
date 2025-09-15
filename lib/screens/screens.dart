@@ -1,6 +1,8 @@
 //Authentication
 
 
+export 'package:biblia_palabra_de_vida_app/screens/features/notification/notification_screen.dart';
+
 export 'package:biblia_palabra_de_vida_app/screens/soon/soon_screen.dart';
 
 // play pages
@@ -76,3 +78,4 @@ export 'package:biblia_palabra_de_vida_app/screens/features/theme_editor/theme_e
 
 //404
 export 'package:biblia_palabra_de_vida_app/screens/404/unknown_screen.dart';
+

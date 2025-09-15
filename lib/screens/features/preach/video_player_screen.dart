@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -143,9 +144,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 child: Column(
                   spacing: 10,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ButtonThemeWidget(
-                      text: "Hebreos 11:6",
+                  children: widget.data.references!.map((ref) => 
+ButtonThemeWidget(
+                      text: "${ref.book?.modernName} ${ref.chapter?.chapter}:${ref.verse?.verse}",
                       buttonStyle: StylesApp(context).btnSecondary.copyWith(
                           maximumSize: WidgetStatePropertyAll(
                               Size(double.infinity, double.infinity)),
@@ -157,79 +158,81 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         showModalBottomSheet(
                             context: context,
                             builder: (BuildContext context) {
-                              return _buildModalDetails(context);
+                              return _buildModalDetails(context, ref);
                             });
                       },
                     ),
-                    ButtonThemeWidget(
-                      text: "Salmo 34:17",
-                      buttonStyle: StylesApp(context).btnSecondary.copyWith(
-                          maximumSize: WidgetStatePropertyAll(
-                              Size(double.infinity, double.infinity)),
-                          minimumSize: WidgetStatePropertyAll(
-                              Size(double.infinity, double.infinity))),
-                      width: MediaQuery.sizeOf(context).width,
-                      height: StylesApp(context).btnSizeSmall.height,
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return _buildModalDetails(context);
-                            });
-                      },
-                    ),
-                    ButtonThemeWidget(
-                      text: "Gálatas 6:2-8",
-                      buttonStyle: StylesApp(context).btnSecondary.copyWith(
-                          maximumSize: WidgetStatePropertyAll(
-                              Size(double.infinity, double.infinity)),
-                          minimumSize: WidgetStatePropertyAll(
-                              Size(double.infinity, double.infinity))),
-                      width: MediaQuery.sizeOf(context).width,
-                      height: StylesApp(context).btnSizeSmall.height,
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return _buildModalDetails(context);
-                            });
-                      },
-                    ),
-                    ButtonThemeWidget(
-                      text: "Mateo 18:20-30",
-                      buttonStyle: StylesApp(context).btnSecondary.copyWith(
-                          maximumSize: WidgetStatePropertyAll(
-                              Size(double.infinity, double.infinity)),
-                          minimumSize: WidgetStatePropertyAll(
-                              Size(double.infinity, double.infinity))),
-                      width: MediaQuery.sizeOf(context).width,
-                      height: StylesApp(context).btnSizeSmall.height,
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return _buildModalDetails(context);
-                            });
-                      },
-                    ),
-                    ButtonThemeWidget(
-                      text: "Salmo 46:10",
-                      buttonStyle: StylesApp(context).btnSecondary.copyWith(
-                          maximumSize: WidgetStatePropertyAll(
-                              Size(double.infinity, double.infinity)),
-                          minimumSize: WidgetStatePropertyAll(
-                              Size(double.infinity, double.infinity))),
-                      width: MediaQuery.sizeOf(context).width,
-                      height: StylesApp(context).btnSizeSmall.height,
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return _buildModalDetails(context);
-                            });
-                      },
-                    ),
-                  ],
+                  ).toList(),
+                    
+                    // ButtonThemeWidget(
+                    //   text: "Salmo 34:17",
+                    //   buttonStyle: StylesApp(context).btnSecondary.copyWith(
+                    //       maximumSize: WidgetStatePropertyAll(
+                    //           Size(double.infinity, double.infinity)),
+                    //       minimumSize: WidgetStatePropertyAll(
+                    //           Size(double.infinity, double.infinity))),
+                    //   width: MediaQuery.sizeOf(context).width,
+                    //   height: StylesApp(context).btnSizeSmall.height,
+                    //   onPressed: () {
+                    //     showModalBottomSheet(
+                    //         context: context,
+                    //         builder: (BuildContext context) {
+                    //           return _buildModalDetails(context);
+                    //         });
+                    //   },
+                    // ),
+                    // ButtonThemeWidget(
+                    //   text: "Gálatas 6:2-8",
+                    //   buttonStyle: StylesApp(context).btnSecondary.copyWith(
+                    //       maximumSize: WidgetStatePropertyAll(
+                    //           Size(double.infinity, double.infinity)),
+                    //       minimumSize: WidgetStatePropertyAll(
+                    //           Size(double.infinity, double.infinity))),
+                    //   width: MediaQuery.sizeOf(context).width,
+                    //   height: StylesApp(context).btnSizeSmall.height,
+                    //   onPressed: () {
+                    //     showModalBottomSheet(
+                    //         context: context,
+                    //         builder: (BuildContext context) {
+                    //           return _buildModalDetails(context);
+                    //         });
+                    //   },
+                    // ),
+                    // ButtonThemeWidget(
+                    //   text: "Mateo 18:20-30",
+                    //   buttonStyle: StylesApp(context).btnSecondary.copyWith(
+                    //       maximumSize: WidgetStatePropertyAll(
+                    //           Size(double.infinity, double.infinity)),
+                    //       minimumSize: WidgetStatePropertyAll(
+                    //           Size(double.infinity, double.infinity))),
+                    //   width: MediaQuery.sizeOf(context).width,
+                    //   height: StylesApp(context).btnSizeSmall.height,
+                    //   onPressed: () {
+                    //     showModalBottomSheet(
+                    //         context: context,
+                    //         builder: (BuildContext context) {
+                    //           return _buildModalDetails(context);
+                    //         });
+                    //   },
+                    // ),
+                    // ButtonThemeWidget(
+                    //   text: "Salmo 46:10",
+                    //   buttonStyle: StylesApp(context).btnSecondary.copyWith(
+                    //       maximumSize: WidgetStatePropertyAll(
+                    //           Size(double.infinity, double.infinity)),
+                    //       minimumSize: WidgetStatePropertyAll(
+                    //           Size(double.infinity, double.infinity))),
+                    //   width: MediaQuery.sizeOf(context).width,
+                    //   height: StylesApp(context).btnSizeSmall.height,
+                    //   onPressed: () {
+                    //     showModalBottomSheet(
+                    //         context: context,
+                    //         builder: (BuildContext context) {
+                    //           return _buildModalDetails(context);
+                    //         });
+                    //   },
+                    // ),
+                  // ],
                 ),
               ),
             ],
@@ -239,35 +242,115 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     );
   }
 
-  Container _buildModalDetails(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(0),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 20,
+  Container _buildModalDetails(BuildContext context, ReferenceModel data) {
+    return  Container(
+        padding: const EdgeInsets.all(4.0),
+        decoration: BoxDecoration(
+          color: StyleColor.white,
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [
+            BoxShadow(
+              offset: const Offset(0, 4.0),
+              spreadRadius: 4.0,
+              color: StyleColor.black.withValues(alpha: 0.25),
             ),
-            Text(
-              "Salmo 34:17-7",
-              style: StylesApp(context)
-                  .textStyleBody12
-                  .copyWith(color: StyleColor.orange),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Text(
-              '17 Claman los justos, y Jehová oye, Y los libra de todas sus angustias.',
-              style: StylesApp(context)
-                  .textStyleBody14
-                  .copyWith(color: Colors.black),
-            )
           ],
         ),
-      ),
-    );
+        child: Stack(
+          children: [
+            // Botones de acción (copiar y compartir)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  color: StyleColor.white,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      iconSize: 25.0,
+                      onPressed: () => copyToClipboard(context, data),
+                      icon: Icon(
+                        Icons.file_copy_rounded,
+                        color: StyleColor.turquoise,
+                      ),
+                    ),
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      iconSize: 25.0,
+                      onPressed: () => shareVerse(context, data),
+                      icon: Icon(
+                        Icons.share_rounded,
+                        color: StyleColor.turquoise,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Contenido principal del diálogo
+            Padding(
+              padding:
+                  const EdgeInsets.only(top: 40.0), // Espacio para los botones
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    textAlign: TextAlign.center,
+                    data.book!.modernName,
+                    style: StylesApp(context).textStyleBody18.copyWith(
+                          color: StyleColor.black,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    textAlign: TextAlign.center,
+                    "${data.chapter!.chapter}:${data.verse!.verse}",
+                    style: StylesApp(context).textStyleBody16.copyWith(
+                          color: StyleColor.black,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    textAlign: TextAlign.center,
+                    data.verse!.text,
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                          color: StyleColor.black,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ButtonThemeWidget(
+                        width: 120,
+                        icon: Icons.read_more_outlined,
+                        showIcon: true,
+                        text: "Leer Más",
+                        buttonStyle: StylesApp(context).btnWidgetSmall,
+                        onPressed: () {
+                          Navigator.pop(context);
+                           Navigator.pushNamed(context, "/layoutPage",
+                                      arguments: {
+                                        'selectedIndex': 1,
+                                        'bibleId':data.book!.bibleId.toString(),
+                                        'bookId': data.book!.id,
+                                        'chapterId':data.chapter!.id!,
+                                        'verseId': data.verse!.id!,
+                                      });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
   }
 }

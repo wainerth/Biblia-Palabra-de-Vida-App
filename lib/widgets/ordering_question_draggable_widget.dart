@@ -8,6 +8,7 @@ class OrderingQuestionDraggableWidget extends StatefulWidget {
   final Question currentQuestion;
   final List<Answer> orderedAnswers;
   final bool showError;
+  final double fontSize;
   final List<Map<String, String>> options;
   final Function(BuildContext context, int) answerSelected;
   final Function()? onContinue;
@@ -19,6 +20,7 @@ class OrderingQuestionDraggableWidget extends StatefulWidget {
       required this.options,
       required this.answerSelected,
       required this.showError,
+      this.fontSize = 14.0,
       this.onContinue});
 
   @override
@@ -117,7 +119,9 @@ class _OrderingQuestionDraggableStateWidget
                                     child: Center(
                                         child: Text(
                                       widget.orderedAnswers[index].answer,
-                                      style: StylesApp(context).textStyleBody12,
+                                      style: StylesApp(context)
+                                          .textStyleBody12
+                                          .copyWith(fontSize: widget.fontSize),
                                     )),
                                   ),
                                 ],
@@ -238,7 +242,9 @@ class _OrderingQuestionDraggableStateWidget
                                   child: Center(
                                       child: Text(
                                     currentAnswers[index].answer,
-                                    style: StylesApp(context).textStyleBody12,
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(fontSize: widget.fontSize),
                                   )),
                                 ),
                               ],

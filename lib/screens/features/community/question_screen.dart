@@ -43,6 +43,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   TitleModel? title;
   PrizeModel? prize;
   Reward? reward;
+  double fontSizeText = 16;
   LevelProgressUser? levelProgress;
   SendScoreModel? sendScore = SendScoreModel(
     isLastLevel: false,
@@ -104,12 +105,18 @@ class _QuestionScreenState extends State<QuestionScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generateData(context);
+      getFontSizeText();
     });
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  getFontSizeText() async {
+    double? fontSize = await PreferencesManager().getFontSizeQuestion();
+    setState(() => fontSizeText = fontSize);
   }
 
   ///
@@ -600,8 +607,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       ),
                       if (questions.isNotEmpty)
                         Expanded(
+                            child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8.0),
                           child: _buildBody(context),
-                        )
+                        ))
                     } else ...{
                       // si completo nivel
                       if (showStepCompleted) ...{
@@ -693,6 +702,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   orderedAnswers: orderedAnswers,
                   currentQuestion: currentQuestion,
                   options: options,
+                  fontSize: fontSizeText,
                   answerSelected: (context, index) =>
                       verifyOrdered(context, index),
                   showError: showError,
@@ -708,6 +718,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       isCorrect: _isCorrect,
                       currentQuestion: currentQuestion,
                       options: options,
+                      fontSize: fontSizeText,
                       answerSelected: (context, index) {
                         _answerSelected(context, index);
                       },
@@ -724,40 +735,70 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ],
           ),
         ),
-        Expanded(
-          flex: !currentQuestion.isOrdering ? 1 : 0,
-          child: Center(
-            child: Container(
-              constraints: BoxConstraints(maxWidth: 278.0),
-              child: Column(
-                children: [
-                  Text(
-                    "${currentIndex + 1}/${questions.length}",
-                    style: StylesApp(context)
-                        .textStyleBody12
-                        .copyWith(color: Colors.black),
-                  ),
-                  LinearProgressIndicator(
-                    borderRadius: BorderRadius.circular(6.0),
-                    minHeight: 14.0,
-                    value: currentIndex /
-                        (questions.length > 1
-                            ? questions.length - 1
-                            : questions.length),
-                    backgroundColor: Color(0xFFC4C4C4),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0XFFF27728),
-                    ),
-                  ),
-                ],
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 9),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Slider(
+                  activeColor: Colors.blueGrey,
+                  inactiveColor: Colors.grey,
+                  thumbColor: StyleColor.turquoise,
+                  min: 12.0,
+                  max: 20.0,
+                  value: fontSizeText,
+                  onChanged: (value) async {
+                    await PreferencesManager().setFontSizeQuestion(value);
+                    print(value);
+                    setState(() => fontSizeText = value);
+                  },
+                  secondaryTrackValue: 20.0,
+                ),
               ),
+              Expanded(
+                flex: 0,
+                child: Text(
+                  "Aa",
+                  style: StylesApp(context).textStyleBody12.copyWith(
+                        color: Colors.black,
+                      ),
+                ),
+              )
+            ],
+          ),
+        ),
+        Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 278.0),
+            child: Column(
+              children: [
+                Text(
+                  "${currentIndex + 1}/${questions.length}",
+                  style: StylesApp(context)
+                      .textStyleBody12
+                      .copyWith(color: Colors.black),
+                ),
+                LinearProgressIndicator(
+                  borderRadius: BorderRadius.circular(6.0),
+                  minHeight: 14.0,
+                  value: currentIndex /
+                      (questions.length > 1
+                          ? questions.length - 1
+                          : questions.length),
+                  backgroundColor: Color(0xFFC4C4C4),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Color(0XFFF27728),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        if (currentQuestion.isOrdering)
-          SizedBox(
-            height: 20,
-          )
+        // if (currentQuestion.isOrdering)
+        SizedBox(
+          height: 20,
+        )
       ],
     );
   }

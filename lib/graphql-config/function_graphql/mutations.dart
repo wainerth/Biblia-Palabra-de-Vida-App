@@ -327,7 +327,7 @@ Future register(dataToRegister) async {
                   : dataToRegister.gender,
           "phoneNumber": dataToRegister.phoneNumber,
           "countryId": dataToRegister.countryId,
-          "city": dataToRegister.city,
+          "cityId": dataToRegister.city,
           "identifier": dataToRegister.identifier,
           "isBaptized": dataToRegister.isBaptized
         },
@@ -436,6 +436,7 @@ Future<ResponseData> forgotPassword(email) async {
 Future logout() async {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   await googleSignIn.signOut();
+   
   // delete credentials in the local stores
   await PreferencesManager().clearOne('userData');
   await PreferencesManager().clearOne('userToken');
@@ -1127,10 +1128,10 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
   final GraphQLClient client = createClient(authToken: userToken);
 
   MutationOptions mutateGql = MutationOptions(
-    operationName: "AddPredicateToFavorite",
+    operationName: "AddPreachToFavorite",
     document: gql(r'''
-     mutation AddPredicateToFavorite($userId: ID, $preachId: ID) {
-        addPredicateToFavorite(userId: $userId, preachId: $preachId)
+      mutation AddPreachToFavorite($userId: ID, $preachId: ID) {
+        addPreachToFavorite(userId: $userId, preachId: $preachId)
       }
       '''),
     variables: <String, dynamic>{"userId": userId, "preachId": preachId},
@@ -1145,26 +1146,86 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
         return ResponseData(
           data: null,
           error:
-              'Add Predicate To Favorite: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+              'Add Preach To Favorite: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
         );
       }
     }
 
     final data = result.data;
-    if (data == null || data['addPredicateToFavorite'] == null) {
+    if (data == null || data['addPreachToFavorite'] == null) {
       return ResponseData(
         data: null,
-        error: 'Add Predicate To Favorite failed: No data returned',
+        error: 'Add Preach To Favorite failed: No data returned',
       );
     }
 
     return ResponseData(
-      data: data['addPredicateToFavorite'],
+      data: data['addPreachToFavorite'],
       error: null,
     );
   } on TimeoutException catch (e) {
     return ResponseData(
-        data: null, error: 'Add Predicate To Favorite Timeout de conexión $e');
+        data: null, error: 'Add Preach To Favorite Timeout de conexión $e');
+  } catch (e) {
+    if (e is TimeoutException) {
+      return ResponseData(data: null, error: "Request timed out");
+    } else if (e is SocketException) {
+      return ResponseData(data: null, error: "No Internet Connection");
+    } else if (e is FormatException) {
+      // Example: JSON parsing error
+      return ResponseData(data: null, error: "Invalid data format");
+    } else {
+      return ResponseData(
+          data: null,
+          error: "An unexpected error occurred: $e"); // Generic error
+    }
+    // return ResponseData(data: null, error: "connection error $e");
+  }
+}
+Future<ResponseData> removePreachFavorite(userId, preachId) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  MutationOptions mutateGql = MutationOptions(
+    operationName: "RemovePreachFavorite",
+    document: gql(r'''
+     mutation RemovePreachFavorite($userId: ID, $preachId: ID) {
+        removePreachFavorite(userId: $userId, preachId: $preachId)
+      }
+      '''),
+    variables: <String, dynamic>{"userId": userId, "preachId": preachId},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Remove Preach Favorite: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['removePreachFavorite'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Remove Preach Favorite failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['removePreachFavorite'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    return ResponseData(
+        data: null, error: 'Remove Preach Favorite Timeout de conexión $e');
   } catch (e) {
     if (e is TimeoutException) {
       return ResponseData(data: null, error: "Request timed out");

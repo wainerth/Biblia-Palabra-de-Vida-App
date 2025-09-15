@@ -876,11 +876,11 @@ class StylesApp {
 
   Size get sizeContainerAvatar {
     if (screenWidth <= SizeScreensApp().xsm) {
-      return Size(39.0, 39.0);
+      return Size(50.0, 50.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(39.0, 39.0);
+      return Size(50.0, 50.0);
     } else if (screenWidth <= SizeScreensApp().md) {
-      return Size(39.0, 39.0);
+      return Size(50.0, 50.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
       return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {

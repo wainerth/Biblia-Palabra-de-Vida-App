@@ -12,7 +12,8 @@ final Map<String, WidgetBuilder> routes = {
   '/changePasswordPage': (BuildContext context) => const ChangePassScreen(),
   '/layoutPage': (BuildContext context) => AuthGuard(child: PageScreen()),
   '/layoutPage1': (BuildContext context) => const LayoutScreen(),
-  '/layoutLibrary': (BuildContext context) =>GraphQLConfig.development ? const LayoutLibrary() : SoonScreen(), 
+  '/layoutLibrary': (BuildContext context) =>
+      GraphQLConfig.development ? const LayoutLibrary() : SoonScreen(),
   '/mapPage': (BuildContext context) => const MapScreen(),
   '/introAventurePage': (BuildContext context) => IntroAventureScreen(),
   '/aventurePage': (BuildContext context) => AventureScreen(),
@@ -23,8 +24,7 @@ final Map<String, WidgetBuilder> routes = {
   '/workspacePage': (BuildContext context) =>
       AuthGuard(child: WorkspaceScreen()),
   '/detailsProgressPage': (BuildContext context) => ProgressDetailScreen(),
-  '/prayerPage': (BuildContext context) =>
-      GraphQLConfig.development ? PrayerScreen() : SoonScreen(),
+  '/prayerPage': (BuildContext context) => PrayerScreen(),
   '/listRequestPage': (BuildContext context) => ListRequestScreen(),
   '/takePrayerPage': (BuildContext context) => TakePrayerScreen(),
   '/detailPrayerPage': (BuildContext context) => DetailRequestScreen(),
@@ -41,6 +41,7 @@ final Map<String, WidgetBuilder> routes = {
   '/reddlePage': (BuildContext context) => ReddleScreen(),
   '/quizPage': (BuildContext context) => QuizScreen(),
   '/aboutScreen': (BuildContext context) => AboutScreen(),
+  '/notificationPage': (BuildContext context) => NotificationScreen(),
 };
 
 Route<dynamic> generateRoute(RouteSettings settings) {

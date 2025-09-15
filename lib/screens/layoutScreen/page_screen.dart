@@ -16,7 +16,7 @@ class _PageScreenState extends State<PageScreen> {
   final List<Widget> _screens = [
     WorkspaceScreen(),
     BibleScreen(),
-    GraphQLConfig.development ? PrayerScreen() : SoonScreen(),
+    PrayerScreen(),
     AudioScreen(),
     GraphQLConfig.development ? OfferingsScreen() : SoonScreen(),
     SettingsScreen(),

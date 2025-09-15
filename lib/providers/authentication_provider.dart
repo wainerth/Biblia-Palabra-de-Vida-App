@@ -354,6 +354,8 @@ class AuthenticationProvider extends ChangeNotifier {
     if (result.error != null) {
       return false;
     }
+    Provider.of<SocketClientProvider>(context, listen: false)
+          .cleanNotification();
     if (navigatorKey.currentState != null) {
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
       navigatorKey.currentState!.pushReplacementNamed('/homePage');

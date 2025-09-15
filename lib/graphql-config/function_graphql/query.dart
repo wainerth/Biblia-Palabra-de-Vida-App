@@ -2165,6 +2165,22 @@ Future<ResponseData> getAllPreach(String userId) async {
               urlImg
             }
           }
+          references {
+            book {
+              id
+              modernName
+              bibleId
+            }
+            chapter {
+              id
+              chapter
+            }
+            verse {
+              id
+              verse
+              text
+            }
+          }
           status
           isFavorite
           createdAt
@@ -3246,12 +3262,12 @@ Future<ResponseData> getAllNotification(
            id
            title
            message
-           img
            isRead
            action
            actionLabel
            notificationType
            notificationTypeName
+           variables
            model
            createdAt
           }
