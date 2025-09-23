@@ -19,18 +19,26 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  // inicializamos firebase
+  // await Firebase.initializeApp();
   // Inicializar
   await PreferencesManager().init();
 
   final socketProvider = SocketClientProvider();
-  await socketProvider.initializeNotifications();
+  await socketProvider.initializeNotificationSystem();
   if (!kIsWeb) {
     await FlutterDownloader.initialize(
       debug: kDebugMode, // Set to false in production
       ignoreSsl: kDebugMode, // Set to false for secure connections
     );
   }
+
+  debugPrint = (String? message, {int? wrapWidth}) {
+      // Logs detallados solo en modo debug
+      if (message != null && message.contains('GraphQL')) {
+        print('🎯 [GRAPHQL_DEBUG] $message');
+      }
+    };
   runApp(
     MultiProvider(
       providers: [

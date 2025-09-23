@@ -29,7 +29,7 @@ class NotificationModel {
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
-      id: json['id'],
+      id: json['id'].toString(),
       title: json['title'],
       message: json['message'],
       isRead: json['isRead'],

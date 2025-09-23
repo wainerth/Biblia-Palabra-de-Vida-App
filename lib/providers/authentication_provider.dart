@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
@@ -61,33 +62,36 @@ class AuthenticationProvider extends ChangeNotifier {
         // llamar conexión con el socket
         final socketProvider =
             Provider.of<SocketClientProvider>(context, listen: false);
-        socketProvider.connectSocket(
-            deviceId: '856-32cd-89',
-            userId: dataUserLoad.userId,
-            username: dataUserLoad.username!,
-            email: dataUserLoad.email!);
+        final deviceInfo = await DeviceInfoPlugin().deviceInfo;
+        if (!socketProvider.isInitialized) {
+          socketProvider.connectSocket(
+              deviceId: '856-32cd-89',
+              userId: dataUserLoad.userId,
+              username: dataUserLoad.username!,
+              email: dataUserLoad.email!);
+        }
 
         Provider.of<UserProvider>(context, listen: false)
             .setUser(LoginUser.fromJson(jsonDecode(userDataString)));
-        final profileResponse = await loadProfileUser(dataUserLoad.userId, userToken);
-        if(profileResponse.error != null) {
-          await showCustomDialogWithAction(
-            context, message: profileResponse.error!, dialogType: DialogTypeAction.error, 
-            buttonOk: "Reintentar", actionCallbackOk: () {
-               checkAuthentication(context);
-            });
-            
+        final profileResponse =
+            await loadProfileUser(dataUserLoad.userId, userToken);
+        if (profileResponse.error != null) {
+          await showCustomDialogWithAction(context,
+              message: profileResponse.error!,
+              dialogType: DialogTypeAction.error,
+              buttonOk: "Reintentar", actionCallbackOk: () {
+            checkAuthentication(context);
+          });
         } else {
-        if (kDebugMode) {
-          print('cargo nueva data de perfil');
-        }
-
+          if (kDebugMode) {
+            print('cargo nueva data de perfil');
+          }
         }
       } else {
         isAuthenticated = false;
         token = userToken;
         Provider.of<UserProvider>(context, listen: false).setUser(null);
-         logoutUser(navigatorKey.currentContext!);
+        logoutUser(navigatorKey.currentContext!);
         LoadingService().hideLoading();
       }
     } catch (e, stackTrace) {
@@ -195,11 +199,14 @@ class AuthenticationProvider extends ChangeNotifier {
     // llamar conexión con el socket
     final socketProvider =
         Provider.of<SocketClientProvider>(context, listen: false);
-    socketProvider.connectSocket(
-        deviceId: '856-32cd-89',
-        userId: userProfile.data['userId'],
-        username: userProfile.data['username'],
-        email: userProfile.data['email']);
+    final deviceInfo = await DeviceInfoPlugin().deviceInfo;
+    if (!socketProvider.isInitialized) {
+      socketProvider.connectSocket(
+          deviceId: '856-32cd-89',
+          userId: userProfile.data['userId'],
+          username: userProfile.data['username'],
+          email: userProfile.data['email']);
+    }
     // leemos las notificaciones
     return ResponseData(data: userProfile, error: null);
   }
@@ -355,7 +362,7 @@ class AuthenticationProvider extends ChangeNotifier {
       return false;
     }
     Provider.of<SocketClientProvider>(context, listen: false)
-          .cleanNotification();
+        .cleanNotification();
     if (navigatorKey.currentState != null) {
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
       navigatorKey.currentState!.pushReplacementNamed('/homePage');

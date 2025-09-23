@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/services/fcm_service.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,9 +13,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-class SocketClientProvider with ChangeNotifier {
+class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
   IO.Socket? _socket;
   bool _isConnected = false;
+  bool _initialized = false;
+  bool get isInitialized => _initialized;
   final FlutterLocalNotificationsPlugin notificationsPlugin =
       FlutterLocalNotificationsPlugin();
   // final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -32,6 +36,10 @@ class SocketClientProvider with ChangeNotifier {
     }
   }
 
+  void initializeObserver() {
+    WidgetsBinding.instance.addObserver(this);
+  }
+
   // Método para inicializar TODO el sistema de notificaciones
   Future<void> initializeNotificationSystem() async {
     await FCMService.initialize();
@@ -41,9 +49,9 @@ class SocketClientProvider with ChangeNotifier {
     _fcmToken = await FCMService.getFCMToken();
     print('Token FCM obtenido: $_fcmToken');
 
-    if (_fcmToken != null) {
-      _sendFcmTokenToServer(_fcmToken!);
-    }
+    // if (_fcmToken != null) {
+    //   _sendFcmTokenToServer(_fcmToken!);
+    // }
   }
 
 // Método para inicializar notificaciones locales
@@ -214,6 +222,8 @@ class SocketClientProvider with ChangeNotifier {
     required String username,
     required String email,
   }) async {
+    _initialized = true;
+    initializeObserver();
     // Inicializar sistema de notificaciones primero
     await initializeNotificationSystem();
 
@@ -233,26 +243,22 @@ class SocketClientProvider with ChangeNotifier {
     }
 
     // Configuración del socket similar a tu implementación en React
-    _socket = IO.io(
-      'https://labibliapalabradevida.com',
-      IO.OptionBuilder()
-          .setTransports(['websocket']) // transports
-          .setPath('/socket.io') // path
-          .setQuery({
-            'deviceId': deviceId,
-            'userId': userId,
-            'username': username,
-            'email': email,
-            'fcmToken': _fcmToken,
-          }) // query
-          .enableReconnection() // reconnection
-          .setReconnectionDelay(1000) // reconnectionDelay
-          .setReconnectionDelayMax(5000) // reconnectionDelayMax
-          .setReconnectionAttempts(3) // maxReconnectionAttempts
-          .setTimeout(10000) // timeout
-          .enableForceNew() // forceNew
-          .build(),
-    );
+    _socket = IO.io('https://labibliapalabradevida.com', {
+      'transports': ['polling'], // ✅ Comenzar con polling
+      'upgrade': true, // ✅ Permitir upgrade a websocket
+      'path': '/socket.io${GraphQLConfig.development ? '-dev' : ''}', // Ajusta el path si es necesario
+      'query': {
+        'deviceId': deviceId,
+        'userId': userId,
+        'username': username,
+        'email': email,
+        'fcmToken': _fcmToken ?? '',
+        'EIO': '4', // ✅ Forzar Engine.IO v4
+      },
+      'forceNew': true,
+      'reconnection': true,
+      'timeout': 10000,
+    });
 
     // Manejar eventos de conexión
     _socket?.onConnect((_) {
@@ -265,6 +271,7 @@ class SocketClientProvider with ChangeNotifier {
 
     _socket?.onDisconnect((_) {
       _isConnected = false;
+      _initialized = false;
       notifyListeners();
       if (kDebugMode) {
         print('Socket disconnected');
@@ -274,6 +281,7 @@ class SocketClientProvider with ChangeNotifier {
     _socket?.onError((error) {
       if (kDebugMode) {
         print('Socket error: $error');
+        _initialized = false;
       }
     });
     // Escuchar evento para notificaciones push
@@ -287,7 +295,7 @@ class SocketClientProvider with ChangeNotifier {
     if (_socket != null) {
       _socket?.disconnect();
       _socket?.dispose();
-      _socket = null;
+      // _socket = null;
       _isConnected = false;
       notifyListeners();
     }
@@ -310,12 +318,6 @@ class SocketClientProvider with ChangeNotifier {
     _socket?.emit(eventName, data);
   }
 
-  void _sendFcmTokenToServer(String token) {
-    // Enviar token a tu backend
-    print('Enviando token FCM al servidor: $token');
-    // Ejemplo: _socket?.emit('register_fcm_token', { 'token': token });
-  }
-
   void _handlePushNotification(dynamic data) {
     try {
       final notification = NotificationModel.fromJson(data);
@@ -325,13 +327,69 @@ class SocketClientProvider with ChangeNotifier {
       // También agregar a la lista de notificaciones
       addNotification(notification);
     } catch (e) {
-      print('Error manejando notificación push: $e');
+      if (kDebugMode) {
+        print('Error manejando notificación push: $e');
+      }
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     disconnectSocket();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (kDebugMode) {
+      print('AppLifecycleState changed: $state');
+    }
+
+    switch (state) {
+      case AppLifecycleState.paused: // ✅ App va a segundo plano o se cierra
+        disconnectSocket();
+        break;
+
+      case AppLifecycleState
+            .detached: // ✅ App siendo cerrada (poco confiable pero por si acaso)
+        disconnectSocket();
+        break;
+
+      case AppLifecycleState.resumed: // ✅ App vuelve a primer plano
+        _tryReconnect();
+        break;
+
+      case AppLifecycleState.inactive: // ⏸️ Estado intermedio
+        break;
+      case AppLifecycleState.hidden: // 🆕 Nuevo estado en Flutter 3.0+
+        disconnectSocket();
+
+        break;
+    }
+
+    super.didChangeAppLifecycleState(state); // ✅ IMPORTANTE
+  }
+
+  void _tryReconnect() {
+    if (_socket != null && !_isConnected) {
+      if (kDebugMode) {
+        print('🔄 Intentando reconexión automática...');
+      }
+
+      try {
+        // Disconnect primero para limpiar
+        _socket?.disconnect();
+
+        // Reconectar después de un breve delay
+        Future.delayed(Duration(milliseconds: 1000), () {
+          _socket?.connect();
+        });
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Error en reconexión: $e');
+        }
+      }
+    }
   }
 }

@@ -72,6 +72,11 @@ Future<ResponseData> getProfileUser(token, idUser) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
+      print('🎯 [GRAPHQL] Query completada: ${
+        result.exception?.linkException.toString()
+      }');
+      print('   Data: ${result.data}');
+      print('   Errors: ${result.exception.toString()}');
       if (kDebugMode) {
         return ResponseData.fromQueryResult(result);
       } else {

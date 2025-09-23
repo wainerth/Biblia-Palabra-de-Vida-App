@@ -7,6 +7,7 @@ GraphQLClient createClient({String? authToken}) {
     defaultHeaders: {
       'Content-Type': 'application/json', // Fuerza JSON
       'apollo-require-preflight': 'true', // Indica que es una solicitud segura
+      
     },
   );
 
@@ -30,3 +31,4 @@ GraphQLClient createClient({String? authToken}) {
     ),
   );
 }
+
