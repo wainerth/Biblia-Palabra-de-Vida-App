@@ -128,7 +128,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             false); // listen: false para evitar reconstrucciones innecesarias
     dataUser = userProvider.currentUser;
     final progressResponse =
-        await userProvider.getProgressUser(dataUser?.userId, null);
+        await userProvider.getProgressUser(dataUser!.userId, null);
     if (progressResponse!.error != null) {
       setState(() {
         error = true;

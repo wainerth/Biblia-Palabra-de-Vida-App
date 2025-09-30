@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart' hide MultipartFile;
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -15,12 +15,13 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 //   -------------Auth User
 
 // Mutation Login with usernameOrEmail and password
+String operationName = '';
 
-Future login(email, password) async {
+Future<ResponseData> login(String email, String password) async {
   final GraphQLClient client = createClient();
-
+  operationName = 'LoginUser';
   final MutationOptions mutateGql = MutationOptions(
-    operationName: 'LoginUser',
+    operationName: operationName,
     document: gql(r'''
         mutation LoginUser($input: LoginInput!) {
           loginUser(input: $input) {
@@ -61,21 +62,7 @@ Future login(email, password) async {
       error: null,
     );
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -97,14 +84,12 @@ Future<ResponseData> loginGoogle() async {
     );
   } else if (kIsWeb) {
     googleSignIn = GoogleSignIn(
-        clientId:
-            "823422522259-lsaj5empb8t54pims7m727krgrcfu6lf.apps.googleusercontent.com",
+        clientId: GraphQLConfig.clientId,
         forceCodeForRefreshToken: true,
         scopes: ["email"]);
   } else {
     googleSignIn = GoogleSignIn(
-        serverClientId:
-            "214929717096-c669jpm1gb9q87cribgbknuteemuj8st.apps.googleusercontent.com",
+        serverClientId: GraphQLConfig.serverClientId,
         forceCodeForRefreshToken: true,
         scopes: [
           "email",
@@ -129,9 +114,10 @@ Future<ResponseData> loginGoogle() async {
       error: 'Google Authentication: Failed to obtain Google tokens',
     );
   }
+  operationName = 'SignUpGoogle';
 
   final MutationOptions mutateGql = MutationOptions(
-    operationName: 'SignUpGoogle',
+    operationName: operationName,
     document: gql(r'''
         mutation SignUpGoogle($accessToken: String!) {
           signUpGoogle(accessToken: $accessToken) {
@@ -170,30 +156,16 @@ Future<ResponseData> loginGoogle() async {
       error: null,
     );
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
 // Mutation Register User
-Future register(dataToRegister) async {
+Future<ResponseData> register(SignupInput dataToRegister) async {
   final GraphQLClient client = createClient();
-
+  operationName = 'RegisterUser';
   final MutationOptions mutateGql = MutationOptions(
-      operationName: "RegisterUser",
+      operationName: operationName,
       document: gql(r'''
     mutation RegisterUser($input: SignupInput!) {
         registerUser(input: $input) {
@@ -218,8 +190,8 @@ Future register(dataToRegister) async {
           "lastname": dataToRegister.lastname,
           "birthdate": dataToRegister.birthdate,
           "gender":
-              dataToRegister.gender != null && dataToRegister.gender.isNotEmpty
-                  ? dataToRegister.gender.toUpperCase()
+              dataToRegister.gender != null && dataToRegister.gender!.isNotEmpty
+                  ? dataToRegister.gender!.toUpperCase()
                   : dataToRegister.gender,
           "phoneNumber": dataToRegister.phoneNumber,
           "countryId": dataToRegister.countryId,
@@ -258,33 +230,17 @@ Future register(dataToRegister) async {
       error: null,
     );
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      // Example: JSON parsing error
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error:
-              "${mutateGql.operationName} An unexpected error occurred: $e"); // Generic error
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
 // Mutation Update Profile User
 
-Future updateUserProfile(token, UserProfile data) async {
+Future<ResponseData> updateUserProfile(String token, UserProfile data) async {
   final GraphQLClient client = createClient(authToken: token);
-
+  operationName = 'UpdateDataProfileUsers';
   final MutationOptions mutateGql = MutationOptions(
-      operationName: "UpdateDataProfileUsers",
+      operationName: operationName,
       document: gql(r'''
      mutation UpdateDataProfileUsers($userId: ID, $dataProfiles: DataProfiles) {
       updateDataProfileUsers(userId: $userId, dataProfiles: $dataProfiles){
@@ -340,30 +296,18 @@ Future updateUserProfile(token, UserProfile data) async {
     }
     return ResponseData(data: data['updateDataProfileUsers'], error: null);
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
 // Mutation Update User Church
 
-Future updateChurchUser(token, userId, churchId) async {
+Future<ResponseData> updateChurchUser(
+    String token, String userId, String churchId) async {
   final GraphQLClient client = createClient(authToken: token);
+  operationName = 'UpdateChurchUser';
   final MutationOptions mutateGql = MutationOptions(
-      operationName: "UpdateChurchUser",
+      operationName: operationName,
       document: gql(r'''
       mutation UpdateChurchUser($userId: ID, $churchId: ID) {
         updateChurchUser(userId: $userId, churchId: $churchId)
@@ -401,21 +345,7 @@ Future updateChurchUser(token, userId, churchId) async {
       error: null,
     );
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -423,8 +353,9 @@ Future updateChurchUser(token, userId, churchId) async {
 
 Future<ResponseData> forgotPassword(email) async {
   final GraphQLClient client = createClient();
+  operationName = 'ForgotPassword';
   final MutationOptions mutateGql = MutationOptions(
-      operationName: "ForgotPassword",
+      operationName: operationName,
       document: gql(r'''
       mutation ForgotPassword($email: String!) {
         forgotPassword(email: $email) {
@@ -462,21 +393,7 @@ Future<ResponseData> forgotPassword(email) async {
       error: null,
     );
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -484,8 +401,9 @@ Future<ResponseData> forgotPassword(email) async {
 
 Future verifyPinPassword(email, code) async {
   final GraphQLClient client = createClient();
+  operationName = 'verifyPinForPassword';
   final MutationOptions mutateGql = MutationOptions(
-      operationName: "VerifyPinForPassword",
+      operationName: operationName,
       document: gql(r'''
         mutation VerifyPinForPassword($email: String, $code: String) {
         verifyPinForPassword(email: $email, code: $code) {
@@ -525,19 +443,7 @@ Future verifyPinPassword(email, code) async {
       error: null,
     );
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(data: null, error: "No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -545,8 +451,9 @@ Future verifyPinPassword(email, code) async {
 
 Future resetPassword(email, password) async {
   final GraphQLClient client = createClient();
+  operationName = 'ResetPassword';
   final MutationOptions mutateGql = MutationOptions(
-      operationName: "ResetPassword",
+      operationName: operationName,
       document: gql(r'''
         mutation ResetPassword($email: String!, $password: String!) {
         resetPassword(email: $email, password: $password) {
@@ -591,21 +498,7 @@ Future resetPassword(email, password) async {
       error: null,
     );
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -614,6 +507,17 @@ Future resetPassword(email, password) async {
 Future logout() async {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   await googleSignIn.signOut();
+  final deviceInfo = await PreferencesManager().getDeviceInfo();
+  String userId = await PreferencesManager().getUserId();
+  // eliminamos el dispositivo del usuario
+  final responseDeleteDevice =
+      await deleteDevice(userId, deviceInfo?['deviceId'] ?? '');
+
+  if (responseDeleteDevice.error != null) {
+    if (kDebugMode) {
+      print('Error deleting device: ${responseDeleteDevice.error}');
+    }
+  }
 
   await PreferencesManager().clearOne('userData');
   await PreferencesManager().clearOne('userToken');
@@ -629,11 +533,11 @@ Future logout() async {
 // Mutation  Send Score
 
 Future<ResponseData> sendScoreUser(
-    userId, courseId, levelId, failedIntents) async {
+    String userId, String courseId, String levelId, int failedIntents) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'SendScore';
   MutationOptions mutateGql = MutationOptions(
     operationName: "SendScore",
     document: gql(r'''
@@ -704,31 +608,17 @@ Future<ResponseData> sendScoreUser(
         data: null,
         error: '${mutateGql.operationName} Send score Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
 // Mutation redeemed Prize
 
-Future<ResponseData> redeemedPrize(prizeId, userId) async {
+Future<ResponseData> redeemedPrize(String prizeId, String userId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'RedeemPrize';
   MutationOptions mutateGql = MutationOptions(
     operationName: "RedeemPrize",
     document: gql(r'''
@@ -772,21 +662,7 @@ Future<ResponseData> redeemedPrize(prizeId, userId) async {
     return ResponseData(
         data: null, error: 'Redeem Prize Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -796,7 +672,7 @@ Future<ResponseData> openOnePromise(String userId, String promiseId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'OpenOnePromise';
   MutationOptions mutateGql = MutationOptions(
     operationName: "OpenOnePromise",
     document: gql(r'''
@@ -837,33 +713,19 @@ Future<ResponseData> openOnePromise(String userId, String promiseId) async {
     return ResponseData(
         data: null, error: 'Open One Promise Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
 // Mutation add Favorite Preach
 
-Future<ResponseData> addToFavoritePreach(userId, preachId) async {
+Future<ResponseData> addToFavoritePreach(String userId, String preachId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'AddPreachToFavorite';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "AddPreachToFavorite",
+    operationName: operationName,
     document: gql(r'''
       mutation AddPreachToFavorite($userId: ID, $preachId: ID) {
         addPreachToFavorite(userId: $userId, preachId: $preachId)
@@ -902,32 +764,19 @@ Future<ResponseData> addToFavoritePreach(userId, preachId) async {
     return ResponseData(
         data: null, error: 'Add Preach To Favorite Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
 // Mutation Remove favorite Preach
-Future<ResponseData> removePreachFavorite(userId, preachId) async {
+Future<ResponseData> removePreachFavorite(
+    String userId, String preachId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'RemovePreachFavorite';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "RemovePreachFavorite",
+    operationName: operationName,
     document: gql(r'''
      mutation RemovePreachFavorite($userId: ID, $preachId: ID) {
         removePreachFavorite(userId: $userId, preachId: $preachId)
@@ -966,21 +815,7 @@ Future<ResponseData> removePreachFavorite(userId, preachId) async {
     return ResponseData(
         data: null, error: '${mutateGql.operationName} Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1000,9 +835,9 @@ Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
       "color": lighter.color
     });
   }
-
+  operationName = 'AppCreateHighlighter';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "AppCreateHighlighter",
+    operationName: operationName,
     document: gql(r'''
      mutation AppCreateHighlighter($input: [HighlightInputApp], $chapterId: ID, $userId: ID, $bibleVersion: Int) {
         appCreateHighlighter(input: $input, chapterId: $chapterId, userId: $userId, bibleVersion: $bibleVersion) {
@@ -1055,22 +890,7 @@ Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
     return ResponseData(
         data: null, error: '${mutateGql.operationName} Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error:
-              "${mutateGql.operationName} An unexpected error occurred: $e"); // Generic error
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1080,9 +900,9 @@ Future<ResponseData> removeHighLighters(String verseId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'RemoveHighlighter';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "RemoveHighlighter",
+    operationName: operationName,
     document: gql(r'''
      mutation RemoveHighlighter($verseId: ID) {
         removeHighlighter(verseId: $verseId)
@@ -1121,22 +941,7 @@ Future<ResponseData> removeHighLighters(String verseId) async {
     return ResponseData(
         data: null, error: 'Remove Highlighter Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error:
-              "${mutateGql.operationName} An unexpected error occurred: $e"); // Generic error
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1146,9 +951,9 @@ Future<ResponseData> updateFavoriteVerse(String userId, String verseId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'UpdateFavoriteVerse';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "UpdateFavoriteVerse",
+    operationName: operationName,
     document: gql(r'''
      mutation UpdateFavoriteVerse($userId: ID, $verseId: ID) {
         updateFavoriteVerse(userId: $userId, verseId: $verseId)
@@ -1190,22 +995,7 @@ Future<ResponseData> updateFavoriteVerse(String userId, String verseId) async {
     return ResponseData(
         data: null, error: 'Update Favorite Verse Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error:
-              "${mutateGql.operationName} An unexpected error occurred: $e"); // Generic error
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1216,9 +1006,9 @@ Future<ResponseData> createNewVerseFavoriteByUser(
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'CreateNewVerseFavoriteByUser';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "CreateNewVerseFavoriteByUser",
+    operationName: operationName,
     document: gql(r'''
      mutation CreateNewVerseFavoriteByUser($userId: ID, $verseId: ID) {
         createNewVerseFavoriteByUser(userId: $userId, verseId: $verseId) {
@@ -1264,21 +1054,7 @@ Future<ResponseData> createNewVerseFavoriteByUser(
         data: null,
         error: 'Create New Verse Favorite By User Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1288,9 +1064,9 @@ Future<ResponseData> deleteVerseFavorite(String userId, String verseId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'DeleteVerseFavorite';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "DeleteVerseFavorite",
+    operationName: operationName,
     document: gql(r'''
      mutation DeleteVerseFavorite($userId: ID, $verseId: ID) {
         deleteVerseFavorite(userId: $userId, verseId: $verseId) {
@@ -1335,21 +1111,7 @@ Future<ResponseData> deleteVerseFavorite(String userId, String verseId) async {
     return ResponseData(
         data: null, error: 'Delete Verse Favorite Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1359,9 +1121,9 @@ Future<ResponseData> markAsReadOneNotification(String notificationId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'MarkAsReadNotification';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "MarkAsReadNotification",
+    operationName: operationName,
     document: gql(r'''
      mutation MarkAsReadNotification($userStatusNotificationId: ID) {
         markAsReadNotification(userStatusNotificationId: $userStatusNotificationId) {
@@ -1405,22 +1167,7 @@ Future<ResponseData> markAsReadOneNotification(String notificationId) async {
     return ResponseData(
         data: null, error: 'Mark As Read Notification Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error:
-              "${mutateGql.operationName} An unexpected error occurred: $e"); // Generic error
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1433,9 +1180,9 @@ Future<ResponseData> saveResultPlay(
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'SaveResultByUser';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "SaveResultByUser",
+    operationName: operationName,
     document: gql(r'''
      mutation SaveResultByUser($userId: ID, $difficulty: String, $category: String) {
         saveResultByUser(userId: $userId, difficulty: $difficulty, category: $category) {
@@ -1480,21 +1227,7 @@ Future<ResponseData> saveResultPlay(
     return ResponseData(
         data: null, error: 'Save Result By User Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(
-          data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1512,9 +1245,9 @@ Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
     prayer.audio.path,
     contentType: MediaType('audio', 'aac'),
   );
-
+  operationName = 'CreateRequestPrayer';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "CreateRequestPrayer",
+    operationName: operationName,
     document: gql(r'''
      mutation CreateRequestPrayer($inputData: OnePrayer!) {
         createRequestPrayer(inputData: $inputData) {
@@ -1565,17 +1298,7 @@ Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
     return ResponseData(
         data: null, error: 'Create Request Prayer Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e"); // Generic error
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1585,9 +1308,9 @@ Future<ResponseData> deleteRequestPrayer(String prayerId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'DeleteRequestPrayer';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "DeleteRequestPrayer",
+    operationName: operationName,
     document: gql(r'''
      mutation DeleteRequestPrayer($prayerId: ID!) {
         deleteRequestPrayer(prayerId: $prayerId) {
@@ -1630,22 +1353,12 @@ Future<ResponseData> deleteRequestPrayer(String prayerId) async {
     return ResponseData(
         data: null, error: 'Delete Request Prayer Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
 // Mutation Answer Request prayer
- 
+
 Future<ResponseData> answerPrayerRequest(String? message, String requestId,
     String responderId, String? verseId, File? audio) async {
   String? userToken = await PreferencesManager().getUserToken();
@@ -1660,9 +1373,9 @@ Future<ResponseData> answerPrayerRequest(String? message, String requestId,
       contentType: MediaType('audio', 'aac'),
     );
   }
-
+  operationName = 'AnswerPrayerRequest';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "AnswerPrayerRequest",
+    operationName: operationName,
     document: gql(r'''
      mutation AnswerPrayerRequest($input: AnswerPrayerInput!) {
         answerPrayerRequest(input: $input) {
@@ -1714,17 +1427,7 @@ Future<ResponseData> answerPrayerRequest(String? message, String requestId,
     return ResponseData(
         data: null, error: 'Answer Prayer Request Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName}Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName}No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName}Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName}An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1735,7 +1438,7 @@ Future<ResponseData> changeStatusRequest(
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'ChangeStatusRequest';
   MutationOptions mutateGql = MutationOptions(
     operationName: "ChangeStatusRequest",
     document: gql(r'''
@@ -1783,17 +1486,7 @@ Future<ResponseData> changeStatusRequest(
     return ResponseData(
         data: null, error: 'Change Status Request Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
-          data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
-    }
+    return handleGenericError(e, operationName);
   }
 }
 
@@ -1803,9 +1496,9 @@ Future<ResponseData> createCertificate(String? userId, String courseId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
+  operationName = 'CreateCertificate';
   MutationOptions mutateGql = MutationOptions(
-    operationName: "CreateCertificate",
+    operationName: operationName,
     document: gql(r'''
      mutation CreateCertificate($userId: ID, $courseId: ID) {
         createCertificate(userId: $userId, courseId: $courseId) {
@@ -1852,16 +1545,61 @@ Future<ResponseData> createCertificate(String? userId, String courseId) async {
     return ResponseData(
         data: null, error: 'Create Certificate Timeout de conexión $e');
   } catch (e) {
-    if (e is TimeoutException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} Request timed out");
-    } else if (e is SocketException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} No Internet Connection");
-    } else if (e is FormatException) {
-      return ResponseData(data: null, error: "${mutateGql.operationName} Invalid data format");
-    } else {
-      return ResponseData(
+    return handleGenericError(e, operationName);
+  }
+}
+
+Future<ResponseData> deleteDevice(String userId, String deviceId) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+  operationName = 'DeleteUserDevice';
+  MutationOptions mutateGql = MutationOptions(
+    operationName: operationName,
+    document: gql(r'''
+     mutation DeleteUserDevice($userId: ID!, $deviceId: String!) {
+        deleteUserDevice(userId:$userId, deviceId: $deviceId) {
+          success
+          message
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+      "deviceId": deviceId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
           data: null,
-          error: "${mutateGql.operationName} An unexpected error occurred: $e");
+          error:
+              'Delete User Device: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
     }
+
+    final data = result.data;
+    if (data == null || data['deleteUserDevice'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Delete User Device failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['deleteUserDevice'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    return ResponseData(
+        data: null, error: 'Delete User Device Timeout de conexión $e');
+  } catch (e) {
+    return handleGenericError(e, operationName);
   }
 }

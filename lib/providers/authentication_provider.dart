@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
@@ -62,10 +61,8 @@ class AuthenticationProvider extends ChangeNotifier {
         // llamar conexión con el socket
         final socketProvider =
             Provider.of<SocketClientProvider>(context, listen: false);
-        final deviceInfo = await DeviceInfoPlugin().deviceInfo;
         if (!socketProvider.isInitialized) {
           socketProvider.connectSocket(
-              deviceId: '856-32cd-89',
               userId: dataUserLoad.userId,
               username: dataUserLoad.username!,
               email: dataUserLoad.email!);
@@ -199,10 +196,8 @@ class AuthenticationProvider extends ChangeNotifier {
     // llamar conexión con el socket
     final socketProvider =
         Provider.of<SocketClientProvider>(context, listen: false);
-    final deviceInfo = await DeviceInfoPlugin().deviceInfo;
     if (!socketProvider.isInitialized) {
       socketProvider.connectSocket(
-          deviceId: '856-32cd-89',
           userId: userProfile.data['userId'],
           username: userProfile.data['username'],
           email: userProfile.data['email']);
@@ -361,8 +356,10 @@ class AuthenticationProvider extends ChangeNotifier {
     if (result.error != null) {
       return false;
     }
+    // limpio el socket
     Provider.of<SocketClientProvider>(context, listen: false)
         .cleanNotification();
+    Provider.of<SocketClientProvider>(context, listen: false).cleanSocket();
     if (navigatorKey.currentState != null) {
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
       navigatorKey.currentState!.pushReplacementNamed('/homePage');

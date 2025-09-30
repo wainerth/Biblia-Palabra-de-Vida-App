@@ -107,7 +107,7 @@ class UserProvider extends ChangeNotifier {
   Future<ResponseData> updateProfile(UserProfile data) async {
     try {
       final String? userToken = await PreferencesManager().getUserToken();
-      final response = await updateUserProfile(userToken, data);
+      final response = await updateUserProfile(userToken!, data);
       if (response.error != null) {
         return ResponseData(data: null, error: response.error);
       }
@@ -146,7 +146,7 @@ class UserProvider extends ChangeNotifier {
   Future updateUserChurch(userId, churchId, churches) async {
     try {
       final String? userToken = await PreferencesManager().getUserToken();
-      final response = await updateChurchUser(userToken, userId, churchId);
+      final response = await updateChurchUser(userToken!, userId, churchId);
       if (response.error != null) {
         return ResponseData(data: null, error: null);
       }
@@ -221,7 +221,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  Future<ResponseData?> getProgressUser(userId, courseId) async {
+  Future<ResponseData?> getProgressUser(String userId,String? courseId) async {
     ResponseProgress? userProgress;
     final progress = await getLastProgressUser(userId, courseId);
     if (progress.error != null) {

@@ -37,7 +37,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             false); // listen: false para evitar reconstrucciones innecesarias
     LoginUser? dataUser = userProvider.currentUser;
     final progressResponse =
-        await userProvider.getProgressUser(dataUser?.userId, null);
+        await userProvider.getProgressUser(dataUser!.userId, null);
     if (progressResponse!.error != null) {
       LoadingService().hideLoading();
       await showCustomDialog(

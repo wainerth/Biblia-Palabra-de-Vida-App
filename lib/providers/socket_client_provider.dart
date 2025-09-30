@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/services/device_service.dart';
 import 'package:biblia_palabra_de_vida_app/services/fcm_service.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -12,6 +13,8 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
   IO.Socket? _socket;
@@ -28,7 +31,9 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
   List<NotificationModel> get notifications => _notifications;
 
   String? _fcmToken;
-
+  void cleanSocket(){
+    _socket = null;
+  }
   @pragma('vm:entry-point')
   static void backgroundNotificationHandler(NotificationResponse response) {
     if (kDebugMode) {
@@ -38,6 +43,23 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
 
   void initializeObserver() {
     WidgetsBinding.instance.addObserver(this);
+  }
+
+// Función para obtener el timezone del dispositivo
+  String getDeviceTimeZone() {
+    try {
+      // Inicializar timezone database
+      tz.initializeTimeZones();
+
+      // Obtener la ubicación local
+      final location = tz.local;
+
+      // Obtener el nombre del timezone (ej: "America/New_York")
+      return location.name;
+    } catch (e) {
+      // Fallback si hay error
+      return 'UTC';
+    }
   }
 
   // Método para inicializar TODO el sistema de notificaciones
@@ -217,16 +239,17 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
 
   // Método para conectar al socket
   void connectSocket({
-    required String deviceId,
     required String userId,
     required String username,
     required String email,
   }) async {
+    final timeZone = getDeviceTimeZone();
     _initialized = true;
     initializeObserver();
     // Inicializar sistema de notificaciones primero
     await initializeNotificationSystem();
-
+    // Obtener información del dispositivo
+    final deviceData = await DeviceService.getDeviceInfo();
     // Desconectar si ya hay una conexión existente
     disconnectSocket();
 
@@ -243,22 +266,32 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     }
 
     // Configuración del socket similar a tu implementación en React
-    _socket = IO.io('https://labibliapalabradevida.com', {
-      'transports': ['polling'], // ✅ Comenzar con polling
-      'upgrade': true, // ✅ Permitir upgrade a websocket
-      'path': '/socket.io${GraphQLConfig.development ? '-dev' : ''}', // Ajusta el path si es necesario
-      'query': {
-        'deviceId': deviceId,
-        'userId': userId,
-        'username': username,
-        'email': email,
-        'fcmToken': _fcmToken ?? '',
-        'EIO': '4', // ✅ Forzar Engine.IO v4
-      },
-      'forceNew': true,
-      'reconnection': true,
-      'timeout': 10000,
-    });
+    _socket = IO.io(
+      GraphQLConfig.urlSocket,
+      IO.OptionBuilder()
+          .setTransports(['websocket']) // transports
+          .setPath('/socket.io-dev') // path
+          .setQuery({
+            'deviceId': deviceData['deviceId'],
+            'userId': userId,
+            'username': username,
+            'email': email,
+            'fcmToken': _fcmToken,
+            'deviceType': 'mobile',
+            'platform': deviceData['platform'],
+            'appVersion': deviceData['appVersion'],
+            'deviceModel': deviceData['deviceModel'],
+            'osVersion': deviceData['osVersion'],
+            'timeZone': timeZone,
+          }) // query
+          .enableReconnection() // reconnection
+          .setReconnectionDelay(1000) // reconnectionDelay
+          .setReconnectionDelayMax(5000) // reconnectionDelayMax
+          .setReconnectionAttempts(3) // maxReconnectionAttempts
+          .setTimeout(10000) // timeout
+          .enableForceNew() // forceNew
+          .build(),
+    );
 
     // Manejar eventos de conexión
     _socket?.onConnect((_) {

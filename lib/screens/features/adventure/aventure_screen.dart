@@ -199,7 +199,7 @@ class _AventureScreenState extends State<AventureScreen> {
                     final userProvider =
                         Provider.of<UserProvider>(context, listen: false);
                     final progressResponse = await userProvider.getProgressUser(
-                        dataUser?.userId, courses[index].id);
+                        dataUser!.userId, courses[index].id);
                     if (progressResponse!.error != null) {
                       setState(() => loadAventure[index] = false);
                       await showCustomDialog(context,
@@ -281,7 +281,7 @@ class _AventureScreenState extends State<AventureScreen> {
 
   loadStage(String? userId, String courseId) async {
     List<Stage> stages = [];
-    final result = await loadStageByCourse(userId, courseId);
+    final result = await loadStageByCourse(userId!, courseId);
     if (result.data != null) {
       stages = result.data
           .map((stage) => Stage.fromJson(removeTypename(stage)))

@@ -37,6 +37,7 @@ class PreferencesManager {
   static const String _fontSizeVerseKey = 'fontSizeVerse';
   static const String _fontSizeQuestionKey = 'fontSizeQuestion';
   static const String _fontFamilySetKey = 'fontFamilySet';
+  static const String _deviceInfoKey = 'deviceInfo';
 
   // Métodos para userToken
   Future<String?> getUserToken() async {
@@ -163,6 +164,32 @@ class PreferencesManager {
     return _prefs!.getString(_userDataKey);
   }
 
+  Future<String> getUserId() async {
+    await _ensureInitialized();
+
+    final userDataString = _prefs!.getString(_userDataKey);
+
+    if (userDataString == null || userDataString.isEmpty) {
+      return "";
+    }
+
+    try {
+      final userInfoJson = jsonDecode(userDataString);
+
+      // Acceder directamente al campo 'id' del JSON
+      if (userInfoJson['id'] != null) {
+        return userInfoJson['id'].toString();
+      } else if (userInfoJson['userId'] != null) {
+        return userInfoJson['userId'].toString();
+      } else {
+        return "";
+      }
+    } catch (e) {
+      print('Error decoding user data: $e');
+      return "";
+    }
+  }
+
   Future<void> setUserData(String userDataJson) async {
     await _ensureInitialized();
 
@@ -243,6 +270,18 @@ class PreferencesManager {
     } else {
       await clearUserData();
     }
+  }
+
+  // Métodos para manejo de modelos complejos
+  Future<Map<String, dynamic>?> getDeviceInfo() async {
+    await _ensureInitialized();
+    final jsonString = _prefs!.getString(_deviceInfoKey);
+    return jsonString != null ? jsonDecode(jsonString) : null;
+  }
+
+  Future<void> setDeviceInfo(Map<String, dynamic> deviceData) async {
+    await _ensureInitialized();
+    await _prefs!.setString(_deviceInfoKey, jsonEncode(deviceData));
   }
 
   // Limpiar todas las preferencias

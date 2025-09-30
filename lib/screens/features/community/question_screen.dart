@@ -141,7 +141,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
         // obtenemos curso
         final ResponseData courseResponse =
-            await loadOneCourse(userData?.userId, courseId);
+            await loadOneCourse(userData!.userId, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
           return;

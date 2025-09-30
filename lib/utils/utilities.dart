@@ -1,3 +1,6 @@
+import 'dart:async' show TimeoutException;
+import 'dart:io' show SocketException;
+
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
@@ -298,3 +301,27 @@ RouteInfo getRouterScreen(action, args) {
   }
   return RouteInfo('/layoutPage');
 }
+
+ResponseData handleGenericError(dynamic e, String operationName) {
+    if (e is TimeoutException) {
+      return ResponseData(
+        data: null, 
+        error: "$operationName Request timed out"
+      );
+    } else if (e is SocketException) {
+      return ResponseData(
+        data: null,
+        error: "$operationName No Internet Connection"
+      );
+    } else if (e is FormatException) {
+      return ResponseData(
+        data: null, 
+        error: "$operationName Invalid data format"
+      );
+    } else {
+      return ResponseData(
+        data: null,
+        error: "$operationName An unexpected error occurred: $e"
+      );
+    }
+  }

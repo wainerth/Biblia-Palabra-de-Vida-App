@@ -19,17 +19,15 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // inicializamos firebase
-  // await Firebase.initializeApp();
-  // Inicializar
+
   await PreferencesManager().init();
 
   final socketProvider = SocketClientProvider();
   await socketProvider.initializeNotificationSystem();
   if (!kIsWeb) {
     await FlutterDownloader.initialize(
-      debug: kDebugMode, // Set to false in production
-      ignoreSsl: kDebugMode, // Set to false for secure connections
+      debug: kDebugMode, 
+      ignoreSsl: kDebugMode,
     );
   }
 
@@ -142,7 +140,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildHomeScreen() {
-    // if the _hasSeenIntro is null, show a loading spinner
     if (_hasSeenIntro == null) {
       return const Scaffold(
         body: Center(

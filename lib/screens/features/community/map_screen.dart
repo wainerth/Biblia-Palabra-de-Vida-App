@@ -176,7 +176,7 @@ class _MapScreenState extends State<MapScreen>
 
         // obtenemos curso
         final ResponseData courseResponse =
-            await loadOneCourse(userData?.userId, courseId);
+            await loadOneCourse(userData!.userId, courseId);
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
           return;
@@ -206,7 +206,7 @@ class _MapScreenState extends State<MapScreen>
         stage = Stage.fromJson(stageResponse.data);
 
         // obtenemos los niveles
-        final result = await loadLevelsByCourse(userData?.userId, sectionId);
+        final result = await loadLevelsByCourse(userData.userId, sectionId);
         if (result.error != null) {
           errorMessage = result.error;
           return;
