@@ -50,210 +50,171 @@ class PersonalInfoStep extends StatefulWidget {
 }
 
 class _PersonalInfoStepState extends State<PersonalInfoStep> {
-  // Future<void> _selectDate(BuildContext context) async {
-  //   final DateFormat formatter = DateFormat.yMd('es_ES');
-  //   final DateTime now = DateTime.now();
-  //   final DateTime? picked = await showDatePicker(
-  //       context: context,
-  //       initialDate: widget.selectedDate ?? now,
-  //       firstDate: DateTime(1951),
-  //       lastDate: now,
-  //       locale: const Locale('es', 'ES'),
-  //       builder: (BuildContext context, Widget? child) {
-  //         return Theme(
-  //           data: ThemeData.light().copyWith(
-  //             primaryColor: const Color(0Xff12CBC4),
-  //             colorScheme: ColorScheme.light(primary: const Color(0Xff12CBC4)),
-  //             buttonTheme:
-  //                 const ButtonThemeData(textTheme: ButtonTextTheme.primary),
-  //           ),
-  //           child: child!,
-  //         );
-  //       });
-  //   if (picked != null && picked != widget.selectedDate) {
-  //     widget.onDateSelected(picked);
-  //     widget.dateController.text = formatter.format(picked);
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
+    final double formWidth = StylesApp(context).sizeTextFormField.width;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+            width: formWidth,
+            child: TextFormField(
+              controller: widget.nameController,
+              decoration: StylesApp(context)
+                  .inputDecorationOutlineStyle
+                  .copyWith(hintText: "Nombre"),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "El Nombre es obligatorio";
+                }
+                return null;
+              },
+            ),
           ),
-          child: TextFormField(
-            controller: widget.nameController,
-            decoration: StylesApp(context)
-                .inputDecorationOutlineStyle
-                .copyWith(hintText: "Nombre"),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "El Nombre es obligatorio";
-              }
-              return null;
-            },
+          const SizedBox(
+            height: 23.0,
           ),
-        ),
-        const SizedBox(
-          height: 23.0,
-        ),
-        Container(
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
+          // DEBUG (opcional)
+          Text("Ancho form: $formWidth, Pantalla: $screenWidth"),
+          const SizedBox(height: 23.0),
+          Container(
+            width: formWidth,
+            child: TextFormField(
+              controller: widget.lastNameController,
+              decoration: StylesApp(context)
+                  .inputDecorationOutlineStyle
+                  .copyWith(hintText: "Apellido"),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "El Apellido es obligatorio";
+                }
+                return null;
+              },
+            ),
           ),
-          child: TextFormField(
-            controller: widget.lastNameController,
-            decoration: StylesApp(context)
-                .inputDecorationOutlineStyle
-                .copyWith(hintText: "Apellido"),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "El Apellido es obligatorio";
-              }
-              return null;
-            },
+          const SizedBox(
+            height: 23.0,
           ),
-        ),
-        const SizedBox(
-          height: 23.0,
-        ),
-        Container(
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
+          Container(
+            width: formWidth,
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
               border: Border.all(color: Colors.black),
               color: Colors.white,
-              borderRadius: BorderRadius.circular(8)),
-          child: RadioButtonWidget<String>(
-            label: "Género:",
-            value: widget.gender,
-            onChanged: (newValue) => widget.onChangeGender!(newValue),
-            options: [
-              RadioButtonOption(value: "m", label: "Masculino"),
-              RadioButtonOption(value: "f", label: "Femenino")
-            ],
-          ),
-        ),
-        const SizedBox(
-          height: 23.0,
-        ),
-        Container(
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
-          ),
-          child: DatePickerFormField(
-            initialDate: DateTime.now().subtract(Duration(days: 15 * 365)),
-            onChanged: (value) {
-              widget.dateController.text = value;
-            },
-          ),
-        ),
-        const SizedBox(
-          height: 23.0,
-        ),
-        Container(
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8)),
-          child: RadioButtonWidget<bool>(
-              // Ejemplo con opciones de tipo String
-              label: "Bautizado:",
-              value: widget.isBaptized,
-              onChanged: (newValue) => widget.onChangeBaptized!(newValue!),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: RadioButtonWidget<String>(
+              label: "Género:",
+              value: widget.gender,
+              onChanged: (newValue) => widget.onChangeGender!(newValue),
               options: [
-                RadioButtonOption(value: true, label: "Si"),
-                RadioButtonOption(value: false, label: "No")
-              ]),
-        ),
-        const SizedBox(
-          height: 23.0,
-        ),
-        Container(
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
+                RadioButtonOption(value: "m", label: "Masculino"),
+                RadioButtonOption(value: "f", label: "Femenino")
+              ],
+            ),
           ),
-          decoration: BoxDecoration(
-              color: StyleColor.white,
-              borderRadius: BorderRadius.circular(8.0)),
-          child: CustomDropdownBottomWidget<Country>(
-            hintText: "Seleccione un país",
-            items: widget.dropDownList,
-            onChanged: widget.onCountrySelected,
-            selectedItem: widget.selectedData,
+          const SizedBox(
+            height: 23.0,
           ),
-        ),
-        const SizedBox(
-          height: 23.0,
-        ),
-        Container(
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
+          Container(
+            width: formWidth,
+            child: DatePickerFormField(
+              initialDate: DateTime.now().subtract(Duration(days: 15 * 365)),
+              onChanged: (value) {
+                widget.dateController.text = value;
+              },
+            ),
           ),
-          child: Row(
-            children: [
-              // Campo del código del país
-              Flexible(
-                flex: 3,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: StyleColor.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: CustomDropdownBottomWidget<AreaCode>(
-                    hintText: "código",
-                    items: widget.dropDownListArea,
-                    onChanged: widget.onPrefixSelected,
-                    selectedItem: widget.selectedDataArea,
+          const SizedBox(
+            height: 23.0,
+          ),
+          Container(
+            width: formWidth,
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+                border: Border.all(color: Colors.black),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8)),
+            child: RadioButtonWidget<bool>(
+                // Ejemplo con opciones de tipo String
+                label: "Bautizado:",
+                value: widget.isBaptized,
+                onChanged: (newValue) => widget.onChangeBaptized!(newValue!),
+                options: [
+                  RadioButtonOption(value: true, label: "Si"),
+                  RadioButtonOption(value: false, label: "No")
+                ]),
+          ),
+          const SizedBox(
+            height: 23.0,
+          ),
+          Container(
+            width: formWidth,
+            // decoration: BoxDecoration(
+            //   color: StyleColor.white,
+            //   borderRadius: BorderRadius.circular(8.0),
+            // ),
+            child: CustomDropdownBottomWidget<Country>(
+              border: true,
+              hintText: "Seleccione un país",
+              items: widget.dropDownList,
+              onChanged: widget.onCountrySelected,
+              selectedItem: widget.selectedData,
+            ),
+          ),
+          const SizedBox(
+            height: 23.0,
+          ),
+          Container(
+            width: formWidth,
+            child: Row(
+              children: [
+                // Campo del código del país
+                Flexible(
+                  flex: 3,
+                  child: Container(
+                    height: StylesApp(context).sizeTextFormField.height,
+                    child: CustomDropdownBottomWidget<AreaCode>(
+                      border: true,
+                      hintText: "código",
+                      items: widget.dropDownListArea,
+                      onChanged: widget.onPrefixSelected,
+                      selectedItem: widget.selectedDataArea,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10), // Espaciado entre los campos
-              // Campo del número de teléfono
-              Flexible(
-                flex: 7,
-                child: TextFormField(
-                  controller: widget.phoneNumberController,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [
-                    maskFormatterTel, // Permite solo números
-                  ],
-                  decoration:
-                      StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                            hintText: "Número de teléfono",
-                          ),
-                  style: const TextStyle(fontSize: 16),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Por favor, ingresa tu número de teléfono.";
-                    }
-                    return null;
-                  },
+                const SizedBox(width: 10), // Espaciado entre los campos
+                // Campo del número de teléfono
+                Flexible(
+                  flex: 7,
+                  child: TextFormField(
+                    controller: widget.phoneNumberController,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      maskFormatterTel, // Permite solo números
+                    ],
+                    decoration:
+                        StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                              hintText: "Número de teléfono",
+                            ),
+                    style: const TextStyle(fontSize: 16),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Por favor, ingresa tu número de teléfono.";
+                      }
+                      return null;
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(
-          height: 41,
-        ),
-      ],
+          const SizedBox(
+            height: 41,
+          ),
+        ],
+      ),
     );
   }
 }

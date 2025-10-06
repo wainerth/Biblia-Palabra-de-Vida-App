@@ -3,18 +3,24 @@ import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class FCMService {
-  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  static final FlutterLocalNotificationsPlugin _notificationsPlugin = 
+  static final FirebaseMessaging _firebaseMessaging =
+      FirebaseMessaging.instance;
+  static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
   static Future<void> initialize() async {
-    await _setupFirebase();
+    if (!isSkiaWeb) {
+      await _setupFirebase();
+    }
     await _setupLocalNotifications();
-    await _requestPermissions();
-    await _setupInterceptors();
+    if (!isSkiaWeb) {
+      await _requestPermissions();
+      await _setupInterceptors();
+    }
   }
 
   static Future<void> _setupFirebase() async {
@@ -59,7 +65,7 @@ class FCMService {
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
     FirebaseMessaging.instance.getInitialMessage().then(_handleInitialMessage);
-    
+
     // Escuchar refresco de token
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
       print('Nuevo token FCM: $newToken');
@@ -85,7 +91,8 @@ class FCMService {
   }
 
   static Future<void> _showLocalNotification(RemoteMessage message) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'high_importance_channel',
       'Notificaciones importantes',
       importance: Importance.max,
@@ -115,7 +122,7 @@ class FCMService {
     if (data.isNotEmpty) {
       // Usar tu función getRouterScreen existente
       final routeInfo = getRouterScreen(data['model'], data['variables']);
-      
+
       if (navigatorKey.currentState != null) {
         if (routeInfo.arguments != null) {
           navigatorKey.currentState?.pushNamed(

@@ -510,12 +510,14 @@ Future logout() async {
   final deviceInfo = await PreferencesManager().getDeviceInfo();
   String userId = await PreferencesManager().getUserId();
   // eliminamos el dispositivo del usuario
-  final responseDeleteDevice =
-      await deleteDevice(userId, deviceInfo?['deviceId'] ?? '');
+  if (GraphQLConfig.development) {
+    final responseDeleteDevice =
+        await deleteDevice(userId, deviceInfo?['deviceId'] ?? '');
 
-  if (responseDeleteDevice.error != null) {
-    if (kDebugMode) {
-      print('Error deleting device: ${responseDeleteDevice.error}');
+    if (responseDeleteDevice.error != null) {
+      if (kDebugMode) {
+        print('Error deleting device: ${responseDeleteDevice.error}');
+      }
     }
   }
 

@@ -10,7 +10,6 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,9 +25,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   List<UserTitle>? titles = [];
   LastProgressUser? progressUser;
   late Map<String, dynamic> config;
-  int MAX_SCORE = 0;
-  int MEDIUM_SCORE = 0;
-  int LOW_SCORE = 0;
+  int maxScore = 0;
+  int mediumScore = 0;
+  int lowScore = 0;
 
   Future<void> _loadProgress(BuildContext context) async {
     LoadingService().showLoading(context);
@@ -55,9 +54,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   @override
   Widget build(BuildContext context) {
     config = Provider.of<CatalogueProvider>(context, listen: false).allConfig;
-    MAX_SCORE = config["highScore"];
-    MEDIUM_SCORE = config["mediumScore"];
-    LOW_SCORE = config["lowScore"];
+    maxScore = config["highScore"];
+    mediumScore = config["mediumScore"];
+    lowScore = config["lowScore"];
     final userProvider = Provider.of<UserProvider>(context);
     final LoginUser? userData = userProvider.currentUser;
     titles = userData?.title;
@@ -251,7 +250,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     );
     int limit = 12;
 
-    // Función para cargar los premios y la paginación
+    // Función para cargar los premios y la pagination
     Future<void> _loadAwards(
         int page, int limit, String userId, StateSetter setStateDialog) async {
       LoadingService().showLoading(context);
@@ -986,7 +985,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
 
     double maxPossibleHeight = score / 1000 * 112;
 
-    if (score >= MAX_SCORE) {
+    if (score >= maxScore) {
       return 112; // Alto fijo cuando los puntos son mayores o iguales a 1000
     } else {
       double width = ((maxPossibleHeight * 100)) / 112;

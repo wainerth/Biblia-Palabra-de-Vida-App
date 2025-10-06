@@ -1,4 +1,3 @@
-import 'package:biblia_palabra_de_vida_app/models/img.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class ReferenceModel {

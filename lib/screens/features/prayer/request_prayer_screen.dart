@@ -23,7 +23,7 @@ class RequestPrayerScreen extends StatefulWidget {
 
 class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
   LoginUser? userData;
-    final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController requestController = TextEditingController();
   final TextEditingController _recipientName = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -110,9 +110,10 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                   child: Container(
                     clipBehavior: Clip.antiAliasWithSaveLayer,
                     decoration: BoxDecoration(
-                        color: StyleColor.white,
-                        // border: Border.all(color: StyleColor.orange, width: 2.0),
-                        borderRadius: BorderRadius.circular(25.0)),
+                      color: StyleColor.white,
+                      // border: Border.all(color: StyleColor.orange, width: 2.0),
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
                     child: CustomDropdownBottomWidget<PrayerSubTypeModel>(
                       hintText: "Tipo de Pedido",
                       items: options,
@@ -173,7 +174,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                       thumbVisibility: true,
                       thickness: 6.0,
                       child: SingleChildScrollView(
-                         controller: _scrollController,
+                        controller: _scrollController,
                         child: TextField(
                           controller: _descriptionController,
                           maxLines: null,
@@ -236,7 +237,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         return;
                       }
                       // cierro el loading
-                      if( !responseCreatedRequest.data['successful']) {
+                      if (!responseCreatedRequest.data['successful']) {
                         LoadingService().hideLoading();
                         await showCustomDialog(context,
                             message: responseCreatedRequest.data['message'],

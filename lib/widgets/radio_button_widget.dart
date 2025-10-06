@@ -23,7 +23,11 @@ class RadioButtonWidget<T> extends StatefulWidget {
 class _RadioButtonWidgetState<T> extends State<RadioButtonWidget<T>> {
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Wrap(
+      spacing: 8.0, // Espacio horizontal entre elementos
+      runSpacing: 0, // Espacio vertical entre líneas
+      alignment: WrapAlignment.start,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: <Widget>[
         if (widget.label != null)
           Text(
@@ -34,11 +38,11 @@ class _RadioButtonWidgetState<T> extends State<RadioButtonWidget<T>> {
           ),
         Wrap(
           spacing: 8.0,
-          runSpacing: 8.0,
+          runSpacing: 4.0,
           children: widget.options.map(
             (option) {
               return Row(
-                 mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Radio<T>(
                     value: option.value,

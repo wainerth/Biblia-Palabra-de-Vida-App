@@ -370,34 +370,6 @@ class _TransferFormState extends State<TransferForm> {
     super.dispose();
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      if (_captureImage == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor, adjunte el comprobante de transferencia'),
-          ),
-        );
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Transferencia enviada para verificación')),
-      );
-
-      final transferData = {
-        'bancoOrigen': _selectedBancoOrigen,
-        'titular': _titularController.text,
-        'identificacion': _identificacionController.text,
-        'numeroCuenta': _numeroCuentaController.text,
-        'numeroReferencia': _numeroReferenciaController.text,
-        'imagenPath': _captureImage!.path,
-      };
-
-      debugPrint('Datos de transferencia: $transferData');
-    }
-  }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
