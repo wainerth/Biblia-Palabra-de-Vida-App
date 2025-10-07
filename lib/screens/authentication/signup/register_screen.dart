@@ -243,6 +243,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 height: 23,
                               ),
                               ButtonThemeWidget(
+                                textStyle: StylesApp(context).buttonTextStyle,
                                 onPressed: () async {
                                   if (_currentStep == 0) {
                                     _nextStep();

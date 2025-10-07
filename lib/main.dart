@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,6 +12,7 @@ import 'dart:io';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/routes/router_page.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+
 import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/text_with_gradient.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
@@ -20,23 +22,28 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+// Bloquear orientación a portrait
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   await PreferencesManager().init();
 
   final socketProvider = SocketClientProvider();
   await socketProvider.initializeNotificationSystem();
   if (!kIsWeb) {
     await FlutterDownloader.initialize(
-      debug: kDebugMode, 
+      debug: kDebugMode,
       ignoreSsl: kDebugMode,
     );
   }
 
   debugPrint = (String? message, {int? wrapWidth}) {
-      // Logs detallados solo en modo debug
-      if (message != null && message.contains('GraphQL')) {
-        print('🎯 [GRAPHQL_DEBUG] $message');
-      }
-    };
+    // Logs detallados solo en modo debug
+    if (message != null && message.contains('GraphQL')) {
+      print('🎯 [GRAPHQL_DEBUG] $message');
+    }
+  };
   runApp(
     MultiProvider(
       providers: [
@@ -86,7 +93,7 @@ class _MyAppState extends State<MyApp> {
       if (e.toString().contains('StreamCorruptedException')) {
         try {
           // 1. Limpia en memoria
-        await PreferencesManager().clearAll();
+          await PreferencesManager().clearAll();
 
           // 2. Elimina el archivo físico (definitivo)
           final appDir = await getApplicationSupportDirectory();
@@ -150,8 +157,7 @@ class _MyAppState extends State<MyApp> {
     if (_hasSeenIntro!) {
       final authProvider = context.read<AuthenticationProvider>();
       return FutureBuilder(
-        future:
-            _loadTokenAndInitializeAuth(),
+        future: _loadTokenAndInitializeAuth(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return LoadMaskedWidget();

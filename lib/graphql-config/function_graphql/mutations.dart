@@ -1,3 +1,5 @@
+import 'package:biblia_palabra_de_vida_app/class/RateLimiter.dart';
+import 'package:biblia_palabra_de_vida_app/class/SecurityUtils.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -38,6 +40,22 @@ Future<ResponseData> login(String email, String password) async {
     fetchPolicy: FetchPolicy.noCache,
   );
   try {
+    if (RateLimiter.isRateLimited(email)) {
+      return ResponseData(
+        error: 'Demasiados intentos. Espere 15 minutos.',
+        data: null,
+      );
+    }
+
+    final sanitizedPassword = SecurityUtils.prepareInputForGraphQL(password);
+
+    if (!SecurityUtils.isStrongPassword(sanitizedPassword)) {
+      RateLimiter.recordAttempt(email);
+      return ResponseData(
+        data: null,
+        error: 'La contraseña no cumple con los requisitos de seguridad',
+      );
+    }
     final QueryResult result = await client.mutate(mutateGql);
     if (result.hasException) {
       if (kDebugMode) {

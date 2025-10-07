@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -93,8 +94,7 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                           child: Column(
                             children: [
                               Container(
-                                constraints:
-                                    const BoxConstraints(minWidth: 160.0),
+                                width: StylesApp(context).formWidth,
                                 child: TextFormField(
                                   controller: _currentPasswordController,
                                   obscureText: _obscureTextCurrentPass,
@@ -110,11 +110,15 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                           ),
                                           onPressed: () {
                                             setState(() {
-                                              _obscureTextCurrentPass = !_obscureTextCurrentPass;
+                                              _obscureTextCurrentPass =
+                                                  !_obscureTextCurrentPass;
                                             });
                                           },
                                         ),
                                       ),
+                                  style: StylesApp(context)
+                                      .textStyleBody12
+                                      .copyWith(color: StyleColor.black),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return "La contraseña es obligatoria";
@@ -127,8 +131,7 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                 height: 30,
                               ),
                               Container(
-                                constraints:
-                                    const BoxConstraints(minWidth: 160.0),
+                                width: StylesApp(context).formWidth,
                                 child: TextFormField(
                                   controller: _passwordController,
                                   obscureText: _obscureTextNewPass,
@@ -144,11 +147,15 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                           ),
                                           onPressed: () {
                                             setState(() {
-                                              _obscureTextNewPass = !_obscureTextNewPass;
+                                              _obscureTextNewPass =
+                                                  !_obscureTextNewPass;
                                             });
                                           },
                                         ),
                                       ),
+                                  style: StylesApp(context)
+                                      .textStyleBody12
+                                      .copyWith(color: StyleColor.black),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return "La contraseña es obligatoria";
@@ -161,8 +168,7 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                 height: 30,
                               ),
                               Container(
-                                constraints:
-                                    const BoxConstraints(minWidth: 160.0),
+                                width: StylesApp(context).formWidth,
                                 child: TextFormField(
                                   controller: _confirmPasswordController,
                                   obscureText: _obscureTextRepeat,
@@ -178,11 +184,15 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                           ),
                                           onPressed: () {
                                             setState(() {
-                                              _obscureTextRepeat = !_obscureTextRepeat;
+                                              _obscureTextRepeat =
+                                                  !_obscureTextRepeat;
                                             });
                                           },
                                         ),
                                       ),
+                                  style: StylesApp(context)
+                                      .textStyleBody12
+                                      .copyWith(color: StyleColor.black),
                                   validator: (value) {
                                     if (value != _passwordController.text) {
                                       return "Las contraseñas no coinciden";
@@ -207,10 +217,10 @@ class _ChangePassScreenState extends State<ChangePassScreen> {
                                 },
                                 buttonStyle:
                                     StylesApp(context).btnSecondarySmall,
+                                    textStyle: StylesApp(context).buttonTextStyle,
                                 width: StylesApp(context).btnHeight.width,
                                 height: StylesApp(context).btnHeight.height,
                               ),
-                              
                               const SizedBox(
                                 height: 44,
                               ),

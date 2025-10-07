@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -59,12 +61,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Column(
                               children: [
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: textEmail,
                                     cursorHeight: 16.sp,
-                                    style: StylesApp(context).textStyleHintText,
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(color: StyleColor.black),
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
@@ -75,6 +78,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                       if (value == null || value.isEmpty) {
                                         return "usuario o Correo electrónico es obligatoria";
                                       }
+                                      if (value.contains(' ')) {
+                                        return "usuario o Correo electrónico no puede contener espacios";
+                                      }
                                       return null;
                                     },
                                   ),
@@ -83,14 +89,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   height: 25,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(minWidth: 160.0),
+                                  width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: textPass,
                                     cursorHeight: 16.sp,
                                     obscureText: _obscureTextPass,
                                     textAlignVertical: TextAlignVertical.center,
-                                    style: StylesApp(context).textStyleHintText,
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(color: StyleColor.black),
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
@@ -114,6 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return "La contraseña es obligatoria";
+                                      }
+                                      if (value.length < 6) {
+                                        return "La contraseña debe contener mínimo 6 caracteres";
                                       }
                                       return null;
                                     },
@@ -161,11 +171,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                   textWithImage: true,
                                   image: "assets/google-icon.png",
                                   text: "Iniciar con",
+                                  textStyle: StylesApp(context).buttonTextStyle,
                                   buttonStyle:
                                       StylesApp(context).btnTransparentSmall,
                                   onPressed: () async {
                                     if (kDebugMode) {
-                                      print("estoy en iniciar session con google");
+                                      print(
+                                          "estoy en iniciar session con google");
                                     }
 
                                     LoadingService().showLoading(context);

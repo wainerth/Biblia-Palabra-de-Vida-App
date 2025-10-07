@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -50,20 +52,51 @@ class PersonalInfoStep extends StatefulWidget {
 }
 
 class _PersonalInfoStepState extends State<PersonalInfoStep> {
+  bool get _isTablet {
+    final shortestSide = MediaQuery.sizeOf(context).shortestSide;
+    return shortestSide > 600;
+  }
+
+  double get _formWidth {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    if (_isTablet) {
+      // Para tablet: máximo 500px o 60% del ancho
+      return math.min(500, screenWidth * 0.6);
+    } else {
+      // Para mobile: usa tu valor actual o 90% del ancho
+      return math.min(
+        StylesApp(context).sizeTextFormField.width,
+        screenWidth * 0.9,
+      );
+    }
+  }
+
+  double get _fieldHeight {
+    return _isTablet
+        ? StylesApp(context).sizeTextFormField.height + 8
+        : StylesApp(context).sizeTextFormField.height;
+  }
+
   @override
   Widget build(BuildContext context) {
     final double formWidth = StylesApp(context).sizeTextFormField.width;
     final double screenWidth = MediaQuery.sizeOf(context).width;
+
     return SingleChildScrollView(
       child: Column(
         children: [
+          // CAMPO NOMBRE
           Container(
             width: formWidth,
+            height: StylesApp(context).sizeTextFormField.height,
             child: TextFormField(
               controller: widget.nameController,
               decoration: StylesApp(context)
                   .inputDecorationOutlineStyle
                   .copyWith(hintText: "Nombre"),
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: StyleColor.black),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return "El Nombre es obligatorio";
@@ -72,19 +105,19 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               },
             ),
           ),
-          const SizedBox(
-            height: 23.0,
-          ),
-          // DEBUG (opcional)
-          Text("Ancho form: $formWidth, Pantalla: $screenWidth"),
-          const SizedBox(height: 23.0),
+          SizedBox(height: _isTablet ? 28.0 : 23.0),
+          // CAMPO APELLIDO
           Container(
             width: formWidth,
+            height: StylesApp(context).sizeTextFormField.height,
             child: TextFormField(
               controller: widget.lastNameController,
               decoration: StylesApp(context)
                   .inputDecorationOutlineStyle
                   .copyWith(hintText: "Apellido"),
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: StyleColor.black),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return "El Apellido es obligatorio";
@@ -93,12 +126,14 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               },
             ),
           ),
-          const SizedBox(
-            height: 23.0,
-          ),
+          SizedBox(height: _isTablet ? 28.0 : 23.0),
+          // GÉNERO
           Container(
             width: formWidth,
-            padding: EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: _isTablet ? 20 : 8,
+              vertical: _isTablet ? 12 : 8,
+            ),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black),
               color: Colors.white,
@@ -114,11 +149,11 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               ],
             ),
           ),
-          const SizedBox(
-            height: 23.0,
-          ),
+          SizedBox(height: _isTablet ? 28.0 : 23.0),
+          // FECHA DE NACIMIENTO
           Container(
             width: formWidth,
+            height: StylesApp(context).sizeTextFormField.height,
             child: DatePickerFormField(
               initialDate: DateTime.now().subtract(Duration(days: 15 * 365)),
               onChanged: (value) {
@@ -126,12 +161,15 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               },
             ),
           ),
-          const SizedBox(
-            height: 23.0,
-          ),
+          SizedBox(height: _isTablet ? 28.0 : 23.0),
+
+          // BAUTIZADO
           Container(
             width: formWidth,
-            padding: EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: _isTablet ? 20 : 8,
+              vertical: _isTablet ? 12 : 8,
+            ),
             decoration: BoxDecoration(
                 border: Border.all(color: Colors.black),
                 color: Colors.white,
@@ -146,48 +184,48 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                   RadioButtonOption(value: false, label: "No")
                 ]),
           ),
-          const SizedBox(
-            height: 23.0,
-          ),
+          SizedBox(height: _isTablet ? 28.0 : 23.0),
+
+          // PAÍS
           Container(
             width: formWidth,
-            // decoration: BoxDecoration(
-            //   color: StyleColor.white,
-            //   borderRadius: BorderRadius.circular(8.0),
-            // ),
             child: CustomDropdownBottomWidget<Country>(
-              border: true,
+              contentPadding: _isTablet
+                  ? EdgeInsets.symmetric(horizontal: 8, vertical: 12)
+                  : EdgeInsets.symmetric(horizontal: 8, vertical: 12),
               hintText: "Seleccione un país",
               items: widget.dropDownList,
               onChanged: widget.onCountrySelected,
               selectedItem: widget.selectedData,
             ),
           ),
-          const SizedBox(
-            height: 23.0,
-          ),
+          SizedBox(height: _isTablet ? 28.0 : 23.0),
+
+          // TELÉFONO
           Container(
             width: formWidth,
+            height: StylesApp(context).sizeTextFormField.height,
             child: Row(
+              // spacing:  _isTablet ? 15 : 10,
               children: [
                 // Campo del código del país
                 Flexible(
-                  flex: 3,
-                  child: Container(
-                    height: StylesApp(context).sizeTextFormField.height,
-                    child: CustomDropdownBottomWidget<AreaCode>(
-                      border: true,
-                      hintText: "código",
-                      items: widget.dropDownListArea,
-                      onChanged: widget.onPrefixSelected,
-                      selectedItem: widget.selectedDataArea,
-                    ),
+                  flex: _isTablet ? 4 : 3,
+                  child: CustomDropdownBottomWidget<AreaCode>(
+                    contentPadding: _isTablet
+                        ? EdgeInsets.symmetric(horizontal: 8, vertical: 12)
+                        : EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    hintText: "código",
+                    items: widget.dropDownListArea,
+                    onChanged: widget.onPrefixSelected,
+                    selectedItem: widget.selectedDataArea,
                   ),
                 ),
-                const SizedBox(width: 10), // Espaciado entre los campos
-                // Campo del número de teléfono
+                SizedBox(width: _isTablet ? 15 : 10),
+
+                // NÚMERO DE TELÉFONO
                 Flexible(
-                  flex: 7,
+                  flex: _isTablet ? 8 : 7,
                   child: TextFormField(
                     controller: widget.phoneNumberController,
                     keyboardType: TextInputType.phone,
@@ -198,7 +236,9 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                         StylesApp(context).inputDecorationOutlineStyle.copyWith(
                               hintText: "Número de teléfono",
                             ),
-                    style: const TextStyle(fontSize: 16),
+                    style: StylesApp(context)
+                        .textStyleBody12
+                        .copyWith(color: StyleColor.black),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Por favor, ingresa tu número de teléfono.";
@@ -210,9 +250,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               ],
             ),
           ),
-          const SizedBox(
-            height: 41,
-          ),
+          SizedBox(height: _isTablet ? 50 : 41),
         ],
       ),
     );

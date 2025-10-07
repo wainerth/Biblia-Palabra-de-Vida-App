@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class CustomDropdownBottomWidget<T> extends StatefulWidget {
@@ -8,14 +9,18 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
   final ValueChanged<ModelData?> onChanged;
   final String hintText;
   final bool border;
+  final EdgeInsetsGeometry? contentPadding;
 
-  const CustomDropdownBottomWidget(
-      {super.key,
-      required this.items,
-      required this.selectedItem,
-      required this.onChanged,
-      required this.hintText,
-      this.border = true});
+  const CustomDropdownBottomWidget({
+    super.key,
+    required this.items,
+    required this.selectedItem,
+    required this.onChanged,
+    required this.hintText,
+    this.border = true,
+    this.contentPadding =
+        const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+  });
 
   @override
   State<CustomDropdownBottomWidget<T>> createState() =>
@@ -25,7 +30,7 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
 class _CustomDropdownBottomWidgetState<T>
     extends State<CustomDropdownBottomWidget<T>> {
   final FocusNode _focusNode = FocusNode();
-   final Color disabledColor = Colors.grey[400]!;
+  final Color disabledColor = Colors.grey[400]!;
   String _searchText = '';
 
   @override
@@ -42,93 +47,98 @@ class _CustomDropdownBottomWidgetState<T>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.items.isEmpty
-          ? null
-          : () {
-              FocusScope.of(context).unfocus();
-              showModalBottomSheet(
-                backgroundColor: Colors.white,
-                context: context,
-                builder: (BuildContext context) {
-                  return StatefulBuilder(
-                    builder: (context, setState) {
-                      return SingleChildScrollView(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom,
-                        ),
-                        child: Column(
-                          children: [
-                            SizedBox(height: 10),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 8.0),
-                              child: TextFormField(
-                                // controller: searchTextController,Z
-                                style: StylesApp(context).textStyleSmallBlack,
-                                decoration: StylesApp(context)
-                                    .inputDecorationOutlineStyle
-                                    .copyWith(
-                                      hintText: 'Buscar...',
-                                      border: OutlineInputBorder(),
-                                      suffixIcon: _searchText.isNotEmpty
-                                          ? IconButton(
-                                              icon: Icon(Icons.clear),
-                                              onPressed: () {
-                                                setState(() {
-                                                  cleanSearch();
-                                                });
-                                              },
-                                            )
-                                          : null,
-                                    ),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _searchText = value;
-                                  });
-                                },
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            _buildFilteredList(),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
-      child: AbsorbPointer(
-        child: TextFormField(
-          focusNode: _focusNode,
-          textAlign: TextAlign.left,
-          style:
-              StylesApp(context).textStyleBody14.copyWith(color: Colors.black),
-            decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-              border: widget.border
-                ? null
-                : OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(0),
-                  borderSide: BorderSide.none,
-                  ),
-              enabledBorder: widget.border
-                ? null
-                : OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(0),
-                  borderSide: BorderSide.none,
-                  ),
-              hintText: widget.hintText,
-              suffixIcon:  Icon(Icons.arrow_drop_down, color: widget.items.isEmpty ? disabledColor : null  ,),
-              fillColor: widget.items.isEmpty ? Colors.grey[100] : null,
-              filled: widget.items.isEmpty
+      onTap: widget.items.isEmpty ? null : _showBottomSheet,
+      child: Container(
+        height: StylesApp(context).sizeTextFormField.height,
+        decoration: widget.border
+            ? BoxDecoration(
+                color: StyleColor.white,
+                border: Border.all(color: StyleColor.black),
+                borderRadius: BorderRadius.circular(8.0),
+              )
+            : null,
+        child: Padding(
+          padding: widget.contentPadding!,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.selectedItem?.label ?? widget.hintText,
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        color: widget.selectedItem != null
+                            ? Colors.black
+                            : Colors.grey.shade600,
+                      ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-          controller: TextEditingController(
-              text: widget.selectedItem?.label ??
-                  ""), // Display selected item label
-          // style: StylesApp(context).textStyleSmallBlack, // Your text style
-          enabled: false, // Important: Disable direct text input
+              Icon(
+                Icons.arrow_drop_down,
+                color:
+                    widget.items.isEmpty ? disabledColor : Colors.grey.shade600,
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  void _showBottomSheet() {
+    FocusScope.of(context).unfocus();
+    showModalBottomSheet(
+      backgroundColor: Colors.white,
+      context: context,
+      builder: (BuildContext context) {
+        return _buildBottomSheetContent();
+      },
+    );
+  }
+
+  Widget _buildBottomSheetContent() {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8.0),
+                child: TextFormField(
+                  style: StylesApp(context).textStyleSmallBlack,
+                  decoration:
+                      StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                            hintText: 'Buscar...',
+                            border: const OutlineInputBorder(),
+                            suffixIcon: _searchText.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      setState(() {
+                                        _searchText = '';
+                                      });
+                                    },
+                                  )
+                                : null,
+                          ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchText = value;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildFilteredList(),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,6 +13,25 @@ class StylesApp {
     return MediaQuery.of(context).size.width;
   }
 
+  bool get isTablet {
+    final shortestSide = MediaQuery.sizeOf(context).shortestSide;
+    return shortestSide > 600;
+  }
+
+  double get formWidth {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    if (isTablet) {
+      // Para tablet: máximo 500px o 60% del ancho
+      return math.min(500, screenWidth * 0.6);
+    } else {
+      // Para mobile: usa tu valor actual o 90% del ancho
+      return math.min(
+        StylesApp(context).sizeTextFormField.width,
+        screenWidth * 0.9,
+      );
+    }
+  }
+
 /** tamaño e fuentes */ ///
   double get fontSizeTitle {
     if (screenWidth <= SizeScreensApp().xsm) {
@@ -20,9 +41,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return 36.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 48.sp;
+      return 18.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 40.sp;
+      return 18.sp;
     } else {
       return 16.sp;
     }
@@ -50,9 +71,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return 30.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 30.sp;
+      return 22.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 30.sp;
+      return 22.sp;
     } else {
       return 16.sp;
     }
@@ -157,6 +178,7 @@ class StylesApp {
       return 16.sp;
     }
   }
+
   double get fontSizeBody32 {
     if (screenWidth <= SizeScreensApp().sm) {
       return 32.sp;
@@ -191,9 +213,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return 12.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 12.sp;
+      return 10.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 12.sp;
+      return 10.sp;
     } else {
       return 16.sp;
     }
@@ -247,9 +269,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return 14.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 14.sp;
+      return 12.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 16.sp;
+      return 12.sp;
     } else {
       return 16.sp;
     }
@@ -289,9 +311,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return 14.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 14.sp;
+      return 12.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 14.sp;
+      return 12.sp;
     } else {
       return 14.sp;
     }
@@ -319,9 +341,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(239.0.sp, 41.0.sp);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(double.infinity, 41.sp);
+      return Size(double.infinity, 30.sp);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(double.infinity, 41.sp);
+      return Size(double.infinity, 30.sp);
     } else {
       return Size(700.0.sp, 80.0.sp);
     }
@@ -695,10 +717,12 @@ class StylesApp {
         hintStyle: hintStyle,
         fillColor: Colors.white,
         filled: true,
-        contentPadding: EdgeInsets.symmetric(horizontal: 8),
+        contentPadding: isTablet
+            ? EdgeInsets.symmetric(horizontal: 8, vertical: 12)
+            : EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(width: 2.0)),
+            borderSide: BorderSide(color: Colors.black, width: 2.0)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: Colors.black),
@@ -707,7 +731,7 @@ class StylesApp {
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: StyleColor.electricViolet),
         ),
-        constraints: BoxConstraints(minHeight: 40.sp),
+        // constraints: BoxConstraints(minHeight: 40.sp),
       );
 
   TextStyle get hintStyle => TextStyle(
@@ -764,13 +788,13 @@ class StylesApp {
     if (screenWidth <= SizeScreensApp().xsm) {
       return Size(223.0, 35.0);
     } else if (screenWidth <= SizeScreensApp().sm) {
-      return Size(MediaQuery.sizeOf(context).width* 0.8, 43.0);
+      return Size(MediaQuery.sizeOf(context).width * 0.8, 43.0);
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(MediaQuery.sizeOf(context).width * 0.7, 43.0);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(MediaQuery.sizeOf(context).width * 0.6, 30.0);
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 40.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(MediaQuery.sizeOf(context).width * 0.6, 70.0);
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 45.0);
     } else {
       return Size(MediaQuery.sizeOf(context).width * 0.6, 60.0);
     }
@@ -984,7 +1008,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 45.0;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 75.0;
+      return 45.0;
     } else {
       return 20.0;
     }

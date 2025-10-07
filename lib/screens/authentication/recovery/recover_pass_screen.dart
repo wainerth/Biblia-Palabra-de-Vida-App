@@ -101,12 +101,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   height: 32.0,
                                 ),
                                 Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
+                                  width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: _emailController,
                                     keyboardType: TextInputType.emailAddress,
@@ -115,6 +110,9 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                         .copyWith(
                                           hintText: "Correo electrónico",
                                         ),
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(color: StyleColor.black),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return "El correo es obligatorio";
@@ -139,18 +137,16 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   height: 33.0,
                                 ),
                                 Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
+                                  width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: __recoveryCodeController,
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
                                             hintText: "Código de recuperación"),
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(color: StyleColor.black),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return "El Código de recuperación es obligatorio";
@@ -163,12 +159,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   height: 23,
                                 ),
                                 Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
+                                  width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: _passwordController,
                                     obscureText: _obscureTextPass,
@@ -190,6 +181,9 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                             },
                                           ),
                                         ),
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(color: StyleColor.black),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return "La contraseña es obligatoria";
@@ -205,12 +199,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   height: 23,
                                 ),
                                 Container(
-                                  constraints: BoxConstraints(
-                                    minWidth: 160.0,
-                                    maxWidth: StylesApp(context)
-                                        .sizeTextFormField
-                                        .width,
-                                  ),
+                                  width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: _confirmPasswordController,
                                     obscureText: _obscureTextRepeat,
@@ -232,6 +221,9 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                             },
                                           ),
                                         ),
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(color: StyleColor.black),
                                     validator: (value) {
                                       if (value != _passwordController.text) {
                                         return "Las contraseñas no coinciden";
@@ -248,6 +240,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                 text: _currentStep == 0
                                     ? "Continuar"
                                     : "Restablecer",
+                                textStyle: StylesApp(context).buttonTextStyle,
                                 onPressed: () async {
                                   final authProvider =
                                       Provider.of<AuthenticationProvider>(
