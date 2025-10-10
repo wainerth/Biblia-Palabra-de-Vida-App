@@ -28,6 +28,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
   // Datos del juego
   List<GuessCharacter> personajes = [];
   TextEditingController nameCharacter = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   GuessCharacter? personajeActual;
   String? respuestaSeleccionada;
   bool mostrarImagen = false;
@@ -101,6 +102,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
   }
 
   void _verificarRespuesta(String respuesta) {
+    // _focusNode.dispose();
+
     setState(() {
       respuestaSeleccionada = respuesta;
       respuestaCorrecta = respuesta.toLowerCase() ==
@@ -310,36 +313,37 @@ class _ReddleScreenState extends State<ReddleScreen> {
     return SingleChildScrollView(
       child: Stack(children: [
         Positioned(
-            top: 0,
-            right: 0,
-            child: Row(
-              children: [
-                Text(
-                  "Oportunidades: ",
-                  style: StylesApp(context)
-                      .textStyleBody10
-                      .copyWith(color: StyleColor.grayMedium),
-                ),
-                Image.asset(
-                  failedAttempts > 2
-                      ? "assets/fire_rachaActive.png"
-                      : "assets/fire_rachaInactive.png",
-                  width: 20,
-                ),
-                Image.asset(
-                  failedAttempts > 1
-                      ? "assets/fire_rachaActive.png"
-                      : "assets/fire_rachaInactive.png",
-                  width: 20,
-                ),
-                Image.asset(
-                  failedAttempts > 0
-                      ? "assets/fire_rachaActive.png"
-                      : "assets/fire_rachaInactive.png",
-                  width: 20,
-                ),
-              ],
-            )),
+          top: 0,
+          right: 0,
+          child: Row(
+            children: [
+              Text(
+                "Oportunidades: ",
+                style: StylesApp(context)
+                    .textStyleBody10
+                    .copyWith(color: StyleColor.grayMedium),
+              ),
+              Image.asset(
+                failedAttempts > 2
+                    ? "assets/fire_rachaActive.png"
+                    : "assets/fire_rachaInactive.png",
+                width: 20,
+              ),
+              Image.asset(
+                failedAttempts > 1
+                    ? "assets/fire_rachaActive.png"
+                    : "assets/fire_rachaInactive.png",
+                width: 20,
+              ),
+              Image.asset(
+                failedAttempts > 0
+                    ? "assets/fire_rachaActive.png"
+                    : "assets/fire_rachaInactive.png",
+                width: 20,
+              ),
+            ],
+          ),
+        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -395,6 +399,11 @@ class _ReddleScreenState extends State<ReddleScreen> {
               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
               child: TextFormField(
                 controller: nameCharacter,
+                focusNode: _focusNode,
+                textInputAction: TextInputAction.done,
+                onTapOutside: (event) {
+                  _focusNode.unfocus();
+                },
                 decoration: StylesApp(context)
                     .inputDecorationOutlineStyle
                     .copyWith(hintText: "Ingrese Nombre del Personaje"),
@@ -429,7 +438,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
               onPressed: nameCharacter.text.isEmpty
                   ? null
                   : () {
-                      _verificarRespuesta(nameCharacter.text);
+                      _verificarRespuesta(nameCharacter.text.trim());
                     },
             ),
             SizedBox(
@@ -509,12 +518,19 @@ class _ReddleScreenState extends State<ReddleScreen> {
 
   void _showDialogFinallyPlay() async {
     LoadingService().showLoading(context);
-
+    String tipo = '';
+    if (difficulty == 'F') {
+      tipo = 'Facil';
+    } else if (difficulty == 'I') {
+      tipo = 'Medio';
+    } else {
+      tipo = 'Difícil';
+    }
     try {
       final userData =
           Provider.of<UserProvider>(context, listen: false).currentUser;
       final responseSaveResult =
-          await saveResultPlay(userData!.userId, difficulty, 'adivinanza');
+          await saveResultPlay(userData!.userId, tipo, 'adivinanza');
       if (responseSaveResult.error != null) {
         LoadingService().hideLoading();
         await showCustomDialogWithAction(context,

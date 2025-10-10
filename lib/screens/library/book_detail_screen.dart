@@ -337,7 +337,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     _listCountries = Provider.of<CatalogueProvider>(context, listen: false)
         .allCountries
         .map<ModelData>((country) => ModelData(
-            label: country.country, value: country.id, originalData: country))
+            label: country.name, value: country.id, originalData: country))
         .toList();
   }
 }

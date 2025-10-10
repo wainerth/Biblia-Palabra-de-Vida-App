@@ -410,8 +410,8 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
 
     if (countryItem.value.isNotEmpty) {
       final country = catalogueProvider.allCountries.firstWhere(
-        (c) => c.country == countryItem.value,
-        orElse: () => Country(id: '', country: '', countryCode: null),
+        (c) => c.name == countryItem.value,
+        orElse: () => Country(id: '', name: '', countryCode: null),
       );
       if (country.id.isNotEmpty) {
         _selectedCountryId = country.id;
@@ -491,7 +491,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         Provider.of<CatalogueProvider>(context, listen: false);
 
     final List<ModelData> dropDownList = catalogueProvider.allCountries
-        .map((country) => ModelData(value: country.id, label: country.country))
+        .map((country) => ModelData(value: country.id, label: country.name))
         .cast<ModelData>()
         .toList();
     final List<ModelData> prefixCode = catalogueProvider.allAreasCode

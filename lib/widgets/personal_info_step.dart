@@ -76,7 +76,6 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
             height: 23.0,
           ),
           // DEBUG (opcional)
-          Text("Ancho form: $formWidth, Pantalla: $screenWidth"),
           const SizedBox(height: 23.0),
           Container(
             width: formWidth,

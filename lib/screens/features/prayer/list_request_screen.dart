@@ -189,7 +189,14 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     ),
                   ),
                   Expanded(
-                    child: ListView.builder(
+                    child: listRequest.isEmpty 
+                    ? Center(
+                      child: Container(
+                        padding: EdgeInsets.all(18.0),
+                        child: Text(textAlign: TextAlign.center, "No Haz Realzado aun Pedido de Oración", style: StylesApp(context).textStyleBody16,),
+                      ),
+                    )
+                    : ListView.builder(
                         itemCount: listRequest.length,
                         itemBuilder: (BuildContext context, int index) {
                           return _cardListItem(context, index);

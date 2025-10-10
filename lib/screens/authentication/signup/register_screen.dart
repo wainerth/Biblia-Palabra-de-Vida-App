@@ -93,7 +93,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           .toList();
       dropDownList = countries
           .map(
-              (country) => ModelData(value: country.id, label: country.country))
+              (country) => ModelData(value: country.id, label: country.name))
           .cast<ModelData>()
           .toList();
     });

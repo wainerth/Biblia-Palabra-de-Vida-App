@@ -44,7 +44,7 @@ Future<ResponseData> getProfileUser(String token, String idUser) async {
         streakDaysCount
         country {
           id
-          country
+          name
         }
         state {
           id

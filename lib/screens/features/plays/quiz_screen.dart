@@ -395,6 +395,7 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   funcAnswerValidate() async {
+
     if (failedAttempts > 0 && currentIndex < questions.length - 1) {
       setState(() {
         currentIndex++;

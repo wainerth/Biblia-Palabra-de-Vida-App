@@ -19,8 +19,8 @@ import 'package:timezone/data/latest.dart' as tz;
 class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
   IO.Socket? _socket;
   bool _isConnected = false;
-  bool _initialized = false;
-  bool get isInitialized => _initialized;
+  bool _initializedSocket = false;
+  bool get isSocketInitialized => _initializedSocket;
   final FlutterLocalNotificationsPlugin notificationsPlugin =
       FlutterLocalNotificationsPlugin();
   // final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -31,9 +31,12 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
   List<NotificationModel> get notifications => _notifications;
 
   String? _fcmToken;
-  void cleanSocket(){
+  void cleanSocket() {
     _socket = null;
+    _isConnected = false;
+    _initializedSocket = false;
   }
+
   @pragma('vm:entry-point')
   static void backgroundNotificationHandler(NotificationResponse response) {
     if (kDebugMode) {
@@ -243,8 +246,10 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     required String username,
     required String email,
   }) async {
-    final timeZone = getDeviceTimeZone();
-    _initialized = true;
+    final urlSocket = GraphQLConfig.development ? GraphQLConfig.urlSocketDev : GraphQLConfig.urlSocketProd;
+    String pathSocket = GraphQLConfig.development ? '/socket.io-dev' : '/socket.io';
+    final timeZone = await getDeviceTimeZone();
+    _initializedSocket = true;
     initializeObserver();
     // Inicializar sistema de notificaciones primero
     await initializeNotificationSystem();
@@ -267,10 +272,10 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
 
     // Configuración del socket similar a tu implementación en React
     _socket = IO.io(
-      GraphQLConfig.urlSocket,
+      urlSocket,
       IO.OptionBuilder()
           .setTransports(['websocket']) // transports
-          .setPath('/socket.io-dev') // path
+          .setPath(pathSocket) // path
           .setQuery({
             'deviceId': deviceData['deviceId'],
             'userId': userId,
@@ -304,7 +309,7 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
 
     _socket?.onDisconnect((_) {
       _isConnected = false;
-      _initialized = false;
+      _initializedSocket = false;
       notifyListeners();
       if (kDebugMode) {
         print('Socket disconnected');
@@ -314,7 +319,7 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     _socket?.onError((error) {
       if (kDebugMode) {
         print('Socket error: $error');
-        _initialized = false;
+        _initializedSocket = false;
       }
     });
     // Escuchar evento para notificaciones push

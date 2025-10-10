@@ -317,6 +317,25 @@ class _QuestionScreenState extends State<QuestionScreen> {
         currentAnswers = questions[currentIndex].answers;
         orderedAnswers.clear();
       });
+      if (failedAttempts >= 3) {
+        setState(() {
+          levelProgress = LevelProgressUser(
+              id: "",
+              score: 0,
+              energy: 0,
+              message: Message(
+                  resultDescription: "", resultTitle: "", difficulty: ""),
+              newRecord: false,
+              user: InfoUser(username: "", rolId: 0, id: ""),
+              failedAttempts: failedAttempts,
+              scoreLastAttempt: 0,
+              completed: false,
+              level: LevelUser(levelNumber: 0, id: "", name: ""),
+              status: true);
+          activityIsCompleted = true;
+          showStepCompleted = true;
+        });
+      }
     } else {
       // si falle 3 o mas veces muestro modal de inténtalo de nuevo
       if (failedAttempts >= 3) {
@@ -578,29 +597,66 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     },
                     if (!activityIsCompleted) ...{
                       // we show  question and answer or ordering
-                      Container(
-                        constraints: BoxConstraints(minHeight: 68.0),
-                        margin: EdgeInsets.symmetric(horizontal: 6.0),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 11.0, vertical: 15.0),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Color(0XFFFFBB00),
-                          borderRadius: BorderRadius.circular(8.0),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withValues(alpha: .25),
-                                offset: Offset(0.0, 4.0),
-                                blurStyle: BlurStyle.outer,
-                                blurRadius: 4.0)
-                          ],
-                        ),
-                        child: Text(
-                          currentQuestion.question,
-                          style: StylesApp(context)
-                              .textStyleBody12
-                              .copyWith(color: Colors.black),
-                        ),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            constraints: BoxConstraints(minHeight: 68.0),
+                            margin: EdgeInsets.symmetric(horizontal: 6.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 11.0, vertical: 15.0),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Color(0XFFFFBB00),
+                              borderRadius: BorderRadius.circular(8.0),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black.withValues(alpha: .25),
+                                    offset: Offset(0.0, 4.0),
+                                    blurStyle: BlurStyle.outer,
+                                    blurRadius: 4.0)
+                              ],
+                            ),
+                            child: Text(
+                              currentQuestion.question,
+                              style: StylesApp(context)
+                                  .textStyleBody12
+                                  .copyWith(color: Colors.black),
+                            ),
+                          ),
+                          Positioned(
+                            top: -20,
+                            right: 10,
+                            child: Row(
+                              children: [
+                                Text(
+                                  "Oportunidades: ",
+                                  style: StylesApp(context)
+                                      .textStyleBody10
+                                      .copyWith(color: StyleColor.grayMedium),
+                                ),
+                                Image.asset(
+                                  failedAttempts <= 2
+                                      ? "assets/fire_rachaActive.png"
+                                      : "assets/fire_rachaInactive.png",
+                                  width: 20,
+                                ),
+                                Image.asset(
+                                  failedAttempts <= 1
+                                      ? "assets/fire_rachaActive.png"
+                                      : "assets/fire_rachaInactive.png",
+                                  width: 20,
+                                ),
+                                Image.asset(
+                                  failedAttempts == 0
+                                      ? "assets/fire_rachaActive.png"
+                                      : "assets/fire_rachaInactive.png",
+                                  width: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(
                         height: 38.0,

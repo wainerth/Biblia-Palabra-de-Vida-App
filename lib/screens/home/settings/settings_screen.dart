@@ -31,27 +31,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Navigator.pushNamed(context, "/layoutPage");
               },
             ),
-            ListTile(
-              title: Text(
-                'Notificaciones',
-                style: StylesApp(context).textStyleBody12,
-              ),
-              trailing: Switch(
-                value: showNotification,
-                onChanged: (bool value) {
-                  setState(() {
-                    showNotification = value;
-                  });
-                },
-              ),
-            ),
-            Divider(
-              height: 2,
-              thickness: 5,
-              color: Colors.white.withValues(alpha: 0.50),
-              endIndent: 10,
-              indent: 10,
-            ),
+            // ListTile(
+            //   title: Text(
+            //     'Notificaciones',
+            //     style: StylesApp(context).textStyleBody12,
+            //   ),
+            //   trailing: Switch(
+            //     value: showNotification,
+            //     onChanged: (bool value) {
+            //       setState(() {
+            //         showNotification = value;
+            //       });
+            //     },
+            //   ),
+            // ),
+            // Divider(
+            //   height: 2,
+            //   thickness: 5,
+            //   color: Colors.white.withValues(alpha: 0.50),
+            //   endIndent: 10,
+            //   indent: 10,
+            // ),
             ListTile(
               title: Text(
                 'Idioma',

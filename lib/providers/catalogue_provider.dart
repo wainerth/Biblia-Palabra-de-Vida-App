@@ -21,7 +21,7 @@ class CatalogueProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  bool get isInitialized => _isInitialized;
+  bool get isSocketInitialized => _isInitialized;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   Future<void> loadLeagues() => _loadLeagues();
@@ -150,7 +150,7 @@ class CatalogueProvider extends ChangeNotifier {
         query GetAllCountryWithCodeAreas($limit: Int, $offset: Int, $search: String) {
           getAllCountryWithCodeAreas(limit: $limit, offset: $offset, search: $search) {
             id
-            country
+            name
             areaCodeCountry {
               id
               code
@@ -186,8 +186,10 @@ class CatalogueProvider extends ChangeNotifier {
         document: gql(r'''
         query GetAllChurches {
           getAllChurches {
+          data{
             id
             name
+          }
           }
         }
         '''),
@@ -204,11 +206,13 @@ class CatalogueProvider extends ChangeNotifier {
       }
 
       final data = result.data;
-      if (data == null || data['getAllChurches'] == null) {
+      if (data == null ||
+          data['getAllChurches'] == null ||
+          data['getAllChurches']['data'] == null) {
         throw Exception('No churches data received');
       }
 
-      allChurches = (data['getAllChurches'] as List)
+      allChurches = (data['getAllChurches']["data"] as List)
           .map((i) => Church.fromJson(i))
           .toList();
       if (kDebugMode && allChurches.isNotEmpty) {
@@ -222,7 +226,7 @@ class CatalogueProvider extends ChangeNotifier {
     } on FormatException catch (e) {
       throw Exception('Data format error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to load leagues: ${e.toString()}');
+      throw Exception('Failed to get all Churches: ${e.toString()}');
     }
   }
 

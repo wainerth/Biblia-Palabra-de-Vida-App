@@ -166,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     List<ModelData> locationData = [
       ModelData(
           label: "País",
-          value: dataUser!.country?.country ?? '',
+          value: dataUser!.country?.name ?? '',
           clave: "country"),
       ModelData(
         label: "Estado",

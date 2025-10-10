@@ -110,7 +110,7 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
       case 'country':
         if (item.value.isNotEmpty) {
           Country? cont =
-              countries.firstWhere((country) => country.country == item.value);
+              countries.firstWhere((country) => country.name == item.value);
           nuevosDatos["country"] = cont;
         } else {
           nuevosDatos["country"] = null;
