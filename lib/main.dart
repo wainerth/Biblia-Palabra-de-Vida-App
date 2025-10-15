@@ -26,17 +26,17 @@ void main() async {
   await socketProvider.initializeNotificationSystem();
   if (!kIsWeb) {
     await FlutterDownloader.initialize(
-      debug: kDebugMode, 
+      debug: kDebugMode,
       ignoreSsl: kDebugMode,
     );
   }
 
   debugPrint = (String? message, {int? wrapWidth}) {
-      // Logs detallados solo en modo debug
-      if (message != null && message.contains('GraphQL')) {
-        print('🎯 [GRAPHQL_DEBUG] $message');
-      }
-    };
+    // Logs detallados solo en modo debug
+    if (message != null && message.contains('GraphQL')) {
+      print('🎯 [GRAPHQL_DEBUG] $message');
+    }
+  };
   runApp(
     MultiProvider(
       providers: [
@@ -74,6 +74,19 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _loadDataPreferences();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    // Esperar a que Flutter esté listo
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final context = navigatorKey.currentContext;
+      if (context != null) {
+        final catalogueProvider =
+            Provider.of<CatalogueProvider>(context, listen: false);
+        await catalogueProvider.initialize();
+      }
+    });
   }
 
   Future<void> _loadDataPreferences() async {
@@ -86,7 +99,7 @@ class _MyAppState extends State<MyApp> {
       if (e.toString().contains('StreamCorruptedException')) {
         try {
           // 1. Limpia en memoria
-        await PreferencesManager().clearAll();
+          await PreferencesManager().clearAll();
 
           // 2. Elimina el archivo físico (definitivo)
           final appDir = await getApplicationSupportDirectory();
@@ -150,8 +163,7 @@ class _MyAppState extends State<MyApp> {
     if (_hasSeenIntro!) {
       final authProvider = context.read<AuthenticationProvider>();
       return FutureBuilder(
-        future:
-            _loadTokenAndInitializeAuth(),
+        future: _loadTokenAndInitializeAuth(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return LoadMaskedWidget();

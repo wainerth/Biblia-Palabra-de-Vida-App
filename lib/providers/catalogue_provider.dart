@@ -20,11 +20,26 @@ class CatalogueProvider extends ChangeNotifier {
   bool _isInitialized = false;
   bool _isLoading = false;
   String? _errorMessage;
+  Map<String, bool> _serviceStatus = {};
 
   bool get isSocketInitialized => _isInitialized;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool get isPartiallyInitialized => 
+      _serviceStatus['Countries'] == true || 
+      _serviceStatus['AreaCodes'] == true;
+  bool get hasCriticalData => 
+      _serviceStatus['Countries'] == true && 
+      _serviceStatus['AreaCodes'] == true;
+  
+  bool isServiceLoaded(String serviceName) => _serviceStatus[serviceName] == true;
+  List<String> get failedServices => _serviceStatus.entries
+      .where((e) => e.value == false)
+      .map((e) => e.key)
+      .toList();
+
   Future<void> loadLeagues() => _loadLeagues();
+  
   CatalogueProvider() {
     initialize();
   }
@@ -46,41 +61,167 @@ class CatalogueProvider extends ChangeNotifier {
 
       _client = await _createClientWithRetry();
 
-      // Cargar datos en paralelo donde sea posible
-      await Future.wait([
-        _loadAllCountriesWithIsolates(),
-        _loadAreasCodeWithIsolates(),
-        _loadChurches(),
-        _loadLeagues(),
-        _getConfigurations(),
-        loadBibleVersions()
-      ]);
+      // Cargar datos con manejo robusto de errores
+      await _loadAllDataWithErrorHandling();
 
       _isInitialized = true;
       if (kDebugMode) {
-        print("Catalogo inicializado");
+        print("Catalogo inicializado exitosamente");
       }
     } catch (e) {
       if (kDebugMode) {
-        print("Catalogo error");
+        print("Error en inicialización del catalogo: $e");
       }
-      _errorMessage = e.toString();
-      if (kDebugMode) {
-        print('Error initializing CatalogueProvider: $e');
-      }
-      rethrow;
+      _errorMessage = "Algunos servicios no pudieron cargarse. Puedes intentarlo más tarde.";
+      // No rethrow - permitimos que el provider se inicialice parcialmente
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
+  Future<void> _loadAllDataWithErrorHandling() async {
+    _serviceStatus = {}; // Map para trackear estado de cada servicio
+
+    // Cargar servicios críticos primero (países y códigos de área)
+    await _loadWithRetry('Countries', _loadAllCountriesWithIsolates, retries: 3);
+    await _loadWithRetry('AreaCodes', _loadAreasCodeWithIsolates, retries: 3);
+
+    // Cargar servicios no críticos en paralelo
+    await Future.wait([
+      _loadWithRetry('Churches', _loadChurches, retries: 2),
+      _loadWithRetry('Leagues', _loadLeagues, retries: 2),
+      _loadWithRetry('Configurations', _getConfigurations, retries: 2),
+      _loadWithRetry('BibleVersions', loadBibleVersions, retries: 2),
+    ], eagerError: false);
+
+    // Verificar si tenemos al menos los servicios críticos
+    _checkCriticalServices();
+    _logLoadStatus();
+  }
+
+  Future<void> _loadWithRetry(
+    String serviceName, 
+    Future<void> Function() loadFunction, 
+    {int retries = 3}
+  ) async {
+    for (int attempt = 1; attempt <= retries; attempt++) {
+      try {
+        await loadFunction();
+        _serviceStatus[serviceName] = true;
+        if (kDebugMode) {
+          print('✅ $serviceName loaded successfully (attempt $attempt)');
+        }
+        return;
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️ Attempt $attempt failed for $serviceName: $e');
+        }
+        
+        if (attempt == retries) {
+          _serviceStatus[serviceName] = false;
+          if (kDebugMode) {
+            print('❌ Failed to load $serviceName after $retries attempts');
+          }
+        } else {
+          // Backoff progresivo: 1s, 2s, 3s...
+          await Future.delayed(Duration(seconds: attempt));
+        }
+      }
+    }
+  }
+
+  void _checkCriticalServices() {
+    final criticalServices = ['Countries', 'AreaCodes'];
+    final criticalFailed = criticalServices.any((service) => _serviceStatus[service] != true);
+    
+    if (criticalFailed) {
+      if (kDebugMode) {
+        print('🚨 Critical services failed - provider partially initialized');
+      }
+    }
+  }
+
+  void _logLoadStatus() {
+    final successful = _serviceStatus.entries.where((e) => e.value == true).length;
+    final failed = _serviceStatus.entries.where((e) => e.value == false).length;
+    
+    if (kDebugMode) {
+      print('📊 Catalogue Load Summary:');
+      print('   ✅ $successful services loaded successfully');
+      print('   ❌ $failed services failed');
+      
+      _serviceStatus.forEach((service, status) {
+        print('   ${status == true ? '✅' : '❌'} $service');
+      });
+    }
+  }
+
+  Future<void> retryFailedServices() async {
+    final failedServices = _serviceStatus.entries
+        .where((e) => e.value == false)
+        .map((e) => e.key)
+        .toList();
+    
+    if (failedServices.isEmpty) {
+      if (kDebugMode) {
+        print('🎉 All services are already loaded');
+      }
+      return;
+    }
+    
+    if (kDebugMode) {
+      print('🔄 Retrying failed services: $failedServices');
+    }
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      for (final service in failedServices) {
+        await _retryService(service);
+      }
+      
+      if (kDebugMode) {
+        print('✅ All services retried successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Some services still failed after retry: $e');
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _retryService(String serviceName) async {
+    switch (serviceName) {
+      case 'Countries':
+        await _loadAllCountriesWithIsolates();
+        break;
+      case 'AreaCodes':
+        await _loadAreasCodeWithIsolates();
+        break;
+      case 'Churches':
+        await _loadChurches();
+        break;
+      case 'Leagues':
+        await _loadLeagues();
+        break;
+      case 'Configurations':
+        await _getConfigurations();
+        break;
+      case 'BibleVersions':
+        await loadBibleVersions();
+        break;
+    }
+    _serviceStatus[serviceName] = true;
+  }
+
   Future<void> _checkInternetConnection() async {
-    // En web, InternetAddress.lookup no está soportado.
-    // Usamos un método compatible con ambas plataformas.
     try {
       if (kIsWeb) {
-        // En web, intentamos hacer una petición fetch a un recurso público.
         final uri = Uri.parse('https://www.google.com/favicon.ico');
         final request = await HttpClient().getUrl(uri);
         final response = await request.close();
@@ -104,7 +245,6 @@ class CatalogueProvider extends ChangeNotifier {
     for (var i = 0; i < retries; i++) {
       try {
         final client = createClient();
-        // Verificar que el cliente funciona con una consulta simple
         final options = QueryOptions(
           document: gql(r'query { __typename }'),
         );
@@ -128,9 +268,7 @@ class CatalogueProvider extends ChangeNotifier {
         notifyListeners();
       } else if (message == 'completed') {
         if (kDebugMode && allCountries.isNotEmpty) {
-          if (kDebugMode) {
-            print("countries cargados...");
-          }
+          print("countries cargados...");
         }
         break;
       }
@@ -216,9 +354,7 @@ class CatalogueProvider extends ChangeNotifier {
           .map((i) => Church.fromJson(i))
           .toList();
       if (kDebugMode && allChurches.isNotEmpty) {
-        if (kDebugMode) {
-          print("all Churches  loaded...");
-        }
+        print("all Churches loaded...");
       }
       notifyListeners();
     } on TimeoutException catch (e) {
@@ -318,11 +454,9 @@ class CatalogueProvider extends ChangeNotifier {
     } on FormatException catch (e) {
       throw Exception('Data format error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to load leagues: ${e.toString()}');
+      throw Exception('Failed to load configurations: ${e.toString()}');
     }
   }
-
-  // Métodos para _loadSex()...
 
   Future<void> _loadAreasCodeWithIsolates() async {
     final receivePort = ReceivePort();

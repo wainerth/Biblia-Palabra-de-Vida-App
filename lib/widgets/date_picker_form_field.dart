@@ -26,6 +26,7 @@ class _DatePickerFormFieldState extends State<DatePickerFormField> {
       setState(() {
         _dateController.text = formatter.format(_selectedDate!);
       });
+      widget.onChanged!(_dateController.text);
     }
   }
 

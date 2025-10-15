@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/services/streak_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -106,6 +107,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generateData(context);
       getFontSizeText();
+      // _checkForStreakCelebration();
     });
   }
 
@@ -463,6 +465,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
         }
         LoadingService().hideLoading();
         // habilitamos mostrar paso completado
+        await _checkForStreakCelebration();
+
         setState(() {
           activityIsCompleted = true; // para ocultar las preguntas
           showStepCompleted = true; // mostramos mensaje de paso completado
@@ -1535,5 +1539,32 @@ class _QuestionScreenState extends State<QuestionScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _checkForStreakCelebration() async {
+    // Verificar si deberíamos mostrar la celebración
+    final shouldShow = await StreakService.shouldShowCelebration();
+
+    if (shouldShow) {
+      // Obtener datos del calendario
+      final ResponseData response =
+          await streaksCalendar(userData!.userId, DateTime.now().month);
+
+      if (response.error == null) {
+        final streakCalendar = DateCalendar.fromJson(response.data);
+
+        // Mostrar diálogo de celebración
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          StreakService.showStreakCelebration(
+            context: context,
+            streakCalendar: streakCalendar,
+            onSeeDetails: () {
+              // Navegar a pantalla de detalles de racha
+              Navigator.pushNamed(context, '/streak-details');
+            },
+          );
+        });
+      }
+    }
   }
 }

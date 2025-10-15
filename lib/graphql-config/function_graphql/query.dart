@@ -1501,6 +1501,9 @@ Future streaksCalendar(String userId, int month) async {
             streakCalendarService(userId: $userId, month: $month) {
               playDay
               protectedStreak
+              longestStreak
+              currentStreak
+              lostStreak
             }
           }
       '''),

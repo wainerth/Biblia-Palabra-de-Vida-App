@@ -29,49 +29,75 @@ class AudioService {
   // --- Efectos de Sonido (SFX) ---
   Future<void> playCardTapSound() async {
     // Usar play(AssetSource) directamente para sonidos cortos
-    await AudioPlayer().play(AssetSource('sounds/card_tap.mp3'), mode: PlayerMode.lowLatency);
+    await AudioPlayer()
+        .play(AssetSource('sounds/card_tap.mp3'), mode: PlayerMode.lowLatency);
   }
 
-
   Future<void> playMatchSound() async {
-    await  AudioPlayer().play(AssetSource('sounds/match_success.mp3'), mode: PlayerMode.lowLatency);
+    await AudioPlayer().play(AssetSource('sounds/match_success.mp3'),
+        mode: PlayerMode.lowLatency);
   }
 
   Future<void> playNoMatchSound() async {
-    await  AudioPlayer().play(AssetSource('sounds/match_fail.mp3'), mode: PlayerMode.lowLatency);
+    await AudioPlayer().play(AssetSource('sounds/match_fail.mp3'),
+        mode: PlayerMode.lowLatency);
   }
 
   Future<void> playTimeUpSound() async {
-    await _sfxPlayer.play(AssetSource('sounds/time_up.mp3'), mode: PlayerMode.lowLatency);
+    await _sfxPlayer.play(AssetSource('sounds/time_up.mp3'),
+        mode: PlayerMode.lowLatency);
   }
-    Future<void> stopTimeUpSound() async {
+
+  Future<void> stopTimeUpSound() async {
     await _sfxPlayer.stop();
   }
+
   Future<void> playCounterClock() async {
-    await _sfxPlayer.play(AssetSource('sounds/counter-clock.mp3'), mode: PlayerMode.lowLatency);
+    await _sfxPlayer.play(AssetSource('sounds/counter-clock.mp3'),
+        mode: PlayerMode.lowLatency);
   }
+
   Future<void> playFailedAttempts() async {
-    await AudioPlayer().play(AssetSource('sounds/failed-attempts.mp3'), mode: PlayerMode.lowLatency);
+    await AudioPlayer().play(AssetSource('sounds/failed-attempts.mp3'),
+        mode: PlayerMode.lowLatency);
   }
+
   Future<void> stopCounterClock() async {
     await _sfxPlayer.stop();
   }
 
   Future<void> playCorrectAnswer() async {
-    await  AudioPlayer().play(AssetSource('sounds/correct-answer.mp3'), mode: PlayerMode.lowLatency);
+    await AudioPlayer().play(AssetSource('sounds/correct-answer.mp3'),
+        mode: PlayerMode.lowLatency);
   }
+
   Future<void> playWrongAnswer() async {
-    await AudioPlayer().play(AssetSource('sounds/wrong-answer.mp3'), mode: PlayerMode.lowLatency);
+    await AudioPlayer().play(AssetSource('sounds/wrong-answer.mp3'),
+        mode: PlayerMode.lowLatency);
   }
+
   Future<void> playWinSound() async {
-    await _sfxPlayer.play(AssetSource('sounds/win_game.mp3'), mode: PlayerMode.lowLatency);
+    await _sfxPlayer.play(AssetSource('sounds/win_game.mp3'),
+        mode: PlayerMode.lowLatency);
   }
+
   Future<void> playBackgroundMusicMap() async {
     await _backgroundPlayer.play(AssetSource('mar-aves.mp3'));
   }
+
   Future<void> stopBackgroundMusicMap() async {
     await _backgroundPlayer.stop();
   }
+
+  Future<void> playSuccessSound() async {
+    await AudioPlayer().play(AssetSource('sounds/wrong-answer.mp3'),
+        mode: PlayerMode.lowLatency);
+  }
+
+  Future<void> stopSuccessSound() async {
+    await _sfxPlayer.stop();
+  }
+
   // Liberar recursos
   void dispose() {
     _backgroundPlayer.dispose();

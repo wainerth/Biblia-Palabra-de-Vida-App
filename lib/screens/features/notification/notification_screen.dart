@@ -343,24 +343,56 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return groupedNotifications;
   }
 
-  DateTime _parseNotificationDate(String dateString) {
-    try {
-      final parts = dateString.split(' ');
-      final dateParts = parts[0].split('/');
-      final timeParts = parts[1].split(':');
-
-      return DateTime(
-        int.parse(dateParts[2]), // año
-        int.parse(dateParts[1]), // mes
-        int.parse(dateParts[0]), // día
-        int.parse(timeParts[0]), // hora
-        int.parse(timeParts[1]), // minuto
-      );
-    } catch (e) {
-      print('Error parsing date: $dateString');
-      return DateTime.now(); // Fallback a fecha actual
+  DateTime _parseNotificationDate(dynamic dateInput) {
+  try {
+    DateTime result;
+    
+    if (dateInput is DateTime) {
+      result = dateInput;
+    } else if (dateInput is String) {
+      // Intentar parseo ISO primero
+      result = DateTime.tryParse(dateInput) ?? 
+               _parseCustomFormat(dateInput) ?? 
+               (throw FormatException('Formato no válido'));
+    } else {
+      throw ArgumentError('Tipo no soportado: ${dateInput.runtimeType}');
     }
+    
+    return DateTime(
+      result.year,
+      result.month,
+      result.day,
+      result.hour,
+      result.minute,
+    );
+    
+  } catch (e) {
+    print('Error parsing date: $dateInput - Error: $e');
+    return DateTime.now();
   }
+}
+
+DateTime? _parseCustomFormat(String dateString) {
+  try {
+    final parts = dateString.split(' ');
+    if (parts.length != 2) return null;
+    
+    final dateParts = parts[0].split('/');
+    final timeParts = parts[1].split(':');
+    
+    if (dateParts.length != 3 || timeParts.length < 2) return null;
+    
+    return DateTime(
+      int.parse(dateParts[2]),
+      int.parse(dateParts[1]),
+      int.parse(dateParts[0]),
+      int.parse(timeParts[0]),
+      int.parse(timeParts[1]),
+    );
+  } catch (e) {
+    return null;
+  }
+}
 
   // Función para obtener la clave de fecha
   String _getDateKey(DateTime date) {

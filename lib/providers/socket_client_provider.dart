@@ -231,12 +231,27 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     );
   }
 
-  void cleanNotification() {
+  Future<void> cleanNotification() async {
     _notifications.clear();
+    notifyListeners();
+    if (kDebugMode) {
+      print('🔔 Notificaciones limpiadas. Total: ${_notifications.length}');
+    }
+    // Puedes agregar un pequeño delay si es necesario
+    await Future.delayed(Duration.zero);
   }
 
   void addNotification(NotificationModel notification) {
     _notifications.add(notification);
+    _notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    notifyListeners(); // ¡Esto es crucial!
+  }
+
+  void addAllNotification(List<NotificationModel> notifications) {
+    _notifications = [];
+
+    _notifications.addAll(notifications);
     notifyListeners(); // ¡Esto es crucial!
   }
 
@@ -246,8 +261,11 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     required String username,
     required String email,
   }) async {
-    final urlSocket = GraphQLConfig.development ? GraphQLConfig.urlSocketDev : GraphQLConfig.urlSocketProd;
-    String pathSocket = GraphQLConfig.development ? '/socket.io-dev' : '/socket.io';
+    final urlSocket = GraphQLConfig.development
+        ? GraphQLConfig.urlSocketDev
+        : GraphQLConfig.urlSocketProd;
+    String pathSocket =
+        GraphQLConfig.development ? '/socket.io-dev' : '/socket.io';
     final timeZone = await getDeviceTimeZone();
     _initializedSocket = true;
     initializeObserver();
