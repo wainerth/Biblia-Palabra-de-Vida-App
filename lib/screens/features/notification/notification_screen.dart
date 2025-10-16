@@ -293,7 +293,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     try {
       final responseNotification = await getAllNotification(
-          1, 10, useData != null ? useData.userId : '');
+          1, null, useData != null ? useData.userId : '');
 
       if (responseNotification.error != null) {
         setState(() => loading = false);

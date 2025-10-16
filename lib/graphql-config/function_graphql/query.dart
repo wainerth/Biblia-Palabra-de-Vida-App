@@ -2748,7 +2748,7 @@ Future<ResponseData> getWordsConcordance(
 }
 
 Future<ResponseData> getAllNotification(
-    int page, int limit, String userId) async {
+    int page, int? limit, String userId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);

@@ -508,10 +508,10 @@ Future logout() async {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   await googleSignIn.signOut();
   final deviceInfo = await PreferencesManager().getDeviceInfo();
-  final token = await PreferencesManager().getUserToken();
+  final String token = await PreferencesManager().getUserToken() ?? '';
   String userId = await PreferencesManager().getUserId();
   // eliminamos el dispositivo del usuario
-  if (GraphQLConfig.development && userId.isNotEmpty ) {
+  if (token.isNotEmpty && userId.isNotEmpty ) {
     final responseDeleteDevice =
         await deleteDevice(userId, deviceInfo?['deviceId'] ?? '');
 

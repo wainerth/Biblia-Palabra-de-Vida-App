@@ -1125,6 +1125,8 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
               ),
               TextButton(
                 onPressed: () {
+                  Navigator.pop(context); // cerramos la modal
+                  
                   Navigator.pushNamed(context, '/notificationPage');
                 },
                 child: Text("Ver Todas...",

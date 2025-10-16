@@ -80,7 +80,7 @@ class DoubtScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
-                  'Aquí respondemos las preguntas más frecuentes sobre la app y su uso.',
+                  'Aquí ALgunas de las preguntas más frecuentes sobre la app y su uso.',
                   textAlign: TextAlign.center,
                   style: StylesApp(context).textStyleBody16.copyWith(
                         color: Colors.white,
@@ -105,26 +105,26 @@ class DoubtScreen extends StatelessWidget {
                       context,
                       question: '¿Cómo puedo buscar un versículo?',
                       answer:
-                          'En la pantalla principal, Ingresas a la opción de la Biblia y el los iconos de la parte superior donde esta la lupa ...',
+                          'En la pantalla principal, Ingresas a la opción de la Biblia y el los iconos de la parte superior donde esta la lupa ...\n Encontraras las opciones que te permiten moverte sobre los Versiones, libros capítulos y versículos, ademas de acceder, a la sección de enseñanzas, y personajes...',
                     ),
                     _buildQuestion(
                       context,
                       question: '¿Puedo leer la Biblia sin conexión?',
                       answer:
-                          'No,la biblia necesitas estar conectado a internet',
+                          'No,necesitas estar conectado a internet, para poder acceder a las funcionalidades de la Biblia',
                     ),
                     _buildQuestion(
                       context,
                       question: '¿Cómo puedo cambiar el tema de la app?',
                       answer:
-                          'Solo puedes cambiar el tema de colores en la sección de la Biblia. \n Ve a la biblia usas el icono de personalización  y selecciona el tema que prefieras: claro, oscuro o personalizado.',
+                          'Solo puedes cambiar el tema de colores en la sección de la Biblia. \n Ve a la biblia usas el icono de personalización  y selecciona el tema que prefieras: claro, oscuro o personalizado. \n Ademas puedes cambiar el tipo de fuente, ajustar el tamaño de la fuente, estos\n datos permanecen guardados dentro del store de la aplicación',
                     ),
                     _buildQuestion(
                       context,
                       question:
                           '¿Dónde puedo enviar sugerencias o reportar errores?',
                       answer:
-                          'En la sección de Contacto puedes enviarnos tus sugerencias o reportar cualquier inconveniente.',
+                          'a traves del correo Electrónico, que encuentras en configuración "acerca de la app", puedes enviarnos tus sugerencias o reportar cualquier inconveniente.',
                     ),
                   ],
                 ),
@@ -136,7 +136,7 @@ class DoubtScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                '¿No encontraste tu respuesta? Escríbenos desde la sección de Contacto.',
+                '¿No encontraste tu respuesta? Escríbenos a devidapalabra25@gmail',
                 textAlign: TextAlign.center,
                 style: StylesApp(context).textStyleBody14.copyWith(
                       color: Colors.white70,

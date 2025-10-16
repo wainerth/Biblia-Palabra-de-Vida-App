@@ -129,7 +129,7 @@ class AboutScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal:  12.0),
               child: const Text(
-                'Contacto: bibliaapp@ejemplo.com',
+                'Contacto: devidapalabra25@gmail.com',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 15,

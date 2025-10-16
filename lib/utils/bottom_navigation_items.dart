@@ -808,9 +808,10 @@ final List<BottomNavItem> items = [
     page: RankingScreen(),
   ),
   BottomNavItem(
-      title: "Dudas",
-      icon: Icons.question_mark_outlined,
-      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen()),
+    title: "Dudas",
+    icon: Icons.question_mark_outlined,
+    page: DoubtScreen(),
+  ),
   BottomNavItem(
       title: "Reto online",
       icon: Icons.language,
@@ -1088,7 +1089,7 @@ final List<BottomNavItem> itemsMap = [
   BottomNavItem(
     title: "Dudas",
     icon: Icons.question_mark_outlined,
-    page: GraphQLConfig.development ? DoubtScreen() : SoonScreen(),
+    page: DoubtScreen(),
   ),
   BottomNavItem(
     title: "Reto online",
@@ -1635,7 +1636,7 @@ final List<BottomNavItem> itemsPromises = [
   BottomNavItem(
       title: "Dudas",
       icon: Icons.question_mark_outlined,
-      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen()),
+      page: DoubtScreen()),
   BottomNavItem(
       title: "Reto online",
       icon: Icons.language,
