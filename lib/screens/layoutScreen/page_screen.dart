@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+// import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
@@ -18,7 +18,7 @@ class _PageScreenState extends State<PageScreen> {
     BibleScreen(),
     PrayerScreen(),
     AudioScreen(),
-    GraphQLConfig.development ? OfferingsScreen() : SoonScreen(),
+    // GraphQLConfig.development ? OfferingsScreen() : SoonScreen(),
     SettingsScreen(),
   ];
 

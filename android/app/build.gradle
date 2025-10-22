@@ -4,9 +4,14 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
     id "com.google.gms.google-services"
 }
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 
 android {
-    namespace = "com.example.biblia_palabra_de_vida_app"
+    namespace = "com.labibliapalabradevida.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "25.1.8937393"
 
@@ -20,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.biblia_palabra_de_vida_app"
+        applicationId = "com.labibliapalabradevida.app"
         minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -29,16 +34,16 @@ android {
 
     signingConfigs {
         debug {
-            keyAlias "androiddebugkey"
-            keyPassword "123456"
-            storeFile file("myKey.jks")
-            storePassword "123456"
+           keyAlias keystoreProperties['keyAlias']
+           keyPassword keystoreProperties['keyPassword']
+           storeFile file(keystoreProperties['storeFile'])
+           storePassword keystoreProperties['storePassword']
         }
         release {
-            keyAlias "androiddebugkey"
-            keyPassword "123456"
-            storeFile file("myKey.jks")
-            storePassword "123456"
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
         }
     }
     buildTypes {

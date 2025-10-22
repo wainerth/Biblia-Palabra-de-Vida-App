@@ -90,7 +90,7 @@ class AudioService {
   }
 
   Future<void> playSuccessSound() async {
-    await AudioPlayer().play(AssetSource('sounds/wrong-answer.mp3'),
+    await AudioPlayer().play(AssetSource('sounds/win_game.mp3'),
         mode: PlayerMode.lowLatency);
   }
 

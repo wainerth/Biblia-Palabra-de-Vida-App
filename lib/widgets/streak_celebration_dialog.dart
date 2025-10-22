@@ -93,7 +93,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
 
   Widget _buildContent() {
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -124,8 +124,6 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
           _buildStreakStats(),
           SizedBox(height: 24),
 
-          // Botón de acción
-          // _buildActionButton(),
         ],
       ),
     );
@@ -136,16 +134,27 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
       width: 80,
       height: 80,
       decoration: BoxDecoration(
-        color: StyleColor.orange,
+        // color: StyleColor.black,
         shape: BoxShape.circle,
       ),
       child: Center(
-        child: Image.asset(
-          'assets/fire_rachaActive.png',
-          width: 50,
-          height: 50,
-          color: Colors.white,
-        ),
+        child: Stack(children: [
+          Positioned(
+            top: 32,
+            left: 20,
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Image.asset(
+            "assets/comingSoon.gif",
+          ),
+        ]),
       ),
     );
   }
@@ -161,18 +170,16 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
               ),
         ),
         SizedBox(height: 8),
-        Text.rich(
-            style: StylesApp(context).textStyleBody14.copyWith(
-                  color: Color(0xFF718096),
-                ),
-            textAlign: TextAlign.center,
-            TextSpan(children: [
-              TextSpan(text: "Haz alcanzado "),
-              TextSpan(style: StylesApp(context).textStyleBody18.copyWith(
-                color: StyleColor.orange
-              ), text: "${widget.streakCalendar?.currentStreak} día(s) "),
-              TextSpan(text: "de racha"),
-            ])),
+        Text("${widget.streakCalendar?.currentStreak}",
+            style: StylesApp(context).textStyleBody32.copyWith(
+                  color: StyleColor.orange,
+                )),
+        Text(
+          "días de Racha",
+          style: StylesApp(context).textStyleBody16.copyWith(
+                color: Color(0xFF718096),
+              ),
+        ),
       ],
     );
   }
@@ -180,26 +187,33 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
   Widget _buildWeekCalendar() {
     final today = DateTime.now();
     final weekDays = _getCurrentWeek();
+    ScrollController scrollController = ScrollController();
+    return Scrollbar(
+      controller: scrollController,
+      thumbVisibility: true,
+      thickness: 8.0,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+          decoration: BoxDecoration(
+            color: StyleColor.turquoise,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            spacing: 4.0,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: weekDays.map((day) {
+              final isPlayed = widget.streakCalendar.playDay.any((playDay) =>
+                  playDay.year == day.year &&
+                  playDay.month == day.month &&
+                  playDay.day == day.day);
+              final isToday = _isSameDay(day, today);
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
-        decoration: BoxDecoration(
-          color: Color(0xFFF7FAFC),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: weekDays.map((day) {
-            final isPlayed = widget.streakCalendar.playDay.any((playDay) =>
-                playDay.year == day.year &&
-                playDay.month == day.month &&
-                playDay.day == day.day);
-            final isToday = _isSameDay(day, today);
-
-            return _buildDayCell(day, isPlayed, isToday);
-          }).toList(),
+              return _buildDayCell(day, isPlayed, isToday);
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -212,7 +226,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
           _getDayAbbreviation(day.weekday),
           style: StylesApp(context).textStyleBody12.copyWith(
                 fontSize: 12,
-                color: Color(0xFF718096),
+                color: StyleColor.white,
                 fontWeight: FontWeight.w500,
               ),
         ),
@@ -225,28 +239,22 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
                 ? StyleColor.orange
                 : isPlayed
                     ? Color(0xFF48BB78)
-                    : Colors.white,
+                    : Colors.transparent,
             shape: BoxShape.circle,
-            border: isToday
-                ? null
-                : Border.all(
-                    color: isPlayed ? Color(0xFF48BB78) : Color(0xFFE2E8F0),
-                    width: 2,
-                  ),
           ),
           child: Center(
             child: isPlayed
                 ? Image.asset(
                     'assets/fire_rachaActive.png',
-                    width: 20,
-                    height: 20,
+                    width: 30,
+                    height: 30,
                   )
                 : Text(
                     day.day.toString(),
                     style: StylesApp(context).textStyleBody14.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: isToday ? Colors.white : Color(0xFF2D3748),
+                          color: Colors.white,
                         ),
                   ),
           ),
@@ -283,8 +291,8 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
         SizedBox(height: 8),
         Text(
           value,
-          style: StylesApp(context).textStyleBody18.copyWith(
-                fontSize: 18,
+          style: StylesApp(context).textStyleBody12.copyWith(
+                // fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF2D3748),
               ),
@@ -298,31 +306,6 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
               ),
         ),
       ],
-    );
-  }
-
-  Widget _buildActionButton() {
-    return ElevatedButton(
-      onPressed: () {
-        Navigator.of(context).pop();
-        widget.onSeeDetails?.call();
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: StyleColor.orange,
-        foregroundColor: Colors.white,
-        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
-        ),
-        elevation: 2,
-      ),
-      child: Text(
-        'Ver Detalles',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 

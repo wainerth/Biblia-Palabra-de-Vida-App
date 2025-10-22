@@ -239,7 +239,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       buttonStyle:
                                           StylesApp(context).btnWidgetSmall,
                                       height: null,
-                                      width: 180,
+                                      width: 170,
                                       onPressed: () async {
                                         setState(() {
                                           finalStory = false;
@@ -255,7 +255,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       buttonStyle:
                                           StylesApp(context).btnWidgetSmall,
                                       height: null,
-                                      width: 180,
+                                      width: 170,
                                       onPressed: () {
                                         Navigator.popAndPushNamed(
                                           context,

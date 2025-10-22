@@ -7,7 +7,7 @@ class GraphQLConfig {
   static const String authToken = '';
   static const bool development = false;
   static const String clientId = '823422522259-lsaj5empb8t54pims7m727krgrcfu6lf.apps.googleusercontent.com';
-  static const String serverClientId = '214929717096-c669jpm1gb9q87cribgbknuteemuj8st.apps.googleusercontent.com';
+  static const String serverClientId = '945681325893-ckla49hrnakacrpc9fc21vie6ub9o9o3.apps.googleusercontent.com';
 }
 
 // "robinsongarces"

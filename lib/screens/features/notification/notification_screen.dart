@@ -1,5 +1,7 @@
+import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/models/notification_model.dart';
 import 'package:biblia_palabra_de_vida_app/providers/socket_client_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
@@ -57,44 +59,85 @@ class _NotificationScreenState extends State<NotificationScreen> {
         backgroundColor: StyleColor.turquoise,
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+        child: RefreshIndicator(
+          color: Colors.blue,
+          backgroundColor: Colors.white,
+          displacement: 40,
+          onRefresh: () => loadAllNotifications(),
+          child: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                right: 0,
+                child: TextButton(
+                  // style: StylesApp(context).btnWidgetSmall,
+                  onPressed: () async {
+                    String userId = await PreferencesManager().getUserId();
+                    setState(() => loading = true);
+                    final ResponseData responseMarkedAllRead =
+                        await markAllAsReadNotifications(userId);
+                    if (responseMarkedAllRead.error != null) {
+                      setState(() => loading = false);
+                      await showCustomDialog(context,
+                          message: responseMarkedAllRead.error!,
+                          dialogType: DialogType.error);
+                      return;
+                    }
+                    await loadAllNotifications();
+                  },
+                  child: Row(
+                    spacing: 4.0,
+                    children: [
+                      Text("Leer Todas"),
+                      Icon(
+                        Icons.checklist_outlined,
+                        color: StyleColor.turquoise,
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: loading
-                  ? Center(child: LoadingIndicator())
-                  : error.isNotEmpty
-                      ? Center(
-                          child: BuildErrorWidget(
-                            errorMessage: error,
-                            onRetry: () async => loadAllNotifications(),
-                            onBack: () => Navigator.pop(context),
-                          ),
-                        )
-                      : notifications.isEmpty
-                          ? Center(
-                              child: Text(
-                                "No tienes notificaciones.",
-                                style: StylesApp(context)
-                                    .textStyleBody7
-                                    .copyWith(color: StyleColor.black),
-                              ),
-                            )
-                          : _buildNotificationList(),
-            ),
-          ],
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: loading
+                        ? Center(child: LoadingIndicator())
+                        : error.isNotEmpty
+                            ? Center(
+                                child: BuildErrorWidget(
+                                  errorMessage: error,
+                                  onRetry: () async => loadAllNotifications(),
+                                  onBack: () => Navigator.pop(context),
+                                ),
+                              )
+                            : notifications.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      "No tienes notificaciones.",
+                                      style: StylesApp(context)
+                                          .textStyleBody7
+                                          .copyWith(color: StyleColor.black),
+                                    ),
+                                  )
+                                : _buildNotificationList(),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -283,7 +326,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Future loadAllNotifications() async {
     setState(() {
       error = '';
-      loading = true;
+      if (!loading) loading = true;
     });
 
     Provider.of<SocketClientProvider>(context, listen: false)
@@ -344,55 +387,54 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   DateTime _parseNotificationDate(dynamic dateInput) {
-  try {
-    DateTime result;
-    
-    if (dateInput is DateTime) {
-      result = dateInput;
-    } else if (dateInput is String) {
-      // Intentar parseo ISO primero
-      result = DateTime.tryParse(dateInput) ?? 
-               _parseCustomFormat(dateInput) ?? 
-               (throw FormatException('Formato no válido'));
-    } else {
-      throw ArgumentError('Tipo no soportado: ${dateInput.runtimeType}');
-    }
-    
-    return DateTime(
-      result.year,
-      result.month,
-      result.day,
-      result.hour,
-      result.minute,
-    );
-    
-  } catch (e) {
-    print('Error parsing date: $dateInput - Error: $e');
-    return DateTime.now();
-  }
-}
+    try {
+      DateTime result;
 
-DateTime? _parseCustomFormat(String dateString) {
-  try {
-    final parts = dateString.split(' ');
-    if (parts.length != 2) return null;
-    
-    final dateParts = parts[0].split('/');
-    final timeParts = parts[1].split(':');
-    
-    if (dateParts.length != 3 || timeParts.length < 2) return null;
-    
-    return DateTime(
-      int.parse(dateParts[2]),
-      int.parse(dateParts[1]),
-      int.parse(dateParts[0]),
-      int.parse(timeParts[0]),
-      int.parse(timeParts[1]),
-    );
-  } catch (e) {
-    return null;
+      if (dateInput is DateTime) {
+        result = dateInput;
+      } else if (dateInput is String) {
+        // Intentar parseo ISO primero
+        result = DateTime.tryParse(dateInput) ??
+            _parseCustomFormat(dateInput) ??
+            (throw FormatException('Formato no válido'));
+      } else {
+        throw ArgumentError('Tipo no soportado: ${dateInput.runtimeType}');
+      }
+
+      return DateTime(
+        result.year,
+        result.month,
+        result.day,
+        result.hour,
+        result.minute,
+      );
+    } catch (e) {
+      print('Error parsing date: $dateInput - Error: $e');
+      return DateTime.now();
+    }
   }
-}
+
+  DateTime? _parseCustomFormat(String dateString) {
+    try {
+      final parts = dateString.split(' ');
+      if (parts.length != 2) return null;
+
+      final dateParts = parts[0].split('/');
+      final timeParts = parts[1].split(':');
+
+      if (dateParts.length != 3 || timeParts.length < 2) return null;
+
+      return DateTime(
+        int.parse(dateParts[2]),
+        int.parse(dateParts[1]),
+        int.parse(dateParts[0]),
+        int.parse(timeParts[0]),
+        int.parse(timeParts[1]),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 
   // Función para obtener la clave de fecha
   String _getDateKey(DateTime date) {

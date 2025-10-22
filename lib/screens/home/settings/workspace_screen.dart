@@ -290,6 +290,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                   SizedBox(
                     height: 22.0,
                   ),
+                  if(GraphQLConfig.development)
                   GestureDetector(
                     onTap: () {
                       Navigator.pushNamed(context, '/layoutLibrary');
@@ -336,7 +337,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: cards.map((card) => _buildCard(context, card)).toList(),
+        children: cards
+        .where((card) =>
+            !(card['label'] == 'Comunidad' && !GraphQLConfig.development))
+        .map((card) => _buildCard(context, card))
+        .toList(),
       ),
     );
   }

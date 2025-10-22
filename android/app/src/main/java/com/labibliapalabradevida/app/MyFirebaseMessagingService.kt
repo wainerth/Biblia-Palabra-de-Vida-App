@@ -1,4 +1,4 @@
-package com.example.biblia_palabra_de_vida_app
+package com.labibliapalabradevida.app
 
 import android.app.NotificationManager
 import android.app.PendingIntent
