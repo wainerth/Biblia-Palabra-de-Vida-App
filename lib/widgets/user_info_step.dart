@@ -209,6 +209,9 @@ class _UserInfoStepState extends State<UserInfoStep> {
                           !widget.obscureTextRepeat),
                     ),
                   ),
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: StyleColor.black),
               validator: (value) {
                 if (value != widget.passwordController.text) {
                   return "Las contraseñas no coinciden";

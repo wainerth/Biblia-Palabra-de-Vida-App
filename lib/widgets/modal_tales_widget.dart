@@ -24,6 +24,10 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
   PaginationInfo? _localPagination;
   String title = '';
   int limit = 12;
+  
+  // Detectar si es tablet
+  bool get isTablet => 1.sw > 600; // Ancho mayor a 600 puntos
+
   @override
   void initState() {
     super.initState();
@@ -69,9 +73,12 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.all(0),
+      insetPadding: isTablet 
+          ? EdgeInsets.symmetric(horizontal: 50.w, vertical: 40.h) // Más margen en tablet
+          : EdgeInsets.all(0), // Pantalla completa en móvil
       child: Container(
         width: double.infinity,
+        height: isTablet ? 0.8.sh : null, // Altura fija en tablet
         decoration: BoxDecoration(color: Colors.white),
         child: Column(
           children: [
@@ -85,7 +92,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
               ),
             ),
             Container(
-              padding: EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(isTablet ? 24.0 : 16.0), // Más padding en tablet
               child: Autocomplete<ButtonData>(
                 optionsBuilder: (TextEditingValue textEditingValue) {
                   if (textEditingValue.text.isEmpty) {
@@ -120,13 +127,16 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                     controller: textEditingController,
                     style: StylesApp(context)
                         .textStyleBody12
-                        .copyWith(color: Colors.black),
+                        .copyWith(
+                          color: Colors.black,
+                          fontSize: isTablet ? 16.sp : 12.sp, // Texto más grande en tablet
+                        ),
                     focusNode: focusNode,
                     decoration: InputDecoration(
                       hintText: 'Buscar cuento',
                       suffixIcon: Icon(
                         Icons.search,
-                        size: 20.sp,
+                        size: isTablet ? 24.sp : 20.sp, // Ícono más grande en tablet
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -134,6 +144,9 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                           color: Colors.black.withValues(alpha: 0.15),
                         ),
                       ),
+                      contentPadding: isTablet 
+                          ? EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0)
+                          : null,
                     ),
                     onSubmitted: (String value) {
                       textEditingController.clear();
@@ -147,7 +160,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                     alignment: Alignment.topLeft,
                     child: Material(
                       child: Container(
-                        width: MediaQuery.of(context).size.width * 0.8,
+                        width: MediaQuery.of(context).size.width * (isTablet ? 0.6 : 0.8),
                         color: Colors.white,
                         child: ListView.builder(
                           padding: EdgeInsets.all(8.0),
@@ -163,7 +176,10 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                                   option.name,
                                   style: StylesApp(context)
                                       .textStyleBody12
-                                      .copyWith(color: Colors.black),
+                                      .copyWith(
+                                        color: Colors.black,
+                                        fontSize: isTablet ? 14.sp : 12.sp,
+                                      ),
                                 ),
                               ),
                             );
@@ -178,34 +194,16 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
             Expanded(
               child: Stack(
                 children: [
-                  ListView.builder(
-                    itemCount: _localReflection!.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        constraints: BoxConstraints(minHeight: 40.sp),
-                        height: 40.sp,
-                        margin: EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 12.0),
-                        child: ButtonThemeWidget(
-                          text: _localReflection![index].name,
-                          buttonStyle: StylesApp(context).btnWidgetSmall,
-                          width: MediaQuery.sizeOf(context).width * 0.7,
-                          height: 27.0,
-                          onPressed: () {
-                            setState(() {
-                              taleSelected = _localReflection![index];
-                            });
-                          },
-                        ),
-                      );
-                    },
-                  ),
+                  // Layout diferente para tablet vs móvil
+                  isTablet 
+                      ? _buildTabletLayout() 
+                      : _buildMobileLayout(),
                   Positioned(
-                    bottom: 5,
-                    left: 5,
+                    bottom: isTablet ? 15.h : 5.h,
+                    left: isTablet ? 15.w : 5.w,
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: isTablet ? 50.w : 40.w,
+                      height: isTablet ? 50.h : 40.h,
                       decoration: BoxDecoration(
                         color: StyleColor.orange,
                         boxShadow: [
@@ -225,17 +223,20 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                                     title);
                               }
                             : null,
-                        icon: Icon(Icons.arrow_back),
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: isTablet ? 20.sp : 20.sp,
+                        ),
                         color: Colors.white,
                       ),
                     ),
                   ),
                   Positioned(
-                    bottom: 5,
-                    right: 5,
+                    bottom: isTablet ? 15.h : 5.h,
+                    right: isTablet ? 15.w : 5.w,
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: isTablet ? 50.w : 40.w,
+                      height: isTablet ? 50.h : 40.h,
                       decoration: BoxDecoration(
                         color: StyleColor.orange,
                         boxShadow: [
@@ -255,7 +256,10 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                                     title);
                               }
                             : null,
-                        icon: Icon(Icons.arrow_forward),
+                        icon: Icon(
+                          Icons.arrow_forward,
+                          size: isTablet ? 18.sp : 20.sp,
+                        ),
                         color: Colors.white,
                       ),
                     ),
@@ -265,29 +269,32 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
             ),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white, // Color de fondo del contenedor
-                borderRadius: BorderRadius.circular(
-                    10), // Opcional: Si deseas esquinas redondeadas
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
                     offset: Offset(0, -4),
                     blurRadius: 4,
-                    color: Colors.black.withValues(
-                        alpha: 0.25), // Negro con 25% de transparencia
+                    color: Colors.black.withValues(alpha: 0.25),
                   ),
                 ],
               ),
               child: Column(
                 children: [
                   SizedBox(
-                    height: 13.0,
+                    height: isTablet ? 18.0 : 13.0,
                   ),
                   Text(
                     taleSelected?.name ?? '',
                     style: StylesApp(context)
                         .textStyleBody12
-                        .copyWith(color: StyleColor.turquoise),
+                        .copyWith(
+                          color: StyleColor.turquoise,
+                          fontSize: isTablet ? 16.sp : 12.sp,
+                        ),
+                    textAlign: TextAlign.center,
                   ),
+                  SizedBox(height: isTablet ? 8.0 : 0),
                   AudioPlayerWidget(
                       controlsColor: StyleColor.turquoise,
                       inactiveColor: StyleColor.orange,
@@ -296,13 +303,71 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                       fileName: taleSelected != null ?  taleSelected!.name : '',
                       pathUrl:
                           taleSelected != null ? "${GraphQLConfig.urlServidor}${taleSelected!.urlAudio}" : ''),
-                  SizedBox(height: 13.0)
+                  SizedBox(height: isTablet ? 20.0 : 13.0)
                 ],
               ),
             )
           ],
         ),
       ),
+    );
+  }
+
+  // Layout para móvil (el original)
+  Widget _buildMobileLayout() {
+    return ListView.builder(
+      itemCount: _localReflection!.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Container(
+          constraints: BoxConstraints(minHeight: 40.sp),
+          height: 40.sp,
+          margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: ButtonThemeWidget(
+            text: _localReflection![index].name,
+            buttonStyle: StylesApp(context).btnWidgetSmall,
+            width: MediaQuery.sizeOf(context).width * 0.7,
+            height: 27.0,
+            onPressed: () {
+              setState(() {
+                taleSelected = _localReflection![index];
+              });
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  // Layout para tablet
+  Widget _buildTabletLayout() {
+    return GridView.builder(
+      padding: EdgeInsets.all(16.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2, // Dos columnas en tablet
+        crossAxisSpacing: 16.0,
+        mainAxisSpacing: 16.0,
+        childAspectRatio: 4.0, // Relación ancho/alto de los botones
+      ),
+      itemCount: _localReflection!.length,
+      itemBuilder: (BuildContext context, int index) {
+        return ButtonThemeWidget(
+          text: _localReflection![index].name,
+          buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                textStyle: MaterialStateProperty.all(
+                  StylesApp(context).textStyleBody12.copyWith(
+                    fontSize: 14.sp, // Texto más grande en tablet
+                  ),
+                ),
+              ),
+          width: double.infinity,
+          height: 50.0, // Botones más altos en tablet
+          onPressed: () {
+            setState(() {
+              taleSelected = _localReflection![index];
+            });
+          },
+        );
+      },
     );
   }
 }

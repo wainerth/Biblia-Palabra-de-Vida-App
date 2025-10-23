@@ -91,19 +91,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
       if (mounted) {
         await loadGetOneReflection();
-        _initCompleted = true; // ✅ Marcar como completado
+        _initCompleted = true;
       }
     });
   }
 
   Future loadAllNotifications() async {
-    // limpiamos las notificaciones antiguas
     List<NotificationModel> notifies = [];
     Provider.of<SocketClientProvider>(context, listen: false)
         .cleanNotification();
-    final userProvider = Provider.of<UserProvider>(context,
-        listen:
-            false); // listen: false para evitar reconstrucciones innecesarias
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     final useData = userProvider.currentUser;
 
     try {
@@ -120,13 +117,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 (notify) => NotificationModel.fromJson(notify))
             .toList();
 
-        if (notifies.length > 0) {
-          // notifies.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        if (notifies.isNotEmpty) {
           Provider.of<SocketClientProvider>(context, listen: false)
               .addAllNotification(notifies);
         }
-        // for (NotificationModel notify in notifies) {
-        // }
       });
     } catch (e) {
       String error = "Error al leer las notificaciones:  ${e.toString()}";
@@ -142,9 +136,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       error = false;
     });
     LoadingService().showLoading(context);
-    final userProvider = Provider.of<UserProvider>(context,
-        listen:
-            false); // listen: false para evitar reconstrucciones innecesarias
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     dataUser = userProvider.currentUser;
     final progressResponse =
         await userProvider.getProgressUser(dataUser!.userId, null);
@@ -162,17 +154,19 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     }
     progressUser = progressResponse.data;
     LoadingService().hideLoading();
-    setState(() {}); // Fuerza una reconstrucción para mostrar los datos
+    setState(() {});
   }
 
   List<ButtonData> buttonsData = [];
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 768;
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
+
     final cardList = [
-      // Replace with your actual asset paths and route names
       {
         'label': 'Aventura',
         'img': 'assets/aventure.gif',
@@ -192,35 +186,35 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
     return SafeArea(
       child: SizedBox(
-        width: MediaQuery.of(context).size.width,
+        width: double.infinity,
         child: SingleChildScrollView(
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               Positioned(
-                top: 0, // Puedes ajustar este valor
+                top: 0,
                 right: 0,
                 child: Visibility(
                   visible: true,
                   child: Container(
-                    width: 35,
-                    height: 35,
-                    decoration: BoxDecoration(
+                    width: isTablet ? 70 : 35,
+                    height: isTablet ? 70 : 35,
+                    decoration: const BoxDecoration(
                       color: Colors.transparent,
                     ),
                     child: IconButton(
-                      padding: EdgeInsets.all(0),
-                      iconSize: 35,
+                      padding: EdgeInsets.zero,
+                      iconSize: isTablet ? 70 :  35,
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
-                          shape: RoundedRectangleBorder(
+                          shape: const RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.vertical(top: Radius.circular(20)),
                           ),
                           builder: (BuildContext context) {
-                            return NotificationListWidget();
+                            return const NotificationListWidget();
                           },
                         );
                       },
@@ -229,19 +223,15 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         children: [
                           Icon(
                             Icons.notifications,
-                            size: 40,
+                            size: isTablet ? 60 : 40,
                             color: StyleColor.redLight,
                           ),
                           Positioned(
-                            right: 6,
-                            top: 12,
+                            right: isTablet ? 22 : 6,
+                            top: isTablet ? 18 : 12,
                             child: Container(
-                              padding: EdgeInsets.all(0),
-                              decoration: BoxDecoration(
-                                  // color: Colors.white,
-                                  // shape: BoxShape.circle,
-                                  ),
-                              constraints: BoxConstraints(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
                                 minWidth: 16,
                                 minHeight: 16,
                               ),
@@ -253,7 +243,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                   style: StylesApp(context)
                                       .textStyleBody10
                                       .copyWith(
-                                        // color: StyleColor.redLight,
                                         fontWeight: FontWeight.bold,
                                       ),
                                   textAlign: TextAlign.center,
@@ -269,60 +258,20 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               ),
               Column(
                 children: [
-                  SizedBox(height: 15.0),
-                  _buildListCardSection(context, cardList),
-                  SizedBox(
-                    height: 12.0,
-                  ),
-                  dataUser != null
-                      ? _buildPositionSection(context, dataUser)
-                      : Container(),
-                  SizedBox(
-                    height: 12.0,
-                  ),
-                  _buildProverbsSection(
-                      context, loadingDaily, errorDaily, dailyWord),
-                  _buildStoriesSection(context, reflection),
-                  SizedBox(
-                    height: 12.0,
-                  ),
-                  _buildGridViewSection(context),
-                  SizedBox(
-                    height: 22.0,
-                  ),
-                  if(GraphQLConfig.development)
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/layoutLibrary');
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                      padding: EdgeInsets.symmetric(horizontal: 26.0),
-                      decoration: BoxDecoration(
-                          color: Color(0XFF5C9EDB),
-                          borderRadius: BorderRadius.circular(12.0)),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Librería Cristiana",
-                            style: StylesApp(context).textStyleBody7,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Image.asset(
-                              'assets/books.png',
-                              width: 52.sp,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: kBottomNavigationBarHeight - 40,
-                  )
+                  const SizedBox(height: 15.0),
+                  // Sección de cards superiores - Responsive
+                  isTablet
+                      ? _buildTabletCardSection(context, cardList)
+                      : _buildMobileCardSection(context, cardList),
+
+                  const SizedBox(height: 12.0),
+
+                  // Layout principal responsive
+                  isTablet
+                      ? _buildTabletLayout(context)
+                      : _buildMobileLayout(context),
+
+                  SizedBox(height: kBottomNavigationBarHeight - 40),
                 ],
               ),
             ],
@@ -332,16 +281,138 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
-  Widget _buildListCardSection(
+  // ============ LAYOUT PARA MÓVIL ============
+  Widget _buildMobileLayout(BuildContext context) {
+    return Column(
+      children: [
+        dataUser != null
+            ? _buildPositionSection(context, dataUser)
+            : Container(),
+        const SizedBox(height: 12.0),
+        _buildProverbsSection(context, loadingDaily, errorDaily, dailyWord),
+        _buildStoriesSection(context, reflection),
+        const SizedBox(height: 12.0),
+        _buildGridViewSection(context),
+        const SizedBox(height: 12.0),
+        if (GraphQLConfig.development) _buildLibrarySection(context),
+      ],
+    );
+  }
+
+  // ============ LAYOUT PARA TABLET ============
+  Widget _buildTabletLayout(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Column(
+        children: [
+          // Primera fila: Perfil y Proverbio
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Columna izquierda: Perfil, Proverbio y Cuentos
+              Expanded(
+                flex: 5,
+                child: Column(
+                  children: [
+                    dataUser != null
+                        ? _buildPositionSection(context, dataUser)
+                        : Container(),
+                    const SizedBox(height: 16.0),
+                    _buildProverbsSection(
+                        context, loadingDaily, errorDaily, dailyWord),
+                    const SizedBox(height: 16.0),
+                    _buildStoriesSection(context, reflection),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16.0),
+              // Columna derecha: Grid de opciones y Librería
+              Expanded(
+                flex: 5,
+                child: Column(
+                  children: [
+                    _buildGridViewSection(context),
+                    const SizedBox(height: 16.0),
+                    if (GraphQLConfig.development)
+                      _buildLibrarySection(context),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16.0),
+        ],
+      ),
+    );
+  }
+
+  // ============ COMPONENTES REUTILIZABLES ============
+
+  // Cards superiores para móvil
+  Widget _buildMobileCardSection(
       BuildContext context, List<Map<String, String>> cards) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: cards
+            .where((card) =>
+                !(card['label'] == 'Comunidad' && !GraphQLConfig.development))
+            .map((card) => _buildCard(context, card))
+            .toList(),
+      ),
+    );
+  }
+
+  // Cards superiores para tablet
+  Widget _buildTabletCardSection(
+      BuildContext context, List<Map<String, String>> cards) {
+    final filteredCards = cards
         .where((card) =>
             !(card['label'] == 'Comunidad' && !GraphQLConfig.development))
-        .map((card) => _buildCard(context, card))
-        .toList(),
+        .toList();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: filteredCards
+            .map((card) => _buildTabletCard(context, card))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildTabletCard(BuildContext context, Map<String, String> card) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: GestureDetector(
+          onTap: () => _onCardTap(context, card),
+          child: Column(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(60),
+                  image: DecorationImage(
+                    image: AssetImage(card['img']!),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                card['label']!,
+                textAlign: TextAlign.center,
+                style: StylesApp(context).textStyleBody4.copyWith(
+                      color: const Color(0xFFFD8C43),
+                      fontSize: 16.sp,
+                    ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -350,51 +421,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: GestureDetector(
-        onTap: () async {
-          await _loadProgress(context);
-          if (card['label'] == 'Aventura') {
-            if (error) return;
-            if (progressUser != null && progressUser!.success == true) {
-              if (progressUser!.message
-                  .contains('El curso ya fue finalizado')) {
-                await showCustomDialogWithAction(
-                  context,
-                  message: progressUser!.message,
-                  dialogType: DialogTypeAction.info,
-                  buttonOk: "Ver más cursos",
-                  textButton: "ir Al curso",
-                  showAction: true,
-                  actionCallbackOk: () {
-                    Navigator.pushNamed(context, '/layoutPage1',
-                        arguments: {'selectedIndex': 1});
-                  },
-                  actionCallback: () {
-                    Navigator.pushNamed(context, '/mapPage', arguments: {
-                      'courseId': progressUser!.data?.courseId,
-                      'sectionId': progressUser?.data?.sectionId
-                    });
-                  },
-                );
-                return;
-              } else {
-                Navigator.pushNamed(context, '/mapPage', arguments: {
-                  'courseId': progressUser!.data?.courseId,
-                  'sectionId': progressUser!.data?.sectionId
-                });
-              }
-            } else {
-              Navigator.pushNamed(context, '/introAventurePage');
-            }
-          } else if (card['label'] == 'La Biblia') {
-            Navigator.pushNamed(
-              context,
-              '/layoutPage',
-              arguments: {'selectedIndex': 1},
-            );
-          } else {
-            Navigator.pushNamed(context, card['route']!);
-          }
-        },
+        onTap: () => _onCardTap(context, card),
         child: Column(
           children: [
             Container(
@@ -402,8 +429,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               height: StylesApp(context).sizeContainerCard.height,
               clipBehavior: Clip.none,
               decoration: BoxDecoration(
-                // border: Border.all(
-                //   color: const Color(0xFFFD8C43), ),
                 borderRadius: BorderRadius.circular(
                     StylesApp(context).sizeContainerCard.width),
                 image: DecorationImage(
@@ -427,6 +452,91 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
+  Future<void> _onCardTap(
+      BuildContext context, Map<String, String> card) async {
+    await _loadProgress(context);
+    if (card['label'] == 'Aventura') {
+      if (error) return;
+      if (progressUser != null && progressUser!.success == true) {
+        if (progressUser!.message.contains('El curso ya fue finalizado')) {
+          await showCustomDialogWithAction(
+            context,
+            message: progressUser!.message,
+            dialogType: DialogTypeAction.info,
+            buttonOk: "Ver más cursos",
+            textButton: "ir Al curso",
+            showAction: true,
+            actionCallbackOk: () {
+              Navigator.pushNamed(context, '/layoutPage1',
+                  arguments: {'selectedIndex': 1});
+            },
+            actionCallback: () {
+              Navigator.pushNamed(context, '/mapPage', arguments: {
+                'courseId': progressUser!.data?.courseId,
+                'sectionId': progressUser?.data?.sectionId
+              });
+            },
+          );
+          return;
+        } else {
+          Navigator.pushNamed(context, '/mapPage', arguments: {
+            'courseId': progressUser!.data?.courseId,
+            'sectionId': progressUser!.data?.sectionId
+          });
+        }
+      } else {
+        Navigator.pushNamed(context, '/introAventurePage');
+      }
+    } else if (card['label'] == 'La Biblia') {
+      Navigator.pushNamed(
+        context,
+        '/layoutPage',
+        arguments: {'selectedIndex': 1},
+      );
+    } else {
+      Navigator.pushNamed(context, card['route']!);
+    }
+  }
+
+  Widget _buildLibrarySection(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/layoutLibrary');
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 26.0, vertical: 16.0),
+        decoration: BoxDecoration(
+          color: const Color(0XFF5C9EDB),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Librería Cristiana",
+              style: StylesApp(context).textStyleBody7,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/books.png',
+                width: 52.sp,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============ MANTENER EL RESTO DE LOS MÉTODOS EXISTENTES ============
+  // (_buildStoriesSection, _buildGridViewSection, _buildProverbsSection,
+  // _buildPositionSection, getDailyProverb, loadGetOneReflection, etc.)
+
+  // ... (mantener todos los métodos existentes sin cambios desde _buildStoriesSection hasta el final)
+
   _buildStoriesSection(BuildContext context, reflection) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -438,7 +548,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               "Cuentos para reflexionar",
               style: StylesApp(context)
                   .textStyleBody5
-                  .copyWith(color: Color(0xFFFE8D43)),
+                  .copyWith(color: const Color(0xFFFE8D43)),
             ),
             IconButton(
               onPressed: () async {
@@ -551,7 +661,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             child: CardOptionWidget(
                 imageBackground: "assets/ranking.png",
                 labelCard: "Aventura",
-                gradientColors: [Color(0XFFA731EC), Color(0XFF620188)]),
+                gradientColors: [
+                  const Color(0XFFA731EC),
+                  const Color(0XFF620188)
+                ]),
           ),
         ),
         Padding(
@@ -562,8 +675,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 imageBackground: "assets/predicas.png",
                 labelCard: "Prédicas",
                 gradientColors: [
-                  Color(0XFF1FEFEC),
-                  Color(0XFF0159A7),
+                  const Color(0XFF1FEFEC),
+                  const Color(0XFF0159A7),
                 ]),
           ),
         ),
@@ -574,7 +687,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             child: CardOptionWidget(
                 imageBackground: "assets/games.png",
                 labelCard: "Juegos",
-                gradientColors: [Color(0XFF3531F3), Color(0XFF040681)]),
+                gradientColors: [
+                  const Color(0XFF3531F3),
+                  const Color(0XFF040681)
+                ]),
           ),
         ),
         Padding(
@@ -585,8 +701,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 imageBackground: "assets/promesas.png",
                 labelCard: "Promesas",
                 gradientColors: [
-                  Color(0XFF58AC5F),
-                  Color(0XFF2F6624),
+                  const Color(0XFF58AC5F),
+                  const Color(0XFF2F6624),
                 ]),
           ),
         )
@@ -647,7 +763,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               if (!loading)
                 Center(
                   child: ButtonThemeWidget(
-                    // text: "Recargar",
                     width: 40,
                     height: 40,
                     icon: Icons.restart_alt_rounded,
@@ -691,7 +806,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                   children: [
                                     Container(
                                       constraints:
-                                          BoxConstraints(maxWidth: 180),
+                                          const BoxConstraints(maxWidth: 180),
                                       width: double.infinity,
                                       child: Text(
                                         maxLines: 1,
@@ -740,7 +855,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                               width: 16.sp,
                               height: 16.sp,
                               child: IconButton(
-                                padding: EdgeInsets.all(0),
+                                padding: EdgeInsets.zero,
                                 icon: Icon(
                                   Icons.copy,
                                   color: Colors.white,
@@ -751,7 +866,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                       text:
                                           "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}."));
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                         content: Text(
                                             'Proverbio copiado al portapapeles')),
                                   );
@@ -763,7 +878,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                             width: 16.sp,
                             height: 16.sp,
                             child: IconButton(
-                              padding: EdgeInsets.all(0),
+                              padding: EdgeInsets.zero,
                               icon: Icon(
                                 Icons.share,
                                 color: Colors.white,
@@ -778,9 +893,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                               },
                             ),
                           ),
-                          // SizedBox(
-                          //   width: 8,
-                          // )
                         ],
                       ),
                     ],
@@ -792,11 +904,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   constraints: MediaQuery.of(context).size.width > 400
-                      ? BoxConstraints(minHeight: 96.0, maxHeight: 100.0)
-                      : BoxConstraints(),
+                      ? const BoxConstraints(minHeight: 96.0, maxHeight: 100.0)
+                      : const BoxConstraints(),
                   width: double.infinity,
                   child: loadingDaily
-                      ? Center(child: CircularProgressIndicator())
+                      ? const Center(child: CircularProgressIndicator())
                       : SingleChildScrollView(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -852,7 +964,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                           child: Column(
                             children: [
                               SizedBox(
-                                // width: double.infinity,
                                 height: StylesApp(context)
                                     .sizeContainerAvatar
                                     .height,
@@ -943,9 +1054,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                           ],
                         ),
                       ),
-                      // SizedBox(
-                      //   width: 20,
-                      // )
                     ],
                   ),
                   Row(
@@ -962,7 +1070,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                         .split(' ')[0][0]
                                         .toUpperCase() +
                                     dataUser!.name.split(' ')[0].substring(1)
-                                : '', //userData!.user.username,
+                                : '',
                             style: StylesApp(context)
                                 .textStyleBody6
                                 .copyWith(color: Colors.white),
@@ -1006,7 +1114,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                     onPressed: () {
                       Navigator.pushNamed(context, '/profilePage');
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.fast_forward_outlined,
                       color: Colors.white,
                       size: 30.0,
@@ -1084,7 +1192,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
   @override
   void dispose() {
     notificationProvider.removeListener(_onNotificationsChanged);
-    _tabController.dispose(); 
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -1119,7 +1227,6 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
               ),
             ),
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1131,7 +1238,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
               TextButton(
                 onPressed: () {
                   Navigator.pop(context); // cerramos la modal
-                  
+
                   Navigator.pushNamed(context, '/notificationPage');
                 },
                 child: Text("Ver Todas...",
@@ -1141,9 +1248,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
           Container(
             decoration: BoxDecoration(
               color: Colors.grey[100],
@@ -1197,15 +1302,12 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
               ],
             ),
           ),
-
           const SizedBox(height: 12),
-
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
                 _buildNotificationsList(unreadNotifications),
-
                 _buildNotificationsList(readNotifications),
               ],
             ),

@@ -25,87 +25,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600; // Umbral para tablets
+
     return Scaffold(
       body: SizedBox(
         height: MediaQuery.sizeOf(context).height,
         child: Stack(
           children: [
             SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Stack(
-                    children: [
-                      BackgroundImages(
-                        backImages: ['assets/start.png', 'assets/nube.png'],
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 45,
-                          ),
-                          Center(
-                            child: Container(
-                              constraints: BoxConstraints(
-                                  maxHeight:
-                                      StylesApp(context).sizeImgLogin.height,
-                                  minHeight:
-                                      StylesApp(context).sizeImgLogin.height),
-                              child: Image.asset(
-                                "assets/bibleLogo.png",
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 40.0,
-                  ),
-                  TextWithGradient(
-                    text: "REGISTRA UNA\n CUENTA GRATIS",
-                    font: StylesApp(context).textWithGradient,
-                  ),
-                  const SizedBox(
-                    height: 53,
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Column(
-                      children: [
-                        ButtonThemeWidget(
-                          text: "Crear una cuenta",
-                          buttonStyle: StylesApp(context).btnPrimary,
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/registerPage');
-                          },
-                          width: StylesApp(context).btnHeight.width,
-                          height: StylesApp(context).btnHeight.height,
-                        ),
-                        const SizedBox(
-                          height: 28,
-                        ),
-                        ButtonThemeWidget(
-                          text: "Iniciar Sesión",
-                          buttonStyle: StylesApp(context).btnSecondary,
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/loginPage');
-                          },
-                          width: StylesApp(context).btnHeight.width,
-                          height: StylesApp(context).btnHeight.height,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10.0,
-                  ),
-                ],
-              ),
+              child: isTablet
+                  ? Center(child: _buildTabletLayout())
+                  : _buildMobileLayout(),
             ),
             Positioned(
               bottom: 10,
@@ -146,6 +77,176 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() {});
                   },
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Layout para móviles (una columna)
+  Widget _buildMobileLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Stack(
+          children: [
+            BackgroundImages(
+              backImages: ['assets/start.png', 'assets/nube.png'],
+            ),
+            Column(
+              children: [
+                const SizedBox(
+                  height: 45,
+                ),
+                Center(
+                  child: Container(
+                    constraints: BoxConstraints(
+                        maxHeight: StylesApp(context).sizeImgLogin.height,
+                        minHeight: StylesApp(context).sizeImgLogin.height),
+                    child: Image.asset(
+                      "assets/bibleLogo.png",
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 40.0,
+        ),
+        TextWithGradient(
+          text: "REGISTRA UNA\n CUENTA GRATIS",
+          font: StylesApp(context).textWithGradient,
+        ),
+        const SizedBox(
+          height: 53,
+        ),
+        SizedBox(
+          width: double.infinity,
+          child: Column(
+            children: [
+              ButtonThemeWidget(
+                text: "Crear una cuenta",
+                buttonStyle: StylesApp(context).btnPrimary,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/registerPage');
+                },
+                width: StylesApp(context).btnHeight.width,
+                height: StylesApp(context).btnHeight.height,
+              ),
+              const SizedBox(
+                height: 28,
+              ),
+              ButtonThemeWidget(
+                text: "Iniciar Sesión",
+                buttonStyle: StylesApp(context).btnSecondary,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/loginPage');
+                },
+                width: StylesApp(context).btnHeight.width,
+                height: StylesApp(context).btnHeight.height,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(
+          height: 10.0,
+        ),
+      ],
+    );
+  }
+
+  // Layout para tablets (dos columnas)
+  Widget _buildTabletLayout() {
+    return SizedBox(
+      height: MediaQuery.sizeOf(context).height,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Columna izquierda: Imagen y gráficos
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Stack(
+                    children: [
+                      BackgroundImages(
+                        backImages: ['assets/start.png', 'assets/nube.png'],
+                      ),
+                      Center(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 45),
+                            Center(
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxHeight:
+                                      StylesApp(context).sizeImgLogin.height,
+                                  minHeight:
+                                      StylesApp(context).sizeImgLogin.height,
+                                ),
+                                child: Image.asset(
+                                  "assets/bibleLogo.png",
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 40.0),
+
+            // Columna derecha: Texto y botones
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TextWithGradient(
+                    text: "REGISTRA UNA\n CUENTA GRATIS",
+                    font: StylesApp(context).textWithGradient,
+                  ),
+                  const SizedBox(height: 53),
+                  Column(
+                    children: [
+                      ButtonThemeWidget(
+                        text: "Crear una cuenta",
+                        buttonStyle: StylesApp(context).btnPrimary,
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/registerPage');
+                        },
+                        width: StylesApp(context).btnHeight.width * 0.45,
+                        height: StylesApp(context).btnHeight.height,
+                      ),
+                      const SizedBox(height: 28),
+                      ButtonThemeWidget(
+                        text: "Iniciar Sesión",
+                        buttonStyle: StylesApp(context).btnSecondary,
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/loginPage');
+                        },
+                        width: StylesApp(context).btnHeight.width * 0.45,
+                        height: StylesApp(context).btnHeight.height,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20.0),
+                ],
               ),
             ),
           ],

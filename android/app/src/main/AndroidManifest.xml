@@ -43,9 +43,9 @@
             </intent-filter>
         </service>
 
+            <!-- android:screenOrientation="portrait"  -->
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait" 
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""

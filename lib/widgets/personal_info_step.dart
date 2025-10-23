@@ -134,25 +134,28 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           const SizedBox(
             height: 23.0,
           ),
-          ValidatedRadioGroup<String>(
-            label: "Género:",
-            initialValue: widget.gender,
-            onChanged: (newValue) {
-              setState(() {
-                widget.onChangeGender!(newValue);
-              });
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "Por favor selecciona tu género";
-              }
-              return null;
-            },
-            onSaved: (newValue) {},
-            options: [
-              RadioButtonOption(value: "m", label: "Masculino"),
-              RadioButtonOption(value: "f", label: "Femenino"),
-            ],
+          SizedBox(
+             width: formWidth,
+            child: ValidatedRadioGroup<String>(
+              label: "Género:",
+              initialValue: widget.gender,
+              onChanged: (newValue) {
+                setState(() {
+                  widget.onChangeGender!(newValue);
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Por favor selecciona tu género";
+                }
+                return null;
+              },
+              onSaved: (newValue) {},
+              options: [
+                RadioButtonOption(value: "m", label: "Masculino"),
+                RadioButtonOption(value: "f", label: "Femenino"),
+              ],
+            ),
           ),
           SizedBox(height: _isTablet ? 28.0 : 23.0),
           // FECHA DE NACIMIENTO

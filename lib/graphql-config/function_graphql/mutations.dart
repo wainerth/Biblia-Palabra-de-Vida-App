@@ -524,7 +524,9 @@ Future resetPassword(email, password) async {
 
 Future logout() async {
   final GoogleSignIn googleSignIn = GoogleSignIn();
-  await googleSignIn.signOut();
+  if (googleSignIn.currentUser != null) {
+    await googleSignIn.signOut();
+  }
   final deviceInfo = await PreferencesManager().getDeviceInfo();
   final String token = await PreferencesManager().getUserToken() ?? '';
   String userId = await PreferencesManager().getUserId();
@@ -1240,7 +1242,8 @@ Future<ResponseData> markAllAsReadNotifications(String userId) async {
     );
   } on TimeoutException catch (e) {
     return ResponseData(
-        data: null, error: 'Mark All As Read Notifications Timeout de conexión $e');
+        data: null,
+        error: 'Mark All As Read Notifications Timeout de conexión $e');
   } catch (e) {
     return handleGenericError(e, operationName);
   }

@@ -303,26 +303,44 @@ RouteInfo getRouterScreen(action, args) {
 }
 
 ResponseData handleGenericError(dynamic e, String operationName) {
-    if (e is TimeoutException) {
-      return ResponseData(
-        data: null, 
-        error: "$operationName Request timed out"
-      );
-    } else if (e is SocketException) {
-      return ResponseData(
-        data: null,
-        error: "$operationName No Internet Connection"
-      );
-    } else if (e is FormatException) {
-      return ResponseData(
-        data: null, 
-        error: "$operationName Invalid data format"
-      );
-    } else {
-      return ResponseData(
-        data: null,
-        error: "$operationName An unexpected error occurred: $e"
-      );
-    }
+  if (e is TimeoutException) {
+    return ResponseData(data: null, error: "$operationName Request timed out");
+  } else if (e is SocketException) {
+    return ResponseData(
+        data: null, error: "$operationName No Internet Connection");
+  } else if (e is FormatException) {
+    return ResponseData(
+        data: null, error: "$operationName Invalid data format");
+  } else {
+    return ResponseData(
+        data: null, error: "$operationName An unexpected error occurred: $e");
   }
+}
 
+Size getDesignSize() {
+  // Puedes usar MediaQuery para detectar el tamaño inicial
+  final window = WidgetsBinding.instance.window;
+  final physicalSize = window.physicalSize;
+  final pixelRatio = window.devicePixelRatio;
+  final logicalSize = physicalSize / pixelRatio;
+
+  if (logicalSize.width > 600) {
+    return const Size(768, 1024); // Tablet
+  } else {
+    return const Size(360, 690); // Móvil
+  }
+}
+
+bool isTablet(BuildContext context) {
+  final size = MediaQuery.of(context).size;
+  final aspectRatio = size.width / size.height;
+  final shortestSide = size.shortestSide;
+
+  // Para Chrome, considera también el aspect ratio
+  if (shortestSide > 600) return true;
+
+  // Si el ancho es grande pero el aspect ratio es de desktop
+  if (size.width > 800 && aspectRatio > 1.3) return true;
+
+  return false;
+}

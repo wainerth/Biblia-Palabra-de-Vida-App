@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -161,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           context, '/layoutPage');
                                     }
                                   },
-                                  width: StylesApp(context).btnHeight.width,
+                                  width: isTablet(context) ? StylesApp(context).formWidth : StylesApp(context).btnHeight.width,
                                   height: StylesApp(context).btnHeight.height,
                                 ),
                                 const SizedBox(
@@ -198,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           context, '/layoutPage');
                                     }
                                   },
-                                  width: StylesApp(context).btnHeight.width,
+                                  width:  isTablet(context) ? StylesApp(context).formWidth :  StylesApp(context).btnHeight.width,
                                   height: StylesApp(context).btnHeight.height,
                                 ),
                                 const SizedBox(

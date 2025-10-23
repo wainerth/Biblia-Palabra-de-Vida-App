@@ -133,7 +133,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return 10.sp;
     } else {
-      return 14.sp;
+      return 10.sp;
     }
   }
 
@@ -203,7 +203,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return 10.sp;
     } else {
-      return 16.sp;
+      return 10.sp;
     }
   }
 
@@ -217,7 +217,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return 10.sp;
     } else {
-      return 16.sp;
+      return 10.sp;
     }
   }
 
@@ -273,7 +273,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return 12.sp;
     } else {
-      return 16.sp;
+      return 12.sp;
     }
   }
 
@@ -315,7 +315,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return 12.sp;
     } else {
-      return 14.sp;
+      return 10.sp;
     }
   }
 
@@ -796,7 +796,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return Size(MediaQuery.sizeOf(context).width * 0.6, 45.0);
     } else {
-      return Size(MediaQuery.sizeOf(context).width * 0.6, 60.0);
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 50.0);
     }
   }
 
@@ -1006,11 +1006,11 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return 45.0;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 45.0;
+      return 65.0;
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return 45.0;
     } else {
-      return 20.0;
+      return 70.0;
     }
   }
 }

@@ -256,7 +256,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     : "Registrar",
                                 buttonStyle:
                                     StylesApp(context).btnSecondarySmall,
-                                width: StylesApp(context).btnHeight.width,
+                                width:  isTablet(context) ? StylesApp(context).formWidth : StylesApp(context).btnHeight.width,
                                 height: StylesApp(context).btnHeight.height,
                               ),
                               const SizedBox(

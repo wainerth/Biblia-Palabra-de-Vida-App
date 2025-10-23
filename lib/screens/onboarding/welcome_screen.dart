@@ -36,9 +36,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (size.width > 800 && aspectRatio > 1.3) return true;
 
     return false;
-    // final data = MediaQuery.of(context);
-    // final shortestSide = data.size.shortestSide;
-    // return shortestSide > 600;
   }
 
   @override
@@ -143,6 +140,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
+        // border: Border.all( color:  StyleColor.black),
           // gradient: LinearGradient(
           //   begin: Alignment.topLeft,
           //   end: Alignment.bottomRight,
@@ -152,14 +150,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       child: Stack(
         children: [
           if (backImages.isNotEmpty) _buildTabletBackgroundImages(backImages),
-          Center(
-            child: Image.asset(
-              image,
-              width: MediaQuery.sizeOf(context).width * 0.4,
-              height: MediaQuery.sizeOf(context).height * 0.6,
-              fit: BoxFit.contain,
-            ),
-          ),
+           Positioned(
+            bottom: 40,
+             child: Center(
+              child: Image.asset(
+                image,
+                width: MediaQuery.sizeOf(context).width * 0.4,
+                height: MediaQuery.sizeOf(context).height * 0.6,
+                fit: BoxFit.contain,
+              ),
+                       ),
+           ),
         ],
       ),
     );
@@ -200,10 +201,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     required String verse,
   }) {
     return Container(
+      height: double.infinity,
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 40),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (title.isNotEmpty) ...{
@@ -211,8 +213,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               text: title,
               font: StylesApp(context).textWithGradient,
             ),
-            const SizedBox(height: 40),
           },
+            const SizedBox(height: 40),
           _buildDescriptionTableBox(
               context,
               subTitle,
@@ -305,7 +307,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget _buildDescriptionTableBox(BuildContext context, String subTitle,
       String description, TextStyle fontTitle, TextStyle fontBody) {
     return Container(
-      width: double.infinity,
+      // width: double.infinity,
       decoration: BoxDecoration(
         // border: Border.all( color:  StyleColor.black),
         image: DecorationImage(

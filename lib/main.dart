@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,10 +24,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
 // Bloquear orientación a portrait
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // SystemChrome.setPreferredOrientations([
+  //   DeviceOrientation.portraitUp,
+  //   DeviceOrientation.portraitDown,
+  // ]);
   await PreferencesManager().init();
 
   final socketProvider = SocketClientProvider();
@@ -59,7 +60,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => BibleThemeProvider()),
       ],
       child: ScreenUtilInit(
-        designSize: const Size(360, 690), // size base of design
+        designSize:  getDesignSize(),
+        minTextAdapt: true,
+        splitScreenMode: true,
         builder: (context, child) {
           return const MyApp();
         },
@@ -136,8 +139,14 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
-
+    print('=== TABLET DIAGNOSTIC ===');
+    print('Ancho: ${mediaQuery.size.width}');
+    print('Alto: ${mediaQuery.size.height}');
+    print('Pixel Ratio: ${mediaQuery.devicePixelRatio}');
+    print('Orientación: ${mediaQuery.orientation}');
+    print('========================');
     return MaterialApp(
       title: 'Palabra de Vida',
       navigatorKey: navigatorKey,

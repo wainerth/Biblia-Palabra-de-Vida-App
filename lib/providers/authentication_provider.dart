@@ -88,7 +88,9 @@ class AuthenticationProvider extends ChangeNotifier {
         isAuthenticated = false;
         token = userToken;
         Provider.of<UserProvider>(context, listen: false).setUser(null);
-        logoutUser(navigatorKey.currentContext!);
+        if (token != null && token!.isNotEmpty) {
+          await logoutUser(navigatorKey.currentContext!);
+        }
         LoadingService().hideLoading();
       }
     } catch (e, stackTrace) {
