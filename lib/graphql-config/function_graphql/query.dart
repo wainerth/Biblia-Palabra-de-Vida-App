@@ -44,7 +44,7 @@ Future<ResponseData> getProfileUser(String token, String idUser) async {
         streakDaysCount
         country {
           id
-          country
+          name
         }
         state {
           id
@@ -1501,6 +1501,9 @@ Future streaksCalendar(String userId, int month) async {
             streakCalendarService(userId: $userId, month: $month) {
               playDay
               protectedStreak
+              longestStreak
+              currentStreak
+              lostStreak
             }
           }
       '''),
@@ -2745,7 +2748,7 @@ Future<ResponseData> getWordsConcordance(
 }
 
 Future<ResponseData> getAllNotification(
-    int page, int limit, String userId) async {
+    int page, int? limit, String userId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);

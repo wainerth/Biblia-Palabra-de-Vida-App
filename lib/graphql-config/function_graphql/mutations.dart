@@ -526,9 +526,10 @@ Future logout() async {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   await googleSignIn.signOut();
   final deviceInfo = await PreferencesManager().getDeviceInfo();
+  final String token = await PreferencesManager().getUserToken() ?? '';
   String userId = await PreferencesManager().getUserId();
   // eliminamos el dispositivo del usuario
-  if (GraphQLConfig.development) {
+  if (token.isNotEmpty && userId.isNotEmpty) {
     final responseDeleteDevice =
         await deleteDevice(userId, deviceInfo?['deviceId'] ?? '');
 
@@ -1186,6 +1187,60 @@ Future<ResponseData> markAsReadOneNotification(String notificationId) async {
   } on TimeoutException catch (e) {
     return ResponseData(
         data: null, error: 'Mark As Read Notification Timeout de conexión $e');
+  } catch (e) {
+    return handleGenericError(e, operationName);
+  }
+}
+
+Future<ResponseData> markAllAsReadNotifications(String userId) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+  operationName = 'MarkAllAsReadNotifications';
+  MutationOptions mutateGql = MutationOptions(
+    operationName: operationName,
+    document: gql(r'''
+      mutation MarkAllAsReadNotifications($userId: ID) {
+        markAllAsReadNotifications(userId: $userId) {
+          message
+          success
+        }
+      }
+      '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Mark All As Read Notifications: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['markAllAsReadNotifications'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Mark All As Read Notifications failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['markAllAsReadNotifications'],
+      error: null,
+    );
+  } on TimeoutException catch (e) {
+    return ResponseData(
+        data: null, error: 'Mark All As Read Notifications Timeout de conexión $e');
   } catch (e) {
     return handleGenericError(e, operationName);
   }

@@ -470,7 +470,7 @@ class _DeliveryCoordinationScreenState
     _listCountries = Provider.of<CatalogueProvider>(context, listen: false)
         .allCountries
         .map<ModelData>((country) => ModelData(
-            label: country.country, value: country.id, originalData: country))
+            label: country.name, value: country.id, originalData: country))
         .toList();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     LoginUser? currentUser = userProvider.currentUser;

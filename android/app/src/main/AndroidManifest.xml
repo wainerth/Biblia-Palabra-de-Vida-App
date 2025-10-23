@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.biblia_palabra_de_vida_app">
+    package="com.labibliapalabradevida.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -10,8 +10,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     
-    <!-- <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" /> -->
-    <!-- <uses-permission android:name="android.permission.GET_INSTALLED_APPS" /> -->
     <queries>
         <!-- Necesario para Android 11+ -->
         <package android:name="amistad.online2" /> <!-- Ejemplo -->

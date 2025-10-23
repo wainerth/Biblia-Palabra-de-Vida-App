@@ -440,27 +440,6 @@ class _MemoryScreenState extends State<MemoryScreen>
     } finally {
       LoadingService().hideLoading();
     }
-    // showDialog(
-    //   context: context,
-    //   builder: (context) => AlertDialog(
-    //     title: const Text('¡Felicidades!'),
-    //     content: const Text('Has encontrado todos los pares.'),
-    //     actions: [
-    //       TextButton(
-    //         onPressed: () {
-    //           Navigator.pop(context);
-    //           setState(() {
-    //             difficulty = '';
-    //             flippedCards = [];
-    //             matchedCards = [];
-    //             firstSelectedIndex = null;
-    //           });
-    //         },
-    //         child: const Text('Jugar de nuevo'),
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 
   void _showTimeUpDialog() {
@@ -625,11 +604,8 @@ class _MemoryScreenState extends State<MemoryScreen>
       ));
     }
 
-    // Esperar a que TODAS las imágenes se carguen
     await Future.wait(precacheFutures);
     LoadingService().hideLoading();
-    // Aquí podrías agregar un pequeño delay si quieres que el usuario vea un "cargando"
-    // o simplemente que el juego empiece instantáneamente después de la carga.
   }
 }
 

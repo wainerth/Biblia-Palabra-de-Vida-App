@@ -838,7 +838,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     _listCountries = Provider.of<CatalogueProvider>(context, listen: false)
         .allCountries
         .map<ModelData>((country) => ModelData(
-            label: country.country, value: country.id, originalData: country))
+            label: country.name, value: country.id, originalData: country))
         .toList();
 
     _listAreasCode = Provider.of<CatalogueProvider>(context, listen: false)

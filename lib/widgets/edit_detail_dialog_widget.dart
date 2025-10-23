@@ -6,6 +6,7 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:intl_phone_field/phone_number.dart';
 import 'package:provider/provider.dart';
 
 class EditDetailDialogWidget extends StatefulWidget {
@@ -26,6 +27,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   List<ModelData> _statesList = [];
   List<ModelData> _citiesList = [];
   bool _isInitialized = false;
+  String? initialPhoneCode;
 
   @override
   void initState() {
@@ -34,10 +36,11 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     _editingData = List.from(widget.data);
     for (var item in _editingData) {
       if (item.label == 'Tel.') {
+        initialPhoneCode =
+            item.originalData != null ? item.originalData.code : null;
+
         _controllers.add(TextEditingController(
-            text: item.value.isNotEmpty
-                ? maskFormatterTel.maskText(item.value.split(' ')[1])
-                : ''));
+            text: item.value.isNotEmpty ? item.value.split(' ')[1] : ''));
       } else {
         _controllers.add(TextEditingController(text: item.value));
       }
@@ -152,66 +155,100 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
       List<Church> listChurches,
       List<Country> listCatalogue) {
     if (item.label == 'Tel.') {
-      return Row(
-        spacing: 10,
-        children: [
-          Expanded(
-            flex: 1,
-            child: SizedBox(
-              child: CustomDropdownBottomWidget<AreaCode>(
-                hintText: "código",
-                items: listPrefixCode,
-                onChanged: (ModelData? newValue) {
-                  setState(() {
-                    _editingData[index] = ModelData(
-                      label: _editingData[index].label,
-                      clave: _editingData[index].clave,
-                      value:
-                          '${newValue?.value} ${_editingData[index].value.split(' ')[1]}',
-                      showLabel: _editingData[index].showLabel,
-                    );
-                  });
-                },
-                selectedItem: item.value.isNotEmpty
-                    ? item.value.contains(' ') &&
-                            item.value.split(' ').length > 1 &&
-                            item.value.split(' ')[0].isNotEmpty
-                        ? listPrefixCode.firstWhere((element) =>
-                            element.value == item.value.split(' ')[0])
-                        : null
-                    : null,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: TextFormField(
-              inputFormatters: [
-                maskFormatterTel, // Permite solo números
-              ],
-              controller: _controllers[index],
-              keyboardType: TextInputType.phone,
-              onChanged: (value) {
-                _controllers[index].text = value;
-                _editingData[index] = ModelData(
-                  label: _editingData[index].label,
-                  clave: _editingData[index].clave,
-                  value:
-                      '${_editingData[index].value.split(' ')[0]} ${_controllers[index].text.replaceAll(RegExp(r'[^\d]+'), '')}',
-                  showLabel: _editingData[index].showLabel,
-                );
-              },
-              decoration:
-                  StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                        hintText: "Número de teléfono",
-                      ),
-              style: StylesApp(context)
-                  .textStyleBody12
-                  .copyWith(color: Colors.black),
-            ),
-          )
-        ],
+      return Container(
+        // width: formWidth,
+        child: IntlPhoneFieldWithValidation(
+          controller: _controllers[index],
+          initialPhoneCode: initialPhoneCode,
+          validator: (PhoneNumber? phone) {
+            if (phone == null || phone.number.isEmpty) {
+              return "Por favor, ingresa tu número de teléfono.";
+            }
+            final cleanNumber = phone.number.replaceAll(RegExp(r'[^\d]'), '');
+            if (cleanNumber.length < 7) {
+              return "Número de teléfono demasiado corto.";
+            }
+            return null;
+          },
+          onChanged: (phone) {
+            print(phone.completeNumber);
+            print(phone.countryCode);
+            print(phone.number);
+            _controllers[index].text = phone.number;
+            AreaCode code = Provider.of<CatalogueProvider>(context,
+                    listen: false)
+                .allAreasCode
+                .firstWhere((areaCode) => areaCode.code == phone.countryCode);
+            _editingData[index] = ModelData(
+              label: _editingData[index].label,
+              clave: _editingData[index].clave,
+              value:
+                  '${code.id} ${phone.number.replaceAll(RegExp(r'[^\d]+'), '')}',
+              showLabel: _editingData[index].showLabel,
+            );
+          },
+        ),
       );
+      //  Row(
+      //   spacing: 10,
+      //   children: [
+      //     Expanded(
+      //       flex: 1,
+      //       child: SizedBox(
+      //         child: CustomDropdownBottomWidget<AreaCode>(
+      //           hintText: "código",
+      //           items: listPrefixCode,
+      //           onChanged: (ModelData? newValue) {
+      //             setState(() {
+      //               _editingData[index] = ModelData(
+      //                 label: _editingData[index].label,
+      //                 clave: _editingData[index].clave,
+      //                 value:
+      //                     '${newValue?.value} ${_editingData[index].value.split(' ')[1]}',
+      //                 showLabel: _editingData[index].showLabel,
+      //               );
+      //             });
+      //           },
+      //           selectedItem: item.value.isNotEmpty
+      //               ? item.value.contains(' ') &&
+      //                       item.value.split(' ').length > 1 &&
+      //                       item.value.split(' ')[0].isNotEmpty
+      //                   ? listPrefixCode.firstWhere((element) =>
+      //                       element.value == item.value.split(' ')[0])
+      //                   : null
+      //               : null,
+      //         ),
+      //       ),
+      //     ),
+      //     Expanded(
+      //       flex: 2,
+      //       child: TextFormField(
+      //         inputFormatters: [
+      //           maskFormatterTel, // Permite solo números
+      //         ],
+      //         controller: _controllers[index],
+      //         keyboardType: TextInputType.phone,
+      //         onChanged: (value) {
+      //           _controllers[index].text = value;
+      //           _editingData[index] = ModelData(
+      //             label: _editingData[index].label,
+      //             clave: _editingData[index].clave,
+      //             value:
+      //                 '${_editingData[index].value.split(' ')[0]} ${_controllers[index].text.replaceAll(RegExp(r'[^\d]+'), '')}',
+      //             showLabel: _editingData[index].showLabel,
+      //           );
+      //         },
+      //         decoration:
+      //             StylesApp(context).inputDecorationOutlineStyle.copyWith(
+      //                   hintText: "Número de teléfono",
+      //                 ),
+      //         style: StylesApp(context)
+      //             .textStyleBody12
+      //             .copyWith(color: Colors.black),
+      //       ),
+      //     )
+      //   ],
+      // );
     } else if (item.label == 'Sexo') {
       return Container(
         constraints: BoxConstraints(
@@ -382,6 +419,9 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
       return TextFormField(
         readOnly: item.label == 'Email',
         controller: _controllers[index],
+        style: StylesApp(context)
+            .textStyleBody14
+            .copyWith(color: StyleColor.black),
         decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
               hintText: item.label,
             ),
@@ -410,8 +450,8 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
 
     if (countryItem.value.isNotEmpty) {
       final country = catalogueProvider.allCountries.firstWhere(
-        (c) => c.country == countryItem.value,
-        orElse: () => Country(id: '', country: '', countryCode: null),
+        (c) => c.name == countryItem.value,
+        orElse: () => Country(id: '', name: '', countryCode: null),
       );
       if (country.id.isNotEmpty) {
         _selectedCountryId = country.id;
@@ -491,7 +531,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         Provider.of<CatalogueProvider>(context, listen: false);
 
     final List<ModelData> dropDownList = catalogueProvider.allCountries
-        .map((country) => ModelData(value: country.id, label: country.country))
+        .map((country) => ModelData(value: country.id, label: country.name))
         .cast<ModelData>()
         .toList();
     final List<ModelData> prefixCode = catalogueProvider.allAreasCode

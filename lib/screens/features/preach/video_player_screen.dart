@@ -1,6 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -163,76 +162,6 @@ ButtonThemeWidget(
                       },
                     ),
                   ).toList(),
-                    
-                    // ButtonThemeWidget(
-                    //   text: "Salmo 34:17",
-                    //   buttonStyle: StylesApp(context).btnSecondary.copyWith(
-                    //       maximumSize: WidgetStatePropertyAll(
-                    //           Size(double.infinity, double.infinity)),
-                    //       minimumSize: WidgetStatePropertyAll(
-                    //           Size(double.infinity, double.infinity))),
-                    //   width: MediaQuery.sizeOf(context).width,
-                    //   height: StylesApp(context).btnSizeSmall.height,
-                    //   onPressed: () {
-                    //     showModalBottomSheet(
-                    //         context: context,
-                    //         builder: (BuildContext context) {
-                    //           return _buildModalDetails(context);
-                    //         });
-                    //   },
-                    // ),
-                    // ButtonThemeWidget(
-                    //   text: "Gálatas 6:2-8",
-                    //   buttonStyle: StylesApp(context).btnSecondary.copyWith(
-                    //       maximumSize: WidgetStatePropertyAll(
-                    //           Size(double.infinity, double.infinity)),
-                    //       minimumSize: WidgetStatePropertyAll(
-                    //           Size(double.infinity, double.infinity))),
-                    //   width: MediaQuery.sizeOf(context).width,
-                    //   height: StylesApp(context).btnSizeSmall.height,
-                    //   onPressed: () {
-                    //     showModalBottomSheet(
-                    //         context: context,
-                    //         builder: (BuildContext context) {
-                    //           return _buildModalDetails(context);
-                    //         });
-                    //   },
-                    // ),
-                    // ButtonThemeWidget(
-                    //   text: "Mateo 18:20-30",
-                    //   buttonStyle: StylesApp(context).btnSecondary.copyWith(
-                    //       maximumSize: WidgetStatePropertyAll(
-                    //           Size(double.infinity, double.infinity)),
-                    //       minimumSize: WidgetStatePropertyAll(
-                    //           Size(double.infinity, double.infinity))),
-                    //   width: MediaQuery.sizeOf(context).width,
-                    //   height: StylesApp(context).btnSizeSmall.height,
-                    //   onPressed: () {
-                    //     showModalBottomSheet(
-                    //         context: context,
-                    //         builder: (BuildContext context) {
-                    //           return _buildModalDetails(context);
-                    //         });
-                    //   },
-                    // ),
-                    // ButtonThemeWidget(
-                    //   text: "Salmo 46:10",
-                    //   buttonStyle: StylesApp(context).btnSecondary.copyWith(
-                    //       maximumSize: WidgetStatePropertyAll(
-                    //           Size(double.infinity, double.infinity)),
-                    //       minimumSize: WidgetStatePropertyAll(
-                    //           Size(double.infinity, double.infinity))),
-                    //   width: MediaQuery.sizeOf(context).width,
-                    //   height: StylesApp(context).btnSizeSmall.height,
-                    //   onPressed: () {
-                    //     showModalBottomSheet(
-                    //         context: context,
-                    //         builder: (BuildContext context) {
-                    //           return _buildModalDetails(context);
-                    //         });
-                    //   },
-                    // ),
-                  // ],
                 ),
               ),
             ],

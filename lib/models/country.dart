@@ -1,16 +1,16 @@
 class Country {
   final String id;
-  final String country;
+  final String name;
   final AreaCode? countryCode;
   Country({
     required this.id,
-    required this.country,
+    required this.name,
     required this.countryCode,
   });
 
   factory Country.fromJson(Map<String, dynamic> json) => Country(
         id: json['id'] as String,
-        country: json['country'] as String,
+        name: json['name'] as String,
         countryCode: json['areaCodeCountry'] != null
             ? AreaCode.fromJson(json['areaCodeCountry'])
             : null,
@@ -18,7 +18,7 @@ class Country {
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'id': id,
-        'country': country,
+        'name': name,
         'areaCodeCountry': countryCode?.toJson(),
       };
 }

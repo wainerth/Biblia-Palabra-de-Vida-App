@@ -81,6 +81,19 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _loadDataPreferences();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    // Esperar a que Flutter esté listo
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final context = navigatorKey.currentContext;
+      if (context != null) {
+        final catalogueProvider =
+            Provider.of<CatalogueProvider>(context, listen: false);
+        await catalogueProvider.initialize();
+      }
+    });
   }
 
   Future<void> _loadDataPreferences() async {

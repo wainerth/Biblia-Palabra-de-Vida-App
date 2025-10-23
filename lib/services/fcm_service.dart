@@ -13,14 +13,10 @@ class FCMService {
       FlutterLocalNotificationsPlugin();
 
   static Future<void> initialize() async {
-    if (!isSkiaWeb) {
-      await _setupFirebase();
-    }
+    await _setupFirebase();
     await _setupLocalNotifications();
-    if (!isSkiaWeb) {
-      await _requestPermissions();
-      await _setupInterceptors();
-    }
+    await _requestPermissions();
+    await _setupInterceptors();
   }
 
   static Future<void> _setupFirebase() async {

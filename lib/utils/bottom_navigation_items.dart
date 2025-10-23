@@ -185,49 +185,50 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Image.asset(
-            'assets/heat.png',
-            color: StyleColor.redDark,
-            width: StylesApp(context).sizeIconBottomBar,
-            fit: BoxFit.cover,
-          ),
-          Text(
-            'Ofrendas',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
+    if (GraphQLConfig.development)
+      BottomNavigationBarItem(
+        activeIcon: Column(
+          children: [
+            Image.asset(
+              'assets/heat.png',
               color: StyleColor.redDark,
-              borderRadius: BorderRadius.circular(5),
+              width: StylesApp(context).sizeIconBottomBar,
+              fit: BoxFit.cover,
             ),
-          )
-        ],
+            Text(
+              'Ofrendas',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 2,
+              decoration: BoxDecoration(
+                color: StyleColor.redDark,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            )
+          ],
+        ),
+        icon: Column(
+          children: [
+            Image.asset(
+              'assets/heat.png',
+              color: StyleColor.redDark,
+              width: StylesApp(context).sizeIconBottomBar,
+              fit: BoxFit.cover,
+            ),
+            Text(
+              'Ofrendas',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+          ],
+        ),
+        label: '',
       ),
-      icon: Column(
-        children: [
-          Image.asset(
-            'assets/heat.png',
-            color: StyleColor.redDark,
-            width: StylesApp(context).sizeIconBottomBar,
-            fit: BoxFit.cover,
-          ),
-          Text(
-            'Ofrendas',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
     BottomNavigationBarItem(
       activeIcon: Column(
         children: [
@@ -450,49 +451,50 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Image.asset(
-            'assets/heat.png',
-            color: StyleColor.redDark,
-            width: StylesApp(context).sizeIconBottomBar,
-            fit: BoxFit.cover,
-          ),
-          Text(
-            'Ofrendas',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
+    if (GraphQLConfig.development)
+      BottomNavigationBarItem(
+        activeIcon: Column(
+          children: [
+            Image.asset(
+              'assets/heat.png',
               color: StyleColor.redDark,
-              borderRadius: BorderRadius.circular(5),
+              width: StylesApp(context).sizeIconBottomBar,
+              fit: BoxFit.cover,
             ),
-          )
-        ],
+            Text(
+              'Ofrendas',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 2,
+              decoration: BoxDecoration(
+                color: StyleColor.redDark,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            )
+          ],
+        ),
+        icon: Column(
+          children: [
+            Image.asset(
+              'assets/heat.png',
+              color: StyleColor.redDark,
+              width: StylesApp(context).sizeIconBottomBar,
+              fit: BoxFit.cover,
+            ),
+            Text(
+              'Ofrendas',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+          ],
+        ),
+        label: '',
       ),
-      icon: Column(
-        children: [
-          Image.asset(
-            'assets/heat.png',
-            color: StyleColor.redDark,
-            width: StylesApp(context).sizeIconBottomBar,
-            fit: BoxFit.cover,
-          ),
-          Text(
-            'Ofrendas',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
     BottomNavigationBarItem(
       activeIcon: Column(
         children: [
@@ -707,88 +709,90 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Icon(
-            Icons.language,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.redDark,
-          ),
-          Text(
-            'Reto online',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
+    if (GraphQLConfig.development)
+      BottomNavigationBarItem(
+        activeIcon: Column(
+          children: [
+            Icon(
+              Icons.language,
+              size: StylesApp(context).sizeIconBottomBar,
               color: StyleColor.redDark,
-              borderRadius: BorderRadius.circular(5),
             ),
-          )
-        ],
+            Text(
+              'Reto online',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 2,
+              decoration: BoxDecoration(
+                color: StyleColor.redDark,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            )
+          ],
+        ),
+        icon: Column(
+          children: [
+            Icon(
+              Icons.language,
+              size: StylesApp(context).sizeIconBottomBar,
+              color: StyleColor.redDark,
+            ),
+            Text(
+              'Reto online',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+          ],
+        ),
+        label: '',
       ),
-      icon: Column(
-        children: [
-          Icon(
-            Icons.language,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.redDark,
-          ),
-          Text(
-            'Reto online',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Icon(
-            Icons.notifications_none_rounded,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.grayMedium,
-          ),
-          Text(
-            'Novedad',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.grayMedium,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
+    if (GraphQLConfig.development)
+      BottomNavigationBarItem(
+        activeIcon: Column(
+          children: [
+            Icon(
+              Icons.notifications_none_rounded,
+              size: StylesApp(context).sizeIconBottomBar,
               color: StyleColor.grayMedium,
-              borderRadius: BorderRadius.circular(5),
             ),
-          )
-        ],
+            Text(
+              'Novedad',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.grayMedium,
+                  ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 2,
+              decoration: BoxDecoration(
+                color: StyleColor.grayMedium,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            )
+          ],
+        ),
+        icon: Column(
+          children: [
+            Icon(
+              Icons.notifications_none_rounded,
+              size: StylesApp(context).sizeIconBottomBar,
+              color: StyleColor.grayMedium,
+            ),
+            Text(
+              'Novedad',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.grayMedium,
+                  ),
+            ),
+          ],
+        ),
+        label: '',
       ),
-      icon: Column(
-        children: [
-          Icon(
-            Icons.notifications_none_rounded,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.grayMedium,
-          ),
-          Text(
-            'Novedad',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.grayMedium,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
   ];
 }
 
@@ -808,18 +812,22 @@ final List<BottomNavItem> items = [
     page: RankingScreen(),
   ),
   BottomNavItem(
-      title: "Dudas",
-      icon: Icons.question_mark_outlined,
-      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen()),
-  BottomNavItem(
-      title: "Reto online",
-      icon: Icons.language,
-      page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()),
-  BottomNavItem(
-      title: "Novedad",
-      icon: Icons.notifications_none_rounded,
-      page: GraphQLConfig.development ? NewsScreen() : SoonScreen() // ,
-      )
+    title: "Dudas",
+    icon: Icons.question_mark_outlined,
+    page: DoubtScreen(),
+  ),
+  if (GraphQLConfig.development)
+    BottomNavItem(
+        title: "Reto online",
+        icon: Icons.language,
+        page:
+            GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()),
+  if (GraphQLConfig.development)
+    BottomNavItem(
+        title: "Novedad",
+        icon: Icons.notifications_none_rounded,
+        page: GraphQLConfig.development ? NewsScreen() : SoonScreen() // ,
+        )
 ];
 
 List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
@@ -1033,47 +1041,48 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Icon(
-            Icons.language,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.grayMedium,
-          ),
-          Text(
-            'Reto online',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.grayMedium,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
+    if (GraphQLConfig.development)
+      BottomNavigationBarItem(
+        activeIcon: Column(
+          children: [
+            Icon(
+              Icons.language,
+              size: StylesApp(context).sizeIconBottomBar,
               color: StyleColor.grayMedium,
-              borderRadius: BorderRadius.circular(5),
             ),
-          )
-        ],
+            Text(
+              'Reto online',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.grayMedium,
+                  ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 2,
+              decoration: BoxDecoration(
+                color: StyleColor.grayMedium,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            )
+          ],
+        ),
+        icon: Column(
+          children: [
+            Icon(
+              Icons.language,
+              size: StylesApp(context).sizeIconBottomBar,
+              color: StyleColor.grayMedium,
+            ),
+            Text(
+              'Reto online',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.grayMedium,
+                  ),
+            ),
+          ],
+        ),
+        label: '',
       ),
-      icon: Column(
-        children: [
-          Icon(
-            Icons.language,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.grayMedium,
-          ),
-          Text(
-            'Reto online',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.grayMedium,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
   ];
 }
 
@@ -1088,7 +1097,7 @@ final List<BottomNavItem> itemsMap = [
   BottomNavItem(
     title: "Dudas",
     icon: Icons.question_mark_outlined,
-    page: GraphQLConfig.development ? DoubtScreen() : SoonScreen(),
+    page: DoubtScreen(),
   ),
   BottomNavItem(
     title: "Reto online",
@@ -1276,88 +1285,90 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Icon(
-            Icons.language,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.redDark,
-          ),
-          Text(
-            'Reto online',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
+    if (GraphQLConfig.development)
+      BottomNavigationBarItem(
+        activeIcon: Column(
+          children: [
+            Icon(
+              Icons.language,
+              size: StylesApp(context).sizeIconBottomBar,
               color: StyleColor.redDark,
-              borderRadius: BorderRadius.circular(5),
             ),
-          )
-        ],
+            Text(
+              'Reto online',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 2,
+              decoration: BoxDecoration(
+                color: StyleColor.redDark,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            )
+          ],
+        ),
+        icon: Column(
+          children: [
+            Icon(
+              Icons.language,
+              size: StylesApp(context).sizeIconBottomBar,
+              color: StyleColor.redDark,
+            ),
+            Text(
+              'Reto online',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+          ],
+        ),
+        label: '',
       ),
-      icon: Column(
-        children: [
-          Icon(
-            Icons.language,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.redDark,
-          ),
-          Text(
-            'Reto online',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Icon(
-            Icons.notifications_none_rounded,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.grayMedium,
-          ),
-          Text(
-            'Novedad',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.grayMedium,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
+    if (GraphQLConfig.development)
+      BottomNavigationBarItem(
+        activeIcon: Column(
+          children: [
+            Icon(
+              Icons.notifications_none_rounded,
+              size: StylesApp(context).sizeIconBottomBar,
               color: StyleColor.grayMedium,
-              borderRadius: BorderRadius.circular(5),
             ),
-          )
-        ],
+            Text(
+              'Novedad',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.grayMedium,
+                  ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 2,
+              decoration: BoxDecoration(
+                color: StyleColor.grayMedium,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            )
+          ],
+        ),
+        icon: Column(
+          children: [
+            Icon(
+              Icons.notifications_none_rounded,
+              size: StylesApp(context).sizeIconBottomBar,
+              color: StyleColor.grayMedium,
+            ),
+            Text(
+              'Novedad',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.grayMedium,
+                  ),
+            ),
+          ],
+        ),
+        label: '',
       ),
-      icon: Column(
-        children: [
-          Icon(
-            Icons.notifications_none_rounded,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.grayMedium,
-          ),
-          Text(
-            'Novedad',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.grayMedium,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
   ];
 }
 
@@ -1539,49 +1550,50 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Image.asset(
-            'assets/heat.png',
-            color: StyleColor.redDark,
-            width: StylesApp(context).sizeIconBottomBar,
-            fit: BoxFit.cover,
-          ),
-          Text(
-            'Ofrendas',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
+    if (GraphQLConfig.development)
+      BottomNavigationBarItem(
+        activeIcon: Column(
+          children: [
+            Image.asset(
+              'assets/heat.png',
               color: StyleColor.redDark,
-              borderRadius: BorderRadius.circular(5),
+              width: StylesApp(context).sizeIconBottomBar,
+              fit: BoxFit.cover,
             ),
-          )
-        ],
+            Text(
+              'Ofrendas',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 2,
+              decoration: BoxDecoration(
+                color: StyleColor.redDark,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            )
+          ],
+        ),
+        icon: Column(
+          children: [
+            Image.asset(
+              'assets/heat.png',
+              color: StyleColor.redDark,
+              width: StylesApp(context).sizeIconBottomBar,
+              fit: BoxFit.cover,
+            ),
+            Text(
+              'Ofrendas',
+              style: StylesApp(context).textStyleBody10.copyWith(
+                    color: StyleColor.redDark,
+                  ),
+            ),
+          ],
+        ),
+        label: '',
       ),
-      icon: Column(
-        children: [
-          Image.asset(
-            'assets/heat.png',
-            color: StyleColor.redDark,
-            width: StylesApp(context).sizeIconBottomBar,
-            fit: BoxFit.cover,
-          ),
-          Text(
-            'Ofrendas',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.redDark,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
     BottomNavigationBarItem(
       activeIcon: Column(
         children: [
@@ -1633,17 +1645,18 @@ final List<BottomNavItem> itemsPromises = [
       title: "Biblia", icon: Icons.book_outlined, page: BibleScreen()),
   BottomNavItem(title: "Promesas", icon: Icons.sync, page: PromisesScreen()),
   BottomNavItem(
-      title: "Dudas",
-      icon: Icons.question_mark_outlined,
-      page: GraphQLConfig.development ? DoubtScreen() : SoonScreen()),
-  BottomNavItem(
-      title: "Reto online",
-      icon: Icons.language,
-      page: GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()),
-  BottomNavItem(
-      title: "Novedad",
-      icon: Icons.notifications_none_rounded,
-      page: GraphQLConfig.development ? NewsScreen() : SoonScreen())
+      title: "Dudas", icon: Icons.question_mark_outlined, page: DoubtScreen()),
+  if (GraphQLConfig.development)
+    BottomNavItem(
+        title: "Reto online",
+        icon: Icons.language,
+        page:
+            GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()),
+  if (GraphQLConfig.development)
+    BottomNavItem(
+        title: "Novedad",
+        icon: Icons.notifications_none_rounded,
+        page: GraphQLConfig.development ? NewsScreen() : SoonScreen())
 ];
 
 List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {

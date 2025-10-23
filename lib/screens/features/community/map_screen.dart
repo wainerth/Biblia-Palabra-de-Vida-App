@@ -291,6 +291,12 @@ class _MapScreenState extends State<MapScreen>
         '/layoutPage1',
         arguments: {'selectedIndex': 2},
       );
+    } else if (_selectedIndex.toString() == 4.toString()) {
+      Navigator.pushNamed(
+        context,
+        '/layoutPage1',
+        arguments: {'selectedIndex': 3},
+      );
     } else if (_selectedIndex.toString() == 5.toString()) {
       Navigator.pushNamed(
         context,

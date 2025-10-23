@@ -143,13 +143,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         value: "${dataUser!.birthdate}",
         clave: "birthdate",
       ),
-      ModelData(
-          label: "Bautizo",
-          value: getIsBaptized(
-            dataUser!.isBaptized ?? false,
-          ),
-          showLabel: false,
-          clave: "isBaptized"),
+      // ModelData(
+      //     label: "Bautizo",
+      //     value: getIsBaptized(
+      //       dataUser!.isBaptized ?? false,
+      //     ),
+      //     showLabel: false,
+      //     clave: "isBaptized"),
     ];
     List<ModelData> contactDetails = [
       ModelData(
@@ -161,12 +161,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           label: "Tel.",
           value:
               "${dataUser != null && dataUser!.profileAreaCode != null ? dataUser!.profileAreaCode!.id : ''} ${dataUser!.phoneNumber ?? ''}",
-          clave: "phoneNumber"),
+          clave: "phoneNumber",
+          originalData: dataUser?.profileAreaCode,
+          ),
     ];
     List<ModelData> locationData = [
       ModelData(
           label: "País",
-          value: dataUser!.country?.country ?? '',
+          value: dataUser!.country?.name ?? '',
           clave: "country"),
       ModelData(
         label: "Estado",

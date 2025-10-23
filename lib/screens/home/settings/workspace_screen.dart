@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -42,48 +45,60 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       book: Book(modernName: ""),
       chapter: Chapter(chapter: 0),
       verse: Verse(verse: 0, text: ""));
+  bool _initCompleted = false;
+
   @override
   void initState() {
     super.initState();
+    _initializePage();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future<void> _initializePage() async {
+    if (_initCompleted) return;
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_initCompleted || !mounted) return;
+
+      if (Provider.of<UserProvider>(context, listen: false).getDailyProverb !=
+          null) {
+        setState(() {
+          dailyWord = Provider.of<UserProvider>(context, listen: false)
+              .getDailyProverb!;
+        });
+      } else {
+        await getDailyProverb();
+      }
+
       if (mounted) {
-        if (Provider.of<UserProvider>(context, listen: false).getDailyProverb !=
-            null) {
-          setState(() {
-            dailyWord = Provider.of<UserProvider>(context, listen: false)
-                .getDailyProverb!;
-          });
-        } else {
-          await getDailyProverb();
-        }
+        final notificationProvider =
+            Provider.of<SocketClientProvider>(context, listen: false);
+        await loadAllNotifications();
 
-        if (GraphQLConfig.development) {
-          if (mounted) {
-            final notificationProvider =
-                Provider.of<SocketClientProvider>(context, listen: false);
-
-            // if (notificationProvider.notifications.isEmpty) {
-            await loadAllNotifications();
-            // }
-
-            notificationProvider.listenToEvent("notification", (notify) {
-              if (kDebugMode) {
-                print(notify);
-              }
-              final newNotification = NotificationModel.fromJson(notify);
-              notificationProvider.addNotification(newNotification);
-              notificationProvider.showNotification(newNotification);
-            });
+        notificationProvider.listenToEvent("notification", (notify) {
+          if (kDebugMode) {
+            print(notify);
           }
-        }
+          final newNotification = NotificationModel.fromJson(notify);
+          notificationProvider.addNotification(newNotification);
+          notificationProvider.showNotification(newNotification);
+        });
+      }
+
+      if (mounted) {
         await loadGetOneReflection();
+        _initCompleted = true; // ✅ Marcar como completado
       }
     });
   }
 
   Future loadAllNotifications() async {
     // limpiamos las notificaciones antiguas
-
+    List<NotificationModel> notifies = [];
     Provider.of<SocketClientProvider>(context, listen: false)
         .cleanNotification();
     final userProvider = Provider.of<UserProvider>(context,
@@ -93,21 +108,25 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
     try {
       final responseNotification = await getAllNotification(
-          1, 10, useData != null ? useData.userId : '');
+          1, 15, useData != null ? useData.userId : '');
       if (responseNotification.error != null) {
         await showCustomDialog(context,
             message: responseNotification.error!, dialogType: DialogType.error);
         return;
       }
       setState(() {
-        List<NotificationModel> notifies = responseNotification.data['data']
+        notifies = responseNotification.data['data']
             .map<NotificationModel>(
                 (notify) => NotificationModel.fromJson(notify))
             .toList();
-        for (NotificationModel notify in notifies) {
+
+        if (notifies.length > 0) {
+          // notifies.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           Provider.of<SocketClientProvider>(context, listen: false)
-              .addNotification(notify);
+              .addAllNotification(notifies);
         }
+        // for (NotificationModel notify in notifies) {
+        // }
       });
     } catch (e) {
       String error = "Error al leer las notificaciones:  ${e.toString()}";
@@ -178,77 +197,76 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              if (GraphQLConfig.development)
-                Positioned(
-                  top: 0, // Puedes ajustar este valor
-                  right: 0,
-                  child: Visibility(
-                    visible: true,
-                    child: Container(
-                      width: 35,
-                      height: 35,
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.all(0),
-                        iconSize: 35,
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(20)),
-                            ),
-                            builder: (BuildContext context) {
-                              return NotificationListWidget();
-                            },
-                          );
-                        },
-                        icon: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Icon(
-                              Icons.notifications,
-                              size: 40,
-                              color: StyleColor.redLight,
-                            ),
-                            Positioned(
-                              right: 6,
-                              top: 12,
-                              child: Container(
-                                padding: EdgeInsets.all(0),
-                                decoration: BoxDecoration(
-                                    // color: Colors.white,
-                                    // shape: BoxShape.circle,
-                                    ),
-                                constraints: BoxConstraints(
-                                  minWidth: 16,
-                                  minHeight: 16,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    int.parse(getUnreadCountNotification()) > 0
-                                        ? getUnreadCountNotification()
-                                        : '',
-                                    style: StylesApp(context)
-                                        .textStyleBody10
-                                        .copyWith(
-                                          // color: StyleColor.redLight,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                    textAlign: TextAlign.center,
+              Positioned(
+                top: 0, // Puedes ajustar este valor
+                right: 0,
+                child: Visibility(
+                  visible: true,
+                  child: Container(
+                    width: 35,
+                    height: 35,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                    ),
+                    child: IconButton(
+                      padding: EdgeInsets.all(0),
+                      iconSize: 35,
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (BuildContext context) {
+                            return NotificationListWidget();
+                          },
+                        );
+                      },
+                      icon: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(
+                            Icons.notifications,
+                            size: 40,
+                            color: StyleColor.redLight,
+                          ),
+                          Positioned(
+                            right: 6,
+                            top: 12,
+                            child: Container(
+                              padding: EdgeInsets.all(0),
+                              decoration: BoxDecoration(
+                                  // color: Colors.white,
+                                  // shape: BoxShape.circle,
                                   ),
+                              constraints: BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  int.parse(getUnreadCountNotification()) > 0
+                                      ? getUnreadCountNotification()
+                                      : '',
+                                  style: StylesApp(context)
+                                      .textStyleBody10
+                                      .copyWith(
+                                        // color: StyleColor.redLight,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
+              ),
               Column(
                 children: [
                   SizedBox(height: 15.0),
@@ -272,6 +290,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                   SizedBox(
                     height: 22.0,
                   ),
+                  if(GraphQLConfig.development)
                   GestureDetector(
                     onTap: () {
                       Navigator.pushNamed(context, '/layoutLibrary');
@@ -318,7 +337,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: cards.map((card) => _buildCard(context, card)).toList(),
+        children: cards
+        .where((card) =>
+            !(card['label'] == 'Comunidad' && !GraphQLConfig.development))
+        .map((card) => _buildCard(context, card))
+        .toList(),
       ),
     );
   }
@@ -386,7 +409,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 image: DecorationImage(
                   alignment: Alignment.center,
                   image: AssetImage(card['img']!),
-                  fit: BoxFit.fill,
+                  fit: BoxFit.fitHeight,
                 ),
               ),
             ),
@@ -1029,17 +1052,24 @@ class NotificationListWidget extends StatefulWidget {
   State<NotificationListWidget> createState() => _NotificationListWidgetState();
 }
 
-class _NotificationListWidgetState extends State<NotificationListWidget> {
-  late List<NotificationModel> notifications;
+class _NotificationListWidgetState extends State<NotificationListWidget>
+    with SingleTickerProviderStateMixin {
+  List<NotificationModel> notifications = [];
   late SocketClientProvider notificationProvider;
+  late TabController _tabController; // ✅ NUEVO: Controlador para los tabs
 
   @override
   void initState() {
     super.initState();
     notificationProvider =
         Provider.of<SocketClientProvider>(context, listen: false);
-    notifications = notificationProvider.notifications.reversed.toList();
+    notifications = notificationProvider.notifications;
 
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: 0, // ← Fuerza el tab inicial
+    );
     // Listen for changes in notifications
     notificationProvider.addListener(_onNotificationsChanged);
   }
@@ -1047,19 +1077,23 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
   void _onNotificationsChanged() {
     final newNotifications = [...notificationProvider.notifications];
     setState(() {
-      notifications = newNotifications.reversed.toList();
-      notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      notifications = newNotifications;
     });
-    // notifications = notificationProvider.notifications.reversed.toList();
-    // // Optionally, sort by createdAt if needed
-    // notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    // });
   }
 
   @override
   void dispose() {
     notificationProvider.removeListener(_onNotificationsChanged);
+    _tabController.dispose(); 
     super.dispose();
+  }
+
+  List<NotificationModel> get unreadNotifications {
+    return notifications.where((n) => n.isRead == false).toList();
+  }
+
+  List<NotificationModel> get readNotifications {
+    return notifications.where((n) => n.isRead == true).toList();
   }
 
   @override
@@ -1071,275 +1105,269 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       height: MediaQuery.of(context).size.height * 0.7,
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            top: 0,
-            right: 0,
-            child: TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/notificationPage');
-              },
-              child: Text("Ver Todas...", style: StylesApp(context).textStyleBody14.copyWith(
-                color: StyleColor.turquoise
-              )),
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
               Text(
                 "Notificaciones",
                 style: StylesApp(context).textStyleBody5.copyWith(
                     color: StyleColor.black, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: notifications.isEmpty
-                    ? Center(
-                        child: Text(
-                          "No tienes notificaciones.",
-                          style: StylesApp(context)
-                              .textStyleBody7
-                              .copyWith(color: StyleColor.black),
-                        ),
-                      )
-                    : ListView.separated(
-                        itemCount: notifications.length,
-                        separatorBuilder: (_, __) => SizedBox(
-                          height: 20.0,
-                        ),
-                        itemBuilder: (context, index) {
-                          final notification = notifications[index];
-                          return Column(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: notification.isRead
-                                      ? Colors.white
-                                      : Colors.blueGrey[100],
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: StyleColor.black.withAlpha(90),
-                                      offset: Offset(0, 4),
-                                      spreadRadius: 4.0,
-                                      blurRadius: 4.0,
-                                    )
-                                  ],
-                                ),
-                                child: ExpansionTile(
-                                  tilePadding: EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 0),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  collapsedShape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  leading: Icon(
-                                    Icons.notifications,
-                                    color: notification.isRead
-                                        ? StyleColor.grayMedium
-                                        : StyleColor.turquoise,
-                                  ),
-                                  title: Text(
-                                    notification.title,
-                                    style: StylesApp(context)
-                                        .textStyleBody14
-                                        .copyWith(
-                                          color: notification.isRead
-                                              ? StyleColor.grayMedium
-                                              : StyleColor.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 16.0, right: 8.0, bottom: 8.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            notification.message,
-                                            style: StylesApp(context)
-                                                .textStyleBody10
-                                                .copyWith(
-                                                  color: notification.isRead
-                                                      ? StyleColor.grayMedium
-                                                      : StyleColor.black,
-                                                  fontWeight:
-                                                      notification.isRead
-                                                          ? FontWeight.normal
-                                                          : FontWeight.bold,
-                                                ),
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            formatDateTime(
-                                                notification.createdAt),
-                                            style: StylesApp(context)
-                                                .textStyleBody10
-                                                .copyWith(
-                                                    color: notification.isRead
-                                                        ? StyleColor.grayMedium
-                                                        : StyleColor.black),
-                                          ),
-                                          if (notification
-                                              .actionLabel.isNotEmpty)
-                                            Align(
-                                              alignment: Alignment.centerRight,
-                                              child: TextButton(
-                                                onPressed: () async {
-                                                  // final responseMarkReadNotification =
-                                                  //     await markAsReadOneNotification(
-                                                  //         notification.id);
-
-                                                  // if (responseMarkReadNotification
-                                                  //         .error !=
-                                                  //     null) {
-                                                  //   await showCustomDialogWithAction(
-                                                  //     context,
-                                                  //     dialogType:
-                                                  //         DialogTypeAction.error,
-                                                  //     message:
-                                                  //         responseMarkReadNotification
-                                                  //             .error!,
-                                                  //     actionCallback: () {
-                                                  //       Navigator.pop(context);
-                                                  //     },
-                                                  //     buttonOk: "Ok",
-                                                  //   );
-                                                  //   return;
-                                                  // } else {
-                                                  //   if (responseMarkReadNotification
-                                                  //           .data !=
-                                                  //       null) {
-                                                  //     if (!responseMarkReadNotification
-                                                  //         .data['success']) {
-                                                  //       await showCustomDialog(
-                                                  //         context,
-                                                  //         dialogType:
-                                                  //             DialogType.error,
-                                                  //         message:
-                                                  //             responseMarkReadNotification
-                                                  //                 .data['message'],
-                                                  //       );
-                                                  //       return;
-                                                  //     }
-                                                  //   }
-                                                  // }
-                                                  if (getRouterScreen(
-                                                              notification.model
-                                                                  .toLowerCase(),
-                                                              notification
-                                                                  .variables)
-                                                          .arguments !=
-                                                      null) {
-                                                    Navigator.pushNamed(
-                                                        context,
-                                                        getRouterScreen(
-                                                                notification
-                                                                    .model,
-                                                                notification
-                                                                    .variables)
-                                                            .routeName,
-                                                        arguments: getRouterScreen(
-                                                                notification
-                                                                    .model,
-                                                                notification
-                                                                    .variables)
-                                                            .arguments);
-                                                  } else {
-                                                    Navigator.pushNamed(
-                                                        context,
-                                                        getRouterScreen(
-                                                                notification
-                                                                    .model,
-                                                                null)
-                                                            .routeName);
-                                                  }
-                                                  // if (notification.model
-                                                  //     .contains('course')) {
-                                                  //   final progress = await _loadProgress(context);
-                                                  //   if (progress == null) return;
-                                                  //   // if (progressUser != null && card['label'] == 'Aventura') {
-                                                  //   Navigator.pushNamed(context,
-                                                  //       '/mapPage', arguments: {
-                                                  //     'courseId':
-                                                  //         progressUser!.courseId,
-                                                  //     'sectionId':
-                                                  //         progressUser!.sectionId
-                                                  //   });
-                                                  //   // } else {
-                                                  //   //   Navigator.pushNamed(context, '/introAventurePage');
-                                                  //   // }
-                                                  // }
-                                                },
-                                                style: TextButton.styleFrom(
-                                                  foregroundColor:
-                                                      StyleColor.blueDark,
-                                                ),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  children: [
-                                                    Text(notification
-                                                        .actionLabel),
-                                                    Icon(Icons.arrow_forward)
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          );
-                        },
-                      ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // cerramos la modal
+                  
+                  Navigator.pushNamed(context, '/notificationPage');
+                },
+                child: Text("Ver Todas...",
+                    style: StylesApp(context)
+                        .textStyleBody14
+                        .copyWith(color: StyleColor.turquoise)),
               ),
             ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+                color: StyleColor.orange,
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelColor: Colors.white,
+              unselectedLabelColor: StyleColor.black,
+              // unselectedLabelStyle: TextStyle(backgroundColor: Colors.blueGrey[200]),
+
+              tabs: [
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("No leídas"),
+                      if (unreadNotifications.isNotEmpty) ...[
+                        SizedBox(width: 4),
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            unreadNotifications.length.toString(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Tab(text: "Leídas"),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildNotificationsList(unreadNotifications),
+
+                _buildNotificationsList(readNotifications),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Future<void> _loadProgress(BuildContext context) async {
-  //   LoadingService().showLoading(context);
-  //   final userProvider = Provider.of<UserProvider>(context,
-  //       listen:
-  //           false); // listen: false para evitar reconstrucciones innecesarias
-  //   final dataUser = userProvider.currentUser;
-  //   final progressResponse =
-  //       await userProvider.getProgressUser(dataUser?.userId, null);
-  //   if (progressResponse!.error != null) {
-  //     LoadingService().hideLoading();
-  //     await showCustomDialog(
-  //       context,
-  //       message: progressResponse.error!,
-  //       dialogType: DialogType.error,
-  //     );
-  //     return;
-  //   }
-  //   LoadingService().hideLoading();
-  //   return progressResponse.data;
-  // }
+  Widget _buildNotificationsList(List<NotificationModel> notificationsToShow) {
+    return notificationsToShow.isEmpty
+        ? Center(
+            child: Text(
+              _tabController.index == 0
+                  ? "No tienes notificaciones no leídas."
+                  : "No tienes notificaciones leídas.",
+              style: StylesApp(context)
+                  .textStyleBody7
+                  .copyWith(color: StyleColor.black),
+            ),
+          )
+        : ListView.separated(
+            itemCount: notificationsToShow.length,
+            separatorBuilder: (_, __) => SizedBox(height: 20.0),
+            itemBuilder: (context, index) {
+              final notification = notificationsToShow[index];
+              return _buildNotificationItem(notification);
+            },
+          );
+  }
+
+  Widget _buildNotificationItem(NotificationModel notification) {
+    return Container(
+      decoration: BoxDecoration(
+        color: notification.isRead ? Colors.white : Colors.blueGrey[100],
+        borderRadius: BorderRadius.circular(8.0),
+        boxShadow: [
+          BoxShadow(
+            color: StyleColor.black.withAlpha(90),
+            offset: Offset(0, 4),
+            spreadRadius: 4.0,
+            blurRadius: 4.0,
+          )
+        ],
+      ),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        collapsedShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        leading: Icon(
+          Icons.notifications,
+          color: notification.isRead
+              ? StyleColor.grayMedium
+              : StyleColor.turquoise,
+        ),
+        title: Text(
+          notification.title,
+          style: StylesApp(context).textStyleBody14.copyWith(
+                color: notification.isRead
+                    ? StyleColor.grayMedium
+                    : StyleColor.black,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, right: 8.0, bottom: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  notification.message,
+                  style: StylesApp(context).textStyleBody10.copyWith(
+                        color: notification.isRead
+                            ? StyleColor.grayMedium
+                            : StyleColor.black,
+                        fontWeight: notification.isRead
+                            ? FontWeight.normal
+                            : FontWeight.bold,
+                      ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  formatDateTime(notification.createdAt),
+                  style: StylesApp(context).textStyleBody10.copyWith(
+                      color: notification.isRead
+                          ? StyleColor.grayMedium
+                          : StyleColor.black),
+                ),
+                if (notification.actionLabel.isNotEmpty)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () async {
+                        final responseMarkReadNotification =
+                            await markAsReadOneNotification(notification.id!);
+
+                        if (responseMarkReadNotification.error != null) {
+                          await showCustomDialogWithAction(
+                            context,
+                            dialogType: DialogTypeAction.error,
+                            message: responseMarkReadNotification.error!,
+                            actionCallback: () {
+                              Navigator.pop(context);
+                            },
+                            buttonOk: "Ok",
+                          );
+                          return;
+                        } else {
+                          if (responseMarkReadNotification.data != null) {
+                            if (!responseMarkReadNotification.data['success']) {
+                              await showCustomDialog(
+                                context,
+                                dialogType: DialogType.error,
+                                message: responseMarkReadNotification
+                                    .data['message'],
+                              );
+                              return;
+                            }
+                          }
+                        }
+
+                        if (getRouterScreen(notification.model.toLowerCase(),
+                                    notification.variables)
+                                .arguments !=
+                            null) {
+                          Navigator.pushNamed(
+                              context,
+                              getRouterScreen(notification.model,
+                                      notification.variables)
+                                  .routeName,
+                              arguments: getRouterScreen(notification.model,
+                                      notification.variables)
+                                  .arguments);
+                        } else {
+                          Navigator.pushNamed(
+                              context,
+                              getRouterScreen(notification.model, null)
+                                  .routeName);
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: StyleColor.blueDark,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(notification.actionLabel),
+                          Icon(Icons.arrow_forward)
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

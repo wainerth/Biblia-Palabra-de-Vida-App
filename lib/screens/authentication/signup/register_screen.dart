@@ -19,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late final Provider catalogueProvider;
   int _currentStep = 0; // Controla el paso actual
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _autoValidate = false;
   final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
@@ -31,7 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _prefixNumberController = TextEditingController(
       text: Intl.defaultLocale == 'es_UY' ? '+598' : '+54');
   final TextEditingController _phoneNumberController =
-      TextEditingController(text: "");
+      TextEditingController(text: '');
   DateTime? _selectedDate;
   final TextEditingController _dateController = TextEditingController(text: "");
   bool _obscureTextPass = true;
@@ -92,8 +93,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           .cast<ModelData>()
           .toList();
       dropDownList = countries
-          .map(
-              (country) => ModelData(value: country.id, label: country.country))
+          .map((country) => ModelData(value: country.id, label: country.name))
           .cast<ModelData>()
           .toList();
     });
@@ -164,6 +164,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                       Form(
                         key: _formKey,
+                        autovalidateMode: _autoValidate
+                            ? AutovalidateMode.always
+                            : AutovalidateMode.disabled,
                         child: Padding(
                           padding:
                               const EdgeInsets.only(left: 29.0, right: 29.0),
@@ -237,6 +240,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       setIsBaptized = baptized!;
                                     });
                                   },
+                                  autoValidate: _autoValidate,
                                 ),
                               ],
                               const SizedBox(
@@ -245,52 +249,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ButtonThemeWidget(
                                 textStyle: StylesApp(context).buttonTextStyle,
                                 onPressed: () async {
-                                  if (_currentStep == 0) {
-                                    _nextStep();
-                                  } else {
-                                    final bool validate =
-                                        _formKey.currentState?.validate() ??
-                                            false;
-                                    if (!validate) {
-                                      return;
-                                    }
-                                    LoadingService().showLoading(context);
-                                    final authenticationProvider =
-                                        Provider.of<AuthenticationProvider>(
-                                            context,
-                                            listen: false);
-                                    // final SignupInput data;
-                                    final dataToRegister = SignupInput(
-                                        name: _nameController.text,
-                                        lastname: _lastNameController.text,
-                                        email: _emailController.text,
-                                        birthdate: _dateController.text,
-                                        // city: _cityController ,
-                                        codeAreaId: _selectedPrefix?.id,
-                                        countryId: _selectedCountry?.id,
-                                        identifier: _userIdController.text,
-                                        password: _passwordController.text,
-                                        phoneNumber: _phoneNumberController.text
-                                            .replaceAll(RegExp(r'[^\d]+'), ''),
-                                        username: _userNameController.text,
-                                        isBaptized: setIsBaptized,
-                                        gender: setGender);
-
-                                    final ResponseData response =
-                                        await authenticationProvider
-                                            .registerUser(dataToRegister);
-
-                                    if (response.error != null) {
-                                      LoadingService().hideLoading();
-                                      await showCustomDialog(context,
-                                          message: response.error!,
-                                          dialogType: DialogType.error);
-                                    } else {
-                                      Navigator.popAndPushNamed(
-                                          context, '/layoutPage');
-                                    }
-                                    LoadingService().hideLoading();
-                                  }
+                                  initRegister();
                                 },
                                 text: _currentStep == 0
                                     ? "Continuar"
@@ -372,5 +331,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  void initRegister() async {
+    if (_currentStep == 0) {
+      _nextStep();
+    } else {
+      setState(() {
+        _autoValidate = true; // Activar validaciones
+      });
+
+      // Esperar un frame para que se actualice el estado
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final bool isValid = _formKey.currentState?.validate() ?? false;
+        if (!isValid) {
+          // Mostrar mensaje de error si quieres
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text('Por favor completa todos los campos requeridos')),
+          );
+          return;
+        }
+
+        // Si es válido, proceder con el registro
+        _proceedWithRegistration();
+      });
+    }
+  }
+
+  void _proceedWithRegistration() async {
+    LoadingService().showLoading(context);
+    final authenticationProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+
+    final dataToRegister = SignupInput(
+      name: _nameController.text,
+      lastname: _lastNameController.text,
+      email: _emailController.text,
+      birthdate: _dateController.text,
+      codeAreaId: _selectedPrefix?.id,
+      countryId: _selectedCountry?.id,
+      identifier: _userIdController.text,
+      password: _passwordController.text,
+      phoneNumber:
+          _phoneNumberController.text.replaceAll(RegExp(r'[^\d]+'), ''),
+      username: _userNameController.text,
+      isBaptized: setIsBaptized,
+      gender: setGender,
+    );
+
+    final ResponseData response =
+        await authenticationProvider.registerUser(dataToRegister);
+
+    LoadingService().hideLoading();
+
+    if (response.error != null) {
+      await showCustomDialog(context,
+          message: response.error!, dialogType: DialogType.error);
+    } else {
+      Navigator.popAndPushNamed(context, '/layoutPage');
+    }
   }
 }

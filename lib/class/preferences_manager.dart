@@ -38,6 +38,7 @@ class PreferencesManager {
   static const String _fontSizeQuestionKey = 'fontSizeQuestion';
   static const String _fontFamilySetKey = 'fontFamilySet';
   static const String _deviceInfoKey = 'deviceInfo';
+  static const String _lastPlayDateKey = 'last_play_date';
 
   // Métodos para userToken
   Future<String?> getUserToken() async {
@@ -282,6 +283,16 @@ class PreferencesManager {
   Future<void> setDeviceInfo(Map<String, dynamic> deviceData) async {
     await _ensureInitialized();
     await _prefs!.setString(_deviceInfoKey, jsonEncode(deviceData));
+  }
+  // Métodos para manejo de modelos complejos
+  Future<String> getLastPlayDate() async {
+    await _ensureInitialized();
+    return _prefs!.getString(_lastPlayDateKey) ?? '';
+  }
+
+  Future<void> setLastPlayDate(String lastPlay) async {
+    await _ensureInitialized();
+    await _prefs!.setString(_lastPlayDateKey, lastPlay);
   }
 
   // Limpiar todas las preferencias

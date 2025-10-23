@@ -1,11 +1,15 @@
 import 'dart:math' as math;
 
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:intl_phone_field/phone_number.dart';
+import 'package:provider/provider.dart';
 
 class PersonalInfoStep extends StatefulWidget {
+  final bool autoValidate;
   final TextEditingController nameController;
   final TextEditingController lastNameController;
   final TextEditingController dateController;
@@ -43,6 +47,7 @@ class PersonalInfoStep extends StatefulWidget {
     required this.onCountrySelected,
     required this.prefixNumberController,
     required this.phoneNumberController,
+    required this.autoValidate,
     this.onChangeGender,
     this.onChangeBaptized,
   });
@@ -126,28 +131,28 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               },
             ),
           ),
-          SizedBox(height: _isTablet ? 28.0 : 23.0),
-          // GÉNERO
-          Container(
-            width: formWidth,
-            padding: EdgeInsets.symmetric(
-              horizontal: _isTablet ? 20 : 8,
-              vertical: _isTablet ? 12 : 8,
-            ),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: RadioButtonWidget<String>(
-              label: "Género:",
-              value: widget.gender,
-              onChanged: (newValue) => widget.onChangeGender!(newValue),
-              options: [
-                RadioButtonOption(value: "m", label: "Masculino"),
-                RadioButtonOption(value: "f", label: "Femenino")
-              ],
-            ),
+          const SizedBox(
+            height: 23.0,
+          ),
+          ValidatedRadioGroup<String>(
+            label: "Género:",
+            initialValue: widget.gender,
+            onChanged: (newValue) {
+              setState(() {
+                widget.onChangeGender!(newValue);
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return "Por favor selecciona tu género";
+              }
+              return null;
+            },
+            onSaved: (newValue) {},
+            options: [
+              RadioButtonOption(value: "m", label: "Masculino"),
+              RadioButtonOption(value: "f", label: "Femenino"),
+            ],
           ),
           SizedBox(height: _isTablet ? 28.0 : 23.0),
           // FECHA DE NACIMIENTO
@@ -189,14 +194,17 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           // PAÍS
           Container(
             width: formWidth,
-            child: CustomDropdownBottomWidget<Country>(
-              contentPadding: _isTablet
-                  ? EdgeInsets.symmetric(horizontal: 8, vertical: 12)
-                  : EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-              hintText: "Seleccione un país",
+            child: CustomDropdownWithValidation(
               items: widget.dropDownList,
+              hintText: "Seleccione un país",
               onChanged: widget.onCountrySelected,
-              selectedItem: widget.selectedData,
+              validator: (value) {
+                if (value == null) {
+                  return "Por favor selecciona un país";
+                }
+                return null;
+              },
+              border: true,
             ),
           ),
           SizedBox(height: _isTablet ? 28.0 : 23.0),
@@ -204,50 +212,30 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           // TELÉFONO
           Container(
             width: formWidth,
-            height: StylesApp(context).sizeTextFormField.height,
-            child: Row(
-              // spacing:  _isTablet ? 15 : 10,
-              children: [
-                // Campo del código del país
-                Flexible(
-                  flex: _isTablet ? 4 : 3,
-                  child: CustomDropdownBottomWidget<AreaCode>(
-                    contentPadding: _isTablet
-                        ? EdgeInsets.symmetric(horizontal: 8, vertical: 12)
-                        : EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                    hintText: "código",
-                    items: widget.dropDownListArea,
-                    onChanged: widget.onPrefixSelected,
-                    selectedItem: widget.selectedDataArea,
-                  ),
-                ),
-                SizedBox(width: _isTablet ? 15 : 10),
-
-                // NÚMERO DE TELÉFONO
-                Flexible(
-                  flex: _isTablet ? 8 : 7,
-                  child: TextFormField(
-                    controller: widget.phoneNumberController,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      maskFormatterTel, // Permite solo números
-                    ],
-                    decoration:
-                        StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                              hintText: "Número de teléfono",
-                            ),
-                    style: StylesApp(context)
-                        .textStyleBody12
-                        .copyWith(color: StyleColor.black),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Por favor, ingresa tu número de teléfono.";
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
+            child: IntlPhoneFieldWithValidation(
+              controller: widget.phoneNumberController,
+              validator: (PhoneNumber? phone) {
+                if (phone == null || phone.number.isEmpty) {
+                  return "Por favor, ingresa tu número de teléfono.";
+                }
+                final cleanNumber =
+                    phone.number.replaceAll(RegExp(r'[^\d]'), '');
+                if (cleanNumber.length < 7) {
+                  return "Número de teléfono demasiado corto.";
+                }
+                return null;
+              },
+              onChanged: (phone) {
+                print(phone.completeNumber);
+                setState(() {
+                  widget.prefixNumberController.text = phone.countryCode;
+                });
+                 AreaCode code = Provider.of<CatalogueProvider>(context,
+                    listen: false)
+                .allAreasCode
+                .firstWhere((areaCode) => areaCode.code == phone.countryCode);
+                  widget.onPrefixSelected(ModelData(label: code.code, value: code.id));
+              },
             ),
           ),
           SizedBox(height: _isTablet ? 50 : 41),

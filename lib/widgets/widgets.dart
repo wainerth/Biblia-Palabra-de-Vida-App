@@ -101,4 +101,8 @@ export 'package:biblia_palabra_de_vida_app/widgets/search_input_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/generic_coordination_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/custom_tab_bar_view_scroll_physics.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/custom_header_body_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/validatedRadioGroup.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/custom_dropdown_with_validation.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/intl_phone_field_with_validation.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/streak_celebration_dialog.dart';
 

@@ -61,7 +61,7 @@ class AuthenticationProvider extends ChangeNotifier {
         // llamar conexión con el socket
         final socketProvider =
             Provider.of<SocketClientProvider>(context, listen: false);
-        if (!socketProvider.isInitialized) {
+        if (!socketProvider.isSocketInitialized) {
           socketProvider.connectSocket(
               userId: dataUserLoad.userId,
               username: dataUserLoad.username!,
@@ -196,7 +196,7 @@ class AuthenticationProvider extends ChangeNotifier {
     // llamar conexión con el socket
     final socketProvider =
         Provider.of<SocketClientProvider>(context, listen: false);
-    if (!socketProvider.isInitialized) {
+    if (!socketProvider.isSocketInitialized) {
       socketProvider.connectSocket(
           userId: userProfile.data['userId'],
           username: userProfile.data['username'],
