@@ -69,24 +69,34 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool? _hasSeenIntro;
-
+  bool _isCatalogueInitialized = false;
   @override
   void initState() {
     super.initState();
-    _loadDataPreferences();
     _initializeApp();
   }
 
   Future<void> _initializeApp() async {
     // Esperar a que Flutter esté listo
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final context = navigatorKey.currentContext;
-      if (context != null) {
-        final catalogueProvider =
-            Provider.of<CatalogueProvider>(context, listen: false);
+
+    await _loadDataPreferences();
+    await _initializeCatalogueProvider();
+  }
+
+  Future<void> _initializeCatalogueProvider() async {
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      final catalogueProvider =
+          Provider.of<CatalogueProvider>(context, listen: false);
+      try {
         await catalogueProvider.initialize();
+        setState(() => _isCatalogueInitialized = true);
+      } catch (e) {
+        debugPrint('⚠️ Error inicializando catálogo: $e');
+        // Permitir que la app continúe incluso si el catálogo falla
+        setState(() => _isCatalogueInitialized = true);
       }
-    });
+    }
   }
 
   Future<void> _loadDataPreferences() async {

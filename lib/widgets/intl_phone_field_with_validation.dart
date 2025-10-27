@@ -4,22 +4,20 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
-
 import 'package:intl_phone_field/countries.dart';
 
 class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
   IntlPhoneFieldWithValidation({
     super.key,
     required TextEditingController controller,
-    String? initialPhoneCode, // "+598", "+58", etc.
-    String? initialCountryCode, // "UY", "VE", etc.
+    String? initialPhoneCode,
+    String? initialCountryCode,
     super.validator,
     ValueChanged<PhoneNumber>? onChanged,
+    bool disableLengthCheck = true,
   }) : super(
           builder: (FormFieldState<PhoneNumber> field) {
-            // Función robusta para determinar el país inicial
             String determineInitialCountryCode() {
-              // Prioridad 1: Código de país directo
               if (initialCountryCode != null &&
                   initialCountryCode.length == 2) {
                 final country = countries.firstWhere(
@@ -29,13 +27,11 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                 return country.code;
               }
 
-              // Prioridad 2: Convertir código de teléfono a código de país
               if (initialPhoneCode != null) {
                 final country = getCountryFromPhoneCode(initialPhoneCode);
                 return country?.code ?? 'US';
               }
 
-              // Prioridad 3: Usar locale del dispositivo
               final locale = Localizations.localeOf(field.context);
               if (locale.countryCode != null) {
                 final country = countries.firstWhere(
@@ -54,8 +50,17 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                 IntlPhoneField(
                   initialCountryCode: determineInitialCountryCode(),
                   controller: controller,
-                  style: StylesApp(field.context).textStyleBody14.copyWith(color: StyleColor.black),
-                  dropdownTextStyle: StylesApp(field.context).textStyleBody14.copyWith(color: StyleColor.black),
+                  style: StylesApp(field.context)
+                      .textStyleBody14
+                      .copyWith(color: StyleColor.black),
+                  dropdownTextStyle: StylesApp(field.context)
+                      .textStyleBody14
+                      .copyWith(color: StyleColor.black),
+                  // 🔹 CONFIGURACIÓN CLAVE PARA PAÍSES CON CÓDIGOS CORTOS
+                  disableLengthCheck:
+                      disableLengthCheck, // 🔹 DESACTIVA VALIDACIÓN POR DEFECTO
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [], // 🔹 PERMITE MÁS FLEXIBILIDAD
                   decoration: StylesApp(field.context)
                       .inputDecorationOutlineStyle
                       .copyWith(
@@ -67,7 +72,6 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                           ),
                         ),
                       ),
-                  validator: validator,
                   languageCode: "es",
                   invalidNumberMessage: "Número de Teléfono Invalido!",
                   onChanged: (phone) {
@@ -78,12 +82,15 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                     controller.text = '';
                     print('Country changed to: ${country.code}');
                     print('Country dial code: ${country.dialCode}');
+                    print('Country min length: ${country.minLength}');
+                    print('Country max length: ${country.maxLength}');
                   },
                 ),
               ],
             );
           },
         );
+        
 }
 
 // Función auxiliar
@@ -97,3 +104,5 @@ Country getCountryFromPhoneCode(String phoneCode) {
     orElse: () => countries.firstWhere((c) => c.code == 'US'),
   );
 }
+
+

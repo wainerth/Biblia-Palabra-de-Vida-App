@@ -211,8 +211,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       _selectedPrefix = prefixCodes.firstWhere(
                                           (country) =>
                                               country.id == newValue!.value);
-                                      _prefixNumberController.text =
-                                          _selectedCountry!.countryCode!.code;
+                                      _prefixNumberController.text = newValue!.value;
                                     });
                                   },
                                   onCountrySelected: (newValue) {

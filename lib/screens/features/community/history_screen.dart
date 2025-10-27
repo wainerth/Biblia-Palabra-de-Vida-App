@@ -915,9 +915,29 @@ class _HistoryScreenState extends State<HistoryScreen> {
         RegExp(r'\{\(([^\/\)]+)(?:\/[^\)]*)?\)\}'),
         (Match match) => (match.group(1) ?? '').trim(),
       );
-
+// 2. Eliminar todos los emojis del texto
+      String textWithoutEmojis = cleanText.replaceAll(
+        RegExp(
+          r'[\u{1F600}-\u{1F64F}' // Emoticones
+          r'\u{1F300}-\u{1F5FF}' // Símbolos y pictogramas
+          r'\u{1F680}-\u{1F6FF}' // Transporte y símbolos
+          r'\u{1F1E0}-\u{1F1FF}' // Banderas (iOS)
+          r'\u{1F018}-\u{1F270}' // Varios símbolos
+          r'[\u{1F000}-\u{1F9FF}' // Emojis principales y suplementarios
+          r'\u{2600}-\u{26FF}' // Símbolos misceláneos
+          r'\u{2700}-\u{27BF}' // Dingbats
+          r'\u{2300}-\u{23FF}' // Símbolos técnicos (incluye ⭐)
+          r'\u{2B50}-\u{2BFF}' // Símbolos y flechas (incluye ⭐)
+          r'\u{FE00}-\u{FE0F}' // Variantes de emojis
+          r'\u{1F900}-\u{1F9FF}' // Emojis suplementarios
+          r'\u{1FA70}-\u{1FAFF}' // Símbolos extendidos
+          r']',
+          unicode: true,
+        ),
+        '', // Reemplazar con string vacío
+      );
       // // 2. Formatear referencias (ej: "Juan 8:4-36" → "Juan capítulo 8 versículo 4 al 36")
-      String ttsText = cleanText.replaceAllMapped(
+      String ttsText = textWithoutEmojis.replaceAllMapped(
         RegExp(r'(\w+) (\d+):(\d+)(?:-(\d+))?'),
         (Match match) {
           final book = match.group(1); // "Juan"

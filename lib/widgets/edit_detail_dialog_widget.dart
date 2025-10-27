@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
+import 'package:biblia_palabra_de_vida_app/services/phone_validator_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -26,8 +27,12 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   String? _selectedStateId;
   List<ModelData> _statesList = [];
   List<ModelData> _citiesList = [];
+  bool loadingState = false;
+  bool loadingCity = false;
   bool _isInitialized = false;
   String? initialPhoneCode;
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -99,51 +104,6 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     );
   }
 
-  // Widget para el estado de error
-  Widget _buildErrorState(dynamic error) {
-    return Container(
-      color: StyleColor.turquoise,
-      width: double.infinity,
-      height: MediaQuery.sizeOf(context).height * 0.6,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, color: Colors.white, size: 50),
-          SizedBox(height: 20),
-          Text(
-            "Error al cargar los datos",
-            style: StylesApp(context)
-                .textStyleBody14
-                .copyWith(color: Colors.white),
-          ),
-          SizedBox(height: 10),
-          Text(
-            error.toString(),
-            style: StylesApp(context)
-                .textStyleBody12
-                .copyWith(color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 20),
-          ButtonThemeWidget(
-            buttonStyle: StylesApp(context).btnWidgetSmall,
-            text: 'Reintentar',
-            width: 120.0,
-            height: 40.0,
-            onPressed: () {
-              // Inicializar valores de país, estado y ciudad si existen
-              _initializeLocationValues().then((_) {
-                setState(() {
-                  _isInitialized = true;
-                });
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   //Method buildField
   Widget _buildField(
       ModelData item,
@@ -155,100 +115,88 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
       List<Church> listChurches,
       List<Country> listCatalogue) {
     if (item.label == 'Tel.') {
-      return Container(
+      return SizedBox(
         // width: formWidth,
-        child: IntlPhoneFieldWithValidation(
-          controller: _controllers[index],
-          initialPhoneCode: initialPhoneCode,
-          validator: (PhoneNumber? phone) {
-            if (phone == null || phone.number.isEmpty) {
-              return "Por favor, ingresa tu número de teléfono.";
-            }
-            final cleanNumber = phone.number.replaceAll(RegExp(r'[^\d]'), '');
-            if (cleanNumber.length < 7) {
-              return "Número de teléfono demasiado corto.";
-            }
-            return null;
-          },
-          onChanged: (phone) {
-            print(phone.completeNumber);
-            print(phone.countryCode);
-            print(phone.number);
-            _controllers[index].text = phone.number;
-            AreaCode code = Provider.of<CatalogueProvider>(context,
-                    listen: false)
-                .allAreasCode
-                .firstWhere((areaCode) => areaCode.code == phone.countryCode);
-            _editingData[index] = ModelData(
-              label: _editingData[index].label,
-              clave: _editingData[index].clave,
-              value:
-                  '${code.id} ${phone.number.replaceAll(RegExp(r'[^\d]+'), '')}',
-              showLabel: _editingData[index].showLabel,
-            );
-          },
+        child: Stack(
+          children: [
+            IntlPhoneFieldWithValidation(
+              controller: _controllers[index],
+              initialPhoneCode: initialPhoneCode,
+              validator: (PhoneNumber? phone) {
+                if (phone == null || phone.number.isEmpty) {
+                  return 'El número de teléfono es obligatorio';
+                }
+                return PhoneValidatorService.validatePhoneNumber(phone);
+              },
+              onChanged: (phone) {
+                if (kDebugMode) {
+                  print('Country Code: ${phone.countryCode}');
+                  print('Complete Number: ${phone.completeNumber}');
+                  print('Country ISO: ${phone.countryISOCode}');
+                  print('Raw Number: ${phone.number}');
+
+                  // MOSTRAR INFORMACIÓN ADICIONAL PARA DEBUG
+                  final rules = PhoneValidatorService.getCountryRules(
+                      phone.countryISOCode);
+                  if (rules != null) {
+                    print(
+                        'Country Rules: ${rules.name} - Min: ${rules.minLength}, Max: ${rules.maxLength}');
+                  }
+                }
+                try {
+                  AreaCode code =
+                      Provider.of<CatalogueProvider>(context, listen: false)
+                          .allAreasCode
+                          .firstWhere(
+                              (areaCode) => areaCode.code == phone.countryCode);
+                  _editingData[index] = ModelData(
+                    label: _editingData[index].label,
+                    clave: _editingData[index].clave,
+                    value:
+                        '${code.id} ${phone.number.replaceAll(RegExp(r'[^\d]+'), '')}',
+                    showLabel: _editingData[index].showLabel,
+                  );
+                } catch (e) {
+                  if (kDebugMode) {
+                    print(
+                        'Código de Area no encontrado para: ${phone.countryCode}');
+                  }
+                }
+              },
+            ),
+            Positioned(
+              right: -10,
+              child: Tooltip(
+                message: 'El número de operador no debe iniciar con 0',
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  iconSize: 20,
+                  icon: const Icon(Icons.info_outline),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Información'),
+                        content: Text(
+                            style: StylesApp(context)
+                                .textStyleBody14
+                                .copyWith(color: StyleColor.black),
+                            'El número de operador no debe iniciar con 0'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       );
-      //  Row(
-      //   spacing: 10,
-      //   children: [
-      //     Expanded(
-      //       flex: 1,
-      //       child: SizedBox(
-      //         child: CustomDropdownBottomWidget<AreaCode>(
-      //           hintText: "código",
-      //           items: listPrefixCode,
-      //           onChanged: (ModelData? newValue) {
-      //             setState(() {
-      //               _editingData[index] = ModelData(
-      //                 label: _editingData[index].label,
-      //                 clave: _editingData[index].clave,
-      //                 value:
-      //                     '${newValue?.value} ${_editingData[index].value.split(' ')[1]}',
-      //                 showLabel: _editingData[index].showLabel,
-      //               );
-      //             });
-      //           },
-      //           selectedItem: item.value.isNotEmpty
-      //               ? item.value.contains(' ') &&
-      //                       item.value.split(' ').length > 1 &&
-      //                       item.value.split(' ')[0].isNotEmpty
-      //                   ? listPrefixCode.firstWhere((element) =>
-      //                       element.value == item.value.split(' ')[0])
-      //                   : null
-      //               : null,
-      //         ),
-      //       ),
-      //     ),
-      //     Expanded(
-      //       flex: 2,
-      //       child: TextFormField(
-      //         inputFormatters: [
-      //           maskFormatterTel, // Permite solo números
-      //         ],
-      //         controller: _controllers[index],
-      //         keyboardType: TextInputType.phone,
-      //         onChanged: (value) {
-      //           _controllers[index].text = value;
-      //           _editingData[index] = ModelData(
-      //             label: _editingData[index].label,
-      //             clave: _editingData[index].clave,
-      //             value:
-      //                 '${_editingData[index].value.split(' ')[0]} ${_controllers[index].text.replaceAll(RegExp(r'[^\d]+'), '')}',
-      //             showLabel: _editingData[index].showLabel,
-      //           );
-      //         },
-      //         decoration:
-      //             StylesApp(context).inputDecorationOutlineStyle.copyWith(
-      //                   hintText: "Número de teléfono",
-      //                 ),
-      //         style: StylesApp(context)
-      //             .textStyleBody12
-      //             .copyWith(color: Colors.black),
-      //       ),
-      //     )
-      //   ],
-      // );
     } else if (item.label == 'Sexo') {
       return Container(
         constraints: BoxConstraints(
@@ -343,25 +291,39 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           minWidth: 160.0,
           maxWidth: StylesApp(context).sizeTextFormField.width,
         ),
-        child: CustomDropdownBottomWidget(
-          hintText: "Seleccione un Estado",
-          items: _statesList,
-          onChanged: (ModelData? newValue) async {
-            setState(() {
-              _editingData[index] = ModelData<StateModel>(
-                label: _editingData[index].label,
-                value: newValue!.label,
-                clave: _editingData[index].clave,
-                showLabel: _editingData[index].showLabel,
-                originalData: StateModel.fromJson(newValue.originalData),
-              );
-            });
-            await _loadCities(newValue!.value, null, null, null);
-          },
-          selectedItem: item.value.isNotEmpty && _statesList.isNotEmpty
-              ? _statesList.firstWhere((element) => element.label == item.value,
-                  orElse: null)
-              : null,
+        child: Stack(
+          children: [
+            CustomDropdownBottomWidget(
+              hintText: "Seleccione un Estado",
+              items: _statesList,
+              onChanged: (ModelData? newValue) async {
+                setState(() {
+                  _editingData[index] = ModelData<StateModel>(
+                    label: _editingData[index].label,
+                    value: newValue!.label,
+                    clave: _editingData[index].clave,
+                    showLabel: _editingData[index].showLabel,
+                    originalData: StateModel.fromJson(newValue.originalData),
+                  );
+                });
+                await _loadCities(newValue!.value, null, null, null);
+              },
+              selectedItem: item.value.isNotEmpty && _statesList.isNotEmpty
+                  ? _statesList.firstWhere(
+                      (element) => element.label == item.value,
+                      orElse: null)
+                  : null,
+            ),
+            if (loadingState)
+              Positioned(
+                right: 0,
+                bottom: 5,
+                child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(StyleColor.turquoise),
+                ),
+              ),
+          ],
         ),
       );
     } else if (item.label == 'Ciudad') {
@@ -370,24 +332,38 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           minWidth: 160.0,
           maxWidth: StylesApp(context).sizeTextFormField.width,
         ),
-        child: CustomDropdownBottomWidget(
-          hintText: "Seleccione una Ciudad",
-          items: _citiesList,
-          onChanged: (ModelData? newValue) {
-            setState(() {
-              _editingData[index] = ModelData<CityModel>(
-                label: _editingData[index].label,
-                value: newValue!.label,
-                clave: _editingData[index].clave,
-                showLabel: _editingData[index].showLabel,
-                originalData: CityModel.fromJson(newValue!.originalData),
-              );
-            });
-          },
-          selectedItem: item.value.isNotEmpty && _citiesList.isNotEmpty
-              ? _citiesList.firstWhere((element) => element.label == item.value,
-                  orElse: null)
-              : null,
+        child: Stack(
+          children: [
+            CustomDropdownBottomWidget(
+              hintText: "Seleccione una Ciudad",
+              items: _citiesList,
+              onChanged: (ModelData? newValue) {
+                setState(() {
+                  _editingData[index] = ModelData<CityModel>(
+                    label: _editingData[index].label,
+                    value: newValue!.label,
+                    clave: _editingData[index].clave,
+                    showLabel: _editingData[index].showLabel,
+                    originalData: CityModel.fromJson(newValue!.originalData),
+                  );
+                });
+              },
+              selectedItem: item.value.isNotEmpty && _citiesList.isNotEmpty
+                  ? _citiesList.firstWhere(
+                      (element) => element.label == item.value,
+                      orElse: null)
+                  : null,
+            ),
+            if (loadingCity)
+              Positioned(
+                right: 0,
+                bottom: 5,
+                child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(StyleColor.turquoise),
+                ),
+              ),
+          ],
         ),
       );
     } else if (item.label == 'Iglesia') {
@@ -480,6 +456,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   Future<void> _loadStates(
       String id, int? limit, int? offset, String? search) async {
     setState(() {
+      loadingState = true;
       _statesList.clear(); // Limpiar la lista antes de cargar nuevos datos
       _citiesList.clear(); // Limpiar la lista de ciudades también
     });
@@ -496,7 +473,9 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
               .toList();
         });
       }
+      setState(() => loadingState = false);
     } catch (e) {
+      setState(() => loadingState = false);
       if (kDebugMode) {
         print("Error loading states: $e");
       }
@@ -506,6 +485,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   Future<void> _loadCities(
       String id, int? limit, int? offset, String? search) async {
     setState(() {
+      loadingCity = true;
       _citiesList.clear(); // Limpiar la lista de ciudades también
     });
     try {
@@ -519,7 +499,9 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
               .toList();
         });
       }
+      setState(() => loadingCity = false);
     } catch (e) {
+      setState(() => loadingCity = false);
       if (kDebugMode) {
         print("Error loading City: $e");
       }
@@ -572,47 +554,50 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                     margin: EdgeInsets.symmetric(horizontal: 15),
                     padding: EdgeInsets.all(15),
                     color: Colors.white,
-                    child: Column(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: ListView.builder(
-                            itemCount: _editingData.length,
-                            itemBuilder: (context, index) {
-                              final item = _editingData[index];
-                              return Column(
-                                children: [
-                                  _buildField(
-                                    item,
-                                    index, // Pasa el índice
-                                    dropDownList,
-                                    prefixCode,
-                                    optionsSex,
-                                    listChurches,
-                                    catalogueProvider.allChurches,
-                                    catalogueProvider.allCountries,
-                                  ),
-                                  SizedBox(
-                                    height: 12.0,
-                                  )
-                                ],
-                              );
-                            },
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: ListView.builder(
+                              itemCount: _editingData.length,
+                              itemBuilder: (context, index) {
+                                final item = _editingData[index];
+                                return Column(
+                                  children: [
+                                    _buildField(
+                                      item,
+                                      index, // Pasa el índice
+                                      dropDownList,
+                                      prefixCode,
+                                      optionsSex,
+                                      listChurches,
+                                      catalogueProvider.allChurches,
+                                      catalogueProvider.allCountries,
+                                    ),
+                                    SizedBox(
+                                      height: 12.0,
+                                    )
+                                  ],
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 0,
-                          child: ButtonThemeWidget(
-                            buttonStyle: StylesApp(context).btnWidgetSmall,
-                            text: 'Guardar',
-                            width: 150.0,
-                            height: 40.0,
-                            onPressed: () {
-                              widget.onSave(_editingData);
-                            },
-                          ),
-                        )
-                      ],
+                          Expanded(
+                            flex: 0,
+                            child: ButtonThemeWidget(
+                              buttonStyle: StylesApp(context).btnWidgetSmall,
+                              text: 'Guardar',
+                              width: 150.0,
+                              height: 40.0,
+                              onPressed: () {
+                                _saveData();
+                              },
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -625,5 +610,65 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         ),
       ],
     );
+  }
+
+  // Widget para el estado de error
+  Widget _buildErrorState(dynamic error) {
+    return Container(
+      color: StyleColor.turquoise,
+      width: double.infinity,
+      height: MediaQuery.sizeOf(context).height * 0.6,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, color: Colors.white, size: 50),
+          SizedBox(height: 20),
+          Text(
+            "Error al cargar los datos",
+            style: StylesApp(context)
+                .textStyleBody14
+                .copyWith(color: Colors.white),
+          ),
+          SizedBox(height: 10),
+          Text(
+            error.toString(),
+            style: StylesApp(context)
+                .textStyleBody12
+                .copyWith(color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          ButtonThemeWidget(
+            buttonStyle: StylesApp(context).btnWidgetSmall,
+            text: 'Reintentar',
+            width: 120.0,
+            height: 40.0,
+            onPressed: () {
+              // Inicializar valores de país, estado y ciudad si existen
+              _initializeLocationValues().then((_) {
+                setState(() {
+                  _isInitialized = true;
+                });
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _saveData() {
+    if (_formKey.currentState!.validate()) {
+      // si la validación es exitosa, guardar los cambios
+      widget.onSave(_editingData);
+    } else {
+      // si hay errores de validación, mostrar mensajes
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Por favor, corrija los errores en el formulario.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

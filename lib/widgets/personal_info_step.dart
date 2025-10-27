@@ -1,7 +1,9 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
+import 'package:biblia_palabra_de_vida_app/services/phone_validator_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl_phone_field/phone_number.dart';
 import 'package:provider/provider.dart';
 
@@ -63,7 +65,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Container(
+          SizedBox(
             width: formWidth,
             child: TextFormField(
               controller: widget.nameController,
@@ -81,7 +83,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           const SizedBox(
             height: 23.0,
           ),
-          Container(
+          SizedBox(
             width: formWidth,
             child: TextFormField(
               controller: widget.lastNameController,
@@ -122,7 +124,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           const SizedBox(
             height: 23.0,
           ),
-          Container(
+          SizedBox(
             width: formWidth,
             child: DatePickerFormField(
               initialDate: DateTime.now().subtract(Duration(days: 15 * 365)),
@@ -154,7 +156,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           const SizedBox(
             height: 23.0,
           ),
-          Container(
+          SizedBox(
             width: formWidth,
             child: CustomDropdownWithValidation(
               items: widget.dropDownList,
@@ -172,32 +174,81 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           const SizedBox(
             height: 23.0,
           ),
-          Container(
+          SizedBox(
             width: formWidth,
-            child: IntlPhoneFieldWithValidation(
-              controller: widget.phoneNumberController,
-              validator: (PhoneNumber? phone) {
-                if (phone == null || phone.number.isEmpty) {
-                  return "Por favor, ingresa tu número de teléfono.";
-                }
-                final cleanNumber =
-                    phone.number.replaceAll(RegExp(r'[^\d]'), '');
-                if (cleanNumber.length < 7) {
-                  return "Número de teléfono demasiado corto.";
-                }
-                return null;
-              },
-              onChanged: (phone) {
-                print(phone.completeNumber);
-                setState(() {
-                  widget.prefixNumberController.text = phone.countryCode;
-                });
-                 AreaCode code = Provider.of<CatalogueProvider>(context,
-                    listen: false)
-                .allAreasCode
-                .firstWhere((areaCode) => areaCode.code == phone.countryCode);
-                  widget.onPrefixSelected(ModelData(label: code.code, value: code.id));
-              },
+            child: Stack(
+              children: [
+                IntlPhoneFieldWithValidation(
+                  controller: widget.phoneNumberController,
+                  validator: (PhoneNumber? phone) {
+                    if (phone == null || phone.number.isEmpty) {
+                      return 'El número de teléfono es obligatorio';
+                    }
+                    return PhoneValidatorService.validatePhoneNumber(phone);
+                  },
+                  onChanged: (phone) {
+                    if (kDebugMode) {
+                      print('Country Code: ${phone.countryCode}');
+                      print('Complete Number: ${phone.completeNumber}');
+                      print('Country ISO: ${phone.countryISOCode}');
+                      print('Raw Number: ${phone.number}');
+                
+                      // MOSTRAR INFORMACIÓN ADICIONAL PARA DEBUG
+                      final rules = PhoneValidatorService.getCountryRules(
+                          phone.countryISOCode);
+                      if (rules != null) {
+                        print(
+                            'Country Rules: ${rules.name} - Min: ${rules.minLength}, Max: ${rules.maxLength}');
+                      }
+                    }
+                
+                    setState(() {
+                      widget.prefixNumberController.text = phone.countryCode;
+                    });
+                    try {
+                      AreaCode code = Provider.of<CatalogueProvider>(context,
+                              listen: false)
+                          .allAreasCode
+                          .firstWhere((areaCode) =>
+                              areaCode.code == phone.countryCode);
+                      widget.onPrefixSelected(
+                          ModelData(label: code.code, value: code.id));
+                    } catch (e) {
+                      if (kDebugMode) {
+                        print(
+                            'Código de Area no encontrado para: ${phone.countryCode}');
+                      }
+                    }
+                  },
+                ),
+                Positioned(
+                  right: -10,
+                  child: Tooltip(
+                    message: 'El número de operador no debe iniciar con 0',
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      iconSize: 20,
+                      icon: const Icon(Icons.info_outline),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Información'),
+                            content: const Text(
+                                'El número de operador no debe iniciar con 0'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(

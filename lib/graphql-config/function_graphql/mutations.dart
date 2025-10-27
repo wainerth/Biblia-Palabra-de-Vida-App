@@ -401,7 +401,7 @@ Future<ResponseData> forgotPassword(email) async {
 
 Future verifyPinPassword(email, code) async {
   final GraphQLClient client = createClient();
-  operationName = 'verifyPinForPassword';
+  operationName = 'VerifyPinForPassword';
   final MutationOptions mutateGql = MutationOptions(
       operationName: operationName,
       document: gql(r'''

@@ -119,7 +119,7 @@ class _CustomDropdownBottomWidgetState<T>
                   ),
               hintText: widget.hintText,
               suffixIcon:  Icon(Icons.arrow_drop_down, color: widget.items.isEmpty ? disabledColor : null  ,),
-              fillColor: widget.items.isEmpty ? Colors.white : null,
+              fillColor: widget.items.isEmpty ? Colors.grey[100] : null,
               filled: true
               ),
           controller: TextEditingController(
