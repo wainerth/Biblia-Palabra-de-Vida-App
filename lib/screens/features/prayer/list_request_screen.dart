@@ -189,18 +189,22 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     ),
                   ),
                   Expanded(
-                    child: listRequest.isEmpty 
-                    ? Center(
-                      child: Container(
-                        padding: EdgeInsets.all(18.0),
-                        child: Text(textAlign: TextAlign.center, "No Haz Realzado aun Pedido de Oración", style: StylesApp(context).textStyleBody16,),
-                      ),
-                    )
-                    : ListView.builder(
-                        itemCount: listRequest.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return _cardListItem(context, index);
-                        }),
+                    child: listRequest.isEmpty
+                        ? Center(
+                            child: Container(
+                              padding: EdgeInsets.all(18.0),
+                              child: Text(
+                                textAlign: TextAlign.center,
+                                "No Haz Realzado aun Pedido de Oración",
+                                style: StylesApp(context).textStyleBody16,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: listRequest.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return _cardListItem(context, index);
+                            }),
                   ),
                   Padding(
                     padding: EdgeInsets.only(
@@ -260,13 +264,18 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                 TextSpan(
                   children: [
                     TextSpan(
-                        text: "Fecha hora: ",
-                        style: StylesApp(context).textStyleBody2_14),
+                      text: "Fecha hora: ",
+                      style: StylesApp(context).textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),
+                    ),
                     TextSpan(
-                        text: listRequest[index].requestDate,
-                        style: StylesApp(context)
-                            .textStyleBody2_14
-                            .copyWith(color: Colors.black)),
+                      text: listRequest[index].requestDate,
+                      style: StylesApp(context).textStyleBody14.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                    ),
                   ],
                 ),
               ),
@@ -275,11 +284,13 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                   children: [
                     TextSpan(
                         text: "Por: ",
-                        style: StylesApp(context).textStyleBody2_14),
+                        style: StylesApp(context).textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),),
                     TextSpan(
                         text: listRequest[index].requestedBy,
                         style: StylesApp(context)
-                            .textStyleBody2_14
+                            .textStyleBody14
                             .copyWith(color: Colors.black)),
                   ],
                 ),
@@ -290,20 +301,24 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                   children: [
                     TextSpan(
                         text: "Oración por: ",
-                        style: StylesApp(context).textStyleBody2_14),
+                        style: StylesApp(context).textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),),
                     TextSpan(
                       text: listRequest[index].prayerCategory.name.trim(),
                       style: StylesApp(context)
-                          .textStyleBody2_14
+                          .textStyleBody14
                           .copyWith(color: Colors.black),
                     ),
                     TextSpan(
                         text: " / ",
-                        style: StylesApp(context).textStyleBody2_14),
+                        style: StylesApp(context).textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),),
                     TextSpan(
                         text: listRequest[index].prayerSubType.name,
                         style: StylesApp(context)
-                            .textStyleBody2_14
+                            .textStyleBody14
                             .copyWith(color: Colors.black)),
                   ],
                 ),

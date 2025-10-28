@@ -1,7 +1,7 @@
 import 'dart:io';
 
 class RequestPrayerModel {
-  final File audio;
+  final File? audio;
   final String description;
   final String prayerFor;
   final String prayerSubTypeId;

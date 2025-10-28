@@ -58,12 +58,14 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                       TextSpan(
                                           text: "Fecha hora: ",
                                           style: StylesApp(context)
-                                              .textStyleBody2_14),
+                                              .textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),),
                                       TextSpan(
                                           text: widget
                                               .dataSeleccionada.requestDate,
                                           style: StylesApp(context)
-                                              .textStyleBody2_14
+                                              .textStyleBody14
                                               .copyWith(color: Colors.black)),
                                     ],
                                   ),
@@ -74,12 +76,14 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                       TextSpan(
                                           text: "Solicitante: ",
                                           style: StylesApp(context)
-                                              .textStyleBody2_14),
+                                              .textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),),
                                       TextSpan(
                                         text:
                                             widget.dataSeleccionada.requestedBy,
                                         style: StylesApp(context)
-                                            .textStyleBody2_14
+                                            .textStyleBody14
                                             .copyWith(color: Colors.black),
                                       ),
                                     ],
@@ -91,11 +95,13 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                       TextSpan(
                                           text: "Pide por: ",
                                           style: StylesApp(context)
-                                              .textStyleBody2_14),
+                                              .textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),),
                                       TextSpan(
                                         text: widget.dataSeleccionada.prayedFor,
                                         style: StylesApp(context)
-                                            .textStyleBody2_14
+                                            .textStyleBody14
                                             .copyWith(color: Colors.black),
                                       ),
                                     ],
@@ -108,24 +114,28 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                       TextSpan(
                                           text: "Oración por: ",
                                           style: StylesApp(context)
-                                              .textStyleBody2_14),
+                                              .textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),),
                                       TextSpan(
                                         text: widget.dataSeleccionada
                                             .prayerCategory.name
                                             .trim(),
                                         style: StylesApp(context)
-                                            .textStyleBody2_14
+                                            .textStyleBody14
                                             .copyWith(color: Colors.black),
                                       ),
                                       TextSpan(
                                           text: " / ",
                                           style: StylesApp(context)
-                                              .textStyleBody2_14),
+                                              .textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),),
                                       TextSpan(
                                         text: widget.dataSeleccionada
                                             .prayerSubType.name,
                                         style: StylesApp(context)
-                                            .textStyleBody2_14
+                                            .textStyleBody14
                                             .copyWith(color: Colors.black),
                                       ),
                                     ],
@@ -137,12 +147,14 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                                       TextSpan(
                                           text: "Descripción: ",
                                           style: StylesApp(context)
-                                              .textStyleBody2_14),
+                                              .textStyleBody14.copyWith(
+                            color: StyleColor.orange,
+                          ),),
                                       TextSpan(
                                           text: widget
                                               .dataSeleccionada.prayerDetails,
                                           style: StylesApp(context)
-                                              .textStyleBody2_14
+                                              .textStyleBody14
                                               .copyWith(color: Colors.black)),
                                     ],
                                   ),

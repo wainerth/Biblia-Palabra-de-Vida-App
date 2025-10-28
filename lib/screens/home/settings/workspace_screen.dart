@@ -1338,16 +1338,16 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
                             null) {
                           Navigator.pushNamed(
                               context,
-                              getRouterScreen(notification.model,
+                              getRouterScreen(notification.model.toLowerCase(),
                                       notification.variables)
                                   .routeName,
-                              arguments: getRouterScreen(notification.model,
+                              arguments: getRouterScreen(notification.model.toLowerCase(),
                                       notification.variables)
                                   .arguments);
                         } else {
                           Navigator.pushNamed(
                               context,
-                              getRouterScreen(notification.model, null)
+                              getRouterScreen(notification.model.toLowerCase(), null)
                                   .routeName);
                         }
                       },

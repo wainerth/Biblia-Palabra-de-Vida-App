@@ -298,6 +298,8 @@ RouteInfo getRouterScreen(action, args) {
       return RouteInfo('/detailsProgressPage');
     case 'streak':
       return RouteInfo('/detailsProgressPage');
+    case 'user':
+      return RouteInfo('/detailsProgressPage');
   }
   return RouteInfo('/layoutPage');
 }

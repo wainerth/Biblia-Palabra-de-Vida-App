@@ -187,6 +187,24 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     });
 
                     await getChapterByBook(book!.value);
+                    setState(() {
+                      initialChapter =
+                          chapters.isNotEmpty ? [chapters.first] : [];
+                      chapterSelected =
+                          chapters.isNotEmpty ? chapters.first : null;
+                      _versesExpanded = true;
+                    });
+                     if (chapterSelected != null) {
+                      setState(() {
+                        initialChapter = [chapterSelected!];
+                        _chaptersExpanded = false;
+                      });
+                      await loadVerses(chapterSelected!.id!);
+                      setState(() {
+                        _versesExpanded = true;
+                        _selectedItems.add(verses.first);
+                      });
+                    }
                   },
                   selectedItem: bookSelected!.value.isNotEmpty
                       ? books.firstWhere((element) =>
@@ -260,7 +278,6 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                             setState(() {
                               chapterSelected = chapter.first;
                               _chaptersExpanded = false;
-                              _versesExpanded = true;
                               _selectedItems = [];
                             });
                           },
@@ -384,16 +401,15 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                   }
 
                   final data = InputDataSearchModel(
-                    version: versionSelected!.originalData,
-                    book: bookSelected!.originalData,
-                    chapter: chapterSelected,
-                    versionId: versionSelected!.value,
-                    bookId: bookSelected!.value,
-                    chapterId: chapterSelected!.id!,
-                    startVerseId: _selectedItems.first.id!,
-                    endVerseId: _selectedItems.last.id!,
-                    verses: _selectedItems
-                  );
+                      version: versionSelected!.originalData,
+                      book: bookSelected!.originalData,
+                      chapter: chapterSelected,
+                      versionId: versionSelected!.value,
+                      bookId: bookSelected!.value,
+                      chapterId: chapterSelected!.id!,
+                      startVerseId: _selectedItems.first.id!,
+                      endVerseId: _selectedItems.last.id!,
+                      verses: _selectedItems);
                   widget.onActionBook!(data);
                 },
               )

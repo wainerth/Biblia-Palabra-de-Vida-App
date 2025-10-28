@@ -34,7 +34,7 @@ class _PageScreenState extends State<PageScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final Object? args = ModalRoute.of(context)!.settings.arguments;
-    if (args != null) {
+    if (args != null && args is Map<String, dynamic> && args.containsKey('selectedIndex')) {
       setState(() {
         _selectedIndex = (args as Map<String, dynamic>)["selectedIndex"];
       });

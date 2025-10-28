@@ -1837,10 +1837,12 @@ class _BibleScreenState extends State<BibleScreen> {
         .allBibleVersion
         .map((v) => ModelData(value: v.id, label: v.version))
         .toList();
+    //version seleccionada
     setState(() {
       lastVersionsSelected = bibleVersions
           .firstWhere((version) => version.value == data.versionId)
           .value;
+
       final currentVers = Provider.of<CatalogueProvider>(context, listen: false)
           .allBibleVersion
           .firstWhere((version) => version.id == lastVersionsSelected);
@@ -1931,6 +1933,12 @@ class _BibleScreenState extends State<BibleScreen> {
           // Si no hay startVerseId, limpiar el marcador
         }
       });
+      await PreferencesManager().setSelectedBibleVersion(lastVersionsSelected!);
+      // actualizamos el storage de libro seleccionado
+      await PreferencesManager().setBookSelected(currentBook!.id);
+      // actualizamos el storage del capítulo seleccionado
+      await PreferencesManager()
+          .setChapterSelected(currentChapter!.chapter.toString());
     } catch (e) {
       LoadingService().hideLoading();
       errorMessage = 'Error al cargar el capítulo $e';

@@ -8,6 +8,7 @@ class GraphQLConfig {
   static const bool development = false;
   static const String clientId = '823422522259-lsaj5empb8t54pims7m727krgrcfu6lf.apps.googleusercontent.com';
   static const String serverClientId = '945681325893-ckla49hrnakacrpc9fc21vie6ub9o9o3.apps.googleusercontent.com';
+  static const String clientId_pro = '945681325893-1pui41okanrgp41gfd2r74m90el7n290.apps.googleusercontent.com';
 }
 
 // "robinsongarces"

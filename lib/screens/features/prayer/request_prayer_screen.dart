@@ -217,7 +217,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                     try {
                       // almaceno en Model para formatear
                       final requestData = RequestPrayerModel(
-                          audio: audioFile!,
+                          audio: audioFile,
                           description: _descriptionController.text,
                           prayerFor: _recipientName.text,
                           prayerSubTypeId: subtypeSelected.value,

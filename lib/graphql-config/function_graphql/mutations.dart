@@ -75,6 +75,7 @@ Future<ResponseData> loginGoogle() async {
 
   if (Platform.isAndroid) {
     googleSignIn = GoogleSignIn(
+      // clientId: GraphQLConfig.serverClientId,
       scopes: [
         "email",
         "profile",
@@ -1222,7 +1223,8 @@ Future<ResponseData> markAllAsReadNotifications(String userId) async {
     );
   } on TimeoutException catch (e) {
     return ResponseData(
-        data: null, error: 'Mark All As Read Notifications Timeout de conexión $e');
+        data: null,
+        error: 'Mark All As Read Notifications Timeout de conexión $e');
   } catch (e) {
     return handleGenericError(e, operationName);
   }
@@ -1296,12 +1298,14 @@ Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
-  final multipartFile = await MultipartFile.fromPath(
-    'audio',
-    prayer.audio.path,
-    contentType: MediaType('audio', 'aac'),
-  );
+  MultipartFile? multipartFile;
+  if (prayer.audio != null) {
+    multipartFile = await MultipartFile.fromPath(
+      'audio',
+      prayer.audio!.path,
+      contentType: MediaType('audio', 'aac'),
+    );
+  }
   operationName = 'CreateRequestPrayer';
   MutationOptions mutateGql = MutationOptions(
     operationName: operationName,
