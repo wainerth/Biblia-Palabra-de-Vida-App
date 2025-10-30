@@ -244,6 +244,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         setState(() {
                                           finalStory = false;
                                           isPage = 0;
+                                          storyIndex = 0;
                                           isPlaying = false;
                                         });
                                         await flutterTts.stop();
@@ -453,6 +454,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         await flutterTts.stop();
                                         _togglePlayPause(stories[storyIndex]);
                                       } else {
+                                        await flutterTts.stop();
+                                        
                                         setState(
                                           () {
                                             finalStory = true;

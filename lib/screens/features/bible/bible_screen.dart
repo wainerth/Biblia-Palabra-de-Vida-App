@@ -62,6 +62,7 @@ class _BibleScreenState extends State<BibleScreen> {
   int? currentPlayingVerseIndex;
 // Añade estas variables a tu estado
   double _speechRate = 0.5; // Velocidad por defecto
+  int scrollToVerse = 0;
 
   @override
   void initState() {
@@ -377,62 +378,6 @@ class _BibleScreenState extends State<BibleScreen> {
                           );
                         },
                       );
-                      // await SystemChrome.setPreferredOrientations([
-                      //   DeviceOrientation.portraitUp,
-                      //   DeviceOrientation.portraitDown,
-                      // ]);
-                      // showDialog(
-                      //     context: context,
-                      //     builder: (BuildContext context) {
-                      //       return Center(
-                      //         child: Stack(children: [
-                      //           Padding(
-                      //             padding: const EdgeInsets.all(8.0),
-                      //             child: Container(
-                      //               decoration: BoxDecoration(
-                      //                   color: Colors.white,
-                      //                   borderRadius: BorderRadius.circular(8)),
-                      //               constraints: BoxConstraints(minHeight: 213),
-                      //               // height: 213,
-                      //               child: ClipRRect(
-                      //                 borderRadius: BorderRadius.circular(8),
-                      //                 child: (video.url
-                      //                             .contains('youtube.com') ||
-                      //                         video.url.contains('youtu.be'))
-                      //                     ? PlayerYoutubeWidget(
-                      //                         videoUrl: video.url)
-                      //                     : PlayerNoYoutube(url: "${GraphQLConfig.urlServidor}${video.url}"),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //           Positioned(
-                      //             // Posiciona el botón de cerrar
-                      //             top: 0,
-                      //             right: 0,
-                      //             child: GestureDetector(
-                      //               onTap: () {
-                      //                 Navigator.of(context)
-                      //                     .pop(); // Cierra el diálogo
-                      //               },
-                      //               child: Container(
-                      //                 padding: const EdgeInsets.all(8.0),
-                      //                 decoration: BoxDecoration(
-                      //                   color: Colors.grey.withValues(
-                      //                       alpha:
-                      //                           0.7), // Fondo semitransparente para el botón
-                      //                   shape: BoxShape.circle,
-                      //                 ),
-                      //                 child: const Icon(
-                      //                   Icons.close,
-                      //                   color: Colors.white,
-                      //                   size: 20.0,
-                      //                 ),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //         ]),
-                      //       );
-                      //     });
                     },
                     onBack: () async {
                       Navigator.pushNamed(
@@ -499,7 +444,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                             SizedBox(
                                               height:
                                                   kBottomNavigationBarHeight +
-                                                      20,
+                                                      45,
                                             )
                                             // Más widgets...
                                           ],
@@ -964,20 +909,31 @@ class _BibleScreenState extends State<BibleScreen> {
                               ),
                               child: Transform.translate(
                                 offset: Offset(0, -4),
-                                child: Text(
-                                  "${verse.verse}",
-                                  style: StylesApp(context)
-                                      .textStyleBody16
-                                      .copyWith(
-                                        fontFamily: fontFamilySet.label,
-                                        fontSize: fontSizeNumber,
-                                        fontWeight: FontWeight.bold,
-                                        color: currentPlayingVerseIndex ==
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    
+                                    color: scrollToVerse > 0 &&
+                                            scrollToVerse ==
                                                 verses.indexOf(verse)
-                                            ? Colors
-                                                .blue // Cambia color cuando se lee
-                                            : currentTheme.verseHighlightColor,
-                                      ),
+                                        ? StyleColor.yellowLight
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  child: Text(
+                                    "${verse.verse}",
+                                    style: StylesApp(context)
+                                        .textStyleBody16
+                                        .copyWith(
+                                          fontFamily: fontFamilySet.label,
+                                          fontSize: fontSizeNumber,
+                                          fontWeight: FontWeight.bold,
+                                          color: currentPlayingVerseIndex ==
+                                                  verses.indexOf(verse)
+                                              ? Colors
+                                                  .blue // Cambia color cuando se lee
+                                              : currentTheme.verseHighlightColor,
+                                        ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -986,18 +942,6 @@ class _BibleScreenState extends State<BibleScreen> {
                       ],
                     ),
                   ),
-                  //  if (_isFavorite(verse))
-                  //   WidgetSpan(
-                  //     alignment: PlaceholderAlignment.baseline,
-                  //     baseline: TextBaseline.alphabetic,
-                  //     child: SelectionContainer.disabled(
-                  //       child: Icon(
-                  //         Icons.star,
-                  //         size: 16,
-                  //         color: StyleColor.yellowLight,
-                  //       ),
-                  //     ),
-                  //   ),
                   ..._buildHighlightedTextSpans(verse),
                 ])
             .toList(),
@@ -1855,6 +1799,7 @@ class _BibleScreenState extends State<BibleScreen> {
       //consulto todos los capítulos del libro actual con sus versículos
       final responseChapterByBook = await getChapterWithVerses(currentBook!.id);
       if (responseChapterByBook.error != null) {
+        print(responseChapterByBook.error);
         setState(() {
           errorMessage = responseChapterByBook.error;
         });
@@ -1887,6 +1832,7 @@ class _BibleScreenState extends State<BibleScreen> {
           final startIndex =
               verses.indexWhere((v) => v.id == data.startVerseId);
           if (startIndex != -1) {
+            setState(() => scrollToVerse = startIndex);
             // Guardar el ID del versículo marcado por scroll
             WidgetsBinding.instance.addPostFrameCallback((_) async {
               if (_selectableTextKey.currentContext != null &&
@@ -1911,18 +1857,26 @@ class _BibleScreenState extends State<BibleScreen> {
                       maxLines: null,
                     );
                     tp.layout(maxWidth: renderBox.size.width);
-                    final offsetY = tp.height;
+                    final extraBottom =
+                      startIndex > 0 ? (kBottomNavigationBarHeight + 45.0) : 0.0;
+                    double offsetY = scrollController.position.maxScrollExtent; // tp.height + extraBottom;
+                    // if (scrollController.hasClients) {
+                    //   offsetY =
+                    //     min(offsetY, scrollController.position.maxScrollExtent);
+                    // }
+
                     await scrollController.animateTo(
                       offsetY,
-                      duration: Duration(milliseconds: 200),
+                      duration: Duration(seconds: 2),
                       curve: Curves.easeInOut,
                     );
                   }
                 } catch (_) {
                   final itemHeight = 40.0;
+                   setState(() => scrollToVerse = startIndex);
                   await scrollController.animateTo(
                     startIndex * itemHeight,
-                    duration: Duration(milliseconds: 400),
+                    duration: Duration(seconds: 400),
                     curve: Curves.easeInOut,
                   );
                 }

@@ -2,7 +2,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+// import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final Preach data;
@@ -13,27 +13,27 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late YoutubePlayerController _controller;
+  // late YoutubePlayerController _controller;
 
   @override
   void initState() {
     super.initState();
-    String? videoId = YoutubePlayer.convertUrlToId(widget.data.video!.url!);
-    if (videoId != null) {
-      _controller = YoutubePlayerController(
-        initialVideoId: videoId, // Reemplaza con el ID de tu video
-        flags: const YoutubePlayerFlags(
-          autoPlay: false,
-          mute: false,
-          controlsVisibleAtStart: true,
-        ),
-      );
-    }
+    // String? videoId = YoutubePlayer.convertUrlToId(widget.data.video!.url!);
+    // if (videoId != null) {
+    //   _controller = YoutubePlayerController(
+    //     initialVideoId: videoId, // Reemplaza con el ID de tu video
+    //     flags: const YoutubePlayerFlags(
+    //       autoPlay: false,
+    //       mute: false,
+    //       controlsVisibleAtStart: true,
+    //     ),
+    //   );
+    // }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    // _controller.dispose();
     super.dispose();
   }
 
