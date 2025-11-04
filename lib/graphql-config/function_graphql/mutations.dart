@@ -825,7 +825,7 @@ Future<ResponseData> removePreachFavorite(
 
 // Mutation Create HightLighters
 
-Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
+Future<ResponseData> createHighLighters(List<HighlightRangeModel> input,
     String userId, int bibleVersion, String chapterId) async {
   String? userToken = await PreferencesManager().getUserToken();
 

@@ -185,11 +185,11 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
         if (navigatorKey.currentState != null) {
           if (routeInfo.arguments != null) {
             navigatorKey.currentState?.pushNamed(
-              routeInfo.routeName,
+              routeInfo.routeName.toLowerCase(),
               arguments: routeInfo.arguments,
             );
           } else {
-            navigatorKey.currentState?.pushNamed(routeInfo.routeName);
+            navigatorKey.currentState?.pushNamed(routeInfo.routeName.toLowerCase());
           }
         }
         // });

@@ -62,7 +62,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.3 # Usa la versión más reciente
   local_auth: ^2.3.0
   flutter_downloader: ^1.12.0
-  youtube_player_flutter: ^9.1.1
+  youtube_player_iframe: ^4.0.4
   open_filex: ^4.7.0
   selectable: ^0.3.1
   flutter_tts: ^3.6.3

@@ -30,7 +30,8 @@ void main() async {
       ignoreSsl: kDebugMode,
     );
   }
-
+  final catalogueProvider = CatalogueProvider();
+  await catalogueProvider.initialize();
   debugPrint = (String? message, {int? wrapWidth}) {
     // Logs detallados solo en modo debug
     if (message != null && message.contains('GraphQL')) {
@@ -43,7 +44,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => socketProvider),
         ChangeNotifierProvider<CatalogueProvider>(
-            create: (_) => CatalogueProvider()),
+            create: (_) => catalogueProvider),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
         ChangeNotifierProvider<AuthenticationProvider>(
           create: (context) => AuthenticationProvider(

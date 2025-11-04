@@ -62,7 +62,9 @@ class _BibleScreenState extends State<BibleScreen> {
   int? currentPlayingVerseIndex;
 // Añade estas variables a tu estado
   double _speechRate = 0.5; // Velocidad por defecto
-  int scrollToVerse = 0;
+  int? scrollToVerse;
+  final Map<int, GlobalKey> _verseKeys = {};
+  bool _isManualScroll = false;
 
   @override
   void initState() {
@@ -95,11 +97,21 @@ class _BibleScreenState extends State<BibleScreen> {
         }
       }
     });
+    scrollController.addListener(() {
+      // Cuando el usuario mueve el scroll manualmente
+      if (scrollController.position.isScrollingNotifier.value) {
+        if (!_isManualScroll) return;
+        if (scrollToVerse != null && scrollToVerse! > 0) {
+          setState(() => scrollToVerse = null);
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     flutterTts.stop(); // Detener TTS al salir
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -290,7 +302,8 @@ class _BibleScreenState extends State<BibleScreen> {
                   BuildErrorWidget(
                     errorMessage: errorMessage!,
                     onRetry: () async => _initDataLoad(),
-                    onBack: () => Navigator.pushNamed(context, '/layoutPage',
+                    onBack: () => Navigator.pushReplacementNamed(
+                        context, '/layoutPage',
                         arguments: {'selectedIndex': 0}),
                   )
                 } else ...{
@@ -880,78 +893,133 @@ class _BibleScreenState extends State<BibleScreen> {
     });
   }
 
-  /// Widget realiza la construcción de los textSpan para selección
-  /// continua
+  /// Widget realiza la construcción de los textSpan para selección continua
   Widget _buildContinuousText() {
-    final fullText = verses.map((v) => "${v.verse} ${v.text}").join(' ');
+    // 🔥 TEXTO COMPLETO con números para copiar/compartir
+    final fullTextWithNumbers =
+        verses.map((v) => "${v.verse} ${v.text}").join(' ');
+    // 🔥 TEXTO SIN números para backend/resaltado
+    final fullTextWithoutNumbers = verses.map((v) => v.text).join(' ');
 
     return SelectableText.rich(
       key: _selectableTextKey,
       TextSpan(
-        children: verses
-            .expand((verse) => [
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.baseline,
-                    baseline: TextBaseline.alphabetic,
-                    child: Stack(
-                      alignment:
-                          Alignment.center, // Centra los hijos en el Stack
-                      children: [
-                        SelectionContainer.disabled(
-                          child: GestureDetector(
-                            onTap: () {
-                              _showVersePopupMenu(context, verse);
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                left: verse.verse == 1 ? 4.0 : 4.0,
-                                right: 4.0,
-                              ),
-                              child: Transform.translate(
-                                offset: Offset(0, -4),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    
-                                    color: scrollToVerse > 0 &&
-                                            scrollToVerse ==
-                                                verses.indexOf(verse)
-                                        ? StyleColor.yellowLight
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  child: Text(
-                                    "${verse.verse}",
-                                    style: StylesApp(context)
-                                        .textStyleBody16
-                                        .copyWith(
-                                          fontFamily: fontFamilySet.label,
-                                          fontSize: fontSizeNumber,
-                                          fontWeight: FontWeight.bold,
-                                          color: currentPlayingVerseIndex ==
-                                                  verses.indexOf(verse)
-                                              ? Colors
-                                                  .blue // Cambia color cuando se lee
-                                              : currentTheme.verseHighlightColor,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                            ),
+        children: verses.asMap().entries.map((entry) {
+          final index = entry.key;
+          final verse = entry.value;
+          _verseKeys[index] ??= GlobalKey();
+
+          return TextSpan(
+            children: [
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Stack(
+                  key: _verseKeys[index],
+                  alignment: Alignment.center,
+                  children: [
+                    SelectionContainer.disabled(
+                      child: GestureDetector(
+                        onTap: () {
+                          _showVersePopupMenu(context, verse);
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: verse.verse == 1 ? 4.0 : 4.0,
+                            right: 4.0,
                           ),
+                          child: Transform.translate(
+                              offset: Offset(0, -4),
+                              child: Stack(
+                                children: [
+                                  if (scrollToVerse != null &&
+                                      scrollToVerse == verses.indexOf(verse))
+                                    StreamBuilder<bool>(
+                                      stream: Stream.periodic(
+                                          const Duration(milliseconds: 700),
+                                          (i) => i % 2 == 0),
+                                      builder: (context, snapshot) {
+                                        final active = snapshot.data ?? true;
+                                        return AnimatedOpacity(
+                                          duration:
+                                              const Duration(milliseconds: 350),
+                                          opacity: active ? 1.0 : 0.35,
+                                          child: Transform.translate(
+                                            offset: active
+                                                ? const Offset(6, 0)
+                                                : const Offset(0, 0),
+                                            child: Icon(
+                                              weight: 35.0,
+                                              Icons.arrow_forward,
+                                              size: 22,
+                                              color: StyleColor.blueDark,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  Container(
+                                    child: Text(
+                                      "${verse.verse}",
+                                      style: StylesApp(context)
+                                          .textStyleBody16
+                                          .copyWith(
+                                            fontFamily: fontFamilySet.label,
+                                            fontSize: fontSizeNumber,
+                                            fontWeight: FontWeight.bold,
+                                            color: currentPlayingVerseIndex ==
+                                                    verses.indexOf(verse)
+                                                ? Colors.blue
+                                                : currentTheme
+                                                    .verseHighlightColor,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              )),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                  ..._buildHighlightedTextSpans(verse),
-                ])
-            .toList(),
+                  ],
+                ),
+              ),
+              // 🔥 TextSpan simple sin números para la selección
+              ..._buildHighlightedTextSpansForSelection(verse),
+            ],
+          );
+        }).toList(),
       ),
       contextMenuBuilder: (context, selectableRegionState) {
         final selection = selectableRegionState.textEditingValue.selection;
-        final selectedText = selection.textInside(fullText);
-        final selectedVerses = _getVersesInSelection(selection, fullText);
+
+        // 🔥 TEXTO PARA COPIAR/COMPARTIR: Con números
+        final selectedTextWithNumbers =
+            selection.textInside(fullTextWithNumbers);
+        // 🔥 TEXTO PARA BACKEND/RESALTADO: Sin números
+        final selectedTextWithoutNumbers = _getSelectedTextWithoutNumbers(
+            selection, fullTextWithNumbers, fullTextWithoutNumbers);
+
+        print("🎯 Texto seleccionado CON números: '$selectedTextWithNumbers'");
+        print(
+            "🎯 Texto seleccionado SIN números: '$selectedTextWithoutNumbers'");
+        print("📏 Rango selección: ${selection.start}-${selection.end}");
+
+        // 🔥 OBTENER versículos usando el texto SIN números para el backend
+        final selectedVerses = _getVersesInSelectionFromOriginalSelection(selection);
+        
+        // _getVersesInSelectionWithoutNumbers(
+        //     selection, fullTextWithNumbers, fullTextWithoutNumbers);
         final overlapsHighlights =
-            _selectionOverlapsHighlights(selection, fullText);
+            _selectionOverlapsHighlights(selection, fullTextWithNumbers);
+
+        // 🔥 DEBUG: Verificar qué versículos se detectaron
+        if (kDebugMode) {
+          print("📋 Versículos detectados: ${selectedVerses.length}");
+          for (final verse in selectedVerses) {
+            print(
+                "   📖 Versículo ${verse.verse}: '${verse.text?.substring(verse.posIni!, verse.posFin!)}'");
+          }
+        }
 
         return CustomContextMenu(
           anchors: selectableRegionState.contextMenuAnchors,
@@ -960,23 +1028,29 @@ class _BibleScreenState extends State<BibleScreen> {
               icon: Icons.content_copy,
               label: 'Copiar versículo',
               onPressed: () {
+                final reference =
+                    "${currentBook?.modernName} ${currentChapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''}";
+                // 🔥 COPIAR texto CON números
                 Clipboard.setData(ClipboardData(
-                    text:
-                        "{currentBook?.modernName}\n ${currentBook?.numberBook} \n  selectedText"));
+                    text: "$reference\n$selectedTextWithNumbers"));
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Versículo copiado')),
                 );
+                selectableRegionState.hideToolbar();
               },
             ),
             CustomContextMenuItem(
               icon: Icons.share,
               label: 'Compartir versículo',
               onPressed: () {
-                SharePlus.instance.share(ShareParams(
-                  text:
-                      "${currentBook?.modernName}\n ${currentBook?.numberBook} \n $selectedText",
+                final reference =
+                    "${currentBook?.modernName} ${currentChapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''}";
+                // 🔥 COMPARTIR texto CON números
+                Share.share(
+                  "$reference\n$selectedTextWithNumbers",
                   subject: 'Versículo de ${currentBook?.modernName}',
-                ));
+                );
+                selectableRegionState.hideToolbar();
               },
             ),
             if (!overlapsHighlights)
@@ -988,6 +1062,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     ? 'Resaltar ${selectedVerses.length} versículos'
                     : 'Resaltar versículo',
                 onPressed: () {
+                  // 🔥 RESALTAR usando versículos SIN números
                   _showColorPickerForSelection(
                     context,
                     selectedVerses,
@@ -995,6 +1070,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     selection.end,
                     selectedVerses.length > 1,
                   );
+                  selectableRegionState.hideToolbar();
                 },
               ),
           ],
@@ -1002,9 +1078,9 @@ class _BibleScreenState extends State<BibleScreen> {
       },
       onSelectionChanged: (selection, cause) {
         if (selection.isValid && !selection.isCollapsed) {
-          final overlaps = _selectionOverlapsHighlights(selection, fullText);
+          final overlaps =
+              _selectionOverlapsHighlights(selection, fullTextWithNumbers);
           if (overlaps) {
-            // Usar un Future para esperar al siguiente frame y luego limpiar la selección
             Future.delayed(Duration.zero, () {
               final renderObject =
                   _selectableTextKey.currentContext?.findRenderObject();
@@ -1018,6 +1094,417 @@ class _BibleScreenState extends State<BibleScreen> {
       },
     );
   }
+/// 🔥 FUNCIÓN SIMPLIFICADA: Obtener versículos desde selección original
+List<VerseModel> _getVersesInSelectionFromOriginalSelection(TextSelection selection) {
+  List<VerseModel> selectedVerses = [];
+
+  if (!selection.isValid || selection.isCollapsed) {
+    return selectedVerses;
+  }
+
+  int currentPosition = 0;
+
+  for (final verse in verses) {
+    final verseText = verse.text!;
+    final verseNumber = "${verse.verse} ";
+    final verseNumberLength = verseNumber.length;
+
+    // Rango de este versículo en el texto completo
+    final verseStart = currentPosition;
+    final verseEnd = currentPosition + verseNumberLength + verseText.length;
+
+    // Verificar superposición
+    if (selection.start < verseEnd && selection.end > verseStart) {
+      // Calcular qué parte del texto del versículo está seleccionada
+      final selectionStartInVerse = selection.start - verseStart - verseNumberLength;
+      final selectionEndInVerse = selection.end - verseStart - verseNumberLength;
+
+      // Ajustar límites
+      final start = selectionStartInVerse.clamp(0, verseText.length);
+      final end = selectionEndInVerse.clamp(0, verseText.length);
+
+      if (start < end) {
+        final selectedVerse = VerseModel(
+          id: verse.id,
+          verse: verse.verse,
+          text: verse.text,
+          highlights: verse.highlights,
+          posIni: start,
+          posFin: end,
+        );
+        selectedVerses.add(selectedVerse);
+      }
+    }
+
+    currentPosition += verseNumberLength + verseText.length + 1;
+  }
+
+  return selectedVerses;
+}
+  /// 🔥 NUEVA FUNCIÓN: Obtener texto seleccionado sin números de versículo
+  String _getSelectedTextWithoutNumbers(TextSelection selection,
+      String fullTextWithNumbers, String fullTextWithoutNumbers) {
+    if (!selection.isValid || selection.isCollapsed) return '';
+
+    final selectedWithNumbers = selection.textInside(fullTextWithNumbers);
+
+    // 🔥 CONVERTIR selección de texto con números a texto sin números
+    final selectionInWithoutNumbers = _convertSelectionToWithoutNumbers(
+        selection, fullTextWithNumbers, fullTextWithoutNumbers);
+
+    return selectionInWithoutNumbers.textInside(fullTextWithoutNumbers);
+  }
+  /// 🔥 FUNCIÓN MEJORADA: Convertir selección de texto con números a sin números
+  TextSelection _convertSelectionToWithoutNumbers(
+      TextSelection selectionWithNumbers,
+      String fullTextWithNumbers,
+      String fullTextWithoutNumbers) {
+    int startWithoutNumbers = 0;
+    int endWithoutNumbers = 0;
+    int currentIndexWith = 0;
+    int currentIndexWithout = 0;
+
+    bool startFound = false;
+    bool endFound = false;
+
+    for (final verse in verses) {
+      final verseNumber = "${verse.verse}";
+      final verseText = verse.text!;
+      final verseNumberLength = verseNumber.length;
+
+      final verseStartWithNumbers = currentIndexWith;
+      final verseEndWithNumbers =
+          currentIndexWith + verseNumberLength + verseText.length;
+      final verseStartWithoutNumbers = currentIndexWithout;
+
+      // Buscar el inicio de la selección
+      if (!startFound &&
+          selectionWithNumbers.start >= verseStartWithNumbers &&
+          selectionWithNumbers.start <= verseEndWithNumbers) {
+        if (selectionWithNumbers.start <=
+            verseStartWithNumbers + verseNumberLength) {
+          // La selección empieza en el número o antes del texto
+          startWithoutNumbers = verseStartWithoutNumbers;
+        } else {
+          // La selección empieza en el texto
+          startWithoutNumbers = verseStartWithoutNumbers +
+              (selectionWithNumbers.start -
+                  (verseStartWithNumbers + verseNumberLength));
+        }
+        startFound = true;
+      }
+
+      // Buscar el fin de la selección
+      if (!endFound &&
+          selectionWithNumbers.end >= verseStartWithNumbers &&
+          selectionWithNumbers.end <= verseEndWithNumbers) {
+        if (selectionWithNumbers.end <=
+            verseStartWithNumbers + verseNumberLength) {
+          // La selección termina en el número
+          endWithoutNumbers = verseStartWithoutNumbers;
+        } else {
+          // La selección termina en el texto
+          endWithoutNumbers = verseStartWithoutNumbers +
+              (selectionWithNumbers.end -
+                  (verseStartWithNumbers + verseNumberLength));
+        }
+        endFound = true;
+      }
+
+      // Si ya encontramos ambos, salir del loop
+      if (startFound && endFound) break;
+
+      currentIndexWith += verseNumberLength + verseText.length + 1;
+      currentIndexWithout += verseText.length + 1;
+    }
+
+    // 🔥 Asegurar que endWithoutNumbers sea al menos igual a startWithoutNumbers
+    if (endWithoutNumbers < startWithoutNumbers) {
+      endWithoutNumbers = startWithoutNumbers;
+    }
+
+    return TextSelection(
+      baseOffset: startWithoutNumbers,
+      extentOffset: endWithoutNumbers,
+    );
+  }
+
+  /// 🔥 NUEVA FUNCIÓN: Obtener versículos en selección sin números
+  List<VerseModel> _getVersesInSelectionWithoutNumbers(TextSelection selection,
+      String fullTextWithNumbers, String fullTextWithoutNumbers) {
+    // final convertedSelection = _convertSelectionToWithoutNumbers(
+    //     selection, fullTextWithNumbers, fullTextWithoutNumbers);
+
+    return _getVersesInSelection(selection, fullTextWithoutNumbers);
+  }
+
+  /// 🔥 VERSIÓN CORREGIDA: Método para crear resaltados que convierte índices
+  List<TextSpan> _buildHighlightedTextSpansForSelection(VerseModel verse) {
+    final text = " ${verse.text} "; // 🔥 INCLUIR el espacio alrededor del texto
+    final spans = <TextSpan>[];
+    int currentPos = 0;
+
+    // Ordenar resaltados por posición de inicio
+    verse.highlights!.sort((a, b) => a!.startIndex.compareTo(b!.startIndex));
+
+    for (final highlight in verse.highlights!) {
+      // 🔥 CONVERTIR índices de backend (solo texto) a índices de visualización (con número)
+      final verseNumber = "${verse.verse}";
+      final verseNumberLength = verseNumber.length;
+
+      // Los índices del backend son relativos solo al texto, necesitamos ajustarlos
+      final displayStartIndex = highlight!.startIndex + verseNumberLength;
+      final displayEndIndex = highlight.endIndex + verseNumberLength;
+
+      // 1. Texto antes del resaltado (si hay espacio no cubierto)
+      if (currentPos < displayStartIndex) {
+        spans.add(TextSpan(
+          text: text.substring(currentPos, displayStartIndex),
+          style: StylesApp(context).textStyleBody14.copyWith(
+                decoration:
+                    _isFavorite(verse) ? TextDecoration.underline : null,
+                color: currentPlayingVerseIndex == verses.indexOf(verse)
+                    ? Colors.blue
+                    : currentTheme.textColor,
+                decorationThickness: 4.0,
+                decorationColor: StyleColor.yellowLight,
+                fontFamily: fontFamilySet.label,
+                fontSize: fontSizeVerse,
+                fontWeight: FontWeight.w400,
+              ),
+        ));
+      }
+
+      // 2. Aplicar el resaltado con índices convertidos
+      spans.add(TextSpan(
+        recognizer: LongPressGestureRecognizer()
+          ..onLongPress = () {
+            if (kDebugMode) {
+              print('Long press en versículo ${verse.verse}');
+            }
+            _showHighlightOptions(context, highlight);
+          },
+        text: text.substring(displayStartIndex, displayEndIndex),
+        style: StylesApp(context).textStyleBody14.copyWith(
+              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+              color: currentPlayingVerseIndex == verses.indexOf(verse)
+                  ? Colors.blue
+                  : currentTheme.textColor,
+              decorationThickness: 4.0,
+              decorationColor: StyleColor.yellowLight,
+              fontFamily: fontFamilySet.label,
+              fontSize: fontSizeVerse,
+              backgroundColor:
+                  Color(int.parse('0XFF${formatColor(highlight.color)}'))
+                      .withAlpha(77),
+              fontWeight: FontWeight.w400,
+            ),
+      ));
+
+      // Actualizar posición actual al final del resaltado actual
+      currentPos = displayEndIndex;
+    }
+
+    // 3. Texto restante después del último resaltado
+    if (currentPos < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(currentPos),
+        style: StylesApp(context).textStyleBody14.copyWith(
+              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+              color: currentPlayingVerseIndex == verses.indexOf(verse)
+                  ? Colors.blue
+                  : currentTheme.textColor,
+              decorationThickness: 4.0,
+              decorationColor: StyleColor.yellowLight,
+              fontFamily: fontFamilySet.label,
+              fontSize: fontSizeVerse,
+              fontWeight: FontWeight.w400,
+            ),
+      ));
+    }
+
+    return spans;
+  }
+
+  /// Método para obtener versículo(s) seleccionado - VERSIÓN DEFINITIVA
+  List<VerseModel> _getVersesInSelection(
+      TextSelection selection, String fullText) {
+    List<VerseModel> selectedVerses = [];
+
+    if (!selection.isValid || selection.isCollapsed) {
+      return selectedVerses;
+    }
+
+    int currentPosition = 0;
+
+    for (final verse in verses) {
+      final verseText = verse.text!;
+      final verseNumber = "${verse.verse}";
+      final verseNumberLength = verseNumber.length;
+
+      // Texto completo del versículo (número + texto)
+      final fullVerseText = verseNumber + verseText;
+      final verseStartInFullText = currentPosition;
+      final verseEndInFullText = currentPosition + fullVerseText.length;
+
+      final selectionStart = selection.start;
+      final selectionEnd = selection.end;
+
+      print("🔍 Analizando versículo ${verse.verse}:");
+      print(
+          "   Rango en texto completo: $verseStartInFullText-$verseEndInFullText");
+      print("   Selección: $selectionStart-$selectionEnd");
+      print("   Texto completo: '$fullVerseText'");
+
+      // Verificar si hay superposición
+      if (selectionStart < verseEndInFullText &&
+          selectionEnd > verseStartInFullText) {
+        // Calcular el overlap REAL dentro de este versículo
+        final overlapStart = selectionStart > verseStartInFullText
+            ? selectionStart
+            : verseStartInFullText;
+        final overlapEnd = selectionEnd < verseEndInFullText
+            ? selectionEnd
+            : verseEndInFullText;
+
+        print("   Overlap calculado: $overlapStart-$overlapEnd");
+
+        // Convertir a posiciones relativas al texto del versículo (sin número)
+        final posIniInVerseText =
+            (overlapStart - verseStartInFullText) - verseNumberLength;
+        final posFinInVerseText =
+            (overlapEnd - verseStartInFullText) - verseNumberLength;
+
+        // Asegurar que las posiciones sean válidas
+        final validPosIni = posIniInVerseText < 0 ? 0 : posIniInVerseText;
+        final validPosFin = posFinInVerseText > verseText.length
+            ? verseText.length
+            : posFinInVerseText;
+
+        // Solo agregar si hay texto seleccionado válido
+        if (validPosIni < validPosFin) {
+          final selectedText = verseText.substring(validPosIni, validPosFin);
+
+          print("✅ Versículo ${verse.verse} SELECCIONADO:");
+          print("   Posiciones en versículo: $validPosIni-$validPosFin");
+          print("   Texto seleccionado: '$selectedText'");
+          print("   Longitud del texto: ${verseText.length}");
+
+          final selectedVerse = VerseModel(
+            id: verse.id,
+            verse: verse.verse,
+            text: verse.text,
+            highlights: verse.highlights,
+            posIni: validPosIni,
+            posFin: validPosFin,
+          );
+
+          selectedVerses.add(selectedVerse);
+        } else {
+          print("❌ Posiciones inválidas: $validPosIni-$validPosFin");
+        }
+      } else {
+        print("❌ No hay superposición");
+      }
+
+      currentPosition +=
+          fullVerseText.length + 1; // +1 por el espacio entre versículos
+      print("---");
+    }
+
+    print("📋 TOTAL versículos seleccionados: ${selectedVerses.length}");
+    return selectedVerses;
+  }
+
+  /// Método para la creación de los resaltados - 🔥 MANTENER EXACTAMENTE IGUAL
+  // List<TextSpan> _buildHighlightedTextSpans(VerseModel verse) {
+  //   final text = verse.text;
+  //   final spans = <TextSpan>[];
+  //   int currentPos = 0;
+
+  //   // Ordenar resaltados por posición de inicio (opcional, pero recomendado)
+  //   verse.highlights!.sort((a, b) => a!.startIndex.compareTo(b!.startIndex));
+
+  //   for (final highlight in verse.highlights!) {
+  //     // 1. Texto antes del resaltado (si hay espacio no cubierto)
+  //     if (currentPos < highlight!.startIndex) {
+  //       spans.add(TextSpan(
+  //         text: text.substring(
+  //             currentPos,
+  //             (highlight.startIndex > 0
+  //                 ? highlight.startIndex - 1
+  //                 : highlight.startIndex)),
+  //         style: StylesApp(context).textStyleBody14.copyWith(
+  //               decoration:
+  //                   _isFavorite(verse) ? TextDecoration.underline : null,
+  //               color: currentPlayingVerseIndex == verses.indexOf(verse)
+  //                   ? Colors.blue // Cambia color cuando se lee
+  //                   : currentTheme.textColor,
+  //               decorationThickness: 4.0,
+  //               decorationColor: StyleColor.yellowLight,
+  //               fontFamily: fontFamilySet.label,
+  //               fontSize: fontSizeVerse,
+  //               fontWeight: FontWeight.w400,
+  //             ),
+  //       ));
+  //     }
+
+  //     // 2. Aplicar el resaltado
+  //     spans.add(TextSpan(
+  //       recognizer: LongPressGestureRecognizer()
+  //         ..onLongPress = () {
+  //           if (kDebugMode) {
+  //             print('Long press en versículo ${verse.verse}');
+  //           }
+  //           _showHighlightOptions(context, highlight);
+  //         },
+  //       text: text.substring(
+  //           (highlight.startIndex > 0
+  //               ? highlight.startIndex - 1
+  //               : highlight.startIndex),
+  //           highlight.endIndex < text.length - 1
+  //               ? highlight.endIndex
+  //               : highlight.endIndex),
+  //       style: StylesApp(context).textStyleBody14.copyWith(
+  //             decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+  //             color: currentPlayingVerseIndex == verses.indexOf(verse)
+  //                 ? Colors.blue // Cambia color cuando se lee
+  //                 : currentTheme.textColor,
+  //             decorationThickness: 4.0,
+  //             decorationColor: StyleColor.yellowLight,
+  //             fontFamily: fontFamilySet.label,
+  //             fontSize: fontSizeVerse,
+  //             backgroundColor:
+  //                 Color(int.parse('0XFF${formatColor(highlight.color)}'))
+  //                     .withValues(alpha: 0.3),
+  //             fontWeight: FontWeight.w400,
+  //           ),
+  //     ));
+
+  //     // Actualizar posición actual al final del resaltado actual
+  //     currentPos = highlight.endIndex;
+  //   }
+
+  //   // 3. Texto restante después del último resaltado
+  //   if (currentPos < text.length) {
+  //     spans.add(TextSpan(
+  //       text: text.substring(currentPos),
+  //       style: StylesApp(context).textStyleBody14.copyWith(
+  //             decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+  //             color: currentPlayingVerseIndex == verses.indexOf(verse)
+  //                 ? Colors.blue // Cambia color cuando se lee
+  //                 : currentTheme.textColor,
+  //             decorationThickness: 4.0,
+  //             decorationColor: StyleColor.yellowLight,
+  //             fontFamily: fontFamilySet.label,
+  //             fontSize: fontSizeVerse,
+  //             fontWeight: FontWeight.w400,
+  //           ),
+  //     ));
+  //   }
+
+  //   return spans;
+  // }
 
   bool _isFavorite(VerseModel verse) {
     return _favoriteVerses.any((f) => f.verse.id == verse.id);
@@ -1062,98 +1549,6 @@ class _BibleScreenState extends State<BibleScreen> {
         ],
       ),
     );
-  }
-
-  /// Método para la creación de los resaltados
-  List<TextSpan> _buildHighlightedTextSpans(VerseModel verse) {
-    final text = verse.text;
-    final spans = <TextSpan>[];
-    int currentPos = 0;
-
-    // Ordenar resaltados por posición de inicio (opcional, pero recomendado)
-    verse.highlights!.sort((a, b) => a!.startIndex.compareTo(b!.startIndex));
-
-    for (final highlight in verse.highlights!) {
-      // 1. Texto antes del resaltado (si hay espacio no cubierto)
-      if (currentPos < highlight!.startIndex) {
-        spans.add(TextSpan(
-          text: text.substring(
-              currentPos,
-              (highlight.startIndex > 0
-                  ? highlight.startIndex - 1
-                  : highlight.startIndex)),
-          style: StylesApp(context).textStyleBody14.copyWith(
-                decoration:
-                    _isFavorite(verse) ? TextDecoration.underline : null,
-                color: currentPlayingVerseIndex == verses.indexOf(verse)
-                    ? Colors.blue // Cambia color cuando se lee
-                    : currentTheme.textColor,
-                decorationThickness: 4.0,
-                decorationColor: StyleColor.yellowLight,
-                fontFamily: fontFamilySet.label,
-                fontSize: fontSizeVerse,
-                fontWeight: FontWeight.w400,
-              ),
-        ));
-      }
-
-      // 2. Aplicar el resaltado
-      spans.add(TextSpan(
-        recognizer: LongPressGestureRecognizer()
-          ..onLongPress = () {
-            if (kDebugMode) {
-              print('Long press en versículo ${verse.verse}');
-            }
-            _showHighlightOptions(context, highlight);
-          },
-        text: text.substring(
-            (highlight.startIndex > 0
-                ? highlight.startIndex - 1
-                : highlight.startIndex),
-            highlight.endIndex < text.length - 1
-                ? highlight.endIndex
-                : highlight.endIndex),
-        // highlight.endIndex < text.length-1 ? highlight.endIndex - 1: highlight.endIndex ),
-        style: StylesApp(context).textStyleBody14.copyWith(
-              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
-              color: currentPlayingVerseIndex == verses.indexOf(verse)
-                  ? Colors.blue // Cambia color cuando se lee
-                  : currentTheme.textColor,
-              decorationThickness: 4.0,
-              decorationColor: StyleColor.yellowLight,
-              fontFamily: fontFamilySet.label,
-              fontSize: fontSizeVerse,
-              backgroundColor:
-                  Color(int.parse('0XFF${formatColor(highlight.color)}'))
-                      .withValues(alpha: 0.3),
-              fontWeight: FontWeight.w400,
-            ),
-      ));
-
-      // Actualizar posición actual al final del resaltado actual
-      currentPos = highlight.endIndex;
-      // currentPos = highlight.endIndex < text.length-1 ?  highlight.endIndex - 1 : highlight.endIndex;
-    }
-
-    // 3. Texto restante después del último resaltado
-    if (currentPos < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(currentPos),
-        style: StylesApp(context).textStyleBody14.copyWith(
-              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
-              color: currentPlayingVerseIndex == verses.indexOf(verse)
-                  ? Colors.blue // Cambia color cuando se lee
-                  : currentTheme.textColor,
-              decorationThickness: 4.0,
-              decorationColor: StyleColor.yellowLight,
-              fontFamily: fontFamilySet.label,
-              fontSize: fontSizeVerse,
-              fontWeight: FontWeight.w400,
-            ),
-      ));
-    }
-
-    return spans;
   }
 
   /// Método que me muestra la modal bottom Sheet pata la elección del color de resaltado
@@ -1265,7 +1660,7 @@ class _BibleScreenState extends State<BibleScreen> {
       inputHighlight.add(newHighlight); // actualizo temporal
     }
     LoadingService().showLoading(context);
-    final responseCreate = await crateHighLighters(inputHighlight,
+    final responseCreate = await createHighLighters(inputHighlight,
         userData!.userId, int.parse(currentVersion!.id), currentChapter!.id!);
     if (responseCreate.error != null) {
       LoadingService().hideLoading();
@@ -1337,44 +1732,6 @@ class _BibleScreenState extends State<BibleScreen> {
       position += "${v.verse} ${v.text}".length + 1; // +1 por el espacio
     }
     return position;
-  }
-
-  /// Método para obtener versículo(s) seleccionado
-  ///
-  List<VerseModel> _getVersesInSelection(
-      TextSelection selection, String fullText) {
-    int currentPosition = 0;
-    final selectedVerses = <VerseModel>[];
-
-    // recorremos verses para asignar posición inicial y final
-    for (VerseModel verse in verses) {
-      final verseText = verse.text;
-      final verseStart = currentPosition;
-      final verseEnd = currentPosition + verseText.length;
-      int initial = 0;
-      int posFinal = 0;
-      // Verificar si la selección se superpone con este versículo
-      if (selection.start < verseEnd && selection.end > verseStart) {
-        initial =
-            ((selection.start) > verseStart ? selection.start : verseStart) -
-                verseStart;
-        posFinal = selection.end > verseEnd
-            ? verseEnd - verseStart
-            : selection.end - verseStart;
-
-        // Guarda la nueva instancia en la list/
-        verse = verse.copyWith(
-          // <- Asigna el resultado
-          posIni: initial == 1 ? initial - 1 : initial,
-          posFin: posFinal,
-        );
-        selectedVerses.add(verse);
-      }
-
-      currentPosition = verseEnd + 1; // +1 por el espacio entre versículos
-    }
-
-    return selectedVerses;
   }
 
   /// Método que se encarga de remover el resaltado
@@ -1833,55 +2190,64 @@ class _BibleScreenState extends State<BibleScreen> {
               verses.indexWhere((v) => v.id == data.startVerseId);
           if (startIndex != -1) {
             setState(() => scrollToVerse = startIndex);
+            scrollToKeyVerse(startIndex); // 🔥 Usar la nueva función
             // Guardar el ID del versículo marcado por scroll
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              if (_selectableTextKey.currentContext != null &&
-                  scrollController.hasClients) {
-                try {
-                  final renderBox =
-                      _selectableTextKey.currentContext!.findRenderObject();
-                  if (renderBox is RenderBox) {
-                    final text = verses
-                        .sublist(0, startIndex)
-                        .map((v) => "${v.verse} ${v.text}")
-                        .join(' ');
-                    final tp = TextPainter(
-                      text: TextSpan(
-                        text: text,
-                        style: StylesApp(context).textStyleBody14.copyWith(
-                              fontFamily: fontFamilySet.label,
-                              fontSize: fontSizeVerse,
-                            ),
-                      ),
-                      textDirection: TextDirection.ltr,
-                      maxLines: null,
-                    );
-                    tp.layout(maxWidth: renderBox.size.width);
-                    final extraBottom =
-                      startIndex > 0 ? (kBottomNavigationBarHeight + 45.0) : 0.0;
-                    double offsetY = scrollController.position.maxScrollExtent; // tp.height + extraBottom;
-                    // if (scrollController.hasClients) {
-                    //   offsetY =
-                    //     min(offsetY, scrollController.position.maxScrollExtent);
-                    // }
+            // WidgetsBinding.instance.addPostFrameCallback((_) async {
+            //   final key = _verseKeys[startIndex];
+            //   if (key?.currentContext != null && scrollController.hasClients) {
+            //     Scrollable.ensureVisible(
+            //       key!.currentContext!,
+            //       duration: const Duration(seconds: 2),
+            //       curve: Curves.easeInOut,
+            //       alignment: 0.1,
+            //       );
+            //   } else {
+            //     _scrollToVerseFallback(startIndex);
+            //   }
+            //   // if (_selectableTextKey.currentContext != null &&
+            //   //     scrollController.hasClients) {
+            //   //   try {
+            //   //     final renderBox =
+            //   //         _selectableTextKey.currentContext!.findRenderObject();
+            //   //     if (renderBox is RenderBox) {
+            //   //       final text = verses
+            //   //           .sublist(0, startIndex)
+            //   //           .map((v) => "${v.verse} ${v.text}")
+            //   //           .join(' ');
+            //   //       final tp = TextPainter(
+            //   //         text: TextSpan(
+            //   //           text: text,
+            //   //           style: StylesApp(context).textStyleBody14.copyWith(
+            //   //                 fontFamily: fontFamilySet.label,
+            //   //                 fontSize: fontSizeVerse,
+            //   //               ),
+            //   //         ),
+            //   //         textDirection: TextDirection.ltr,
+            //   //         maxLines: null,
+            //   //       );
+            //   //       tp.layout(maxWidth: renderBox.size.width);
+            //   //       final extraBottom = startIndex > 0
+            //   //           ? (kBottomNavigationBarHeight + 65.0)
+            //   //           : 0.0;
+            //   //       final offsetY = tp.height + extraBottom;
 
-                    await scrollController.animateTo(
-                      offsetY,
-                      duration: Duration(seconds: 2),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                } catch (_) {
-                  final itemHeight = 40.0;
-                   setState(() => scrollToVerse = startIndex);
-                  await scrollController.animateTo(
-                    startIndex * itemHeight,
-                    duration: Duration(seconds: 400),
-                    curve: Curves.easeInOut,
-                  );
-                }
-              }
-            });
+            //   //       await scrollController.animateTo(
+            //   //         offsetY,
+            //   //         duration: Duration(seconds: 2),
+            //   //         curve: Curves.easeInOut,
+            //   //       );
+            //   //     }
+            //   //   } catch (_) {
+            //   //     final itemHeight = 40.0;
+            //   //     setState(() => scrollToVerse = startIndex);
+            //   //     await scrollController.animateTo(
+            //   //       startIndex * itemHeight,
+            //   //       duration: Duration(seconds: 400),
+            //   //       curve: Curves.easeInOut,
+            //   //     );
+            //   //   }
+            //   // }
+            // });
           }
         } else {
           // Si no hay startVerseId, limpiar el marcador
@@ -1905,6 +2271,76 @@ class _BibleScreenState extends State<BibleScreen> {
         isLoading = false;
       });
     }
+  }
+
+// Reemplaza la función de scroll en loadVersionAndChapter
+  void scrollToKeyVerse(int startIndex) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final key = _verseKeys[startIndex];
+      if (key?.currentContext != null && scrollController.hasClients) {
+        // 🔥 Usar Scrollable.ensureVisible para scroll preciso
+        Scrollable.ensureVisible(
+          key!.currentContext!,
+          duration: const Duration(seconds: 2),
+          curve: Curves.easeInOut,
+          alignment: 0.1, // El versículo aparece al 10% desde arriba
+        ).then((_) {
+          // Permitir scroll manual nuevamente después de un delay
+          setState(() => _isManualScroll = false);
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              setState(() => _isManualScroll = true);
+            }
+          });
+        });
+      } else {
+        // Fallback: cálculo aproximado
+        _scrollToVerseFallback(startIndex);
+      }
+    });
+  }
+
+// Método fallback por si las keys no funcionan
+  void _scrollToVerseFallback(int startIndex) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_selectableTextKey.currentContext != null &&
+          scrollController.hasClients) {
+        try {
+          // Calcular altura aproximada basada en texto acumulado
+          double estimatedHeight = 0.0;
+
+          for (int i = 0; i < startIndex; i++) {
+            final verse = verses[i];
+            // Estimación más precisa basada en longitud del texto
+            final textLength = "${verse.verse} ${verse.text}".length;
+            final lineHeight =
+                fontSizeVerse * 1.5; // Altura aproximada por línea
+            final lines =
+                (textLength / 50).ceil(); // Aprox. 50 caracteres por línea
+            estimatedHeight += lines * lineHeight + 16; // +16 por padding
+          }
+
+          // Ajustar con márgenes
+          estimatedHeight += 40.0; // Widget inicial del ListView
+
+          await scrollController.animateTo(
+            estimatedHeight.clamp(
+                0.0, scrollController.position.maxScrollExtent),
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeInOut,
+          );
+        } catch (error) {
+          // Fallback más simple
+          final itemHeight = 80.0; // Altura estimada por versículo
+          await scrollController.animateTo(
+            (startIndex * itemHeight)
+                .clamp(0.0, scrollController.position.maxScrollExtent),
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
   }
 
   Future<void> _togglePlayPause() async {
