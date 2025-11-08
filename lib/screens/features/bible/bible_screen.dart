@@ -918,8 +918,8 @@ class _BibleScreenState extends State<BibleScreen> {
                                                 ? const Offset(6, 0)
                                                 : const Offset(0, 0),
                                             child: Icon(
-                                              weight: 35.0,
-                                              Icons.arrow_forward,
+                                              weight: 75.0,
+                                              Icons.swap_horizontal_circle_rounded,
                                               size: 22,
                                               color: StyleColor.blueDark,
                                             ),
