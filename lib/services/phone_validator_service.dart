@@ -176,7 +176,9 @@ class PhoneValidatorService {
       );
       
       if (kDebugMode && validationResult != null) {
-        print('❌ Validation failed: $validationResult');
+        if (kDebugMode) {
+          print('❌ Validation failed: $validationResult');
+        }
       }
       
       return validationResult;
@@ -539,7 +541,7 @@ class PhoneValidatorService {
         return _PhoneLength(min: 8, max: 8);
       case '+507': // Panamá
         return _PhoneLength(min: 8, max: 8);
-      case '+508': // San Pedro y Miquelón
+      case '+508': // San Pedro y Miquelon
         return _PhoneLength(min: 6, max: 6);
       case '+509': // Haití
         return _PhoneLength(min: 8, max: 8);
@@ -617,7 +619,7 @@ class PhoneValidatorService {
         return _PhoneLength(min: 9, max: 9);
       case '+880': // Bangladés
         return _PhoneLength(min: 10, max: 10);
-      case '+886': // Taiwán
+      case '+886': // Taiwan
         return _PhoneLength(min: 9, max: 9);
       case '+960': // Maldivas
         return _PhoneLength(min: 7, max: 7);

@@ -2,6 +2,7 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
 import 'package:intl_phone_field/countries.dart';
@@ -80,17 +81,18 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                   },
                   onCountryChanged: (country) {
                     controller.text = '';
-                    print('Country changed to: ${country.code}');
-                    print('Country dial code: ${country.dialCode}');
-                    print('Country min length: ${country.minLength}');
-                    print('Country max length: ${country.maxLength}');
+                    if (kDebugMode) {
+                      print('Country changed to: ${country.code}');
+                      print('Country dial code: ${country.dialCode}');
+                      print('Country min length: ${country.minLength}');
+                      print('Country max length: ${country.maxLength}');
+                    }
                   },
                 ),
               ],
             );
           },
         );
-        
 }
 
 // Función auxiliar
@@ -104,5 +106,3 @@ Country getCountryFromPhoneCode(String phoneCode) {
     orElse: () => countries.firstWhere((c) => c.code == 'US'),
   );
 }
-
-

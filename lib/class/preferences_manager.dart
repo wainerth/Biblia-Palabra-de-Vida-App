@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
@@ -14,7 +15,7 @@ class PreferencesManager {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  // Método privado para verificar inicialización
+  // Método privado para verificar initialization
   Future<void> _ensureInitialized() async {
     if (_prefs == null) {
       await init();
@@ -186,7 +187,9 @@ class PreferencesManager {
         return "";
       }
     } catch (e) {
-      print('Error decoding user data: $e');
+      if (kDebugMode) {
+        print('Error decoding user data: $e');
+      }
       return "";
     }
   }

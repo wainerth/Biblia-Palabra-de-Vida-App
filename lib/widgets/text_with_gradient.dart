@@ -14,8 +14,6 @@ class TextWithGradient extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(left: 10, right: 10),
-      // Contenedor para ajustar el tamaño si es necesario
-      // height: 100, // Ajusta la altura según tu diseño
       child: ShaderMask(
         blendMode: BlendMode.srcIn, // Mezcla el degradado con el texto
         shaderCallback: (bounds) => LinearGradient(

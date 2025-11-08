@@ -42,6 +42,24 @@ final Map<String, WidgetBuilder> routes = {
   '/quizPage': (BuildContext context) => QuizScreen(),
   '/aboutScreen': (BuildContext context) => AboutScreen(),
   '/notificationPage': (BuildContext context) => NotificationScreen(),
+  '/offeringPage': (BuildContext context) => OfferingsScreen(),
+  '/stripe_payment': (context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    return StripePaymentScreen(
+      amount: args['amount'],
+      description: args['description'],
+      currency: args['currency'] ,
+      donorName: args['donorName'], 
+      donorEmail: args['donorEmail'],
+    );
+  },
+  '/paypal_payment': (context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    return PayPalPaymentScreen(
+      amount: args['amount'],
+      description: args['description'],
+    );
+  },
 };
 
 Route<dynamic> generateRoute(RouteSettings settings) {

@@ -5,6 +5,7 @@ import 'package:biblia_palabra_de_vida_app/screens/library/payment_methods_scree
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +19,6 @@ class DeliveryCoordinationScreen extends StatefulWidget {
 
 class _DeliveryCoordinationScreenState
     extends State<DeliveryCoordinationScreen> {
-  final NumberFormat _numberFormat = NumberFormat.decimalPattern();
   List<ModelData> _listCountries = [];
   List<ModelData> _listAreasCode = [];
   List<ModelData> _lisCities = [];
@@ -220,7 +220,9 @@ class _DeliveryCoordinationScreenState
                             currency: newValue.label,
                             price: format.format(7)
                             );
-                        print(_deliveryOptions[i].price);
+                        if (kDebugMode) {
+                          print(_deliveryOptions[i].price);
+                        }
                       });
                     }
                   },
@@ -338,7 +340,7 @@ class _DeliveryCoordinationScreenState
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.grey.withValues(alpha: 0.2),
                     spreadRadius: 1,
                     blurRadius: 4,
                     offset: const Offset(0, 2),

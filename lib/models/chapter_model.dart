@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class ChapterModel extends GridItem {
+  @override
   final String? id;
   final int? bookId;
   final int chapter;

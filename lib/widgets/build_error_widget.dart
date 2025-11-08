@@ -23,7 +23,7 @@ class BuildErrorWidget extends StatelessWidget {
           children: [
             Text(
                 textAlign: TextAlign.center,
-                errorMessage ?? "Failed to load stages.",
+                errorMessage,
                 style: TextStyle(color: Colors.red)),
             SizedBox(height: 10),
             ButtonThemeWidget(

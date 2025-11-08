@@ -352,6 +352,8 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future logoutUser(context) async {
+
+    
     final ResponseData result = await logout();
     if (result.error != null) {
       return false;

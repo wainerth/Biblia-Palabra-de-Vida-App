@@ -9,3 +9,4 @@ export 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dar
 export 'package:biblia_palabra_de_vida_app/providers/theme_provider.dart';
 export 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 export 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
+export 'package:biblia_palabra_de_vida_app/providers/exchange_rate_provider.dart';

@@ -17,6 +17,19 @@ import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+// Provide a concrete HttpOverrides implementation so HttpOverrides.global = MyHttpOverrides()
+// compiles — this allows customizing the HttpClient (e.g. to accept self-signed certs in dev).
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    final client = super.createHttpClient(context);
+    // NOTE: In production you should not allow bad certificates; this is typically used only for development.
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
+    return client;
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -35,14 +48,19 @@ void main() async {
   debugPrint = (String? message, {int? wrapWidth}) {
     // Logs detallados solo en modo debug
     if (message != null && message.contains('GraphQL')) {
-      print('🎯 [GRAPHQL_DEBUG] $message');
+      if (kDebugMode) {
+        print('🎯 [GRAPHQL_DEBUG] $message');
+      }
     }
   };
+
+  HttpOverrides.global = MyHttpOverrides();
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => socketProvider),
+        ChangeNotifierProvider(create: (_) => ExchangeRateProvider()),
         ChangeNotifierProvider<CatalogueProvider>(
             create: (_) => catalogueProvider),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
@@ -70,7 +88,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool? _hasSeenIntro;
-  bool _isCatalogueInitialized = false;
   @override
   void initState() {
     super.initState();
@@ -91,11 +108,9 @@ class _MyAppState extends State<MyApp> {
           Provider.of<CatalogueProvider>(context, listen: false);
       try {
         await catalogueProvider.initialize();
-        setState(() => _isCatalogueInitialized = true);
       } catch (e) {
         debugPrint('⚠️ Error inicializando catálogo: $e');
         // Permitir que la app continúe incluso si el catálogo falla
-        setState(() => _isCatalogueInitialized = true);
       }
     }
   }

@@ -21,7 +21,7 @@ class AudioService {
     _sfxPlayer = AudioPlayer()
       ..setPlayerMode(PlayerMode.lowLatency); // 🔥 Modo baja latencia para SFX
 
-    // 🔥 Configurar manejadores de eventos para la música de fondo
+    // 🔥 Configurar manejado de eventos para la música de fondo
     _backgroundPlayer.onPlayerStateChanged.listen((state) {
       if (state == PlayerState.stopped) {
         _isBackgroundPlaying = false;
@@ -89,7 +89,9 @@ class AudioService {
     if (_isBackgroundPlaying && !_isDisposed) {
       final state = _backgroundPlayer.state;
       if (state == PlayerState.stopped || state == PlayerState.completed) {
-        print('Restaurando música de fondo...');
+        if (kDebugMode) {
+          print('Restaurando música de fondo...');
+        }
         await playBackgroundMusic();
       }
     }
@@ -154,7 +156,9 @@ class AudioService {
       // La música sigue sonando mientras el contador corre
     } catch (e) {
       if (!_isDisposed) {
-        print('Error playing counter clock: $e');
+        if (kDebugMode) {
+          print('Error playing counter clock: $e');
+        }
       }
     }
   }
@@ -164,7 +168,9 @@ class AudioService {
     try {
       await _sfxPlayer.stop();
     } catch (e) {
-      print('Error stopping counter clock: $e');
+      if (kDebugMode) {
+        print('Error stopping counter clock: $e');
+      }
     }
   }
 
@@ -215,7 +221,9 @@ class AudioService {
     } catch (e) {
       _safeDisposePlayer(player);
       if (!_isDisposed) {
-        print('Error playing short sound $source: $e');
+        if (kDebugMode) {
+          print('Error playing short sound $source: $e');
+        }
       }
     }
   }
@@ -232,13 +240,17 @@ class AudioService {
     if (_isDisposed) return;
 
     if (!_isBackgroundPlaying) {
-      print('Restaurando música de fondo manualmente...');
+      if (kDebugMode) {
+        print('Restaurando música de fondo manualmente...');
+      }
       await playBackgroundMusic();
     } else {
       // Verificar que realmente esté sonando
       final state = _backgroundPlayer.state;
       if (state != PlayerState.playing) {
-        print('Música marcada como playing pero no lo está. Restaurando...');
+        if (kDebugMode) {
+          print('Música marcada como playing pero no lo está. Restaurando...');
+        }
         _isBackgroundPlaying = false;
         await playBackgroundMusic();
       }

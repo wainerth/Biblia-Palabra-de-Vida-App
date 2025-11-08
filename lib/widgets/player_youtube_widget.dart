@@ -1,176 +1,209 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class PlayerYoutubeWidget extends StatefulWidget {
   final String videoUrl;
-  final Function(bool)? onFullScreenChanged;
-
-  const PlayerYoutubeWidget({
-    super.key,
-    required this.videoUrl,
-    this.onFullScreenChanged,
-  });
+  const PlayerYoutubeWidget({super.key, required this.videoUrl});
 
   @override
   State<PlayerYoutubeWidget> createState() => _PlayerYoutubeWidgetState();
 }
 
 class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
-  late  YoutubePlayerController _controller;
+  late YoutubePlayerController _normalController;
+  YoutubePlayerController? _fullScreenController;
+  bool _isPlayerReady = false;
+  OverlayEntry? _fullScreenOverlay;
   bool _isFullScreen = false;
 
   @override
   void initState() {
     super.initState();
-    _initializePlayer();
+    _initializeNormalController();
   }
 
-  void _initializePlayer() {
-    try {
-      final videoId = YoutubePlayerController.convertUrlToId(widget.videoUrl);
+  void _initializeNormalController() {
+    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
 
-      if (videoId != null) {
-        print('🎬 Inicializando reproductor con ID: $videoId');
+    _normalController = YoutubePlayerController(
+      initialVideoId: videoId!,
+      flags: const YoutubePlayerFlags(
+        mute: false,
+        autoPlay: true,
+        enableCaption: false, // Deshabilitar captions puede ayudar
+      ),
+    );
 
-        _controller = YoutubePlayerController(
-          params: const YoutubePlayerParams(
-            // 🔥 CONFIGURACIÓN DE IDIOMA ESPAÑOL
-            interfaceLanguage: 'es',
-            origin: 'https://www.youtube.com',
-
-            // Configuración básica
-            showControls: true,
-            showFullscreenButton: true,
-
-            mute: false,
-            strictRelatedVideos: false,
-            enableJavaScript: true,
-
-            // Configuración adicional
-            playsInline: false,
-            showVideoAnnotations: true,
-            color: 'red',
-            loop: false,
-          ),
-        );
-
-        // 🔥 CARGAR EL VIDEO - MÉTODO CORRECTO PARA v5.2.2
-        _controller.loadVideoById(videoId: videoId);
-
-        // 🔥 LISTENERS CORRECTOS PARA v5.2.2
-        // _controller.listen((event) {
-        //   if (event is YoutubePlayerEvent) {
-        //     print('✅ Reproductor listo - Idioma: Español');
-        //   }
-        // });
+    _normalController.addListener(() {
+      if (_isPlayerReady && mounted && !_isFullScreen) {
+        setState(() {});
       }
-    } catch (e) {
-      print('❌ Error inicializando reproductor: $e');
-    }
+    });
   }
 
-  void _enterFullScreen() async {
-    widget.onFullScreenChanged?.call(true);
-    try {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-      setState(() {
-        _isFullScreen = true;
-      });
-    } catch (e) {
-      widget.onFullScreenChanged?.call(false);
-    }
-  }
+  void _initializeFullScreenController() {
+    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
 
-  void _exitFullScreen() async {
-    try {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      setState(() {
-        _isFullScreen = false;
-      });
-      widget.onFullScreenChanged?.call(false);
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Widget _buildNormalPlayer() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: YoutubePlayerControllerProvider(
-          // 🔥 WRAPPER NECESARIO
-          controller: _controller,
-          child: YoutubePlayer(
-            // 🔥 CORRECTO PARA v5.2.2
-            controller: _controller,
-            aspectRatio: 16 / 9,
-          ),
-        ),
+    _fullScreenController = YoutubePlayerController(
+      initialVideoId: videoId!,
+      flags: const YoutubePlayerFlags(
+        mute: false,
+        autoPlay: true,
+        enableCaption: false,
       ),
     );
   }
 
-  Widget _buildFullScreenPlayer() {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: YoutubePlayerControllerProvider(
-                // 🔥 WRAPPER NECESARIO
-                controller: _controller,
-                child: YoutubePlayer(
-                  controller: _controller,
-                  aspectRatio: 16 / 9,
+  void _enterFullScreen(BuildContext context) {
+    if (_isFullScreen) return;
+
+    setState(() {
+      _isFullScreen = true;
+    });
+
+    // Pausar el reproductor normal antes de entrar en fullscreen
+    _normalController.pause();
+
+    // Ocultar barras del sistema
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+    // Inicializar controlador para fullscreen
+    _initializeFullScreenController();
+
+    // Crear overlay que cubre toda la pantalla
+    _fullScreenOverlay = OverlayEntry(
+      builder: (context) => Scaffold(
+        backgroundColor: Colors.black,
+        body: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, result) {
+            if (didPop) return;
+            _exitFullScreen();
+          },
+          child: SafeArea(
+            child: Stack(
+              children: [
+                // Reproductor a pantalla completa con controlador separado
+                YoutubePlayer(
+                  controller: _fullScreenController!,
+                  showVideoProgressIndicator: true,
+                  progressIndicatorColor: Colors.blueAccent,
+                  onReady: () {
+                    // Sincronizar el estado con el reproductor normal
+                    final currentPosition = _normalController.value.position;
+                    if (currentPosition.inSeconds > 0) {
+                      _fullScreenController!.seekTo(currentPosition);
+                    }
+                  },
                 ),
-              ),
+                // Botón para salir del fullscreen
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: IconButton(
+                    icon:
+                        const Icon(Icons.close, color: Colors.white, size: 30),
+                    onPressed: _exitFullScreen,
+                  ),
+                ),
+              ],
             ),
-            Positioned(
-              top: 10,
-              left: 10,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                onPressed: _exitFullScreen,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
+
+    // Mostrar el overlay
+    Overlay.of(context).insert(_fullScreenOverlay!);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return _isFullScreen ? _buildFullScreenPlayer() : _buildNormalPlayer();
+  void _exitFullScreen() {
+    if (!_isFullScreen) return;
+
+    // Guardar la posición actual del video en fullscreen
+    final currentPosition =
+        _fullScreenController?.value.position ?? Duration.zero;
+
+    // Limpiar el overlay
+    if (_fullScreenOverlay != null) {
+      _fullScreenOverlay!.remove();
+      _fullScreenOverlay = null;
+    }
+
+    // Disposer el controlador de fullscreen
+    if (_fullScreenController != null) {
+      _fullScreenController!.dispose();
+      _fullScreenController = null;
+    }
+
+    // Sincronizar la posición con el reproductor normal
+    if (currentPosition.inSeconds > 0) {
+      _normalController.seekTo(currentPosition);
+    }
+
+    // Restaurar UI del sistema
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+
+    setState(() {
+      _isFullScreen = false;
+    });
+
+    // Reanudar el video en el reproductor normal si estaba reproduciéndose
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _normalController.play();
+      }
+    });
   }
 
   @override
   void dispose() {
-    if (_isFullScreen) {
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    }
-    _controller.close();
+    _exitFullScreen();
+    _normalController.dispose();
+    _fullScreenController?.dispose();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(
+        minHeight: 200,
+        maxHeight: 300,
+      ),
+      child: Stack(
+        children: [
+          YoutubePlayer(
+            controller: _normalController,
+            showVideoProgressIndicator: true,
+            progressIndicatorColor: Colors.blueAccent,
+            onReady: () {
+              setState(() {
+                _isPlayerReady = true;
+              });
+            },
+            onEnded: (data) {
+              // Lógica cuando termina el video
+            },
+          ),
+          // Positioned(
+          //   bottom: 10,
+          //   right: 10,
+          //   child: IconButton(
+          //     icon: const Icon(Icons.fullscreen, color: Colors.white),
+          //     onPressed: _isPlayerReady && !_isFullScreen
+          //         ? () => _enterFullScreen(context)
+          //         : null,
+          //   ),
+          // ),
+        ],
+      ),
+    );
   }
 }

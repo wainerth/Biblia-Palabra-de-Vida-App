@@ -70,7 +70,7 @@ class CatalogueProvider extends ChangeNotifier {
       }
     } catch (e) {
       if (kDebugMode) {
-        print("Error en inicialización del catalogo: $e");
+        print("Error en inicializar del catalogo: $e");
       }
       _errorMessage = "Algunos servicios no pudieron cargarse. Puedes intentarlo más tarde.";
       // No rethrow - permitimos que el provider se inicialice parcialmente
@@ -81,7 +81,7 @@ class CatalogueProvider extends ChangeNotifier {
   }
 
   Future<void> _loadAllDataWithErrorHandling() async {
-    _serviceStatus = {}; // Map para trackear estado de cada servicio
+    _serviceStatus = {}; // Map para tracker estado de cada servicio
 
     // Cargar servicios críticos primero (países y códigos de área)
     await _loadWithRetry('Countries', _loadAllCountriesWithIsolates, retries: 3);
@@ -152,7 +152,9 @@ class CatalogueProvider extends ChangeNotifier {
       print('   ❌ $failed services failed');
       
       _serviceStatus.forEach((service, status) {
-        print('   ${status == true ? '✅' : '❌'} $service');
+        if (kDebugMode) {
+          print('   ${status == true ? '✅' : '❌'} $service');
+        }
       });
     }
   }
@@ -268,7 +270,9 @@ class CatalogueProvider extends ChangeNotifier {
         notifyListeners();
       } else if (message == 'completed') {
         if (kDebugMode && allCountries.isNotEmpty) {
-          print("countries cargados...");
+          if (kDebugMode) {
+            print("countries cargados...");
+          }
         }
         break;
       }
@@ -354,7 +358,9 @@ class CatalogueProvider extends ChangeNotifier {
           .map((i) => Church.fromJson(i))
           .toList();
       if (kDebugMode && allChurches.isNotEmpty) {
-        print("all Churches loaded...");
+        if (kDebugMode) {
+          print("all Churches loaded...");
+        }
       }
       notifyListeners();
     } on TimeoutException catch (e) {

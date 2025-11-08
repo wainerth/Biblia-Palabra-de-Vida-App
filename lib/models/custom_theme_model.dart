@@ -27,16 +27,16 @@ class CustomTheme {
       'id': id,
       'name': name,
       'backgroundColor':
-          '#${backgroundColor.value.toRadixString(16)}', // backgroundColor.value,
-      'textColor': '#${textColor.value.toRadixString(16)}', // textColor.value,
+          '#${backgroundColor.toARGB32().toRadixString(16)}', // backgroundColor.toARGB32(),
+      'textColor': '#${textColor.toARGB32().toRadixString(16)}', // textColor.toARGB32(),
       'appBarColor':
-          '#${appBarColor.value.toRadixString(16)}', //appBarColor.value,
+          '#${appBarColor.toARGB32().toRadixString(16)}', //appBarColor.toARGB32(),
       'buttonColor':
-          '#${buttonColor.value.toRadixString(16)}', //buttonColor.value,
+          '#${buttonColor.toARGB32().toRadixString(16)}', //buttonColor.toARGB32(),
       'buttonTextColor':
-          '#${buttonTextColor.value.toRadixString(16)}', //buttonTextColor.value,
+          '#${buttonTextColor.toARGB32().toRadixString(16)}', //buttonTextColor.toARGB32(),
       'verseHighlightColor':
-          '#${verseHighlightColor.value.toRadixString(16)}', // verseHighlightColor,
+          '#${verseHighlightColor.toARGB32().toRadixString(16)}', // verseHighlightColor,
     };
   }
 

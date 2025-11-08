@@ -55,21 +55,6 @@ class _VerseHighlighterState extends State<VerseHighlighter> {
     });
   }
 
-  // void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-  //   if (!_isSelecting) return;
-
-  //   final offset = details.globalPosition;
-  //   final startPosition = _getTextPosition(_startSelectionOffset!);
-  //   final currentPosition = _getTextPosition(offset);
-
-  //   setState(() {
-  //     _selection = TextSelection(
-  //       baseOffset: startPosition.offset,
-  //       extentOffset: currentPosition.offset,
-  //     );
-  //   });
-  // }
-
   void _onPanEnd(DragEndDetails details) {
     if (_isSelecting && _selection.textInside(widget.verseText).isNotEmpty) {
       _showColorPicker(_selection.textInside(widget.verseText));

@@ -24,7 +24,6 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   late List<ModelData> _editingData;
   final List<TextEditingController> _controllers = [];
   String? _selectedCountryId;
-  String? _selectedStateId;
   List<ModelData> _statesList = [];
   List<ModelData> _citiesList = [];
   bool loadingState = false;
@@ -41,8 +40,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     _editingData = List.from(widget.data);
     for (var item in _editingData) {
       if (item.label == 'Tel.') {
-        initialPhoneCode =
-            item.originalData != null ? item.originalData.code : null;
+        initialPhoneCode = item.originalData?.code;
 
         _controllers.add(TextEditingController(
             text: item.value.isNotEmpty ? item.value.split(' ')[1] : ''));
@@ -281,7 +279,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           selectedItem: item.value.isNotEmpty
               ? dropDownList.firstWhere(
                   (element) => element.label == item.value,
-                  orElse: null)
+                  orElse: () => dropDownList.first)
               : null,
         ),
       );
@@ -311,7 +309,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
               selectedItem: item.value.isNotEmpty && _statesList.isNotEmpty
                   ? _statesList.firstWhere(
                       (element) => element.label == item.value,
-                      orElse: null)
+                      orElse: () => _statesList.first)
                   : null,
             ),
             if (loadingState)
@@ -344,14 +342,14 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                     value: newValue!.label,
                     clave: _editingData[index].clave,
                     showLabel: _editingData[index].showLabel,
-                    originalData: CityModel.fromJson(newValue!.originalData),
+                    originalData: CityModel.fromJson(newValue.originalData),
                   );
                 });
               },
               selectedItem: item.value.isNotEmpty && _citiesList.isNotEmpty
                   ? _citiesList.firstWhere(
                       (element) => element.label == item.value,
-                      orElse: null)
+                      orElse: () => _citiesList.first)
                   : null,
             ),
             if (loadingCity)
@@ -447,7 +445,6 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         orElse: () => ModelData(value: '', label: ''),
       );
       if (state.value.isNotEmpty) {
-        _selectedStateId = state.value;
         await _loadCities(state.value, null, null, null);
       }
     }
@@ -613,49 +610,6 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   }
 
   // Widget para el estado de error
-  Widget _buildErrorState(dynamic error) {
-    return Container(
-      color: StyleColor.turquoise,
-      width: double.infinity,
-      height: MediaQuery.sizeOf(context).height * 0.6,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, color: Colors.white, size: 50),
-          SizedBox(height: 20),
-          Text(
-            "Error al cargar los datos",
-            style: StylesApp(context)
-                .textStyleBody14
-                .copyWith(color: Colors.white),
-          ),
-          SizedBox(height: 10),
-          Text(
-            error.toString(),
-            style: StylesApp(context)
-                .textStyleBody12
-                .copyWith(color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 20),
-          ButtonThemeWidget(
-            buttonStyle: StylesApp(context).btnWidgetSmall,
-            text: 'Reintentar',
-            width: 120.0,
-            height: 40.0,
-            onPressed: () {
-              // Inicializar valores de país, estado y ciudad si existen
-              _initializeLocationValues().then((_) {
-                setState(() {
-                  _isInitialized = true;
-                });
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   void _saveData() {
     if (_formKey.currentState!.validate()) {
