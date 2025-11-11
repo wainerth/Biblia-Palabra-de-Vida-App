@@ -269,11 +269,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               ),
               Column(
                 children: [
-                  SizedBox(height: 15.0),
-                  _buildListCardSection(context, cardList),
-                  SizedBox(
-                    height: 12.0,
-                  ),
+                 SizedBox( height: 50),
                   dataUser != null
                       ? _buildPositionSection(context, dataUser)
                       : Container(),
@@ -320,6 +316,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                       ),
                     ),
                   ),
+                  SizedBox(
+                    height: 12.0,
+                  ),
+                   SizedBox(height: 15.0),
+                  _buildListCardSection(context, cardList),
                   SizedBox(
                     height: kBottomNavigationBarHeight - 40,
                   )

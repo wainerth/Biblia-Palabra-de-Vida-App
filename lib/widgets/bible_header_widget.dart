@@ -9,6 +9,10 @@ class BibleHeaderWidget extends StatelessWidget {
   final String versionName;
   final String chapter;
   final bool showIconVideo;
+  final bool showButton;
+  final double? topPosition;
+  final double? bottomPosition;
+  final double spacingBottom;
   final Function()? onSearchBible;
   final VoidCallback? onBack;
   final VoidCallback? onVersionTap;
@@ -20,6 +24,10 @@ class BibleHeaderWidget extends StatelessWidget {
     required this.versionName,
     required this.chapter,
     this.showIconVideo = false,
+    this.showButton = true,
+    this.topPosition = 0,
+    this.bottomPosition= 0,
+    this.spacingBottom = 50,
     this.onBack,
     this.onSearchBible,
     this.onVersionTap,
@@ -41,44 +49,39 @@ class BibleHeaderWidget extends StatelessWidget {
           ),
         ),
         Container(
-          padding: EdgeInsets.only(bottom: 50.0),
+          padding: EdgeInsets.only(bottom: spacingBottom),
           width: double.infinity,
-          decoration: BoxDecoration(
-              // image: DecorationImage(
-              //   image: const AssetImage("assets/elipsisTopColor1.svg"),
-              //   fit: BoxFit.cover,
-              //   alignment: Alignment.bottomCenter,
-              // ),
-              ),
+          decoration: BoxDecoration(),
           child: Stack(
             children: [
-              Positioned(
-                top: 10,
-                left: 15,
-                child: Container(
-                  height: 35.0,
-                  width: 35.0,
-                  decoration: BoxDecoration(
-                    color: currentTheme.name != 'Claro'
-                        ? currentTheme.buttonColor
-                        : Color(0XFFFD8C43),
-                    borderRadius: BorderRadius.circular(35.0),
-                  ),
-                  child: IconButton(
-                    constraints: BoxConstraints(maxHeight: 35.0),
-                    padding: EdgeInsets.all(0),
-                    iconSize: 35.0,
-                    color: currentTheme.name != 'Claro'
-                        ? currentTheme.buttonTextColor
-                        : currentTheme.backgroundColor,
-                    onPressed: onBack ?? () => Navigator.pop(context),
-                    icon: Icon(
-                      Icons.arrow_back,
-                      size: 35.0,
+              if (showButton)
+                Positioned(
+                  top: 10,
+                  left: 15,
+                  child: Container(
+                    height: 35.0,
+                    width: 35.0,
+                    decoration: BoxDecoration(
+                      color: currentTheme.name != 'Claro'
+                          ? currentTheme.buttonColor
+                          : Color(0XFFFD8C43),
+                      borderRadius: BorderRadius.circular(35.0),
+                    ),
+                    child: IconButton(
+                      constraints: BoxConstraints(maxHeight: 35.0),
+                      padding: EdgeInsets.all(0),
+                      iconSize: 35.0,
+                      color: currentTheme.name != 'Claro'
+                          ? currentTheme.buttonTextColor
+                          : currentTheme.backgroundColor,
+                      onPressed: onBack ?? () => Navigator.pop(context),
+                      icon: Icon(
+                        Icons.arrow_back,
+                        size: 35.0,
+                      ),
                     ),
                   ),
                 ),
-              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -133,8 +136,8 @@ class BibleHeaderWidget extends StatelessWidget {
               ),
               if (showIconVideo)
                 Positioned(
-                  top: 0,
-                  bottom: 0,
+                  top: topPosition,
+                  bottom: bottomPosition,
                   right: 15,
                   child: Column(
                     children: [

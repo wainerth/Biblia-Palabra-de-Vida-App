@@ -470,7 +470,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
     setState(() {
       loadingVerses = true;
       verses = chapters
-          .firstWhere((ch) => ch.id == id)
+          .firstWhere((ch) => ch.id == id,)
           .verses!
           .map((verse) => verse)
           .toList();

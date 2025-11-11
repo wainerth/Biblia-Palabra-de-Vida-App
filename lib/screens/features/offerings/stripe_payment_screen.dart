@@ -2,7 +2,7 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutat
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+// import 'package:flutter_stripe/flutter_stripe.dart';
 
 class StripePaymentScreen extends StatefulWidget {
   final double amount;
@@ -44,8 +44,8 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
 
   Future<void> _initializeStripe() async {
     // Configura Stripe con tu publishable key
-    Stripe.publishableKey = 'pk_test_...'; // Reemplaza con tu clave real
-    await Stripe.instance.applySettings();
+    // Stripe.publishableKey = 'pk_test_...'; // Reemplaza con tu clave real
+    // await Stripe.instance.applySettings();
   }
 
   @override
@@ -81,25 +81,25 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
 
     try {
       // 1. Crear PaymentMethod usando la información del CardField
-      final paymentMethod = await Stripe.instance.createPaymentMethod(
-        params: PaymentMethodParams.card(
-          paymentMethodData: PaymentMethodData(
-            billingDetails: BillingDetails(
-              name: _cardHolderNameController.text,
-              email: widget.donorEmail,
-              phone: widget.donorPhone,
-              address: Address(
-                city: '',
-                country: '',
-                line1: '',
-                line2: '',
-                postalCode: '',
-                state: '',
-              ),
-            ),
-          ),
-        ),
-      );
+      // final paymentMethod = await Stripe.instance.createPaymentMethod(
+      //   params: PaymentMethodParams.card(
+      //     paymentMethodData: PaymentMethodData(
+      //       billingDetails: BillingDetails(
+      //         name: _cardHolderNameController.text,
+      //         email: widget.donorEmail,
+      //         phone: widget.donorPhone,
+      //         address: Address(
+      //           city: '',
+      //           country: '',
+      //           line1: '',
+      //           line2: '',
+      //           postalCode: '',
+      //           state: '',
+      //         ),
+      //       ),
+      //     ),
+      //   ),
+      // );
 
       // 2. Crear Payment Intent en tu backend
 
@@ -124,49 +124,49 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
       final String donationId = paymentIntentData['donationId'];
 
       // 3. Confirmar el pago con Stripe
-      final paymentResult = await Stripe.instance.confirmPayment(
-        paymentIntentClientSecret: clientSecret,
-        data: PaymentMethodParams.card(
-          paymentMethodData: PaymentMethodData(
-            billingDetails: BillingDetails(
-              name: _cardHolderNameController.text,
-              email: widget.donorEmail,
-              phone: widget.donorPhone,
-              address: Address(
-                city: '',
-                country: '',
-                line1: '',
-                line2: '',
-                postalCode: '',
-                state: '',
-              ),
-            ),
-          ),
-        ),
-      );
+      // final paymentResult = await Stripe.instance.confirmPayment(
+      //   paymentIntentClientSecret: clientSecret,
+      //   data: PaymentMethodParams.card(
+      //     paymentMethodData: PaymentMethodData(
+      //       billingDetails: BillingDetails(
+      //         name: _cardHolderNameController.text,
+      //         email: widget.donorEmail,
+      //         phone: widget.donorPhone,
+      //         address: Address(
+      //           city: '',
+      //           country: '',
+      //           line1: '',
+      //           line2: '',
+      //           postalCode: '',
+      //           state: '',
+      //         ),
+      //       ),
+      //     ),
+      //   ),
+      // );
 
       // 4. Verificar el estado del pago
-      if (paymentResult.status == PaymentIntentsStatus.Succeeded) {
-        // 5. Confirmar el pago con tu backend
-        final confirmationResult = await confirmPaymentWithBackend(
-            paymentIntentId: paymentIntentId, donationId: donationId);
+      // if (paymentResult.status == PaymentIntentsStatus.Succeeded) {
+      //   // 5. Confirmar el pago con tu backend
+      //   final confirmationResult = await confirmPaymentWithBackend(
+      //       paymentIntentId: paymentIntentId, donationId: donationId);
 
-        if (confirmationResult.error != null) {
-          _showErrorDialog(confirmationResult.error!);
-          return;
-        }
+      //   if (confirmationResult.error != null) {
+      //     _showErrorDialog(confirmationResult.error!);
+      //     return;
+      //   }
 
-        final confirmationData =
-            confirmationResult.data!['confirmStripePayment'];
+      //   final confirmationData =
+      //       confirmationResult.data!['confirmStripePayment'];
 
-        if (confirmationData['success'] == true) {
-          _showSuccessDialog(donationId);
-        } else {
-          _showErrorDialog('El pago no pudo ser confirmado en el servidor');
-        }
-      } else {
-        _showErrorDialog('El pago no fue exitoso: ${paymentResult.status}');
-      }
+      //   if (confirmationData['success'] == true) {
+      //     _showSuccessDialog(donationId);
+      //   } else {
+      //     _showErrorDialog('El pago no pudo ser confirmado en el servidor');
+      //   }
+      // } else {
+      //   _showErrorDialog('El pago no fue exitoso: ${paymentResult.status}');
+      // }
     } catch (e) {
       _showErrorDialog('Error al procesar el pago: $e');
     } finally {
@@ -371,25 +371,26 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: CardField(
-                          onCardChanged: (card) {
-                            setState(() {
-                              _isCardValid = card!.complete;
-                            });
-                          },
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                          ),
-                          cursorColor: StyleColor.orange,
-                        ),
+                        child: Container()
+                        // CardField(
+                        //   onCardChanged: (card) {
+                        //     setState(() {
+                        //       _isCardValid = card!.complete;
+                        //     });
+                        //   },
+                        //   decoration: const InputDecoration(
+                        //     contentPadding: EdgeInsets.symmetric(
+                        //       horizontal: 16,
+                        //       vertical: 12,
+                        //     ),
+                        //     border: InputBorder.none,
+                        //   ),
+                        //   style: TextStyle(
+                        //     color: Colors.black,
+                        //     fontSize: 16,
+                        //   ),
+                        //   cursorColor: StyleColor.orange,
+                        // ),
                       ),
                       const SizedBox(height: 8),
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class PlayerYoutubeWidget extends StatefulWidget {
@@ -100,6 +101,33 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
                       _fullScreenController!.seekTo(currentPosition);
                     }
                   },
+                  topActions: [
+                    if (_fullScreenController != null)
+                      GestureDetector(
+                        onTap: () {
+                          _openInYouTube();
+                        },
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _fullScreenController!.metadata.title,
+                                maxLines: 1,
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.open_in_new,
+                              size: 18,
+                              color: Colors.white70,
+                            ),
+                          ],
+                        ),
+                      )
+                  ],
                 ),
                 // Botón para salir del fullscreen
                 Positioned(
@@ -191,6 +219,33 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
             onEnded: (data) {
               // Lógica cuando termina el video
             },
+            topActions: [
+              if (_normalController != null)
+                GestureDetector(
+                  onTap: () {
+                    _openInYouTube();
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _normalController.metadata.title,
+                          maxLines: 1,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.open_in_new,
+                        size: 18,
+                        color: Colors.white70,
+                      ),
+                    ],
+                  ),
+                )
+            ],
           ),
           // Positioned(
           //   bottom: 10,
@@ -205,5 +260,24 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
         ],
       ),
     );
+  }
+
+  void _openInYouTube() async {
+    final youtubeUrl = widget.videoUrl;
+
+    if (await canLaunchUrl(Uri.parse(youtubeUrl))) {
+      await launchUrl(
+        Uri.parse(youtubeUrl),
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se puede abrir YouTube'),
+          ),
+        );
+      }
+    }
   }
 }

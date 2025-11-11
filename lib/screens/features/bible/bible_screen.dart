@@ -66,6 +66,12 @@ class _BibleScreenState extends State<BibleScreen> {
   final Map<int, GlobalKey> _verseKeys = {};
   bool _isManualScroll = false;
 
+  final double _scrollThreshold = 50.0;
+
+  // Nueva variable para controlar el drawer
+  bool _showDrawer = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -98,6 +104,7 @@ class _BibleScreenState extends State<BibleScreen> {
       }
     });
     scrollController.addListener(() {
+      _handleScroll();
       // Cuando el usuario mueve el scroll manualmente
       if (scrollController.position.isScrollingNotifier.value) {
         if (!_isManualScroll) return;
@@ -279,6 +286,16 @@ class _BibleScreenState extends State<BibleScreen> {
     await completer.future;
   }
 
+  void _handleScroll() {
+    final scrollPosition = scrollController.position;
+
+    if (scrollPosition.pixels > _scrollThreshold && !_showDrawer) {
+      setState(() => _showDrawer = true);
+    } else if (scrollPosition.pixels <= _scrollThreshold && _showDrawer) {
+      setState(() => _showDrawer = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<BibleThemeProvider>(context);
@@ -288,7 +305,26 @@ class _BibleScreenState extends State<BibleScreen> {
         builder: (context, themeProvider, child) {
       final currentTheme = themeProvider.themeData;
       return Scaffold(
+        key: _scaffoldKey,
         backgroundColor: currentTheme.backgroundColor,
+        endDrawer:
+            _buildNavigationDrawer(currentTheme), // Drawer siempre disponible
+        endDrawerEnableOpenDragGesture: true,
+        floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
+        floatingActionButton: _showDrawer
+            ? FloatingActionButton(
+                mini: true,
+                elevation: 0,
+                onPressed: () {
+                  _scaffoldKey.currentState?.openEndDrawer();
+                },
+                backgroundColor: currentTheme.backgroundColor,
+                child: Icon(
+                  Icons.menu,
+                  color: currentTheme.buttonColor,
+                ),
+              )
+            : null,
         body: SafeArea(
           child: Column(
             children: [
@@ -305,128 +341,33 @@ class _BibleScreenState extends State<BibleScreen> {
                   )
                 } else ...{
                   // cabecera
-                  BibleHeaderWidget(
-                    onSearchBible: () {
-                      openModal();
-                    },
-                    versionName:
-                        currentVersion != null ? currentVersion!.version : '',
-                    title: currentBook != null ? currentBook!.modernName : '',
-                    showIconVideo: video.url.isNotEmpty,
-                    chapter: currentChapter != null
-                        ? '${currentChapter!.chapter}'
-                        : '',
-                    onVideoCollection: () async {
-                      await SystemChrome.setPreferredOrientations([
-                        DeviceOrientation.portraitUp,
-                        DeviceOrientation.portraitDown,
-                      ]);
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return Center(
-                            child: Container(
-                              constraints: BoxConstraints(
-                                minHeight:
-                                    MediaQuery.sizeOf(context).height * 0.50,
-                                maxHeight:
-                                    MediaQuery.sizeOf(context).height * 0.50,
-                              ),
-                              child: Stack(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
-                                      constraints:
-                                          BoxConstraints(minHeight: 213),
-                                      // height: 213,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: (video.url
-                                                    .contains('youtube.com') ||
-                                                video.url.contains('youtu.be'))
-                                            ? PlayerYoutubeWidget(
-                                                videoUrl: video.url)
-                                            : PlayerNoYoutube(
-                                                url:
-                                                    "${GraphQLConfig.urlServidor}${video.url}"),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    // Posiciona el botón de cerrar
-                                    top: 0,
-                                    right: 0,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context)
-                                            .pop(); // Cierra el diálogo
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8.0),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.withValues(
-                                              alpha:
-                                                  0.7), // Fondo semitransparente para el botón
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                          size: 20.0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    onBack: () async {
-                      Navigator.pushNamed(
-                        context,
-                        '/layoutPage',
-                        arguments: {'selectedIndex': 0},
-                      );
-                    },
-                    onVersionTap: () async {
-                      final bibleVersions = Provider.of<CatalogueProvider>(
-                              context,
-                              listen: false)
-                          .allBibleVersion
-                          .map((v) => ModelData(value: v.id, label: v.version))
-                          .toList();
-
-                      final selectedVersion = await BibleVersionSelector.show(
-                          context: context,
-                          versions: bibleVersions,
-                          preferenceKey: preferenceKey,
-                          savedId: lastVersionsSelected);
-
-                      if (selectedVersion != null) {
-                        // Aquí manejas la versión seleccionada
-                        if (kDebugMode) {
-                          print(
-                              'Versión seleccionada: ${selectedVersion.label}');
-                        }
-                        setState(() => lastVersionsSelected = selectedVersion
-                            .value); // actualizo la version de la biblia
-                        // removemos los datos de la cache para iniciar de nuevo
-                        await PreferencesManager().clearOne('bookSelected');
-                        await PreferencesManager().clearOne('chapterSelected');
-                        await PreferencesManager()
-                            .setSelectedBibleVersion(lastVersionsSelected!);
-                        _initDataLoad();
-                      }
-                    },
-                  ),
+                  if (!_showDrawer)
+                    BibleHeaderWidget(
+                      spacingBottom: 10.0,
+                      onSearchBible: () {
+                        openModal();
+                      },
+                      versionName:
+                          currentVersion != null ? currentVersion!.version : '',
+                      title: currentBook != null ? currentBook!.modernName : '',
+                      showIconVideo: video.url.isNotEmpty,
+                      chapter: currentChapter != null
+                          ? '${currentChapter!.chapter}'
+                          : '',
+                      onVideoCollection: () async {
+                        await _showVideoDialog();
+                      },
+                      onBack: () async {
+                        Navigator.pushNamed(
+                          context,
+                          '/layoutPage',
+                          arguments: {'selectedIndex': 0},
+                        );
+                      },
+                      onVersionTap: () async {
+                        await _changeBibleVersion();
+                      },
+                    ),
                   Expanded(
                     child: SizedBox(
                       width: double.infinity,
@@ -448,6 +389,9 @@ class _BibleScreenState extends State<BibleScreen> {
                                         child: ListView(
                                           controller: scrollController,
                                           children: [
+                                            if (_showDrawer)
+                                              _buildDrawerIndicator(
+                                                  currentTheme),
                                             // Otros widgets de la lista...
                                             const SizedBox(height: 40),
                                             _buildContinuousText(), // Tu texto formateado como un widget
@@ -919,7 +863,8 @@ class _BibleScreenState extends State<BibleScreen> {
                                                 : const Offset(0, 0),
                                             child: Icon(
                                               weight: 75.0,
-                                              Icons.swap_horizontal_circle_rounded,
+                                              Icons
+                                                  .swap_horizontal_circle_rounded,
                                               size: 22,
                                               color: StyleColor.blueDark,
                                             ),
@@ -1207,7 +1152,6 @@ class _BibleScreenState extends State<BibleScreen> {
     );
   }
 
-
   /// 🔥 VERSIÓN CORREGIDA: Método para crear resaltados que convierte índices
   List<TextSpan> _buildHighlightedTextSpansForSelection(VerseModel verse) {
     final text = " ${verse.text} "; // 🔥 INCLUIR el espacio alrededor del texto
@@ -1295,7 +1239,6 @@ class _BibleScreenState extends State<BibleScreen> {
 
     return spans;
   }
-
 
   bool _isFavorite(VerseModel verse) {
     return _favoriteVerses.any((f) => f.verse.id == verse.id);
@@ -1391,7 +1334,8 @@ class _BibleScreenState extends State<BibleScreen> {
               children: colors.map((color) {
                 return GestureDetector(
                   onTap: () {
-                    final hexColor = color.toARGB32()
+                    final hexColor = color
+                        .toARGB32()
                         .toRadixString(16)
                         .padLeft(8, '0')
                         .toUpperCase();
@@ -1432,7 +1376,9 @@ class _BibleScreenState extends State<BibleScreen> {
             title: Text('Cancelar'),
             onTap: () => Navigator.pop(ctx),
           ),
-          SizedBox(height: 30,)
+          SizedBox(
+            height: 30,
+          )
         ],
       ),
     );
@@ -1728,6 +1674,135 @@ class _BibleScreenState extends State<BibleScreen> {
     }
   }
 
+  Widget _buildSelectionDrawer() {
+    return Drawer(
+      width: 320,
+      backgroundColor: StyleColor.blueDark,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header del drawer con información actual
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: currentTheme.appBarColor,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Navegación Bíblica',
+                        style: TextStyle(
+                          color: currentTheme.textColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, size: 24),
+                        color: currentTheme.textColor,
+                        onPressed: () {
+                          _scaffoldKey.currentState?.closeEndDrawer();
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  // Información actual
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: currentTheme.backgroundColor.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Leyendo actualmente:',
+                          style: TextStyle(
+                            color: currentTheme.textColor.withOpacity(0.7),
+                            fontSize: 12,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          '${currentBook?.modernName} ${currentChapter?.chapter}',
+                          style: TextStyle(
+                            color: currentTheme.textColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Versión: ${currentVersion?.version}',
+                          style: TextStyle(
+                            color: currentTheme.textColor.withOpacity(0.7),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Selección de Versión de la Biblia
+                    // _buildVersionSelection(currentTheme),
+
+                    SizedBox(height: 24),
+
+                    // Selección de Libro
+                    // _buildBookSelection(currentTheme),
+
+                    SizedBox(height: 24),
+
+                    // Selección de Capítulo
+                    // _buildChapterSelection(currentTheme),
+
+                    SizedBox(height: 24),
+
+                    // Acciones rápidas
+                    // _buildQuickActions(currentTheme),
+                  ],
+                ),
+              ),
+            ),
+
+            // Footer
+            Container(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Desliza hacia abajo para cerrar',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: currentTheme.textColor.withOpacity(0.5),
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Método para ir al siguiente capítulo
   Future<void> _goToPreviousChapter(String chapterNumber) async {
     setState(() {
@@ -1986,7 +2061,6 @@ class _BibleScreenState extends State<BibleScreen> {
           if (startIndex != -1) {
             setState(() => scrollToVerse = startIndex);
             scrollToKeyVerse(startIndex); // 🔥 Usar la nueva función
-           
           }
         }
       });
@@ -2155,6 +2229,222 @@ class _BibleScreenState extends State<BibleScreen> {
         );
       },
     );
+  }
+
+// Método para construir el drawer de navegación
+  Widget _buildNavigationDrawer(BibleTheme currentTheme) {
+    return Drawer(
+      width: MediaQuery.sizeOf(context).width * 0.75, // Ancho personalizado
+      backgroundColor: currentTheme.backgroundColor,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header del drawer
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 20),
+              decoration: BoxDecoration(
+                color: currentTheme.appBarColor,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Navegación',
+                        style: StylesApp(context).textStyleBody18.copyWith(
+                              color: currentTheme.buttonTextColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, size: 24),
+                        color: currentTheme.buttonTextColor,
+                        onPressed: () {
+                          _scaffoldKey.currentState?.closeEndDrawer();
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: ListView(
+                // padding: EdgeInsets.all(16),
+                children: [
+                  BibleHeaderWidget(
+                    showButton: false,
+                    topPosition: null,
+                    bottomPosition: 10.0,
+                    onSearchBible: () {
+                      openModal();
+                    },
+                    versionName:
+                        currentVersion != null ? currentVersion!.version : '',
+                    title: currentBook != null ? currentBook!.modernName : '',
+                    showIconVideo: video.url.isNotEmpty,
+                    chapter: currentChapter != null
+                        ? '${currentChapter!.chapter}'
+                        : '',
+                    onVideoCollection: () async {
+                      await _showVideoDialog();
+                    },
+                    onBack: () async {
+                      Navigator.pushNamed(
+                        context,
+                        '/layoutPage',
+                        arguments: {'selectedIndex': 0},
+                      );
+                    },
+                    onVersionTap: () async {
+                      await _changeBibleVersion();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerIndicator(BibleTheme currentTheme) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: currentTheme.buttonColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: currentTheme.buttonColor.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.swipe_left,
+            color: currentTheme.buttonColor,
+            size: 20,
+          ),
+          SizedBox(width: 8),
+          Text(
+            'Desliza desde la derecha para navegar',
+            style: TextStyle(
+              color: currentTheme.buttonColor,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Método para mostrar el diálogo de video
+  Future<void> _showVideoDialog() async {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.sizeOf(context).height * 0.50,
+              maxHeight: MediaQuery.sizeOf(context).height * 0.50,
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    constraints: BoxConstraints(minHeight: 213),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: (video.url.contains('youtube.com') ||
+                              video.url.contains('youtu.be'))
+                          ? PlayerYoutubeWidget(videoUrl: video.url)
+                          : PlayerNoYoutube(
+                              url: "${GraphQLConfig.urlServidor}${video.url}"),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop(); // Cierra el diálogo
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.7),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 20.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Método para cambiar la versión de la Biblia
+  Future<void> _changeBibleVersion() async {
+    final bibleVersions = Provider.of<CatalogueProvider>(
+      context,
+      listen: false,
+    )
+        .allBibleVersion
+        .map(
+          (v) => ModelData(value: v.id, label: v.version),
+        )
+        .toList();
+
+    final selectedVersion = await BibleVersionSelector.show(
+      context: context,
+      versions: bibleVersions,
+      preferenceKey: preferenceKey,
+      savedId: lastVersionsSelected,
+    );
+
+    if (selectedVersion != null) {
+      if (kDebugMode) {
+        print('Versión seleccionada: ${selectedVersion.label}');
+      }
+
+      // Actualizar la versión seleccionada
+      setState(() => lastVersionsSelected = selectedVersion.value);
+
+      // Limpiar cache y guardar nueva versión
+      await PreferencesManager().clearOne('bookSelected');
+      await PreferencesManager().clearOne('chapterSelected');
+      await PreferencesManager().setSelectedBibleVersion(lastVersionsSelected!);
+
+      // Recargar datos con la nueva versión
+      _initDataLoad();
+    }
   }
 }
 
