@@ -35,47 +35,37 @@ class _RankingScreenState extends State<RankingScreen> {
     });
 
     try {
-      // si no hay ligas en catalogoProvider consultar servicios
-      if (Provider.of<CatalogueProvider>(context, listen: false)
-          .allLeagues
-          .isEmpty) {
-        Provider.of<CatalogueProvider>(context, listen: false).loadLeagues();
+      final catalogueProvider =
+          Provider.of<CatalogueProvider>(context, listen: false);
+
+      if (catalogueProvider.allLeagues.isEmpty) {
+        await catalogueProvider.loadLeagues();
       }
 
-      leagues = Provider.of<CatalogueProvider>(context, listen: false)
-          .allLeagues
-          .map((league) => league)
-          .toList();
+      leagues = List.from(catalogueProvider.allLeagues);
+
       if (leagues.isEmpty) {
-        setState(() {
-          errorMessage = "No se encontraron ligas";
-        });
+        setState(() => errorMessage = "No se encontraron ligas");
       }
     } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-      });
+      setState(() => errorMessage = e.toString());
     } finally {
       LoadingService().hideLoading();
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? Container()
-        : errorMessage != null
-            ? Center(
-                child: BuildErrorWidget(
-                  errorMessage: errorMessage ?? '',
-                  onRetry: () async => _generateData(context),
-                  onBack: () => Navigator.pop(context),
-                ),
-              )
-            : RankingScreenView(ranking: leagues);
+    if (isLoading) return Container();
+    if (errorMessage != null) {
+      return BuildErrorWidget(
+        errorMessage: errorMessage!,
+        onRetry: () => _generateData(context),
+        onBack: () => Navigator.pop(context),
+      );
+    }
+    return RankingScreenView(ranking: leagues);
   }
 }
 
@@ -91,6 +81,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
   List<MemberModel> members = [];
   String activeLeagueId = "";
   bool noActiveLigue = false;
+  UserProvider? userData;
 
   @override
   void initState() {
@@ -101,17 +92,14 @@ class _RankingScreenViewState extends State<RankingScreenView> {
   }
 
   void _loadInitialMembers(BuildContext context) {
-    final userData = Provider.of<UserProvider>(context, listen: false);
-    // activeLeagueId = widget.ranking[DefaultTabController.of(context).index].id;
-    if (userData.currentUser != null) {
-      if (userData.currentUser!.currentLeague != null) {
-        activeLeagueId = userData.currentUser!.currentLeague!.id;
-        loadMembers(activeLeagueId, userData.currentUser!.userId, context);
+    userData = Provider.of<UserProvider>(context, listen: false);
+
+    if (userData?.currentUser != null) {
+      if (userData?.currentUser!.currentLeague != null) {
+        activeLeagueId = userData!.currentUser!.currentLeague!.id;
+        loadMembers(activeLeagueId, userData?.currentUser!.userId, context);
       } else {
-        // Si no hay una liga activa, puedes manejarlo como desees
-        setState(() {
-          noActiveLigue = true;
-        });
+        setState(() => noActiveLigue = true);
       }
     }
   }
@@ -130,149 +118,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                   children: [
                     // Pestañas
                     if (!noActiveLigue) LeagueTimeRemaining(),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.black,
-                            width: 1.0,
-                          ),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: .30),
-                            spreadRadius: 0,
-                            blurRadius: 4,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: SizedBox(
-                        width: MediaQuery.sizeOf(context).width,
-                        height: 120,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: widget.ranking.length,
-                          itemBuilder: (BuildContext context, index) {
-                            return GestureDetector(
-                              onTap: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  builder: (context) {
-                                    return SingleChildScrollView(
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: EdgeInsets.all(16),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              widget.ranking[index].name,
-                                              style: StylesApp(context)
-                                                  .textStyleBody18
-                                                  .copyWith(
-                                                      color: StyleColor.black,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                            ),
-                                            SizedBox(height: 10),
-                                            Image.network(
-                                              GraphQLConfig.urlServidor +
-                                                  widget.ranking[index].img!
-                                                      .urlImg,
-                                              height: 120,
-                                            ),
-                                            SizedBox(height: 10),
-                                            Text(
-                                              widget.ranking[index].description,
-                                              style: StylesApp(context)
-                                                  .textStyleBody14
-                                                  .copyWith(
-                                                      color: StyleColor.black),
-                                            ),
-                                            SizedBox(height: 20),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                height: 109,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Container(
-                                      height: 60,
-                                      padding: EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Color(int.parse(
-                                            "0xFF${widget.ranking[index].colorBack}")),
-                                        borderRadius: BorderRadius.circular(30),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Color(int.parse(
-                                                "0xFF${widget.ranking[index].colorFront}")),
-                                            spreadRadius: 0,
-                                            blurRadius: 0,
-                                            offset: Offset(0, 6),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Container(
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                          color: Color(int.parse(
-                                              "0xFF${widget.ranking[index].colorFront}")),
-                                        ),
-                                        child: Image.network(
-                                          GraphQLConfig.urlServidor +
-                                              widget.ranking[index].img!.urlImg,
-                                        ),
-                                      ),
-                                    ),
-                                    if (widget.ranking[index].id ==
-                                        activeLeagueId) ...{
-                                      SizedBox(
-                                        height: 8,
-                                      ),
-                                      ClipOval(
-                                        child: Container(
-                                          width: 80,
-                                          height: 9,
-                                          decoration: BoxDecoration(
-                                              color: Colors.amber),
-                                        ),
-                                      )
-                                    } else ...{
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                    },
-                                    Text(
-                                      widget.ranking[index].name,
-                                      style: StylesApp(context)
-                                          .textStyleBody14
-                                          .copyWith(
-                                            color: widget.ranking[index].id ==
-                                                    activeLeagueId
-                                                ? StyleColor.turquoise
-                                                : StyleColor.orange,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
+                    _buildLeagueTabs(),
                     Expanded(
                       child: Container(
                         margin: EdgeInsets.only(left: 8, top: 0, right: 8),
@@ -280,48 +126,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                           color: Colors.white,
                         ),
                         child: noActiveLigue
-                            ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: const Color.fromARGB(
-                                              255, 56, 54, 54),
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                        ),
-                                        child: Image.asset(
-                                          'assets/go-aventure.gif',
-                                          height: 100,
-                                        ),
-                                      ),
-                                      Text(
-                                        'No tienes una liga activa',
-                                        style: StylesApp(context)
-                                            .textStyleBody18
-                                            .copyWith(
-                                              color: const Color.fromARGB(
-                                                  255, 22, 22, 22),
-                                            ),
-                                      ),
-                                      Text(
-                                        textAlign: TextAlign.center,
-                                        'Juega Aventuras para conseguir una liga',
-                                        style: StylesApp(context)
-                                            .textStyleBody15
-                                            .copyWith(
-                                              color: const Color.fromARGB(
-                                                  255, 22, 22, 22),
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            : _buildRankingList(context, members),
+                            ? _buildNoLeagueWidget()
+                            : _buildRankingList(),
                       ),
                     ),
                   ],
@@ -334,309 +140,408 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     );
   }
 
-  Widget _buildRankingList(BuildContext context, members) {
-    // Cargar los miembros de la liga
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: members.length, // Ejemplo: 10 usuarios en el ranking
-      itemBuilder: (context, index) {
-        String mono = '';
-        if (index == 0) {
-          mono = 'assets/position1.png';
-        } else if (index == 1) {
-          mono = 'assets/position2.png';
-        } else if (index == 2) {
-          mono = 'assets/position3.png';
-        }
-        Color color;
-        if (index < 5) {
-          color = StyleColor.orange;
-        } else if (index > 15) {
-          color = Colors.red;
-        } else {
-          color = Colors.black;
-        }
-
-        if (index == 5) {
-          return Column(
-            children: [
-              if (!isLastLeague())
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(Icons.arrow_upward_rounded, color: StyleColor.turquoise),
-                      Text(
-                        'Zona de Ascenso',
-                        style: StylesApp(context).textStyleBody15.copyWith(
-                              color: StyleColor.turquoise,
-                              fontWeight: FontWeight.bold,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Icon(Icons.arrow_upward_rounded, color: StyleColor.turquoise),
-                    ],
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      spacing: 10,
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          clipBehavior: Clip.none,
-                          children: [
-                            Center(
-                              child: SizedBox(
-                                width: 45,
-                                height: 45,
-                                child: Center(
-                                  child: Text("${index + 1}",
-                                      style: StylesApp(context)
-                                          .textStyleBody20
-                                          .copyWith(color: color)),
-                                ),
-                              ),
-                            ),
-                            if (index < 3)
-                              Image.asset(
-                                mono,
-                                height: 45,
-                                fit: BoxFit.fill,
-                              ),
-                          ],
-                        ),
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage: NetworkImage(GraphQLConfig
-                                  .urlServidor +
-                              members[index]
-                                  .profilePicture), // Reemplaza con la imagen del usuario
-                        ),
-                        SizedBox(
-                          width: 120,
-                          child: Text(
-                            members[index].username,
-                            overflow: TextOverflow.ellipsis,
-                            style: StylesApp(context)
-                                .textStyleBody18
-                                .copyWith(color: Colors.black),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Text(
-                      maxLines: 2,
-                      softWrap: true,
-                      'exp ${members[index].currentPoints}',
-                      style: StylesApp(context)
-                          .textStyleBody18
-                          .copyWith(color: Colors.black),
-                    ), // Reemplaza con el exp del usuario
-                  ],
-                ),
-              )
-            ],
-          );
-        } else if (index == 10) {
-          return Column(
-            children: [
-              if (!isFirstLeague())
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(Icons.arrow_downward_rounded, color: Colors.red),
-                      Text(
-                        'Zona de Descenso',
-                        style: StylesApp(context).textStyleBody15.copyWith(
-                              color: StyleColor.redDark,
-                              fontWeight: FontWeight.bold,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Icon(Icons.arrow_downward_rounded, color: Colors.red),
-                    ],
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      spacing: 10,
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Center(
-                              child: SizedBox(
-                                width: 45,
-                                height: 45,
-                                child: Center(
-                                  child: Text("${index + 1}",
-                                      style: StylesApp(context)
-                                          .textStyleBody20
-                                          .copyWith(color: color)),
-                                ),
-                              ),
-                            ),
-                            if (index < 3)
-                              Image.asset(
-                                mono,
-                                height: 45,
-                                fit: BoxFit.fill,
-                              ),
-                          ],
-                        ),
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage: NetworkImage(GraphQLConfig
-                                  .urlServidor +
-                              members[index]
-                                  .profilePicture), // Reemplaza con la imagen del usuario
-                        ),
-                        SizedBox(
-                          width: 130,
-                          child: Text(
-                            members[index].username,
-                            overflow: TextOverflow.ellipsis,
-                            style: StylesApp(context)
-                                .textStyleBody18
-                                .copyWith(color: Colors.black),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Text(
-                      maxLines: 2,
-                      softWrap: true,
-                      'exp ${members[index].currentPoints}',
-                      style: StylesApp(context)
-                          .textStyleBody18
-                          .copyWith(color: Colors.black),
-                    ), // Reemplaza con el exp del usuario
-                  ],
-                ),
-              )
-            ],
-          );
-        } else {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  spacing: 10,
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Center(
-                          child: SizedBox(
-                            width: 45,
-                            height: 45,
-                            child: Center(
-                              child: Text("${index + 1}",
-                                  style: StylesApp(context)
-                                      .textStyleBody20
-                                      .copyWith(color: color)),
-                            ),
-                          ),
-                        ),
-                        if (index < 3)
-                          Image.asset(
-                            mono,
-                            height: 45,
-                            fit: BoxFit.fill,
-                          ),
-                      ],
-                    ),
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(GraphQLConfig.urlServidor +
-                          members[index]
-                              .profilePicture), // Reemplaza con la imagen del usuario
-                    ),
-                    SizedBox(
-                      width: 140,
-                      child: index <= 2
-                          ? TextWithGradient(
-                              text: members[index]
-                                      .username
-                                      .split(' ')[0][0]
-                                      .toUpperCase() +
-                                  members[index]
-                                      .username
-                                      .split(' ')[0]
-                                      .substring(1),
-                              colorList: getColorsGradient(index),
-                              font: StylesApp(context).textStyleBody18.copyWith(
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                            )
-                          : Text(
-                              members[index]
-                                      .username
-                                      .split(' ')[0][0]
-                                      .toUpperCase() +
-                                  members[index]
-                                      .username
-                                      .split(' ')[0]
-                                      .substring(1),
-                              overflow: TextOverflow.ellipsis,
-                              style: StylesApp(context)
-                                  .textStyleBody18
-                                  .copyWith(color: Colors.black),
-                            ),
-                    ),
-                  ],
-                ),
-                index <= 2
-                    ? TextWithGradient(
-                        text: 'exp ${members[index].currentPoints}',
-                        colorList: getColorsGradient(index),
-                        font: StylesApp(context).textStyleBody18.copyWith(
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                      )
-                    : Text(
-                        maxLines: 2,
-                        softWrap: true,
-                        'exp ${members[index].currentPoints}',
-                        style: StylesApp(context)
-                            .textStyleBody18
-                            .copyWith(color: Colors.black),
-                      ), // Reemplaza con el exp del usuario
-              ],
-            ),
-          );
-        }
-      },
+  Widget _buildLeagueTabs() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border:
+            const Border(bottom: BorderSide(color: Colors.black, width: 1.0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width,
+        height: 120,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: widget.ranking.length,
+          itemBuilder: (context, index) => _buildLeagueTabItem(index),
+        ),
+      ),
     );
   }
 
-  void loadMembers(activeLeagueId, userId, BuildContext context) async {
+  Widget _buildLeagueTabItem(int index) {
+    final league = widget.ranking[index];
+    final isActive = league.id == activeLeagueId;
+
+    return GestureDetector(
+      onTap: () => _showLeagueDetails(league),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        height: 109,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // Icono de la liga
+            Container(
+              height: 60,
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Color(int.parse("0xFF${league.colorBack}")),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(int.parse("0xFF${league.colorFront}")),
+                    blurRadius: 0,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  color: Color(int.parse("0xFF${league.colorFront}")),
+                ),
+                child: Image.network(
+                  GraphQLConfig.urlServidor + league.img!.urlImg,
+                ),
+              ),
+            ),
+            // Indicador activo
+            SizedBox(height: isActive ? 8 : 5),
+            if (isActive)
+              ClipOval(
+                child: Container(
+                  width: 80,
+                  height: 9,
+                  color: Colors.amber,
+                ),
+              ),
+            // Nombre de la liga
+            Text(
+              league.name,
+              style: StylesApp(context).textStyleBody14.copyWith(
+                    color: isActive ? StyleColor.turquoise : StyleColor.orange,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoLeagueWidget() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 56, 54, 54),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Image.asset(
+                'assets/go-aventure.gif',
+                height: 100,
+              ),
+            ),
+            Text(
+              'No tienes una liga activa',
+              style: StylesApp(context).textStyleBody18.copyWith(
+                    color: const Color.fromARGB(255, 22, 22, 22),
+                  ),
+            ),
+            Text(
+              textAlign: TextAlign.center,
+              'Juega Aventuras para conseguir una liga',
+              style: StylesApp(context).textStyleBody15.copyWith(
+                    color: const Color.fromARGB(255, 22, 22, 22),
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRankingList() {
+    // Cargar los miembros de la liga
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: members.length,
+      itemBuilder: (context, index) => _buildRankingItem(index),
+    );
+  }
+
+  Widget _buildRankingItem(int index) {
+    final member = members[index];
+    final isCurrentUser = (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username);
+    final position = index + 1;
+
+    // Widgets para zonas especiales
+    if (position == 6) return _buildPromotionZone(index);
+    if (position == 11) return _buildRelegationZone(index);
+
+    return _buildMemberRow(
+      index: index,
+      member: member,
+      isCurrentUser: isCurrentUser,
+      showSpecialZones: false,
+    );
+  }
+
+  Widget _buildPromotionZone(int index) {
+    return Column(
+      children: [
+        if (!_isLastLeague())
+          _buildZoneHeader(
+            text: 'Zona de Ascenso',
+            icon: Icons.arrow_upward_rounded,
+            color: StyleColor.turquoise,
+          ),
+        _buildMemberRow(
+          index: index,
+          member: members[index],
+          isCurrentUser: (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username),
+          showSpecialZones: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRelegationZone(int index) {
+    return Column(
+      children: [
+        if (!_isFirstLeague())
+          _buildZoneHeader(
+            text: 'Zona de Descenso',
+            icon: Icons.arrow_downward_rounded,
+            color: StyleColor.redDark,
+          ),
+        _buildMemberRow(
+          index: index,
+          member: members[index],
+          isCurrentUser: (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username),
+          showSpecialZones: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildZoneHeader(
+      {required String text, required IconData icon, required Color color}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color),
+          Text(
+            text,
+            style: StylesApp(context).textStyleBody15.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          Icon(icon, color: color),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMemberRow({
+    required int index,
+    required MemberModel member,
+    required bool isCurrentUser,
+    required bool showSpecialZones,
+  }) {
+    final position = index + 1;
+    final positionColor = _getPositionColor(position);
+    final isTopThree = position <= 3;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isCurrentUser ? StyleColor.blueMedium.withAlpha(70) : null,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Información del usuario
+            Row(
+              children: [
+                _buildPositionIndicator(position, isTopThree),
+                const SizedBox(width: 10),
+                CircleAvatar(
+                  radius: 20,
+                  backgroundImage: NetworkImage(
+                    GraphQLConfig.urlServidor + member.profilePicture,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 140,
+                  child: isTopThree
+                      ? TextWithGradient(
+                          text: _formatUsername(member.username),
+                          colorList: _getColorsGradient(index),
+                          font: StylesApp(context).textStyleBody18.copyWith(
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                        )
+                      : Text(
+                          _formatUsername(member.username),
+                          overflow: TextOverflow.ellipsis,
+                          style: StylesApp(context).textStyleBody18.copyWith(
+                                color: Colors.black,
+                              ),
+                        ),
+                ),
+              ],
+            ),
+            // Puntos del usuario
+            isTopThree
+                ? TextWithGradient(
+                    text: 'exp ${member.currentPoints}',
+                    colorList: _getColorsGradient(index),
+                    font: StylesApp(context).textStyleBody18,
+                  )
+                : Text(
+                    'exp ${member.currentPoints}',
+                    style: StylesApp(context).textStyleBody18.copyWith(
+                          color: Colors.black,
+                        ),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPositionIndicator(int position, bool isTopThree) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox(
+          width: 45,
+          height: 45,
+          child: Center(
+            child: Text(
+              "$position",
+              style: StylesApp(context).textStyleBody20.copyWith(
+                    color: _getPositionColor(position),
+                  ),
+            ),
+          ),
+        ),
+        if (isTopThree)
+          Image.asset(
+            _getPositionImage(position),
+            height: 45,
+            fit: BoxFit.fill,
+          ),
+      ],
+    );
+  }
+
+  String _formatUsername(String username) {
+    final firstName = username.split(' ')[0];
+    return firstName[0].toUpperCase() + firstName.substring(1);
+  }
+
+  Color _getPositionColor(int position) {
+    if (position < 5) return StyleColor.orange;
+    if (position > 15) return Colors.red;
+    return Colors.black;
+  }
+
+  String _getPositionImage(int position) {
+    switch (position) {
+      case 1:
+        return 'assets/position1.png';
+      case 2:
+        return 'assets/position2.png';
+      case 3:
+        return 'assets/position3.png';
+      default:
+        return '';
+    }
+  }
+
+  List<Color> _getColorsGradient(int index) {
+    switch (index) {
+      case 0:
+        return [
+          const Color(0xFF775D0C),
+          const Color(0xFFA07D11),
+          const Color(0xFFBA9113),
+          const Color(0XFFDDAC17),
+        ];
+      case 1:
+        return [
+          const Color(0xFF3D3D3D),
+          const Color(0xFF676767),
+          const Color(0XFFB7B6B4),
+          const Color(0xFF8B8B8B),
+        ];
+      case 2:
+        return [
+          const Color(0xFFA97654),
+          const Color(0xFF875E43),
+          const Color(0xFF6C4B35),
+          const Color(0xFF432F21),
+        ];
+      default:
+        return [];
+    }
+  }
+
+  void _showLeagueDetails(League league) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SingleChildScrollView(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                league.name,
+                style: StylesApp(context).textStyleBody18.copyWith(
+                      color: StyleColor.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 10),
+              Image.network(
+                GraphQLConfig.urlServidor + league.img!.urlImg,
+                height: 120,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                league.description,
+                style: StylesApp(context).textStyleBody14.copyWith(
+                      color: StyleColor.black,
+                    ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void loadMembers(
+      String activeLeagueId, String? userId, BuildContext context) async {
     LoadingService().showLoading(context);
-    final memberResponse = await getLeagueMembers(activeLeagueId, userId);
+    final memberResponse = await getLeagueMembers(activeLeagueId, userId!);
+
     if (memberResponse.error != null) {
       LoadingService().hideLoading();
-      // await showCustomDialog(context,
-      //     message: memberResponse.error!, dialogType: DialogType.error);
       return;
     }
+
     setState(() {
       members = memberResponse.data
           .map((member) => MemberModel.fromJson(removeTypename(member)))
@@ -646,54 +551,12 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     LoadingService().hideLoading();
   }
 
-  List<Color> getColorsGradient(int index) {
-    List<Color> colors = [];
-    if (index == 0) {
-      colors = [
-        Color(0xFF775D0C),
-        Color(0xFFA07D11),
-        Color(0xFFBA9113),
-        Color(0XFFDDAC17)
-      ];
-    } else if (index == 1) {
-      colors = [
-        Color(0xFF3D3D3D),
-        Color(0xFF676767),
-        Color(0XFFB7B6B4),
-        Color(0xFF8B8B8B)
-      ];
-    } else if (index == 2) {
-      colors = [
-        Color(0xFFA97654),
-        Color(0xFF875E43),
-        Color(0xFF6C4B35),
-        Color(0xFF432F21)
-      ];
-    }
-
-    return colors;
+  bool _isFirstLeague() {
+    return widget.ranking.first.id == activeLeagueId;
   }
 
-  bool isFirstLeague() {
-    final leagues = Provider.of<CatalogueProvider>(context, listen: false)
-        .allLeagues
-        .map((league) => league)
-        .toList();
-    if (leagues.first.id == activeLeagueId) {
-      return true;
-    }
-    return false;
-  }
-
-  bool isLastLeague() {
-    final leagues = Provider.of<CatalogueProvider>(context, listen: false)
-        .allLeagues
-        .map((league) => league)
-        .toList();
-    if (leagues.last.id == activeLeagueId) {
-      return true;
-    }
-    return false;
+  bool _isLastLeague() {
+    return widget.ranking.last.id == activeLeagueId;
   }
 }
 

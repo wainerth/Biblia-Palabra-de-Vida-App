@@ -285,11 +285,11 @@ class StylesApp {
 
   double get fontSizeBtn {
     if (screenWidth <= SizeScreensApp().sm) {
-      return 14.sp;
+      return 12.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 14.sp;
+      return 12.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 14.sp;
+      return 12.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return 14.sp;
     } else {

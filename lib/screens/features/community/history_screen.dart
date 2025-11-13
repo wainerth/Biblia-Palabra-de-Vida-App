@@ -61,6 +61,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _generateData(BuildContext context) async {
     setState(() {
       errorMessage = null;
+      isLoading = true;
     });
     LoadingService().showLoading(context);
 

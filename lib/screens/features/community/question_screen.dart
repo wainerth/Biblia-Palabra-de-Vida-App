@@ -400,6 +400,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ? levelProgress!.score - levelProgress!.scoreLastAttempt
               : 0;
           energy = (experience / 10).toInt();
+          bestScore = levelProgress!.scoreLastAttempt;
         } else {
           experience = 0;
           energy = 0;

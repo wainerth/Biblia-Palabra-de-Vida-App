@@ -134,7 +134,7 @@ class FCMService {
     final data = message.data;
     if (data.isNotEmpty) {
       // Usar tu función getRouterScreen existente
-      final routeInfo = getRouterScreen(data['model'], data['variables']);
+      final routeInfo = getRouterScreen(data['model'].toLowerCase(), data['variables']);
 
       if (navigatorKey.currentState != null) {
         if (routeInfo.arguments != null) {

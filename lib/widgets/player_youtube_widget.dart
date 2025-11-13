@@ -30,10 +30,10 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
     _normalController = YoutubePlayerController(
       initialVideoId: videoId!,
       flags: const YoutubePlayerFlags(
-        mute: false,
-        autoPlay: true,
-        enableCaption: false, // Deshabilitar captions puede ayudar
-      ),
+          mute: false,
+          autoPlay: true,
+          enableCaption: false, // Deshabilitar captions puede ayudar
+          showLiveFullscreenButton: false),
     );
 
     _normalController.addListener(() {
@@ -49,10 +49,10 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
     _fullScreenController = YoutubePlayerController(
       initialVideoId: videoId!,
       flags: const YoutubePlayerFlags(
-        mute: false,
-        autoPlay: true,
-        enableCaption: false,
-      ),
+          mute: false,
+          autoPlay: true,
+          enableCaption: false,
+          showLiveFullscreenButton: false),
     );
   }
 
@@ -102,14 +102,17 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
                     }
                   },
                   topActions: [
-                    if (_fullScreenController != null)
+                    if (_fullScreenController != null && _isPlayerReady)
                       GestureDetector(
-                        onTap: () {
-                          _openInYouTube();
-                        },
+                        onTap: _openInYouTube,
                         child: Row(
+                          mainAxisSize: MainAxisSize.min, // ✅ No expandir
                           children: [
-                            Expanded(
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width -
+                                    50, // ✅ Reservar espacio para el icono
+                              ),
                               child: Text(
                                 _fullScreenController!.metadata.title,
                                 maxLines: 1,
@@ -137,6 +140,16 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
                     icon:
                         const Icon(Icons.close, color: Colors.white, size: 30),
                     onPressed: _exitFullScreen,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: IconButton(
+                    icon: const Icon(Icons.fullscreen, color: Colors.white),
+                    onPressed: _isPlayerReady && _isFullScreen
+                        ? () => _exitFullScreen()
+                        : null,
                   ),
                 ),
               ],
@@ -220,14 +233,17 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
               // Lógica cuando termina el video
             },
             topActions: [
-              if (_normalController != null)
+              if (_normalController != null && _isPlayerReady)
                 GestureDetector(
-                  onTap: () {
-                    _openInYouTube();
-                  },
+                  onTap: _openInYouTube,
                   child: Row(
+                    mainAxisSize: MainAxisSize.min, // ✅ No expandir
                     children: [
-                      Expanded(
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width -
+                              60, // ✅ Reservar espacio para el icono
+                        ),
                         child: Text(
                           _normalController.metadata.title,
                           maxLines: 1,
@@ -247,16 +263,16 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
                 )
             ],
           ),
-          // Positioned(
-          //   bottom: 10,
-          //   right: 10,
-          //   child: IconButton(
-          //     icon: const Icon(Icons.fullscreen, color: Colors.white),
-          //     onPressed: _isPlayerReady && !_isFullScreen
-          //         ? () => _enterFullScreen(context)
-          //         : null,
-          //   ),
-          // ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.fullscreen, color: Colors.white),
+              onPressed: _isPlayerReady && !_isFullScreen
+                  ? () => _enterFullScreen(context)
+                  : null,
+            ),
+          ),
         ],
       ),
     );

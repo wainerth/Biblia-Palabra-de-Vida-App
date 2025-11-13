@@ -179,20 +179,18 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
 
         // Navegación más robusta
         final routeInfo =
-            getRouterScreen(notification.model, notification.variables);
+            getRouterScreen(notification.model.toLowerCase(), notification.variables);
 
-        // WidgetsBinding.instance.addPostFrameCallback((_) {
         if (navigatorKey.currentState != null) {
           if (routeInfo.arguments != null) {
             navigatorKey.currentState?.pushNamed(
-              routeInfo.routeName.toLowerCase(),
+              routeInfo.routeName,
               arguments: routeInfo.arguments,
             );
           } else {
-            navigatorKey.currentState?.pushNamed(routeInfo.routeName.toLowerCase());
+            navigatorKey.currentState?.pushNamed(routeInfo.routeName);
           }
         }
-        // });
       } else {
         if (kDebugMode) {
           print('Notification clicked but payload was empty');
