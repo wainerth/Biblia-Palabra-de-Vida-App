@@ -109,7 +109,10 @@ class _BibleScreenState extends State<BibleScreen> {
       if (scrollController.position.isScrollingNotifier.value) {
         if (!_isManualScroll) return;
         if (scrollToVerse != null && scrollToVerse! > 0) {
-          setState(() => scrollToVerse = null);
+          setState(() {
+            scrollToVerse = null;
+            _isManualScroll = false;
+          });
         }
       }
     });
@@ -1674,135 +1677,6 @@ class _BibleScreenState extends State<BibleScreen> {
     }
   }
 
-  Widget _buildSelectionDrawer() {
-    return Drawer(
-      width: 320,
-      backgroundColor: StyleColor.blueDark,
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Header del drawer con información actual
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: currentTheme.appBarColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(16),
-                  bottomRight: Radius.circular(16),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Navegación Bíblica',
-                        style: TextStyle(
-                          color: currentTheme.textColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.close, size: 24),
-                        color: currentTheme.textColor,
-                        onPressed: () {
-                          _scaffoldKey.currentState?.closeEndDrawer();
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  // Información actual
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: currentTheme.backgroundColor.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Leyendo actualmente:',
-                          style: TextStyle(
-                            color: currentTheme.textColor.withOpacity(0.7),
-                            fontSize: 12,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '${currentBook?.modernName} ${currentChapter?.chapter}',
-                          style: TextStyle(
-                            color: currentTheme.textColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Versión: ${currentVersion?.version}',
-                          style: TextStyle(
-                            color: currentTheme.textColor.withOpacity(0.7),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Selección de Versión de la Biblia
-                    // _buildVersionSelection(currentTheme),
-
-                    SizedBox(height: 24),
-
-                    // Selección de Libro
-                    // _buildBookSelection(currentTheme),
-
-                    SizedBox(height: 24),
-
-                    // Selección de Capítulo
-                    // _buildChapterSelection(currentTheme),
-
-                    SizedBox(height: 24),
-
-                    // Acciones rápidas
-                    // _buildQuickActions(currentTheme),
-                  ],
-                ),
-              ),
-            ),
-
-            // Footer
-            Container(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Desliza hacia abajo para cerrar',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: currentTheme.textColor.withOpacity(0.5),
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   /// Método para ir al siguiente capítulo
   Future<void> _goToPreviousChapter(String chapterNumber) async {
     setState(() {
@@ -1850,6 +1724,14 @@ class _BibleScreenState extends State<BibleScreen> {
 
     // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
     validateNextAndPrevious();
+    _scrollToTop();
+    // Al cambiar al siguiente libro, aseguramos que el scroll vuelva al inicio
+    setState(() {
+      scrollToVerse = null;
+      currentPlayingVerseIndex = null;
+      isPlaying = false;
+      _isManualScroll = false;
+    });
   }
 
   /// Método para regresar al capítulo anterior
@@ -1891,6 +1773,25 @@ class _BibleScreenState extends State<BibleScreen> {
       /// consultamos los capítulos con sus versículos del libro siguiente y le indicamos
       /// en false el parámetro firstChapter
       await loadChapters(nextBook, false);
+
+      // Esperar un frame para que el nuevo contenido esté construido y luego hacer scroll al top
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (scrollController.hasClients) {
+          await scrollController.animateTo(
+            0.0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        } else {
+          try {
+            scrollController.jumpTo(0.0);
+          } catch (_) {}
+        }
+        // permitir scroll manual nuevamente después de un pequeño delay
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) setState(() => _isManualScroll = true);
+        });
+      });
     }
 
     // cargamos los resaltados
@@ -1898,6 +1799,14 @@ class _BibleScreenState extends State<BibleScreen> {
     LoadingService().hideLoading();
     // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
     validateNextAndPrevious();
+    _scrollToTop();
+    // Al cambiar al siguiente libro, aseguramos que el scroll vuelva al inicio
+    setState(() {
+      scrollToVerse = null;
+      currentPlayingVerseIndex = null;
+      isPlaying = false;
+      _isManualScroll = false;
+    });
   }
 
   Future<void> loadChapters(BookModel book, bool firstChapter) async {
@@ -2445,6 +2354,21 @@ class _BibleScreenState extends State<BibleScreen> {
       // Recargar datos con la nueva versión
       _initDataLoad();
     }
+  }
+
+  void _scrollToTop() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        // Verificar si ya está en la parte superior
+        if (scrollController.offset > 0) {
+          scrollController.animateTo(
+            0.0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
   }
 }
 

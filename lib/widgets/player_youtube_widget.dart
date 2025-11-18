@@ -11,16 +11,19 @@ class PlayerYoutubeWidget extends StatefulWidget {
   State<PlayerYoutubeWidget> createState() => _PlayerYoutubeWidgetState();
 }
 
-class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
+class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget>
+    with WidgetsBindingObserver {
   late YoutubePlayerController _normalController;
   YoutubePlayerController? _fullScreenController;
   bool _isPlayerReady = false;
   OverlayEntry? _fullScreenOverlay;
   bool _isFullScreen = false;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializeNormalController();
   }
 
@@ -205,6 +208,7 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _exitFullScreen();
     _normalController.dispose();
     _fullScreenController?.dispose();

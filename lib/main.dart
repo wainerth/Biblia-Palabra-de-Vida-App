@@ -17,19 +17,6 @@ import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-// Provide a concrete HttpOverrides implementation so HttpOverrides.global = MyHttpOverrides()
-// compiles — this allows customizing the HttpClient (e.g. to accept self-signed certs in dev).
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    final client = super.createHttpClient(context);
-    // NOTE: In production you should not allow bad certificates; this is typically used only for development.
-    client.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    return client;
-  }
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -54,7 +41,6 @@ void main() async {
     }
   };
 
-  HttpOverrides.global = MyHttpOverrides();
   runApp(
     MultiProvider(
       providers: [
@@ -88,6 +74,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool? _hasSeenIntro;
+  bool _isAuthCheckComplete = false;
+
   @override
   void initState() {
     super.initState();
@@ -144,14 +132,14 @@ class _MyAppState extends State<MyApp> {
   }
 
 // function to load the token and initialize the authentication
-  Future<void> _loadTokenAndInitializeAuth() async {
-    final authProvider = context.read<AuthenticationProvider>();
-    try {
-      await authProvider.checkAuthentication(context);
-    } catch (e) {
-      debugPrint('⚠️ Error en _loadTokenAndInitializeAuth: $e');
-    }
-  }
+  // Future<void> _loadTokenAndInitializeAuth() async {
+  //   final authProvider = context.read<AuthenticationProvider>();
+  //   try {
+  //     await authProvider.checkAuthentication(context);
+  //   } catch (e) {
+  //     debugPrint('⚠️ Error en _loadTokenAndInitializeAuth: $e');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -187,26 +175,62 @@ class _MyAppState extends State<MyApp> {
       );
     }
     if (_hasSeenIntro!) {
-      final authProvider = context.read<AuthenticationProvider>();
-      return FutureBuilder(
-        future: _loadTokenAndInitializeAuth(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return LoadMaskedWidget();
-          } else {
-            LoadingService().hideLoading();
+      return Consumer<AuthenticationProvider>(
+        builder: (context, authProvider, child) {
+          // si aún no hemos empezado lña verificación, la iniciamos
+          if (!_isAuthCheckComplete && !authProvider.isLoading) {
+            _startAuthCheck(context);
+          }
 
-            if (authProvider.token != null) {
-              return PageScreen();
-            } else {
-              return const HomeScreen();
-            }
+          // Muestra loading mientras se verifica la autenticación
+          if (authProvider.isLoading) {
+            return const LoadMaskedWidget();
+          }
+
+          // cuando termina la verificación, decidimos qué pantalla mostrar
+          if (authProvider.isAuthenticated && authProvider.token != null) {
+            return const PageScreen();
+          } else {
+            return const HomeScreen();
           }
         },
       );
+      // return FutureBuilder(
+      //   future: _loadTokenAndInitializeAuth(),
+      //   builder: (context, snapshot) {
+      //     if (snapshot.connectionState == ConnectionState.waiting) {
+      //       return LoadMaskedWidget();
+      //     } else {
+      //       LoadingService().hideLoading();
+
+      //       if (authProvider.token != null) {
+      //         return PageScreen();
+      //       } else {
+      //         return const HomeScreen();
+      //       }
+      //     }
+      //   },
+      // );
     } else {
       return const WelcomeScreen();
     }
+  }
+
+  void _startAuthCheck(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final authProvider = context.read<AuthenticationProvider>();
+      try {
+        await authProvider.checkAuthentication(context);
+      } catch (e) {
+        debugPrint('⚠️ Error en verificación de autenticación: $e');
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isAuthCheckComplete = true;
+          });
+        }
+      }
+    });
   }
 }
 

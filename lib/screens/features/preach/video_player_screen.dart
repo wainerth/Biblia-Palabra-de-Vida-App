@@ -161,6 +161,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             height: StylesApp(context).btnSizeSmall.height,
                             onPressed: () {
                               showModalBottomSheet(
+                                  useSafeArea: true,
+                                  isScrollControlled: true, // Añade esto
                                   context: context,
                                   builder: (BuildContext context) {
                                     return _buildModalDetails(context, ref);
@@ -182,8 +184,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   Container _buildModalDetails(BuildContext context, ReferenceModel data) {
+    final safeAreaBottom = MediaQuery.of(context).padding.bottom;
     return Container(
-      padding: const EdgeInsets.all(4.0),
+      padding: EdgeInsets.only(
+        top: 4.0,
+        left: 4.0,
+        right: 4.0,
+        bottom: safeAreaBottom + 4.0,
+      ),
       decoration: BoxDecoration(
         color: StyleColor.white,
         borderRadius: BorderRadius.circular(8.0),
@@ -272,13 +280,20 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       text: "Leer Más",
                       buttonStyle: StylesApp(context).btnWidgetSmall,
                       onPressed: () {
+                        // Cerrar el modal primero
                         Navigator.pop(context);
-                        Navigator.pushNamed(context, "/layoutPage", arguments: {
-                          'selectedIndex': 1,
-                          'bibleId': data.book!.bibleId.toString(),
-                          'bookId': data.book!.id,
-                          'chapterId': data.chapter!.id!,
-                          'verseId': data.verse!.id!,
+
+                        // Pequeño delay para asegurar que el modal se cierre
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          // Navegar reemplazando la pantalla actual en lugar de apilar
+                          Navigator.pushReplacementNamed(context, "/layoutPage",
+                              arguments: {
+                                'selectedIndex': 1,
+                                'bibleId': data.book!.bibleId.toString(),
+                                'bookId': data.book!.id,
+                                'chapterId': data.chapter!.id!,
+                                'verseId': data.verse!.id!,
+                              });
                         });
                       },
                     ),
