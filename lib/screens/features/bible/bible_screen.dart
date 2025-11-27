@@ -62,6 +62,15 @@ class _BibleScreenState extends State<BibleScreen> {
   int? currentPlayingVerseIndex;
 // Añade estas variables a tu estado
   double _speechRate = 0.5; // Velocidad por defecto
+  int? scrollToVerse;
+  final Map<int, GlobalKey> _verseKeys = {};
+  bool _isManualScroll = false;
+
+  final double _scrollThreshold = 50.0;
+
+  // Nueva variable para controlar el drawer
+  bool _showDrawer = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -94,11 +103,25 @@ class _BibleScreenState extends State<BibleScreen> {
         }
       }
     });
+    scrollController.addListener(() {
+      _handleScroll();
+      // Cuando el usuario mueve el scroll manualmente
+      if (scrollController.position.isScrollingNotifier.value) {
+        if (!_isManualScroll) return;
+        if (scrollToVerse != null && scrollToVerse! > 0) {
+          setState(() {
+            scrollToVerse = null;
+            _isManualScroll = false;
+          });
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     flutterTts.stop(); // Detener TTS al salir
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -117,10 +140,7 @@ class _BibleScreenState extends State<BibleScreen> {
     });
 
     flutterTts.setCompletionHandler(() {
-      setState(() {
-        // isPlaying = false;
-        // currentPlayingVerseIndex = null;
-      });
+      setState(() {});
     });
 
     flutterTts.setErrorHandler((msg) {
@@ -269,6 +289,16 @@ class _BibleScreenState extends State<BibleScreen> {
     await completer.future;
   }
 
+  void _handleScroll() {
+    final scrollPosition = scrollController.position;
+
+    if (scrollPosition.pixels > _scrollThreshold && !_showDrawer) {
+      setState(() => _showDrawer = true);
+    } else if (scrollPosition.pixels <= _scrollThreshold && _showDrawer) {
+      setState(() => _showDrawer = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<BibleThemeProvider>(context);
@@ -276,738 +306,146 @@ class _BibleScreenState extends State<BibleScreen> {
 
     return Consumer<BibleThemeProvider>(
         builder: (context, themeProvider, child) {
-      final currentTheme = themeProvider.themeData;
-      return Scaffold(
-        backgroundColor: currentTheme.backgroundColor,
-        body: SafeArea(
-          child: Column(
-            children: [
-              if (isLoading) ...{
-                Container()
-              } else ...{
-                if (errorMessage != null) ...{
-                  BuildErrorWidget(
-                    errorMessage: errorMessage!,
-                    onRetry: () async => _initDataLoad(),
-                    onBack: () => Navigator.pushNamed(context, '/layoutPage',
-                        arguments: {'selectedIndex': 0}),
-                  )
-                } else ...{
-                  // cabecera
-                  BibleHeaderWidget(
-                    onSearchBible: () {
-                      openModal();
-                    },
-                    versionName:
-                        currentVersion != null ? currentVersion!.version : '',
-                    title: currentBook != null ? currentBook!.modernName : '',
-                    showIconVideo: video.url.isNotEmpty,
-                    chapter: currentChapter != null
-                        ? '${currentChapter!.chapter}'
-                        : '',
-                    onVideoCollection: () async {
-                      await SystemChrome.setPreferredOrientations([
-                        DeviceOrientation.portraitUp,
-                        DeviceOrientation.portraitDown,
-                      ]);
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return Center(
-                            child: Container(
-                              constraints: BoxConstraints(
-                                minHeight:
-                                    MediaQuery.sizeOf(context).height * 0.50,
-                                maxHeight:
-                                    MediaQuery.sizeOf(context).height * 0.50,
-                              ),
-                              child: Stack(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
-                                      constraints:
-                                          BoxConstraints(minHeight: 213),
-                                      // height: 213,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: (video.url
-                                                    .contains('youtube.com') ||
-                                                video.url.contains('youtu.be'))
-                                            ? PlayerYoutubeWidget(
-                                                videoUrl: video.url)
-                                            : PlayerNoYoutube(
-                                                url:
-                                                    "${GraphQLConfig.urlServidor}${video.url}"),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    // Posiciona el botón de cerrar
-                                    top: 0,
-                                    right: 0,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context)
-                                            .pop(); // Cierra el diálogo
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8.0),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.withValues(
-                                              alpha:
-                                                  0.7), // Fondo semitransparente para el botón
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                          size: 20.0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                      // await SystemChrome.setPreferredOrientations([
-                      //   DeviceOrientation.portraitUp,
-                      //   DeviceOrientation.portraitDown,
-                      // ]);
-                      // showDialog(
-                      //     context: context,
-                      //     builder: (BuildContext context) {
-                      //       return Center(
-                      //         child: Stack(children: [
-                      //           Padding(
-                      //             padding: const EdgeInsets.all(8.0),
-                      //             child: Container(
-                      //               decoration: BoxDecoration(
-                      //                   color: Colors.white,
-                      //                   borderRadius: BorderRadius.circular(8)),
-                      //               constraints: BoxConstraints(minHeight: 213),
-                      //               // height: 213,
-                      //               child: ClipRRect(
-                      //                 borderRadius: BorderRadius.circular(8),
-                      //                 child: (video.url
-                      //                             .contains('youtube.com') ||
-                      //                         video.url.contains('youtu.be'))
-                      //                     ? PlayerYoutubeWidget(
-                      //                         videoUrl: video.url)
-                      //                     : PlayerNoYoutube(url: "${GraphQLConfig.urlServidor}${video.url}"),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //           Positioned(
-                      //             // Posiciona el botón de cerrar
-                      //             top: 0,
-                      //             right: 0,
-                      //             child: GestureDetector(
-                      //               onTap: () {
-                      //                 Navigator.of(context)
-                      //                     .pop(); // Cierra el diálogo
-                      //               },
-                      //               child: Container(
-                      //                 padding: const EdgeInsets.all(8.0),
-                      //                 decoration: BoxDecoration(
-                      //                   color: Colors.grey.withValues(
-                      //                       alpha:
-                      //                           0.7), // Fondo semitransparente para el botón
-                      //                   shape: BoxShape.circle,
-                      //                 ),
-                      //                 child: const Icon(
-                      //                   Icons.close,
-                      //                   color: Colors.white,
-                      //                   size: 20.0,
-                      //                 ),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //         ]),
-                      //       );
-                      //     });
-                    },
-                    onBack: () async {
-                      Navigator.pushNamed(
-                        context,
-                        '/layoutPage',
-                        arguments: {'selectedIndex': 0},
-                      );
-                    },
-                    onVersionTap: () async {
-                      final bibleVersions = Provider.of<CatalogueProvider>(
-                              context,
-                              listen: false)
-                          .allBibleVersion
-                          .map((v) => ModelData(value: v.id, label: v.version))
-                          .toList();
-
-                      final selectedVersion = await BibleVersionSelector.show(
-                          context: context,
-                          versions: bibleVersions,
-                          preferenceKey: preferenceKey,
-                          savedId: lastVersionsSelected);
-
-                      if (selectedVersion != null) {
-                        // Aquí manejas la versión seleccionada
-                        if (kDebugMode) {
-                          print(
-                              'Versión seleccionada: ${selectedVersion.label}');
-                        }
-                        setState(() => lastVersionsSelected = selectedVersion
-                            .value); // actualizo la version de la biblia
-                        // removemos los datos de la cache para iniciar de nuevo
-                        await PreferencesManager().clearOne('bookSelected');
-                        await PreferencesManager().clearOne('chapterSelected');
-                        await PreferencesManager()
-                            .setSelectedBibleVersion(lastVersionsSelected!);
-                        _initDataLoad();
-                      }
-                    },
-                  ),
-                  Expanded(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Stack(
-                        children: [
-                          // body
-                          Scrollbar(
-                            controller: scrollController,
-                            thumbVisibility: true,
-                            thickness: 6.0,
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: SizedBox(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (versionConSaltos) ...{
-                                      Expanded(
-                                        child: ListView(
-                                          controller: scrollController,
-                                          children: [
-                                            // Otros widgets de la lista...
-                                            const SizedBox(height: 40),
-                                            _buildContinuousText(), // Tu texto formateado como un widget
-                                            SizedBox(
-                                              height:
-                                                  kBottomNavigationBarHeight +
-                                                      20,
-                                            )
-                                            // Más widgets...
-                                          ],
-                                        ),
-                                      ),
-                                    }
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          // opciones de copiado, compartir y configuración
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Container(
-                              width: MediaQuery.sizeOf(context).width,
-                              decoration: BoxDecoration(
-                                  color: currentTheme.backgroundColor),
-                              // width: MediaQuery.sizeOf(context).width,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  // CUSTOMIZE BUTTON
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 25.0,
-                                    onPressed: () {
-                                      showModalBottomSheet(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return ModalTextFormatSizeWidget(
-                                              fontSize: fontSizeVerse,
-                                              selectedItem: fontFamilySet,
-                                              onChangedFontSize:
-                                                  (fontSize) async {
-                                                setState(() {
-                                                  // persistir tamaño de fuente
-                                                  fontSizeNumber =
-                                                      fontSize! - 4;
-                                                  fontSizeVerse = fontSize;
-                                                });
-                                                await PreferencesManager()
-                                                    .setFontSizeVerse(
-                                                        fontSize!);
-                                              },
-                                              onChangedFont: (newFont) async {
-                                                if (kDebugMode) {
-                                                  print(
-                                                      'la nueva fuente ${newFont!.label}');
-                                                }
-                                                // persistir familia de fuente
-                                                setState(() {
-                                                  fontFamilySet = newFont!;
-                                                });
-                                                await PreferencesManager()
-                                                    .setFontFamilySet(
-                                                        newFont!.toJson());
-                                              },
-                                            );
-                                          });
-                                    },
-                                    icon: Icon(
-                                      CupertinoIcons.textformat_size,
-                                      color: currentTheme.buttonColor,
-                                    ),
-                                  ),
-
-                                  // COPY BUTTON
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 25.0,
-                                    onPressed: () async {
-                                      Clipboard.setData(ClipboardData(
-                                          text: await copyChapter(
-                                              currentVersion,
-                                              currentBook,
-                                              currentChapter)));
-                                      await showCustomDialog(
-                                        context,
-                                        message:
-                                            "El capitulo ${currentChapter!.chapter} del libro ${currentBook!.modernName}  \n se ha copiado con éxito al\n portapapeles",
-                                        dialogType: DialogType.info,
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.file_copy_rounded,
-                                      color: currentTheme.buttonColor,
-                                    ),
-                                  ),
-                                  // SHARED BUTTON
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 25.0,
-                                    onPressed: () async {
-                                      await SharePlus.instance
-                                          .share(ShareParams(
-                                        text: await copyChapter(currentVersion,
-                                            currentBook, currentChapter),
-                                        subject:
-                                            "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName} \n ver en:${GraphQLConfig.urlServidor}officialbible",
-                                      ));
-                                    },
-                                    icon: Icon(
-                                      Icons.share_rounded,
-                                      color: currentTheme.buttonColor,
-                                    ),
-                                  ),
-                                  // MODAL ACTIONS BUTTON
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 25.0,
-                                    onPressed: () {
-                                      openModal();
-                                    },
-                                    icon: Icon(
-                                      Icons.search_rounded,
-                                      color: currentTheme.buttonColor,
-                                    ),
-                                  ),
-                                  // FAVORITE BUTTON
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 25.0,
-                                    onPressed: () async {
-                                      String versionId = currentVersion != null
-                                          ? currentVersion!.id
-                                          : "0";
-                                      LoadingService().showLoading(context);
-                                      try {
-                                        String userId = userData != null
-                                            ? userData!.userId
-                                            : '';
-                                        List<FavoriteVerse> listFavorite = [];
-                                        PaginationInfo? objPagination;
-                                        final responseFavorite =
-                                            await getFavoriteVerseByUser(
-                                                1, 10, versionId, null, userId);
-                                        if (responseFavorite.error != null) {
-                                          LoadingService().hideLoading();
-                                          await showCustomDialog(context,
-                                              message: responseFavorite.error!,
-                                              dialogType: DialogType.error);
-                                          return;
-                                        }
-
-                                        setState(() {
-                                          listFavorite = responseFavorite
-                                              .data['data']
-                                              .map<FavoriteVerse>((favorite) =>
-                                                  FavoriteVerse.fromJson(
-                                                      favorite))
-                                              .toList();
-                                          objPagination =
-                                              PaginationInfo.fromJson(
-                                                  responseFavorite
-                                                      .data['meta']);
-                                        });
-                                        LoadingService().hideLoading();
-                                        showGeneralDialog(
-                                            context: context,
-                                            barrierDismissible: false,
-                                            transitionDuration:
-                                                Duration(milliseconds: 500),
-                                            pageBuilder: (_, __, ___) {
-                                              return DialogFavoriteVerseWidget(
-                                                  currentTheme: currentTheme,
-                                                  paginationInfo: objPagination,
-                                                  versionId: currentVersion!.id,
-                                                  favoriteVerses: listFavorite,
-                                                  onDeleted: (verseId) {
-                                                    final indexToDelete =
-                                                        _favoriteVerses
-                                                            .indexWhere(
-                                                                (verse) =>
-                                                                    verse.verse
-                                                                        .id ==
-                                                                    verseId);
-                                                    if (indexToDelete != -1) {
-                                                      setState(() {
-                                                        _favoriteVerses
-                                                            .removeAt(
-                                                                indexToDelete);
-                                                      });
-                                                    }
-                                                  });
-                                            });
-                                      } catch (e) {
-                                        LoadingService().hideLoading();
-                                        await showCustomDialog(context,
-                                            message: e.toString(),
-                                            dialogType: DialogType.error);
-                                      }
-                                    },
-                                    icon: Icon(
-                                      Icons.star,
-                                      color: currentTheme.buttonColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 4,
-                            right: 0,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 7.0),
-                              width: MediaQuery.sizeOf(context).width,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    width: 35,
-                                    height: 35,
-                                    decoration: BoxDecoration(
-                                        color: hasPreviousChapter
-                                            ? currentTheme.buttonColor
-                                            : StyleColor.grayMedium,
-                                        borderRadius: BorderRadius.circular(8)),
-                                    child: Center(
-                                      child: IconButton(
-                                        disabledColor: StyleColor.grayMedium,
-                                        padding: EdgeInsets.all(0),
-                                        alignment: Alignment.center,
-                                        iconSize: 35,
-                                        //  color: currentTheme.buttonColor,
-                                        onPressed: !hasPreviousChapter
-                                            ? null
-                                            : () {
-                                                // Lógica para ir al capítulo anterior
-                                                _goToPreviousChapter(
-                                                    (currentChapter!.chapter -
-                                                            1)
-                                                        .toString());
-                                              },
-                                        icon: Icon(
-                                          Icons.keyboard_arrow_left_rounded,
-                                          size: 35,
-                                          color: currentTheme.buttonTextColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: currentTheme.backgroundColor,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      margin:
-                                          EdgeInsets.symmetric(horizontal: 8),
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 4),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          // Slider para control de velocidad
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    // Botón de stop
-                                                    IconButton(
-                                                      icon: Icon(Icons.stop,
-                                                          size: 24),
-                                                      color: currentTheme
-                                                          .buttonColor,
-                                                      onPressed: () async {
-                                                        await flutterTts.stop();
-                                                        setState(() {
-                                                          isPlaying = false;
-                                                          currentPlayingVerseIndex =
-                                                              null;
-                                                        });
-                                                      },
-                                                    ),
-                                                    // Botón de play/pause
-                                                    IconButton(
-                                                      icon: Icon(
-                                                        isPlaying
-                                                            ? Icons.pause
-                                                            : Icons.play_arrow,
-                                                        size: 28,
-                                                      ),
-                                                      color: currentTheme
-                                                          .buttonColor,
-                                                      onPressed:
-                                                          _togglePlayPause,
-                                                    ),
-                                                    Icon(Icons.speed,
-                                                        size: 18,
-                                                        color: currentTheme
-                                                            .textColor),
-                                                    SizedBox(width: 8),
-                                                    Expanded(
-                                                      child: Slider(
-                                                        value: _speechRate,
-                                                        min: 0.1,
-                                                        max: 1.0,
-                                                        divisions: 9,
-                                                        label: _getSpeedLabel(
-                                                            _speechRate),
-                                                        activeColor:
-                                                            currentTheme
-                                                                .buttonColor,
-                                                        inactiveColor:
-                                                            currentTheme
-                                                                .buttonColor
-                                                                .withValues(
-                                                                    alpha: 0.3),
-                                                        onChanged:
-                                                            (value) async {
-                                                          setState(() =>
-                                                              _speechRate =
-                                                                  value);
-                                                          await flutterTts
-                                                              .setSpeechRate(
-                                                                  value);
-
-                                                          await PreferencesManager()
-                                                              .setTtsSpeechRate(
-                                                                  value);
-                                                        },
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 8),
-                                                    Text(
-                                                      _getSpeedLabel(
-                                                          _speechRate),
-                                                      style: TextStyle(
-                                                        color: currentTheme
-                                                            .textColor,
-                                                        fontSize: 12,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Text(
-                                                  'Velocidad: ${(_speechRate * 100).round()}%',
-                                                  style: TextStyle(
-                                                    color:
-                                                        currentTheme.textColor,
-                                                    fontSize: 10,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-
-                                          // Indicador de progreso (opcional)
-                                          // if (isPlaying &&
-                                          //     currentPlayingVerseIndex != null)
-                                          //   Padding(
-                                          //     padding: EdgeInsets.only(left: 8),
-                                          //     child: Text(
-                                          //       '${currentPlayingVerseIndex! + 1}/${verses.length}',
-                                          //       style: TextStyle(
-                                          //         color: currentTheme.textColor
-                                          //             .withOpacity(0.6),
-                                          //         fontSize: 12,
-                                          //       ),
-                                          //     ),
-                                          //   ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  // Expanded(
-                                  //   child: AudioPlayerWidget(
-                                  //     showImage: false,
-                                  //     pathUrl: audioChapter != null &&
-                                  //             audioChapter!.audioUrl.isNotEmpty
-                                  //         ? '${GraphQLConfig.urlServidor}${audioChapter!.audioUrl}'
-                                  //         : '',
-                                  //     backgroundColor:
-                                  //         currentTheme.backgroundColor,
-                                  //     controlsColor: currentTheme.buttonColor,
-                                  //     actionColor: currentTheme.textColor,
-                                  //   ),
-                                  // ),
-                                  Container(
-                                    width: 35,
-                                    height: 35,
-                                    decoration: BoxDecoration(
-                                        color: hasNextChapter
-                                            ? currentTheme.buttonColor
-                                            : StyleColor.grayMedium,
-                                        borderRadius: BorderRadius.circular(8)),
-                                    child: Center(
-                                      child: IconButton(
-                                        padding: EdgeInsets.all(0),
-                                        alignment: Alignment.center,
-                                        iconSize: 35,
-                                        onPressed: !hasNextChapter
-                                            ? null
-                                            : () {
-                                                // Lógica para ir al siguiente capítulo
-                                                _goToNextChapter(
-                                                    (currentChapter!.chapter +
-                                                            1)
-                                                        .toString());
-                                              },
-                                        icon: Icon(
-                                          Icons.keyboard_arrow_right_rounded,
-                                          size: 35,
-                                          color: currentTheme.buttonTextColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                }
-              }
-            ],
-          ),
-        ),
-      );
+      if (isTablet(context)) {
+        return _buildTableLayout(currentTheme);
+      } else {
+        return _buildMobileLayout(currentTheme);
+      }
     });
   }
 
-  /// Widget realiza la construcción de los textSpan para selección
-  /// continua
+  /// Widget realiza la construcción de los textSpan para selección continua
   Widget _buildContinuousText() {
-    final fullText = verses.map((v) => "${v.verse} ${v.text}").join(' ');
+    // 🔥 TEXTO COMPLETO con números para copiar/compartir
+    final fullTextWithNumbers =
+        verses.map((v) => "${v.verse} ${v.text}").join(' ');
+    // 🔥 TEXTO SIN números para backend/resaltado
+    final fullTextWithoutNumbers = verses.map((v) => v.text).join(' ');
 
     return SelectableText.rich(
       key: _selectableTextKey,
       TextSpan(
-        children: verses
-            .expand((verse) => [
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.baseline,
-                    baseline: TextBaseline.alphabetic,
-                    child: Stack(
-                      alignment:
-                          Alignment.center, // Centra los hijos en el Stack
-                      children: [
-                        SelectionContainer.disabled(
-                          child: GestureDetector(
-                            onTap: () {
-                              _showVersePopupMenu(context, verse);
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                left: verse.verse == 1 ? 4.0 : 4.0,
-                                right: 4.0,
-                              ),
-                              child: Transform.translate(
-                                offset: Offset(0, -4),
-                                child: Text(
-                                  "${verse.verse}",
-                                  style: StylesApp(context)
-                                      .textStyleBody16
-                                      .copyWith(
-                                        fontFamily: fontFamilySet.label,
-                                        fontSize: fontSizeNumber,
-                                        fontWeight: FontWeight.bold,
-                                        color: currentPlayingVerseIndex ==
-                                                verses.indexOf(verse)
-                                            ? Colors
-                                                .blue // Cambia color cuando se lee
-                                            : currentTheme.verseHighlightColor,
-                                      ),
-                                ),
-                              ),
-                            ),
+        children: verses.asMap().entries.map((entry) {
+          final index = entry.key;
+          final verse = entry.value;
+          _verseKeys[index] ??= GlobalKey();
+
+          return TextSpan(
+            children: [
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Stack(
+                  key: _verseKeys[index],
+                  alignment: Alignment.center,
+                  children: [
+                    SelectionContainer.disabled(
+                      child: GestureDetector(
+                        onTap: () {
+                          _showVersePopupMenu(context, verse);
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: verse.verse == 1 ? 4.0 : 4.0,
+                            right: 4.0,
                           ),
+                          child: Transform.translate(
+                              offset: Offset(0, -4),
+                              child: Stack(
+                                children: [
+                                  if (scrollToVerse != null &&
+                                      scrollToVerse == verses.indexOf(verse))
+                                    StreamBuilder<bool>(
+                                      stream: Stream.periodic(
+                                          const Duration(milliseconds: 700),
+                                          (i) => i % 2 == 0),
+                                      builder: (context, snapshot) {
+                                        final active = snapshot.data ?? true;
+                                        return AnimatedOpacity(
+                                          duration:
+                                              const Duration(milliseconds: 350),
+                                          opacity: active ? 1.0 : 0.35,
+                                          child: Transform.translate(
+                                            offset: active
+                                                ? const Offset(6, 0)
+                                                : const Offset(0, 0),
+                                            child: Icon(
+                                              weight: 75.0,
+                                              Icons
+                                                  .swap_horizontal_circle_rounded,
+                                              size: 22,
+                                              color: StyleColor.blueDark,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  SizedBox(
+                                    child: Text(
+                                      "${verse.verse}",
+                                      style: StylesApp(context)
+                                          .textStyleBody16
+                                          .copyWith(
+                                            fontFamily: fontFamilySet.label,
+                                            fontSize: fontSizeNumber,
+                                            fontWeight: FontWeight.bold,
+                                            color: currentPlayingVerseIndex ==
+                                                    verses.indexOf(verse)
+                                                ? Colors.blue
+                                                : currentTheme
+                                                    .verseHighlightColor,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              )),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                  //  if (_isFavorite(verse))
-                  //   WidgetSpan(
-                  //     alignment: PlaceholderAlignment.baseline,
-                  //     baseline: TextBaseline.alphabetic,
-                  //     child: SelectionContainer.disabled(
-                  //       child: Icon(
-                  //         Icons.star,
-                  //         size: 16,
-                  //         color: StyleColor.yellowLight,
-                  //       ),
-                  //     ),
-                  //   ),
-                  ..._buildHighlightedTextSpans(verse),
-                ])
-            .toList(),
+                  ],
+                ),
+              ),
+              // 🔥 TextSpan simple sin números para la selección
+              ..._buildHighlightedTextSpansForSelection(verse),
+            ],
+          );
+        }).toList(),
       ),
       contextMenuBuilder: (context, selectableRegionState) {
         final selection = selectableRegionState.textEditingValue.selection;
-        final selectedText = selection.textInside(fullText);
-        final selectedVerses = _getVersesInSelection(selection, fullText);
+
+        // 🔥 TEXTO PARA COPIAR/COMPARTIR: Con números
+        final selectedTextWithNumbers =
+            selection.textInside(fullTextWithNumbers);
+        // 🔥 TEXTO PARA BACKEND/RESALTADO: Sin números
+        final selectedTextWithoutNumbers = _getSelectedTextWithoutNumbers(
+            selection, fullTextWithNumbers, fullTextWithoutNumbers);
+
+        if (kDebugMode) {
+          print(
+              "🎯 Texto seleccionado CON números: '$selectedTextWithNumbers'");
+          print(
+              "🎯 Texto seleccionado SIN números: '$selectedTextWithoutNumbers'");
+          print("📏 Rango selección: ${selection.start}-${selection.end}");
+        }
+
+        // 🔥 OBTENER versículos usando el texto SIN números para el backend
+        final selectedVerses =
+            _getVersesInSelectionFromOriginalSelection(selection);
+
+        // _getVersesInSelectionWithoutNumbers(
+        //     selection, fullTextWithNumbers, fullTextWithoutNumbers);
         final overlapsHighlights =
-            _selectionOverlapsHighlights(selection, fullText);
+            _selectionOverlapsHighlights(selection, fullTextWithNumbers);
+
+        // 🔥 DEBUG: Verificar qué versículos se detectaron
+        if (kDebugMode) {
+          print("📋 Versículos detectados: ${selectedVerses.length}");
+          for (final verse in selectedVerses) {
+            print(
+                "   📖 Versículo ${verse.verse}: '${verse.text.substring(verse.posIni!, verse.posFin!)}'");
+          }
+        }
 
         return CustomContextMenu(
           anchors: selectableRegionState.contextMenuAnchors,
@@ -1016,23 +454,30 @@ class _BibleScreenState extends State<BibleScreen> {
               icon: Icons.content_copy,
               label: 'Copiar versículo',
               onPressed: () {
+                final reference =
+                    "${currentBook?.modernName} ${currentChapter?.chapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''}";
+                // 🔥 COPIAR texto CON números
+                print("Copiado a :  $reference");
                 Clipboard.setData(ClipboardData(
-                    text:
-                        "{currentBook?.modernName}\n ${currentBook?.numberBook} \n  selectedText"));
+                    text: "$reference\n$selectedTextWithNumbers"));
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Versículo copiado')),
                 );
+                selectableRegionState.hideToolbar();
               },
             ),
             CustomContextMenuItem(
               icon: Icons.share,
               label: 'Compartir versículo',
               onPressed: () {
+                final reference =
+                    "${currentBook?.modernName} ${currentChapter?.chapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''}";
+                // 🔥 COMPARTIR texto CON números
                 SharePlus.instance.share(ShareParams(
-                  text:
-                      "${currentBook?.modernName}\n ${currentBook?.numberBook} \n $selectedText",
+                  text: "$reference\n$selectedTextWithNumbers",
                   subject: 'Versículo de ${currentBook?.modernName}',
                 ));
+                selectableRegionState.hideToolbar();
               },
             ),
             if (!overlapsHighlights)
@@ -1044,6 +489,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     ? 'Resaltar ${selectedVerses.length} versículos'
                     : 'Resaltar versículo',
                 onPressed: () {
+                  // 🔥 RESALTAR usando versículos SIN números
                   _showColorPickerForSelection(
                     context,
                     selectedVerses,
@@ -1051,6 +497,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     selection.end,
                     selectedVerses.length > 1,
                   );
+                  selectableRegionState.hideToolbar();
                 },
               ),
           ],
@@ -1058,9 +505,9 @@ class _BibleScreenState extends State<BibleScreen> {
       },
       onSelectionChanged: (selection, cause) {
         if (selection.isValid && !selection.isCollapsed) {
-          final overlaps = _selectionOverlapsHighlights(selection, fullText);
+          final overlaps =
+              _selectionOverlapsHighlights(selection, fullTextWithNumbers);
           if (overlaps) {
-            // Usar un Future para esperar al siguiente frame y luego limpiar la selección
             Future.delayed(Duration.zero, () {
               final renderObject =
                   _selectableTextKey.currentContext?.findRenderObject();
@@ -1073,6 +520,232 @@ class _BibleScreenState extends State<BibleScreen> {
         }
       },
     );
+  }
+
+  /// 🔥 FUNCIÓN SIMPLIFICADA: Obtener versículos desde selección original
+  List<VerseModel> _getVersesInSelectionFromOriginalSelection(
+      TextSelection selection) {
+    List<VerseModel> selectedVerses = [];
+
+    if (!selection.isValid || selection.isCollapsed) {
+      return selectedVerses;
+    }
+
+    int currentPosition = 0;
+
+    for (final verse in verses) {
+      final verseText = verse.text;
+      final verseNumber = "${verse.verse} ";
+      final verseNumberLength = verseNumber.length;
+
+      // Rango de este versículo en el texto completo
+      final verseStart = currentPosition;
+      final verseEnd = currentPosition + verseNumberLength + verseText.length;
+
+      // Verificar superposición
+      if (selection.start < verseEnd && selection.end > verseStart) {
+        // Calcular qué parte del texto del versículo está seleccionada
+        final selectionStartInVerse =
+            selection.start - verseStart - verseNumberLength;
+        final selectionEndInVerse =
+            selection.end - verseStart - verseNumberLength;
+
+        // Ajustar límites
+        final start = selectionStartInVerse.clamp(0, verseText.length);
+        final end = selectionEndInVerse.clamp(0, verseText.length);
+
+        if (start < end) {
+          final selectedVerse = VerseModel(
+            id: verse.id,
+            verse: verse.verse,
+            text: verse.text,
+            highlights: verse.highlights,
+            posIni: start,
+            posFin: end,
+          );
+          selectedVerses.add(selectedVerse);
+        }
+      }
+
+      currentPosition += verseNumberLength + verseText.length + 1;
+    }
+
+    return selectedVerses;
+  }
+
+  /// 🔥 NUEVA FUNCIÓN: Obtener texto seleccionado sin números de versículo
+  String _getSelectedTextWithoutNumbers(TextSelection selection,
+      String fullTextWithNumbers, String fullTextWithoutNumbers) {
+    if (!selection.isValid || selection.isCollapsed) return '';
+
+    // 🔥 CONVERTIR selección de texto con números a texto sin números
+    final selectionInWithoutNumbers = _convertSelectionToWithoutNumbers(
+        selection, fullTextWithNumbers, fullTextWithoutNumbers);
+
+    return selectionInWithoutNumbers.textInside(fullTextWithoutNumbers);
+  }
+
+  /// 🔥 FUNCIÓN MEJORADA: Convertir selección de texto con números a sin números
+  TextSelection _convertSelectionToWithoutNumbers(
+      TextSelection selectionWithNumbers,
+      String fullTextWithNumbers,
+      String fullTextWithoutNumbers) {
+    int startWithoutNumbers = 0;
+    int endWithoutNumbers = 0;
+    int currentIndexWith = 0;
+    int currentIndexWithout = 0;
+
+    bool startFound = false;
+    bool endFound = false;
+
+    for (final verse in verses) {
+      final verseNumber = "${verse.verse}";
+      final verseText = verse.text;
+      final verseNumberLength = verseNumber.length;
+
+      final verseStartWithNumbers = currentIndexWith;
+      final verseEndWithNumbers =
+          currentIndexWith + verseNumberLength + verseText.length;
+      final verseStartWithoutNumbers = currentIndexWithout;
+
+      // Buscar el inicio de la selección
+      if (!startFound &&
+          selectionWithNumbers.start >= verseStartWithNumbers &&
+          selectionWithNumbers.start <= verseEndWithNumbers) {
+        if (selectionWithNumbers.start <=
+            verseStartWithNumbers + verseNumberLength) {
+          // La selección empieza en el número o antes del texto
+          startWithoutNumbers = verseStartWithoutNumbers;
+        } else {
+          // La selección empieza en el texto
+          startWithoutNumbers = verseStartWithoutNumbers +
+              (selectionWithNumbers.start -
+                  (verseStartWithNumbers + verseNumberLength));
+        }
+        startFound = true;
+      }
+
+      // Buscar el fin de la selección
+      if (!endFound &&
+          selectionWithNumbers.end >= verseStartWithNumbers &&
+          selectionWithNumbers.end <= verseEndWithNumbers) {
+        if (selectionWithNumbers.end <=
+            verseStartWithNumbers + verseNumberLength) {
+          // La selección termina en el número
+          endWithoutNumbers = verseStartWithoutNumbers;
+        } else {
+          // La selección termina en el texto
+          endWithoutNumbers = verseStartWithoutNumbers +
+              (selectionWithNumbers.end -
+                  (verseStartWithNumbers + verseNumberLength));
+        }
+        endFound = true;
+      }
+
+      // Si ya encontramos ambos, salir del loop
+      if (startFound && endFound) break;
+
+      currentIndexWith += verseNumberLength + verseText.length + 1;
+      currentIndexWithout += verseText.length + 1;
+    }
+
+    // 🔥 Asegurar que endWithoutNumbers sea al menos igual a startWithoutNumbers
+    if (endWithoutNumbers < startWithoutNumbers) {
+      endWithoutNumbers = startWithoutNumbers;
+    }
+
+    return TextSelection(
+      baseOffset: startWithoutNumbers,
+      extentOffset: endWithoutNumbers,
+    );
+  }
+
+  /// 🔥 VERSIÓN CORREGIDA: Método para crear resaltados que convierte índices
+  List<TextSpan> _buildHighlightedTextSpansForSelection(VerseModel verse) {
+    final text = " ${verse.text} "; // 🔥 INCLUIR el espacio alrededor del texto
+    final spans = <TextSpan>[];
+    int currentPos = 0;
+
+    // Ordenar resaltados por posición de inicio
+    verse.highlights!.sort((a, b) => a!.startIndex.compareTo(b!.startIndex));
+
+    for (final highlight in verse.highlights!) {
+      // 🔥 CONVERTIR índices de backend (solo texto) a índices de visualización (con número)
+      final verseNumber = "${verse.verse}";
+      final verseNumberLength = verseNumber.length;
+
+      // Los índices del backend son relativos solo al texto, necesitamos ajustarlos
+      final displayStartIndex = highlight!.startIndex + verseNumberLength;
+      final displayEndIndex = highlight.endIndex + verseNumberLength;
+
+      // 1. Texto antes del resaltado (si hay espacio no cubierto)
+      if (currentPos < displayStartIndex) {
+        spans.add(TextSpan(
+          text: text.substring(currentPos, displayStartIndex),
+          style: StylesApp(context).textStyleBody14.copyWith(
+                decoration:
+                    _isFavorite(verse) ? TextDecoration.underline : null,
+                color: currentPlayingVerseIndex == verses.indexOf(verse)
+                    ? Colors.blue
+                    : currentTheme.textColor,
+                decorationThickness: 4.0,
+                decorationColor: StyleColor.yellowLight,
+                fontFamily: fontFamilySet.label,
+                fontSize: fontSizeVerse,
+                fontWeight: FontWeight.w400,
+              ),
+        ));
+      }
+
+      // 2. Aplicar el resaltado con índices convertidos
+      spans.add(TextSpan(
+        recognizer: LongPressGestureRecognizer()
+          ..onLongPress = () {
+            if (kDebugMode) {
+              print('Long press en versículo ${verse.verse}');
+            }
+            _showHighlightOptions(context, highlight);
+          },
+        text: text.substring(displayStartIndex, displayEndIndex),
+        style: StylesApp(context).textStyleBody14.copyWith(
+              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+              color: currentPlayingVerseIndex == verses.indexOf(verse)
+                  ? Colors.blue
+                  : currentTheme.textColor,
+              decorationThickness: 4.0,
+              decorationColor: StyleColor.yellowLight,
+              fontFamily: fontFamilySet.label,
+              fontSize: fontSizeVerse,
+              backgroundColor:
+                  Color(int.parse('0XFF${formatColor(highlight.color)}'))
+                      .withAlpha(77),
+              fontWeight: FontWeight.w400,
+            ),
+      ));
+
+      // Actualizar posición actual al final del resaltado actual
+      currentPos = displayEndIndex;
+    }
+
+    // 3. Texto restante después del último resaltado
+    if (currentPos < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(currentPos),
+        style: StylesApp(context).textStyleBody14.copyWith(
+              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+              color: currentPlayingVerseIndex == verses.indexOf(verse)
+                  ? Colors.blue
+                  : currentTheme.textColor,
+              decorationThickness: 4.0,
+              decorationColor: StyleColor.yellowLight,
+              fontFamily: fontFamilySet.label,
+              fontSize: fontSizeVerse,
+              fontWeight: FontWeight.w400,
+            ),
+      ));
+    }
+
+    return spans;
   }
 
   bool _isFavorite(VerseModel verse) {
@@ -1115,101 +788,10 @@ class _BibleScreenState extends State<BibleScreen> {
               Navigator.pop(context);
             },
           ),
+          SizedBox(height: 30),
         ],
       ),
     );
-  }
-
-  /// Método para la creación de los resaltados
-  List<TextSpan> _buildHighlightedTextSpans(VerseModel verse) {
-    final text = verse.text;
-    final spans = <TextSpan>[];
-    int currentPos = 0;
-
-    // Ordenar resaltados por posición de inicio (opcional, pero recomendado)
-    verse.highlights!.sort((a, b) => a!.startIndex.compareTo(b!.startIndex));
-
-    for (final highlight in verse.highlights!) {
-      // 1. Texto antes del resaltado (si hay espacio no cubierto)
-      if (currentPos < highlight!.startIndex) {
-        spans.add(TextSpan(
-          text: text.substring(
-              currentPos,
-              (highlight.startIndex > 0
-                  ? highlight.startIndex - 1
-                  : highlight.startIndex)),
-          style: StylesApp(context).textStyleBody14.copyWith(
-                decoration:
-                    _isFavorite(verse) ? TextDecoration.underline : null,
-                color: currentPlayingVerseIndex == verses.indexOf(verse)
-                    ? Colors.blue // Cambia color cuando se lee
-                    : currentTheme.textColor,
-                decorationThickness: 4.0,
-                decorationColor: StyleColor.yellowLight,
-                fontFamily: fontFamilySet.label,
-                fontSize: fontSizeVerse,
-                fontWeight: FontWeight.w400,
-              ),
-        ));
-      }
-
-      // 2. Aplicar el resaltado
-      spans.add(TextSpan(
-        recognizer: LongPressGestureRecognizer()
-          ..onLongPress = () {
-            if (kDebugMode) {
-              print('Long press en versículo ${verse.verse}');
-            }
-            _showHighlightOptions(context, highlight);
-          },
-        text: text.substring(
-            (highlight.startIndex > 0
-                ? highlight.startIndex - 1
-                : highlight.startIndex),
-            highlight.endIndex < text.length - 1
-                ? highlight.endIndex
-                : highlight.endIndex),
-        // highlight.endIndex < text.length-1 ? highlight.endIndex - 1: highlight.endIndex ),
-        style: StylesApp(context).textStyleBody14.copyWith(
-              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
-              color: currentPlayingVerseIndex == verses.indexOf(verse)
-                  ? Colors.blue // Cambia color cuando se lee
-                  : currentTheme.textColor,
-              decorationThickness: 4.0,
-              decorationColor: StyleColor.yellowLight,
-              fontFamily: fontFamilySet.label,
-              fontSize: fontSizeVerse,
-              backgroundColor:
-                  Color(int.parse('0XFF${formatColor(highlight.color)}'))
-                      .withValues(alpha: 0.3),
-              fontWeight: FontWeight.w400,
-            ),
-      ));
-
-      // Actualizar posición actual al final del resaltado actual
-      currentPos = highlight.endIndex;
-      // currentPos = highlight.endIndex < text.length-1 ?  highlight.endIndex - 1 : highlight.endIndex;
-    }
-
-    // 3. Texto restante después del último resaltado
-    if (currentPos < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(currentPos),
-        style: StylesApp(context).textStyleBody14.copyWith(
-              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
-              color: currentPlayingVerseIndex == verses.indexOf(verse)
-                  ? Colors.blue // Cambia color cuando se lee
-                  : currentTheme.textColor,
-              decorationThickness: 4.0,
-              decorationColor: StyleColor.yellowLight,
-              fontFamily: fontFamilySet.label,
-              fontSize: fontSizeVerse,
-              fontWeight: FontWeight.w400,
-            ),
-      ));
-    }
-
-    return spans;
   }
 
   /// Método que me muestra la modal bottom Sheet pata la elección del color de resaltado
@@ -1260,7 +842,8 @@ class _BibleScreenState extends State<BibleScreen> {
               children: colors.map((color) {
                 return GestureDetector(
                   onTap: () {
-                    final hexColor = color.value
+                    final hexColor = color
+                        .toARGB32()
                         .toRadixString(16)
                         .padLeft(8, '0')
                         .toUpperCase();
@@ -1287,7 +870,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     height: 50,
                     margin: EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Color(color.value),
+                      color: Color(color.toARGB32()),
                       shape: BoxShape.circle,
                       border: Border.all(width: 2),
                     ),
@@ -1301,6 +884,9 @@ class _BibleScreenState extends State<BibleScreen> {
             title: Text('Cancelar'),
             onTap: () => Navigator.pop(ctx),
           ),
+          SizedBox(
+            height: 30,
+          )
         ],
       ),
     );
@@ -1321,7 +907,7 @@ class _BibleScreenState extends State<BibleScreen> {
       inputHighlight.add(newHighlight); // actualizo temporal
     }
     LoadingService().showLoading(context);
-    final responseCreate = await crateHighLighters(inputHighlight,
+    final responseCreate = await createHighLighters(inputHighlight,
         userData!.userId, int.parse(currentVersion!.id), currentChapter!.id!);
     if (responseCreate.error != null) {
       LoadingService().hideLoading();
@@ -1393,44 +979,6 @@ class _BibleScreenState extends State<BibleScreen> {
       position += "${v.verse} ${v.text}".length + 1; // +1 por el espacio
     }
     return position;
-  }
-
-  /// Método para obtener versículo(s) seleccionado
-  ///
-  List<VerseModel> _getVersesInSelection(
-      TextSelection selection, String fullText) {
-    int currentPosition = 0;
-    final selectedVerses = <VerseModel>[];
-
-    // recorremos verses para asignar posición inicial y final
-    for (VerseModel verse in verses) {
-      final verseText = verse.text;
-      final verseStart = currentPosition;
-      final verseEnd = currentPosition + verseText.length;
-      int initial = 0;
-      int posFinal = 0;
-      // Verificar si la selección se superpone con este versículo
-      if (selection.start < verseEnd && selection.end > verseStart) {
-        initial =
-            ((selection.start) > verseStart ? selection.start : verseStart) -
-                verseStart;
-        posFinal = selection.end > verseEnd
-            ? verseEnd - verseStart
-            : selection.end - verseStart;
-
-        // Guarda la nueva instancia en la list/
-        verse = verse.copyWith(
-          // <- Asigna el resultado
-          posIni: initial == 1 ? initial - 1 : initial,
-          posFin: posFinal,
-        );
-        selectedVerses.add(verse);
-      }
-
-      currentPosition = verseEnd + 1; // +1 por el espacio entre versículos
-    }
-
-    return selectedVerses;
   }
 
   /// Método que se encarga de remover el resaltado
@@ -1681,6 +1229,14 @@ class _BibleScreenState extends State<BibleScreen> {
 
     // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
     validateNextAndPrevious();
+    _scrollToTop();
+    // Al cambiar al siguiente libro, aseguramos que el scroll vuelva al inicio
+    setState(() {
+      scrollToVerse = null;
+      currentPlayingVerseIndex = null;
+      isPlaying = false;
+      _isManualScroll = false;
+    });
   }
 
   /// Método para regresar al capítulo anterior
@@ -1722,6 +1278,25 @@ class _BibleScreenState extends State<BibleScreen> {
       /// consultamos los capítulos con sus versículos del libro siguiente y le indicamos
       /// en false el parámetro firstChapter
       await loadChapters(nextBook, false);
+
+      // Esperar un frame para que el nuevo contenido esté construido y luego hacer scroll al top
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (scrollController.hasClients) {
+          await scrollController.animateTo(
+            0.0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        } else {
+          try {
+            scrollController.jumpTo(0.0);
+          } catch (_) {}
+        }
+        // permitir scroll manual nuevamente después de un pequeño delay
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) setState(() => _isManualScroll = true);
+        });
+      });
     }
 
     // cargamos los resaltados
@@ -1729,6 +1304,14 @@ class _BibleScreenState extends State<BibleScreen> {
     LoadingService().hideLoading();
     // validamos si se habilita o deshabilita el botón anterior y el botón siguiente
     validateNextAndPrevious();
+    _scrollToTop();
+    // Al cambiar al siguiente libro, aseguramos que el scroll vuelva al inicio
+    setState(() {
+      scrollToVerse = null;
+      currentPlayingVerseIndex = null;
+      isPlaying = false;
+      _isManualScroll = false;
+    });
   }
 
   Future<void> loadChapters(BookModel book, bool firstChapter) async {
@@ -1837,10 +1420,12 @@ class _BibleScreenState extends State<BibleScreen> {
         .allBibleVersion
         .map((v) => ModelData(value: v.id, label: v.version))
         .toList();
+    //version seleccionada
     setState(() {
       lastVersionsSelected = bibleVersions
           .firstWhere((version) => version.value == data.versionId)
           .value;
+
       final currentVers = Provider.of<CatalogueProvider>(context, listen: false)
           .allBibleVersion
           .firstWhere((version) => version.id == lastVersionsSelected);
@@ -1853,6 +1438,9 @@ class _BibleScreenState extends State<BibleScreen> {
       //consulto todos los capítulos del libro actual con sus versículos
       final responseChapterByBook = await getChapterWithVerses(currentBook!.id);
       if (responseChapterByBook.error != null) {
+        if (kDebugMode) {
+          print(responseChapterByBook.error);
+        }
         setState(() {
           errorMessage = responseChapterByBook.error;
         });
@@ -1885,52 +1473,17 @@ class _BibleScreenState extends State<BibleScreen> {
           final startIndex =
               verses.indexWhere((v) => v.id == data.startVerseId);
           if (startIndex != -1) {
-            // Guardar el ID del versículo marcado por scroll
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              if (_selectableTextKey.currentContext != null &&
-                  scrollController.hasClients) {
-                try {
-                  final renderBox =
-                      _selectableTextKey.currentContext!.findRenderObject();
-                  if (renderBox is RenderBox) {
-                    final text = verses
-                        .sublist(0, startIndex)
-                        .map((v) => "${v.verse} ${v.text}")
-                        .join(' ');
-                    final tp = TextPainter(
-                      text: TextSpan(
-                        text: text,
-                        style: StylesApp(context).textStyleBody14.copyWith(
-                              fontFamily: fontFamilySet.label,
-                              fontSize: fontSizeVerse,
-                            ),
-                      ),
-                      textDirection: TextDirection.ltr,
-                      maxLines: null,
-                    );
-                    tp.layout(maxWidth: renderBox.size.width);
-                    final offsetY = tp.height;
-                    await scrollController.animateTo(
-                      offsetY,
-                      duration: Duration(milliseconds: 200),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                } catch (_) {
-                  final itemHeight = 40.0;
-                  await scrollController.animateTo(
-                    startIndex * itemHeight,
-                    duration: Duration(milliseconds: 400),
-                    curve: Curves.easeInOut,
-                  );
-                }
-              }
-            });
+            setState(() => scrollToVerse = startIndex);
+            scrollToKeyVerse(startIndex); // 🔥 Usar la nueva función
           }
-        } else {
-          // Si no hay startVerseId, limpiar el marcador
         }
       });
+      await PreferencesManager().setSelectedBibleVersion(lastVersionsSelected!);
+      // actualizamos el storage de libro seleccionado
+      await PreferencesManager().setBookSelected(currentBook!.id);
+      // actualizamos el storage del capítulo seleccionado
+      await PreferencesManager()
+          .setChapterSelected(currentChapter!.chapter.toString());
     } catch (e) {
       LoadingService().hideLoading();
       errorMessage = 'Error al cargar el capítulo $e';
@@ -1943,6 +1496,76 @@ class _BibleScreenState extends State<BibleScreen> {
         isLoading = false;
       });
     }
+  }
+
+// Reemplaza la función de scroll en loadVersionAndChapter
+  void scrollToKeyVerse(int startIndex) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final key = _verseKeys[startIndex];
+      if (key?.currentContext != null && scrollController.hasClients) {
+        // 🔥 Usar Scrollable.ensureVisible para scroll preciso
+        Scrollable.ensureVisible(
+          key!.currentContext!,
+          duration: const Duration(seconds: 2),
+          curve: Curves.easeInOut,
+          alignment: 0.1, // El versículo aparece al 10% desde arriba
+        ).then((_) {
+          // Permitir scroll manual nuevamente después de un delay
+          setState(() => _isManualScroll = false);
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              setState(() => _isManualScroll = true);
+            }
+          });
+        });
+      } else {
+        // Fallback: cálculo aproximado
+        _scrollToVerseFallback(startIndex);
+      }
+    });
+  }
+
+// Método fallback por si las keys no funcionan
+  void _scrollToVerseFallback(int startIndex) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_selectableTextKey.currentContext != null &&
+          scrollController.hasClients) {
+        try {
+          // Calcular altura aproximada basada en texto acumulado
+          double estimatedHeight = 0.0;
+
+          for (int i = 0; i < startIndex; i++) {
+            final verse = verses[i];
+            // Estimación más precisa basada en longitud del texto
+            final textLength = "${verse.verse} ${verse.text}".length;
+            final lineHeight =
+                fontSizeVerse * 1.5; // Altura aproximada por línea
+            final lines =
+                (textLength / 50).ceil(); // Aprox. 50 caracteres por línea
+            estimatedHeight += lines * lineHeight + 16; // +16 por padding
+          }
+
+          // Ajustar con márgenes
+          estimatedHeight += 40.0; // Widget inicial del ListView
+
+          await scrollController.animateTo(
+            estimatedHeight.clamp(
+                0.0, scrollController.position.maxScrollExtent),
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeInOut,
+          );
+        } catch (error) {
+          // Fallback más simple
+          final itemHeight = 80.0; // Altura estimada por versículo
+          await scrollController.animateTo(
+            (startIndex * itemHeight)
+                .clamp(0.0, scrollController.position.maxScrollExtent),
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
   }
 
   Future<void> _togglePlayPause() async {
@@ -1983,18 +1606,29 @@ class _BibleScreenState extends State<BibleScreen> {
     });
   }
 
-  void openModal() {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      transitionDuration: Duration(milliseconds: 500),
-      pageBuilder: (_, __, ___) {
-        return Dialog(
-          backgroundColor: currentTheme.backgroundColor,
-          insetPadding: EdgeInsets.zero,
+ void openModal() {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: false,
+    transitionDuration: Duration(milliseconds: 500),
+    pageBuilder: (_, __, ___) {
+      return Dialog(
+        backgroundColor: currentTheme.backgroundColor,
+        insetPadding: isTablet(context) 
+            ? EdgeInsets.symmetric(horizontal: 50, vertical: 0)
+            : EdgeInsets.zero,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isTablet(context) ? 900 : double.infinity,
+            maxHeight: isTablet(context) ? 700 : double.infinity,
+          ),
           child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
+            width: isTablet(context) 
+                ? MediaQuery.of(context).size.width * 0.85
+                : MediaQuery.of(context).size.width,
+            height: isTablet(context) 
+                ? MediaQuery.of(context).size.height * 0.85
+                : MediaQuery.of(context).size.height,
             child: SearchBibleWidget(
               currentVersion: currentVersion!,
               currentBook: currentBook!,
@@ -2010,15 +1644,1266 @@ class _BibleScreenState extends State<BibleScreen> {
               },
             ),
           ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return ScaleTransition(
+        scale: animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
+        child: child,
+      );
+    },
+  );
+}
+
+// Método para construir el drawer de navegación
+  Widget _buildNavigationDrawer(BibleTheme currentTheme) {
+    return Drawer(
+      width: MediaQuery.sizeOf(context).width * 0.75, // Ancho personalizado
+      backgroundColor: currentTheme.backgroundColor,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header del drawer
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 20),
+              decoration: BoxDecoration(
+                color: currentTheme.appBarColor,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Navegación',
+                        style: StylesApp(context).textStyleBody18.copyWith(
+                              color: currentTheme.buttonTextColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, size: 24),
+                        color: currentTheme.buttonTextColor,
+                        onPressed: () {
+                          _scaffoldKey.currentState?.closeEndDrawer();
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: ListView(
+                // padding: EdgeInsets.all(16),
+                children: [
+                  BibleHeaderWidget(
+                    spacingBottom: 10.0,
+                    onSearchBible: () {
+                      openModal();
+                    },
+                    versionName:
+                        currentVersion != null ? currentVersion!.version : '',
+                    title: currentBook != null ? currentBook!.modernName : '',
+                    showIconVideo: video.url.isNotEmpty,
+                    chapter: currentChapter != null
+                        ? '${currentChapter!.chapter}'
+                        : '',
+                    onVideoCollection: () async {
+                      await _showVideoDialog();
+                    },
+                    onBack: () async {
+                      Navigator.pushNamed(
+                        context,
+                        '/layoutPage',
+                        arguments: {'selectedIndex': 0},
+                      );
+                    },
+                    onVersionTap: () async {
+                      await _changeBibleVersion();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerIndicator(BibleTheme currentTheme) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: currentTheme.buttonColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: currentTheme.buttonColor.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.swipe_left,
+            color: currentTheme.buttonColor,
+            size: 20,
+          ),
+          SizedBox(width: 8),
+          Text(
+            'Desliza desde la derecha para navegar',
+            style: TextStyle(
+              color: currentTheme.buttonColor,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Método para mostrar el diálogo de video
+  Future<void> _showVideoDialog() async {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.sizeOf(context).height * 0.50,
+              maxHeight: MediaQuery.sizeOf(context).height * 0.50,
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    constraints: BoxConstraints(minHeight: 213),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: (video.url.contains('youtube.com') ||
+                              video.url.contains('youtu.be'))
+                          ? PlayerYoutubeWidget(videoUrl: video.url)
+                          : PlayerNoYoutube(
+                              url: "${GraphQLConfig.urlServidor}${video.url}"),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop(); // Cierra el diálogo
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.7),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 20.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: animation.drive(
-              CurveTween(curve: Curves.fastOutSlowIn)), // ← Solución segura
-          child: child,
-        );
-      },
+    );
+  }
+
+  // Método para cambiar la versión de la Biblia
+  Future<void> _changeBibleVersion() async {
+    final bibleVersions = Provider.of<CatalogueProvider>(
+      context,
+      listen: false,
+    )
+        .allBibleVersion
+        .map(
+          (v) => ModelData(value: v.id, label: v.version),
+        )
+        .toList();
+
+    final selectedVersion = await BibleVersionSelector.show(
+      context: context,
+      versions: bibleVersions,
+      preferenceKey: preferenceKey,
+      savedId: lastVersionsSelected,
+    );
+
+    if (selectedVersion != null) {
+      if (kDebugMode) {
+        print('Versión seleccionada: ${selectedVersion.label}');
+      }
+
+      // Actualizar la versión seleccionada
+      setState(() => lastVersionsSelected = selectedVersion.value);
+
+      // Limpiar cache y guardar nueva versión
+      await PreferencesManager().clearOne('bookSelected');
+      await PreferencesManager().clearOne('chapterSelected');
+      await PreferencesManager().setSelectedBibleVersion(lastVersionsSelected!);
+
+      // Recargar datos con la nueva versión
+      _initDataLoad();
+    }
+  }
+
+  void _scrollToTop() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        // Verificar si ya está en la parte superior
+        if (scrollController.offset > 0) {
+          scrollController.animateTo(
+            0.0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
+  }
+
+  _buildTableLayout(BibleTheme currentTheme) {
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: currentTheme.backgroundColor,
+      body: SafeArea(
+          child: Row(
+        children: [
+          // Columna Izquierda
+          Flexible(
+            flex: 3,
+            child: Container(
+              // width: 300,
+              decoration: BoxDecoration(
+                color: currentTheme.backgroundColor,
+                border: Border(
+                  right: BorderSide(
+                    color: currentTheme.buttonColor.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: _buildNavigationPanel(currentTheme),
+            ),
+          ),
+
+          // Columna Derecha
+          Flexible(
+            flex: 8,
+            child: _buildBibleContent(currentTheme),
+          ),
+        ],
+      )),
+    );
+  }
+
+  Widget _buildNavigationPanel(BibleTheme currentTheme) {
+    return Column(
+      children: [
+        // header de la navegación - CORREGIDO
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
+          decoration: BoxDecoration(
+            color: currentTheme.appBarColor,
+          ),
+          child: Stack(
+            // 🔥 CAMBIO: Usar Stack en lugar de Row con Positioned
+            children: [
+              // Botón de retroceso
+              Container(
+                height: 35.0,
+                width: 35.0,
+                decoration: BoxDecoration(
+                  color: currentTheme.name != 'Claro'
+                      ? currentTheme.buttonColor
+                      : Color(0XFFFD8C43),
+                  borderRadius: BorderRadius.circular(35.0),
+                ),
+                child: IconButton(
+                  constraints: BoxConstraints(maxHeight: 35.0),
+                  padding: EdgeInsets.all(0),
+                  iconSize: 35.0,
+                  color: currentTheme.name != 'Claro'
+                      ? currentTheme.buttonTextColor
+                      : currentTheme.backgroundColor,
+                  onPressed: () => Navigator.pushNamed(
+                    context,
+                    '/layoutPage',
+                    arguments: {'selectedIndex': 0},
+                  ),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    size: 35.0,
+                  ),
+                ),
+              ),
+
+              // Título centrado
+              Center(
+                child: Text(
+                  'Navegación',
+                  style: StylesApp(context).textStyleBody18.copyWith(
+                        color: currentTheme.buttonTextColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: 10),
+
+        // contenido del panel de navegación
+        Expanded(
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+            children: [
+              BibleHeaderWidget(
+                widthButton: 250.0,
+                showButton: false,
+                topPosition: null,
+                bottomPosition: 10.0,
+                onSearchBible: () {
+                  openModal();
+                },
+                versionName:
+                    currentVersion != null ? currentVersion!.version : '',
+                title: currentBook != null ? currentBook!.modernName : '',
+                showIconVideo: video.url.isNotEmpty,
+                chapter:
+                    currentChapter != null ? '${currentChapter!.chapter}' : '',
+                onVideoCollection: () async {
+                  await _showVideoDialog();
+                },
+                onVersionTap: () async {
+                  await _changeBibleVersion();
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBibleContent(BibleTheme currentTheme) {
+    return Column(
+      children: [
+        if (isLoading) ...{
+          Expanded(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+        } else ...{
+          if (errorMessage != null) ...{
+            BuildErrorWidget(
+              errorMessage: errorMessage!,
+              onRetry: () async => _initDataLoad(),
+              onBack: () => Navigator.pushReplacementNamed(
+                  context, '/layoutPage',
+                  arguments: {'selectedIndex': 0}),
+            )
+          } else ...{
+            // En tablet no mostramos el BibleHeaderWidget aquí ya que está en la columna izquierda
+            Expanded(
+              child: SizedBox(
+                width: double.infinity,
+                child: Stack(
+                  children: [
+                    // body
+                    Scrollbar(
+                      controller: scrollController,
+                      thumbVisibility: true,
+                      thickness: 6.0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: SizedBox(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (versionConSaltos) ...{
+                                Expanded(
+                                  child: ListView(
+                                    controller: scrollController,
+                                    children: [
+                                      const SizedBox(height: 40),
+                                      _buildContinuousText(),
+                                      SizedBox(
+                                        height: kBottomNavigationBarHeight + 45,
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              }
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // 🔥 EN TABLET: Mantenemos los botones de acciones en la parte superior derecha
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        width: MediaQuery.sizeOf(context).width,
+                        decoration:
+                            BoxDecoration(color: currentTheme.backgroundColor),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            // CUSTOMIZE BUTTON
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 25.0,
+                              onPressed: () {
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return ModalTextFormatSizeWidget(
+                                        fontSize: fontSizeVerse,
+                                        selectedItem: fontFamilySet,
+                                        onChangedFontSize: (fontSize) async {
+                                          setState(() {
+                                            fontSizeNumber = fontSize! - 4;
+                                            fontSizeVerse = fontSize;
+                                          });
+                                          await PreferencesManager()
+                                              .setFontSizeVerse(fontSize!);
+                                        },
+                                        onChangedFont: (newFont) async {
+                                          if (kDebugMode) {
+                                            print(
+                                                'la nueva fuente ${newFont!.label}');
+                                          }
+                                          setState(() {
+                                            fontFamilySet = newFont!;
+                                          });
+                                          await PreferencesManager()
+                                              .setFontFamilySet(
+                                                  newFont!.toJson());
+                                        },
+                                      );
+                                    });
+                              },
+                              icon: Icon(
+                                CupertinoIcons.textformat_size,
+                                color: currentTheme.buttonColor,
+                              ),
+                            ),
+
+                            // COPY BUTTON
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 25.0,
+                              onPressed: () async {
+                                Clipboard.setData(ClipboardData(
+                                    text: await copyChapter(currentVersion,
+                                        currentBook, currentChapter)));
+                                await showCustomDialog(
+                                  context,
+                                  message:
+                                      "El capitulo ${currentChapter!.chapter} del libro ${currentBook!.modernName}  \n se ha copiado con éxito al\n portapapeles",
+                                  dialogType: DialogType.info,
+                                );
+                              },
+                              icon: Icon(
+                                Icons.file_copy_rounded,
+                                color: currentTheme.buttonColor,
+                              ),
+                            ),
+
+                            // SHARED BUTTON
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 25.0,
+                              onPressed: () async {
+                                await SharePlus.instance.share(ShareParams(
+                                  text: await copyChapter(currentVersion,
+                                      currentBook, currentChapter),
+                                  subject:
+                                      "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName} \n ver en:${GraphQLConfig.urlServidor}officialbible",
+                                ));
+                              },
+                              icon: Icon(
+                                Icons.share_rounded,
+                                color: currentTheme.buttonColor,
+                              ),
+                            ),
+
+                            // MODAL ACTIONS BUTTON
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 25.0,
+                              onPressed: () {
+                                openModal();
+                              },
+                              icon: Icon(
+                                Icons.search_rounded,
+                                color: currentTheme.buttonColor,
+                              ),
+                            ),
+
+                            // FAVORITE BUTTON
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 25.0,
+                              onPressed: () async {
+                                String versionId = currentVersion != null
+                                    ? currentVersion!.id
+                                    : "0";
+                                LoadingService().showLoading(context);
+                                try {
+                                  String userId =
+                                      userData != null ? userData!.userId : '';
+                                  List<FavoriteVerse> listFavorite = [];
+                                  PaginationInfo? objPagination;
+                                  final responseFavorite =
+                                      await getFavoriteVerseByUser(
+                                          1, 10, versionId, null, userId);
+                                  if (responseFavorite.error != null) {
+                                    LoadingService().hideLoading();
+                                    await showCustomDialog(context,
+                                        message: responseFavorite.error!,
+                                        dialogType: DialogType.error);
+                                    return;
+                                  }
+
+                                  setState(() {
+                                    listFavorite = responseFavorite.data['data']
+                                        .map<FavoriteVerse>((favorite) =>
+                                            FavoriteVerse.fromJson(favorite))
+                                        .toList();
+                                    objPagination = PaginationInfo.fromJson(
+                                        responseFavorite.data['meta']);
+                                  });
+                                  LoadingService().hideLoading();
+                                  showGeneralDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      transitionDuration:
+                                          Duration(milliseconds: 500),
+                                      pageBuilder: (_, __, ___) {
+                                        return DialogFavoriteVerseWidget(
+                                            currentTheme: currentTheme,
+                                            paginationInfo: objPagination,
+                                            versionId: currentVersion!.id,
+                                            favoriteVerses: listFavorite,
+                                            onDeleted: (verseId) {
+                                              final indexToDelete =
+                                                  _favoriteVerses.indexWhere(
+                                                      (verse) =>
+                                                          verse.verse.id ==
+                                                          verseId);
+                                              if (indexToDelete != -1) {
+                                                setState(() {
+                                                  _favoriteVerses
+                                                      .removeAt(indexToDelete);
+                                                });
+                                              }
+                                            });
+                                      });
+                                } catch (e) {
+                                  LoadingService().hideLoading();
+                                  await showCustomDialog(context,
+                                      message: e.toString(),
+                                      dialogType: DialogType.error);
+                                }
+                              },
+                              icon: Icon(
+                                Icons.star,
+                                color: currentTheme.buttonColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // 🔥 EN TABLET: Mantenemos los controles de navegación y TTS en la parte inferior
+                    Positioned(
+                      bottom: 4,
+                      right: 0,
+                      left: 0,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 7.0),
+                        width: MediaQuery.sizeOf(context).width * 0.75,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: 35,
+                              height: 35,
+                              decoration: BoxDecoration(
+                                  color: hasPreviousChapter
+                                      ? currentTheme.buttonColor
+                                      : StyleColor.grayMedium,
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: Center(
+                                child: IconButton(
+                                  disabledColor: StyleColor.grayMedium,
+                                  padding: EdgeInsets.all(0),
+                                  alignment: Alignment.center,
+                                  iconSize: 35,
+                                  onPressed: !hasPreviousChapter
+                                      ? null
+                                      : () {
+                                          _goToPreviousChapter(
+                                              (currentChapter!.chapter - 1)
+                                                  .toString());
+                                        },
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_left_rounded,
+                                    size: 35,
+                                    color: currentTheme.buttonTextColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: currentTheme.backgroundColor,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                margin: EdgeInsets.symmetric(horizontal: 8),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 4),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              IconButton(
+                                                icon:
+                                                    Icon(Icons.stop, size: 24),
+                                                color: currentTheme.buttonColor,
+                                                onPressed: () async {
+                                                  await flutterTts.stop();
+                                                  setState(() {
+                                                    isPlaying = false;
+                                                    currentPlayingVerseIndex =
+                                                        null;
+                                                  });
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: Icon(
+                                                  isPlaying
+                                                      ? Icons.pause
+                                                      : Icons.play_arrow,
+                                                  size: 28,
+                                                ),
+                                                color: currentTheme.buttonColor,
+                                                onPressed: _togglePlayPause,
+                                              ),
+                                              Icon(Icons.speed,
+                                                  size: 18,
+                                                  color:
+                                                      currentTheme.textColor),
+                                              SizedBox(width: 8),
+                                              Expanded(
+                                                child: Slider(
+                                                  value: _speechRate,
+                                                  min: 0.1,
+                                                  max: 1.0,
+                                                  divisions: 9,
+                                                  label: _getSpeedLabel(
+                                                      _speechRate),
+                                                  activeColor:
+                                                      currentTheme.buttonColor,
+                                                  inactiveColor: currentTheme
+                                                      .buttonColor
+                                                      .withValues(alpha: 0.3),
+                                                  onChanged: (value) async {
+                                                    setState(() =>
+                                                        _speechRate = value);
+                                                    await flutterTts
+                                                        .setSpeechRate(value);
+                                                    await PreferencesManager()
+                                                        .setTtsSpeechRate(
+                                                            value);
+                                                  },
+                                                ),
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                _getSpeedLabel(_speechRate),
+                                                style: TextStyle(
+                                                  color: currentTheme.textColor,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Text(
+                                            'Velocidad: ${(_speechRate * 100).round()}%',
+                                            style: TextStyle(
+                                              color: currentTheme.textColor,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 35,
+                              height: 35,
+                              decoration: BoxDecoration(
+                                  color: hasNextChapter
+                                      ? currentTheme.buttonColor
+                                      : StyleColor.grayMedium,
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: Center(
+                                child: IconButton(
+                                  padding: EdgeInsets.all(0),
+                                  alignment: Alignment.center,
+                                  iconSize: 35,
+                                  onPressed: !hasNextChapter
+                                      ? null
+                                      : () {
+                                          _goToNextChapter(
+                                              (currentChapter!.chapter + 1)
+                                                  .toString());
+                                        },
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_right_rounded,
+                                    size: 35,
+                                    color: currentTheme.buttonTextColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          }
+        }
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(BibleTheme currentTheme) {
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: currentTheme.backgroundColor,
+      endDrawer:
+          _buildNavigationDrawer(currentTheme), // Drawer siempre disponible
+      endDrawerEnableOpenDragGesture: true,
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
+      floatingActionButton: _showDrawer
+          ? FloatingActionButton(
+              mini: true,
+              elevation: 0,
+              onPressed: () {
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
+              backgroundColor: currentTheme.backgroundColor,
+              child: Icon(
+                Icons.menu,
+                color: currentTheme.buttonColor,
+              ),
+            )
+          : null,
+      body: SafeArea(
+        child: Column(
+          children: [
+            if (isLoading) ...{
+              Container()
+            } else ...{
+              if (errorMessage != null) ...{
+                BuildErrorWidget(
+                  errorMessage: errorMessage!,
+                  onRetry: () async => _initDataLoad(),
+                  onBack: () => Navigator.pushReplacementNamed(
+                      context, '/layoutPage',
+                      arguments: {'selectedIndex': 0}),
+                )
+              } else ...{
+                // cabecera
+                if (!_showDrawer)
+                  BibleHeaderWidget(
+                    spacingBottom: 10.0,
+                    onSearchBible: () {
+                      openModal();
+                    },
+                    versionName:
+                        currentVersion != null ? currentVersion!.version : '',
+                    title: currentBook != null ? currentBook!.modernName : '',
+                    showIconVideo: video.url.isNotEmpty,
+                    chapter: currentChapter != null
+                        ? '${currentChapter!.chapter}'
+                        : '',
+                    onVideoCollection: () async {
+                      await _showVideoDialog();
+                    },
+                    onBack: () async {
+                      Navigator.pushNamed(
+                        context,
+                        '/layoutPage',
+                        arguments: {'selectedIndex': 0},
+                      );
+                    },
+                    onVersionTap: () async {
+                      await _changeBibleVersion();
+                    },
+                  ),
+                Expanded(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Stack(
+                      children: [
+                        // body
+                        Scrollbar(
+                          controller: scrollController,
+                          thumbVisibility: true,
+                          thickness: 6.0,
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: SizedBox(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (versionConSaltos) ...{
+                                    Expanded(
+                                      child: ListView(
+                                        controller: scrollController,
+                                        children: [
+                                          if (_showDrawer)
+                                            _buildDrawerIndicator(currentTheme),
+                                          // Otros widgets de la lista...
+                                          const SizedBox(height: 40),
+                                          _buildContinuousText(), // Tu texto formateado como un widget
+                                          SizedBox(
+                                            height:
+                                                kBottomNavigationBarHeight + 45,
+                                          )
+                                          // Más widgets...
+                                        ],
+                                      ),
+                                    ),
+                                  }
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        // opciones de copiado, compartir y configuración
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Container(
+                            width: MediaQuery.sizeOf(context).width,
+                            decoration: BoxDecoration(
+                                color: currentTheme.backgroundColor),
+                            // width: MediaQuery.sizeOf(context).width,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // CUSTOMIZE BUTTON
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return ModalTextFormatSizeWidget(
+                                            fontSize: fontSizeVerse,
+                                            selectedItem: fontFamilySet,
+                                            onChangedFontSize:
+                                                (fontSize) async {
+                                              setState(() {
+                                                // persistir tamaño de fuente
+                                                fontSizeNumber = fontSize! - 4;
+                                                fontSizeVerse = fontSize;
+                                              });
+                                              await PreferencesManager()
+                                                  .setFontSizeVerse(fontSize!);
+                                            },
+                                            onChangedFont: (newFont) async {
+                                              if (kDebugMode) {
+                                                print(
+                                                    'la nueva fuente ${newFont!.label}');
+                                              }
+                                              // persistir familia de fuente
+                                              setState(() {
+                                                fontFamilySet = newFont!;
+                                              });
+                                              await PreferencesManager()
+                                                  .setFontFamilySet(
+                                                      newFont!.toJson());
+                                            },
+                                          );
+                                        });
+                                  },
+                                  icon: Icon(
+                                    CupertinoIcons.textformat_size,
+                                    color: currentTheme.buttonColor,
+                                  ),
+                                ),
+
+                                // COPY BUTTON
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () async {
+                                    Clipboard.setData(ClipboardData(
+                                        text: await copyChapter(currentVersion,
+                                            currentBook, currentChapter)));
+                                    await showCustomDialog(
+                                      context,
+                                      message:
+                                          "El capitulo ${currentChapter!.chapter} del libro ${currentBook!.modernName}  \n se ha copiado con éxito al\n portapapeles",
+                                      dialogType: DialogType.info,
+                                    );
+                                  },
+                                  icon: Icon(
+                                    Icons.file_copy_rounded,
+                                    color: currentTheme.buttonColor,
+                                  ),
+                                ),
+                                // SHARED BUTTON
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () async {
+                                    await SharePlus.instance.share(ShareParams(
+                                      text: await copyChapter(currentVersion,
+                                          currentBook, currentChapter),
+                                      subject:
+                                          "Palabra de Vida - ${currentChapter!.chapter} ${currentBook!.modernName} \n ver en:${GraphQLConfig.urlServidor}officialbible",
+                                    ));
+                                  },
+                                  icon: Icon(
+                                    Icons.share_rounded,
+                                    color: currentTheme.buttonColor,
+                                  ),
+                                ),
+                                // MODAL ACTIONS BUTTON
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () {
+                                    openModal();
+                                  },
+                                  icon: Icon(
+                                    Icons.search_rounded,
+                                    color: currentTheme.buttonColor,
+                                  ),
+                                ),
+                                // FAVORITE BUTTON
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 25.0,
+                                  onPressed: () async {
+                                    String versionId = currentVersion != null
+                                        ? currentVersion!.id
+                                        : "0";
+                                    LoadingService().showLoading(context);
+                                    try {
+                                      String userId = userData != null
+                                          ? userData!.userId
+                                          : '';
+                                      List<FavoriteVerse> listFavorite = [];
+                                      PaginationInfo? objPagination;
+                                      final responseFavorite =
+                                          await getFavoriteVerseByUser(
+                                              1, 10, versionId, null, userId);
+                                      if (responseFavorite.error != null) {
+                                        LoadingService().hideLoading();
+                                        await showCustomDialog(context,
+                                            message: responseFavorite.error!,
+                                            dialogType: DialogType.error);
+                                        return;
+                                      }
+
+                                      setState(() {
+                                        listFavorite = responseFavorite
+                                            .data['data']
+                                            .map<FavoriteVerse>((favorite) =>
+                                                FavoriteVerse.fromJson(
+                                                    favorite))
+                                            .toList();
+                                        objPagination = PaginationInfo.fromJson(
+                                            responseFavorite.data['meta']);
+                                      });
+                                      LoadingService().hideLoading();
+                                      showGeneralDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          transitionDuration:
+                                              Duration(milliseconds: 500),
+                                          pageBuilder: (_, __, ___) {
+                                            return DialogFavoriteVerseWidget(
+                                                currentTheme: currentTheme,
+                                                paginationInfo: objPagination,
+                                                versionId: currentVersion!.id,
+                                                favoriteVerses: listFavorite,
+                                                onDeleted: (verseId) {
+                                                  final indexToDelete =
+                                                      _favoriteVerses
+                                                          .indexWhere((verse) =>
+                                                              verse.verse.id ==
+                                                              verseId);
+                                                  if (indexToDelete != -1) {
+                                                    setState(() {
+                                                      _favoriteVerses.removeAt(
+                                                          indexToDelete);
+                                                    });
+                                                  }
+                                                });
+                                          });
+                                    } catch (e) {
+                                      LoadingService().hideLoading();
+                                      await showCustomDialog(context,
+                                          message: e.toString(),
+                                          dialogType: DialogType.error);
+                                    }
+                                  },
+                                  icon: Icon(
+                                    Icons.star,
+                                    color: currentTheme.buttonColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 4,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 7.0),
+                            width: MediaQuery.sizeOf(context).width,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 35,
+                                  height: 35,
+                                  decoration: BoxDecoration(
+                                      color: hasPreviousChapter
+                                          ? currentTheme.buttonColor
+                                          : StyleColor.grayMedium,
+                                      borderRadius: BorderRadius.circular(8)),
+                                  child: Center(
+                                    child: IconButton(
+                                      disabledColor: StyleColor.grayMedium,
+                                      padding: EdgeInsets.all(0),
+                                      alignment: Alignment.center,
+                                      iconSize: 35,
+                                      //  color: currentTheme.buttonColor,
+                                      onPressed: !hasPreviousChapter
+                                          ? null
+                                          : () {
+                                              // Lógica para ir al capítulo anterior
+                                              _goToPreviousChapter(
+                                                  (currentChapter!.chapter - 1)
+                                                      .toString());
+                                            },
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_left_rounded,
+                                        size: 35,
+                                        color: currentTheme.buttonTextColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: currentTheme.backgroundColor,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    margin: EdgeInsets.symmetric(horizontal: 8),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 4),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        // Slider para control de velocidad
+                                        Expanded(
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  // Botón de stop
+                                                  IconButton(
+                                                    icon: Icon(Icons.stop,
+                                                        size: 24),
+                                                    color: currentTheme
+                                                        .buttonColor,
+                                                    onPressed: () async {
+                                                      await flutterTts.stop();
+                                                      setState(() {
+                                                        isPlaying = false;
+                                                        currentPlayingVerseIndex =
+                                                            null;
+                                                      });
+                                                    },
+                                                  ),
+                                                  // Botón de play/pause
+                                                  IconButton(
+                                                    icon: Icon(
+                                                      isPlaying
+                                                          ? Icons.pause
+                                                          : Icons.play_arrow,
+                                                      size: 28,
+                                                    ),
+                                                    color: currentTheme
+                                                        .buttonColor,
+                                                    onPressed: _togglePlayPause,
+                                                  ),
+                                                  Icon(Icons.speed,
+                                                      size: 18,
+                                                      color: currentTheme
+                                                          .textColor),
+                                                  SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Slider(
+                                                      value: _speechRate,
+                                                      min: 0.1,
+                                                      max: 1.0,
+                                                      divisions: 9,
+                                                      label: _getSpeedLabel(
+                                                          _speechRate),
+                                                      activeColor: currentTheme
+                                                          .buttonColor,
+                                                      inactiveColor:
+                                                          currentTheme
+                                                              .buttonColor
+                                                              .withValues(
+                                                                  alpha: 0.3),
+                                                      onChanged: (value) async {
+                                                        setState(() =>
+                                                            _speechRate =
+                                                                value);
+                                                        await flutterTts
+                                                            .setSpeechRate(
+                                                                value);
+
+                                                        await PreferencesManager()
+                                                            .setTtsSpeechRate(
+                                                                value);
+                                                      },
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                    _getSpeedLabel(_speechRate),
+                                                    style: TextStyle(
+                                                      color: currentTheme
+                                                          .textColor,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Text(
+                                                'Velocidad: ${(_speechRate * 100).round()}%',
+                                                style: TextStyle(
+                                                  color: currentTheme.textColor,
+                                                  fontSize: 10,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: 35,
+                                  height: 35,
+                                  decoration: BoxDecoration(
+                                      color: hasNextChapter
+                                          ? currentTheme.buttonColor
+                                          : StyleColor.grayMedium,
+                                      borderRadius: BorderRadius.circular(8)),
+                                  child: Center(
+                                    child: IconButton(
+                                      padding: EdgeInsets.all(0),
+                                      alignment: Alignment.center,
+                                      iconSize: 35,
+                                      onPressed: !hasNextChapter
+                                          ? null
+                                          : () {
+                                              // Lógica para ir al siguiente capítulo
+                                              _goToNextChapter(
+                                                  (currentChapter!.chapter + 1)
+                                                      .toString());
+                                            },
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_right_rounded,
+                                        size: 35,
+                                        color: currentTheme.buttonTextColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              }
+            }
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,8 +1,34 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/services/device_service.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
+
+  @override
+  State<AboutScreen> createState() => _AboutScreenState();
+}
+
+class _AboutScreenState extends State<AboutScreen> {
+  Map<String, dynamic>? _versionApp;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeviceInfo();
+  }
+
+  Future<void> _initDeviceInfo() async {
+    final info = await _loadDeviceInfo();
+    if (mounted) {
+      setState(() {
+        _versionApp = info;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,55 +38,29 @@ class AboutScreen extends StatelessWidget {
         centerTitle: true,
         leading: IconButton.filled(
           style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(StyleColor.orange),
-              foregroundColor: WidgetStatePropertyAll(StyleColor.white)),
-          padding: EdgeInsets.all(0),
+              backgroundColor: MaterialStatePropertyAll(StyleColor.orange),
+              foregroundColor: MaterialStatePropertyAll(StyleColor.white)),
+          padding: const EdgeInsets.all(0),
           onPressed: () {
             Navigator.pop(context);
           },
           splashColor: StyleColor.orange,
           color: StyleColor.white,
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back,
             size: 30,
           ),
         ),
         backgroundColor: StyleColor.white,
-        // actions: [
-        //   Image.asset(
-        //     "assets/kawaii_fire.png",
-        //     height: 52.0,
-        //     fit: BoxFit.contain,
-        //   )
-        // ],
       ),
-
-      //  AppBar(
-      //   backgroundColor: Colors.white,
-      //   elevation: 0,
-      //   leading: IconButton(
-      //     icon: const Icon(Icons.arrow_back, color: Color(0xFF12CBC4)),
-      //     onPressed: () => Navigator.pop(context),
-      //   ),
-      //   title: const Text(
-      //     'Acerca de',
-      //     style: TextStyle(
-      //       color: Color(0xFFFF914D),
-      //       fontFamily: 'LuckiestGuy',
-      //       fontSize: 28,
-      //       fontWeight: FontWeight.bold,
-      //     ),
-      //   ),
-      //   centerTitle: true,
-      // ),
       body: SafeArea(
         child: Column(
           children: [
             Container(
               width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: const AssetImage("assets/elipsisTop.png"),
+                  image: AssetImage("assets/elipsisTop.png"),
                   fit: BoxFit.cover,
                   alignment: Alignment.bottomCenter,
                 ),
@@ -69,6 +69,7 @@ class AboutScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Logo o imagen de la app
+                  const SizedBox(height: 8),
                   CircleAvatar(
                     radius: 48,
                     backgroundColor: Colors.white,
@@ -93,9 +94,11 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Versión 1.0.0',
-              style: TextStyle(
+            Text(
+              _versionApp != null && _versionApp!.isNotEmpty
+                  ? _versionApp!['appVersion'].toString()
+                  : 'Cargando...',
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontFamily: 'Montserrat',
@@ -104,12 +107,12 @@ class AboutScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal:  12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: const Divider(color: Colors.white, thickness: 1),
             ),
             const SizedBox(height: 16),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal:  12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: const Text(
                 'Esta aplicación fue creada para ayudarte a estudiar y compartir la Palabra de Dios de manera interactiva y divertida.\n\nDesarrollada por el equipo de Biblia Palabra de Vida.',
                 textAlign: TextAlign.center,
@@ -122,18 +125,42 @@ class AboutScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal:  12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: const Divider(color: Colors.white, thickness: 1),
             ),
             const SizedBox(height: 16),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal:  12.0),
-              child: const Text(
-                'Contacto: devidapalabra25@gmail.com',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontFamily: 'Montserrat',
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: GestureDetector(
+                onTap: () async {
+                  final Uri emailLaunchUri = Uri(
+                    scheme: 'mailto',
+                    path: GraphQLConfig.emailContact,
+                    queryParameters: {
+                      'subject': 'Consulta - Biblia Palabra de Vida',
+                      'body': 'Hola, tengo una consulta sobre la aplicación:',
+                    },
+                  );
+
+                  if (await canLaunchUrl(emailLaunchUri)) {
+                    await launchUrl(emailLaunchUri);
+                  } else {
+                    // Si no se puede abrir el cliente de correo, mostrar un snackbar o diálogo
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text('No se pudo abrir la aplicación de correo'),
+                      ),
+                    );
+                  }
+                },
+                child: const Text(
+                  'Contacto: ${GraphQLConfig.emailContact}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontFamily: 'Montserrat',
+                  ),
                 ),
               ),
             ),
@@ -151,5 +178,21 @@ class AboutScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<Map<String, dynamic>> _loadDeviceInfo() async {
+    try {
+      final deviceData = await DeviceService.getDeviceInfo();
+      if (kDebugMode) {
+        print('Device info: $deviceData');
+      }
+      // Aquí puedes usar la información si la necesitas
+      return deviceData;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading device info: $e');
+      }
+      return <String, dynamic>{};
+    }
   }
 }

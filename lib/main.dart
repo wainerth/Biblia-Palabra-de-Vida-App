@@ -23,11 +23,6 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-// Bloquear orientación a portrait
-  // SystemChrome.setPreferredOrientations([
-  //   DeviceOrientation.portraitUp,
-  //   DeviceOrientation.portraitDown,
-  // ]);
   await PreferencesManager().init();
 
   final socketProvider = SocketClientProvider();
@@ -38,20 +33,25 @@ void main() async {
       ignoreSsl: kDebugMode,
     );
   }
-
+  final catalogueProvider = CatalogueProvider();
+  await catalogueProvider.initialize();
   debugPrint = (String? message, {int? wrapWidth}) {
     // Logs detallados solo en modo debug
     if (message != null && message.contains('GraphQL')) {
-      print('🎯 [GRAPHQL_DEBUG] $message');
+      if (kDebugMode) {
+        print('🎯 [GRAPHQL_DEBUG] $message');
+      }
     }
   };
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => socketProvider),
+        ChangeNotifierProvider(create: (_) => ExchangeRateProvider()),
         ChangeNotifierProvider<CatalogueProvider>(
-            create: (_) => CatalogueProvider()),
+            create: (_) => catalogueProvider),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
         ChangeNotifierProvider<AuthenticationProvider>(
           create: (context) => AuthenticationProvider(
@@ -60,7 +60,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => BibleThemeProvider()),
       ],
       child: ScreenUtilInit(
-        designSize:  getDesignSize(),
+        designSize: getDesignSize(),
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {
@@ -79,24 +79,34 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool? _hasSeenIntro;
+  bool _isAuthCheckComplete = false;
+  bool _orientationApplied = false;
 
   @override
   void initState() {
     super.initState();
-    _loadDataPreferences();
     _initializeApp();
   }
 
   Future<void> _initializeApp() async {
     // Esperar a que Flutter esté listo
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final context = navigatorKey.currentContext;
-      if (context != null) {
-        final catalogueProvider =
-            Provider.of<CatalogueProvider>(context, listen: false);
+
+    await _loadDataPreferences();
+    await _initializeCatalogueProvider();
+  }
+
+  Future<void> _initializeCatalogueProvider() async {
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      final catalogueProvider =
+          Provider.of<CatalogueProvider>(context, listen: false);
+      try {
         await catalogueProvider.initialize();
+      } catch (e) {
+        debugPrint('⚠️ Error inicializando catálogo: $e');
+        // Permitir que la app continúe incluso si el catálogo falla
       }
-    });
+    }
   }
 
   Future<void> _loadDataPreferences() async {
@@ -124,16 +134,6 @@ class _MyAppState extends State<MyApp> {
           debugPrint('⚠️ Error en limpieza: $e');
         }
       }
-    }
-  }
-
-// function to load the token and initialize the authentication
-  Future<void> _loadTokenAndInitializeAuth() async {
-    final authProvider = context.read<AuthenticationProvider>();
-    try {
-      await authProvider.checkAuthentication(context);
-    } catch (e) {
-      debugPrint('⚠️ Error en _loadTokenAndInitializeAuth: $e');
     }
   }
 
@@ -168,6 +168,36 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_orientationApplied) {
+      _applyOrientationPolicy();
+      _orientationApplied = true;
+    }
+  }
+
+  void _applyOrientationPolicy() {
+    try {
+      final shortestSide = MediaQuery.of(context).size.shortestSide;
+      final bool isTablet = shortestSide >= 600; // standard heuristic
+
+      if (isTablet) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          // DeviceOrientation.portraitDown,
+        ]);
+      } else {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
+      }
+    } catch (e) {
+      // If MediaQuery is not available yet or any other error, ignore silently
+      debugPrint('Could not apply orientation policy: $e');
+    }
+  }
+
   Widget _buildHomeScreen() {
     if (_hasSeenIntro == null) {
       return const Scaffold(
@@ -177,26 +207,46 @@ class _MyAppState extends State<MyApp> {
       );
     }
     if (_hasSeenIntro!) {
-      final authProvider = context.read<AuthenticationProvider>();
-      return FutureBuilder(
-        future: _loadTokenAndInitializeAuth(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return LoadMaskedWidget();
-          } else {
-            LoadingService().hideLoading();
+      return Consumer<AuthenticationProvider>(
+        builder: (context, authProvider, child) {
+          // si aún no hemos empezado lña verificación, la iniciamos
+          if (!_isAuthCheckComplete && !authProvider.isLoading) {
+            _startAuthCheck(context);
+          }
 
-            if (authProvider.token != null) {
-              return PageScreen();
-            } else {
-              return const HomeScreen();
-            }
+          // Muestra loading mientras se verifica la autenticación
+          if (authProvider.isLoading) {
+            return const LoadMaskedWidget();
+          }
+
+          // cuando termina la verificación, decidimos qué pantalla mostrar
+          if (authProvider.isAuthenticated && authProvider.token != null) {
+            return const PageScreen();
+          } else {
+            return const HomeScreen();
           }
         },
       );
     } else {
       return const WelcomeScreen();
     }
+  }
+
+  void _startAuthCheck(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final authProvider = context.read<AuthenticationProvider>();
+      try {
+        await authProvider.checkAuthentication(context);
+      } catch (e) {
+        debugPrint('⚠️ Error en verificación de autenticación: $e');
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isAuthCheckComplete = true;
+          });
+        }
+      }
+    });
   }
 }
 

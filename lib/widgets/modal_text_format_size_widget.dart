@@ -325,9 +325,9 @@ class _ModalTextFormatSizeWidgetState extends State<ModalTextFormatSizeWidget> {
               items: [
                 ModelData(label: "Aclonica", value: "1"),
                 ModelData(label: "All sane", value: "2"),
-                // ModelData(label: "Erica One", value: "3"),
                 ModelData(label: "Roboto", value: "3"),
                 ModelData(label: "Ysabeau Infant", value: "4"),
+                ModelData(label: "Handwriting", value: "5"),
               ],
               selectedItem: selectedFont,
               onChanged: (ModelData? newValue) {

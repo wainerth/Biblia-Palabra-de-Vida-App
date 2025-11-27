@@ -44,41 +44,50 @@ class CustomDialog extends StatelessWidget {
         break;
     }
 
-    return AlertDialog(
-      scrollable: true,
-      title: Row(
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double dialogMaxWidth = screenWidth * 0.9 > 600 ? 600 : screenWidth * 0.9;
+
+    return Center(
+      child: ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: dialogMaxWidth),
+      child: AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24.0),
+        scrollable: true,
+        title: Row(
         children: [
           Icon(icon, color: color),
           const SizedBox(width: 8),
           Text(title, style: TextStyle(color: color)),
         ],
-      ),
-      content: Text(
+        ),
+        content: Text(
         textAlign: TextAlign.center,
         message,
         style: StylesApp(context).textStyleBody12.copyWith(color: Colors.black),
-      ),
-      actions: [
+        ),
+        actions: [
         TextButton(
           style: StylesApp(context).btnWidgetSmall,
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
-            buttonOk,
-            style: StylesApp(context).textStyleBody14,
+          buttonOk,
+          style: StylesApp(context).textStyleBody14,
           ),
         ),
         if (showAction) ...{
           SizedBox(height: 10),
           TextButton(
-            style: StylesApp(context).btnWidgetSmall,
-            onPressed: actionCallback,
-            child: Text(
-              textButton,
-              style: StylesApp(context).textStyleBody14,
-            ),
+          style: StylesApp(context).btnWidgetSmall,
+          onPressed: actionCallback,
+          child: Text(
+            textButton,
+            style: StylesApp(context).textStyleBody14,
+          ),
           ),
         }
-      ],
+        ],
+      ),
+      ),
     );
   }
 }

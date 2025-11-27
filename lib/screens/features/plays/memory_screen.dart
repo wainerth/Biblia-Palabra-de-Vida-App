@@ -31,6 +31,7 @@ class _MemoryScreenState extends State<MemoryScreen>
   bool canFlip = true;
   bool isBackgroundPlaying = true;
   bool _playWin = false;
+  bool _isDisposed = false;
   late AudioService _audioService;
 
   @override
@@ -38,13 +39,15 @@ class _MemoryScreenState extends State<MemoryScreen>
     super.initState();
     _audioService = AudioService(); // Initialize the audio service
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _loadData();
+      if (!_isDisposed) await _loadData();
     });
+
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    _isDisposed = false;
     _audioService.stopBackgroundMusic(); // Detener música al salir
     _audioService.dispose(); // Liberar recursos del audio
     WidgetsBinding.instance.removeObserver(this); // Limpiar el observer
@@ -54,10 +57,15 @@ class _MemoryScreenState extends State<MemoryScreen>
   // Manejo del ciclo de vida de la aplicación para pausar/reanudar música
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_isDisposed) return;
+
     if (state == AppLifecycleState.paused) {
       _audioService.pauseBackgroundMusic();
     } else if (state == AppLifecycleState.resumed) {
-      _audioService.playBackgroundMusic();
+      if (isBackgroundPlaying) {
+        // 🔥 Usar restore en lugar de play para evitar duplicados
+        _audioService.restoreBackgroundMusic();
+      }
     }
   }
 
@@ -90,14 +98,15 @@ class _MemoryScreenState extends State<MemoryScreen>
         ),
         actions: [
           IconButton(
-            icon: Icon( isBackgroundPlaying ?  Icons.volume_up : Icons.volume_off, color: StyleColor.white),
+            icon: Icon(isBackgroundPlaying ? Icons.volume_up : Icons.volume_off,
+                color: StyleColor.white),
             onPressed: () async {
               if (isBackgroundPlaying) {
                 _audioService.stopBackgroundMusic();
                 setState(() => isBackgroundPlaying = false);
                 await PreferencesManager().setBackgroundPlaying(false);
               } else {
-                _audioService.playBackgroundMusic();
+                _audioService.restoreBackgroundMusic();
                 await PreferencesManager().setBackgroundPlaying(true);
                 setState(() => isBackgroundPlaying = true);
               }
@@ -120,155 +129,67 @@ class _MemoryScreenState extends State<MemoryScreen>
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        GestureDetector(
-          onTap: () async {
-            setState(() {
-              difficulty = "Facil";
-              flippedCards = List<bool>.filled(lisMemory.length, false);
-              matchedCards = List<bool>.filled(lisMemory.length, false);
-            });
-            if (kDebugMode) {
-              print('DEBUG: Dificultad seleccionada: F. Iniciando precarga...');
-            }
-            await _preloadImages(); // <-- Asegúrate de que este await termine.
-            if (kDebugMode) {
-              print('DEBUG: Precarga de imágenes completada para dificultad F.');
-            }
-          },
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(12.0),
-            constraints: BoxConstraints(minHeight: 80),
-            decoration: BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(
-                  color: StyleColor.cosmicBlue,
-                  strokeAlign: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                      color: StyleColor.black.withValues(alpha: 0.25))
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(Icons.face_2_rounded),
-                Text(
-                  "Fácil",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: StyleColor.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 15,
-        ),
-        GestureDetector(
-          onTap: () async {
-            setState(() {
-              difficulty = "Medio";
-              flippedCards = List<bool>.filled(lisMemory.length, false);
-              matchedCards = List<bool>.filled(lisMemory.length, false);
-            });
-            if (kDebugMode) {
-              print('DEBUG: Dificultad seleccionada: I. Iniciando precarga...');
-            }
-            await _preloadImages(); // <-- Asegúrate de que este await termine.
-            if (kDebugMode) {
-              print('DEBUG: Precarga de imágenes completada para dificultad I.');
-            }
-          },
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(12.0),
-            constraints: BoxConstraints(minHeight: 80),
-            decoration: BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(
-                  color: StyleColor.cosmicBlue,
-                  strokeAlign: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                      color: StyleColor.black.withValues(alpha: 0.25))
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(Icons.face_2_rounded),
-                Text(
-                  "Medio",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: StyleColor.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 15,
-        ),
-        GestureDetector(
-          onTap: () async {
-            setState(() {
-              difficulty = "Difícil";
-              flippedCards = List<bool>.filled(lisMemory.length, false);
-              matchedCards = List<bool>.filled(lisMemory.length, false);
-            });
-            if (kDebugMode) {
-              print('DEBUG: Dificultad seleccionada: D. Iniciando precarga...');
-            }
-            await _preloadImages(); // <-- Asegúrate de que este await termine.
-            if (kDebugMode) {
-              print('DEBUG: Precarga de imágenes completada para dificultad D.');
-            }
-          },
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(12.0),
-            constraints: BoxConstraints(minHeight: 80),
-            decoration: BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(
-                  color: StyleColor.cosmicBlue,
-                  strokeAlign: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                      color: StyleColor.black.withValues(alpha: 0.25))
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(Icons.face_2_rounded),
-                Text(
-                  "Difícil",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: StyleColor.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 15,
-        ),
+        _buildDifficultyButton("Fácil", Icons.face_2_rounded),
+        const SizedBox(height: 15),
+        _buildDifficultyButton("Medio", Icons.face_2_rounded),
+        const SizedBox(height: 15),
+        _buildDifficultyButton("Difícil", Icons.face_2_rounded),
+        const SizedBox(height: 15),
       ],
     );
+  }
+
+  Widget _buildDifficultyButton(String level, IconData icon) {
+    return GestureDetector(
+      onTap: () => _selectDifficulty(level),
+      child: Container(
+        padding: EdgeInsets.all(8.0),
+        margin: EdgeInsets.all(12.0),
+        constraints: BoxConstraints(minHeight: 80),
+        decoration: BoxDecoration(
+            color: StyleColor.white,
+            border: Border.all(
+              color: StyleColor.cosmicBlue,
+              strokeAlign: 0.5,
+            ),
+            borderRadius: BorderRadius.circular(8.0),
+            boxShadow: [
+              BoxShadow(
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                  color: StyleColor.black.withValues(alpha: 0.25))
+            ]),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Icon(icon),
+            Text(
+              level,
+              style: StylesApp(context)
+                  .textStyleBody20
+                  .copyWith(color: StyleColor.black),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDifficulty(String level) async {
+    if (_isDisposed) return;
+
+    if (kDebugMode) {
+      print('DEBUG: Dificultad seleccionada: $level  Iniciando precarga...');
+    }
+    await _preloadImages(); // <-- Asegúrate de que este await termine.
+    setState(() {
+      difficulty = level;
+      flippedCards = List<bool>.filled(lisMemory.length, false);
+      matchedCards = List<bool>.filled(lisMemory.length, false);
+    });
+    if (kDebugMode) {
+      print('DEBUG: Precarga de imágenes completada para dificultad $level.');
+    }
   }
 
   Widget _buildPlayScene() {
@@ -317,7 +238,7 @@ class _MemoryScreenState extends State<MemoryScreen>
             win: _playWin,
             initialCount: getTimeLevel(difficulty),
             onFinished: () {
-              if (!_playWin) {
+              if (!_playWin && !_isDisposed) {
                 _audioService.playTimeUpSound();
                 _showTimeUpDialog();
               }
@@ -330,6 +251,8 @@ class _MemoryScreenState extends State<MemoryScreen>
   }
 
   void _showDialogFinallyPlay() async {
+    if (_isDisposed) return;
+
     LoadingService().showLoading(context);
 
     try {
@@ -338,111 +261,116 @@ class _MemoryScreenState extends State<MemoryScreen>
       final responseSaveResult =
           await saveResultPlay(userData!.userId, difficulty, 'memoria');
       if (responseSaveResult.error != null) {
+        if (_isDisposed) return;
         LoadingService().hideLoading();
-        await showCustomDialogWithAction(context,
-            message: responseSaveResult.error!,
-            dialogType: DialogTypeAction.error,
-            buttonOk: "Volver",
-            actionCallbackOk: () {
-              Navigator.pop(context);
-            },
-            textButton: "Reintentar",
-            actionCallback: () {
-              _showDialogFinallyPlay();
-            });
+        await _showErrorDialog(responseSaveResult.error!);
         return;
       }
 
       final responseResult = await getAllResultGame(userData.userId, 'memoria');
       if (responseResult.error != null) {
+        if (_isDisposed) return;
+
         LoadingService().hideLoading();
-        await showCustomDialogWithAction(context,
-            message: responseSaveResult.error!,
-            dialogType: DialogTypeAction.error,
-            buttonOk: "Volver",
-            actionCallbackOk: () {
-              Navigator.pop(context);
-            },
-            textButton: "Reintentar",
-            actionCallback: () {
-              _showDialogFinallyPlay();
-            });
+        await _showErrorDialog(responseSaveResult.error!);
         return;
       }
+
+      if (_isDisposed) return;
+
       LoadingService().hideLoading();
 
       final ResultGameModel infoResult =
           ResultGameModel.fromJson(responseResult.data);
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(
-            textAlign: TextAlign.center,
-            "${infoResult.message.resultTitle}",
-            style: StylesApp(context)
-                .textStyleBody18
-                .copyWith(color: StyleColor.black),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                textAlign: TextAlign.center,
-                "${infoResult.message.resultDescription}",
-                style: StylesApp(context)
-                    .textStyleBody16
-                    .copyWith(color: StyleColor.black),
-              ),
-              Text(
-                textAlign: TextAlign.center,
-                "Dificultad: ${infoResult.message.difficulty}",
-                style: StylesApp(context)
-                    .textStyleBody12
-                    .copyWith(color: StyleColor.grayMedium),
-              ),
-              Text(
-                textAlign: TextAlign.center,
-                "Puntaje obtenido:  ${infoResult.score}",
-                style: StylesApp(context)
-                    .textStyleBody12
-                    .copyWith(color: StyleColor.grayMedium),
-              )
-            ],
-          ),
-          actions: [
-            ButtonThemeWidget(
-              text: "Jugar de nuevo",
-              buttonStyle: StylesApp(context).btnWidgetSmall,
-              onPressed: () {
-                Navigator.pop(context);
-                setState(() {
-                  difficulty = '';
-                });
-                _audioService.playBackgroundMusic();
-              },
-            )
-          ],
-        ),
-      );
+      await _showSuccessDialog(infoResult);
     } catch (e) {
+      if (_isDisposed) return;
       LoadingService().hideLoading();
-      await showCustomDialogWithAction(context,
-          message: e.toString(),
-          dialogType: DialogTypeAction.error,
-          buttonOk: "Volver",
-          actionCallbackOk: () {
-            Navigator.pop(context);
-          },
-          textButton: "Reintentar",
-          actionCallback: () {
-            _showDialogFinallyPlay();
-          });
+      await _showErrorDialog(e.toString());
     } finally {
       LoadingService().hideLoading();
     }
   }
 
+  Future<void> _showErrorDialog(String message) async {
+    await showCustomDialogWithAction(
+      context,
+      message: message,
+      dialogType: DialogTypeAction.error,
+      buttonOk: "Volver",
+      actionCallbackOk: () {
+        if (!_isDisposed) Navigator.pop(context);
+      },
+      textButton: "Reintentar",
+      actionCallback: () {
+        if (!_isDisposed) _showDialogFinallyPlay();
+      },
+    );
+  }
+
+  Future<void> _showSuccessDialog(ResultGameModel infoResult) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(
+          textAlign: TextAlign.center,
+          "${infoResult.message.resultTitle}",
+          style: StylesApp(context)
+              .textStyleBody18
+              .copyWith(color: StyleColor.black),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              textAlign: TextAlign.center,
+              "${infoResult.message.resultDescription}",
+              style: StylesApp(context)
+                  .textStyleBody16
+                  .copyWith(color: StyleColor.black),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              textAlign: TextAlign.center,
+              "Dificultad: ${infoResult.message.difficulty}",
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: StyleColor.grayMedium),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              textAlign: TextAlign.center,
+              "Puntaje obtenido: ${infoResult.score}",
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: StyleColor.grayMedium),
+            ),
+          ],
+        ),
+        actions: [
+          ButtonThemeWidget(
+            text: "Jugar de nuevo",
+            buttonStyle: StylesApp(context).btnWidgetSmall,
+            onPressed: () {
+              Navigator.pop(context);
+              if (!_isDisposed) {
+                setState(() {
+                  difficulty = '';
+                  _playWin = false;
+                });
+                _audioService.restoreBackgroundMusic();
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showTimeUpDialog() {
+    if (_isDisposed) return;
+
     setState(() {
       _audioService.stopBackgroundMusic();
     });
@@ -463,7 +391,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                 matchedCards = [];
                 firstSelectedIndex = null;
               });
-              _audioService.playBackgroundMusic();
+              _audioService.restoreBackgroundMusic();
               _audioService.stopTimeUpSound();
             },
             child: const Text('Jugar de nuevo'),
@@ -480,59 +408,69 @@ class _MemoryScreenState extends State<MemoryScreen>
   }
 
   Future<void> _loadData() async {
+    if (_isDisposed) return;
+
     final musicBackground = await PreferencesManager().getIsBackgroundPlaying();
+    setState(() => isBackgroundPlaying = musicBackground);
+
     if (musicBackground == true) {
       _audioService.playBackgroundMusic();
     } else {
       _audioService.stopBackgroundMusic();
     }
 
-    setState(() => isBackgroundPlaying = musicBackground);
-
     LoadingService().showLoading(context);
     try {
       final memoryResponse = await getMemory();
       if (memoryResponse.error != null) {
+        if (_isDisposed) return;
         LoadingService().hideLoading();
-        await showCustomDialogWithAction(context,
-            message: memoryResponse.error!,
-            dialogType: DialogTypeAction.error,
-            textButton: "Reintentar",
-            actionCallback: () => _loadData(),
-            buttonOk: "Volver",
-            actionCallbackOk: () => {
-                  Navigator.pushNamed(context, "/layoutPage"),
-                  _audioService.stopBackgroundMusic(),
-                });
+        await _showLoadErrorDialog(memoryResponse.error!);
         return;
       }
+
+      if (_isDisposed) return;
 
       setState(() {
         lisMemory = memoryResponse.data
             .map<MemoryModel>((memory) => MemoryModel.fromJson(memory))
             .toList();
-        flippedCards = List<bool>.filled(lisMemory.length, false);
-        matchedCards = List<bool>.filled(lisMemory.length, false);
       });
-      LoadingService().hideLoading();
     } catch (e) {
-      LoadingService().hideLoading();
-      await showCustomDialogWithAction(context,
-          message: e.toString(),
-          dialogType: DialogTypeAction.error,
-          buttonOk: "Reintentar",
-          actionCallbackOk: () => _loadData());
+      if (_isDisposed) return;
+      await _showLoadErrorDialog(e.toString());
     } finally {
-      LoadingService().hideLoading();
+      if (!_isDisposed) LoadingService().hideLoading();
     }
   }
 
+  Future<void> _showLoadErrorDialog(String message) async {
+    await showCustomDialogWithAction(
+      context,
+      message: message,
+      dialogType: DialogTypeAction.error,
+      textButton: "Reintentar",
+      actionCallback: () => _loadData(),
+      buttonOk: "Volver",
+      actionCallbackOk: () {
+        Navigator.pushNamed(context, "/layoutPage");
+        _audioService.stopBackgroundMusic();
+      },
+    );
+  }
+
   void _handleCardTap(int index) async {
-    if (!canFlip || flippedCards[index] || matchedCards[index]) return;
+    if (!canFlip || flippedCards[index] || matchedCards[index] || _isDisposed)
+      return;
+
     await _audioService.playCardTapSound();
-    setState(() {
-      flippedCards[index] = true;
+    // 🔥 Verificar música después de un breve delay
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!_isDisposed) {
+        _audioService.restoreBackgroundMusic();
+      }
     });
+    setState(() => flippedCards[index] = true);
 
     if (firstSelectedIndex == null) {
       // Primera carta seleccionada
@@ -541,11 +479,12 @@ class _MemoryScreenState extends State<MemoryScreen>
       // Segunda carta seleccionada
       canFlip = false;
       final secondIndex = index;
-
       // Verificar si hay coincidencia
       if (lisMemory[firstSelectedIndex!].pair == lisMemory[secondIndex].pair) {
         // Coincidencia encontrada
         await _audioService.playMatchSound(); // Sonido de coincidencia
+        if (_isDisposed) return;
+
         setState(() {
           matchedCards[firstSelectedIndex!] = true;
           matchedCards[secondIndex] = true;
@@ -562,50 +501,60 @@ class _MemoryScreenState extends State<MemoryScreen>
           });
           await _audioService.stopBackgroundMusic();
           await _audioService.playWinSound();
-          _showDialogFinallyPlay();
+          if (!_isDisposed) _showDialogFinallyPlay();
         }
       } else {
         // No hay coincidencia, voltear de nuevo después de un retraso
         await _audioService.playNoMatchSound(); // Sonido de no coincidencia
+        if (_isDisposed) return;
+
         Future.delayed(const Duration(milliseconds: 1000), () {
-          setState(() {
-            flippedCards[firstSelectedIndex!] = false;
-            flippedCards[secondIndex] = false;
-            firstSelectedIndex = null;
-            canFlip = true;
-          });
+          if (!_isDisposed && mounted && firstSelectedIndex != null) {
+            setState(() {
+              flippedCards[firstSelectedIndex!] = false;
+              flippedCards[secondIndex] = false;
+              firstSelectedIndex = null;
+              canFlip = true;
+            });
+          }
         });
       }
     }
   }
 
   int getTimeLevel(String difficulty) {
-    if (difficulty == 'Facil') {
-      return 90;
-    } else if (difficulty == 'Medio') {
-      return 60;
-    } else {
-      return 40;
+    switch (difficulty) {
+      case 'Medio':
+        return 60;
+      case 'Difícil':
+        return 40;
+      default:
+        return 90;
     }
   }
 
   Future<void> _preloadImages() async {
+    if (_isDisposed) return;
+
     // Muestra un indicador de carga mientras precarga las imágenes
     LoadingService().showLoading(context);
-
-    // Iterar sobre todas las MemoryModel y precarga sus imágenes
-    final List<Future<void>> precacheFutures = [];
-    for (final memoryItem in lisMemory) {
-      final imageUrl = "${GraphQLConfig.urlServidor}${memoryItem.img.urlImg}";
-      // print('DEBUG: Preloading image: $imageUrl');
-      precacheFutures.add(precacheImage(
-        NetworkImage(imageUrl),
-        context,
-      ));
+    try {
+      // Iterar sobre todas las MemoryModel y precarga sus imágenes
+      final List<Future<void>> precacheFutures = [];
+      for (final memoryItem in lisMemory) {
+        final imageUrl = "${GraphQLConfig.urlServidor}${memoryItem.img.urlImg}";
+        precacheFutures.add(precacheImage(
+          NetworkImage(imageUrl),
+          context,
+        ));
+      }
+      await Future.wait(precacheFutures);
+    } catch (e) {
+      LoadingService().hideLoading();
+      if (kDebugMode) print('Error en precarga $e');
+    } finally {
+      if (!_isDisposed) LoadingService().hideLoading();
     }
-
-    await Future.wait(precacheFutures);
-    LoadingService().hideLoading();
   }
 }
 
@@ -627,17 +576,19 @@ class _CountDownWidgetState extends State<CountDownWidget> {
   late int _currentCount;
   Timer? _timer;
   late AudioService _audioService;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
     _currentCount = widget.initialCount;
-    _startCountDown();
     _audioService = AudioService(); // Initialize the audio service
+    _startCountDown();
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _timer?.cancel();
     _audioService.dispose(); // Liberar recursos del audio
     super.dispose();
@@ -654,15 +605,26 @@ class _CountDownWidgetState extends State<CountDownWidget> {
 
   void _startCountDown() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_isDisposed) {
+        timer.cancel();
+        return;
+      }
+
+      if (widget.win) {
+        timer.cancel();
+        _audioService.stopCounterClock();
+        return;
+      }
+
       setState(() {
         if (_currentCount > 0) {
-          if (_currentCount <= 10 && !widget.win) {
+          if (_currentCount <= 10) {
             _audioService.playCounterClock();
           }
           _currentCount--;
         } else {
           _audioService.stopCounterClock();
-          _timer?.cancel();
+          timer.cancel();
           if (widget.onFinished != null) {
             widget.onFinished!();
           }

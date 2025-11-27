@@ -61,232 +61,246 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          color: widget.currentTheme.backgroundColor,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppBarHeaderWidget(
-              backColor: StyleColor.turquoise,
-              buttonColor: StyleColor.orange,
-              textButtonColor: Colors.white,
-              title: 'Versículos Favoritos',
-              styleText: StylesApp(context).textStyleBody7,
-              onRoute: () {
-                Navigator.pop(context);
-              },
-            ),
-            Expanded(
-              child: loading
-                  ? LoadingIndicator()
-                  : _favoriteVerses.isEmpty
-                      ? SizedBox(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: Text(
-                                  textAlign: TextAlign.center,
-                                  "No hay Versículos agregados a favorito...",
-                                  style: StylesApp(context)
-                                      .textStyleBody18
-                                      .copyWith(
-                                          color: widget.currentTheme.textColor),
+      child: Scaffold(
+        // appBar: AppBar(),
+        body: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+            color: widget.currentTheme.backgroundColor,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppBarHeaderWidget(
+                backColor: StyleColor.turquoise,
+                buttonColor: StyleColor.orange,
+                textButtonColor: Colors.white,
+                title: 'Versículos Favoritos',
+                styleText: StylesApp(context).textStyleBody7,
+                onRoute: () {
+                  Navigator.pop(context);
+                },
+              ),
+              Expanded(
+                child: loading
+                    ? LoadingIndicator()
+                    : _favoriteVerses.isEmpty
+                        ? SizedBox(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Center(
+                                  child: Text(
+                                    textAlign: TextAlign.center,
+                                    "No hay Versículos agregados a favorito...",
+                                    style: StylesApp(context)
+                                        .textStyleBody18
+                                        .copyWith(
+                                            color:
+                                                widget.currentTheme.textColor),
+                                  ),
                                 ),
-                              ),
-                              Center(
-                                child: Text(
-                                  "Para agregar un versículo, presione sobre el \nnúmero del versículo",
-                                  style: StylesApp(context)
-                                      .textStyleBody10
-                                      .copyWith(
-                                          color: widget.currentTheme.textColor),
+                                Center(
+                                  child: Text(
+                                    "Para agregar un versículo, presione sobre el \nnúmero del versículo",
+                                    style: StylesApp(context)
+                                        .textStyleBody10
+                                        .copyWith(
+                                            color:
+                                                widget.currentTheme.textColor),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _favoriteVerses.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Container(
+                                margin: EdgeInsets.only(
+                                    top: 6.0,
+                                    left: 4.0,
+                                    right: 4.0,
+                                    bottom: 6.0),
+                                padding: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  color: widget.currentTheme.backgroundColor,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: StyleColor.black
+                                          .withValues(alpha: .25),
+                                      spreadRadius: 2.0,
+                                      offset: Offset(0, 2.0),
+                                    )
+                                  ],
                                 ),
-                              )
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: _favoriteVerses.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Container(
-                              margin: EdgeInsets.only(
-                                  top: 6.0, left: 4.0, right: 4.0, bottom: 6.0),
-                              padding: EdgeInsets.all(8.0),
-                              decoration: BoxDecoration(
-                                color: widget.currentTheme.backgroundColor,
-                                borderRadius: BorderRadius.circular(8.0),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color:
-                                        StyleColor.black.withValues(alpha: .25),
-                                    spreadRadius: 2.0,
-                                    offset: Offset(0, 2.0),
-                                  )
-                                ],
-                              ),
-                              child: Stack(
-                                children: [
-                                  Positioned(
-                                    top: -15,
-                                    right: 0,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          padding: EdgeInsets.zero,
-                                          iconSize: 20.0,
-                                          onPressed: () => copyToClipboard(
-                                            context,
-                                            CopyModelVerse(
-                                              book: Book(
+                                child: Stack(
+                                  children: [
+                                    Positioned(
+                                      top: -15,
+                                      right: 0,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            iconSize: 20.0,
+                                            onPressed: () => copyToClipboard(
+                                              context,
+                                              CopyModelVerse(
+                                                book: Book(
+                                                    modernName:
+                                                        _favoriteVerses[index]
+                                                            .book
+                                                            .modernName),
+                                                chapter: ChapterModel(
+                                                  chapter:
+                                                      _favoriteVerses[index]
+                                                          .chapter
+                                                          .chapter,
+                                                ),
+                                                verse: VerseModel(
+                                                  verse: _favoriteVerses[index]
+                                                      .verse
+                                                      .verse,
+                                                  text: _favoriteVerses[index]
+                                                      .verse
+                                                      .text,
+                                                ),
+                                              ),
+                                            ),
+                                            icon: Icon(
+                                              Icons.file_copy_rounded,
+                                              color: widget
+                                                  .currentTheme.buttonColor,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            iconSize: 20.0,
+                                            onPressed: () => shareVerse(
+                                              context,
+                                              CopyModelVerse(
+                                                book: Book(
                                                   modernName:
                                                       _favoriteVerses[index]
                                                           .book
-                                                          .modernName),
-                                              chapter: ChapterModel(
-                                                chapter: _favoriteVerses[index]
-                                                    .chapter
-                                                    .chapter,
-                                              ),
-                                              verse: VerseModel(
-                                                verse: _favoriteVerses[index]
-                                                    .verse
-                                                    .verse,
-                                                text: _favoriteVerses[index]
-                                                    .verse
-                                                    .text,
-                                              ),
-                                            ),
-                                          ),
-                                          icon: Icon(
-                                            Icons.file_copy_rounded,
-                                            color:
-                                                widget.currentTheme.buttonColor,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          padding: EdgeInsets.zero,
-                                          iconSize: 20.0,
-                                          onPressed: () => shareVerse(
-                                            context,
-                                            CopyModelVerse(
-                                              book: Book(
-                                                modernName:
-                                                    _favoriteVerses[index]
-                                                        .book
-                                                        .modernName,
-                                              ),
-                                              chapter: ChapterModel(
-                                                chapter: _favoriteVerses[index]
-                                                    .chapter
-                                                    .chapter,
-                                              ),
-                                              verse: VerseModel(
-                                                verse: _favoriteVerses[index]
-                                                    .verse
-                                                    .verse,
-                                                text: _favoriteVerses[index]
-                                                    .verse
-                                                    .text,
+                                                          .modernName,
+                                                ),
+                                                chapter: ChapterModel(
+                                                  chapter:
+                                                      _favoriteVerses[index]
+                                                          .chapter
+                                                          .chapter,
+                                                ),
+                                                verse: VerseModel(
+                                                  verse: _favoriteVerses[index]
+                                                      .verse
+                                                      .verse,
+                                                  text: _favoriteVerses[index]
+                                                      .verse
+                                                      .text,
+                                                ),
                                               ),
                                             ),
+                                            icon: Icon(
+                                              Icons.share_rounded,
+                                              color: StyleColor.turquoise,
+                                            ),
                                           ),
-                                          icon: Icon(
-                                            Icons.share_rounded,
-                                            color: StyleColor.turquoise,
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            iconSize: 20.0,
+                                            onPressed: () => deleteFavorite(
+                                                _favoriteVerses[index]
+                                                    .verse
+                                                    .id),
+                                            icon: Icon(
+                                              Icons.delete_forever_outlined,
+                                              color: StyleColor.turquoise,
+                                            ),
                                           ),
-                                        ),
-                                        IconButton(
-                                          padding: EdgeInsets.zero,
-                                          iconSize: 20.0,
-                                          onPressed: () => deleteFavorite(
-                                              _favoriteVerses[index].verse.id),
-                                          icon: Icon(
-                                            Icons.delete_forever_outlined,
-                                            color: StyleColor.turquoise,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      SizedBox(
-                                        height: 22,
+                                        ],
                                       ),
-                                      Center(
-                                        child: Text.rich(TextSpan(children: [
-                                          TextSpan(
-                                            text: _favoriteVerses[index]
-                                                .book
-                                                .modernName,
+                                    ),
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          height: 22,
+                                        ),
+                                        Center(
+                                          child: Text.rich(TextSpan(children: [
+                                            TextSpan(
+                                              text: _favoriteVerses[index]
+                                                  .book
+                                                  .modernName,
+                                              style: StylesApp(context)
+                                                  .textStyleBody16
+                                                  .copyWith(
+                                                      color:
+                                                          StyleColor.turquoise),
+                                            ),
+                                            TextSpan(
+                                              text:
+                                                  "  ${_favoriteVerses[index].chapter.chapter}:${_favoriteVerses[index].verse.verse}",
+                                              style: StylesApp(context)
+                                                  .textStyleBody14
+                                                  .copyWith(
+                                                      color: widget.currentTheme
+                                                          .textColor),
+                                            )
+                                          ])),
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Center(
+                                          child: Text(
+                                            textAlign: TextAlign.center,
+                                            '"${_favoriteVerses[index].verse.text}"',
                                             style: StylesApp(context)
-                                                .textStyleBody16
-                                                .copyWith(
-                                                    color:
-                                                        StyleColor.turquoise),
-                                          ),
-                                          TextSpan(
-                                            text:
-                                                "  ${_favoriteVerses[index].chapter.chapter}:${_favoriteVerses[index].verse.verse}",
-                                            style: StylesApp(context)
-                                                .textStyleBody14
+                                                .textStyleBody12
                                                 .copyWith(
                                                     color: widget.currentTheme
                                                         .textColor),
-                                          )
-                                        ])),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Center(
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          '"${_favoriteVerses[index].verse.text}"',
-                                          style: StylesApp(context)
-                                              .textStyleBody12
-                                              .copyWith(
-                                                  color: widget
-                                                      .currentTheme.textColor),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-            ),
-            CustomPagination(
-              pagination: PaginationInfo(
-                  currentPage: pagination.currentPage,
-                  itemsPerPage: pagination.itemsPerPage,
-                  totalPages: pagination.totalPages,
-                  hasPreviousPage: pagination.hasPreviousPage,
-                  hasNextPage: pagination.hasNextPage,
-                  totalItems: pagination.totalItems),
-              itemPerPageValue: itemPerPageValue,
-              currentTheme: widget.currentTheme,
-              onPageChanged: (newPage, newPerPage) async {
-                setState(() {
-                  itemPerPageValue = newPerPage;
-                });
-                await _loadData(newPage, newPerPage);
-              },
-              itemsPerPage: itemsPerPage, // Opcional: personaliza los valores
-            ),
-          ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+              ),
+              CustomPagination(
+                pagination: PaginationInfo(
+                    currentPage: pagination.currentPage,
+                    itemsPerPage: pagination.itemsPerPage,
+                    totalPages: pagination.totalPages,
+                    hasPreviousPage: pagination.hasPreviousPage,
+                    hasNextPage: pagination.hasNextPage,
+                    totalItems: pagination.totalItems),
+                itemPerPageValue: itemPerPageValue,
+                currentTheme: widget.currentTheme,
+                onPageChanged: (newPage, newPerPage) async {
+                  setState(() {
+                    itemPerPageValue = newPerPage;
+                  });
+                  await _loadData(newPage, newPerPage);
+                },
+                itemsPerPage: itemsPerPage, // Opcional: personaliza los valores
+              ),
+            ],
+          ),
         ),
       ),
     );

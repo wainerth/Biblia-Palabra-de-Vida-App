@@ -88,3 +88,5 @@ export 'package:biblia_palabra_de_vida_app/models/response_reference_biblical_mo
 export 'package:biblia_palabra_de_vida_app/models/copy_model_verse.dart';
 export 'package:biblia_palabra_de_vida_app/models/currency_model.dart';
 export 'package:biblia_palabra_de_vida_app/models/delivery_option.dart';
+
+export 'package:biblia_palabra_de_vida_app/models/auth_check_result.dart';

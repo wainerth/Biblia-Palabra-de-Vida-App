@@ -1,6 +1,8 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DoubtScreen extends StatelessWidget {
   const DoubtScreen({super.key});
@@ -135,13 +137,39 @@ class DoubtScreen extends StatelessWidget {
                 child: const Divider(color: Colors.white, thickness: 1),
               ),
               const SizedBox(height: 16),
-              Text(
-                '¿No encontraste tu respuesta? Escríbenos a devidapalabra25@gmail',
-                textAlign: TextAlign.center,
-                style: StylesApp(context).textStyleBody14.copyWith(
-                      color: Colors.white70,
-                      fontFamily: 'Montserrat',
-                    ),
+              GestureDetector(
+                onTap: () async {
+                  final Uri emailLaunchUri = Uri(
+                    scheme: 'mailto',
+                    path: GraphQLConfig.emailContact,
+                    queryParameters: {
+                      'subject': 'Consulta - Biblia Palabra de Vida',
+                      'body': 'Hola, tengo una consulta sobre la aplicación:',
+                    },
+                  );
+
+                  if (await canLaunchUrl(emailLaunchUri)) {
+                    await launchUrl(emailLaunchUri);
+                  } else {
+                    // Si no se puede abrir el cliente de correo, mostrar un snackbar o diálogo
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text('No se pudo abrir la aplicación de correo'),
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  '¿No encontraste tu respuesta? Escríbenos a ${GraphQLConfig.emailContact}',
+                  textAlign: TextAlign.center,
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        color: Colors.white70,
+                        fontFamily: 'Montserrat',
+                        decoration: TextDecoration
+                            .underline, // Opcional: para indicar que es clickeable
+                      ),
+                ),
               ),
               const SizedBox(height: 20),
               Text(

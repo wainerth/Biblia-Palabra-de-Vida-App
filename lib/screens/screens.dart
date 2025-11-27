@@ -56,6 +56,8 @@ export 'package:biblia_palabra_de_vida_app/screens/features/news/news_screen.dar
 export 'package:biblia_palabra_de_vida_app/screens/features/doubt/doubt_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/contact/contact_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/offerings/offerings_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/offerings/stripe_payment_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/offerings/paypal_payment_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/prayer/prayer_screen.dart';
 
 //Layout

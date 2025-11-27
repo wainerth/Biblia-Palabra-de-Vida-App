@@ -34,7 +34,7 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
               style: StylesApp(context).textStyleBody12,
               children: [
                 TextSpan(text: "Exp: "),
-                TextSpan(text: "${userData!.expTotalUser}"),
+                TextSpan(text: "${userData?.expTotalUser}"),
               ],
             ),
           ),
@@ -43,7 +43,7 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
               style: StylesApp(context).textStyleBody12,
               children: [
                 TextSpan(text: "Racha: "),
-                TextSpan(text: "${userData.streakDaysCount} días"),
+                TextSpan(text: "${userData?.streakDaysCount} días"),
               ],
             ),
           ),

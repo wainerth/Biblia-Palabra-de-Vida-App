@@ -19,7 +19,7 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
     required this.hintText,
     this.border = true,
     this.contentPadding =
-        const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+        const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
   });
 
   @override

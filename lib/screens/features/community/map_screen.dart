@@ -128,33 +128,6 @@ class _MapScreenState extends State<MapScreen>
         );
       });
     }
-    // final int lastUnlockedIndex = gruposDeNiveles.lastIndexWhere(
-    //   (grupo) => grupo.any((level) => level.unLockLevel == true),
-    // );
-    // if (lastUnlockedIndex != -1) {
-    //   int? lastLockedId = gruposDeNiveles[lastUnlockedIndex]
-    //       .lastWhere((level) => level.unLockLevel == true,
-    //           orElse: () => Level(
-    //                 id: '',
-    //                 name: '',
-    //                 unLockLevel: false,
-    //                 color: '',
-    //                 section: Section(sectionName: ''),
-    //                 img: Img(urlImg: ''),
-    //                 score: 0,
-    //                 levelScore: 0,
-    //               ))
-    //       .levelNumber;
-
-    //   scrollController.animateTo(
-    //     lastLockedId *
-    //         StylesApp(context)
-    //             .sizeContainerLevel
-    //             .height, //50.0, // Ajusta según el tamaño del nivel
-    //     duration: Duration(seconds: 2),
-    //     curve: Curves.easeInOut,
-    //   );
-    // }
   }
 
   Future<void> _generateData(BuildContext context) async {
@@ -180,14 +153,7 @@ class _MapScreenState extends State<MapScreen>
         if (courseResponse.error != null) {
           errorMessage = courseResponse.error;
           return;
-        } else {
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(
-          //       backgroundColor: Colors.green,
-          //       content: Text(
-          //           'Datos del curso cargados correctamente id del curso ${courseResponse.data['id']}')),
-          // );
-        }
+        } 
         course = CourseDetail.fromJson(courseResponse.data);
 
         // obtenemos sección
@@ -195,14 +161,7 @@ class _MapScreenState extends State<MapScreen>
         if (stageResponse.error != null) {
           errorMessage = stageResponse.error;
           return;
-        } else {
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(
-          //       backgroundColor: Colors.green,
-          //       content: Text(
-          //           'Datos de la sección cargados correctamente id de sección ${stageResponse.data['id']}')),
-          // );
-        }
+        } 
         stage = Stage.fromJson(stageResponse.data);
 
         // obtenemos los niveles
@@ -211,11 +170,6 @@ class _MapScreenState extends State<MapScreen>
           errorMessage = result.error;
           return;
         } else {
-          //  ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(
-          //       backgroundColor: Colors.green,
-          //       content: Text('Datos de los niveles cargados correctamente')),
-          // );
           setState(() {
             levels = result.data
                 .map((level) => Level.fromJson(removeTypename(level)))
@@ -726,7 +680,7 @@ class _MapScreenState extends State<MapScreen>
           builder: (context, isVisible, child) {
             return AnimatedContainer(
               duration: Duration(milliseconds: 300),
-              height: isVisible ? kBottomNavigationBarHeight : 0,
+              height: isVisible ? kBottomNavigationBarHeight +25 : 0,
               curve: Curves.easeInOut,
               child: Wrap(children: [
                 CustomBottomNavigationBarWidget(

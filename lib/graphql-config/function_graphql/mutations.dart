@@ -93,6 +93,7 @@ Future<ResponseData> loginGoogle() async {
 
   if (Platform.isAndroid) {
     googleSignIn = GoogleSignIn(
+      // clientId: GraphQLConfig.serverClientId,
       scopes: [
         "email",
         "profile",
@@ -419,7 +420,7 @@ Future<ResponseData> forgotPassword(email) async {
 
 Future verifyPinPassword(email, code) async {
   final GraphQLClient client = createClient();
-  operationName = 'verifyPinForPassword';
+  operationName = 'VerifyPinForPassword';
   final MutationOptions mutateGql = MutationOptions(
       operationName: operationName,
       document: gql(r'''
@@ -844,7 +845,7 @@ Future<ResponseData> removePreachFavorite(
 
 // Mutation Create HightLighters
 
-Future<ResponseData> crateHighLighters(List<HighlightRangeModel> input,
+Future<ResponseData> createHighLighters(List<HighlightRangeModel> input,
     String userId, int bibleVersion, String chapterId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
@@ -1317,12 +1318,14 @@ Future<ResponseData> sendPrayerRequest(RequestPrayerModel prayer) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
-
-  final multipartFile = await MultipartFile.fromPath(
-    'audio',
-    prayer.audio.path,
-    contentType: MediaType('audio', 'aac'),
-  );
+  MultipartFile? multipartFile;
+  if (prayer.audio != null) {
+    multipartFile = await MultipartFile.fromPath(
+      'audio',
+      prayer.audio!.path,
+      contentType: MediaType('audio', 'aac'),
+    );
+  }
   operationName = 'CreateRequestPrayer';
   MutationOptions mutateGql = MutationOptions(
     operationName: operationName,
@@ -1679,5 +1682,139 @@ Future<ResponseData> deleteDevice(String userId, String deviceId) async {
         data: null, error: 'Delete User Device Timeout de conexión $e');
   } catch (e) {
     return handleGenericError(e, operationName);
+  }
+}
+
+/// Mutation para Stripe
+///
+Future<ResponseData> createStripePaymentIntent({
+  required double amount,
+  required String donorName,
+  required String donorEmail,
+  String? donorPhone,
+  String currency = 'USD',
+  String? project,
+  String? notes,
+}) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+  final MutationOptions options = MutationOptions(
+    operationName: 'CreateStripePaymentIntent',
+    document: gql(r'''
+        mutation CreateStripePaymentIntent($input: DonationInput!) {
+      createStripePaymentIntent(input: $input) {
+        clientSecret
+        paymentIntentId
+        donationId
+      }
+    }
+        '''),
+    variables: {
+      'input': {
+        'amount': amount,
+        'donorName': donorName,
+        'donorEmail': donorEmail,
+        'donorPhone': donorPhone,
+        'currency': currency,
+        'project': project,
+        'notes': notes,
+      },
+    },
+  );
+  try {
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Create Stripe Payment Intent: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['deleteUserDevice'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Create Stripe Payment Intent failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['createStripePaymentIntent'],
+      error: null,
+    );
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<ResponseData> confirmPaymentWithBackend({
+  required String paymentIntentId,
+  required String donationId,
+}) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+  final MutationOptions options = MutationOptions(
+    document: gql(r'''
+        mutation ConfirmStripePayment($paymentIntentId: String!,$donationId: ID!) {
+              confirmStripePayment(paymentIntentId: $paymentIntentId, donationId: $donationId) {
+                success
+                status
+                donation {
+                  id
+                  paymentStatus
+                }
+              }
+            }
+      '''),
+    variables: {
+      'paymentIntentId': paymentIntentId,
+      'donationId': donationId,
+    },
+  );
+
+  try {
+    final QueryResult result = await client.mutate(options);
+
+     if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
+    if (result.hasException) {
+      if (kDebugMode) {
+        return ResponseData.fromQueryResult(result);
+      } else {
+        return ResponseData(
+          data: null,
+          error:
+              'Confirm Stripe Payment: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
+        );
+      }
+    }
+
+    final data = result.data;
+    if (data == null || data['deleteUserDevice'] == null) {
+      return ResponseData(
+        data: null,
+        error: 'Confirm Stripe Payment failed: No data returned',
+      );
+    }
+
+    return ResponseData(
+      data: data['confirmStripePayment'],
+      error: null,
+    );
+
+  } catch (e) {
+    rethrow;
   }
 }

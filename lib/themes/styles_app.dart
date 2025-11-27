@@ -307,9 +307,9 @@ class StylesApp {
 
   double get fontSizeBtn {
     if (screenWidth <= SizeScreensApp().sm) {
-      return 14.sp;
+      return 12.sp;
     } else if (screenWidth <= SizeScreensApp().md) {
-      return 14.sp;
+      return 12.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 12.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
@@ -341,11 +341,11 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return Size(239.0.sp, 41.0.sp);
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return Size(double.infinity, 30.sp);
+      return Size(double.infinity, 20.sp);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(double.infinity, 30.sp);
+      return Size(double.infinity, 20.sp);
     } else {
-      return Size(700.0.sp, 80.0.sp);
+      return Size(700.0.sp, 20.0.sp);
     }
   }
 

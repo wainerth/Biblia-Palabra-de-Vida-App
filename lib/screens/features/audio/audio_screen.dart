@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -15,7 +16,7 @@ class AudioScreen extends StatefulWidget {
 
 class _AudioScreenState extends State<AudioScreen> {
   static const platform =
-      MethodChannel('com.example.biblia_palabra_de_vida_app/appchecker');
+      MethodChannel('com.labibliapalabradevida.app/appchecker');
   final String appName = "amistad Online"; // Ajusta esto
   final String appPackageName = "amistad.online2"; // Ajusta esto
   String playStoreUrl = "";
@@ -82,17 +83,8 @@ class _AudioScreenState extends State<AudioScreen> {
           showAction: true,
           actionCallbackOk: () async {
             Navigator.pop(context);
-            // Si no funciona, intentar abrir Play Store directamente
-            // bool canLaunchStore = await canLaunchUrl(Uri.parse(playStoreUrl));
-
-            // if (canLaunchStore) {
-            //   await launchUrl(Uri.parse(playStoreUrl),
-            //       mode: LaunchMode.externalApplication);
-            // } else {
-            // Fallback a versión web de Play Store
             await launchUrl(Uri.parse(playStoreWebUrl),
                 mode: LaunchMode.externalApplication);
-            // }
           },
           textButton: "Cancelar",
           actionCallback: () {
@@ -113,23 +105,15 @@ class _AudioScreenState extends State<AudioScreen> {
         showAction: true,
         actionCallbackOk: () {
           Navigator.pop(context);
-          final Uri playStoreUri = Uri.parse(playStoreUrl);
+          final Uri playStoreUri = Uri.parse(playStoreWebUrl);
           launchUrl(playStoreUri, mode: LaunchMode.externalApplication);
         },
         textButton: "Cancelar",
         actionCallback: () async {
           Navigator.pop(context);
-          //  Si no funciona, intentar abrir Play Store directamente
-          // bool canLaunchStore = await canLaunchUrl(Uri.parse(playStoreUrl));
-
-          // if (canLaunchStore) {
-          //   await launchUrl(Uri.parse(playStoreUrl),
-          //       mode: LaunchMode.externalApplication);
-          // } else {
-          //   Fallback a versión web de Play Store
-          await launchUrl(Uri.parse(playStoreWebUrl),
-              mode: LaunchMode.externalApplication);
-          // }
+            setState(() {
+              showScreen = true;
+            });
         },
       );
     }
@@ -139,8 +123,7 @@ class _AudioScreenState extends State<AudioScreen> {
   Widget build(BuildContext context) {
     setState(() {
       playStoreUrl = "market://details?id=$appPackageName";
-      playStoreWebUrl = "https://apk.e-droid.net/apk/app3557953-xlahe3.apk?v=1";
-      //"https://play.google.com/store/apps/details?id=$appPackageName";
+      playStoreWebUrl = GraphQLConfig.urlApkRadio;
     });
     return Scaffold(
       appBar: AppBar(
@@ -181,33 +164,18 @@ class _AudioScreenState extends State<AudioScreen> {
                     fontWeight: FontWeight.bold,
                     color: Colors.blue,
                   ),
-              // TextStyle(
-              //   fontSize: 28,
-              //   fontWeight: FontWeight.bold,
-              //   color: Colors.blue,
-              // ),
             ),
             Text(
               "Online Radio",
               style: StylesApp(context).textStyleBody20.copyWith(
                     color: Colors.grey[600],
                   ),
-
-              // TextStyle(
-              //   fontSize: 22,
-              //   color: Colors.grey[600],
-              // ),
             ),
             Text(
               "La frecuencia que acompaña",
               style: StylesApp(context).textStyleBody16.copyWith(
                     color: Colors.grey[600],
                   ),
-              // TextStyle(
-              //   fontSize: 16,
-              //   fontStyle: FontStyle.italic,
-              //   color: Colors.grey[600],
-              // ),
             ),
             SizedBox(height: 40),
             Card(
@@ -243,9 +211,6 @@ class _AudioScreenState extends State<AudioScreen> {
               ),
             ),
             SizedBox(height: 40),
-            // ButtonThemeWidget(
-            //   text: "Escuchar Radio", ,
-            // ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,

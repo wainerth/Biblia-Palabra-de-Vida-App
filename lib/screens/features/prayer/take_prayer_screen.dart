@@ -280,11 +280,13 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                   children: [
                     TextSpan(
                         text: "Fecha hora: ",
-                        style: StylesApp(context).textStyleBody2_14),
+                        style: StylesApp(context).textStyleBody12.copyWith(
+                          color: StyleColor.orange,
+                        ),),
                     TextSpan(
                         text: listRequest[index].requestDate,
                         style: StylesApp(context)
-                            .textStyleBody2_14
+                            .textStyleBody14
                             .copyWith(color: Colors.black)),
                   ],
                 ),
@@ -294,11 +296,13 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                   children: [
                     TextSpan(
                         text: "Por: ",
-                        style: StylesApp(context).textStyleBody2_14),
+                        style: StylesApp(context).textStyleBody12.copyWith(
+                          color: StyleColor.orange,
+                        ),),
                     TextSpan(
                         text: listRequest[index].requestedBy,
                         style: StylesApp(context)
-                            .textStyleBody2_14
+                            .textStyleBody14
                             .copyWith(color: Colors.black)),
                   ],
                 ),
@@ -309,20 +313,24 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                   children: [
                     TextSpan(
                         text: "Oración por: ",
-                        style: StylesApp(context).textStyleBody2_14),
+                        style: StylesApp(context).textStyleBody12.copyWith(
+                          color: StyleColor.orange,
+                        ),),
                     TextSpan(
                       text: listRequest[index].prayerCategory.name.trim(),
                       style: StylesApp(context)
-                          .textStyleBody2_14
+                          .textStyleBody14
                           .copyWith(color: Colors.black),
                     ),
                     TextSpan(
                         text: " / ",
-                        style: StylesApp(context).textStyleBody2_14),
+                        style: StylesApp(context).textStyleBody12.copyWith(
+                          color: StyleColor.orange,
+                        ),),
                     TextSpan(
                         text: listRequest[index].prayerSubType.name,
                         style: StylesApp(context)
-                            .textStyleBody2_14
+                            .textStyleBody14
                             .copyWith(color: Colors.black)),
                   ],
                 ),

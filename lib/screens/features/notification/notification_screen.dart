@@ -280,22 +280,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           }
                         }
                         // Tu lógica de navegación aquí
-                        if (getRouterScreen(notification.model.toLowerCase(),
+                          if (getRouterScreen(notification.model.toLowerCase(),
                                     notification.variables)
                                 .arguments !=
                             null) {
                           Navigator.pushNamed(
                               context,
-                              getRouterScreen(notification.model,
+                              getRouterScreen(notification.model.toLowerCase(),
                                       notification.variables)
                                   .routeName,
-                              arguments: getRouterScreen(notification.model,
+                              arguments: getRouterScreen(notification.model.toLowerCase(),
                                       notification.variables)
                                   .arguments);
                         } else {
                           Navigator.pushNamed(
                               context,
-                              getRouterScreen(notification.model, null)
+                              getRouterScreen(notification.model.toLowerCase(), null)
                                   .routeName);
                         }
                       },

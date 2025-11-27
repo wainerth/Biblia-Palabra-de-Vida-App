@@ -434,11 +434,13 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                                       response.data);
 
                                                   // 3. Compartir el archivo
-                                                  await Share.shareXFiles(
-                                                    [XFile(tempFile.path)],
-                                                    text:
-                                                        '¡Escucha este audio!',
-                                                  );
+                                                  await SharePlus.instance
+                                                      .share(ShareParams(
+                                                    files: [
+                                                      XFile(tempFile.path),
+                                                    ],
+                                                    text:                                                        '¡Escucha este audio!',
+                                                  ));
 
                                                   // 4. Opcional: Eliminar el temporal después de compartir
                                                   tempFile.delete();

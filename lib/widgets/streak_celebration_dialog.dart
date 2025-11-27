@@ -99,7 +99,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: Offset(0, 10),
           ),
@@ -170,7 +170,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
               ),
         ),
         SizedBox(height: 8),
-        Text("${widget.streakCalendar?.currentStreak}",
+        Text("${widget.streakCalendar.currentStreak}",
             style: StylesApp(context).textStyleBody32.copyWith(
                   color: StyleColor.orange,
                 )),
@@ -269,7 +269,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
       children: [
         _buildStatItem(
           'Racha Actual',
-          '${widget.streakCalendar?.currentStreak} días',
+          '${widget.streakCalendar.currentStreak} días',
           Icons.local_fire_department,
           StyleColor.orange,
         ),

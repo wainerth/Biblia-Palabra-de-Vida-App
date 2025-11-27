@@ -11,6 +11,8 @@ class LayoutScreen extends StatefulWidget {
 
 class _LayoutScreenState extends State<LayoutScreen> {
   int _selectedIndex = 1;
+  bool _hasProcessedInitialArguments = false;
+
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
 
@@ -25,9 +27,12 @@ class _LayoutScreenState extends State<LayoutScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_hasProcessedInitialArguments) return;
+
     final Object? args = ModalRoute.of(context)!.settings.arguments;
     if (args != null) {
       setState(() {
+        _hasProcessedInitialArguments = true;
         _selectedIndex = (args as Map<String, dynamic>)["selectedIndex"];
       });
     }

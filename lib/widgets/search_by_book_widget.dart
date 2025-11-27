@@ -52,6 +52,44 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   bool _versesExpanded = false;
   List<VerseModel> _selectedItems = [];
 
+  // Función para determinar si es tablet
+  bool get isTablet {
+    final mediaQuery = MediaQuery.of(context);
+    return mediaQuery.size.shortestSide >= 600;
+  }
+
+  // Función para obtener el ancho máximo del dropdown según el dispositivo
+  double get maxDropdownWidth {
+    if (isTablet) {
+      return 400; // Ancho mayor para tablet
+    }
+    return StylesApp(context).sizeTextFormField.width;
+  }
+
+  // Función para obtener la altura de los grids según el dispositivo
+  double get gridHeight {
+    if (isTablet) {
+      return 350; // Altura mayor para tablet
+    }
+    return 280;
+  }
+
+  // Función para obtener el padding horizontal según el dispositivo
+  EdgeInsets get horizontalPadding {
+    if (isTablet) {
+      return EdgeInsets.symmetric(horizontal: 24.0);
+    }
+    return EdgeInsets.symmetric(horizontal: 12.0);
+  }
+
+  // Función para obtener el tamaño de los espacios según el dispositivo
+  double get spacingHeight {
+    if (isTablet) {
+      return 35; // Más espacio en tablet
+    }
+    return 25;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -110,14 +148,13 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         children: [
           Column(
             children: [
-              SizedBox(
-                height: 25,
-              ),
+              SizedBox(height: spacingHeight),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                padding: horizontalPadding,
                 constraints: BoxConstraints(
-                  minWidth: 160.0,
-                  maxWidth: StylesApp(context).sizeTextFormField.width,
+                  minWidth:
+                      isTablet ? 200.0 : 160.0, // Min width mayor en tablet
+                  maxWidth: maxDropdownWidth,
                 ),
                 child: CustomDropdownBottomWidget(
                   hintText: "Seleccione la version",
@@ -164,14 +201,13 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                       : null,
                 ),
               ),
-              SizedBox(
-                height: 25,
-              ),
+              SizedBox(height: spacingHeight),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                padding: horizontalPadding,
                 constraints: BoxConstraints(
-                  minWidth: 160.0,
-                  maxWidth: StylesApp(context).sizeTextFormField.width,
+                  minWidth:
+                      isTablet ? 200.0 : 160.0, // Min width mayor en tablet
+                  maxWidth: maxDropdownWidth,
                 ),
                 child: CustomDropdownBottomWidget(
                   hintText: "Seleccione el Libro",
@@ -187,6 +223,24 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     });
 
                     await getChapterByBook(book!.value);
+                    setState(() {
+                      initialChapter =
+                          chapters.isNotEmpty ? [chapters.first] : [];
+                      chapterSelected =
+                          chapters.isNotEmpty ? chapters.first : null;
+                      _versesExpanded = true;
+                    });
+                    if (chapterSelected != null) {
+                      setState(() {
+                        initialChapter = [chapterSelected!];
+                        _chaptersExpanded = false;
+                      });
+                      await loadVerses(chapterSelected!.id!);
+                      setState(() {
+                        _versesExpanded = true;
+                        _selectedItems.add(verses.first);
+                      });
+                    }
                   },
                   selectedItem: bookSelected!.value.isNotEmpty
                       ? books.firstWhere((element) =>
@@ -195,9 +249,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                       : null,
                 ),
               ),
-              SizedBox(
-                height: 25,
-              ),
+              SizedBox(height: spacingHeight),
               Column(
                 children: [
                   // Sección Capítulos
@@ -205,14 +257,17 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     onTap: () =>
                         setState(() => _chaptersExpanded = !_chaptersExpanded),
                     child: Padding(
-                      padding: const EdgeInsets.all(12.0),
+                      padding: horizontalPadding,
                       child: Row(
                         children: [
                           Text(
                             "Capítulos",
-                            style: StylesApp(context)
-                                .textStyleBody16
-                                .copyWith(color: currentTheme.textColor),
+                            style: StylesApp(context).textStyleBody16.copyWith(
+                                  color: currentTheme.textColor,
+                                  fontSize: isTablet
+                                      ? 18
+                                      : 16, // Texto más grande en tablet
+                                ),
                           ),
                           Spacer(),
                           Icon(
@@ -220,6 +275,9 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 ? Icons.expand_less
                                 : Icons.expand_more,
                             color: currentTheme.textColor,
+                            size: isTablet
+                                ? 28
+                                : 24, // Icono más grande en tablet
                           ),
                         ],
                       ),
@@ -231,7 +289,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
                     firstChild: Padding(
-                      padding: const EdgeInsets.all(12.0),
+                      padding: horizontalPadding,
                       child: Container(
                         decoration: BoxDecoration(
                           color: currentTheme.backgroundColor,
@@ -243,8 +301,11 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 offset: Offset(0, 4)),
                           ],
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 12.0),
-                        height: 280,
+                        padding: EdgeInsets.symmetric(
+                          horizontal:
+                              isTablet ? 16.0 : 12.0, // Más padding en tablet
+                        ),
+                        height: gridHeight,
                         child: GridButtonWidget<ChapterModel>(
                           loading: loadingChapter,
                           data: chapters,
@@ -260,7 +321,6 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                             setState(() {
                               chapterSelected = chapter.first;
                               _chaptersExpanded = false;
-                              _versesExpanded = true;
                               _selectedItems = [];
                             });
                           },
@@ -275,14 +335,17 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     onTap: () =>
                         setState(() => _versesExpanded = !_versesExpanded),
                     child: Padding(
-                      padding: const EdgeInsets.all(12.0),
+                      padding: horizontalPadding,
                       child: Row(
                         children: [
                           Text(
                             "Versículos",
-                            style: StylesApp(context)
-                                .textStyleBody16
-                                .copyWith(color: currentTheme.textColor),
+                            style: StylesApp(context).textStyleBody16.copyWith(
+                                  color: currentTheme.textColor,
+                                  fontSize: isTablet
+                                      ? 18
+                                      : 16, // Texto más grande en tablet
+                                ),
                           ),
                           Spacer(),
                           Icon(
@@ -290,6 +353,9 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 ? Icons.expand_less
                                 : Icons.expand_more,
                             color: currentTheme.textColor,
+                            size: isTablet
+                                ? 28
+                                : 24, // Icono más grande en tablet
                           ),
                         ],
                       ),
@@ -301,7 +367,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
                     firstChild: Padding(
-                      padding: const EdgeInsets.all(12.0),
+                      padding: horizontalPadding,
                       child: Container(
                         decoration: BoxDecoration(
                           color: currentTheme.backgroundColor,
@@ -313,8 +379,11 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 offset: Offset(0, 4)),
                           ],
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 12.0),
-                        height: 280,
+                        padding: EdgeInsets.symmetric(
+                          horizontal:
+                              isTablet ? 16.0 : 12.0, // Más padding en tablet
+                        ),
+                        height: gridHeight,
                         child: GridButtonWidget<VerseModel>(
                           loading: loadingVerses,
                           data: verses,
@@ -334,71 +403,87 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                 ],
               ),
               if (widget.showSelectedRange)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.sizeOf(context).width,
-                      child: ListTile(
-                        title: Text(
-                          'Rango de versículos',
-                          style: StylesApp(context)
-                              .textStyleBody12
-                              .copyWith(color: currentTheme.textColor),
-                        ),
-                        trailing: Switch(
-                          activeColor: currentTheme.buttonColor,
-                          thumbColor:
-                              WidgetStatePropertyAll(currentTheme.buttonColor),
-                          trackOutlineColor:
-                              WidgetStatePropertyAll(StyleColor.grayMedium),
-                          value: verseRange,
-                          onChanged: (bool value) {
-                            setState(() {
-                              verseRange = value;
-                              _selectedItems = [];
-                            });
-                          },
+                Padding(
+                  padding: horizontalPadding,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: ListTile(
+                          title: Text(
+                            'Rango de versículos',
+                            style: StylesApp(context).textStyleBody12.copyWith(
+                                  color: currentTheme.textColor,
+                                  fontSize: isTablet
+                                      ? 14
+                                      : 12, // Texto más grande en tablet
+                                ),
+                          ),
+                          trailing: Transform.scale(
+                            scale: isTablet
+                                ? 1.2
+                                : 1.0, // Switch más grande en tablet
+                            child: Switch(
+                              activeColor: currentTheme.buttonColor,
+                              thumbColor: WidgetStatePropertyAll(
+                                  currentTheme.buttonColor),
+                              trackOutlineColor:
+                                  WidgetStatePropertyAll(StyleColor.grayMedium),
+                              value: verseRange,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  verseRange = value;
+                                  _selectedItems = [];
+                                });
+                              },
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ButtonThemeWidget(
-                text: "Aceptar",
-                buttonStyle: StylesApp(context).btnWidgetSmall,
-                onPressed: () {
-                  if (versionSelected!.value.isEmpty ||
-                      bookSelected!.value.isEmpty ||
-                      chapterSelected == null ||
-                      _selectedItems.isEmpty) {
-                    showCustomDialog(context,
-                        message: "Debe seleccionar todos los campos",
-                        dialogType: DialogType.error);
-                    return;
-                  }
+          SizedBox(height: spacingHeight),
+          Padding(
+            padding: horizontalPadding,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ButtonThemeWidget(
+                  text: "Aceptar",
+                  width: isTablet ? 200 : null,
+                  height: isTablet ? 50 : null,
+                  buttonStyle: StylesApp(context).btnWidgetSmall,
+                  onPressed: () {
+                    if (versionSelected!.value.isEmpty ||
+                        bookSelected!.value.isEmpty ||
+                        chapterSelected == null ||
+                        _selectedItems.isEmpty) {
+                      showCustomDialog(context,
+                          message: "Debe seleccionar todos los campos",
+                          dialogType: DialogType.error);
+                      return;
+                    }
 
-                  final data = InputDataSearchModel(
-                    version: versionSelected!.originalData,
-                    book: bookSelected!.originalData,
-                    chapter: chapterSelected,
-                    versionId: versionSelected!.value,
-                    bookId: bookSelected!.value,
-                    chapterId: chapterSelected!.id!,
-                    startVerseId: _selectedItems.first.id!,
-                    endVerseId: _selectedItems.last.id!,
-                    verses: _selectedItems
-                  );
-                  widget.onActionBook!(data);
-                },
-              )
-            ],
-          )
+                    final data = InputDataSearchModel(
+                        version: versionSelected!.originalData,
+                        book: bookSelected!.originalData,
+                        chapter: chapterSelected,
+                        versionId: versionSelected!.value,
+                        bookId: bookSelected!.value,
+                        chapterId: chapterSelected!.id!,
+                        startVerseId: _selectedItems.first.id!,
+                        endVerseId: _selectedItems.last.id!,
+                        verses: _selectedItems);
+                    widget.onActionBook!(data);
+                  },
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: spacingHeight),
         ],
       ),
     );
@@ -454,7 +539,9 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
     setState(() {
       loadingVerses = true;
       verses = chapters
-          .firstWhere((ch) => ch.id == id)
+          .firstWhere(
+            (ch) => ch.id == id,
+          )
           .verses!
           .map((verse) => verse)
           .toList();

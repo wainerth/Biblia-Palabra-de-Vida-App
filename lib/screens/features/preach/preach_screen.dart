@@ -80,7 +80,6 @@ class _PreachScreenState extends State<PreachScreen> {
   }
 
   _getSuggestions(value, String filter) {
-    
     switch (filter) {
       case "Mensaje":
         return preaches
@@ -173,7 +172,6 @@ class _PreachScreenState extends State<PreachScreen> {
   }
 
   Future<void> removeFavorite(preach) async {
-    
     final responseRemoveFavorite =
         await removePreachFavorite(userData!.userId, preach.id);
     if (responseRemoveFavorite.error != null) {
@@ -571,74 +569,85 @@ class _MessageCardState extends State<MessageCard> {
       references: widget.references,
       createdAt: widget.date,
     );
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          // Imagen
-          Expanded(
-            flex: 1,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: GestureDetector(
-                  key: GlobalKey(),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => VideoPlayerScreen(data: valores),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VideoPlayerScreen(data: valores),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            // Imagen
+            Expanded(
+              flex: 1,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: GestureDetector(
+                    key: GlobalKey(),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              VideoPlayerScreen(data: valores),
+                        ),
+                      );
+                    },
+                    child: SizedBox(
+                      width: 200,
+                      height: 110,
+                      child: FadeInImage.memoryNetwork(
+                        placeholder: kTransparentImage,
+                        image: widget.imageUrl,
+                        width: 100,
+                        height: 80,
+                        fit: BoxFit.cover,
                       ),
-                    );
-                  },
-                  child: SizedBox(
-                    width: 200,
-                    height: 110,
-                    child: FadeInImage.memoryNetwork(
-                      placeholder: kTransparentImage,
-                      image: widget.imageUrl,
-                      width: 100,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
-                  )),
+                    )),
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          // Contenido
-          Expanded(
-            flex: 1,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title,
-                  style: StylesApp(context).textStyleBody14.copyWith(
-                        color: StyleColor.turquoise,
-                      ),
-                  overflow: TextOverflow.visible,
-                  softWrap: true,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.author.replaceAll(". ", ".\n"),
-                  style: StylesApp(context).textStyleBody14.copyWith(
-                        color: StyleColor.orange,
-                      ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.date,
-                  style: StylesApp(context).textStyleBody14.copyWith(
-                      color: Colors.black, fontWeight: FontWeight.w800),
-                ),
-              ],
+            const SizedBox(width: 16),
+            // Contenido
+            Expanded(
+              flex: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.title,
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                          color: StyleColor.turquoise,
+                        ),
+                    overflow: TextOverflow.visible,
+                    softWrap: true,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.author.replaceAll(". ", ".\n"),
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                          color: StyleColor.orange,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.date,
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                        color: Colors.black, fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            icon: widget.iconFavorite,
-            onPressed: widget.onPressed,
-          ),
-        ],
+            IconButton(
+              icon: widget.iconFavorite,
+              onPressed: widget.onPressed,
+            ),
+          ],
+        ),
       ),
     );
   }

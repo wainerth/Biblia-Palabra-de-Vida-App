@@ -13,6 +13,7 @@ class PageScreen extends StatefulWidget {
 
 class _PageScreenState extends State<PageScreen> {
   int _selectedIndex = 0;
+  bool _hasProcessedInitialArguments = false;
   final List<Widget> _screens = [
     WorkspaceScreen(),
     BibleScreen(),
@@ -33,9 +34,11 @@ class _PageScreenState extends State<PageScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_hasProcessedInitialArguments) return;
     final Object? args = ModalRoute.of(context)!.settings.arguments;
-    if (args != null) {
+    if (args != null && args is Map<String, dynamic> && args.containsKey('selectedIndex')) {
       setState(() {
+         _hasProcessedInitialArguments = true; 
         _selectedIndex = (args as Map<String, dynamic>)["selectedIndex"];
       });
     }

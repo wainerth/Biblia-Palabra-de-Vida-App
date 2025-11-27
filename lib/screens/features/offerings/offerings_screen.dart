@@ -1,16 +1,47 @@
-import 'dart:io';
-
-import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/main.dart';
+import 'package:biblia_palabra_de_vida_app/models/model_data.dart';
+import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
+import 'package:biblia_palabra_de_vida_app/screens/features/offerings/stripe_payment_screen.dart';
+import 'package:biblia_palabra_de_vida_app/services/phone_validator_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/transfer_form.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
+import 'package:intl_phone_field/phone_number.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class OfferingsScreen extends StatelessWidget {
+class OfferingsScreen extends StatefulWidget {
   const OfferingsScreen({super.key});
 
   @override
+  State<OfferingsScreen> createState() => _OfferingsScreenState();
+}
+
+class _OfferingsScreenState extends State<OfferingsScreen> {
+  String? _selectedCurrency;
+  double? _selectedAmount = 0.0;
+  bool _isEnabled = false;
+  // Key para DonationAmountSelector
+  UniqueKey _donationSelectorKey = UniqueKey();
+
+  final List<ModelData> _currencies = [
+    ModelData(label: 'USD - Dólar Americano', value: 'USD'),
+    ModelData(label: 'EUR - Euro', value: 'EUR'),
+    ModelData(label: 'BS - Bolívar', value: 'BS'),
+  ];
+
+  // Reemplaza con tu Payment Link real de Stripe
+  final String stripePaymentLink = "https://buy.stripe.com/test_xxxxxxxxxxxx";
+
+  @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final currentUser = userProvider.currentUser;
+    _isEnabled = _selectedCurrency != null &&
+        _selectedAmount != null &&
+        _selectedAmount! > 0;
     return Scaffold(
       backgroundColor: const Color(0xFF12CBC4),
       appBar: AppBar(
@@ -48,8 +79,20 @@ class OfferingsScreen extends StatelessWidget {
                     // Message Section
                     _buildMessageSection(context),
 
-                    // Payment Methods
-                    _buildPaymentMethods(context),
+                    // Currency Selection
+                    _buildCurrencySection(context),
+
+                    DonationAmountSelector(
+                      key: _donationSelectorKey,
+                      currency: _selectedCurrency,
+                      onAmountSelected: (value) {
+                        setState(() {
+                          _selectedAmount = value;
+                          _isEnabled = _selectedCurrency != null && value > 0;
+                        });
+                      },
+                    ),
+                    _buildPaymentMethods(context, currentUser),
                   ],
                 ),
               ),
@@ -76,7 +119,6 @@ class OfferingsScreen extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 20),
-          // Icono de ofrendas
           CircleAvatar(
             radius: 48,
             backgroundColor: Colors.white,
@@ -126,7 +168,68 @@ class OfferingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentMethods(BuildContext context) {
+  Widget _buildCurrencySection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Selecciona la moneda:',
+            style: StylesApp(context).textStyleBody16.copyWith(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+
+          // Dropdown de monedas
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: StyleColor.orange, width: 2),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  const Icon(Icons.currency_exchange, color: StyleColor.orange),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: CustomDropdownBottomWidget(
+                      border: false,
+                      hintText: "Moneda ",
+                      items: _currencies,
+                      onChanged: (ModelData? newValue) async {
+                        setState(() {
+                          _selectedCurrency = newValue?.value;
+                          _selectedAmount =
+                              null; // Resetear monto al cambiar moneda
+                          _donationSelectorKey = UniqueKey();
+                        });
+                      },
+                      selectedItem: _currencies.firstWhere(
+                        (element) => element.value == _selectedCurrency,
+                        orElse: () =>
+                            ModelData(label: 'Selecciona moneda', value: ''),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethods(BuildContext context, dynamic currentUser) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
@@ -142,26 +245,85 @@ class OfferingsScreen extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 12),
-          // _buildPaymentOption(
-          //   icon: Icons.credit_card,
-          //   title: 'Tarjeta de crédito/débito',
-          //   context: context,
-          //   onTap: () => debugPrint("Tarjeta seleccionada"),
-          // ),
+
+          // Stripe - Tarjetas de crédito/débito
           _buildPaymentOption(
+            isEnabled: _isEnabled,
+            currency: _selectedCurrency,
+            amount: _selectedAmount,
+            icon: Icons.credit_card,
+            title: 'Tarjeta de crédito/débito',
+            subtitle: 'Pago seguro con Stripe',
+            context: context,
+            onTap: () => _processStripePayment(context, currentUser),
+          ),
+
+          // Payment Link de Stripe
+          _buildPaymentOption(
+            isEnabled: _isEnabled,
+            currency: _selectedCurrency,
+            amount: _selectedAmount,
+            icon: Icons.link,
+            title: 'Múltiples Métodos de Pago',
+            subtitle: 'PayPal, Google Pay, Apple Pay',
+            context: context,
+            onTap: () => _launchStripePaymentLink(
+                _selectedCurrency, _selectedAmount, currentUser),
+          ),
+
+          // Transferencia bancaria
+          _buildPaymentOption(
+            isEnabled: _isEnabled,
+            currency: _selectedCurrency,
+            amount: _selectedAmount,
             icon: Icons.account_balance,
             title: 'Transferencia bancaria',
+            subtitle: 'Transferencia manual',
             context: context,
             onTap: () => _showBankTransferOptions(context),
           ),
-          // _buildPaymentOption(
-          //   icon: Icons.pix,
-          //   title: 'Pago con PIX',
-          //   context: context,
-          //   onTap: () => debugPrint("PIX seleccionado"),
-          // ),
+
           const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentOption({
+    required String? currency,
+    required double? amount,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required BuildContext context,
+    isEnabled = true,
+    Function()? onTap,
+  }) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      color: isEnabled ? Colors.white : StyleColor.grayMedium.withAlpha(20),
+      child: ListTile(
+        leading: Icon(icon, color: StyleColor.orange, size: 28),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontFamily: 'Montserrat',
+            fontSize: 12,
+          ),
+        ),
+        enabled: isEnabled,
+        trailing:
+            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+        onTap: isEnabled ? onTap : null,
       ),
     );
   }
@@ -180,28 +342,289 @@ class OfferingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentOption({
-    required IconData icon,
-    required String title,
-    required BuildContext context,
-    Function()? onTap,
-  }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: Colors.white, size: 28),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontFamily: 'Montserrat',
-        ),
-      ),
-      trailing:
-          const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
-      onTap: onTap,
+  // === MÉTODOS DE PAGO ACTUALIZADOS ===
+
+  void _processStripePayment(BuildContext context, dynamic currentUser) {
+    _showDonorInfoForm(
+        context, currentUser, _selectedCurrency, _selectedAmount);
+  }
+
+  // void _processStripePaymentLink(BuildContext context, dynamic currentUser) {
+  //   _showDonationAmountSelector(
+  //     context: context,
+  //     onAmountSelected: (amount) {
+  //       _launchStripePaymentLink(amount, currentUser);
+  //     },
+  //   );
+// void _showDonationAmountSelector({
+//   required BuildContext context,
+//   required Function(double) onAmountSelected,
+// }) {
+//   showModalBottomSheet(
+//     context: context,
+//     isScrollControlled: true,
+//     backgroundColor: Colors.transparent,
+//     builder: (BuildContext context) {
+//       return Padding(
+//         padding: const EdgeInsets.all(20),
+//         child: DonationAmountSelector(
+//           currency: _selectedCurrency!,
+//           initialAmount: 25.0,
+//           onCancel: () => Navigator.pop(context),
+//           onAmountSelected: (amount) {
+//             Navigator.pop(context); // Cerrar el bottom sheet
+//             onAmountSelected(amount);
+//           },
+//         ),
+//       );
+//     },
+//   );
+// }
+
+  void _showDonorInfoForm(BuildContext context, dynamic currentUser,
+      String? currency, double? amount) {
+    final donorNameController = TextEditingController(
+        text: "${currentUser?.name ?? ''} ${currentUser.lastname ?? ''}");
+    final donorEmailController =
+        TextEditingController(text: currentUser?.email ?? '');
+    final donorPhoneController =
+        TextEditingController(text: currentUser?.phoneNumber ?? '');
+    String initialPhoneCode = currentUser?.profileAreaCode != null
+        ? currentUser?.profileAreaCode.code
+        : "UY";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom, // ← Esto es clave
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: SingleChildScrollView(
+              // ← Usar SingleChildScrollView
+              padding: const EdgeInsets.all(0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Información del Donante',
+                        style: StylesApp(context).textStyleBody18.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+                  Text(
+                    'Por favor ingresa los datos del titular de la tarjeta:',
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                          color: Colors.grey[700],
+                        ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Formulario de datos del donante
+                  TextFormField(
+                    controller: donorNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nombre del Titular*',
+                      hintText: 'Como aparece en la tarjeta',
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Este campo es obligatorio';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  TextFormField(
+                    controller: donorEmailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email*',
+                      hintText: 'email@ejemplo.com',
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Este campo es obligatorio';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Ingresa un email válido';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  IntlPhoneFieldWithValidation(
+                    controller: donorPhoneController,
+                    initialPhoneCode: initialPhoneCode,
+                    validator: (PhoneNumber? phone) {
+                      if (phone == null || phone.number.isEmpty) {
+                        return 'El número de teléfono es obligatorio';
+                      }
+                      return PhoneValidatorService.validatePhoneNumber(phone);
+                    },
+                    onChanged: (phone) {
+                      if (kDebugMode) {
+                        print('Country Code: ${phone.countryCode}');
+                        print('Complete Number: ${phone.completeNumber}');
+                        print('Country ISO: ${phone.countryISOCode}');
+                        print('Raw Number: ${phone.number}');
+
+                        final rules = PhoneValidatorService.getCountryRules(
+                            phone.countryISOCode);
+                        if (rules != null) {
+                          print(
+                              'Country Rules: ${rules.name} - Min: ${rules.minLength}, Max: ${rules.maxLength}');
+                        }
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Botones de acción
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            side: BorderSide(color: StyleColor.orange),
+                          ),
+                          child: Text(
+                            'Cancelar',
+                            style: TextStyle(color: StyleColor.orange),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (donorNameController.text.isNotEmpty &&
+                                donorEmailController.text.isNotEmpty &&
+                                donorEmailController.text.contains('@')) {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StripePaymentScreen(
+                                    amount: amount!,
+                                    description:
+                                        'Donación - Biblia Palabra de Vida',
+                                    donorName: donorNameController.text,
+                                    donorEmail: donorEmailController.text,
+                                    donorPhone:
+                                        donorPhoneController.text.isEmpty
+                                            ? null
+                                            : donorPhoneController.text,
+                                    currency: _selectedCurrency!,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: StyleColor.orange,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Continuar al Pago',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Espacio extra para el teclado
+                  SizedBox(
+                      height: MediaQuery.of(context).viewInsets.bottom > 0
+                          ? 20
+                          : 0),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
+  void _launchStripePaymentLink(
+      String? currency, double? amount, dynamic currentUser) async {
+    try {
+      final uri = Uri.parse(stripePaymentLink).replace(
+        queryParameters: {
+          'prefilled_email': currentUser?.email ?? '',
+          'client_reference_id': 'user_${currentUser?.id ?? 'guest'}',
+        },
+      );
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        _showErrorDialog('No se pudo abrir el enlace de pago');
+      }
+    } catch (e) {
+      _showErrorDialog('Error: $e');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: navigatorKey.currentContext!,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// Mantener tus métodos existentes para transferencias bancarias
   void _showBankTransferOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -224,9 +647,7 @@ class OfferingsScreen extends StatelessWidget {
               ),
               Expanded(
                 child: ListView.separated(
-                  separatorBuilder: (context, index) {
-                    return Divider();
-                  },
+                  separatorBuilder: (context, index) => const Divider(),
                   itemCount: 3,
                   itemBuilder: (context, index) {
                     return GestureDetector(
@@ -319,7 +740,6 @@ class OfferingsScreen extends StatelessWidget {
                     ),
               ),
             ),
-           
             body: const SingleChildScrollView(
               padding: EdgeInsets.all(16),
               child: TransferForm(),
@@ -327,295 +747,6 @@ class OfferingsScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class TransferForm extends StatefulWidget {
-  const TransferForm({super.key});
-
-  @override
-  State<TransferForm> createState() => _TransferFormState();
-}
-
-class _TransferFormState extends State<TransferForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _bancoOrigenController = TextEditingController();
-  final _titularController = TextEditingController();
-  final _identificacionController = TextEditingController();
-  final _numeroCuentaController = TextEditingController();
-  final _numeroReferenciaController = TextEditingController();
-
-  File? _captureImage;
-  ModelData? _selectedBancoOrigen;
-
-  final List<ModelData> _bancos = [
-    ModelData(label: 'Banco de Venezuela', value: '1'),
-    ModelData(label: 'Banesco', value: '2'),
-    ModelData(label: 'Mercantil', value: '3'),
-    ModelData(label: 'Provincial', value: '4'),
-    ModelData(label: 'Bancaribe', value: '5'),
-    ModelData(label: 'BOD', value: '6'),
-    ModelData(label: 'Banco del Tesoro', value: '7'),
-    ModelData(label: 'Otro', value: '8')
-  ];
-
-  @override
-  void dispose() {
-    _bancoOrigenController.dispose();
-    _titularController.dispose();
-    _identificacionController.dispose();
-    _numeroCuentaController.dispose();
-    _numeroReferenciaController.dispose();
-    super.dispose();
-  }
-
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _captureImage = File(pickedFile.path);
-      });
-    }
-  }
-
-  void _removeImage() {
-    setState(() {
-      _captureImage = null;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Banco Origen
-          Container(
-            width: MediaQuery.sizeOf(context).width,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: StyleColor.grayDark,
-              ),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Icon(Icons.account_balance),
-                ),
-                Expanded(
-                  child: CustomDropdownBottomWidget(
-                    border: true,
-                    hintText: 'Banco de Origen',
-                    items: _bancos,
-                    onChanged: (ModelData? newValue) {
-                      setState(() {
-                        _selectedBancoOrigen = newValue;
-                      });
-                    },
-                    selectedItem: _selectedBancoOrigen,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Titular de la cuenta
-          TextFormField(
-            controller: _titularController,
-            decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                  labelText: 'Titular de la Cuenta',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  prefixIcon: const Icon(Icons.person),
-                ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Por favor ingrese el nombre del titular';
-              }
-              if (value.length < 3) {
-                return 'El nombre debe tener al menos 3 caracteres';
-              }
-              if (!RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$').hasMatch(value)) {
-                return 'Solo se permiten letras y espacios';
-              }
-              return null;
-            },
-            textCapitalization: TextCapitalization.words,
-          ),
-          const SizedBox(height: 16),
-
-          // Identificación
-          TextFormField(
-            controller: _identificacionController,
-            decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                  labelText: 'Número de Identificación',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  prefixIcon: const Icon(Icons.badge),
-                ),
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Por favor ingrese el número de identificación';
-              }
-              if (value.length < 6) {
-                return 'La identificación debe tener al menos 6 dígitos';
-              }
-              if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                return 'Solo se permiten números';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Número de cuenta
-          TextFormField(
-            controller: _numeroCuentaController,
-            decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                  labelText: 'Número de Cuenta',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  prefixIcon: const Icon(Icons.credit_card),
-                ),
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Por favor ingrese el número de cuenta';
-              }
-              if (value.length < 4) {
-                return 'El número de cuenta debe tener al menos 4 dígitos';
-              }
-              if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                return 'Solo se permiten números';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Número de referencia
-          TextFormField(
-            controller: _numeroReferenciaController,
-            decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                  labelText: 'Número de Referencia',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  prefixIcon: const Icon(Icons.receipt),
-                ),
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Por favor ingrese el número de referencia';
-              }
-              if (value.length < 4) {
-                return 'El número de referencia debe tener al menos 4 dígitos';
-              }
-              if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                return 'Solo se permiten números';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 20),
-
-          // Imagen del comprobante
-          Text(
-            'Comprobante de Transferencia',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 8),
-
-          _captureImage == null
-              ? OutlinedButton(
-                  onPressed: _pickImage,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 100),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.camera_alt,
-                        size: 40,
-                        color: StyleColor.turquoise,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Adjuntar Comprobante',
-                        style: StylesApp(context)
-                            .textStyleBody14
-                            .copyWith(color: StyleColor.turquoise),
-                      ),
-                    ],
-                  ),
-                )
-              : Stack(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                          image: FileImage(_captureImage!),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.red,
-                        child: IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white),
-                          onPressed: _removeImage,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-          const SizedBox(height: 24),
-
-          // Botón de enviar
-          SizedBox(
-              width: double.infinity,
-              child: ButtonThemeWidget(
-                buttonStyle: StylesApp(context).btnWidgetSmall,
-                text: 'Enviar Transferencia',
-                onPressed: () {},
-              )
-              //  ElevatedButton(
-              //   onPressed: _submitForm,
-              //   style: ElevatedButton.styleFrom(
-              //     padding: const EdgeInsets.symmetric(vertical: 16),
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(8),
-              //     ),
-              //   ),
-              //   child: const Text(
-              //     'Enviar Transferencia',
-              //     style: TextStyle(fontSize: 16),
-              //   ),
-              // ),
-              ),
-        ],
-      ),
     );
   }
 }

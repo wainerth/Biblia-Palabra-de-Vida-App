@@ -23,7 +23,7 @@ class ProgressDetailScreen extends StatefulWidget {
 
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   List<UserTitle>? titles = [];
-  LastProgressUser? progressUser;
+  ResponseProgress? progressUser;
   late Map<String, dynamic> config;
   int maxScore = 0;
   int mediumScore = 0;
@@ -217,11 +217,33 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             buttonStyle: StylesApp(context).btnWidgetSmall,
             onPressed: () async {
               await _loadProgress(context);
-              if (progressUser != null) {
-                Navigator.pushNamed(context, '/mapPage', arguments: {
-                  'courseId': progressUser!.courseId,
-                  'sectionId': progressUser!.sectionId
-                });
+              if (progressUser != null && progressUser?.success == true) {
+                if (progressUser!.message
+                    .contains('El curso ya fue finalizado')) {
+                  await showCustomDialogWithAction(
+                    context,
+                    message: progressUser!.message,
+                    dialogType: DialogTypeAction.info,
+                    buttonOk: "Cerrar",
+                    textButton: "ir Al curso",
+                    showAction: true,
+                    actionCallbackOk: () {
+                      Navigator.pop(context);
+                    },
+                    actionCallback: () {
+                      Navigator.pushNamed(context, '/mapPage', arguments: {
+                        'courseId': progressUser?.data?.courseId,
+                        'sectionId': progressUser?.data?.sectionId
+                      });
+                    },
+                  );
+                  return;
+                } else {
+                  Navigator.pushNamed(context, '/mapPage', arguments: {
+                    'courseId': progressUser?.data?.courseId,
+                    'sectionId': progressUser!.data?.sectionId
+                  });
+                }
               } else {
                 Navigator.pushNamed(context, '/introAventurePage');
               }

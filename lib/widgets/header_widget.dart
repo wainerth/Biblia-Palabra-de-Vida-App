@@ -75,7 +75,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   TextSpan(
                     children: [
                       TextSpan(text: "Exp: "),
-                      TextSpan(text: "${userData!.expTotalUser}")
+                      TextSpan(text: "${userData?.expTotalUser}")
                     ],
                   ),
                 ),
@@ -84,7 +84,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   TextSpan(
                     children: [
                       TextSpan(text: "Racha: "),
-                      TextSpan(text: "${userData.streakDaysCount} días")
+                      TextSpan(text: "${userData?.streakDaysCount} días")
                     ],
                   ),
                 )

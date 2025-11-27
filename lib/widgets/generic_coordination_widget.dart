@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';

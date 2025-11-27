@@ -30,7 +30,7 @@ class History {
       countCards: json['countCards'],
       orderCard: json['orderCard'],
       level: IntermediateLevel.fromJson(json['level']),
-      img: Img.fromJson(json['img']),
+      img: json['img'] != null ? Img.fromJson(json['img']) : Img(urlImg: ''),
       audio:json['audio'] != null ? Audio.fromJson(json['audio']) : null,
       video:json['video'] != null ? Video.fromJson(json['video']) : null,
       status: json['status']

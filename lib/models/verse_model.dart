@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 
 class VerseModel extends GridItem {
+  @override
   final String? id;
   final int? chapterId;
   final int verse;
