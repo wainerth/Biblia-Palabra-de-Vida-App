@@ -5,16 +5,21 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Para Android 13+ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Para Android 13+ -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <!-- Para cambiar foto de perfil (Android 13+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Para grabar audio (en la sección de Oraciones (Función  Opcional) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Para descargar audio al teléfono (los cuentos si el usuario quiere descargarlos Opcional) -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     
     <queries>
-        <!-- Necesario para Android 11+ -->
-        <package android:name="amistad.online2" /> <!-- Ejemplo -->
-        <!-- Agrega aquí los paquetes que quieras verificar -->
-        <!-- O usa este enfoque más amplio: -->
+        <!-- Necesario para Android 11+ (se le muestran al usuario Diálogos para verificar o confirmar si quiere usar esta app Opcional ) --> 
+        <package android:name="amistad.online2" /> 
+
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="amistad.online2" />
@@ -27,9 +32,7 @@
     <application
         android:label="Biblia Palabra de vida"
         android:name="${applicationName}"
-        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true">
 
         <meta-data
@@ -84,7 +87,7 @@
 
         <service
             android:name="com.dexterous.flutterlocalnotifications.ForegroundService"
-            android:foregroundServiceType="mediaProjection" />
+            android:foregroundServiceType="dataSync" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"

@@ -4,8 +4,9 @@ import 'dart:io';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_sound/public/flutter_sound_recorder.dart';
+import 'package:flutter_sound/public/flutter_sound.dart' as fs;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:audioplayers/audioplayers.dart' as ap;
 
 class AudioRecorderWidget extends StatefulWidget {
   final bool saveToDevice;
@@ -22,12 +23,12 @@ class AudioRecorderWidget extends StatefulWidget {
 
 class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
     with SingleTickerProviderStateMixin {
-  final FlutterSoundRecorder _soundRecorder = FlutterSoundRecorder();
-  AudioPlayer audioPlayer = AudioPlayer();
+  final fs.FlutterSoundRecorder _soundRecorder = fs.FlutterSoundRecorder();
+  ap.AudioPlayer audioPlayer = ap.AudioPlayer();
   StreamSubscription<Duration>? _durationSubscription;
   StreamSubscription<Duration>? _positionSubscription;
   StreamSubscription<void>? _playerCompleteSubscription;
-  StreamSubscription<PlayerState>? _playerStateChangeSubscription;
+  StreamSubscription<ap.PlayerState>? _playerStateChangeSubscription;
 
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -45,60 +46,92 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
       _recordingDuration.toString().split('.').first;
   String? _audioPath;
 
-  Future<bool> _hasMicrophonePermission() async {
-    PermissionStatus status = await Permission.microphone.status;
-    if (status.isDenied) {
-      status = await Permission.microphone.request();
+  bool _isRecorderReady = false;
+  bool _hasMicPermission = false;
+
+  // CORREGIDO: Manejo de permisos más robusto
+  Future<bool> _checkAndRequestMicrophonePermission() async {
+    try {
+      // Verificar estado actual
+      PermissionStatus status = await Permission.microphone.status;
+
+      if (kDebugMode) {
+        print('🎤 Estado permiso micrófono: $status');
+      }
+
+      if (status.isGranted) {
+        return true;
+      }
+
+      if (status.isDenied) {
+        // Mostrar explicación si es la primera vez
+        if (await Permission.microphone.shouldShowRequestRationale) {
+          await _showPermissionExplanation();
+        }
+
+        // Solicitar permiso
+        status = await Permission.microphone.request();
+
+        if (kDebugMode) {
+          print('🎤 Respuesta solicitud permiso: $status');
+        }
+
+        return status.isGranted;
+      }
+
+      if (status.isPermanentlyDenied) {
+        // Guiar al usuario a configuraciones
+        await _openAppSettings();
+        return false;
+      }
+
+      return false;
+    } catch (e) {
+      if (kDebugMode) {
+        print('🎤 Error verificación permiso: $e');
+      }
+      return false;
     }
-    return status.isGranted;
   }
 
   Future<void> initRecorder() async {
     try {
-      if (await _hasMicrophonePermission()) {
-        await _soundRecorder.openRecorder();
-      } else {
+      // Primero verificar/obtener permiso
+      _hasMicPermission = await _checkAndRequestMicrophonePermission();
+
+      if (!_hasMicPermission) {
         if (kDebugMode) {
-          print('Microphone permission denied');
+          print('🎤 Permiso de micrófono denegado');
         }
+        if (mounted) {
+          await _showPermissionDeniedDialog();
+        }
+        return;
+      }
+
+      // Abrir grabador solo si tenemos permiso
+      await _soundRecorder.openRecorder();
+      _isRecorderReady = true;
+
+      if (kDebugMode) {
+        print('🎤 Grabador inicializado exitosamente');
       }
     } catch (e) {
       if (kDebugMode) {
-        print(e);
+        print('🎤 Error inicializando grabador: $e');
       }
-    }
-    setState(() {});
-  }
+      _isRecorderReady = false;
 
-  Future<void> startRecording() async {
-    try {
-      setState(() {
-        _isRecording = true;
-        _recordingDuration = Duration.zero;
-      });
-      await _soundRecorder.startRecorder(toFile: 'audio.aac');
-      
-      _recordingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-        setState(() {
-          _recordingDuration += Duration(seconds: 1);
-        });
-      });
-    } on Exception catch (e) {
-      if (kDebugMode) {
-        print('Codec not supported: $e');
-      }
       if (mounted) {
-        showDialog(
+        await showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Error de codificación'),
-              content: Text('El codec seleccionado no es compatible.'),
+              title: Text('Error de inicialización'),
+              content: Text('No se pudo inicializar el grabador de audio.'),
               actions: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                   child: Text('Aceptar'),
                 ),
               ],
@@ -106,75 +139,270 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
           },
         );
       }
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> startRecording() async {
+    try {
+      // Verificar permiso nuevamente (por si cambió)
+      if (!_hasMicPermission) {
+        _hasMicPermission = await _checkAndRequestMicrophonePermission();
+      }
+
+      if (!_hasMicPermission) {
+        if (mounted) {
+          await _showPermissionDeniedDialog();
+        }
+        return;
+      }
+
+      // Verificar que el grabador esté abierto
+      if (_isRecording) {
+        if (kDebugMode) {
+          print('🎤 Ya se está grabando');
+        }
+        return;
+      }
+
+      // Verificar que el grabador esté listo
+      if (!_isRecorderReady) {
+        await initRecorder();
+      }
+
+      if (!_isRecorderReady) {
+        if (mounted) {
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Error'),
+                content: Text('El grabador no está disponible.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text('Aceptar'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+        return;
+      }
+
+      // Iniciar grabación
+      setState(() {
+        _isRecording = true;
+        _recordingDuration = Duration.zero;
+      });
+
+      // ✅ IMPORTANTE: Usar AAC codec (compatible)
+      await _soundRecorder.startRecorder(
+        toFile: 'audio.aac',
+        codec: fs.Codec.aacADTS, // Codec más compatible
+      );
+
+      // Iniciar timer para mostrar duración
+      _recordingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+        if (mounted) {
+          setState(() {
+            _recordingDuration += Duration(seconds: 1);
+          });
+        }
+      });
+
+      if (kDebugMode) {
+        print('🎤 Grabación iniciada');
+      }
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print('🎤 Error codec: $e');
+      }
+
+      if (mounted) {
+        setState(() {
+          _isRecording = false;
+          _isRecorderReady = false;
+        });
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error de grabación'),
+              content:
+                  Text('No se pudo iniciar la grabación. Intente nuevamente.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Aceptar'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+
+      // Resetear estado
+      if (mounted) {
+        setState(() {
+          _isRecording = false;
+        });
+      }
     } catch (e) {
       if (kDebugMode) {
-        print('Error al iniciar la grabación: $e');
+        print('🎤 Error al iniciar grabación: $e');
+      }
+
+      if (mounted) {
+        setState(() {
+          _isRecording = false;
+          _isRecorderReady = false;
+        });
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text('Error inesperado al grabar.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Aceptar'),
+                ),
+              ],
+            );
+          },
+        );
       }
     }
   }
 
   Future<void> stopRecording() async {
-    final path = await _soundRecorder.stopRecorder();
-    // final String? pathFile = await _soundRecorder.getRecordURL(path: path!);
-      if (path != null) {
-        final file = File(path);
-        if (widget.saveToDevice == true) {
-          // Ejemplo de almacenamiento en el directorio de documentos
-          // final directory = await getApplicationDocumentsDirectory();
-          // final newPath =
-          //     '${directory.path}/audio_${DateTime.now().millisecondsSinceEpoch}.aac';
-          // final savedFile = await file.copy(newPath);
-        }
-        widget.onAudioRecorded.call(file);
+    try {
+      _recordingTimer?.cancel();
+
+      if (!_isRecording) {
+        return;
       }
-    _recordingTimer?.cancel();
-    if (kDebugMode) {
-      print('Record finished: $path');
+
+      final path = await _soundRecorder.stopRecorder();
+
+      if (kDebugMode) {
+        print('🎤 Grabación detenida. Ruta: $path');
+      }
+
+      if (path != null && path.isNotEmpty) {
+        final file = File(path);
+
+        // Verificar que el archivo existe
+        if (await file.exists()) {
+          // Llamar callback con el archivo
+          widget.onAudioRecorded.call(file);
+
+          if (kDebugMode) {
+            print(
+                '🎤 Archivo guardado: ${file.path} (${await file.length()} bytes)');
+          }
+        } else {
+          throw Exception('Archivo grabado no encontrado');
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _isRecording = false;
+          _isPlaying = false;
+          _audioPath = path;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('🎤 Error deteniendo grabación: $e');
+      }
+
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text('Error al guardar la grabación.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Aceptar'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
-    setState(() {
-      _isRecording = false;
-      _isPlaying = false;
-      _audioPath = path;
-    });
   }
 
   void _playAudio() async {
-    audioPlayer.setVolume(volume);
-    await audioPlayer.play(DeviceFileSource(_audioPath!));
-    setState(() {
-      _isPlaying = true;
-    });
+    if (_audioPath == null) return;
+
+    try {
+      audioPlayer.setVolume(volume);
+      await audioPlayer.play(ap.DeviceFileSource(_audioPath!));
+      setState(() {
+        _isPlaying = true;
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('🎤 Error reproduciendo audio: $e');
+      }
+    }
   }
 
   void _pauseAudio() async {
-    await audioPlayer.pause();
-    setState(() {
-      _isPlaying = false;
-    });
+    try {
+      await audioPlayer.pause();
+      setState(() {
+        _isPlaying = false;
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('🎤 Error pausando audio: $e');
+      }
+    }
   }
 
   void _initStreams() {
     _durationSubscription = audioPlayer.onDurationChanged.listen((duration) {
-      setState(() => _duration = duration);
+      if (mounted) {
+        setState(() => _duration = duration);
+      }
     });
 
     _positionSubscription = audioPlayer.onPositionChanged.listen((p) {
-      setState(() => _position = p);
+      if (mounted) {
+        setState(() => _position = p);
+      }
     });
 
     _playerCompleteSubscription = audioPlayer.onPlayerComplete.listen((event) {
-      setState(() {
-        _position = Duration.zero;
-        _isPlaying = false;
-      });
+      if (mounted) {
+        setState(() {
+          _position = Duration.zero;
+          _isPlaying = false;
+        });
+      }
     });
 
     _playerStateChangeSubscription =
         audioPlayer.onPlayerStateChanged.listen((state) {
-      if (state == PlayerState.playing) {
-        setState(() => _isPlaying = true);
-      } else if (state == PlayerState.paused) {
-        setState(() => _isPlaying = false);
+      if (mounted) {
+        if (state == ap.PlayerState.playing) {
+          setState(() => _isPlaying = true);
+        } else if (state == PlayerState.paused) {
+          setState(() => _isPlaying = false);
+        }
       }
     });
   }
@@ -182,6 +410,7 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
   @override
   void initState() {
     super.initState();
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
@@ -191,8 +420,10 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
       parent: _controller,
       curve: Curves.easeInOut,
     ));
-
+    // Inicializar grabador
     initRecorder();
+
+    // Inicializar streams de reproducción
     _initStreams();
   }
 
@@ -204,6 +435,10 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
     _playerStateChangeSubscription?.cancel();
     _recordingTimer?.cancel();
     audioPlayer.dispose();
+    if (_isRecorderReady) {
+      _soundRecorder.closeRecorder();
+    }
+
     _controller.dispose();
 
     super.dispose();
@@ -369,19 +604,67 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
             }
           ],
         ),
-        // Text.rich(
-        //   style: TextStyle(color: Colors.white),
-        //   TextSpan(
-        //     text: _isRecording
-        //         ? 'Grabando: ${_recordingDurationText.substring(3)}'
-        //         : _position != null
-        //             ? '${_positionText.substring(3)} / ${_durationText.substring(3)}'
-        //             : _duration != null
-        //                 ? _durationText.substring(3)
-        //                 : '0:00 / 0:00',
-        //   ),
-        // )
       ],
     );
+  }
+
+  Future<void> _showPermissionExplanation() async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Permiso de micrófono necesario'),
+        content: Text(
+            'Esta aplicación necesita acceso al micrófono para grabar audio. '
+            'El audio grabado solo se usará dentro de la aplicación.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Continuar con solicitud
+            },
+            child: Text('Continuar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showPermissionDeniedDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Permiso denegado'),
+        content:
+            Text('Necesitas permitir el acceso al micrófono para grabar audio. '
+                'Puedes habilitarlo en la configuración de la aplicación.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _openAppSettings();
+            },
+            child: Text('Abrir configuración'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openAppSettings() async {
+    try {
+      await openAppSettings();
+    } catch (e) {
+      if (kDebugMode) {
+        print('🎤 Error abriendo configuración: $e');
+      }
+    }
   }
 }

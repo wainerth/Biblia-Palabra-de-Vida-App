@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
@@ -64,11 +63,9 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   getDirectory() async {
-    final externalDir = await getExternalStorageDirectory();
     final internalDir = await getApplicationDocumentsDirectory();
     if (!mounted) return;
     setState(() {
-      externalStorage = externalDir;
       internalStorage = internalDir;
     });
   }
@@ -114,74 +111,54 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   Future<void> downloadFile(
       BuildContext context1, String url, String fileName) async {
     LoadingService().showLoading(context);
-    // declaración de variables
-    Directory? externalDir;
-    Directory? internalDir;
+    Directory? downloadDir;
 
-    PermissionStatus storageStatus = PermissionStatus.denied;
     try {
       // Obtengo los diferentes directorios dependiendo de la plataforma
       if (Platform.isAndroid) {
-        final newStatus = await Permission.storage.request();
-        setState(() {
-          storageStatus = newStatus;
-        });
-        externalDir = await getExternalStorageDirectory();
-        internalDir = await getApplicationDocumentsDirectory();
+        downloadDir = await _getInternalDownloadDirectory();
+        // internalDir = await getExternalStorageDirectory();
       } else {
-        internalDir = await getApplicationDocumentsDirectory();
+        downloadDir = await getApplicationDocumentsDirectory();
       }
 
       // tomo el directorio de descarga si tengo permisos uso el externo si no el interno
-      Directory? savedDir;
-      if (Platform.isAndroid &&
-          storageStatus.isGranted &&
-          externalDir != null) {
-        savedDir = Directory('${externalDir.path}/Download');
-      } else {
-        savedDir = Directory('${internalDir.path}/Download');
-      }
+      // Crear directorio si no existe
+      final savedDir = Directory('${downloadDir?.path}/Download');
+
       if (!await savedDir.exists()) {
         await savedDir.create(recursive: true);
       }
 
-      if (savedDir != null) {
-        Future.delayed(Duration(seconds: 1));
-        final taskId = await FlutterDownloader.enqueue(
-          url: url,
-          savedDir: savedDir.path,
-          fileName: "$fileName.mp3",
-          showNotification: true,
-          openFileFromNotification: Platform.isIOS ? false : true,
-        );
+      // ✅ VERIFICAR que tenemos permisos de escritura (no storage)
+      final canWrite = await _checkWritePermission(downloadDir!);
+      if (!canWrite) {
+        throw Exception('No se pudo escribir en el directorio');
+      }
 
-        if (kDebugMode) {
-          print('Descarga iniciada con ID: $taskId');
-        }
-        if (taskId != null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: StyleColor.turquoise,
-                content: Text(
-                  'Descarga iniciada en ${savedDir == externalDir ? 'almacenamiento externo' : 'almacenamiento interno'}. Revisar notificaciones.',
-                  style: StylesApp(context).textStyleBody12,
-                ),
+      Future.delayed(Duration(seconds: 1));
+      final taskId = await FlutterDownloader.enqueue(
+        url: url,
+        savedDir: savedDir.path,
+        fileName: "$fileName.mp3",
+        showNotification: true,
+        openFileFromNotification: Platform.isIOS ? false : true,
+      );
+
+      if (kDebugMode) {
+        print('Descarga iniciada con ID: $taskId');
+      }
+      if (taskId != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: StyleColor.turquoise,
+              content: Text(
+                '✅ Descarga iniciada. El archivo se guardará en: ${savedDir.path}',
+                style: StylesApp(context).textStyleBody12,
               ),
-            );
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: StyleColor.redLight,
-                content: Text(
-                  'Error al iniciar la descarga.',
-                  style: StylesApp(context).textStyleBody12,
-                ),
-              ),
-            );
-          }
+            ),
+          );
         }
       } else {
         if (mounted) {
@@ -189,13 +166,14 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             SnackBar(
               backgroundColor: StyleColor.redLight,
               content: Text(
-                'No se pudo acceder al almacenamiento.',
+                'Error al iniciar la descarga.',
                 style: StylesApp(context).textStyleBody12,
               ),
             ),
           );
         }
       }
+
       LoadingService().hideLoading();
     } catch (e) {
       LoadingService().hideLoading();
@@ -398,12 +376,13 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                             ? null
                                             : () async {
                                                 Navigator.pop(context);
-                                                downloadFile(
-                                                    context,
-                                                    widget.pathUrl,
-                                                    widget.fileName == null
-                                                        ? 'audio.mp3'
-                                                        : widget.fileName!);
+                                                await downloadFile(
+                                                  context,
+                                                  widget.pathUrl,
+                                                  widget.fileName == null
+                                                      ? 'audio'
+                                                      : widget.fileName!,
+                                                );
                                               },
                                       ),
                                       ListTile(
@@ -439,7 +418,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                                     files: [
                                                       XFile(tempFile.path),
                                                     ],
-                                                    text:                                                        '¡Escucha este audio!',
+                                                    text:
+                                                        '¡Escucha este audio!',
                                                   ));
 
                                                   // 4. Opcional: Eliminar el temporal después de compartir
@@ -533,6 +513,113 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         _isPlaying = false;
         loading = false;
       });
+    }
+  }
+
+  Future _checkWritePermission(Directory downloadDir) async {
+    try {
+      // Intentar crear un archivo temporal
+      final testFile = File('${downloadDir.path}/.test_write_permission.tmp');
+      await testFile.writeAsString('test');
+      await testFile.delete();
+      return true;
+    } catch (e) {
+      if (kDebugMode) print('🚫 Error escritura: $e');
+      return false;
+    }
+  }
+
+  Future<Directory?> _getInternalDownloadDirectory() async {
+    if (Platform.isAndroid) {
+      // Para Android 10+, usar el directorio específico de la app
+      final appDocDir = await getApplicationDocumentsDirectory();
+      final downloadDir = Directory('${appDocDir.path}/Download');
+
+      if (!await downloadDir.exists()) {
+        await downloadDir.create(recursive: true);
+      }
+
+      return downloadDir;
+    } else {
+      // Para iOS
+      final appDocDir = await getApplicationDocumentsDirectory();
+      return appDocDir;
+    }
+  }
+
+  Future<void> downloadFileDirect(
+      BuildContext context1, String url, String fileName) async {
+    LoadingService().showLoading(context);
+
+    try {
+      // 1. Obtener directorio
+      final directory = await getApplicationDocumentsDirectory();
+      final downloadDir = Directory('${directory.path}/Download');
+
+      if (!await downloadDir.exists()) {
+        await downloadDir.create(recursive: true);
+      }
+
+      // 2. Descargar con Dio
+      final dio = Dio();
+      final savePath = '${downloadDir.path}/$fileName.mp3';
+
+      await dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            final progress = (received / total * 100).toStringAsFixed(0);
+            if (kDebugMode) print('📥 Descargando: $progress%');
+          }
+        },
+      );
+
+      // 3. Notificar éxito
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: StyleColor.turquoise,
+            content: Text(
+              '✅ Descarga completada: $fileName.mp3',
+              style: StylesApp(context).textStyleBody12,
+            ),
+          ),
+        );
+      }
+
+      // 4. (Opcional) Abrir el archivo o notificar al sistema
+      await _notifyDownloadComplete(savePath, fileName);
+    } catch (e) {
+      if (kDebugMode) print('🚫 Error descarga directa: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: StyleColor.redLight,
+            content: Text(
+              '❌ Error descargando: ${e.toString()}',
+              style: StylesApp(context).textStyleBody12,
+            ),
+          ),
+        );
+      }
+    } finally {
+      LoadingService().hideLoading();
+    }
+  }
+
+  // ✅ Notificar al sistema que hay un nuevo archivo (Android)
+  Future<void> _notifyDownloadComplete(String filePath, String fileName) async {
+    if (Platform.isAndroid) {
+      try {
+        // Esto actualiza la galería/media scanner
+        await FlutterDownloader.loadTasksWithRawQuery(
+            query:
+                'UPDATE downloaded_files SET status=3 WHERE file_path="$filePath"');
+      } catch (e) {
+        if (kDebugMode) print('⚠️ No se pudo notificar al sistema: $e');
+      }
     }
   }
 }
