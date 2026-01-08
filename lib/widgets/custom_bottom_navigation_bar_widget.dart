@@ -32,6 +32,7 @@ class CustomBottomNavigationBarWidget extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
       Container(
+        padding: EdgeInsets.zero,
         decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(

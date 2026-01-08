@@ -1,4 +1,3 @@
-
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -19,10 +18,6 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController textEmail = TextEditingController();
   TextEditingController textPass = TextEditingController();
   bool _obscureTextPass = true;
-  // final LocalAuthentication auth = LocalAuthentication();
-  // bool _canCheckBiometrics = false;
-  // List<BiometricType> _availableBiometrics = <BiometricType>[];
-  // String _authorized = 'No autorizado';
 
   @override
   Widget build(BuildContext context) {
@@ -152,15 +147,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                       LoadingService().hideLoading();
                                       // ignore: use_build_context_synchronously
                                       await showCustomDialog(context,
-                                          message: user.error!,
+                                          message: user.userFriendlyError!,
+                                          messageDetail: user.error ?? '',
+                                          showDetails: true,
                                           dialogType: DialogType.error);
                                     } else {
                                       LoadingService().hideLoading();
-                                      Navigator.pushNamed(
-                                          context, '/layoutPage');
+                                      if (!mounted) return;
+                                      Navigator.pushNamedAndRemoveUntil(context,
+                                          '/layoutPage', (route) => false);
                                     }
                                   },
-                                  width: isTablet(context) ? StylesApp(context).formWidth : StylesApp(context).btnHeight.width,
+                                  width: isTablet(context)
+                                      ? StylesApp(context).formWidth
+                                      : StylesApp(context).btnHeight.width,
                                   height: StylesApp(context).btnHeight.height,
                                 ),
                                 const SizedBox(
@@ -189,15 +189,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                     if (user.error != null) {
                                       LoadingService().hideLoading();
                                       await showCustomDialog(context,
-                                          message: user.error!,
+                                          message: user.userFriendlyError! ,
+                                          messageDetail: user.error ?? '',
+                                          showDetails: true,
                                           dialogType: DialogType.error);
                                     } else {
                                       LoadingService().hideLoading();
-                                      Navigator.pushNamed(
-                                          context, '/layoutPage');
+                                      if (!mounted) return;
+                                      Navigator.pushNamedAndRemoveUntil(context,
+                                          '/layoutPage', (route) => false);
                                     }
                                   },
-                                  width:  isTablet(context) ? StylesApp(context).formWidth :  StylesApp(context).btnHeight.width,
+                                  width: isTablet(context)
+                                      ? StylesApp(context).formWidth
+                                      : StylesApp(context).btnHeight.width,
                                   height: StylesApp(context).btnHeight.height,
                                 ),
                                 const SizedBox(

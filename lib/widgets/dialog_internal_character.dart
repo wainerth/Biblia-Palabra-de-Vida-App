@@ -25,12 +25,13 @@ class DialogInternalCharacter extends StatefulWidget {
 class _DialogInternalCharacterState extends State<DialogInternalCharacter> {
   List<ReferenceBiblicalModel> references = [];
 
-   @override
+  @override
   void initState() {
     // consultamos las referencias
     WidgetsBinding.instance.addPostFrameCallback((_) => initialized());
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     final imageUrl = '${GraphQLConfig.urlServidor}${widget.data.img.urlImg}';
@@ -125,35 +126,38 @@ class _DialogInternalCharacterState extends State<DialogInternalCharacter> {
           SizedBox(
             height: 15.0,
           ),
-          ButtonThemeWidget(
-            text: "Referencias Bíblicas",
-            buttonStyle: StylesApp(context).btnWidgetSmall,
-            onPressed: references.isEmpty
-                ? null
-                : () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return DialogReference(
-                            currentTheme: widget.currentTheme,
-                            title: "${widget.data.typeNameChar} ${widget.data.name}",
-                            data: references,
-                            onActionReferences: (InputDataSearchModel data) {
-                              widget.onActionReferences!(data);
-                              Navigator.pop(context);
-                            },
-                          );
-                        });
-                  },
-          ),
-            SizedBox(
+          if (references.isNotEmpty)
+            ButtonThemeWidget(
+              text: "Referencias Bíblicas",
+              buttonStyle: StylesApp(context).btnWidgetSmall,
+              onPressed: references.isEmpty
+                  ? null
+                  : () {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return DialogReference(
+                              currentTheme: widget.currentTheme,
+                              title:
+                                  "${widget.data.typeNameChar} ${widget.data.name}",
+                              data: references,
+                              onActionReferences: (InputDataSearchModel data) {
+                                widget.onActionReferences!(data);
+                                Navigator.pop(context);
+                              },
+                            );
+                          });
+                    },
+            ),
+          SizedBox(
             height: 15.0,
           ),
         ],
       ),
     );
   }
-   void initialized() async {
+
+  void initialized() async {
     // final responseReferences = await getCharacterFirstAppearance(widget.data.id);
     // if (responseReferences.error != null) {
     //   await showCustomDialog(

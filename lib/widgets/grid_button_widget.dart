@@ -33,6 +33,30 @@ class _GridButtonWidgetState<T extends GridItem>
   T? _firstSelectedItem; // Guarda el primer ítem seleccionado para el rango
   int? _initialVerse;
   int? _endVerse;
+
+  // Determinar si es tablet
+  bool get isTablet {
+    final mediaQuery = MediaQuery.of(context);
+    return mediaQuery.size.shortestSide >= 600;
+  }
+
+  // Tamaños responsivos para los botones
+  double get buttonSize {
+    return isTablet ? 35.0 : 25.0; // Más grande en tablet
+  }
+
+  double get buttonFontSize {
+    return isTablet ? 16.0 : 14.0; // Texto más grande en tablet
+  }
+
+  double get buttonBorderRadius {
+    return isTablet ? 12.0 : 8.0; // Bordes más redondeados en tablet
+  }
+
+  double get buttonBorderWidth {
+    return isTablet ? 3.0 : 2.0; // Borde más grueso en tablet
+  }
+
   @override
   void initState() {
     super.initState();
@@ -48,16 +72,6 @@ class _GridButtonWidgetState<T extends GridItem>
       setState(() {
         _selectedItems =
             widget.initiallySelected != null ? widget.initiallySelected! : [];
-        if (widget.initiallySelected != null) {
-          if (widget.initiallySelected!.isEmpty) {
-            _initialVerse = null;
-            _endVerse = null;
-          }
-          // if (_selectedItems.isNotEmpty) {
-              _selectedItems = widget.initiallySelected ?? [];
-  
-          // }
-        }
       });
       if (kDebugMode) {
         print("selectedItem $_selectedItems");
@@ -105,9 +119,7 @@ class _GridButtonWidgetState<T extends GridItem>
     widget.onTap?.call(_selectedItems);
   }
 
-  bool _isSelected(T item){
-    
-    
+  bool _isSelected(T item) {
     return _selectedItems.contains(item);
   }
 
@@ -117,9 +129,10 @@ class _GridButtonWidgetState<T extends GridItem>
         ? Center(child: LoadingIndicator())
         : GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
-              crossAxisSpacing: 10.0,
-              mainAxisSpacing: 10.0,
+              crossAxisCount: isTablet ? 9 : 7, // Más columnas en tablet
+              crossAxisSpacing: isTablet ? 12.0 : 10.0, // Más espacio en tablet
+              mainAxisSpacing: isTablet ? 12.0 : 10.0, // Más espacio en tablet
+              childAspectRatio: 1.0, // Mantener cuadrados
             ),
             itemCount: widget.data.length,
             itemBuilder: (context, index) {
@@ -132,29 +145,29 @@ class _GridButtonWidgetState<T extends GridItem>
               return GestureDetector(
                 onTap: () => _handleItemTap(item),
                 child: Container(
-                  width: 25,
-                  height: 25,
+                  width: buttonSize,
+                  height: buttonSize,
                   decoration: BoxDecoration(
                     color: isSelected
                         ? StyleColor.orange
                         : widget.currentTheme.buttonColor,
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(buttonBorderRadius),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.35),
-                        blurRadius: 5.0,
-                        offset: Offset(5, 3),
+                        blurRadius: isTablet ? 6.0 : 5.0, // Sombra más suave en tablet
+                        offset: Offset(isTablet ? 4 : 3, isTablet ? 3 : 2),
                       ),
                     ],
                     border: isRangeStart
                         ? Border.all(
                             color: Colors.white,
-                            width: 3.0, // Borde más grueso para el inicio
+                            width: buttonBorderWidth + 1.0, // Borde más grueso para el inicio
                           )
                         : isSelected
                             ? Border.all(
                                 color: Colors.white,
-                                width: 2.0,
+                                width: buttonBorderWidth,
                               )
                             : null,
                   ),
@@ -162,6 +175,7 @@ class _GridButtonWidgetState<T extends GridItem>
                     child: Text(
                       item.displayText,
                       style: StylesApp(context).textStyleBody16.copyWith(
+                            fontSize: buttonFontSize,
                             color: isSelected
                                 ? Colors.white
                                 : widget.currentTheme.buttonTextColor,

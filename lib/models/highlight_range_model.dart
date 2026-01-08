@@ -20,8 +20,25 @@ class HighlightRangeModel {
         'endIndex': endIndex,
         'color': color,
       };
+// Método copyWith
+  HighlightRangeModel copyWith({
+    String? id,
+    int? verse,
+    int? startIndex,
+    int? endIndex,
+    String? color,
+  }) {
+    return HighlightRangeModel(
+      id: id ?? this.id,
+      verse: verse ?? this.verse,
+      startIndex: startIndex ?? this.startIndex,
+      endIndex: endIndex ?? this.endIndex,
+      color: color ?? this.color,
+    );
+  }
 
-  factory HighlightRangeModel.fromJson(Map<String, dynamic> json) => HighlightRangeModel(
+  factory HighlightRangeModel.fromJson(Map<String, dynamic> json) =>
+      HighlightRangeModel(
         id: json['id'],
         verse: json['verse'],
         startIndex: json['startIndex'],

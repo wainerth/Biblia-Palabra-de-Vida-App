@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/services/streak_service.dart';
 import 'package:flutter/foundation.dart';
@@ -17,6 +16,12 @@ import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
+// Importar los nuevos componentes
+import 'responsive_layout.dart';
+import 'question_header.dart';
+import 'question_card.dart';
+import 'progress_controls.dart';
+
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
 
@@ -25,9 +30,6 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
-  int MAX_SCORE = 0;
-  int MEDIUM_SCORE = 0;
-  int LOW_SCORE = 0;
   final options = [
     {"option": "A", "color": "A8A1E7"},
     {"option": "B", "color": "C3F0F9"},
@@ -63,7 +65,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       status: 0,
       answers: [],
       isOrdering: false);
-  // ResponseData? responseSend;
+
   int numberQuestion = 0;
   List currentAnswers = [];
   List<Question> questions = [];
@@ -101,13 +103,18 @@ class _QuestionScreenState extends State<QuestionScreen> {
 //draggable variables
   bool orderedCompleted = false;
   List<Answer> orderedAnswers = [];
+
+  // Constantes
+  int MAX_SCORE = 0;
+  int MEDIUM_SCORE = 0;
+  int LOW_SCORE = 0;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generateData(context);
       getFontSizeText();
-      // _checkForStreakCelebration();
     });
   }
 
@@ -116,7 +123,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     super.dispose();
   }
 
-  getFontSizeText() async {
+  Future<void> getFontSizeText() async {
     double? fontSize = await PreferencesManager().getFontSizeQuestion();
     setState(() => fontSizeText = fontSize);
   }
@@ -125,6 +132,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
   //función que se encarga de cargar los datos iniciales de la pantalla
   ///
   Future<void> _generateData(BuildContext context) async {
+     setState (()=>isLoading = true);
+
     errorMessage = null;
     LoadingService().showLoading(context);
 
@@ -174,21 +183,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           errorMessage = questionResponse.error;
           return;
         }
-        setState(() {
-          questions = questionResponse.data
-              .map((question) => Question.fromJson(removeTypename(question)))
-              .cast<Question>()
-              .toList();
-
-          for (int i = 0; i < questions.length; i++) {
-            for (int j = 0; j < questions[i].answers.length; j++) {
-              questions[i].answers[j].option = options[j]["option"];
-            }
-          }
-          currentQuestion = questions[currentIndex];
-          numberQuestion = currentIndex + 1;
-          currentAnswers = questions[currentIndex].answers;
-        });
+        _initializeQuestions(questionResponse.data);
       } catch (e) {
         errorMessage = "An error occurred: $e";
       } finally {
@@ -198,6 +193,24 @@ class _QuestionScreenState extends State<QuestionScreen> {
         });
       }
     }
+  }
+
+  void _initializeQuestions(List<dynamic> data) {
+    setState(() {
+      questions = data
+          .map((question) => Question.fromJson(removeTypename(question)))
+          .cast<Question>()
+          .toList();
+
+      for (int i = 0; i < questions.length; i++) {
+        for (int j = 0; j < questions[i].answers.length; j++) {
+          questions[i].answers[j].option = options[j]["option"];
+        }
+      }
+      currentQuestion = questions[currentIndex];
+      numberQuestion = currentIndex + 1;
+      currentAnswers = questions[currentIndex].answers;
+    });
   }
 
   ///
@@ -221,7 +234,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
     if (!_isCorrect) {
       setState(() {
         _suggestionSelected = true;
-
         failedAttempts += 1;
       });
     } else {
@@ -232,6 +244,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
     setState(() {
       _selectionCompleted = true;
     });
+    _showAnswerSnackbar(context);
+  }
+
+  void _showAnswerSnackbar(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: Duration(hours: 24),
@@ -240,35 +256,24 @@ class _QuestionScreenState extends State<QuestionScreen> {
           children: [
             Row(
               children: [
-                Icon(
-                  _isCorrect ? Icons.check_circle : Icons.error,
-                  color: Colors.white,
-                ),
+                Icon(_isCorrect ? Icons.check_circle : Icons.error,
+                    color: Colors.white),
                 SizedBox(width: 8),
-                Text(
-                  _isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!',
-                  style: StylesApp(context).textStyleBody12,
-                ),
+                Text(_isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!'),
               ],
             ),
-            // botón de siguiente
             TextButton(
               onPressed: () async {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 await funcAnswerValidate();
-                if (!mounted) return;
-                setState(() {
-                  _isAnswerSelected = false;
-                  _suggestionSelected = false;
-                });
-                // });
+                if (mounted) {
+                  setState(() {
+                    _isAnswerSelected = false;
+                    _suggestionSelected = false;
+                  });
+                }
               },
-              child: Text(
-                'Siguiente',
-                style: StylesApp(context)
-                    .textStyleBody12
-                    .copyWith(color: Colors.white),
-              ),
+              child: Text('Siguiente', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -353,7 +358,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               failedAttempts: failedAttempts,
               scoreLastAttempt: 0,
               completed: false,
-              level: LevelUser(levelNumber: 0, id: "", name: ""),
+              level: LevelUser(levelNumber: level!.levelNumber, id: "", name: ""),
               status: true);
           activityIsCompleted = true;
           showStepCompleted = true;
@@ -533,207 +538,366 @@ class _QuestionScreenState extends State<QuestionScreen> {
     MAX_SCORE = config["highScore"];
     MEDIUM_SCORE = config["mediumScore"];
     LOW_SCORE = config["lowScore"];
+
     return PopScope(
-      canPop:
-          true, // Permite que la pantalla sea sacada de la pila de navegación
+      canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       },
       child: Scaffold(
         body: SafeArea(
-          child: SizedBox(
-            height: MediaQuery.sizeOf(context).height,
-            child: Column(
-              children: [
-                if (isLoading) ...{
-                  Container()
-                } else ...{
-                  if (errorMessage != null) ...{
-                    BuildErrorWidget(
-                      errorMessage: errorMessage!,
-                      onRetry: () async => _generateData(context),
-                      onBack: () => Navigator.pop(context),
-                    )
-                  } else ...{
-                    Column(
-                      children: <Widget>[
-                        HeaderNotDetailsStageWidget(
-                          showStage: !showTitleObtained &&
-                              !showRewardObtained &&
-                              !showPrizeWon,
-                          showAction: !showTitleObtained &&
-                              !showRewardObtained &&
-                              !showPrizeWon,
-                          title:
-                              "Conoce el ${course != null ? course!.titleCourse : ''}",
-                          stage: stage != null
-                              ? (stage!.sectionNumber).toString()
-                              : '',
-                          subtitle: stage != null ? stage!.sectionName : '',
-                          details: stage,
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ],
-                    ),
-                    if (!showTitleObtained &&
-                        !showRewardObtained &&
-                        !showPrizeWon &&
-                        !showLastStageCompleted) ...{
-                      Container(
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                        width: double.infinity,
-                        // height: 25.0,
-                        decoration: BoxDecoration(
-                            color: StyleColor.orange,
-                            borderRadius: BorderRadius.circular(8.0)),
-                        child: Text(
-                          "${level?.name} - Paso ${numberQuestion}",
-                          style: StylesApp(context).textStyleBody5,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 19.0,
-                      ),
-                    },
-                    if (!activityIsCompleted) ...{
-                      // we show  question and answer or ordering
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            constraints: BoxConstraints(minHeight: 68.0),
-                            margin: EdgeInsets.symmetric(horizontal: 6.0),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 11.0, vertical: 15.0),
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Color(0XFFFFBB00),
-                              borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withValues(alpha: .25),
-                                    offset: Offset(0.0, 4.0),
-                                    blurStyle: BlurStyle.outer,
-                                    blurRadius: 4.0)
-                              ],
-                            ),
-                            child: Text(
-                              currentQuestion.question,
-                              style: StylesApp(context)
-                                  .textStyleBody12
-                                  .copyWith(color: Colors.black),
-                            ),
-                          ),
-                          Positioned(
-                            top: -20,
-                            right: 10,
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Oportunidades: ",
-                                  style: StylesApp(context)
-                                      .textStyleBody10
-                                      .copyWith(color: StyleColor.grayMedium),
-                                ),
-                                Image.asset(
-                                  failedAttempts <= 2
-                                      ? "assets/fire_rachaActive.png"
-                                      : "assets/fire_rachaInactive.png",
-                                  width: 20,
-                                ),
-                                Image.asset(
-                                  failedAttempts <= 1
-                                      ? "assets/fire_rachaActive.png"
-                                      : "assets/fire_rachaInactive.png",
-                                  width: 20,
-                                ),
-                                Image.asset(
-                                  failedAttempts == 0
-                                      ? "assets/fire_rachaActive.png"
-                                      : "assets/fire_rachaInactive.png",
-                                  width: 20,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 38.0,
-                      ),
-                      if (questions.isNotEmpty)
-                        Expanded(
-                            child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: _buildBody(context),
-                        ))
-                    } else ...{
-                      // si completo nivel
-                      if (showStepCompleted) ...{
-                        Expanded(
-                          child:
-                              _buildActivityCompleted(context, levelProgress!),
-                        )
-                      },
-                      // si obtiene recompensa por completar sección
-                      if (showRewardObtained) ...{
-                        Expanded(
-                          child: RewardWidget(
-                            rewardInfo: reward,
-                            onPressed: () async {
-                              // si es la ultima sección del curso
-                              if (sendScore!.isLastStage && !showReview) {
-                                setState(() {
-                                  showStepCompleted = false;
-                                  showTitleObtained = false;
-                                  showRewardObtained = false;
-                                  showLastStageCompleted = true;
-                                });
-                              } else {
-                                Navigator.popAndPushNamed(context, '/mapPage',
-                                    arguments: {
-                                      'courseId': courseId,
-                                      'sectionId': nextSectionId.isEmpty
-                                          ? sectionId
-                                          : nextSectionId
-                                    });
-                              }
-                            },
-                          ),
-                        ),
-                      },
-                      // si es la ultima sección del curso
-                      if (showLastStageCompleted) ...{
-                        Expanded(
-                          child: _buildLastStage(context),
-                        ),
-                      },
-                      //si tiene premio por el curso
-                      if (showPrizeWon) ...{
-                        Expanded(
-                          child: _buildPrizeWon(context),
-                        )
-                      },
-                      //si tiene Titulo por el curso
-                      if (showTitleObtained) ...{
-                        Expanded(
-                          child: _buildAchievementUnlocked(context),
-                        )
-                      },
-                    },
-                  },
-                },
-              ],
-            ),
-          ),
+          child: _buildMainContent(),
         ),
       ),
     );
+  }
+
+  Widget _buildMainContent() {
+    if (isLoading) return Container();
+    if (errorMessage != null) {
+      return BuildErrorWidget(
+        errorMessage: errorMessage!,
+        onRetry: () async => _generateData(context),
+        onBack: () => Navigator.pop(context),
+      );
+    }
+
+    // Usar ResponsiveLayout para manejar móvil/tablet
+    return ResponsiveLayout(
+      mobile: _buildMobileLayout(),
+      tablet: _buildTabletLayout(),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        _buildCommonHeader(),
+        if (_shouldShowQuestionContent()) ...[
+          SizedBox(height: 19),
+          QuestionCard(
+            question: currentQuestion.question,
+            numberQuestion: numberQuestion,
+            totalQuestions: questions.length,
+            failedAttempts: failedAttempts,
+            fontSize: fontSizeText,
+            isTablet: false,
+          ),
+          SizedBox(height: 38),
+          Expanded(child: _buildQuestionBody()),
+        ] else if (activityIsCompleted) ...[
+          Expanded(child: _buildResultScreen(context)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildTabletLayout() {
+    return Column(
+      children: [
+        _buildCommonHeader(),
+        if (_shouldShowQuestionContent()) ...[
+          SizedBox(height: 16),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Columna izquierda
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          QuestionCard(
+                            question: currentQuestion.question,
+                            numberQuestion: numberQuestion,
+                            totalQuestions: questions.length,
+                            failedAttempts: failedAttempts,
+                            fontSize: fontSizeText,
+                            isTablet: true,
+                          ),
+                          SizedBox(height: 20),
+                          ProgressControls(
+                            fontSize: fontSizeText,
+                            currentValue: currentIndex.toDouble(),
+                            maxValue: questions.length > 1
+                                ? (questions.length - 1).toDouble()
+                                : questions.length.toDouble(),
+                            onFontSizeChanged: _updateFontSize,
+                            isTablet: true,
+                          ),
+                          Spacer(),
+                          _buildLevelInfo(),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(width: 16),
+
+                  // Columna derecha: Respuestas
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[200]!),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: _buildQuestionBody(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ] else if (activityIsCompleted) ...[
+          Expanded(child: _buildResultScreen(context)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCommonHeader() {
+    final showStageInfo = !showTitleObtained &&
+        !showRewardObtained &&
+        !showPrizeWon &&
+        !showLastStageCompleted;
+
+    return QuestionHeader(
+      course: course,
+      stage: stage,
+      level: level,
+      numberQuestion: numberQuestion,
+      showStageInfo: showStageInfo,
+      onBack: () => Navigator.pop(context),
+    );
+  }
+
+  Widget _buildQuestionBody() {
+    if (currentQuestion.isOrdering) {
+      return OrderingQuestionDraggableWidget(
+        orderedCompleted: orderedCompleted,
+        orderedAnswers: orderedAnswers,
+        currentQuestion: currentQuestion,
+        options: options,
+        fontSize: fontSizeText,
+        answerSelected: verifyOrdered,
+        showError: showError,
+        onContinue: funcAnswerValidate,
+      );
+    }
+
+    return SelectionQuestionWidget(
+      suggestionSelected: _suggestionSelected,
+      selectionCompleted: _selectionCompleted,
+      isCorrect: _isCorrect,
+      currentQuestion: currentQuestion,
+      options: options,
+      fontSize: fontSizeText,
+      answerSelected: _answerSelected,
+      callBackContinue: () {},
+      isAnswerSelected: _isAnswerSelected,
+    );
+  }
+
+  Widget _buildResultScreen(BuildContext context) {
+    if (showStepCompleted) return _buildActivityCompleted();
+    if (showRewardObtained) return _buildRewardScreen();
+    if (showLastStageCompleted) return _buildLastStage(context);
+    if (showPrizeWon) return _buildPrizeWon(context);
+    if (showTitleObtained) return _buildAchievementUnlocked(context);
+    return Container();
+  }
+
+  Widget _buildRewardScreen() {
+    return Center(
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: isTablet(context) ? 600 : double.infinity,
+        ),
+        child: RewardWidget(
+          rewardInfo: reward,
+          onPressed: () async {
+            if (sendScore!.isLastStage && !showReview) {
+              setState(() {
+                showStepCompleted = false;
+                showTitleObtained = false;
+                showRewardObtained = false;
+                showLastStageCompleted = true;
+              });
+            } else {
+              Navigator.popAndPushNamed(context, '/mapPage', arguments: {
+                'courseId': courseId,
+                'sectionId': nextSectionId.isEmpty ? sectionId : nextSectionId
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  String _getBackgroundImage() {
+    if (levelProgress == null) return "assets/boxStartFailed.png";
+
+    final score = levelProgress!.score;
+    if (score > MEDIUM_SCORE) return "assets/boxStartFull.png";
+    if (score > LOW_SCORE && score <= MEDIUM_SCORE)
+      return "assets/boxStartMedium.png";
+    if (score > 0 && score <= LOW_SCORE) return "assets/boxStartLow.png";
+    return "assets/boxStartFailed.png";
+  }
+
+  // Método reutilizable para construir contenido del resultado
+  Widget _buildResultContent() {
+    return Column(
+      children: [
+        Text(
+          '${levelProgress!.score > 0 ? levelProgress!.message.resultTitle : "Ya casi lo\n logras!"}',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: isTablet(context) ? 28 : 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: isTablet(context) ? 16 : 8),
+        Text(
+          levelProgress!.score > 0
+              ? 'Culminaste el Paso ${levelProgress!.level.levelNumber}'
+              : "Intenta nuevamente el\n Paso ${levelProgress!.level.levelNumber} para avanzar",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: isTablet(context) ? 20 : 16,
+          ),
+        ),
+        if (levelProgress!.score > 0 && !showReview) ...[
+          SizedBox(height: isTablet(context) ? 20 : 8),
+          Text(
+            'Haz ganado\n ${levelProgress!.energy} LMs de energía',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: isTablet(context) ? 18 : 16,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // Método reutilizable para construir acciones del resultado
+  Widget _buildResultActions() {
+    return Column(
+      children: [
+        if (levelProgress!.score > 0 && !showReview) ...[
+          Image.asset(
+            "assets/kawaii_fire.png",
+            height: isTablet(context) ? 100 : 60,
+            fit: BoxFit.contain,
+          ),
+          SizedBox(height: 12),
+          Text(
+            "${levelProgress!.energy.toStringAsFixed(0)} lms",
+            style: TextStyle(
+              color: Color(0XFFFD8C43),
+              fontSize: isTablet(context) ? 18 : 16,
+            ),
+          ),
+          SizedBox(height: 20),
+        ],
+        ButtonThemeWidget(
+          text: "Continuar",
+          width: isTablet(context) ? double.infinity : 132,
+          height: isTablet(context) ? 48 : 32,
+          buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                textStyle: WidgetStatePropertyAll(
+                  StylesApp(context).textStyleBody16.copyWith(
+                        fontSize: isTablet(context) ? 16 : 14,
+                      ),
+                ),
+              ),
+          onPressed: _handleContinue,
+        ),
+      ],
+    );
+  }
+
+  void _handleContinue() async {
+    // Lógica reutilizable para continuar
+    if (!sendScore!.hasBeenPlayedSection &&
+        sendScore!.rewardObtained &&
+        reward != null &&
+        !showReview) {
+      setState(() {
+        showStepCompleted = false;
+        showTitleObtained = false;
+        showRewardObtained = true;
+      });
+    } else {
+      Navigator.popAndPushNamed(context, '/mapPage',
+          arguments: {'courseId': courseId, 'sectionId': sectionId});
+    }
+  }
+
+  // Helper para verificar si mostrar contenido de pregunta
+  bool _shouldShowQuestionContent() {
+    return !activityIsCompleted &&
+        !showTitleObtained &&
+        !showRewardObtained &&
+        !showPrizeWon &&
+        !showLastStageCompleted;
+  }
+
+  // Helper para info de nivel en tablet
+  Widget _buildLevelInfo() {
+    if (level == null) return Container();
+
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.teal.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.teal.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Nivel actual",
+              style: StylesApp(context).textStyleBody12.copyWith(fontSize: 12, color: Colors.grey[600])),
+          Text(level!.name,
+              style: StylesApp(context).textStyleBody16.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal)),
+          SizedBox(height: 4),
+          Text("Paso $numberQuestion",
+              style: StylesApp(context).textStyleBody14.copyWith(fontSize: 14, color: Colors.grey[700])),
+        ],
+      ),
+    );
+  }
+
+  void _updateFontSize(double value) async {
+    await PreferencesManager().setFontSizeQuestion(value);
+    setState(() => fontSizeText = value);
   }
 
   double calculateHeight(double score) {
@@ -750,290 +914,35 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  _buildBody(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          flex: !currentQuestion.isOrdering ? 3 : 2,
+  // esta parte es para mostrar nivel Completado
+  Widget _buildActivityCompleted() {
+    // Usar el mismo componente para móvil y tablet con diseño responsivo interno
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(isTablet(context) ? 24 : 20),
+      child: Center(
+        child: Container(
+          constraints: BoxConstraints(
+              maxWidth: isTablet(context) ? 800 : double.infinity),
           child: Column(
             children: [
-              if (currentQuestion.isOrdering) ...{
-                OrderingQuestionDraggableWidget(
-                  orderedCompleted: orderedCompleted,
-                  orderedAnswers: orderedAnswers,
-                  currentQuestion: currentQuestion,
-                  options: options,
-                  fontSize: fontSizeText,
-                  answerSelected: (context, index) =>
-                      verifyOrdered(context, index),
-                  showError: showError,
-                  onContinue: funcAnswerValidate,
-                )
-              } else ...{
-                if (options.isNotEmpty)
-                  Expanded(
-                    flex: 3,
-                    child: SelectionQuestionWidget(
-                      suggestionSelected: _suggestionSelected,
-                      selectionCompleted: _selectionCompleted,
-                      isCorrect: _isCorrect,
-                      currentQuestion: currentQuestion,
-                      options: options,
-                      fontSize: fontSizeText,
-                      answerSelected: (context, index) {
-                        _answerSelected(context, index);
-                      },
-                      callBackContinue: () async {
-                        // await funcAnswerValidate();
-                      },
-                      isAnswerSelected: _isAnswerSelected,
-                    ),
+              // Contenido adaptable según tamaño
+              Container(
+                padding: EdgeInsets.all(isTablet(context) ? 32 : 20),
+                decoration: BoxDecoration(
+                  borderRadius:
+                      BorderRadius.circular(isTablet(context) ? 16 : 8),
+                  image: DecorationImage(
+                    image: AssetImage(_getBackgroundImage()),
+                    fit: BoxFit.cover,
                   ),
-              },
-              SizedBox(
-                height: 47.0,
+                ),
+                child: _buildResultContent(),
               ),
+              SizedBox(height: isTablet(context) ? 32 : 20),
+              _buildResultActions(),
             ],
           ),
         ),
-        Container(
-          margin: EdgeInsets.symmetric(horizontal: 9),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Slider(
-                  activeColor: Colors.blueGrey,
-                  inactiveColor: Colors.grey,
-                  thumbColor: StyleColor.turquoise,
-                  min: 12.0,
-                  max: 20.0,
-                  value: fontSizeText,
-                  onChanged: (value) async {
-                    await PreferencesManager().setFontSizeQuestion(value);
-                    print(value);
-                    setState(() => fontSizeText = value);
-                  },
-                  secondaryTrackValue: 20.0,
-                ),
-              ),
-              Expanded(
-                flex: 0,
-                child: Text(
-                  "Aa",
-                  style: StylesApp(context).textStyleBody12.copyWith(
-                        color: Colors.black,
-                      ),
-                ),
-              )
-            ],
-          ),
-        ),
-        Center(
-          child: Container(
-            constraints: BoxConstraints(maxWidth: 278.0),
-            child: Column(
-              children: [
-                Text(
-                  "${currentIndex + 1}/${questions.length}",
-                  style: StylesApp(context)
-                      .textStyleBody12
-                      .copyWith(color: Colors.black),
-                ),
-                LinearProgressIndicator(
-                  borderRadius: BorderRadius.circular(6.0),
-                  minHeight: 14.0,
-                  value: currentIndex /
-                      (questions.length > 1
-                          ? questions.length - 1
-                          : questions.length),
-                  backgroundColor: Color(0xFFC4C4C4),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Color(0XFFF27728),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        // if (currentQuestion.isOrdering)
-        SizedBox(
-          height: 20,
-        )
-      ],
-    );
-  }
-
-  // esta parte es para mostrar nivel Completado
-  _buildActivityCompleted(BuildContext context, data) {
-    if (data.score > MEDIUM_SCORE) {
-      setState(() {
-        imgBack = "assets/boxStartFull.png";
-      });
-    } else if (data.score > LOW_SCORE && data.score <= MEDIUM_SCORE) {
-      setState(() {
-        imgBack = "assets/boxStartMedium.png";
-      });
-    } else if (data.score > 0 && data.score <= LOW_SCORE) {
-      setState(() {
-        imgBack = "assets/boxStartLow.png";
-      });
-    } else {
-      setState(() {
-        imgBack = "assets/boxStartFailed.png";
-      });
-    }
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(imgBack),
-                    fit: BoxFit.fill,
-                    alignment: Alignment.topCenter)),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: data.score > 0 ? 100 : 33.0,
-                ),
-                Text(
-                  textAlign: TextAlign.center,
-                  data.score > 0
-                      ? data.message.resultTitle
-                      : "Ya casi lo\n logras! ",
-                  style: StylesApp(context)
-                      .textStyleCongratulation
-                      .copyWith(color: Colors.white),
-                ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                Text(
-                  textAlign: TextAlign.center,
-                  data.score > 0
-                      ? 'Culminaste el Paso ${data.level.levelNumber}'
-                      : "Intenta nuevamente el\n Paso ${data.level.levelNumber} para avanzar",
-                  style: StylesApp(context).textStyleWithe20,
-                ),
-                if (data.score > 0 && !showReview) ...{
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  Text(
-                    textAlign: TextAlign.center,
-                    'Haz ganado\n ${data.energy} LMs de energía',
-                    style: StylesApp(context).textStyleWithe20,
-                  ),
-                } else ...{
-                  Text(
-                    textAlign: TextAlign.center,
-                    "En toda labor hay fruto.",
-                    style: StylesApp(context).textStyleBodyAso20.copyWith(
-                          color: Colors.white,
-                          letterSpacing: data.score > 0 ? 0.0 : 1,
-                        ),
-                  ),
-                },
-                SizedBox(
-                  height: 37.0,
-                ),
-              ],
-            ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 23.0,
-              ),
-              Text(
-                textAlign: TextAlign.center,
-                data.score > 0 && data.score < MAX_SCORE
-                    ? "Puedes repetir el paso para\n tratar de ganar 3 estrellas"
-                    : "En toda labor hay fruto.",
-                style: StylesApp(context).textStyleBodyAso20.copyWith(
-                      color: Color(0XFFFD8C43),
-                      letterSpacing: data.score > 0 ? 0.0 : 1,
-                    ),
-              ),
-              if (showReview) ...{
-                Text(
-                  textAlign: TextAlign.center,
-                  "Mejor puntaje : $bestScore",
-                  style: StylesApp(context).textStyleBodyAso20.copyWith(
-                        color: Color(0XFFFD8C43),
-                        letterSpacing: data.score > 0 ? 0.0 : 1,
-                      ),
-                ),
-              },
-              if (data.score > 0 && !showReview)
-                Image.asset(
-                  "assets/kawaii_fire.png",
-                  height: calculateHeight(score),
-                  fit: BoxFit.contain,
-                ),
-              if (data.score > 0 && !showReview) ...{
-                Text(
-                  "${data.energy.toStringAsFixed(0)} lms",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: Color(0XFFFD8C43)),
-                )
-              },
-              SizedBox(
-                height: data.score > 0 ? 50.0 : 158.0,
-              ),
-              ButtonThemeWidget(
-                text: "Continuar",
-                width: 132.0,
-                height: 32.0,
-                buttonStyle: StylesApp(context).btnWidgetSmall,
-                onPressed: () async {
-                  // mostrar si hay recompensa
-                  if (sendScore!.devMessageLevel != null &&
-                      sendScore!.devMessageLevel!.isNotEmpty) {
-                    await showCustomDialog(
-                      context,
-                      message: sendScore!.devMessageLevel!,
-                      dialogType: DialogType.info,
-                    );
-                  }
-
-                  if (sendScore!.isLastLevel == true &&
-                      sendScore!.devMessageSection != null &&
-                      sendScore!.devMessageSection!.isNotEmpty) {
-                    await showCustomDialog(
-                      context,
-                      message: sendScore!.devMessageSection!,
-                      dialogType: DialogType.info,
-                    );
-                  }
-                  if (!sendScore!.hasBeenPlayedSection &&
-                      sendScore!.rewardObtained &&
-                      reward != null &&
-                      !showReview) {
-                    setState(() {
-                      showStepCompleted = false;
-                      showTitleObtained = false;
-                      showRewardObtained = true;
-                    });
-                  } else {
-                    Navigator.popAndPushNamed(context, '/mapPage', arguments: {
-                      'courseId': courseId,
-                      'sectionId': sectionId
-                    });
-                  }
-                },
-              )
-            ],
-          ),
-        ],
       ),
     );
   }

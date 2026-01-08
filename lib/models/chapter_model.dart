@@ -15,6 +15,22 @@ class ChapterModel extends GridItem {
     this.verses,
     this.status,
   });
+  // Método copyWith
+  ChapterModel copyWith({
+    String? id,
+    int? bookId,
+    int? chapter,
+    List<VerseModel>? verses,
+    int? status,
+  }) {
+    return ChapterModel(
+      id: id ?? this.id,
+      bookId: bookId ?? this.bookId,
+      chapter: chapter ?? this.chapter,
+      verses: verses ?? this.verses,
+      status: status ?? this.status,
+    );
+  }
 
   factory ChapterModel.fromJson(Map<String, dynamic> json) {
     List<VerseModel> verses = [];
@@ -42,6 +58,13 @@ class ChapterModel extends GridItem {
     };
   }
 
+  factory ChapterModel.empty() {
+    return ChapterModel(
+      id: null,
+      verses: [],
+      chapter: 0,
+    );
+  }
   @override
   String get displayText => chapter.toString();
   @override

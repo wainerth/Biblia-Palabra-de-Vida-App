@@ -86,48 +86,46 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
 
   // diseño para Tablet
   Widget _buildTabletLayout() {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          color: currentTheme.backgroundColor,
-          width: double.infinity,
-          height: double.infinity,
-          child: Column(
-            children: [
-              // Header
-              _buildAppBar(),
-              SizedBox(
-                height: 16,
-              ),
-
-              // contenido principal en dos columnas
-              Expanded(
-                child: Row(
-                  children: [
-                    // Columna Izquierda
-                    Container(
-                      width: 200,
-                      decoration: BoxDecoration(
-                        color: StyleColor.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: StyleColor.black.withValues(alpha: 0.25),
-                            spreadRadius: 0,
-                            offset: const Offset(0, 4),
-                          )
-                        ],
-                      ),
-                      child: _buildVerticalTabs(),
+    return Scaffold(
+      body: Container(
+        color: currentTheme.backgroundColor,
+        width: double.infinity,
+        height: double.infinity,
+        child: Column(
+          children: [
+            // Header
+            _buildAppBar(),
+            SizedBox(
+              height: 16,
+            ),
+    
+            // contenido principal en dos columnas
+            Expanded(
+              child: Row(
+                children: [
+                  // Columna Izquierda
+                  Container(
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: StyleColor.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: StyleColor.black.withValues(alpha: 0.25),
+                          spreadRadius: 0,
+                          offset: const Offset(0, 4),
+                        )
+                      ],
                     ),
-                    // Columna Derecha - CONTENIDO
-                    Expanded(
-                      child: _buildTabContent(),
-                    ),
-                  ],
-                ),
+                    child: _buildVerticalTabs(),
+                  ),
+                  // Columna Derecha - CONTENIDO
+                  Expanded(
+                    child: _buildTabContent(),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -237,19 +235,19 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
         children: [
           // Botón de cerrar
           Container(
-            height: isTablet(context) ? 40 : 35,
-            width: isTablet(context) ? 40 : 35,
+            height: isTablet(context) ? 40 : 25,
+            width: isTablet(context) ? 40 : 25,
             decoration: BoxDecoration(
               color: StyleColor.orange,
-              borderRadius: BorderRadius.circular(isTablet(context) ? 40 : 35),
+              borderRadius: BorderRadius.circular(isTablet(context) ? 40 : 25),
             ),
             child: IconButton(
               constraints: BoxConstraints(
-                maxHeight: isTablet(context) ? 40 : 35,
-                maxWidth: isTablet(context) ? 40 : 35,
+                maxHeight: isTablet(context) ? 40 : 25,
+                maxWidth: isTablet(context) ? 40 : 25,
               ),
               padding: EdgeInsets.all(0),
-              iconSize: isTablet(context) ? 30 : 25,
+              iconSize: isTablet(context) ? 30 : 20,
               color: Colors.white,
               onPressed: () => Navigator.pop(context),
               icon: Icon(Icons.close),
@@ -295,6 +293,7 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
         );
       case 1:
         return SearchByTextWidget(
+          version: widget.currentVersion,
           onActionTabText: (InputDataSearchModel data) {
             if (kDebugMode) {
               print(data.versionId);
@@ -341,6 +340,7 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
         labelColor: Colors.white,
         labelStyle: StylesApp(context).textStyleBody12,
         indicatorSize: TabBarIndicatorSize.tab,
+         tabAlignment: TabAlignment.start,
         automaticIndicatorColorAdjustment: true,
         indicatorWeight: 0,
         indicatorPadding: EdgeInsets.all(0),
@@ -400,6 +400,7 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
         },
       ),
       SearchByTextWidget(
+        version: widget.currentVersion,
         onActionTabText: (InputDataSearchModel data) {
           if (kDebugMode) {
             print(data.versionId);
@@ -417,88 +418,6 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
     ];
   }
 
-  // 🔥 MÉTODO PARA CONSTRUIR TAB BAR RESPONSIVE
-  Widget _buildTabBar() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            spreadRadius: 0,
-            offset: const Offset(0, 4),
-          )
-        ],
-        borderRadius: isTablet(context) ? BorderRadius.zero : BorderRadius.zero,
-      ),
-      child: TabBar(
-        isScrollable: isTablet(context) ? false : true, // Scroll solo en móvil
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        unselectedLabelColor: Colors.white,
-        labelColor: Colors.white,
-        labelStyle: isTablet(context)
-            ? StylesApp(context).textStyleBody14
-            : StylesApp(context).textStyleBody12,
-        indicatorSize: TabBarIndicatorSize.tab,
-        automaticIndicatorColorAdjustment: true,
-        indicatorWeight: 0,
-        indicatorPadding: EdgeInsets.all(0),
-        padding: isTablet(context)
-            ? EdgeInsets.symmetric(horizontal: 20)
-            : EdgeInsets.all(0),
-        dividerColor: Color(0XFFFFFDFD),
-        dividerHeight: 0,
-        labelPadding:
-            EdgeInsets.symmetric(horizontal: isTablet(context) ? 8 : 2),
-        indicator: BoxDecoration(
-          color: Colors.orange,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(10),
-          ),
-        ),
-        tabs: tabs.asMap().entries.map((entry) {
-          int index = entry.key;
-          var tab = entry.value;
-          return Tab(
-            height: isTablet(context) ? 40 : 32.sp,
-            child: Container(
-              width: isTablet(context) ? null : 100, // Ancho fijo solo en móvil
-              constraints: isTablet(context)
-                  ? BoxConstraints(minWidth: 80)
-                  : BoxConstraints(maxWidth: 100),
-              decoration: BoxDecoration(
-                color: _selectedIndex == index ? Colors.orange : Colors.grey,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                ),
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: isTablet(context) ? 16 : 8,
-                vertical: isTablet(context) ? 8 : 4,
-              ),
-              child: Center(
-                child: Text(
-                  tab["title"],
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: isTablet(context)
-                      ? StylesApp(context).textStyleBody14
-                      : StylesApp(context).textStyleBody12,
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
 
   // 🔥 ICONOS PARA LOS TABS VERTICALES
   IconData _getTabIcon(int index) {

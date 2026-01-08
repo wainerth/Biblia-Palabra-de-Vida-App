@@ -254,9 +254,12 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                               _emailController.text);
                                       if (response.error != null) {
                                         LoadingService().hideLoading();
-                                        await showCustomDialog(context,
-                                            message: response.error!,
-                                            dialogType: DialogType.error);
+                                        await showCustomDialog(
+                                          context,
+                                          message: response.userFriendlyError!,
+                                          messageDetail: response.error!,
+                                          dialogType: DialogType.error,
+                                        );
                                       } else {
                                         setState(() {
                                           messageSend =
@@ -278,9 +281,12 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                               _passwordController.text);
                                       if (response.error != null) {
                                         LoadingService().hideLoading();
-                                        await showCustomDialog(context,
-                                            message: response.error!,
-                                            dialogType: DialogType.error);
+                                        await showCustomDialog(
+                                          context,
+                                          message: response.userFriendlyError!,
+                                          messageDetail: response.error!,
+                                          dialogType: DialogType.error,
+                                        );
                                       } else {
                                         LoadingService().hideLoading();
                                         Navigator.of(context)
@@ -290,7 +296,6 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                       }
                                     }
                                   }
-                                  // LoadingService().hideLoading();
                                 },
                                 buttonStyle:
                                     StylesApp(context).btnSecondarySmall,

@@ -923,7 +923,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                         .textStyleBody5
                                         .copyWith(
                                           color: Colors.black,
-                                          fontSize: 14.sp,
+                                          fontSize: 10.sp,
                                         ),
                                   ),
                                 ),

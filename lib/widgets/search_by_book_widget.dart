@@ -8,6 +8,15 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
+extension IterableExtension<T> on Iterable<T> {
+  T? firstWhereOrNull(bool Function(T) test) {
+    for (final element in this) {
+      if (test(element)) return element;
+    }
+    return null;
+  }
+}
+
 class SearchByBookWidget extends StatefulWidget {
   final VersionModel? version;
   final BookModel? book;
@@ -49,8 +58,9 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   bool loadingVerses = false;
   bool verseRange = false;
   bool _chaptersExpanded = true;
-  bool _versesExpanded = false;
+  bool _versesExpanded = true;
   List<VerseModel> _selectedItems = [];
+  VerseModel? verseSelected;
 
   // Función para determinar si es tablet
   bool get isTablet {
@@ -93,46 +103,55 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final catalogueProvider =
-          Provider.of<CatalogueProvider>(context, listen: false);
-      setState(() {
-        listBibleVersions =
-            catalogueProvider.allBibleVersion.map((v) => v).toList();
-        bibleVersions = catalogueProvider.allBibleVersion
-            .map((v) =>
-                ModelData(value: v.id, label: v.version, originalData: v))
-            .toList();
-      });
-      if (widget.version != null) {
+      try {
+        final catalogueProvider =
+            Provider.of<CatalogueProvider>(context, listen: false);
         setState(() {
-          versionSelected = ModelData(
-              label: widget.version!.version,
-              value: widget.version!.id,
-              originalData: widget.version);
+          listBibleVersions =
+              catalogueProvider.allBibleVersion.map((v) => v).toList();
+          bibleVersions = catalogueProvider.allBibleVersion
+              .map((v) =>
+                  ModelData(value: v.id, label: v.version, originalData: v))
+              .toList();
         });
-        await loadBookByVersion(versionSelected!.value);
-      }
-      if (widget.book != null) {
-        setState(() {
-          bookSelected = ModelData(
-              label: widget.book!.modernName,
-              value: widget.book!.id,
-              originalData: widget.book);
-        });
-        await getChapterByBook(bookSelected!.value);
-      }
-      if (widget.chapter != null) {
-        setState(() {
-          chapterSelected = widget.chapter;
-          initialChapter = [chapterSelected!];
-          _chaptersExpanded = false;
-        });
-        await loadVerses(chapterSelected!.id!);
-        setState(() {
-          _versesExpanded = true;
-          _selectedItems.add(verses.first);
-        });
+        if (widget.version != null) {
+          setState(() {
+            versionSelected = ModelData(
+                label: widget.version!.version,
+                value: widget.version!.id,
+                originalData: widget.version);
+          });
+          await loadBookByVersion(versionSelected!.value);
+        }
+        if (widget.book != null) {
+          setState(() {
+            bookSelected = ModelData(
+                label: widget.book!.modernName,
+                value: widget.book!.id,
+                originalData: widget.book);
+          });
+          await getChapterByBook(bookSelected!.value);
+        }
+        if (widget.chapter != null) {
+          setState(() {
+            chapterSelected = widget.chapter;
+            initialChapter = [chapterSelected!];
+            // _chaptersExpanded = false;
+          });
+          await loadVerses(chapterSelected!.id!);
+          setState(() {
+            _versesExpanded = true;
+            _selectedItems.add(verses.first);
+            verseSelected = verses.first;
+          });
+        }
+      } catch (e) {
+        if(!mounted) return;
+        await showCustomDialog(context,
+            message: 'Error al cargar los datos: $e',
+            dialogType: DialogType.error);
       }
     });
   }
@@ -156,6 +175,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                       isTablet ? 200.0 : 160.0, // Min width mayor en tablet
                   maxWidth: maxDropdownWidth,
                 ),
+                // Dropdown de versiones de la biblia
                 child: CustomDropdownBottomWidget(
                   hintText: "Seleccione la version",
                   items: bibleVersions,
@@ -166,7 +186,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     setState(() {
                       versionSelected = version;
                       _chaptersExpanded = true;
-                      _versesExpanded = false;
+                      // _versesExpanded = false;
                     });
                     // leemos los libros de esta version y tomamos el primero
                     await loadBookByVersion(version!.value);
@@ -176,7 +196,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                           value: books.first.value,
                           originalData: books.first.originalData);
                       _chaptersExpanded = true;
-                      _versesExpanded = false;
+                      // _versesExpanded = false;
                     });
                     // leemos los capítulos de esta version y tomamos el primero
                     await getChapterByBook(bookSelected!.value);
@@ -184,7 +204,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     setState(() {
                       chapterSelected = chapters.first;
                       initialChapter = [chapterSelected!];
-                      _chaptersExpanded = false;
+                      // _chaptersExpanded = false;
                     });
                     // leemos los versículos y seleccionamos el primero
                     await loadVerses(chapterSelected!.id!);
@@ -209,6 +229,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                       isTablet ? 200.0 : 160.0, // Min width mayor en tablet
                   maxWidth: maxDropdownWidth,
                 ),
+                // dropdown de libros de la biblia
                 child: CustomDropdownBottomWidget(
                   hintText: "Seleccione el Libro",
                   items: books,
@@ -219,7 +240,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     setState(() {
                       bookSelected = book;
                       _chaptersExpanded = true;
-                      _versesExpanded = false;
+                      // _versesExpanded = false;
                     });
 
                     await getChapterByBook(book!.value);
@@ -233,12 +254,13 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     if (chapterSelected != null) {
                       setState(() {
                         initialChapter = [chapterSelected!];
-                        _chaptersExpanded = false;
+                        // _chaptersExpanded = false;
                       });
                       await loadVerses(chapterSelected!.id!);
                       setState(() {
                         _versesExpanded = true;
                         _selectedItems.add(verses.first);
+                        verseSelected = verses.first;
                       });
                     }
                   },
@@ -322,6 +344,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                               chapterSelected = chapter.first;
                               _chaptersExpanded = false;
                               _selectedItems = [];
+                              verseSelected = null;
                             });
                           },
                         ),
@@ -393,6 +416,8 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                           onTap: (verse) {
                             setState(() {
                               _selectedItems = verse;
+                              verseSelected =
+                                  verse.isNotEmpty ? verse.first : null;
                             });
                           },
                         ),
@@ -434,6 +459,9 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 setState(() {
                                   verseRange = value;
                                   _selectedItems = [];
+                                  if (!value && verseSelected != null) {
+                                    _selectedItems = [verseSelected!];
+                                  }
                                 });
                               },
                             ),
@@ -535,24 +563,43 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
     }
   }
 
-  loadVerses(String id) {
-    setState(() {
-      loadingVerses = true;
-      verses = chapters
-          .firstWhere(
-            (ch) => ch.id == id,
-          )
-          .verses!
-          .map((verse) => verse)
-          .toList();
+// Función para ordenar en isolate
+  static List<VerseModel> _sortVerses(List<VerseModel> verses) {
+    return [...verses]..sort((a, b) => a.verse.compareTo(b.verse));
+  }
 
-      verses.sort((a, b) {
-        final verseA = a.verse;
-        final verseB = b.verse;
+  Future<void> loadVerses(String id) async {
+    if (!mounted) return;
 
-        return verseA.compareTo(verseB);
-      });
-      loadingVerses = false;
-    });
+    setState(() => loadingVerses = true);
+
+    try {
+      // Usar firstWhereOrNull en lugar de firstWhere
+      final chapter = chapters.firstWhereOrNull((ch) => ch.id == id);
+
+      if (chapter != null && chapter.verses != null) {
+        // Ordenar en batches para no bloquear UI
+        final sortedVerses = await compute(_sortVerses, chapter.verses!);
+
+        if (mounted) {
+          setState(() {
+            verses = sortedVerses;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() => verses = []);
+        }
+      }
+    } catch (e) {
+      print('Error loading verses: $e');
+      if (mounted) {
+        setState(() => verses = []);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => loadingVerses = false);
+      }
+    }
   }
 }

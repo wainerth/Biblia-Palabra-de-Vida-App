@@ -25,6 +25,8 @@ class CustomDialogWithAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+    
     IconData icon;
     Color color;
     String title;
@@ -49,38 +51,96 @@ class CustomDialogWithAction extends StatelessWidget {
 
     return AlertDialog(
       scrollable: true,
+      insetPadding: isTablet 
+          ? EdgeInsets.symmetric(horizontal: 100, vertical: 100)
+          : EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      contentPadding: EdgeInsets.all(isTablet ? 24 : 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(isTablet ? 20 : 16),
+      ),
       title: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color),
+          Icon(icon, color: color, size: isTablet ? 28 : 24),
           const SizedBox(width: 8),
-          Text(title, style: TextStyle(color: color)),
-        ],
-      ),
-      content: Text(
-        message,
-        style: StylesApp(context).textStyleBody12.copyWith(color: Colors.black),
-      ),
-      actions: [
-        TextButton(
-          style: StylesApp(context).btnWidgetSmall,
-          onPressed: callbackActionOk,
-          child: Text(
-            buttonOk,
-            style: StylesApp(context).textStyleBody14,
-          ),
-        ),
-        if (showAction) ...{
-          SizedBox(height: 10),
-          TextButton(
-            style: StylesApp(context).btnWidgetSmall,
-            onPressed: actionCallback,
+          Flexible(
             child: Text(
-              textButtonAction,
-              style: StylesApp(context).textStyleBody14,
+              title,
+              style: TextStyle(
+                color: color,
+                fontSize: isTablet ? 20 : 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        }
+        ],
+      ),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: isTablet ? 400 : 300,
+          maxHeight: isTablet ? 300 : 200,
+        ),
+        child: SingleChildScrollView(
+          child: Text(
+            message,
+            style: TextStyle(
+              fontSize: isTablet ? 17 : 15,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: callbackActionOk ?? () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 24 : 16,
+                  vertical: isTablet ? 12 : 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(isTablet ? 10 : 8),
+                ),
+              ),
+              child: Text(
+                buttonOk,
+                style: TextStyle(
+                  fontSize: isTablet ? 16 : 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            if (showAction) ...[
+              SizedBox(width: isTablet ? 16 : 12),
+              OutlinedButton(
+                onPressed: actionCallback,
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 24 : 16,
+                    vertical: isTablet ? 12 : 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(isTablet ? 10 : 8),
+                  ),
+                  side: BorderSide(color: color),
+                ),
+                child: Text(
+                  textButtonAction,
+                  style: TextStyle(
+                    fontSize: isTablet ? 16 : 14,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ],
     );
   }
 }
+

@@ -221,11 +221,15 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  Future<ResponseData?> getProgressUser(String userId,String? courseId) async {
+  Future<ResponseData?> getProgressUser(String userId, String? courseId) async {
     ResponseProgress? userProgress;
     final progress = await getLastProgressUser(userId, courseId);
     if (progress.error != null) {
-      return ResponseData(error: progress.error, data: null);
+      return ResponseData(
+        data: null,
+        userFriendlyError: progress.userFriendlyError,
+        error: progress.error,
+      );
     }
 
     if (progress.data == null || progress.data['data'] == null) {

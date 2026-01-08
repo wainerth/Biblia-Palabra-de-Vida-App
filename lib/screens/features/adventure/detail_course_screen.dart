@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
@@ -24,6 +25,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   ResponseProgress? progressUser;
   int _selectedIndex = 1;
 
+  // determinar s ies table
   @override
   void initState() {
     super.initState();
@@ -33,25 +35,65 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   }
 
   Future<void> _loadStageSections(_) async {
-    LoadingService().showLoading(context);
+    setState(() => errorMessage = null);
+
+    if (!mounted) return;
+    final route = ModalRoute.of(context);
+    if (route == null || route.settings.arguments == null) {
+      setState(() {
+        errorMessage = "Contexto de navegación inválido.";
+        isLoading = false;
+      });
+      return;
+    }
 
     try {
+      if (mounted) {
+        LoadingService().showLoading(context);
+      }
+
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final courseParam = ModalRoute.of(context)!.settings.arguments;
+      final courseParam = route.settings.arguments as Map<String, dynamic>?;
+
+      if (courseParam == null || !courseParam.containsKey("courseId")) {
+        setState(() {
+          errorMessage = "ID de curso no proporcionado.";
+          isLoading = false;
+        });
+        return;
+      }
+
       final LoginUser? userData = userProvider.currentUser;
-      errorMessage = null;
-      progressUser = userProvider.progressUser;
+
+      if (userData == null) {
+        setState(() {
+          errorMessage = "Usuario no autenticado.";
+          isLoading = false;
+        });
+        return;
+      }
+
+      setState(() {
+        progressUser = userProvider.progressUser;
+      });
 
       // obtenemos curso
       final ResponseData courseResponse = await loadOneCourse(
-          userData!.userId, (courseParam as Map<String, dynamic>)["courseId"]);
+        userData.userId,
+        courseParam["courseId"],
+      ).timeout(const Duration(seconds: 30));
+
       if (courseResponse.error != null) {
         errorMessage = courseResponse.error;
+        return;
       }
       course = CourseDetail.fromJson(courseResponse.data);
+
+      // obtenemos etapas del curso
       final result = await loadStageByCourse(userData.userId, course!.id);
       if (result.error != null) {
         errorMessage = result.error;
+        return;
       } else {
         setState(() {
           if (result.data != null) {
@@ -64,11 +106,19 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
       }
     } catch (e) {
       errorMessage = "An error occurred: $e";
+      return;
     } finally {
-      LoadingService().hideLoading();
-      setState(() {
-        isLoading = false;
-      });
+      // 5. Asegurar que hideLoading se llame incluso si mounted es false
+      try {
+        LoadingService().hideLoading();
+      } catch (_) {}
+
+      // 6. Solo llamar setState si el widget sigue montado
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -96,44 +146,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: OrientationBuilder(
-          builder: (BuildContext context, Orientation orientation) {
-            return SingleChildScrollView(
-              child: SizedBox(
-                height: orientation == Orientation.portrait
-                    ? MediaQuery.sizeOf(context).height - 60
-                    : MediaQuery.sizeOf(context).width -
-                        (MediaQuery.sizeOf(context).height / 2),
-                child: Column(
-                  children: [
-                    HeadScoreWidget(
-                      onRoute: () {
-                        Navigator.popAndPushNamed(context, '/profilePage');
-                      },
-                    ),
-                    Text(
-                      "Sigue la ruta de la sabiduría",
-                      style: StylesApp(context)
-                          .textStyleBody20
-                          .copyWith(color: StyleColor.vibrantPurple),
-                    ),
-                    isLoading
-                        ? Container()
-                        : errorMessage != null
-                            ? Center(
-                                child: BuildErrorWidget(
-                                errorMessage: errorMessage!,
-                                onRetry: () async =>
-                                    await _loadStageSections(context),
-                                onBack: () => Navigator.pop(context),
-                              ))
-                            : _buildBodyContent(course)
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+        child: isTablet(context) ? _buildTabletLayout() : _buildMobileLayout(),
       ),
       bottomNavigationBar: CustomBottomNavigationBarWidget(
         type: BottomNavigationBarType.fixed,
@@ -169,7 +182,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                       userProvider.currentUser!.userId, course.id);
                   if (progressResponse!.error != null) {
                     await showCustomDialog(context,
-                        message: progressResponse.error!,
+                        messageDetail: progressResponse.error!,
+                        message: progressResponse.userFriendlyError!,
                         dialogType: DialogType.error);
                   }
                   progressUser = progressResponse.data;
@@ -509,7 +523,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                     borderRadius: BorderRadius.circular(12.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         offset: Offset(2.0, 4.0),
                         blurRadius: 6.0,
                       ),
@@ -570,5 +584,696 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
       default:
         return Icons.error;
     }
+  }
+
+  _buildTabletLayout() {
+    return Column(
+      children: [
+        HeadScoreWidget(
+          onRoute: () {
+            Navigator.popAndPushNamed(context, '/profilePage');
+          },
+        ),
+        SizedBox(height: 16.0),
+        // titulo
+        Text(
+          "Sigue la ruta de la sabiduría",
+          style: StylesApp(context)
+              .textStyleBody14
+              .copyWith(color: StyleColor.vibrantPurple),
+        ),
+        SizedBox(
+          height: 24.0,
+        ),
+
+        // contenido Principal
+        if (isLoading)
+          Center(
+            child: CircularProgressIndicator(),
+          )
+        else if (errorMessage != null)
+          Center(
+            child: BuildErrorWidget(
+              errorMessage: errorMessage!,
+              onRetry: () async => await _loadStageSections(context),
+              onBack: () => Navigator.pop(context),
+            ),
+          )
+        else
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    child: _buildTabletCourseCard(),
+                  ),
+                ),
+                Expanded(
+                  flex: 7,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          color: Colors.black,
+                          width: 2.0,
+                        ),
+                      ),
+                    ),
+                    child: _buildTabletStagesList(),
+                  ),
+                ),
+              ],
+            ),
+          )
+      ],
+    );
+  }
+
+  // Card del curso para tablet
+  Widget _buildTabletCourseCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Imagen del curso
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              image: course?.imgCourseUrl.isNotEmpty == true
+                  ? DecorationImage(
+                      image: NetworkImage("${GraphQLConfig.urlServidor}${course!.imgCourseUrl}"),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+              color: course?.imgCourseUrl.isNotEmpty == true
+                  ? Colors.transparent
+                  : Color(0XFF12CBC4),
+            ),
+            child: course?.imgCourseUrl.isNotEmpty == true
+                ? null
+                : Center(
+                    child: Icon(
+                      Icons.book,
+                      size: 80,
+                      color: Colors.white,
+                    ),
+                  ),
+          ),
+
+          // Contenido del card
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  
+                  // Información del curso
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        course?.titleCourse ?? 'Curso',
+                        style: StylesApp(context).textStyleBody20.copyWith(
+                              fontSize: 22,
+                              color: Colors.black87,
+                            ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        course?.introduction ?? 'Descripción del curso',
+                        style: StylesApp(context).textStyleBody14.copyWith(
+                              fontSize: 16,
+                              color: Colors.grey[700],
+                              height: 1.4,
+                            ),
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 16),
+                      Row(
+                        children: [
+                          _buildInfoChip(
+                            icon: Icons.layers,
+                            text:
+                                '${course?.sectionCompletedCount ?? 0}/${course?.sectionCount ?? 0} Secciones',
+                          ),
+                          SizedBox(width: 12),
+                          _buildInfoChip(
+                            icon: Icons.check_circle,
+                            text:
+                                '${((course?.sectionCompletedCount ?? 0) / (course?.sectionCount ?? 1) * 100).toInt()}% Completado',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  // Botones de acción
+                  Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Container(
+                                  padding: EdgeInsets.all(24),
+                                  constraints: BoxConstraints(
+                                    maxWidth: 500,
+                                  ),
+                                  child: CustomModalWidget(
+                                    title: course?.titleCourse ?? '',
+                                    content: course?.introduction ?? '',
+                                    buttonText: 'Aceptar',
+                                    id: course?.id ?? '',
+                                    showSubtitle: false,
+                                    itemCount: 0,
+                                    itemsCompleted: 0,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: StyleColor.turquoise,
+                          minimumSize: Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Ver detalles del curso',
+                          style: StylesApp(context).textStyleBody14.copyWith(
+                                color: Colors.white,
+                              ),
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: () async {
+                          setState(() => loadAventure = true);
+                          await _handleGoToMap();
+                          setState(() => loadAventure = false);
+                        },
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          side: BorderSide(color: StyleColor.turquoise),
+                        ),
+                        child: loadAventure
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: StyleColor.turquoise,
+                                ),
+                              )
+                            : Text(
+                                'Ir al mapa del curso',
+                                style:
+                                    StylesApp(context).textStyleBody12.copyWith(
+                                          color: StyleColor.turquoise,
+                                        ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return OrientationBuilder(
+      builder: (BuildContext context, Orientation orientation) {
+        return SingleChildScrollView(
+          child: SizedBox(
+            height: orientation == Orientation.portrait
+                ? MediaQuery.sizeOf(context).height - 60
+                : MediaQuery.sizeOf(context).width -
+                    (MediaQuery.sizeOf(context).height / 2),
+            child: Column(
+              children: [
+                HeadScoreWidget(
+                  onRoute: () {
+                    Navigator.popAndPushNamed(context, '/profilePage');
+                  },
+                ),
+                Text(
+                  "Sigue la ruta de la sabiduría",
+                  style: StylesApp(context)
+                      .textStyleBody20
+                      .copyWith(color: StyleColor.vibrantPurple),
+                ),
+                isLoading
+                    ? Container()
+                    : errorMessage != null
+                        ? Center(
+                            child: BuildErrorWidget(
+                            errorMessage: errorMessage!,
+                            onRetry: () async =>
+                                await _loadStageSections(context),
+                            onBack: () => Navigator.pop(context),
+                          ))
+                        : _buildBodyContent(course)
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoChip({required IconData icon, required String text}) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: StyleColor.turquoise.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Color(0XFF12CBC4)),
+          SizedBox(width: 6),
+          Text(
+            text,
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  fontSize: 12.0,
+                  color: StyleColor.turquoise,
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Método auxiliar para manejar la navegación al mapa
+  Future<void> _handleGoToMap() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final progressResponse = await userProvider.getProgressUser(
+        userProvider.currentUser!.userId, course!.id);
+
+    if (progressResponse!.error != null) {
+      await showCustomDialog(context,
+          messageDetail: progressResponse.error!,
+          message: progressResponse.userFriendlyError!,
+          dialogType: DialogType.error);
+      return;
+    }
+
+    progressUser = progressResponse.data;
+
+    if (progressUser?.success == true) {
+      if (progressUser!.message.contains('El curso ya fue finalizado')) {
+        await showCustomDialogWithAction(
+          context,
+          message: progressUser!.message,
+          dialogType: DialogTypeAction.info,
+          buttonOk: "Ver más cursos",
+          textButton: "ir Al curso",
+          showAction: true,
+          actionCallbackOk: () {
+            Navigator.pushNamed(context, '/layoutPage',
+                arguments: {'selectedIndex': 1});
+          },
+          actionCallback: () {
+            Navigator.pushNamed(context, '/mapPage', arguments: {
+              'courseId': progressUser?.data?.courseId,
+              'sectionId': progressUser?.data?.sectionId ?? stages.first.id
+            });
+          },
+        );
+        return;
+      } else {
+        Navigator.pushNamed(context, '/mapPage', arguments: {
+          'courseId': course!.id,
+          'sectionId': progressUser?.data?.sectionId ?? stages.first.id
+        });
+      }
+    } else {
+      if (stages.first.levelCount > 0) {
+        Navigator.pushNamed(context, '/mapPage',
+            arguments: {'courseId': course!.id, 'sectionId': stages.first.id});
+      } else {
+        await showCustomDialog(context,
+            message: "¡Este curso no esta Disponible!",
+            dialogType: DialogType.info);
+      }
+    }
+  }
+
+  // Lista de etapas para tablet
+  Widget _buildTabletStagesList() {
+    return Container(
+      decoration: BoxDecoration(
+        color: StyleColor.white,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: StyleColor.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header de la lista
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: StyleColor.turquoise,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Etapas del curso',
+                  style: StylesApp(context).textStyleBody20.copyWith(
+                        fontSize: 22,
+                        color: Colors.white,
+                      ),
+                ),
+                Text(
+                  '${stages.length} etapas',
+                  style: StylesApp(context).textStyleBody12,
+                ),
+              ],
+            ),
+          ),
+
+          // Lista de etapas
+          Expanded(
+            child: stages.isEmpty
+                ? Center(
+                    child: Text(
+                      'No hay etapas disponibles',
+                      style: StylesApp(context).textStyleBody14.copyWith(
+                            fontSize: 18,
+                            color: StyleColor.grayMedium,
+                          ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.all(16),
+                    itemCount: stages.length,
+                    itemBuilder: (context, index) {
+                      final stage = stages[index];
+                      return _buildTabletStageItem(stage, index);
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Item de etapa para tablet
+  Widget _buildTabletStageItem(Stage stage, int index) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(left: 16.0),
+      decoration: BoxDecoration(
+        color: Color(int.parse('0XFF${stage.color}')).withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: StyleColor.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Número de etapa
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: StyleColor.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Etapa',
+                    style: StylesApp(context).textStyleBody10.copyWith(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  Text(
+                    '${stage.sectionNumber}',
+                    style: StylesApp(context).textStyleBody20.copyWith(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Contenido de la etapa
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          stage.sectionName,
+                          style: StylesApp(context).textStyleBody16.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.info_outline, color: Colors.white),
+                        onPressed: () {
+                          showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Container(
+                                  padding: EdgeInsets.all(24),
+                                  constraints: BoxConstraints(
+                                    maxWidth: 500,
+                                  ),
+                                  child: CustomModalWidget(
+                                    title: stage.sectionName,
+                                    content: stage.introduction,
+                                    buttonText: 'Aceptar',
+                                    id: "${stage.sectionNumber} ",
+                                    itemCount: stage.levelCount,
+                                    itemsCompleted: stage.levelCompletedCount,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 12),
+
+                  // Barra de progreso
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Progreso',
+                            style: StylesApp(context).textStyleBody14.copyWith(
+                                  fontSize: 14,
+                                ),
+                          ),
+                          Text(
+                            '${stage.levelCompletedCount}/${stage.levelCount}',
+                            style: StylesApp(context).textStyleBody14.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 6),
+                      Container(
+                        height: 6,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: StyleColor.white.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: stage.levelCount > 0
+                              ? stage.levelCompletedCount / stage.levelCount
+                              : 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: StyleColor.white,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 16),
+
+                  // Botones de acción
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ButtonThemeWidget(
+                          height: StylesApp(context).btnHeight.height,
+                          onPressed: (getStatus(stage) == "Pendiente")
+                              ? null
+                              : () {
+                                  Navigator.pushNamed(context, '/mapPage',
+                                      arguments: {
+                                        'courseId': course?.id,
+                                        'sectionId': stage.id
+                                      });
+                                },
+                          textStyle:
+                              StylesApp(context).textStyleBody14.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                          buttonStyle:
+                              StylesApp(context).btnWidgetSmall.copyWith(
+                            backgroundColor:
+                                WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.disabled)) {
+                                  return Colors.grey[400]; // Color when the button is disabled
+                                }
+                                return (getStatus(stage) == "Completado")
+                                    ? Color(0XFFC7AA34)
+                                    : StyleColor
+                                        .turquoise; // Use the component's default.
+                              },
+                            ),
+                          ),
+                          text: getStatus(stage),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      if (getStatus(stage) != "Pendiente") ...{
+                        SizedBox(width: 8.0),
+                        ButtonThemeWidget(
+                          height: StylesApp(context).btnHeight.height,
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/mapPage',
+                                arguments: {
+                                  'courseId': course?.id,
+                                  'sectionId': stage.id
+                                });
+                          },
+                          textStyle: StylesApp(context).textStyleBody14.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                          width: 60,
+                          text: "Ir",
+                          buttonStyle: StylesApp(context).btnWidgetSmall,
+                        )
+                      }
+                      // if (status != "Pendiente")
+                      //   SizedBox(
+                      //     width: 60,
+                      //     child: ElevatedButton(
+                      //       onPressed: () {
+                      //         Navigator.pushNamed(context, '/mapPage',
+                      //             arguments: {
+                      //               'courseId': course?.id,
+                      //               'sectionId': stage.id
+                      //             });
+                      //       },
+                      //       style: ElevatedButton.styleFrom(
+                      //         backgroundColor: Colors.white,
+                      //         shape: RoundedRectangleBorder(
+                      //           borderRadius: BorderRadius.circular(8),
+                      //         ),
+                      //         padding: EdgeInsets.symmetric(vertical: 12),
+                      //       ),
+                      //       child: Text(
+                      //         'Ir',
+                      //         style: TextStyle(
+                      //           fontSize: 14,
+                      //           fontWeight: FontWeight.w500,
+                      //           color: Color(0XFF12CBC4),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

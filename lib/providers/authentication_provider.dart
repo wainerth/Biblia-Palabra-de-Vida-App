@@ -23,9 +23,8 @@ class AuthenticationProvider extends ChangeNotifier {
   bool _isLoading = false;
 
   AuthenticationProvider(this.context, this._catalogueProvider);
-    bool get isLoading => _isLoading;
+  bool get isLoading => _isLoading;
 
-    
   Future<AuthCheckResult> checkAuthentication(BuildContext context) async {
     // evita múltiples verificaciones simultáneas
     if (_isCheckingAuth) {
@@ -229,7 +228,11 @@ class AuthenticationProvider extends ChangeNotifier {
       var error = userResponse.error;
 
       if (error != null) {
-        return ResponseData(data: null, error: error);
+        return ResponseData(
+            data: null,
+            error: error,
+            errorType: userResponse.errorType,
+            userFriendlyError: userResponse.userFriendlyError);
       }
       if (userResponse.data == null) {
         return ResponseData(data: null, error: "no data result");
@@ -358,7 +361,10 @@ class AuthenticationProvider extends ChangeNotifier {
       // get to mutation  GraphQl
       final registerResponse = await register(dataToRegister);
       if (registerResponse.error != null) {
-        return ResponseData(data: null, error: registerResponse.error);
+        return ResponseData(
+            data: null,
+            userFriendlyError: registerResponse.userFriendlyError,
+            error: registerResponse.error);
       }
       final userId = registerResponse.data["id"];
       final token = registerResponse.data["userJwtToken"]["token"];
@@ -368,29 +374,15 @@ class AuthenticationProvider extends ChangeNotifier {
       final ResponseData response = await loadProfileUser(userId, token);
       error = response.error;
       if (error != null) {
-        return ResponseData(data: null, error: error);
+        return ResponseData(
+            data: null,
+            error: error,
+            userFriendlyError: response.userFriendlyError);
       }
 
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      return handleGenericError(e, "registerUser");
-      // if (kDebugMode) {
-      //   print("Error during Register User: $e");
-      // } // Print the error for debugging.  Crucial!
-
-      // // More specific error handling if needed:
-      // if (e is TimeoutException) {
-      //   return ResponseData(data: null, error: "Request timed out");
-      // } else if (e is SocketException) {
-      //   return ResponseData(data: null, error: "No Internet Connection");
-      // } else if (e is FormatException) {
-      //   // Example: JSON parsing error
-      //   return ResponseData(data: null, error: "Invalid data format");
-      // } else {
-      //   return ResponseData(
-      //       data: null,
-      //       error: "An unexpected error occurred: $e"); // Generic error
-      // }
+      return handleGenericError(e, "Registrar Usuario");
     }
   }
 
@@ -400,28 +392,16 @@ class AuthenticationProvider extends ChangeNotifier {
       final ResponseData response = await forgotPassword(email);
       error = response.error;
       if (error != null) {
-        return ResponseData(data: null, error: error);
+        return ResponseData(
+            data: null,
+            userFriendlyError: response.userFriendlyError,
+            error: error,
+            errorType: response.errorType);
       }
 
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      if (kDebugMode) {
-        print("Error during forgot password: $e");
-      } // Print the error for debugging.  Crucial!
-
-      // More specific error handling if needed:
-      if (e is TimeoutException) {
-        return ResponseData(data: null, error: "Request timed out");
-      } else if (e is SocketException) {
-        return ResponseData(data: null, error: "No Internet Connection");
-      } else if (e is FormatException) {
-        // Example: JSON parsing error
-        return ResponseData(data: null, error: "Invalid data format");
-      } else {
-        return ResponseData(
-            data: null,
-            error: "An unexpected error occurred: $e"); // Generic error
-      }
+      return handleGenericError(e, "Olvidé mi contraseña");
     }
   }
 

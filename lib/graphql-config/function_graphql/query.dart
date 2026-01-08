@@ -8,6 +8,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 
 String operationName = '';
+
 // Query to get user profile by user ID
 
 Future<ResponseData> getProfileUser(String token, String idUser) async {
@@ -75,42 +76,24 @@ Future<ResponseData> getProfileUser(String token, String idUser) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        print(
-            '🎯 [GRAPHQL] Query completada: ${result.exception?.linkException.toString()}');
-        print('   Data: ${result.data}');
-        print('   Errors: ${result.exception.toString()}');
-      }
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Profile User failed: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getOneProfileByUserId'] == null) {
       return ResponseData(
         data: null,
-        error: 'Profile User failed: No data returned',
+        userFriendlyError: 'No se pudo obtener el perfil del usuario.',
+        error: 'Error en el perfil de usuario: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
     return ResponseData(
       data: removeTypename(data['getOneProfileByUserId']),
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get One Profile By User Id Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener perfil de usuario");
   }
 }
 
@@ -145,90 +128,21 @@ Future<ResponseData> verifyToken(String token) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'verify Token: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['verifyToken'] == null) {
-      if (kDebugMode) {
-        print("No data returned");
-      }
-      return ResponseData(data: false, error: "No data returned");
+      return ResponseData(
+        data: false,
+        userFriendlyError: 'No se pudo verificar el token.',
+        error: "No se devolvieron datos",
+        errorType: ErrorType.noData,
+      );
     }
     return ResponseData(data: data['verifyToken'], error: null);
   } catch (e) {
-    return handleGenericError(e, operationName);
-  }
-}
-
-Future<ResponseData> getAchievement(String userId) async {
-  String? userToken = await PreferencesManager().getUserToken();
-  final GraphQLClient client = createClient(authToken: userToken);
-  operationName = 'GetUserAchievement';
-  final QueryOptions options = QueryOptions(
-    operationName: operationName,
-    document: gql(r'''
-    query GetUserAchievement($userId: ID) {
-      getUserAchievement(userId: $userId) {
-        id
-        classification
-        img {
-          urlImg
-        }
-        unLockAchievement
-        title
-        description
-        requirement {
-          requirement
-        }
-      }
-    }
-    '''),
-    variables: <String, dynamic>{"userId": userId},
-    fetchPolicy: FetchPolicy.noCache,
-  );
-  try {
-    final QueryResult result = await client.query(options);
-    if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get User Achievement: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
-    }
-
-    final data = result.data;
-    if (data == null || data['getUserAchievement'] == null) {
-      return ResponseData(
-        data: null,
-        error: 'Achievement failed: No data returned',
-      );
-    }
-
-    return ResponseData(
-      data: data['getUserAchievement'],
-      error: null,
-    );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get User Achievement Timeout de conexión $e');
-  } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Verificar token");
   }
 }
 
@@ -259,22 +173,17 @@ Future<ResponseData> getUserTitle(String userId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get User Title: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getUserTitle'] == null) {
       return ResponseData(
         data: null,
-        error: 'get user title failed: No data returned',
+        userFriendlyError: 'No se pudo obtener los títulos del usuario.',
+        error:
+            'Error al obtener los título del usuario: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -282,14 +191,8 @@ Future<ResponseData> getUserTitle(String userId) async {
       data: data['getUserTitle'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get User Title Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener títulos del usuario");
   }
 }
 
@@ -323,36 +226,26 @@ Future<ResponseData> getTitleForUser(String userId, String courseId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Title For User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getTitleForUser'] == null ||
         data['getTitleForUser']["data"] == null) {
       return ResponseData(
-        data: null,
-        error: data['getTitleForUser']["message"] ??
-            'get title for user failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener el título para el usuario.',
+          error: data['getTitleForUser']["message"] ??
+              'Error al obtener el título del usuario: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getTitleForUser']["data"],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get User for title Title Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener título para el usuario");
   }
 }
 
@@ -385,22 +278,16 @@ Future<ResponseData> getPrizeWon(String userId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Prize By Course: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getPrizeByCourse'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get Prize By Course failed: No data returned',
+        userFriendlyError: 'No se pudo obtener los premios ganados.',
+        error: 'Error al obtener premio por curso: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -408,11 +295,8 @@ Future<ResponseData> getPrizeWon(String userId) async {
       data: data['getPrizeByCourse'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Prize By Course Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener premios ganados");
   }
 }
 
@@ -435,38 +319,27 @@ Future<ResponseData> getNextSectionUnlocked(
   );
   try {
     final QueryResult result = await client.query(options);
-    if (kDebugMode) {
-      print(result.data);
-    }
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Progress Section User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Progress Section User failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudo obtener la siguiente sección desbloqueada.',
+          error:
+              'Error en Obtener siguiente sección desbloqueada: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getProgressSectionUser'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Progress Section User Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener siguiente sección desbloqueada");
   }
 }
 
@@ -494,38 +367,25 @@ Future<ResponseData> getRewardObtained(String sectionId) async {
   );
   try {
     final QueryResult result = await client.query(options);
-    if (kDebugMode) {
-      print(result.data);
-    }
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get One Reward By Section: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getOneRewardBySection'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Reward failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener la recompensa obtenida.',
+          error: 'Recompensa fallida: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getOneRewardBySection'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get One reward Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Recompensa obtenida");
   }
 }
 
@@ -562,26 +422,19 @@ Future<ResponseData> getPrizeByUserId(String userId, String courseId) async {
   );
   try {
     final QueryResult result = await client.query(options);
-    if (kDebugMode) {
-      print(result.data);
-    }
+
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Prize By User Id: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getPrizeByUserId'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get Prize By User Id failed: No data returned',
+        userFriendlyError: 'No se pudo obtener el premio por ID de usuario.',
+        error:
+            'Error al obtener premio por ID de usuario: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -589,11 +442,8 @@ Future<ResponseData> getPrizeByUserId(String userId, String courseId) async {
       data: data['getPrizeByUserId'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Prize By User Id Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener premio por ID de usuario");
   }
 }
 
@@ -620,32 +470,24 @@ Future getDataMember(String token, String userId) async {
   try {
     final QueryResult result = await client.query(query);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'get Member By User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data["getMemberByUserId"] == null) {
       return ResponseData(
         data: null,
-        error: 'get Member By User Id failed: No data returned',
+        userFriendlyError: 'No se pudo obtener los datos del miembro.',
+        error:
+            'Error al obtener miembro por Id. de usuario: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
     return ResponseData(
         data: removeTypename(data['getMemberByUserId']), error: null);
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'get Member By User Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener Miembro por ID de usuario");
   }
 }
 
@@ -696,22 +538,18 @@ Future loadCoursesByUserAndChurch(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get all Courses: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getAllCourses'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get All Courses By User Id and church failed: No data returned',
+        userFriendlyError:
+            'No se pudieron cargar los cursos por usuario y iglesia.',
+        error:
+            'Obtener todos los cursos por ID de usuario e iglesia falló: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -719,11 +557,9 @@ Future loadCoursesByUserAndChurch(
       data: data['getAllCourses']['data'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get all Courses Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(
+        e, "Obtener todos los cursos por ID de usuario e iglesia");
   }
 }
 
@@ -761,34 +597,24 @@ Future loadOneCourse(String userId, String courseId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get One Course: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getOneCourse'] == null) {
       return ResponseData(
-        data: null,
-        error: 'get One Courses failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo cargar el curso.',
+          error: 'Obtener un curso falló: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getOneCourse'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get One Course Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener un curso");
   }
 }
 
@@ -827,22 +653,16 @@ Future loadStageById(String sectionId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Section: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getSectionById'] == null) {
       return ResponseData(
         data: null,
-        error: 'get Section By Id failed: No data returned',
+        userFriendlyError: 'No se pudo cargar la sección por ID.',
+        error: 'Error al obtener la sección por Id: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -850,11 +670,8 @@ Future loadStageById(String sectionId) async {
       data: data['getSectionById'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Section By Id Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener sección por ID");
   }
 }
 
@@ -900,15 +717,7 @@ Future loadStageByCourse(String userId, String courseId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Sections By Course: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
@@ -917,7 +726,9 @@ Future loadStageByCourse(String userId, String courseId) async {
         data['getSections']['data'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get Sections By Course failed: No data returned',
+        userFriendlyError: 'No se pudo cargar las secciones por curso.',
+        error: 'Error al obtener secciones por curso: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -925,11 +736,8 @@ Future loadStageByCourse(String userId, String courseId) async {
       data: data['getSections']['data'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Sections By Course Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener secciones por curso");
   }
 }
 
@@ -967,22 +775,17 @@ Future loadLevelsByCourse(String userId, String sectionId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Levels By Section: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getAllLevelsBySectionId'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get All Levels By Section failed: No data returned',
+        userFriendlyError: 'No se pudieron cargar los niveles por sección.',
+        error:
+            'Error al obtener todos los niveles por sección: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -990,12 +793,8 @@ Future loadLevelsByCourse(String userId, String sectionId) async {
       data: data['getAllLevelsBySectionId'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null,
-        error: 'Get All Levels By Section Id Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todos los niveles por sección");
   }
 }
 
@@ -1034,22 +833,16 @@ Future loadOneLevel(String levelId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get One Level: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getLevelById'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get One Level failed: No data returned',
+        userFriendlyError: 'No se pudo cargar el nivel.',
+        error: 'Obtener un nivel fallo: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -1057,11 +850,8 @@ Future loadOneLevel(String levelId) async {
       data: data['getLevelById'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get One Level Id Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener un nivel");
   }
 }
 
@@ -1117,22 +907,16 @@ Future loadStoriesByLevel(String levelId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Story Level: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getStoryByLevelId'] == null) {
       return ResponseData(
         data: null,
-        error: 'get Stories By level failed: No data returned',
+        userFriendlyError: 'No se pudo cargar las historias por nivel.',
+        error: 'Error al obtener historias por nivel: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -1140,11 +924,8 @@ Future loadStoriesByLevel(String levelId) async {
       data: data['getStoryByLevelId'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Story Level Id Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener historias por nivel");
   }
 }
 
@@ -1189,22 +970,16 @@ Future loadQuestionByStory(String levelId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Question By Level: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getQuestionsByLevelId'] == null) {
       return ResponseData(
         data: null,
-        error: 'get Question By level Id failed: No data returned',
+        userFriendlyError: 'No se pudieron cargar las preguntas por nivel.',
+        error: 'Obtener pregunta por nivel Id falló: No se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -1212,11 +987,8 @@ Future loadQuestionByStory(String levelId) async {
       data: data['getQuestionsByLevelId'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Question By Level Id Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener preguntas por nivel");
   }
 }
 
@@ -1249,22 +1021,17 @@ Future getLastProgressUser(String userId, String? courseId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Last Progress User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getLastProgressUser'] == null) {
       return ResponseData(
         data: null,
-        error: 'Get Last Progress User failed: No data returned',
+        userFriendlyError: 'No se pudo obtener el último progreso del usuario.',
+        error:
+            'Obtener último progreso Error del usuario: no se devolvieron datos',
+        errorType: ErrorType.noData,
       );
     }
 
@@ -1272,11 +1039,8 @@ Future getLastProgressUser(String userId, String? courseId) async {
       data: removeTypename(data['getLastProgressUser']),
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Last Progress User Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener último progreso del usuario");
   }
 }
 
@@ -1324,34 +1088,26 @@ Future lastLevelProgressUser(String userId, String levelId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Progress Level User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getProgressLevelUser'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Progress Level User failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudo obtener el nivel de progreso del usuario.',
+          error:
+              'Error al obtener el nivel de progreso del usuario: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: removeTypename(data['getProgressLevelUser']),
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Progress Level User Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener nivel de progreso del usuario");
   }
 }
 
@@ -1381,34 +1137,25 @@ Future getLeagueMembers(String leagueId, String userId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Member By User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getLeagueMembers'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get League Members failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudieron obtener los miembros de la liga.',
+          error:
+              'Error al obtener miembros de la liga: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getLeagueMembers'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get League Members Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener miembros de la liga");
   }
 }
 
@@ -1456,15 +1203,7 @@ Future getAllPrize(int? page, int? limit, String userId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Prize: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
@@ -1472,20 +1211,18 @@ Future getAllPrize(int? page, int? limit, String userId) async {
         data['getAllPrize'] == null ||
         data['getAllPrize']['data'] == null) {
       return ResponseData(
-        data: null,
-        error: 'get All Prize failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudieron obtener todos los premios.',
+          error: 'Error al obtener todos los premios: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: removeTypename(data['getAllPrize']),
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get All Prize Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todos los premios");
   }
 }
 
@@ -1513,34 +1250,24 @@ Future streaksCalendar(String userId, int month) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Streak Calendar Service: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['streakCalendarService'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Streak Calendar Service failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener el calendario de rachas.',
+          error: 'Calendario Racha falló: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: removeTypename(data['streakCalendarService']),
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Streak Calendar Service Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Calendario de rachas");
   }
 }
 
@@ -1579,34 +1306,24 @@ Future<ResponseData> getDailyWord() async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Daily Word: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getDailyWord'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Daily Word failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener la palabra diaria.',
+          error: 'Error al obtener Palabra Diaria: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: removeTypename(data['getDailyWord']),
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Daily Word Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener palabra diaria");
   }
 }
 
@@ -1634,34 +1351,25 @@ Future<ResponseData> getOneReflection() async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get One Reflection Random: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getOneReflectionRandom'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get One Reflection Random failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener una reflexión.',
+          error:
+              'Obtener una reflexión aleatoria falló: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: removeTypename(data['getOneReflectionRandom']),
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get One Reflection Random Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener una reflexión aleatoria");
   }
 }
 
@@ -1698,34 +1406,24 @@ Future<ResponseData> getDailyPromises(String userId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Daily Promise: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = result.data;
     if (data == null || data['getDailyPromise'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Daily Promise failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener la promesa diaria.',
+          error: 'Error en la promesa diaria: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getDailyPromise'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Daily Promise Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener promesas diarias ");
   }
 }
 
@@ -1766,37 +1464,25 @@ Future<ResponseData> getAllReflections(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Reflection: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllReflection'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get All Reflection failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudieron obtener todas las reflexiones.',
+          error:
+              'Error al obtener todas las reflexiones: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllReflection'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get All Reflection Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todas las reflexiones");
   }
 }
 
@@ -1852,35 +1538,26 @@ Future<ResponseData> getAllPreach(String userId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Preaches With Favorite: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllPreachesWithFavorite'] == null) {
       return ResponseData(
-        data: null,
-        error: 'get All Preaches With Favorite failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudieron obtener todas las predicaciones.',
+          error:
+              'Error al obtener todas las predicaciones con favoritos: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllPreachesWithFavorite'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null,
-        error: 'Get All Preaches With Favorite Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(
+        e, "Obtener todas las predicaciones con favoritos");
   }
 }
 
@@ -1918,35 +1595,26 @@ Future<ResponseData> getChapterWithVerses(String bookId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get One Book By Book: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getOneBookByBookId'] == null ||
         data['getOneBookByBookId']['chapters'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get One Book By BookId  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener los capítulos con versículos.',
+          error: 'Error al obtener un libro por BookId: no se devolvieron dato',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getOneBookByBookId']['chapters'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get One Book By BookId Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener Un libro");
   }
 }
 
@@ -1983,35 +1651,25 @@ Future<ResponseData> getOneChapterWithVerses(String? chapterId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get One Chapter By Chapter: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getOneChapterByChapterId'] == null) {
       return ResponseData(
-        data: null,
-        error: 'get One Chapter By ChapterId  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener un capítulo por ChapterId.',
+          error:
+              'Error al obtener un capítulo por ChapterId: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getOneChapterByChapterId'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null,
-        error: 'Get One Chapter By ChapterId Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener un capítulo");
   }
 }
 
@@ -2037,34 +1695,24 @@ Future<ResponseData> getAudioByChapter(String? chapterId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Audio By Chapter: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAudioByChapter'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Audio By Chapter  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener el audio por capítulo.',
+          error: 'Get Audio By Chapter  failed: No data returned',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAudioByChapter'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Audio By Chapter Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener audio por capítulo");
   }
 }
 
@@ -2089,34 +1737,25 @@ Future<ResponseData> getVideoByChapter(String? chapterId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Video By Chapter: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getVideoByChapter'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Video By Chapter  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener el video por capítulo.',
+          error:
+              'Error al obtener el video por capítulo: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getVideoByChapter'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Video By Chapter Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener video por capítulo");
   }
 }
 
@@ -2154,34 +1793,24 @@ Future<ResponseData> getBooksByBibleId(String? versionId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Books By Bible: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getBooksByBibleId'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Books By BibleId  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudieron obtener los libros por BibleId.',
+          error: 'Error al obtener libros por BibleId: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getBooksByBibleId'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    return ResponseData(
-        data: null, error: 'Get Books By BibleId Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener libros por BibleId");
   }
 }
 
@@ -2217,37 +1846,26 @@ Future<ResponseData> getAllHighLighters(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Highlighters: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllHighlighters'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get All Highlighters failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todos los Versículos resaltados.',
+          error:
+              'Error al obtener todos los Versículos resaltados: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllHighlighters'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get All Highlighters Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener Versículos Resaltados");
   }
 }
 
@@ -2308,38 +1926,26 @@ Future<ResponseData> getFavoriteVerseByUser(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Favorite Verses By Chapter: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getFavoriteVersesByChapterId'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Favorite Verses By ChapterId  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener los versículos favoritos por ChapterId.',
+          error:
+              'Error al obtener versículos favoritos por ChapterId: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getFavoriteVersesByChapterId'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null,
-        error: 'Get Favorite Verses By ChapterId Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener versículos favoritos por ChapterId");
   }
 }
 
@@ -2388,37 +1994,24 @@ Future<ResponseData> getAllTeaching(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Teaching: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllTeaching'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get All Teaching  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudieron obtener todas las enseñanzas.',
+          error: 'Error al obtener toda la enseñanza: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllTeaching'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get All Teaching Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todas las enseñanzas");
   }
 }
 
@@ -2429,7 +2022,6 @@ Future<ResponseData> getAllCharacters(
   final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
-    // operationName: "GetOneReflectionRandom ",
     document: gql(r'''
         query GetCharacters($page: Int, $limit: Int, $name: String, $isNewTestament: Boolean) {
           getCharacters(page: $page, limit: $limit, name: $name, isNewTestament: $isNewTestament) {
@@ -2484,37 +2076,24 @@ Future<ResponseData> getAllCharacters(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Characters: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getCharacters'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Characters  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudieron obtener todos los personajes.',
+          error: 'Error al obtener caracteres: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getCharacters'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get Characters Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todos los personajes");
   }
 }
 
@@ -2524,7 +2103,6 @@ Future<ResponseData> getReferenceTeaching(String id) async {
   final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
-    // operationName: "GetOneReflectionRandom ",
     document: gql(r'''
         query GetVersesForTeaching($id: ID) {
           getVersesForTeaching(id: $id) {
@@ -2553,37 +2131,27 @@ Future<ResponseData> getReferenceTeaching(String id) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Verses For Teaching: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getVersesForTeaching'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Verses For Teaching  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener los versículos para la enseñanza.',
+          error:
+              'Error al obtener Versos para la Enseñanza: No se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getVersesForTeaching'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get Verses For Teaching Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(
+        e, "Obtener todos los Versículos para la enseñanza");
   }
 }
 
@@ -2594,7 +2162,6 @@ Future<ResponseData> getCharacterFirstAppearance(
   final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
-    // operationName: "GetOneReflectionRandom ",
     document: gql(r'''
         query GetCharacterFirstAppearance($getCharacterFirstAppearanceId: ID) {
           getCharacterFirstAppearance(id: $getCharacterFirstAppearanceId) {
@@ -2623,38 +2190,26 @@ Future<ResponseData> getCharacterFirstAppearance(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Character First Appearance: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getCharacterFirstAppearance'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Character First Appearance  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudo obtener la primera aparición del personaje.',
+          error:
+              'Error al obtener la primera aparición del personaje: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getCharacterFirstAppearance'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null,
-        error: 'Get Character First Appearance Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener la primera aparición del personaje");
   }
 }
 
@@ -2665,7 +2220,6 @@ Future<ResponseData> getWordsConcordance(
   final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
-    // operationName: "GetOneReflectionRandom ",
     document: gql(r'''
         query WordSearchConcordance($page: Int, $limit: Int, $versionId: ID, $searchWord: String) {
         wordSearchConcordance(page: $page, limit: $limit, versionId: $versionId, searchWord: $searchWord) {
@@ -2713,37 +2267,25 @@ Future<ResponseData> getWordsConcordance(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Word Search Concordance: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['wordSearchConcordance'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Word Search Concordance  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener la concordancia de palabras.',
+          error:
+              'Error en la concordancia de búsqueda de palabras: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['wordSearchConcordance'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Word Search Concordance Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener concordancia de palabras");
   }
 }
 
@@ -2754,7 +2296,6 @@ Future<ResponseData> getAllNotification(
   final GraphQLClient client = createClient(authToken: userToken);
 
   QueryOptions options = QueryOptions(
-    // operationName: "GetOneReflectionRandom ",
     document: gql(r'''
         query GetAllNotificationsByUserId($page: Int, $limit: Int, $userId: ID) {
         getAllNotificationsByUserId(page: $page, limit: $limit, userId: $userId) {
@@ -2793,38 +2334,26 @@ Future<ResponseData> getAllNotification(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Notifications By User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllNotificationsByUserId'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get All Notifications By UserId  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todas las notificaciones por UserId.',
+          error:
+              'Error al obtener todas las notificaciones por ID de usuario: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllNotificationsByUserId'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null,
-        error: 'Get All Notifications By UserId Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todas las notificaciones");
   }
 }
 
@@ -2853,36 +2382,24 @@ Future<ResponseData> getMemory() async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Notifications By User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getMemory'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Memory  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener la memoria.',
+          error: 'Error al obtener Cartas de memoria: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getMemory'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(data: null, error: 'Get Memory Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener cartas de memoria");
   }
 }
 
@@ -2932,37 +2449,26 @@ Future<ResponseData> getAllGuessCharacters(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Guess Characters: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllGuessCharacters'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get All Guess Characters  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todos los personajes de adivinanza.',
+          error:
+              'Error al obtener todos los caracteres: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllGuessCharacters'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get All Guess Characters Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todos los personajes de adivinanza");
   }
 }
 
@@ -3006,37 +2512,24 @@ Future<ResponseData> getAllResultGame(String? userId, String category) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Result ByUser: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['resultByUser'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Result ByUser  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError: 'No se pudo obtener el resultado por usuario.',
+          error: 'Resultado Por Usuario fallido: No se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['resultByUser'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Result ByUser Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener resultado por usuario");
   }
 }
 
@@ -3077,37 +2570,26 @@ Future<ResponseData> getQuestionGameDifficulty(String difficulty) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Questions By Difficulty: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getQuestionsByDifficulty'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Questions By Difficulty  failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener las preguntas por dificultad.',
+          error:
+              'Obtener preguntas por dificultad falló: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getQuestionsByDifficulty'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Result ByUser Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener preguntas por dificultad");
   }
 }
 
@@ -3134,38 +2616,27 @@ Future<ResponseData> getAllPrayerRequestTypes() async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Prayer Request Types: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllPrayerRequestTypes'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get All Prayer Request Types failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todos los tipos de solicitudes de oración.',
+          error:
+              'Error al obtener todos los tipos de solicitudes de oración: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllPrayerRequestTypes'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null,
-        error: 'Get All Prayer Request Types Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(
+        e, "Obtener todos los tipos de solicitudes de oración");
   }
 }
 
@@ -3195,37 +2666,26 @@ Future<ResponseData> getAllPrayerRequestSubTypes(String prayerTypeId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Prayer Sub Type: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllPrayerSubType'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get All Prayer Sub Type failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todos los subtipos de oración.',
+          error:
+              'Error al obtener todos los subtipos de oración: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllPrayerSubType'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get ALl Prayer Sub Type Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todos los subtipos de oración");
   }
 }
 
@@ -3254,22 +2714,17 @@ Future<ResponseData> isMemberPrayerGroup(String userId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Is User Prayer Group Member: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['isUserPrayerGroupMember'] == null) {
       return ResponseData(
         data: null,
-        error: 'Is User Prayer Group Member failed: No data returned',
+        userFriendlyError:
+            'No se pudo verificar si el usuario es miembro del grupo de oración.',
+        error:
+            'Falló la membresía del grupo de oración del usuario; No se devolvieron datos',
       );
     }
 
@@ -3277,15 +2732,9 @@ Future<ResponseData> isMemberPrayerGroup(String userId) async {
       data: data['isUserPrayerGroupMember'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null,
-        error: 'Is User Prayer Group Member Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(
+        e, "Verificar membresía del grupo de oración del usuario");
   }
 }
 
@@ -3347,38 +2796,27 @@ Future<ResponseData> getAllRequestPrayerByGroupId(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Prayer Request By Prayer Group: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getPrayerRequestByPrayerGroup'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Prayer Request By Prayer Group failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todas las solicitudes de oración por grupo de oración.',
+          error:
+              'Error al obtener una solicitud de oración por grupo de oración: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getPrayerRequestByPrayerGroup'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null,
-        error: 'Get Prayer Request By Prayer Group Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(
+        e, "Obtener todas las solicitudes de oración por grupo de oración");
   }
 }
 
@@ -3453,38 +2891,27 @@ Future<ResponseData> getAllRequestPrayerByUser(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Prayer Request By User Id: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getPrayerRequestByUserId'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Prayer Request By User Id failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todas las solicitudes de oración por UserId.',
+          error:
+              'Error al obtener una solicitud de oración por ID de usuario: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getPrayerRequestByUserId'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null,
-        error: 'Get Prayer Request By User Id Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(
+        e, "Obtener todas las solicitudes de oración por UserId");
   }
 }
 
@@ -3519,40 +2946,27 @@ Future<ResponseData> getReferencesBibleByName(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Verse By Chapter Book Name And Code Bible: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getVerseByChapterBookNameAndCodeBible'] == null) {
       return ResponseData(
-        data: null,
-        error:
-            'Get Verse By Chapter Book Name And Code Bible failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener los versículos por nombre de libro y código de biblia.',
+          error:
+              'Error al obtener versículo por capítulo, nombre del libro y código de la Biblia: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getVerseByChapterBookNameAndCodeBible'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null,
-        error:
-            'Get Verse By Chapter Book Name And Code Bible Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(
+        e, "Obtener versículos por nombre de libro y código de biblia");
   }
 }
 
@@ -3579,38 +2993,26 @@ Future<ResponseData> getUrlCertificate(String userId, String? courseId) async {
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get Url Certificate By User: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getUrlCertificateByUser'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get Url Certificate By User failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudo obtener la URL del certificado por usuario.',
+          error:
+              'Error al obtener el certificado de URL por usuario: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getUrlCertificateByUser'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null,
-        error: 'Get Url Certificate By User Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener URL del certificado por usuario");
   }
 }
 
@@ -3641,37 +3043,26 @@ Future<ResponseData> getStatesByCountry(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All States By Country: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllStatesByCountry'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get All States By Country failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todos los estados por país.',
+          error:
+              'Error al obtener todos los estados por país: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllStatesByCountry'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get All States By Country Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todos los estados por país");
   }
 }
 
@@ -3702,36 +3093,25 @@ Future<ResponseData> getCitiesByState(
   try {
     final QueryResult result = await client.query(options);
     if (result.hasException) {
-      if (kDebugMode) {
-        return ResponseData.fromQueryResult(result);
-      } else {
-        return ResponseData(
-          data: null,
-          error:
-              'Get All Cities By State: Ocurrió un error inesperado. Nuestro equipo ya está trabajando para solucionarlo.',
-        );
-      }
+      return ResponseData.fromQueryResult(result);
     }
 
     final data = removeTypename(result.data);
     if (data['getAllCitiesByState'] == null) {
       return ResponseData(
-        data: null,
-        error: 'Get All Cities By State failed: No data returned',
-      );
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todas las ciudades por estado.',
+          error:
+              'Error al obtener todas las ciudades por estado: no se devolvieron datos',
+          errorType: ErrorType.noData);
     }
 
     return ResponseData(
       data: data['getAllCitiesByState'],
       error: null,
     );
-  } on TimeoutException catch (e) {
-    if (kDebugMode) {
-      print('Timeout: $e');
-    }
-    return ResponseData(
-        data: null, error: 'Get All Cities By State Timeout de conexión $e');
   } catch (e) {
-    return handleGenericError(e, operationName);
+    return handleGenericError(e, "Obtener todas las ciudades por estado");
   }
 }

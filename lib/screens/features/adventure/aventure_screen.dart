@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
@@ -42,6 +43,13 @@ class _AventureScreenState extends State<AventureScreen> {
   );
 
   List<CourseModel> courses = [];
+
+  // Determinar si es tablet
+  bool get isTablet {
+    final mediaQuery = MediaQuery.of(context);
+    return mediaQuery.size.shortestSide >= 600;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -110,6 +118,7 @@ class _AventureScreenState extends State<AventureScreen> {
     final themeProvider =
         Provider.of<BibleThemeProvider>(context, listen: false);
     currentTheme = themeProvider.themeData;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -127,7 +136,9 @@ class _AventureScreenState extends State<AventureScreen> {
                             onBack: () => Navigator.pop(context),
                           ),
                         )
-                      : listViewCardAventure(),
+                      : isTablet
+                          ? _buildTabletLayout() // Diseño para tablet
+                          : _buildMobileLayout(), // Diseño para móvil (existente)
             ),
             Padding(
               padding: EdgeInsets.only(
@@ -162,7 +173,228 @@ class _AventureScreenState extends State<AventureScreen> {
     );
   }
 
-  listViewCardAventure() {
+  // ========== DISEÑO PARA TABLET (2 COLUMNAS) ==========
+  Widget _buildTabletLayout() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 20.0,
+          mainAxisSpacing: 20.0,
+          childAspectRatio: 1.8, // ¡CAMBIADO de 1.8 a 0.9! Esto es clave
+        ),
+        padding: EdgeInsets.only(bottom: 24.0),
+        itemCount: courses.length,
+        itemBuilder: (context, index) {
+          if (loadAventure.length <= index) loadAventure.add(false);
+          return _buildTabletCard(index);
+        },
+      ),
+    );
+  }
+
+  Widget _buildTabletCard(int index) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      margin: EdgeInsets.zero,
+      child: Container(
+        constraints: BoxConstraints(
+          minHeight: 380,
+          maxHeight: 420,
+        ),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Imagen con altura fija
+                Container(
+                  height: 160, // Altura fija para la imagen
+                  width: double.infinity,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(16.0),
+                    ),
+                    child: courses[index].img.urlImg.isNotEmpty
+                        ? Image.network(
+                            GraphQLConfig.urlServidor +
+                                courses[index].img.urlImg,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[200],
+                                child: Center(
+                                  child: Icon(
+                                    Icons.book,
+                                    size: 60,
+                                    color: Colors.grey[400],
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        : Container(
+                            color: currentTheme.buttonColor,
+                            child: Center(
+                              child: Icon(
+                                Icons.book,
+                                size: 60,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+
+                // Contenido flexible
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Título y descripción - altura flexible
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                courses[index].title,
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: currentTheme.textColor,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: 8.0),
+                              Flexible(
+                                child: SingleChildScrollView(
+                                  physics: NeverScrollableScrollPhysics(),
+                                  child: Text(
+                                    courses[index].introduction,
+                                    style: TextStyle(
+                                      fontSize: 14.0,
+                                      color: Colors.grey[700],
+                                      height: 1.4,
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 16),
+
+                        // Botones - altura fija
+                        Container(
+                          height: 50, // Altura fija para botones
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    _handleCardTap(index);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: currentTheme.buttonColor,
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 12.0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Ver Detalles',
+                                    style: TextStyle(
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w500,
+                                      color: currentTheme.buttonTextColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 12.0),
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    _handleGoToMap(index);
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 12.0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    side: BorderSide(
+                                        color: currentTheme.buttonColor),
+                                  ),
+                                  child: Text(
+                                    'Ir al Mapa',
+                                    style: TextStyle(
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w500,
+                                      color: currentTheme.buttonColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Indicador de carga
+            if (loadAventure[index])
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  child: Center(
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 4.0,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ========== DISEÑO PARA MÓVIL (EXISTENTE) ==========
+  Widget _buildMobileLayout() {
     return ListView.builder(
       padding: EdgeInsets.only(bottom: 24.0),
       itemCount: courses.length,
@@ -175,88 +407,10 @@ class _AventureScreenState extends State<AventureScreen> {
                 course: courses[index],
                 loadingAction: loadAventure[index],
                 onTap: () async {
-                  Stage? stage =
-                      await loadStage(dataUser?.userId, courses[index].id);
-                  if (stage != null && stage.levelCount > 0) {
-                    Navigator.popAndPushNamed(context, '/detailCoursePage',
-                        arguments: {"courseId": courses[index].id});
-                  } else {
-                    setState(() {
-                      loadAventure[index] = false;
-                    });
-                    await showCustomDialog(context,
-                        message: "¡Este curso no esta Disponible!",
-                        dialogType: DialogType.info);
-                  }
+                  _handleCardTap(index);
                 },
                 goToMap: () async {
-                  setState(() {
-                    loadAventure[index] = true;
-                  });
-                  Stage? stage =
-                      await loadStage(dataUser?.userId, courses[index].id);
-                  if (stage != null && stage.levelCount > 0) {
-                    final userProvider =
-                        Provider.of<UserProvider>(context, listen: false);
-                    final progressResponse = await userProvider.getProgressUser(
-                        dataUser!.userId, courses[index].id);
-                    if (progressResponse!.error != null) {
-                      setState(() => loadAventure[index] = false);
-                      await showCustomDialog(context,
-                          message: progressResponse.error!,
-                          dialogType: DialogType.error);
-                      return;
-                    }
-                    progressUser = progressResponse.data;
-                    if (progressUser?.success == true) {
-                      if (progressUser!.message
-                          .contains('El curso ya fue finalizado')) {
-                        await showCustomDialogWithAction(
-                          context,
-                          message: progressUser!.message,
-                          dialogType: DialogTypeAction.info,
-                          buttonOk: "Cerrar",
-                          textButton: "ir Al curso",
-                          showAction: true,
-                          actionCallbackOk: () {
-                            setState(() {
-                              loadAventure[index] = false;
-                            });
-                            Navigator.pop(context);
-                          },
-                          actionCallback: () {
-                            Navigator.pushNamed(context, '/mapPage',
-                                arguments: {
-                                  'courseId': progressUser?.data?.courseId,
-                                  'sectionId':
-                                      progressUser?.data?.sectionId ?? stage.id
-                                });
-                          },
-                        );
-                        return;
-                      } else {
-                        Navigator.pushNamed(context, '/mapPage', arguments: {
-                          'courseId': courses[index].id,
-                          'sectionId': progressUser?.data?.sectionId ?? stage.id
-                        });
-                      }
-                    } else {
-                      Navigator.pushNamed(context, '/mapPage', arguments: {
-                        'courseId': courses[index].id,
-                        'sectionId': stage.id
-                      });
-                    }
-                  } else {
-                    setState(() {
-                      loadAventure[index] = false;
-                    });
-                    await showCustomDialog(context,
-                        message: "¡Este curso no esta Disponible!",
-                        dialogType: DialogType.info);
-                  }
-                  setState(() {
-                    loadAventure[index] = false;
-                  });
+                  _handleGoToMap(index);
                 },
               ),
               if (loadAventure[index])
@@ -290,5 +444,98 @@ class _AventureScreenState extends State<AventureScreen> {
       return stages.first;
     }
     return null;
+  }
+
+  // Agrega estas funciones dentro de la clase _AventureScreenState:
+  Future<void> _handleCardTap(int index) async {
+    setState(() => loadAventure[index] = true);
+    Stage? stage = await loadStage(dataUser?.userId, courses[index].id);
+    if (!mounted) return;
+    if (stage != null && stage.levelCount > 0) {
+      if (!mounted) return;
+      Navigator.popAndPushNamed(context, '/detailCoursePage',
+          arguments: {"courseId": courses[index].id});
+    } else {
+      if (mounted) setState(() => loadAventure[index] = false);
+      if (!mounted) return;
+      await showCustomDialog(context,
+          message: "¡Este curso no esta Disponible!",
+          showDetails: false,
+          dialogType: DialogType.info);
+    }
+  }
+
+  Future<void> _handleGoToMap(int index) async {
+    if (mounted) setState(() => loadAventure[index] = true);
+
+    Stage? stage = await loadStage(dataUser?.userId, courses[index].id);
+    if (!mounted) return;
+
+    if (stage != null && stage.levelCount > 0) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final progressResponse = await userProvider.getProgressUser(
+          dataUser!.userId, courses[index].id);
+      if (!mounted) return;
+
+      if (progressResponse!.error != null) {
+        if (mounted) setState(() => loadAventure[index] = false);
+        if (!mounted) return;
+        await showCustomDialog(
+          context,
+          messageDetail: progressResponse.error!,
+          message: progressResponse.userFriendlyError!,
+          dialogType: DialogType.error,
+        );
+        return;
+      }
+
+      progressUser = progressResponse.data;
+
+      if (progressUser?.success == true) {
+        if (progressUser!.message.contains('El curso ya fue finalizado')) {
+          if (!mounted) return;
+          await showCustomDialogWithAction(
+            context,
+            message: progressUser!.message,
+            dialogType: DialogTypeAction.info,
+            buttonOk: "Cerrar",
+            textButton: "ir Al curso",
+            showAction: true,
+            actionCallbackOk: () {
+              if (mounted) setState(() => loadAventure[index] = false);
+              if (mounted) Navigator.pop(context);
+            },
+            actionCallback: () {
+              if (mounted)
+                Navigator.pushNamed(context, '/mapPage', arguments: {
+                  'courseId': progressUser?.data?.courseId,
+                  'sectionId': progressUser?.data?.sectionId ?? stage.id
+                });
+            },
+          );
+          return;
+        } else {
+          if (mounted)
+            Navigator.pushNamed(context, '/mapPage', arguments: {
+              'courseId': courses[index].id,
+              'sectionId': progressUser?.data?.sectionId ?? stage.id
+            });
+        }
+      } else {
+        if (mounted)
+          Navigator.pushNamed(context, '/mapPage', arguments: {
+            'courseId': courses[index].id,
+            'sectionId': stage.id
+          });
+      }
+    } else {
+      if (mounted) setState(() => loadAventure[index] = false);
+      if (!mounted) return;
+      await showCustomDialog(context,
+          message: "¡Este curso no esta Disponible!",
+          dialogType: DialogType.info);
+    }
+
+    if (mounted) setState(() => loadAventure[index] = false);
   }
 }

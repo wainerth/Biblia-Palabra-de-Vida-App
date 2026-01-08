@@ -6,6 +6,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
@@ -167,11 +168,18 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
 }
 
 Future<void> showCustomDialog(BuildContext context,
-    {required String message, required DialogType dialogType}) async {
+    {required String message,
+    String messageDetail = '',
+    showDetails = false,
+    required DialogType dialogType}) async {
   await showDialog(
     context: context,
     builder: (BuildContext context) {
-      return CustomDialog(message: message, dialogType: dialogType);
+      return CustomDialog(
+          showDetails: showDetails,
+          message: message,
+          dialogType: dialogType,
+          errorDetail: messageDetail);
     },
   );
 }
@@ -186,6 +194,7 @@ Future<void> showCustomDialogWithAction(BuildContext context,
     void Function()? actionCallback}) async {
   await showDialog(
     context: context,
+    barrierDismissible: true,
     builder: (BuildContext context) {
       return CustomDialogWithAction(
         message: message,
@@ -306,16 +315,28 @@ RouteInfo getRouterScreen(action, args) {
 
 ResponseData handleGenericError(dynamic e, String operationName) {
   if (e is TimeoutException) {
-    return ResponseData(data: null, error: "$operationName Request timed out");
+    return ResponseData(
+      data: null,
+      userFriendlyError: "$operationName solicitud agotada",
+      error: "$operationName Request timed out",
+    );
   } else if (e is SocketException) {
     return ResponseData(
-        data: null, error: "$operationName No Internet Connection");
+      data: null,
+      userFriendlyError: "$operationName Sin conexión a Internet",
+      error: "$operationName: ${e.toString()}",
+    );
   } else if (e is FormatException) {
     return ResponseData(
-        data: null, error: "$operationName Invalid data format");
+      data: null,
+      userFriendlyError: "$operationName Formato de datos no válido",
+      error: "$operationName:  ${e.toString()}",
+    );
   } else {
     return ResponseData(
-        data: null, error: "$operationName An unexpected error occurred: $e");
+        data: null,
+        userFriendlyError: "$operationName Error inesperado",
+        error: "$operationName: ${e.toString()}");
   }
 }
 
@@ -333,8 +354,14 @@ Size getDesignSize() {
   }
 }
 
-bool isTablet(BuildContext context) {
-  final size = MediaQuery.of(context).size;
+bool isTablet(BuildContext? context) {
+  // Use window metrics instead of MediaQuery to avoid accessing a possibly
+  // deactivated BuildContext (e.g. from dispose).
+  final window = WidgetsBinding.instance.window;
+  final physicalSize = window.physicalSize;
+  final pixelRatio = window.devicePixelRatio;
+  final logicalSize = physicalSize / pixelRatio;
+  final size = logicalSize;
   final aspectRatio = size.width / size.height;
   final shortestSide = size.shortestSide;
 
@@ -346,4 +373,3 @@ bool isTablet(BuildContext context) {
 
   return false;
 }
-

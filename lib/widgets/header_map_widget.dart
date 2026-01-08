@@ -61,6 +61,7 @@ class HeaderMapWidget extends StatelessWidget {
         Container(
           constraints: BoxConstraints(
             minHeight: 79,
+            maxWidth: 750
           ),
           decoration: BoxDecoration(
             color: Color(0XFF7688C2),

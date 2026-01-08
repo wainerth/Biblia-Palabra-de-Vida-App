@@ -796,7 +796,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().xlg) {
       return Size(MediaQuery.sizeOf(context).width * 0.6, 45.0);
     } else {
-      return Size(MediaQuery.sizeOf(context).width * 0.6, 50.0);
+      return Size(MediaQuery.sizeOf(context).width * 0.6, 35.0);
     }
   }
 
@@ -988,9 +988,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 25.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 25.sp;
+      return 20.sp;
     } else {
-      return 25.sp;
+      return 20.sp;
     }
   }
 

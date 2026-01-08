@@ -14,9 +14,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class SearchByTextWidget extends StatefulWidget {
+  final VersionModel? version;
   final void Function(InputDataSearchModel data)? onActionTabText;
   const SearchByTextWidget({
     super.key,
+    this.version,
     this.onActionTabText,
   });
 
@@ -67,6 +69,14 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
             .map((v) => ModelData(value: v.id, label: v.version))
             .toList();
       });
+      if (widget.version != null) {
+        setState(() {
+          versionSelected = ModelData(
+              label: widget.version!.version,
+              value: widget.version!.id,
+              originalData: widget.version);
+        });
+      }
     });
   }
 
@@ -120,31 +130,51 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
               SizedBox(
                 height: 25.0,
               ),
-              TextFormField(
-                readOnly: versionSelected!.value.isEmpty || loading,
-                controller: searchTextController,
-                style: StylesApp(context).textStyleSmallBlack,
-                decoration:
-                    StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                          hintText: 'Buscar...',
-                          border: OutlineInputBorder(),
-                          suffixIcon: _searchText.isNotEmpty
-                              ? IconButton(
-                                  icon: Icon(Icons.clear),
-                                  onPressed: () {
-                                    setState(() {
-                                      cleanSearch();
-                                    });
-                                  },
-                                )
-                              : Icon(Icons.search),
-                        ),
-                onChanged: (value) {
-                  setState(() {
-                    _searchText = value;
-                  });
-                  _onSearchChanged(value);
-                },
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      readOnly: versionSelected!.value.isEmpty || loading,
+                      controller: searchTextController,
+                      style: StylesApp(context).textStyleSmallBlack,
+                      decoration: StylesApp(context)
+                          .inputDecorationOutlineStyle
+                          .copyWith(
+                            hintText: 'Buscar...',
+                            border: OutlineInputBorder(),
+                            suffixIcon: _searchText.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(Icons.clear),
+                                    onPressed: () {
+                                      setState(() {
+                                        cleanSearch();
+                                      });
+                                    },
+                                  )
+                                : Icon(Icons.search),
+                          ),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchText = value;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8.0), // Espacio entre el input y el botón
+                  ElevatedButton(
+                    onPressed: _searchText.isNotEmpty
+                        ? () {
+                            _onSearchChanged(_searchText);
+                          }
+                        : null,
+                    child: Text(
+                      'Buscar',
+                      style: StylesApp(context)
+                          .textStyleBody14
+                          .copyWith(color: currentTheme.buttonTextColor),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -211,7 +211,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       _selectedPrefix = prefixCodes.firstWhere(
                                           (country) =>
                                               country.id == newValue!.value);
-                                      _prefixNumberController.text = newValue!.value;
+                                      _prefixNumberController.text =
+                                          newValue!.value;
                                     });
                                   },
                                   onCountrySelected: (newValue) {
@@ -255,7 +256,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     : "Registrar",
                                 buttonStyle:
                                     StylesApp(context).btnSecondarySmall,
-                                width:  isTablet(context) ? StylesApp(context).formWidth : StylesApp(context).btnHeight.width,
+                                width: isTablet(context)
+                                    ? StylesApp(context).formWidth
+                                    : StylesApp(context).btnHeight.width,
                                 height: StylesApp(context).btnHeight.height,
                               ),
                               const SizedBox(
@@ -387,7 +390,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (response.error != null) {
       await showCustomDialog(context,
-          message: response.error!, dialogType: DialogType.error);
+          messageDetail: response.error!,
+          message: response.userFriendlyError!,
+          showDetails: false,
+          dialogType: DialogType.error);
     } else {
       Navigator.popAndPushNamed(context, '/layoutPage');
     }
