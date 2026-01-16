@@ -60,120 +60,534 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     final userProvider = Provider.of<UserProvider>(context);
     final LoginUser? userData = userProvider.currentUser;
     titles = userData?.title;
+
+    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              HeaderWidgetProgress(),
-              SizedBox(
-                height: 4.0,
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 7.0),
-                padding: EdgeInsets.symmetric(horizontal: 11.0, vertical: 6),
-                width: double.infinity,
-                constraints: BoxConstraints(minHeight: 80.0),
-                decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(8.0)),
-                child: Column(
+        child: isTablet
+            ? _buildTabletLayout(context, userData!)
+            : _buildMobileLayout(context, userData!),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context, LoginUser userData) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          HeaderWidgetProgress(),
+          SizedBox(
+            height: 4.0,
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 7.0),
+            padding: EdgeInsets.symmetric(horizontal: 11.0, vertical: 6),
+            width: double.infinity,
+            constraints: BoxConstraints(minHeight: 80.0),
+            decoration: BoxDecoration(
+                color: Colors.orange, borderRadius: BorderRadius.circular(8.0)),
+            child: Column(
+              children: [
+                Row(
+                  spacing: 10,
                   children: [
-                    Row(
-                      spacing: 10,
-                      children: [
-                        Expanded(
-                          flex: 0,
-                          child: SizedBox(
-                            width: 40.0,
-                            child: Image.asset(
-                              "assets/Flag.png",
-                              color: Colors.white,
+                    Expanded(
+                      flex: 0,
+                      child: SizedBox(
+                        width: 40.0,
+                        child: Image.asset(
+                          "assets/Flag.png",
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text.rich(
+                            TextSpan(
+                              style: StylesApp(context).textStyleBody6,
+                              children: [
+                                TextSpan(text: "Registro: "),
+                                TextSpan(
+                                    text: userData.createdAt.isNotEmpty
+                                        ? getFormattedDate(
+                                            int.parse(userData.createdAt))
+                                        : ""),
+                              ],
                             ),
                           ),
+                          Text.rich(
+                            TextSpan(
+                              style: StylesApp(context).textStyleBody6,
+                              children: [
+                                TextSpan(text: "Racha: "),
+                                TextSpan(
+                                    text: "${userData.streakDaysCount} días"),
+                              ],
+                            ),
+                          ),
+                          Text.rich(
+                            TextSpan(
+                              style: StylesApp(context).textStyleBody6,
+                              children: [
+                                TextSpan(text: "Energía: "),
+                                TextSpan(text: "${userData.energyPoints}"),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(0XFFC7AA34),
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text.rich(
+                      TextSpan(style: StylesApp(context).chipLevels, children: [
+                        TextSpan(
+                            text:
+                                "${userData.league != null ? userData.league?.leagueName : ''} "),
+                        TextSpan(
+                            text:
+                                "${userData.league != null ? userData.league?.currentPoints : '0'}"),
+                      ]),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          CurrentMonthCalendarWidget(
+            registrationDate: userData.createdAt.isNotEmpty
+                ? DateTime.fromMillisecondsSinceEpoch(
+                    int.parse(userData.createdAt))
+                : DateTime.now(),
+          ),
+          _buildAchievements(context),
+          SizedBox(
+            height: 8.0,
+          ),
+          _buildCollections(context)
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletLayout(BuildContext context, LoginUser userData) {
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Header en fila completa
+            HeaderWidgetProgress(),
+            SizedBox(height: 16.0),
+
+            // Contenedor principal de dos columnas
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // COLUMNA IZQUIERDA - Información del usuario y colección de premios
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      children: [
+                        // Sección de información del usuario
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Colección de Premios",
+                              style: StylesApp(context)
+                                  .textStyCalendar
+                                  .copyWith(fontSize: 20),
+                            ),
+                            ButtonThemeWidget(
+                              onPressed: () {
+                                _dialogAwards(context);
+                              },
+                              text: "Ver Colección",
+                              width: 150.0,
+                              height: 40.0,
+                              buttonStyle:
+                                  StylesApp(context).btnWidgetSmall.copyWith(
+                                        textStyle: WidgetStatePropertyAll(
+                                            TextStyle(fontSize: 16)),
+                                      ),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          flex: 2,
+                        SizedBox(height: 16.0),
+                        Container(
+                          padding: EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text.rich(
-                                TextSpan(
-                                  style: StylesApp(context).textStyleBody6,
-                                  children: [
-                                    TextSpan(text: "Registro: "),
-                                    TextSpan(
-                                        text: userData!.createdAt.isNotEmpty
-                                            ? getFormattedDate(
-                                                int.parse(userData.createdAt))
-                                            : ""),
-                                  ],
-                                ),
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: 60.0,
+                                    child: Image.asset(
+                                      "assets/Flag.png",
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(width: 16.0),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text.rich(
+                                          TextSpan(
+                                            style: StylesApp(context)
+                                                .textStyleBody4
+                                                .copyWith(fontSize: 18),
+                                            children: [
+                                              TextSpan(text: "Registro: "),
+                                              TextSpan(
+                                                  text: userData
+                                                          .createdAt.isNotEmpty
+                                                      ? getFormattedDate(
+                                                          int.parse(userData
+                                                              .createdAt))
+                                                      : ""),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(height: 8.0),
+                                        Text.rich(
+                                          TextSpan(
+                                            style: StylesApp(context)
+                                                .textStyleBody4
+                                                .copyWith(fontSize: 18),
+                                            children: [
+                                              TextSpan(text: "Racha: "),
+                                              TextSpan(
+                                                  text:
+                                                      "${userData.streakDaysCount} días"),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(height: 8.0),
+                                        Text.rich(
+                                          TextSpan(
+                                            style: StylesApp(context)
+                                                .textStyleBody4
+                                                .copyWith(fontSize: 18),
+                                            children: [
+                                              TextSpan(text: "Energía: "),
+                                              TextSpan(
+                                                  text:
+                                                      "${userData.energyPoints}"),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text.rich(
-                                TextSpan(
-                                  style: StylesApp(context).textStyleBody6,
-                                  children: [
-                                    TextSpan(text: "Racha: "),
-                                    TextSpan(
-                                        text:
-                                            "${userData.streakDaysCount} días"),
-                                  ],
+                              SizedBox(height: 16.0),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 20.0, vertical: 10.0),
+                                decoration: BoxDecoration(
+                                  color: Color(0XFFC7AA34),
+                                  borderRadius: BorderRadius.circular(12.0),
                                 ),
-                              ),
-                              Text.rich(
-                                TextSpan(
-                                  style: StylesApp(context).textStyleBody6,
-                                  children: [
-                                    TextSpan(text: "Energía: "),
-                                    TextSpan(text: "${userData.energyPoints}"),
-                                  ],
+                                child: Text.rich(
+                                  TextSpan(
+                                      style: StylesApp(context)
+                                          .chipLevels
+                                          .copyWith(fontSize: 18),
+                                      children: [
+                                        TextSpan(
+                                            text:
+                                                "${userData.league != null ? userData.league?.leagueName : ''} "),
+                                        TextSpan(
+                                            text:
+                                                "${userData.league != null ? userData.league?.currentPoints : '0'}"),
+                                      ]),
                                 ),
                               ),
                             ],
                           ),
-                        )
+                        ),
+                        // Sección de colección de premios
+                        Container(
+                          padding: EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.0),
+                            color: Colors.grey[50],
+                          ),
+                          child: Column(
+                            children: [
+                              // Logros/títulos (versión expandida)
+                              _buildAchievementsTablet(context),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                    SizedBox(
-                      height: 5.0,
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Color(0XFFC7AA34),
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text.rich(
-                          TextSpan(
-                              style: StylesApp(context).chipLevels,
-                              children: [
-                                TextSpan(
-                                    text:
-                                        "${userData.league != null ? userData.league?.leagueName : ''} "),
-                                TextSpan(
-                                    text:
-                                        "${userData.league != null ? userData.league?.currentPoints : '0'}"),
-                              ]),
+                  ),
+
+                  SizedBox(width: 16.0),
+
+                  // COLUMNA DERECHA - Calendario y logros
+                  Expanded(
+                    flex: 4,
+                    child: Column(
+                      children: [
+                        // Calendario
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.0),
+                            color: Colors.grey[50],
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                "Progreso Mensual",
+                                style: StylesApp(context)
+                                    .textStyCalendar
+                                    .copyWith(fontSize: 20),
+                              ),
+                              // Calendario
+                              // FractionallySizedBox(
+                              //   widthFactor: 0.7, // 90% del ancho disponible
+                              //   heightFactor:
+                              //       0.8, // 80% de la altura disponible
+                              //   child: CurrentMonthCalendarWidget(
+                              //     registrationDate:
+                              //         userData.createdAt.isNotEmpty
+                              //             ? DateTime.fromMillisecondsSinceEpoch(
+                              //                 int.parse(userData.createdAt))
+                              //             : DateTime.now(),
+                              //   ),
+                              // ),
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: 400, // Ancho máximo para tablet
+                                  maxHeight: 350, // Altura máxima para tablet
+                                ),
+                                child: CurrentMonthCalendarWidget(
+                                  registrationDate:
+                                      userData.createdAt.isNotEmpty
+                                          ? DateTime.fromMillisecondsSinceEpoch(
+                                              int.parse(userData.createdAt))
+                                          : DateTime.now(),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Botón Continuar centrado
+            Center(
+              child: Container(
+                width: 300,
+                child: ButtonThemeWidget(
+                  text: "Continuar Aventura",
+                  height: 50.0,
+                  buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                        textStyle: WidgetStatePropertyAll(TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                      ),
+                  onPressed: () async {
+                    await _loadProgress(context);
+                    if (progressUser != null && progressUser?.success == true) {
+                      if (progressUser!.message
+                          .contains('El curso ya fue finalizado')) {
+                        await showCustomDialogWithAction(
+                          context,
+                          message: progressUser!.message,
+                          dialogType: DialogTypeAction.info,
+                          buttonOk: "Cerrar",
+                          textButton: "ir Al curso",
+                          showAction: true,
+                          actionCallbackOk: () {
+                            Navigator.pop(context);
+                          },
+                          actionCallback: () {
+                            Navigator.pushNamed(context, '/mapPage',
+                                arguments: {
+                                  'courseId': progressUser?.data?.courseId,
+                                  'sectionId': progressUser?.data?.sectionId
+                                });
+                          },
+                        );
+                        return;
+                      } else {
+                        Navigator.pushNamed(context, '/mapPage', arguments: {
+                          'courseId': progressUser?.data?.courseId,
+                          'sectionId': progressUser!.data?.sectionId
+                        });
+                      }
+                    } else {
+                      Navigator.pushNamed(context, '/introAventurePage');
+                    }
+                  },
                 ),
               ),
-              CurrentMonthCalendarWidget(
-                registrationDate: userData.createdAt.isNotEmpty
-                    ? DateTime.fromMillisecondsSinceEpoch(
-                        int.parse(userData.createdAt))
-                    : DateTime.now(),
+            ),
+
+            SizedBox(height: 16.0),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Versión tablet de los logros
+  Widget _buildAchievementsTablet(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.0),
+        color: Colors.grey[50],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Títulos Alcanzados",
+                style:
+                    StylesApp(context).textStyCalendar.copyWith(fontSize: 20),
               ),
-              _buildAchievements(context),
-              SizedBox(
-                height: 8.0,
+              if (titles != null && titles!.isNotEmpty)
+                Text(
+                  "${titles!.length} títulos",
+                  style:
+                      StylesApp(context).textStyleBody6.copyWith(fontSize: 16),
+                ),
+            ],
+          ),
+          SizedBox(height: 16.0),
+          Container(
+            constraints: BoxConstraints(minHeight: 120),
+            decoration: BoxDecoration(
+              color: Color(0XFFFFF2C2),
+              borderRadius: BorderRadius.circular(12.0),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    offset: Offset(0, 4),
+                    blurRadius: 5)
+              ],
+            ),
+            child: titles == null || titles!.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        "Aún no has obtenido títulos",
+                        style: StylesApp(context).textStyleBody6,
+                      ),
+                    ),
+                  )
+                : GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 12.0,
+                      mainAxisSpacing: 12.0,
+                      childAspectRatio: 0.9,
+                    ),
+                    padding: EdgeInsets.all(16.0),
+                    itemCount: titles!.length,
+                    itemBuilder: (context, index) {
+                      final userProvider =
+                          Provider.of<UserProvider>(context, listen: false);
+                      final LoginUser? userData = userProvider.currentUser;
+                      return _buildTitleItemTablet(
+                          context, titles![index], userData!);
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Item de título para tablet
+  Widget _buildTitleItemTablet(
+      BuildContext context, UserTitle title, LoginUser userData) {
+    return GestureDetector(
+      onTap: () {
+        _showTitleDetailModal(context, title, userData);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Color(0XFFC7AA34),
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                offset: Offset(0, 4),
+                blurRadius: 5)
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: NetworkImage(
+                      '${GraphQLConfig.urlServidor}${title.img.urlImg}',
+                    ),
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-              _buildCollections(context)
+              SizedBox(height: 8.0),
+              Expanded(
+                child: Text(
+                  title.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style:
+                      StylesApp(context).textStyleBody10.copyWith(fontSize: 14),
+                ),
+              ),
             ],
           ),
         ),
@@ -258,6 +672,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   }
 
   Future<dynamic> _dialogAwards(BuildContext context) async {
+    // Detectar si estamos en tablet
+    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+
     // Variables locales para el estado del diálogo
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userData = userProvider.currentUser;
@@ -290,7 +707,6 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
 
       LoadingService().hideLoading();
       setStateDialog(() {
-        // Usamos el StateSetter del StatefulBuilder
         awards = responsePrize.data['data']
             .map((award) => Award.fromJson(removeTypename(award)))
             .cast<Award>()
@@ -302,7 +718,6 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     }
 
     // Llamada inicial para cargar los premios
-    // No necesitamos el await aquí ya que showDialog lo esperará
     final response = await getAllAwards(1, limit, userData!.userId);
     if (response != null) {
       setState(() {
@@ -313,50 +728,82 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
       return;
     }
 
-    return showDialog(
-      barrierDismissible: false,
+    return showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      constraints: BoxConstraints(
+        maxWidth: 600, // Máximo ancho para tablet
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            // La llamada inicial ahora se realiza fuera del StatefulBuilder,
-            // pero necesitamos la referencia al setState del builder para las pagination.
-
-            return Dialog(
-              insetPadding:
-                  EdgeInsets.only(left: 12.0, right: 12.0, top: 0.0, bottom: 0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
               child: SingleChildScrollView(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Header arrastrable
                     Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 22.0, vertical: 6.0),
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 14.0, vertical: 4),
-                      constraints: BoxConstraints(minHeight: 38.0),
+                      margin: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
-                          color: Colors.orange,
-                          borderRadius: BorderRadius.circular(8.0)),
-                      child: Text(
-                        "Piedras Preciosas usadas en el pectoral sacerdotal",
-                        style: StylesApp(context).textStyleBody14,
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
+
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 22.0),
-                      constraints: BoxConstraints(maxHeight: 383),
-                      height: double.infinity, // Adjust the height as needed
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 22.0, vertical: 12.0),
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Text(
+                        "Piedras Preciosas usadas en el pectoral sacerdotal",
+                        textAlign: TextAlign.center,
+                        style: StylesApp(context).textStyleBody14.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+
+                    // Grid de premios para tablet
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      constraints: BoxConstraints(
+                        maxHeight: 400,
+                        minHeight: 200,
+                      ),
                       child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: AlwaysScrollableScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3, // Number of columns
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 1.0,
+                          crossAxisCount:
+                              isTablet ? 4 : 3, // Más columnas en tablet
+                          crossAxisSpacing: isTablet ? 12 : 8.0,
+                          mainAxisSpacing: isTablet ? 12 : 8.0,
+                          childAspectRatio: isTablet ? 0.9 : 1.0,
                         ),
-                        itemCount: awards.length, // Usar la lista local
+                        itemCount: awards.length,
                         itemBuilder: (BuildContext context, int index) {
                           final award = awards[index];
                           return GestureDetector(
@@ -369,36 +816,72 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                             child: Opacity(
                               opacity: award.unLockPrize ? 1 : 0.5,
                               child: Container(
-                                width: 80.0,
-                                height: 80.0,
-                                margin: EdgeInsets.only(bottom: 4),
-                                padding: EdgeInsets.all(4.0),
+                                width: isTablet ? null : 80.0,
+                                height: isTablet ? null : 80.0,
+                                margin: isTablet
+                                    ? null
+                                    : EdgeInsets.only(bottom: 4),
                                 decoration: BoxDecoration(
-                                    color: award.unLockPrize
-                                        ? null
-                                        : StyleColor.grayMedium
-                                            .withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Colors.black
-                                              .withValues(alpha: .25),
-                                          offset: Offset(0, 4),
-                                          blurRadius: 2,
-                                          blurStyle: BlurStyle.outer)
-                                    ]),
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                        width: 40,
-                                        height: 40,
-                                        child: Image.network(
-                                            GraphQLConfig.urlServidor +
-                                                award.img.urlImg,
-                                            fit: BoxFit.fill)),
-                                    Text(award.biblicalName),
-                                    Text(award.typeStone),
+                                  color: award.unLockPrize
+                                      ? null
+                                      : StyleColor.grayMedium
+                                          .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: .15),
+                                      offset: Offset(0, 3),
+                                      blurRadius: 6,
+                                    )
                                   ],
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: isTablet ? 60 : 40,
+                                        height: isTablet ? 60 : 40,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                              GraphQLConfig.urlServidor +
+                                                  award.img.urlImg,
+                                            ),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        award.biblicalName,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: StylesApp(context)
+                                            .textStyleBody10
+                                            .copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        award.typeStone,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: StylesApp(context)
+                                            .textStyleBody10
+                                            .copyWith(
+                                              color: Colors.grey[700],
+                                            ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -406,81 +889,194 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                         },
                       ),
                     ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ButtonThemeWidget(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            text: "Salir",
-                            width: 129.0,
-                            height: 35.0,
-                            buttonStyle: StylesApp(context).btnWidgetSmall,
-                          ),
-                          Row(
-                            spacing: 10.0,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              ButtonThemeWidget(
-                                icon: Icons.arrow_back,
-                                colorIcon: Colors.white,
-                                width: 70.0,
-                                height: 35.0,
-                                buttonStyle: StylesApp(context)
-                                    .btnWidgetSmall
-                                    .copyWith(
+
+                    SizedBox(height: isTablet ? 16 : 10.0),
+
+                    // Controles de paginación para tablet
+                    if (isTablet) ...{
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Página ${pagination.currentPage} de ${pagination.totalPages}",
+                                  style: StylesApp(context)
+                                      .textStyleBody6
+                                      .copyWith(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: ButtonThemeWidget(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    text: "Salir",
+                                    height: 40.0,
+                                    buttonStyle:
+                                        StylesApp(context).btnWidgetSmall,
+                                  ),
+                                ),
+                                SizedBox(width: 16),
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      ButtonThemeWidget(
+                                        icon: Icons.arrow_back,
+                                        colorIcon: Colors.white,
+                                        width: 50.0,
+                                        height: 40.0,
+                                        buttonStyle: StylesApp(context)
+                                            .btnWidgetSmall
+                                            .copyWith(
+                                              backgroundColor:
+                                                  WidgetStatePropertyAll(
+                                                      pagination.hasPreviousPage
+                                                          ? StyleColor.orange
+                                                          : StyleColor
+                                                              .grayMedium
+                                                              .withValues(
+                                                                  alpha: .25)),
+                                            ),
+                                        onPressed: pagination.hasPreviousPage
+                                            ? () async {
+                                                await _loadAwards(
+                                                  pagination.currentPage - 1,
+                                                  limit,
+                                                  userData.userId,
+                                                  setState,
+                                                );
+                                              }
+                                            : null,
+                                      ),
+                                      SizedBox(width: 12),
+                                      ButtonThemeWidget(
+                                        icon: Icons.arrow_forward,
+                                        colorIcon: Colors.white,
+                                        width: 50.0,
+                                        height: 40.0,
+                                        buttonStyle: StylesApp(context)
+                                            .btnWidgetSmall
+                                            .copyWith(
+                                              backgroundColor:
+                                                  WidgetStatePropertyAll(
+                                                      pagination.hasNextPage
+                                                          ? StyleColor.orange
+                                                          : StyleColor
+                                                              .grayMedium
+                                                              .withValues(
+                                                                  alpha: .25)),
+                                            ),
+                                        onPressed: pagination.hasNextPage
+                                            ? () async {
+                                                await _loadAwards(
+                                                  pagination.currentPage + 1,
+                                                  limit,
+                                                  userData.userId,
+                                                  setState,
+                                                );
+                                              }
+                                            : null,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    } else ...{
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ButtonThemeWidget(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              text: "Salir",
+                              width: 129.0,
+                              height: 35.0,
+                              buttonStyle: StylesApp(context).btnWidgetSmall,
+                            ),
+                            Row(
+                              spacing: 10.0,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                ButtonThemeWidget(
+                                  icon: Icons.arrow_back,
+                                  colorIcon: Colors.white,
+                                  width: 70.0,
+                                  height: 35.0,
+                                  buttonStyle: StylesApp(context)
+                                      .btnWidgetSmall
+                                      .copyWith(
                                         backgroundColor: WidgetStatePropertyAll(
                                             pagination.hasPreviousPage
                                                 ? StyleColor.orange
                                                 : StyleColor.grayMedium
-                                                    .withValues(alpha: .25))),
-                                onPressed: pagination.hasPreviousPage
-                                    ? () async {
-                                        await _loadAwards(
+                                                    .withValues(alpha: .25)),
+                                      ),
+                                  onPressed: pagination.hasPreviousPage
+                                      ? () async {
+                                          await _loadAwards(
                                             pagination.currentPage - 1,
                                             limit,
-                                            "77",
-                                            setState); // Pasar el setState del StatefulBuilder
-                                      }
-                                    : null,
-                              ),
-                              ButtonThemeWidget(
-                                icon: Icons.arrow_forward,
-                                colorIcon: Colors.white,
-                                width: 70.0,
-                                height: 35.0,
-                                buttonStyle: StylesApp(context)
-                                    .btnWidgetSmall
-                                    .copyWith(
+                                            userData.userId,
+                                            setState,
+                                          );
+                                        }
+                                      : null,
+                                ),
+                                ButtonThemeWidget(
+                                  icon: Icons.arrow_forward,
+                                  colorIcon: Colors.white,
+                                  width: 70.0,
+                                  height: 35.0,
+                                  buttonStyle: StylesApp(context)
+                                      .btnWidgetSmall
+                                      .copyWith(
                                         backgroundColor: WidgetStatePropertyAll(
                                             pagination.hasNextPage
                                                 ? StyleColor.orange
                                                 : StyleColor.grayMedium
-                                                    .withValues(alpha: .25))),
-                                onPressed: pagination.hasNextPage
-                                    ? () async {
-                                        await _loadAwards(
+                                                    .withValues(alpha: .25)),
+                                      ),
+                                  onPressed: pagination.hasNextPage
+                                      ? () async {
+                                          await _loadAwards(
                                             pagination.currentPage + 1,
                                             limit,
-                                            "77",
-                                            setState); // Pasar el setState del StatefulBuilder
-                                      }
-                                    : null,
-                              ),
-                            ],
-                          ),
-                        ],
+                                            userData.userId,
+                                            setState,
+                                          );
+                                        }
+                                      : null,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
+                    },
+
+                    SizedBox(height: 20),
+
+                    // Espacio para el notch en dispositivos con notch
+                    SizedBox(height: MediaQuery.of(context).padding.bottom),
                   ],
                 ),
               ),
@@ -494,22 +1090,36 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   Widget _buildAchievements(BuildContext context) {
     ScrollController scrollController = ScrollController();
 
+    // Detectar si estamos en tablet
+    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 7.0),
+      margin: isTablet
+          ? EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)
+          : EdgeInsets.symmetric(horizontal: 7.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            textAlign: TextAlign.left,
-            "Títulos Alcanzados",
-            style: StylesApp(context).textStyCalendar,
+          Padding(
+            padding: isTablet
+                ? EdgeInsets.only(left: 8.0, bottom: 12.0)
+                : EdgeInsets.zero,
+            child: Text(
+              textAlign: TextAlign.left,
+              "Títulos Alcanzados",
+              style: isTablet
+                  ? StylesApp(context).textStyCalendar.copyWith(fontSize: 20)
+                  : StylesApp(context).textStyCalendar,
+            ),
           ),
           Container(
-            constraints: BoxConstraints(minHeight: 75),
-            height: 85.sp,
+            constraints: BoxConstraints(
+              minHeight: isTablet ? 110 : 75,
+            ),
+            height: isTablet ? 110.sp : 85.sp,
             decoration: BoxDecoration(
               color: Color(0XFFFFF2C2),
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(isTablet ? 12.0 : 8.0),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withValues(alpha: 0.25),
@@ -520,74 +1130,94 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             child: Scrollbar(
               controller: scrollController,
               thumbVisibility: true,
-              thickness: 4.0,
+              thickness: isTablet ? 6.0 : 4.0,
+              radius: Radius.circular(isTablet ? 3.0 : 2.0),
               child: ListView.builder(
                 controller: scrollController,
-                scrollDirection: Axis.horizontal, // Dirección horizontal
-                itemCount: titles!.length, // Número de elementos
+                scrollDirection: Axis.horizontal,
+                padding: isTablet
+                    ? EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0)
+                    : EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                itemCount: titles!.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          final userProvider = Provider.of<UserProvider>(
-                              context,
-                              listen:
-                                  false); // listen: false para evitar reconstrucciones innecesarias
-                          LoginUser? userData = userProvider.currentUser;
-                          _showTitleDetailModal(
-                              context, titles![index], userData!);
-                        },
-                        child: Container(
-                          margin: EdgeInsets.only(right: 5.0),
-                          constraints: BoxConstraints(minWidth: 80.0),
-                          decoration: BoxDecoration(
-                            color: Color(0XFFC7AA34),
-                            borderRadius: BorderRadius.circular(8.0),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.25),
-                                  offset: Offset(0, 4),
-                                  blurRadius: 5)
+                  return Padding(
+                    padding: isTablet
+                        ? EdgeInsets.only(right: 12.0)
+                        : EdgeInsets.only(right: 5.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        final userProvider = Provider.of<UserProvider>(
+                          context,
+                          listen: false,
+                        );
+                        LoginUser? userData = userProvider.currentUser;
+                        _showTitleDetailModal(
+                            context, titles![index], userData!);
+                      },
+                      child: Container(
+                        constraints: BoxConstraints(
+                          minWidth: isTablet ? 100.0 : 80.0,
+                        ),
+                        width: isTablet ? 100.0 : 80.0,
+                        height: isTablet ? 100.0 : 80.0,
+                        decoration: BoxDecoration(
+                          color: Color(0XFFC7AA34),
+                          borderRadius:
+                              BorderRadius.circular(isTablet ? 12.0 : 8.0),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.25),
+                                offset: Offset(0, 4),
+                                blurRadius: 5)
+                          ],
+                        ),
+                        child: Padding(
+                          padding: isTablet
+                              ? EdgeInsets.all(8.0)
+                              : EdgeInsets.only(
+                                  left: 3.0, top: 6.0, right: 6.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: isTablet ? 70 : 60,
+                                height: isTablet ? 50 : 40,
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.circular(isTablet ? 10 : 8),
+                                  image: DecorationImage(
+                                    image: NetworkImage(
+                                      '${GraphQLConfig.urlServidor}${titles![index].img.urlImg}',
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: isTablet ? 6 : 4),
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    titles?[index].title ?? '',
+                                    textAlign: TextAlign.center,
+                                    softWrap: true,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: isTablet
+                                        ? StylesApp(context)
+                                            .textStyleBody10
+                                            .copyWith(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            )
+                                        : StylesApp(context).textStyleBody10,
+                                  ),
+                                ),
+                              ),
                             ],
-                          ),
-                          width: 80.0,
-                          height: 80.0,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 3.0, top: 6.0, right: 6.0),
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: 60,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(8),
-                                    ),
-                                    image: DecorationImage(
-                                      image: NetworkImage(
-                                        '${GraphQLConfig.urlServidor}${titles![index].img.urlImg}',
-                                      ),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Center(
-                                    child: Text(
-                                      softWrap: true,
-                                      '${titles?[index].title}',
-                                      style: StylesApp(context).textStyleBody10,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   );
                 },
               ),
@@ -610,158 +1240,164 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 22.0, vertical: 6.0),
-                  margin: EdgeInsets.symmetric(horizontal: 14.0, vertical: 4),
-                  constraints: BoxConstraints(minHeight: 38.0),
-                  decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(8.0)),
-                  child: Text(
-                    "${item.typeStone} es una Piedra preciosa usada en el pectoral sacerdotal",
-                    style: StylesApp(context).textStyleBody14,
-                  ),
-                ),
-                Center(
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: 80.0,
-                        height: 84.0,
-                        child: Image.network(
-                            GraphQLConfig.urlServidor + item.img.urlImg,
-                            fit: BoxFit.fill),
-                      ),
-                      Text(item.biblicalName),
-                      Text(item.typeStone),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10.0,
-                ),
-                SingleChildScrollView(
-                  child: Container(
-                    padding: EdgeInsets.all(6.0),
-                    margin: EdgeInsets.symmetric(horizontal: 16.0),
-                    constraints: BoxConstraints(minHeight: 233),
+            child: Container(
+              width: isTablet(context)
+                  ? MediaQuery.sizeOf(context).width * 0.65
+                  : MediaQuery.sizeOf(context).width,
+              child: Column(
+                children: [
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 22.0, vertical: 6.0),
+                    margin: EdgeInsets.symmetric(horizontal: 14.0, vertical: 4),
+                    constraints: BoxConstraints(minHeight: 38.0),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.0),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black
-                              .withValues(alpha: 0.25), // Color de la sombra
-                          spreadRadius: 2, // Extensión de la sombra
-                          blurRadius: 5, // Difuminado de la sombra
-                          offset: Offset(0, 3), // Desplazamiento de la sombra
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.circular(8.0)),
+                    child: Text(
+                      "${item.typeStone} es una Piedra preciosa usada en el pectoral sacerdotal",
+                      style: StylesApp(context).textStyleBody14,
+                    ),
+                  ),
+                  Center(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: 80.0,
+                          height: 84.0,
+                          child: Image.network(
+                              GraphQLConfig.urlServidor + item.img.urlImg,
+                              fit: BoxFit.fill),
                         ),
+                        Text(item.biblicalName),
+                        Text(item.typeStone),
                       ],
                     ),
-                    child: Column(
-                      spacing: 10.0,
-                      children: [
-                        Text(
-                          item.description,
-                          style:
-                              StylesApp(context).textStyleBodyWhite4.copyWith(
-                                    color: Colors.black,
+                  ),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  SingleChildScrollView(
+                    child: Container(
+                      padding: EdgeInsets.all(6.0),
+                      margin: EdgeInsets.symmetric(horizontal: 16.0),
+                      constraints: BoxConstraints(minHeight: 233),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black
+                                .withValues(alpha: 0.25), // Color de la sombra
+                            spreadRadius: 2, // Extensión de la sombra
+                            blurRadius: 5, // Difuminado de la sombra
+                            offset: Offset(0, 3), // Desplazamiento de la sombra
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        spacing: 10.0,
+                        children: [
+                          Text(
+                            item.description,
+                            style:
+                                StylesApp(context).textStyleBodyWhite4.copyWith(
+                                      color: Colors.black,
+                                    ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 32.0,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                        child: Text(
+                          textAlign: TextAlign.center,
+                          item.redeemed
+                              ? "Este Premio ya fue canjeado"
+                              : "Puedes canjear esta gema por ${item.exchangeValue.toInt()}Lsm de energía",
+                          style: StylesApp(context)
+                              .textStyleBody14
+                              .copyWith(color: Colors.black),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 7.0,
+                      ),
+                      Opacity(
+                        opacity: item.redeemed ? 0.5 : 1,
+                        child: ButtonThemeWidget(
+                          onPressed: item.redeemed
+                              ? null
+                              : () async {
+                                  final userProvider =
+                                      Provider.of<UserProvider>(context);
+                                  final LoginUser? userData =
+                                      userProvider.currentUser;
+                                  LoadingService().showLoading(context);
+                                  final responseRedime = await redeemedPrize(
+                                      item.id, userData!.userId);
+                                  if (responseRedime.error != null) {
+                                    LoadingService().hideLoading();
+                                    await showCustomDialog(
+                                      context,
+                                      message: responseRedime.error!,
+                                      dialogType: DialogType.error,
+                                    );
+                                    return;
+                                  } else {
+                                    LoadingService().hideLoading();
+                                    await showCustomDialog(
+                                      context,
+                                      message: responseRedime.data,
+                                      dialogType: DialogType.info,
+                                    );
+                                  }
+                                  LoadingService().hideLoading();
+                                  Navigator.pop(context);
+                                },
+                          text: "Canjear",
+                          width: 132.0,
+                          height: 32.0,
+                          buttonStyle:
+                              StylesApp(context).btnWidgetSmall.copyWith(
+                                    backgroundColor: WidgetStatePropertyAll(
+                                        item.redeemed
+                                            ? StyleColor.grayMedium
+                                            : StyleColor.turquoise),
                                   ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(
-                  height: 32.0,
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        item.redeemed
-                            ? "Este Premio ya fue canjeado"
-                            : "Puedes canjear esta gema por ${item.exchangeValue.toInt()}Lsm de energía",
-                        style: StylesApp(context)
-                            .textStyleBody14
-                            .copyWith(color: Colors.black),
+                  SizedBox(
+                    height: 50,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ButtonThemeWidget(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        text: "Aceptar",
+                        width: 129.0,
+                        height: 35.0,
+                        buttonStyle: StylesApp(context).btnWidgetSmall,
                       ),
-                    ),
-                    SizedBox(
-                      height: 7.0,
-                    ),
-                    Opacity(
-                      opacity: item.redeemed ? 0.5 : 1,
-                      child: ButtonThemeWidget(
-                        onPressed: item.redeemed
-                            ? null
-                            : () async {
-                                final userProvider =
-                                    Provider.of<UserProvider>(context);
-                                final LoginUser? userData =
-                                    userProvider.currentUser;
-                                LoadingService().showLoading(context);
-                                final responseRedime = await redeemedPrize(
-                                    item.id, userData!.userId);
-                                if (responseRedime.error != null) {
-                                  LoadingService().hideLoading();
-                                  await showCustomDialog(
-                                    context,
-                                    message: responseRedime.error!,
-                                    dialogType: DialogType.error,
-                                  );
-                                  return;
-                                } else {
-                                  LoadingService().hideLoading();
-                                  await showCustomDialog(
-                                    context,
-                                    message: responseRedime.data,
-                                    dialogType: DialogType.info,
-                                  );
-                                }
-                                LoadingService().hideLoading();
-                                Navigator.pop(context);
-                              },
-                        text: "Canjear",
-                        width: 132.0,
-                        height: 32.0,
-                        buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                              backgroundColor: WidgetStatePropertyAll(
-                                  item.redeemed
-                                      ? StyleColor.grayMedium
-                                      : StyleColor.turquoise),
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 50,
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ButtonThemeWidget(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      text: "Aceptar",
-                      width: 129.0,
-                      height: 35.0,
-                      buttonStyle: StylesApp(context).btnWidgetSmall,
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10.0,
-                ),
-              ],
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                ],
+              ),
             ),
           ),
         );

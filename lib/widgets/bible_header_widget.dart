@@ -28,13 +28,12 @@ class BibleHeaderWidget extends StatelessWidget {
     this.showButton = true,
     this.widthButton,
     this.topPosition = 0,
-    this.bottomPosition= 0,
+    this.bottomPosition = 0,
     this.spacingBottom = 50,
     this.onBack,
     this.onSearchBible,
     this.onVersionTap,
     this.onVideoCollection,
-
   });
 
   @override
@@ -46,7 +45,8 @@ class BibleHeaderWidget extends StatelessWidget {
         Positioned.fill(
           child: SvgPicture.asset(
             "assets/elipsisTopColor.svg",
-            color: currentTheme.appBarColor, // Color dinámico
+            colorFilter: ColorFilter.mode(currentTheme.appBarColor,
+                BlendMode.color), // currentTheme.appBarColor, // Color dinámico
             fit: BoxFit.cover,
             alignment: Alignment.bottomCenter,
           ),
@@ -71,7 +71,8 @@ class BibleHeaderWidget extends StatelessWidget {
                       borderRadius: BorderRadius.circular(35.0),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal:  0, vertical: 0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 0),
                       child: IconButton(
                         constraints: BoxConstraints(maxHeight: 35.0),
                         padding: EdgeInsets.all(0),

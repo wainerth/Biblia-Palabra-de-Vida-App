@@ -87,7 +87,7 @@ class ResponseData {
     }
 
     // Extraer mensaje más limpio si es posible
-    final cleanedMessage = _cleanErrorMessage(errorMessage ?? 'Unknown error');
+    final cleanedMessage = _cleanErrorMessage(errorMessage ?? 'Error Desconocido');
     
     return ErrorInfo(
       message: cleanedMessage,
@@ -116,7 +116,7 @@ class ResponseData {
       if (firstLine.length < 150) {
         cleaned = firstLine;
       } else {
-        cleaned = cleaned.substring(0, 150) + '...';
+        cleaned = '${cleaned.substring(0, 150)}...';
       }
     }
     

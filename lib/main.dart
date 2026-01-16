@@ -141,12 +141,14 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
-    print('=== TABLET DIAGNOSTIC ===');
-    print('Ancho: ${mediaQuery.size.width}');
-    print('Alto: ${mediaQuery.size.height}');
-    print('Pixel Ratio: ${mediaQuery.devicePixelRatio}');
-    print('Orientación: ${mediaQuery.orientation}');
-    print('========================');
+    if (kDebugMode) {
+      print('=== TABLET DIAGNOSTIC ===');
+      print('Ancho: ${mediaQuery.size.width}');
+      print('Alto: ${mediaQuery.size.height}');
+      print('Pixel Ratio: ${mediaQuery.devicePixelRatio}');
+      print('Orientación: ${mediaQuery.orientation}');
+      print('========================');
+    }
     return MaterialApp(
       title: 'Palabra de Vida',
       navigatorKey: navigatorKey,

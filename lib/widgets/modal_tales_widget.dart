@@ -24,7 +24,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
   PaginationInfo? _localPagination;
   String title = '';
   int limit = 12;
-  
+
   // Detectar si es tablet
   bool get isTablet => 1.sw > 600; // Ancho mayor a 600 puntos
 
@@ -46,11 +46,13 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
     final response = await getAllReflections(page, limit, title);
     if (response.error != null) {
       LoadingService().hideLoading();
+      if (mounted) {
       await showCustomDialog(
         context,
         message: response.error!,
         dialogType: DialogType.error,
       );
+      }
       return;
     }
     LoadingService().hideLoading();
@@ -73,8 +75,9 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: isTablet 
-          ? EdgeInsets.symmetric(horizontal: 50.w, vertical: 40.h) // Más margen en tablet
+      insetPadding: isTablet
+          ? EdgeInsets.symmetric(
+              horizontal: 50.w, vertical: 40.h) // Más margen en tablet
           : EdgeInsets.all(0), // Pantalla completa en móvil
       child: Container(
         width: double.infinity,
@@ -92,7 +95,8 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
               ),
             ),
             Container(
-              padding: EdgeInsets.all(isTablet ? 24.0 : 16.0), // Más padding en tablet
+              padding: EdgeInsets.all(
+                  isTablet ? 24.0 : 16.0), // Más padding en tablet
               child: Autocomplete<ButtonData>(
                 optionsBuilder: (TextEditingValue textEditingValue) {
                   if (textEditingValue.text.isEmpty) {
@@ -125,18 +129,20 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                   textEditingController.clear();
                   return TextField(
                     controller: textEditingController,
-                    style: StylesApp(context)
-                        .textStyleBody12
-                        .copyWith(
+                    style: StylesApp(context).textStyleBody12.copyWith(
                           color: Colors.black,
-                          fontSize: isTablet ? 16.sp : 12.sp, // Texto más grande en tablet
+                          fontSize: isTablet
+                              ? 16.sp
+                              : 12.sp, // Texto más grande en tablet
                         ),
                     focusNode: focusNode,
                     decoration: InputDecoration(
                       hintText: 'Buscar cuento',
                       suffixIcon: Icon(
                         Icons.search,
-                        size: isTablet ? 24.sp : 20.sp, // Ícono más grande en tablet
+                        size: isTablet
+                            ? 24.sp
+                            : 20.sp, // Ícono más grande en tablet
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -144,8 +150,9 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                           color: Colors.black.withValues(alpha: 0.15),
                         ),
                       ),
-                      contentPadding: isTablet 
-                          ? EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0)
+                      contentPadding: isTablet
+                          ? EdgeInsets.symmetric(
+                              vertical: 16.0, horizontal: 12.0)
                           : null,
                     ),
                     onSubmitted: (String value) {
@@ -160,7 +167,8 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                     alignment: Alignment.topLeft,
                     child: Material(
                       child: Container(
-                        width: MediaQuery.of(context).size.width * (isTablet ? 0.6 : 0.8),
+                        width: MediaQuery.of(context).size.width *
+                            (isTablet ? 0.6 : 0.8),
                         color: Colors.white,
                         child: ListView.builder(
                           padding: EdgeInsets.all(8.0),
@@ -195,9 +203,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
               child: Stack(
                 children: [
                   // Layout diferente para tablet vs móvil
-                  isTablet 
-                      ? _buildTabletLayout() 
-                      : _buildMobileLayout(),
+                  isTablet ? _buildTabletLayout() : _buildMobileLayout(),
                   Positioned(
                     bottom: isTablet ? 15.h : 5.h,
                     left: isTablet ? 15.w : 5.w,
@@ -286,9 +292,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                   ),
                   Text(
                     taleSelected?.name ?? '',
-                    style: StylesApp(context)
-                        .textStyleBody12
-                        .copyWith(
+                    style: StylesApp(context).textStyleBody12.copyWith(
                           color: StyleColor.turquoise,
                           fontSize: isTablet ? 16.sp : 12.sp,
                         ),
@@ -300,9 +304,10 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                       inactiveColor: StyleColor.orange,
                       showImage: false,
                       backgroundColor: Colors.white,
-                      fileName: taleSelected != null ?  taleSelected!.name : '',
-                      pathUrl:
-                          taleSelected != null ? "${GraphQLConfig.urlServidor}${taleSelected!.urlAudio}" : ''),
+                      fileName: taleSelected != null ? taleSelected!.name : '',
+                      pathUrl: taleSelected != null
+                          ? "${GraphQLConfig.urlServidor}${taleSelected!.urlAudio}"
+                          : ''),
                   SizedBox(height: isTablet ? 20.0 : 13.0)
                 ],
               ),
@@ -353,10 +358,10 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
         return ButtonThemeWidget(
           text: _localReflection![index].name,
           buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                textStyle: MaterialStateProperty.all(
+                textStyle: WidgetStatePropertyAll(
                   StylesApp(context).textStyleBody12.copyWith(
-                    fontSize: 14.sp, // Texto más grande en tablet
-                  ),
+                        fontSize: 14.sp, // Texto más grande en tablet
+                      ),
                 ),
               ),
           width: double.infinity,

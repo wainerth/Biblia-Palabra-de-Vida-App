@@ -2,6 +2,7 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
@@ -20,15 +21,24 @@ class ProfileHeader extends StatefulWidget {
 }
 
 class _ProfileHeaderState extends State<ProfileHeader> {
+  String _lastImageUrl = '';
+
   ImageProvider _getImageProvider() {
     if (widget.avatarImg.isEmpty) {
-      return AssetImage('assets/no-image.jpg');
-    } else {
-      setState(() {});
-      return NetworkImage(
-        '${GraphQLConfig.urlServidor}${widget.avatarImg}?timestamp=${DateTime.now().millisecondsSinceEpoch}',
-      );
+      return const AssetImage('assets/no-image.jpg');
     }
+
+    final fullImageUrl = '${GraphQLConfig.urlServidor}${widget.avatarImg}';
+
+    // Agregar timestamp solo si la URL ha cambiado
+    if (_lastImageUrl != fullImageUrl) {
+      _lastImageUrl = fullImageUrl;
+      final urlWithTimestamp =
+          '$fullImageUrl?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+      return NetworkImage(urlWithTimestamp);
+    }
+
+    return NetworkImage(fullImageUrl);
   }
 
   @override
@@ -95,6 +105,29 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               height: 160,
                               width: 160,
                               alignment: Alignment.center,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                if (kDebugMode) {
+                                  print('Error cargando imagen: $error');
+                                }
+                                return Image.asset(
+                                  'assets/no.image.jpg',
+                                  fit: BoxFit.cover,
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -124,7 +157,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               Text(
                 textAlign: TextAlign.center,
                 softWrap: true,
-                dataUser!.name.split(' ')[0][0].toUpperCase() + dataUser.name.split(' ')[0].substring(1),
+                dataUser!.name.split(' ')[0][0].toUpperCase() +
+                    dataUser.name.split(' ')[0].substring(1),
                 style: StylesApp(context).textStyleTitleOrange,
               ),
               SizedBox(

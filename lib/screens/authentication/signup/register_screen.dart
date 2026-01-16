@@ -216,14 +216,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     });
                                   },
                                   onCountrySelected: (newValue) {
-                                    setState(() {
-                                      _selectedData = newValue;
-                                      _selectedCountry = countries.firstWhere(
-                                          (country) =>
-                                              country.id == newValue!.value);
-                                      _prefixNumberController.text =
-                                          _selectedCountry!.countryCode!.code;
-                                    });
+                                    if (newValue != null) {
+                                      setState(() {
+                                        _selectedData = newValue;
+                                        _selectedCountry = _selectedData?.originalData;
+                                        _prefixNumberController.text =
+                                            _selectedCountry!.countryCode!.code;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        _selectedData = null;
+                                        _selectedCountry = null;
+                                      });
+                                    }
                                   },
                                   prefixNumberController:
                                       _prefixNumberController,

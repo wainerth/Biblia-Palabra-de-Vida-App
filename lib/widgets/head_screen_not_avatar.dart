@@ -28,21 +28,23 @@ class HeadScreenNotAvatar extends StatelessWidget {
             top: 10,
             left: 15,
             child: Container(
-                height: 35.0,
-                width: 35.0,
-                decoration: BoxDecoration(
-                    color: Color(0XFFFD8C43),
-                    borderRadius: BorderRadius.circular(35.0)),
-                child: IconButton(
-                    constraints: BoxConstraints(maxHeight: 35.0),
-                    padding: EdgeInsets.all(0),
-                    iconSize: 35.0,
-                    color: Colors.white,
-                    onPressed: onRoute,
-                    icon: Icon(
-                      Icons.arrow_back,
-                      size: 35.0,
-                    ))),
+              height: 35.0,
+              width: 35.0,
+              decoration: BoxDecoration(
+                  color: Color(0XFFFD8C43),
+                  borderRadius: BorderRadius.circular(35.0)),
+              child: IconButton(
+                constraints: BoxConstraints(maxHeight: 35.0),
+                padding: EdgeInsets.all(0),
+                iconSize: 35.0,
+                color: Colors.white,
+                onPressed: onRoute,
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: 35.0,
+                ),
+              ),
+            ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,

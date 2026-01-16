@@ -68,7 +68,6 @@ export 'package:biblia_palabra_de_vida_app/screens/layoutScreen/page_screen.dart
 export 'package:biblia_palabra_de_vida_app/screens/features/prayer/request_prayer_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/prayer/list_request_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/prayer/take_prayer_screen.dart';
-export 'package:biblia_palabra_de_vida_app/screens/features/prayer/detail_request_screen.dart';
 
 // library
 export 'package:biblia_palabra_de_vida_app/screens/library/library_screen.dart';

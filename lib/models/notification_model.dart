@@ -9,7 +9,7 @@ class NotificationModel {
   final Map<String, dynamic>? variables;
   final String notificationTypeName;
   final String model;
-  
+
   final String createdAt;
 
   NotificationModel({
@@ -23,9 +23,34 @@ class NotificationModel {
     required this.notificationTypeName,
     this.variables,
     required this.model,
-    
     required this.createdAt,
   });
+  NotificationModel copyWith(
+      {String? id,
+      String? title,
+      String? message,
+      bool? isRead,
+      String? action,
+      String? actionLabel,
+      String? notificationType,
+      Map<String, dynamic>? variables,
+      String? notificationTypeName,
+      String? model,
+      String? createdAt}) {
+    return NotificationModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      message: message ?? this.message,
+      isRead: isRead ?? this.isRead,
+      action: action ?? this.action,
+      actionLabel: actionLabel ?? this.actionLabel,
+      notificationType: notificationType ?? this.notificationType,
+      variables: variables ?? this.variables,
+      notificationTypeName: notificationTypeName ?? this.notificationTypeName,
+      model: model ?? this.model,
+      createdAt: '',
+    );
+  }
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
@@ -39,7 +64,6 @@ class NotificationModel {
       notificationTypeName: json['notificationTypeName'],
       variables: json['variables'],
       model: json['model'] ?? '',
-      
       createdAt: json['createdAt'],
     );
   }

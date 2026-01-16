@@ -95,12 +95,13 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
               ),
             ),
           ),
-          SizedBox(height: 15.0,),
+          SizedBox(
+            height: 15.0,
+          ),
           ButtonThemeWidget(
             text: "Referencias Bíblicas",
-            disabled: references.isEmpty ,
-            buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-            ),
+            disabled: references.isEmpty,
+            buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(),
             onPressed: references.isEmpty
                 ? null
                 : () {
@@ -108,18 +109,20 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                         context: context,
                         builder: (BuildContext context) {
                           return DialogReference(
-                              currentTheme: widget.currentTheme,
-                              title: widget.data.title,
-                              data: references,
-                              onActionReferences: (InputDataSearchModel data){
-                                widget.onActionReferences!(data);
-                                Navigator.pop(context);
-                              },
-                              );
+                            currentTheme: widget.currentTheme,
+                            title: widget.data.title,
+                            data: references,
+                            onActionReferences: (InputDataSearchModel data) {
+                              widget.onActionReferences!(data);
+                              Navigator.pop(context);
+                            },
+                          );
                         });
                   },
           ),
-           SizedBox(height: 15.0,),
+          SizedBox(
+            height: 15.0,
+          ),
         ],
       ),
     );
@@ -128,16 +131,19 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
   void initialized() async {
     final responseReferences = await getReferenceTeaching(widget.data.id);
     if (responseReferences.error != null) {
-      await showCustomDialog(
-        context,
-        message: responseReferences.error!,
-        dialogType: DialogType.error,
-      );
+      if (mounted) {
+        await showCustomDialog(
+          context,
+          message: responseReferences.error!,
+          dialogType: DialogType.error,
+        );
+      }
       return;
     }
     setState(() {
       references = responseReferences.data
-          .map<ReferenceBiblicalModel>((reference) => ReferenceBiblicalModel.fromJson(reference))
+          .map<ReferenceBiblicalModel>(
+              (reference) => ReferenceBiblicalModel.fromJson(reference))
           .toList();
     });
   }

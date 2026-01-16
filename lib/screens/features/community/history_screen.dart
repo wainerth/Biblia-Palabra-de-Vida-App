@@ -84,12 +84,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
 
     try {
-      levelId = args['levelId'];
-      sectionId = args['sectionId'];
-      courseId = args['courseId'];
+      levelId = args['levelId'] ?? '';
+      sectionId = args['sectionId'] ?? '';
+      courseId = args['courseId'] ?? '';
 
       // Validar IDs
-      if (levelId == null || sectionId == null || courseId == null) {
+      if (levelId.isEmpty || sectionId.isEmpty || courseId.isEmpty) {
         setState(() {
           errorMessage = "Faltan parámetros requeridos";
         });
@@ -247,7 +247,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "${level != null ? level!.name : ''}",
+                            level != null ? level!.name : '',
                             style: StylesApp(context).textStyleBody5.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -281,11 +281,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               children: [
                                 Text(
                                   'Control de voz',
-                                  style: StylesApp(context).textStyleBody16.copyWith(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: StyleColor.black,
-                                  ),
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: StyleColor.black,
+                                      ),
                                 ),
                                 IconButton(
                                   icon: Icon(
@@ -319,8 +321,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     divisions: 9,
                                     label: _getSpeedLabel(_speechRate),
                                     activeColor: StyleColor.turquoise,
-                                    inactiveColor:
-                                        StyleColor.turquoise.withOpacity(0.3),
+                                    inactiveColor: StyleColor.turquoise
+                                        .withValues(alpha: 0.3),
                                     onChanged: (value) async {
                                       setState(() => _speechRate = value);
                                       await flutterTts.setSpeechRate(value);
@@ -334,8 +336,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 12, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color:
-                                        StyleColor.turquoise.withOpacity(0.1),
+                                    color: StyleColor.turquoise
+                                        .withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -363,9 +365,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               Expanded(
                                 child: ElevatedButton.icon(
                                   icon: Icon(Icons.skip_previous),
-                                  label: Text('Inicio', style: StylesApp(context).textStyleBody10.copyWith(
-                                    fontSize: 14.0,
-                                  ),),
+                                  label: Text(
+                                    'Inicio',
+                                    style: StylesApp(context)
+                                        .textStyleBody10
+                                        .copyWith(
+                                          fontSize: 14.0,
+                                        ),
+                                  ),
                                   onPressed: () {
                                     // SIEMPRE permitir ir al inicio, incluso en finalStory
                                     if (stories.isNotEmpty) {
@@ -390,9 +397,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               Expanded(
                                 child: ElevatedButton.icon(
                                   icon: Icon(Icons.skip_next),
-                                  label: Text('Final', style: StylesApp(context).textStyleBody10.copyWith(
-                                    fontSize: 14.0,
-                                  ),),
+                                  label: Text(
+                                    'Final',
+                                    style: StylesApp(context)
+                                        .textStyleBody10
+                                        .copyWith(
+                                          fontSize: 14.0,
+                                        ),
+                                  ),
                                   onPressed: () async {
                                     if (stories.isNotEmpty) {
                                       // // Ir al final de las historias
@@ -436,10 +448,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           SizedBox(height: 16),
                           if (!finalStory && stories.isNotEmpty) ...[
                             LinearProgressIndicator(
-                              value: isPage /
-                                  (stories.length > 1
-                                      ? stories.length - 1
-                                      : stories.length),
+                              value: _calculateProgressValue(),
                               backgroundColor: Colors.grey[300],
                               valueColor: AlwaysStoppedAnimation<Color>(
                                   StyleColor.turquoise),
@@ -449,10 +458,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             SizedBox(height: 8),
                             Text(
                               'Progreso: ${((isPage / (stories.length > 1 ? stories.length - 1 : stories.length)) * 100).toStringAsFixed(0)}%',
-                              style: StylesApp(context).textStyleBody12.copyWith(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
+                              style:
+                                  StylesApp(context).textStyleBody12.copyWith(
+                                        color: Colors.grey[600],
+                                        fontSize: 12,
+                                      ),
                             ),
                           ],
                         ],
@@ -467,7 +477,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         margin: EdgeInsets.all(16),
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: StyleColor.orange.withOpacity(0.1),
+                          color: StyleColor.orange.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: StyleColor.orange),
                         ),
@@ -475,29 +485,29 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           children: [
                             Text(
                               "¡Felicidades!",
-                              style: StylesApp(context).textStyleBody18.copyWith(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: StyleColor.orange,
-                              ),
+                              style:
+                                  StylesApp(context).textStyleBody18.copyWith(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: StyleColor.orange,
+                                      ),
                             ),
                             SizedBox(height: 8),
                             Text(
                               "Has llegado al final de la historia",
                               textAlign: TextAlign.center,
-                              style: StylesApp(context).textStyleBody16.copyWith(
-                                color: Colors.grey[700],
-                                fontSize: 16.0,
-                              ),
+                              style:
+                                  StylesApp(context).textStyleBody16.copyWith(
+                                        color: Colors.grey[700],
+                                        fontSize: 16.0,
+                                      ),
                             ),
                             SizedBox(height: 16),
                             Column(
                               children: [
                                 ElevatedButton(
                                   onPressed: () {
-                                    if (stories.isNotEmpty
-                                        ) {
-                                      
+                                    if (stories.isNotEmpty) {
                                       setState(() {
                                         finalStory = false;
                                         isPage = 0;
@@ -512,9 +522,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     foregroundColor: Colors.white,
                                     minimumSize: Size(double.infinity, 48),
                                   ),
-                                  child: Text('Volver a Iniciar', style: StylesApp(context).textStyleBody16.copyWith(
-                                    fontSize:16.0,
-                                  ),),
+                                  child: Text(
+                                    'Volver a Iniciar',
+                                    style: StylesApp(context)
+                                        .textStyleBody16
+                                        .copyWith(
+                                          fontSize: 16.0,
+                                        ),
+                                  ),
                                 ),
                                 SizedBox(height: 12),
                                 ElevatedButton(
@@ -534,9 +549,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     foregroundColor: Colors.white,
                                     minimumSize: Size(double.infinity, 48),
                                   ),
-                                  child: Text('Continuar con Preguntas', style: StylesApp(context).textStyleBody16.copyWith(
-                                    fontSize:16.0,
-                                  ),),
+                                  child: Text(
+                                    'Continuar con Preguntas',
+                                    style: StylesApp(context)
+                                        .textStyleBody16
+                                        .copyWith(
+                                          fontSize: 16.0,
+                                        ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -592,7 +612,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
+                                  color: Colors.grey.withValues(alpha: 0.2),
                                   blurRadius: 10,
                                   offset: Offset(0, 4),
                                 ),
@@ -675,7 +695,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       Builder(
                         builder: (_) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            initConnffettu();
+                            initConfetti();
                           });
                           return SizedBox.shrink();
                         },
@@ -818,7 +838,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),
@@ -829,7 +849,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           // Imagen de la historia
           ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            child: Container(
+            child: SizedBox(
               height: 300,
               width: double.infinity,
               child: Image.network(
@@ -910,7 +930,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     Icon(Icons.text_decrease,
                         size: 20, color: Colors.grey[600]),
                     SizedBox(width: 8),
-                    Container(
+                    SizedBox(
                       width: 150,
                       child: Slider(
                         value: fontSizeText,
@@ -1005,52 +1025,53 @@ class _HistoryScreenState extends State<HistoryScreen> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.all(20),
-          child: Stack(
-            children: [
-              Container(
-                width: 600,
-                height: 400,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(16),
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.all(20),
+            child: Stack(
+              children: [
+                Container(
+                  width: 600,
+                  height: 400,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: story.video != null &&
+                            (story.video!.url.contains('youtube.com') ||
+                                story.video!.url.contains('youtu.be'))
+                        ? PlayerYoutubeWidget(videoUrl: story.video!.url)
+                        : PlayerNoYoutube(url: story.video?.url ?? ""),
+                  ),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: story.video != null &&
-                          (story.video!.url.contains('youtube.com') ||
-                              story.video!.url.contains('youtu.be'))
-                      ? PlayerYoutubeWidget(videoUrl: story.video!.url)
-                      : PlayerNoYoutube(url: story.video?.url ?? ""),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.white, size: 24),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.portraitUp,
+                        DeviceOrientation.portraitDown,
+                        DeviceOrientation.landscapeLeft,
+                        DeviceOrientation.landscapeRight,
+                      ]);
+                    },
+                  ),
                 ),
-              ),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: IconButton(
-                  icon: Icon(Icons.close, color: Colors.white, size: 24),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    SystemChrome.setPreferredOrientations([
-                      DeviceOrientation.portraitUp,
-                      DeviceOrientation.portraitDown,
-                      DeviceOrientation.landscapeLeft,
-                      DeviceOrientation.landscapeRight,
-                    ]);
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+              ],
+            ),
+          );
+        },
+      );
+    }
   }
 
   // Layout para móvil (mismo que el original)
@@ -1327,10 +1348,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             child: LinearProgressIndicator(
                               borderRadius: BorderRadius.circular(6.0),
                               minHeight: 14.0,
-                              value: isPage /
-                                  (stories.length > 1
-                                      ? stories.length - 1
-                                      : stories.length),
+                              value: _calculateProgressValue(),
                               backgroundColor: Color(0xFFC4C4C4),
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 Color(0XFFF27728),
@@ -1561,61 +1579,65 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         DeviceOrientation.portraitUp,
                         DeviceOrientation.portraitDown,
                       ]);
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Center(
-                              child: Stack(children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(8)),
-                                    constraints: BoxConstraints(minHeight: 213),
-                                    // height: 213,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: story.video != null &&
-                                              (story.video!.url.contains(
-                                                      'youtube.com') ||
-                                                  story.video!.url
-                                                      .contains('youtu.be'))
-                                          ? PlayerYoutubeWidget(
-                                              videoUrl: story.video!.url)
-                                          : PlayerNoYoutube(
-                                              url: story.video!.url),
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  // Posiciona el botón de cerrar
-                                  top: 0,
-                                  right: 0,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.of(context)
-                                          .pop(); // Cierra el diálogo
-                                    },
+                      if (mounted) {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Center(
+                                child: Stack(children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Container(
-                                      padding: const EdgeInsets.all(8.0),
                                       decoration: BoxDecoration(
-                                        color: Colors.grey.withValues(
-                                            alpha:
-                                                0.7), // Fondo semitransparente para el botón
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                        size: 20.0,
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
+                                      constraints:
+                                          BoxConstraints(minHeight: 213),
+                                      // height: 213,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: story.video != null &&
+                                                (story.video!.url.contains(
+                                                        'youtube.com') ||
+                                                    story.video!.url
+                                                        .contains('youtu.be'))
+                                            ? PlayerYoutubeWidget(
+                                                videoUrl: story.video!.url)
+                                            : PlayerNoYoutube(
+                                                url: story.video!.url),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ]),
-                            );
-                          });
+                                  Positioned(
+                                    // Posiciona el botón de cerrar
+                                    top: 0,
+                                    right: 0,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .pop(); // Cierra el diálogo
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.withValues(
+                                              alpha:
+                                                  0.7), // Fondo semitransparente para el botón
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 20.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                              );
+                            });
+                      }
                     },
                     icon: Icon(Icons.videocam),
                     color: _selectedButtonIndex == 3
@@ -1825,7 +1847,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 // 2. Eliminar todos los emojis del texto
       String textWithoutEmojis = cleanText.replaceAll(
         RegExp(
-          r'[\u{1F600}-\u{1F64F}' // Emoticones
+          r'[\u{1F600}-\u{1F64F}' // Emoticons
           r'\u{1F300}-\u{1F5FF}' // Símbolos y pictogramas
           r'\u{1F680}-\u{1F6FF}' // Transporte y símbolos
           r'\u{1F1E0}-\u{1F1FF}' // Banderas (iOS)
@@ -1911,11 +1933,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     await getReferencesBibleByName(matchedText, null);
                 if (responseDetailLink.error != null) {
                   LoadingService().hideLoading();
+                  if (mounted) {
                   await showCustomDialog(context,
                       showDetails: true,
                       messageDetail: responseDetailLink.error!,
                       message: responseDetailLink.userFriendlyError!,
                       dialogType: DialogType.error);
+
+                  }
                   return;
                 }
                 setState(() {
@@ -2212,7 +2237,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  initConnffettu() {
+  double _calculateProgressValue() {
+    // Validar que haya historias
+    if (stories.isEmpty) return 0.0;
+
+    // Validar que isPage sea un número válido
+    if (isPage.isNaN || isPage.isInfinite) return 0.0;
+
+    // Calcular progreso seguro
+    final int totalItems = stories.length;
+    final int maxPage = totalItems > 1 ? totalItems - 1 : totalItems;
+
+    // Evitar división por cero
+    if (maxPage <= 0) return 0.0;
+
+    // Limitar el valor entre 0 y 1
+    double progress = isPage / maxPage;
+    return progress.clamp(0.0, 1.0);
+  }
+
+  initConfetti() {
     _confettiController.play();
   }
 }

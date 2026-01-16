@@ -27,7 +27,6 @@ final Map<String, WidgetBuilder> routes = {
   '/prayerPage': (BuildContext context) => PrayerScreen(),
   '/listRequestPage': (BuildContext context) => ListRequestScreen(),
   '/takePrayerPage': (BuildContext context) => TakePrayerScreen(),
-  // '/detailPrayerPage': (BuildContext context) => DetailRequestScreen(),
   '/detailCoursePage': (BuildContext context) => DetailCourseScreen(),
   '/historyPage': (BuildContext context) => HistoryScreen(),
   '/questionPage': (BuildContext context) => QuestionScreen(),

@@ -92,7 +92,6 @@ class _PromisesScreenState extends State<PromisesScreen> {
           .toList();
       redeemedPromise = redeemedPromise.map((promise) {
         final randomColor = colorsCard[redeemedPromise.indexOf(promise)];
-        // colorsCard[redeemedPromise.indexOf(promise) % colorsCard.length];
         return promise.copyWith(
           color: randomColor.toString(),
         );
@@ -132,131 +131,17 @@ class _PromisesScreenState extends State<PromisesScreen> {
     });
   }
 
+  // Detectar si es tablet
+  bool get isTablet {
+    final mediaQuery = MediaQuery.of(context);
+    return mediaQuery.size.shortestSide >= 600;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SizedBox(
-          child: Column(
-            children: [
-              SimpleHeaderWidget(
-                title: 'Promesas',
-                onRoute: () {
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(
-                height: 8.0,
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                    color: StyleColor.orange,
-                    borderRadius: BorderRadius.circular(8)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 0,
-                      child: Image.asset(
-                        'assets/kawaii_fire.png',
-                        width: 40,
-                        height: 40,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 0,
-                      child: Text(
-                        '${userData != null ? userData!.energyPoints : ''}',
-                        style: StylesApp(context).textStyleBody14,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text.rich(
-                        textAlign: TextAlign.center,
-                        TextSpan(
-                          style: StylesApp(context).textStyleBody14,
-                          children: [
-                            TextSpan(text: 'Racha: '),
-                            TextSpan(
-                                text:
-                                    '${userData != null ? userData!.streakDaysCount : '0'} días'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 5.0,
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: SizedBox(
-                      child: Column(
-                    children: [
-                      if (isLoading) ...{
-                        Container()
-                      } else ...{
-                        if (errorMessage != null) ...{
-                          BuildErrorWidget(
-                            errorMessage: errorMessage!,
-                            onRetry: () async => _generateData(context),
-                            onBack: () => Navigator.pop(context),
-                          )
-                        } else ...{
-                          Column(
-                            children: [
-                              for (var index = 0;
-                                  index < promises.length;
-                                  index++)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20.0, vertical: 5.0),
-                                  child: CardPromiseWidget(
-                                    onePromise: promises[index],
-                                    redeemedPromise: redeemedPromise[index],
-                                    updateData: (bool value) {
-                                      if (value) {
-                                        setState(() {
-                                          promises[index] = promises[index]
-                                              .copyWith(hasViewed: value);
-                                          if (kDebugMode) {
-                                            print(
-                                                "cambio valor ${promises[index].hasViewed}");
-                                          }
-                                          didChangeDependencies();
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 20.0,
-                          ),
-                          Center(
-                            child: Text(
-                              textAlign: TextAlign.center,
-                              'Las promesas se actualizarán cada 24 horas',
-                              style: StylesApp(context)
-                                  .textStyleBody12
-                                  .copyWith(color: StyleColor.turquoise),
-                            ),
-                          ),
-                        }
-                      }
-                    ],
-                  )),
-                ),
-              )
-            ],
-          ),
-        ),
+        child: isTablet ? _buildTabletLayout() : _buildMobileLayout(),
       ),
       bottomNavigationBar: CustomBottomNavigationBarWidget(
         type: BottomNavigationBarType.fixed,
@@ -272,8 +157,329 @@ class _PromisesScreenState extends State<PromisesScreen> {
       ),
     );
   }
+
+  // Layout para móvil
+  Widget _buildMobileLayout() {
+    return SizedBox(
+      child: Column(
+        children: [
+          SimpleHeaderWidget(
+            title: 'Promesas',
+            onRoute: () {
+              Navigator.pop(context);
+            },
+          ),
+          SizedBox(
+            height: 8.0,
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+                color: StyleColor.orange,
+                borderRadius: BorderRadius.circular(8)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 0,
+                  child: Image.asset(
+                    'assets/kawaii_fire.png',
+                    width: 40,
+                    height: 40,
+                  ),
+                ),
+                Expanded(
+                  flex: 0,
+                  child: Text(
+                    '${userData != null ? userData!.energyPoints : ''}',
+                    style: StylesApp(context).textStyleBody14,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text.rich(
+                    textAlign: TextAlign.center,
+                    TextSpan(
+                      style: StylesApp(context).textStyleBody14,
+                      children: [
+                        TextSpan(text: 'Racha: '),
+                        TextSpan(
+                            text:
+                                '${userData != null ? userData!.streakDaysCount : '0'} días'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 5.0,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: SizedBox(
+                  child: Column(
+                children: [
+                  if (isLoading) ...{
+                    Container()
+                  } else ...{
+                    if (errorMessage != null) ...{
+                      BuildErrorWidget(
+                        errorMessage: errorMessage!,
+                        onRetry: () async => _generateData(context),
+                        onBack: () => Navigator.pop(context),
+                      )
+                    } else ...{
+                      Column(
+                        children: [
+                          for (var index = 0; index < promises.length; index++)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0, vertical: 5.0),
+                              child: CardPromiseWidget(
+                                onePromise: promises[index],
+                                redeemedPromise: redeemedPromise[index],
+                                updateData: (bool value) {
+                                  if (value) {
+                                    setState(() {
+                                      promises[index] = promises[index]
+                                          .copyWith(hasViewed: value);
+                                      if (kDebugMode) {
+                                        print(
+                                            "cambio valor ${promises[index].hasViewed}");
+                                      }
+                                      didChangeDependencies();
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      Center(
+                        child: Text(
+                          textAlign: TextAlign.center,
+                          'Las promesas se actualizarán cada 24 horas',
+                          style: StylesApp(context)
+                              .textStyleBody12
+                              .copyWith(color: StyleColor.turquoise),
+                        ),
+                      ),
+                    }
+                  }
+                ],
+              )),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  // Layout para tablet
+  Widget _buildTabletLayout() {
+    return Column(
+      children: [
+        // Header para tablet
+        Container(
+          color: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Botón de retroceso
+              Container(
+                width: 45,
+                height: 45,
+                child: IconButton(
+                  style: IconButton.styleFrom(
+                    backgroundColor: StyleColor.orange,
+                    foregroundColor: StyleColor.white,
+                    shape: const CircleBorder(),
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(35, 35),
+                    fixedSize: const Size(35, 35),
+                    iconSize: 20,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.arrow_back),
+                ),
+              ),
+              // Título y estadísticas
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Promesas',
+                          style: StylesApp(context).textStyleTitleOrange.copyWith(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        if (userData != null && promises.isNotEmpty)
+                          SizedBox(height: 8),
+                        if (userData != null && promises.isNotEmpty)
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: StyleColor.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${promises.where((p) => !p.hasViewed).length} de ${promises.length} por abrir',
+                              style: StylesApp(context)
+                                  .textStyleBody14
+                                  .copyWith(color: StyleColor.orange),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Puntos de energía
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: StyleColor.orange,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/kawaii_fire.png',
+                      width: 30,
+                      height: 30,
+                    ),
+                    SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${userData?.energyPoints ?? '0'}',
+                          style: StylesApp(context)
+                              .textStyleBody14
+                              .copyWith(color: Colors.white),
+                        ),
+                        Text(
+                          '${userData?.streakDaysCount ?? '0'} días',
+                          style: StylesApp(context)
+                              .textStyleBody12
+                              .copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Contenido principal
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : errorMessage != null
+                    ? Center(
+                        child: BuildErrorWidget(
+                          errorMessage: errorMessage!,
+                          onRetry: () async => _generateData(context),
+                          onBack: () => Navigator.pop(context),
+                        ),
+                      )
+                    : promises.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.inbox_outlined,
+                                    size: 60, color: Colors.grey),
+                                SizedBox(height: 20),
+                                Text(
+                                  'No hay promesas disponibles',
+                                  style: StylesApp(context)
+                                      .textStyleBody14
+                                      .copyWith(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          )
+                        : GridView.builder(
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: _getCrossAxisCount(context),
+                              crossAxisSpacing: 20,
+                              mainAxisSpacing: 20,
+                              // childAspectRatio: _getChildAspectRatio(context),
+                            ),
+                            itemCount: promises.length,
+                            itemBuilder: (context, index) {
+                              return CardPromiseWidget(
+                                onePromise: promises[index],
+                                redeemedPromise: redeemedPromise[index],
+                                updateData: (bool value) {
+                                  if (value) {
+                                    setState(() {
+                                      promises[index] =
+                                          promises[index].copyWith(hasViewed: value);
+                                      didChangeDependencies();
+                                    });
+                                  }
+                                },
+                              );
+                            },
+                          ),
+          ),
+        ),
+        // Mensaje de actualización
+        Container(
+          padding: EdgeInsets.all(16),
+          color: StyleColor.turquoise.withOpacity(0.1),
+          child: Text(
+            'Las promesas se actualizarán cada 24 horas',
+            style: StylesApp(context)
+                .textStyleBody12
+                .copyWith(color: StyleColor.turquoise),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Calcular número de columnas según tamaño de pantalla
+  int _getCrossAxisCount(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width > 1200) return 4;
+    if (width > 1000) return 3;
+    if (width > 700) return 2;
+    return 1;
+  }
+
+  // Calcular aspect ratio según orientación
+  double _getChildAspectRatio(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width > 1200) return 0.8;
+    if (width > 1000) return 0.8;
+    if (width > 700) return 0.8;
+    return 0.8;
+  }
 }
 
+// La clase CardPromiseWidget se mantiene igual sin cambios
 class CardPromiseWidget extends StatefulWidget {
   final PromiseCardModel onePromise;
   final PromiseModel? redeemedPromise;
@@ -328,7 +534,6 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
       child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 500),
           transitionBuilder: (Widget child, Animation<double> animation) {
-            // Animación de fundido
             return FadeTransition(
               opacity: animation,
               child: child,
@@ -342,10 +547,10 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
 
   Widget _buildPromiseCard() {
     return Container(
-      key: ValueKey(1), // Clave única para AnimatedSwitcher
+      key: ValueKey(1),
       decoration: BoxDecoration(
         color: Color(0XFFF3E9C6),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
               color: Colors.black.withValues(alpha: .25),
@@ -355,16 +560,20 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(widget.onePromise.images.isNotEmpty
                 ? widget.onePromise.images
                 : ''),
+            SizedBox(height: 16),
             Text(
               widget.onePromise.title,
               style: StylesApp(context).textStyleBodyOrange15,
+              textAlign: TextAlign.center,
             ),
+            SizedBox(height: 8),
             Text(
               widget.onePromise.description,
               textAlign: TextAlign.center,
@@ -380,15 +589,15 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
 
   Widget _buildRedeemedPromiseCard() {
     return Container(
-      key: ValueKey(2), // Clave única para AnimatedSwitcher
+      key: ValueKey(2),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Color(int.parse("0XFF${widget.redeemedPromise!.color}")),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
               color: Colors.black.withValues(alpha: .25),
-              blurRadius: 4,
+              blurRadius: 8,
               spreadRadius: 0,
               offset: Offset(0, 4))
         ],
@@ -396,8 +605,8 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
       child: Stack(
         children: [
           Positioned(
-            top: 0,
-            right: 0,
+            top: 10,
+            right: 10,
             child: IconButton(
               onPressed: () async {
                 await Share.share(
@@ -409,33 +618,38 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}",
                   style: StylesApp(context)
                       .textStyleBody4
                       .copyWith(color: Colors.white),
+                  textAlign: TextAlign.center,
                 ),
-                SizedBox(
-                  height: 20,
-                ),
-                Center(
-                  child: Container(
-                    width: double.infinity,
-                    constraints: BoxConstraints(maxWidth: 280, minHeight: 80),
-                    child: Text(
-                      widget.redeemedPromise!.verse!.text!,
-                      textAlign: TextAlign.center,
-                      style: StylesApp(context).textStyleBody12,
-                    ),
+                SizedBox(height: 16),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    widget.redeemedPromise!.verse!.text!,
+                    textAlign: TextAlign.center,
+                    style: StylesApp(context)
+                        .textStyleBody14
+                        .copyWith(color: Colors.white),
                   ),
                 ),
-                Image.asset("assets/star_complete.png"),
+                SizedBox(height: 20),
+                Image.asset("assets/star_complete.png", width: 50, height: 50),
+                SizedBox(height: 10),
                 Text(
-                  textAlign: TextAlign.center,
                   "Haz ganado una mini estrella\n ${widget.redeemedPromise!.energyPoint} Lms de energía",
+                  textAlign: TextAlign.center,
                   style: StylesApp(context)
                       .textStyleBody12
                       .copyWith(color: StyleColor.yellowLight),

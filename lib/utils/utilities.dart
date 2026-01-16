@@ -3,14 +3,14 @@ import 'dart:io' show SocketException;
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
+import 'package:biblia_palabra_de_vida_app/services/country_search_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 export 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 export 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
@@ -81,7 +81,7 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
   var datos = dataToSend;
 
   var nuevosDatos = {};
-  for (var item in data) {
+  for (ModelData item in data) {
     switch (item.clave) {
       case 'lastname':
         nuevosDatos["lastname"] = item.value as String?;
@@ -99,10 +99,7 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
         final parts = item.value.split(' ');
         AreaCode? code;
         if (parts.length == 2) {
-          code = Provider.of<CatalogueProvider>(context, listen: false)
-              .allAreasCode
-              .firstWhere(
-                  (areaCode) => areaCode.id == item.value.split(' ')[0]);
+          code = item.originalData;
         }
         nuevosDatos['profileAreaCode'] =
             code != null ? AreaCode(id: code.id, code: code.code) : null;
@@ -110,8 +107,7 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
         break;
       case 'country':
         if (item.value.isNotEmpty) {
-          Country? cont =
-              countries.firstWhere((country) => country.name == item.value);
+          Country? cont = item.originalData;
           nuevosDatos["country"] = cont;
         } else {
           nuevosDatos["country"] = null;
@@ -217,15 +213,17 @@ obtainedStar(int maxScore, int sectionCompleted, int sectionCount) {
   return 0;
 }
 
-(String, String) parsePhoneNumberSimple(BuildContext context, String value) {
+Future<(String, String)> parsePhoneNumberSimple(
+    BuildContext context, String value) async {
   if (value.isEmpty) return ('', '');
   String code = '';
   final parts = value.trim().split(RegExp(r'\s+'));
+
   if (parts.length == 2) {
-    code = Provider.of<CatalogueProvider>(context, listen: false)
-        .allAreasCode
-        .firstWhere((areaCode) => areaCode.id == parts[0])
-        .code;
+    final codeArea = await AreaCodeSearchService().getCodeAreaById(parts[0]);
+    if (codeArea != null) {
+      code = codeArea.code;
+    }
   }
 
   return (
@@ -354,22 +352,55 @@ Size getDesignSize() {
   }
 }
 
+// bool isTablet(BuildContext? context) {
+//   // Use window metrics instead of MediaQuery to avoid accessing a possibly
+//   // deactivated BuildContext (e.g. from dispose).
+//   final window = WidgetsBinding.instance.window;
+//   final physicalSize = window.physicalSize;
+//   final pixelRatio = window.devicePixelRatio;
+//   final logicalSize = physicalSize / pixelRatio;
+//   final size = logicalSize;
+//   final aspectRatio = size.width / size.height;
+//   final shortestSide = size.shortestSide;
+
+//   // Para Chrome, considera también el aspect ratio
+//   if (shortestSide > 600) return true;
+
+//   // Si el ancho es grande pero el aspect ratio es de desktop
+//   if (size.width > 800 && aspectRatio > 1.3) return true;
+
+//   return false;
+// }
 bool isTablet(BuildContext? context) {
-  // Use window metrics instead of MediaQuery to avoid accessing a possibly
-  // deactivated BuildContext (e.g. from dispose).
-  final window = WidgetsBinding.instance.window;
-  final physicalSize = window.physicalSize;
-  final pixelRatio = window.devicePixelRatio;
-  final logicalSize = physicalSize / pixelRatio;
-  final size = logicalSize;
-  final aspectRatio = size.width / size.height;
-  final shortestSide = size.shortestSide;
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Para Chrome, considera también el aspect ratio
-  if (shortestSide > 600) return true;
+    final views = WidgetsBinding.instance.platformDispatcher.views;
+    if (views.isEmpty) return false;
 
-  // Si el ancho es grande pero el aspect ratio es de desktop
-  if (size.width > 800 && aspectRatio > 1.3) return true;
+    final view = views.first;
+    final logicalSize = view.physicalSize / view.devicePixelRatio;
 
-  return false;
+    // Lógica simple: si el lado más corto es > 600px, es tablet
+    return logicalSize.shortestSide > 600;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Función para obtener el timezone del dispositivo
+Future<String> getDeviceTimeZone() async {
+  try {
+    // Inicializar timezone database
+    tz.initializeTimeZones();
+
+    // Obtener la ubicación local
+    final location = tz.local;
+
+    // Obtener el nombre del timezone (ej: "America/New_York")
+    return location.name;
+  } catch (e) {
+    // Fallback si hay error
+    return 'UTC';
+  }
 }

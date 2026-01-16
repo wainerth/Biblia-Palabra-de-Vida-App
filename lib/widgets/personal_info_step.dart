@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
+import 'package:biblia_palabra_de_vida_app/services/country_search_service.dart';
 import 'package:biblia_palabra_de_vida_app/services/phone_validator_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
@@ -59,6 +60,9 @@ class PersonalInfoStep extends StatefulWidget {
 }
 
 class _PersonalInfoStepState extends State<PersonalInfoStep> {
+  late final CountrySearchService _countrySearchService;
+  late final AreaCodeSearchService _areaCodeSearchService;
+
   bool get _isTablet {
     final shortestSide = MediaQuery.sizeOf(context).shortestSide;
     return shortestSide > 600;
@@ -85,6 +89,21 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _countrySearchService = CountrySearchService();
+    _areaCodeSearchService = AreaCodeSearchService();
+  }
+
+  Future<PaginationModel<ModelData>> _searchCountries(String query, int page) {
+    return _countrySearchService.searchCountries(
+      query: query,
+      page: page,
+      limit: 15, // Menos items por página para mejor rendimiento
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final double formWidth = StylesApp(context).sizeTextFormField.width;
     final double screenWidth = MediaQuery.sizeOf(context).width;
@@ -94,7 +113,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
         children: [
           SizedBox(
             width: formWidth,
-            height: StylesApp(context).sizeTextFormField.height,
+            // height: StylesApp(context).sizeTextFormField.height,
             child: TextFormField(
               controller: widget.nameController,
               decoration: StylesApp(context)
@@ -115,7 +134,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           // CAMPO APELLIDO
           SizedBox(
             width: formWidth,
-            height: StylesApp(context).sizeTextFormField.height,
+            // height: StylesApp(context).sizeTextFormField.height,
             child: TextFormField(
               controller: widget.lastNameController,
               decoration: StylesApp(context)
@@ -197,18 +216,27 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
 
           // PAÍS
           SizedBox(
-            width: formWidth,
-            child: CustomDropdownWithValidation(
-              items: widget.dropDownList,
+            width: _formWidth,
+            child: OptimizedSearchableDropdownFormField(
               hintText: "Seleccione un país",
               onChanged: widget.onCountrySelected,
+              searchFunction: _searchCountries,
+              fetchItemById: (id) => _countrySearchService.getCountryById(id),
+              defaultValueId: 'VE', // Opcional: ID del país por defecto
+              showClearButton: true, // ← NUEVO: muestra botón para limpiar
+              border: true,
+              leadingIcon: Icon(
+                Icons.location_on,
+                color: StyleColor.cosmicBlue,
+                size: 20,
+              ),
+              height: StylesApp(context).sizeTextFormField.height + 4,
               validator: (value) {
                 if (value == null) {
                   return "Por favor selecciona un país";
                 }
                 return null;
               },
-              border: true,
             ),
           ),
           SizedBox(height: _isTablet ? 28.0 : 23.0),

@@ -34,10 +34,16 @@ class _MemoryScreenState extends State<MemoryScreen>
   bool _isDisposed = false;
   late AudioService _audioService;
 
+  // Función para determinar si es tablet
+  bool get isTablet {
+    final width = MediaQuery.of(context).size.width;
+    return width >= 600;
+  }
+
   @override
   void initState() {
     super.initState();
-    _audioService = AudioService(); // Initialize the audio service
+    _audioService = AudioService();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) await _loadData();
     });
@@ -48,13 +54,12 @@ class _MemoryScreenState extends State<MemoryScreen>
   @override
   void dispose() {
     _isDisposed = false;
-    _audioService.stopBackgroundMusic(); // Detener música al salir
-    _audioService.dispose(); // Liberar recursos del audio
-    WidgetsBinding.instance.removeObserver(this); // Limpiar el observer
+    _audioService.stopBackgroundMusic();
+    _audioService.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  // Manejo del ciclo de vida de la aplicación para pausar/reanudar música
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_isDisposed) return;
@@ -63,7 +68,6 @@ class _MemoryScreenState extends State<MemoryScreen>
       _audioService.pauseBackgroundMusic();
     } else if (state == AppLifecycleState.resumed) {
       if (isBackgroundPlaying) {
-        // 🔥 Usar restore en lugar de play para evitar duplicados
         _audioService.restoreBackgroundMusic();
       }
     }
@@ -116,6 +120,9 @@ class _MemoryScreenState extends State<MemoryScreen>
       ),
       body: SafeArea(
         child: Container(
+          padding: isTablet
+              ? EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0)
+              : null,
           child: difficulty.isEmpty
               ? _buildSelectedDifficulty()
               : _buildPlayScene(),
@@ -125,17 +132,38 @@ class _MemoryScreenState extends State<MemoryScreen>
   }
 
   Widget _buildSelectedDifficulty() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildDifficultyButton("Fácil", Icons.face_2_rounded),
-        const SizedBox(height: 15),
-        _buildDifficultyButton("Medio", Icons.face_2_rounded),
-        const SizedBox(height: 15),
-        _buildDifficultyButton("Difícil", Icons.face_2_rounded),
-        const SizedBox(height: 15),
-      ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: isTablet ? 500 : double.infinity,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: isTablet ? 20.0 : 0),
+            Text(
+              "Selecciona la dificultad",
+              style: isTablet
+                  ? StylesApp(context).textStyleBody24.copyWith(
+                        color: StyleColor.black,
+                        fontWeight: FontWeight.bold,
+                      )
+                  : StylesApp(context).textStyleBody20.copyWith(
+                        color: StyleColor.black,
+                      ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: isTablet ? 40.0 : 20.0),
+            _buildDifficultyButton("Fácil", Icons.face_2_rounded),
+            SizedBox(height: isTablet ? 24.0 : 15),
+            _buildDifficultyButton("Medio", Icons.face_2_rounded),
+            SizedBox(height: isTablet ? 24.0 : 15),
+            _buildDifficultyButton("Difícil", Icons.face_2_rounded),
+            SizedBox(height: isTablet ? 40.0 : 15),
+          ],
+        ),
+      ),
     );
   }
 
@@ -143,31 +171,50 @@ class _MemoryScreenState extends State<MemoryScreen>
     return GestureDetector(
       onTap: () => _selectDifficulty(level),
       child: Container(
-        padding: EdgeInsets.all(8.0),
-        margin: EdgeInsets.all(12.0),
-        constraints: BoxConstraints(minHeight: 80),
+        padding: EdgeInsets.all(isTablet ? 16.0 : 8.0),
+        margin: EdgeInsets.symmetric(
+          horizontal: isTablet ? 60.0 : 12.0,
+          vertical: isTablet ? 8.0 : 0,
+        ),
+        constraints: BoxConstraints(
+          minHeight: isTablet ? 100 : 80,
+          minWidth: isTablet ? 300 : double.infinity,
+        ),
         decoration: BoxDecoration(
-            color: StyleColor.white,
-            border: Border.all(
-              color: StyleColor.cosmicBlue,
-              strokeAlign: 0.5,
+          color: StyleColor.white,
+          border: Border.all(
+            color: StyleColor.cosmicBlue,
+            strokeAlign: 0.5,
+            width: isTablet ? 2.0 : 1.0,
+          ),
+          borderRadius: BorderRadius.circular(isTablet ? 16.0 : 8.0),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: isTablet ? 16 : 12,
+              offset: Offset(0, isTablet ? 6 : 4),
+              color: StyleColor.black.withValues(alpha: isTablet ? 0.2 : 0.25),
             ),
-            borderRadius: BorderRadius.circular(8.0),
-            boxShadow: [
-              BoxShadow(
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                  color: StyleColor.black.withValues(alpha: 0.25))
-            ]),
+          ],
+        ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon),
+            Icon(
+              icon,
+              size: isTablet ? 32 : 24,
+              color: _getDifficultyColor(level),
+            ),
+            SizedBox(width: isTablet ? 20.0 : 12.0),
             Text(
               level,
-              style: StylesApp(context)
-                  .textStyleBody20
-                  .copyWith(color: StyleColor.black),
+              style: isTablet
+                  ? StylesApp(context).textStyleBody24.copyWith(
+                        color: _getDifficultyColor(level),
+                        fontWeight: FontWeight.w600,
+                      )
+                  : StylesApp(context).textStyleBody20.copyWith(
+                        color: StyleColor.black,
+                      ),
             ),
           ],
         ),
@@ -175,13 +222,26 @@ class _MemoryScreenState extends State<MemoryScreen>
     );
   }
 
+  Color _getDifficultyColor(String level) {
+    switch (level) {
+      case "Fácil":
+        return StyleColor.greenDark;
+      case "Medio":
+        return StyleColor.orange;
+      case "Difícil":
+        return StyleColor.redDark;
+      default:
+        return StyleColor.black;
+    }
+  }
+
   Future<void> _selectDifficulty(String level) async {
     if (_isDisposed) return;
-
+    await _loadData();
     if (kDebugMode) {
       print('DEBUG: Dificultad seleccionada: $level  Iniciando precarga...');
     }
-    await _preloadImages(); // <-- Asegúrate de que este await termine.
+    await _preloadImages();
     setState(() {
       difficulty = level;
       flippedCards = List<bool>.filled(lisMemory.length, false);
@@ -193,61 +253,15 @@ class _MemoryScreenState extends State<MemoryScreen>
   }
 
   Widget _buildPlayScene() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(height: 20),
-        Text(
-          "¡Encuentra los pares para ganar!",
-          style: StylesApp(context)
-              .textStyleBody20
-              .copyWith(color: StyleColor.black),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 20),
-        Expanded(
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: 8.0,
-              mainAxisSpacing: 8.0,
-            ),
-            padding: const EdgeInsets.all(16.0),
-            itemCount: lisMemory.length,
-            itemBuilder: (BuildContext context, int index) {
-              return MemoryCard(
-                card: lisMemory[index],
-                isFlipped:
-                    flippedCards.isNotEmpty ? flippedCards[index] : false,
-                isMatched:
-                    matchedCards.isNotEmpty ? matchedCards[index] : false,
-                onTap: () => _handleCardTap(index),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          "Tiempo Restante: ",
-          style: StylesApp(context)
-              .textStyleBody15
-              .copyWith(color: StyleColor.black),
-        ),
-        Center(
-          child: CountDownWidget(
-            win: _playWin,
-            initialCount: getTimeLevel(difficulty),
-            onFinished: () {
-              if (!_playWin && !_isDisposed) {
-                _audioService.playTimeUpSound();
-                _showTimeUpDialog();
-              }
-            },
-          ),
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
+    return isTablet ? _buildSceneTablet() : _buildSceneMobile();
+  }
+
+  int _getGridColumnCount() {
+    // Para tablet, calculamos el número de columnas según la dificultad
+    if (lisMemory.length <= 8) return 5;
+    if (lisMemory.length <= 12) return 5;
+    if (lisMemory.length <= 16) return 5;
+    return 4; // Por defecto
   }
 
   void _showDialogFinallyPlay() async {
@@ -305,6 +319,7 @@ class _MemoryScreenState extends State<MemoryScreen>
       actionCallback: () {
         if (!_isDisposed) _showDialogFinallyPlay();
       },
+      // isTablet: isTablet,
     );
   }
 
@@ -313,55 +328,144 @@ class _MemoryScreenState extends State<MemoryScreen>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text(
-          textAlign: TextAlign.center,
-          "${infoResult.message.resultTitle}",
-          style: StylesApp(context)
-              .textStyleBody18
-              .copyWith(color: StyleColor.black),
+        backgroundColor: StyleColor.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(isTablet ? 20.0 : 12.0),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              textAlign: TextAlign.center,
-              "${infoResult.message.resultDescription}",
-              style: StylesApp(context)
-                  .textStyleBody16
-                  .copyWith(color: StyleColor.black),
+        insetPadding: isTablet
+            ? EdgeInsets.symmetric(horizontal: 80.0, vertical: 60.0)
+            : EdgeInsets.all(16.0),
+        title: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(isTablet ? 20.0 : 12.0),
+          decoration: BoxDecoration(
+            color: StyleColor.greenLight,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(isTablet ? 20.0 : 12.0),
+              topRight: Radius.circular(isTablet ? 20.0 : 12.0),
             ),
-            const SizedBox(height: 8),
-            Text(
-              textAlign: TextAlign.center,
-              "Dificultad: ${infoResult.message.difficulty}",
-              style: StylesApp(context)
-                  .textStyleBody12
-                  .copyWith(color: StyleColor.grayMedium),
+          ),
+          child: Text(
+            textAlign: TextAlign.center,
+            "${infoResult.message.resultTitle}",
+            style: isTablet
+                ? StylesApp(context).textStyleBody24.copyWith(
+                      color: StyleColor.white,
+                      fontWeight: FontWeight.bold,
+                    )
+                : StylesApp(context).textStyleBody18.copyWith(
+                      color: StyleColor.white,
+                    ),
+          ),
+        ),
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isTablet ? 500 : double.infinity,
+            maxHeight:
+                isTablet ? 450 : MediaQuery.of(context).size.height * 0.5,
+          ),
+          child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: IntrinsicHeight(
+              child: Container(
+                padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.celebration,
+                      size: isTablet ? 64 : 48,
+                      color: StyleColor.orange,
+                    ),
+                    SizedBox(height: isTablet ? 20.0 : 12),
+                    Text(
+                      textAlign: TextAlign.center,
+                      "${infoResult.message.resultDescription}",
+                      style: isTablet
+                          ? StylesApp(context).textStyleBody18.copyWith(
+                                color: StyleColor.black,
+                                height: 1.4,
+                              )
+                          : StylesApp(context).textStyleBody16.copyWith(
+                                color: StyleColor.black,
+                              ),
+                    ),
+                    SizedBox(height: isTablet ? 20.0 : 8),
+                    if (infoResult.message.difficulty != 'Limite') ...{
+                      Container(
+                        padding: EdgeInsets.all(isTablet ? 16.0 : 12),
+                        margin: EdgeInsets.only(top: isTablet ? 16.0 : 8),
+                        decoration: BoxDecoration(
+                          color: StyleColor.blueLight,
+                          borderRadius:
+                              BorderRadius.circular(isTablet ? 12.0 : 8.0),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              textAlign: TextAlign.center,
+                              "Dificultad: ${infoResult.message.difficulty}",
+                              style: isTablet
+                                  ? StylesApp(context).textStyleBody16.copyWith(
+                                        color: StyleColor.cosmicBlue,
+                                        fontWeight: FontWeight.w600,
+                                      )
+                                  : StylesApp(context).textStyleBody12.copyWith(
+                                        color: StyleColor.cosmicBlue,
+                                      ),
+                            ),
+                            SizedBox(height: isTablet ? 8.0 : 4),
+                            if (infoResult.score > 0)
+                              Text(
+                                textAlign: TextAlign.center,
+                                "Puntaje obtenido: ${infoResult.score}",
+                                style: isTablet
+                                    ? StylesApp(context)
+                                        .textStyleBody20
+                                        .copyWith(
+                                          color: StyleColor.orange,
+                                          fontWeight: FontWeight.bold,
+                                        )
+                                    : StylesApp(context)
+                                        .textStyleBody14
+                                        .copyWith(
+                                          color: StyleColor.orange,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    }
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              textAlign: TextAlign.center,
-              "Puntaje obtenido: ${infoResult.score}",
-              style: StylesApp(context)
-                  .textStyleBody12
-                  .copyWith(color: StyleColor.grayMedium),
-            ),
-          ],
+          ),
         ),
         actions: [
-          ButtonThemeWidget(
-            text: "Jugar de nuevo",
-            buttonStyle: StylesApp(context).btnWidgetSmall,
-            onPressed: () {
-              Navigator.pop(context);
-              if (!_isDisposed) {
-                setState(() {
-                  difficulty = '';
-                  _playWin = false;
-                });
-                _audioService.restoreBackgroundMusic();
-              }
-            },
+          Container(
+            padding: EdgeInsets.all(isTablet ? 20.0 : 16.0),
+            child: Center(
+              child: ButtonThemeWidget(
+                text: "Jugar de nuevo",
+                width: isTablet ? 250 : null,
+                height: isTablet ? 55 : null,
+                buttonStyle: isTablet
+                    ? StylesApp(context).btnWidgetSmall
+                    : StylesApp(context).btnWidgetSmall,
+                onPressed: () {
+                  Navigator.pop(context);
+                  if (!_isDisposed) {
+                    setState(() {
+                      difficulty = '';
+                      _playWin = false;
+                    });
+                    _audioService.restoreBackgroundMusic();
+                  }
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -378,25 +482,80 @@ class _MemoryScreenState extends State<MemoryScreen>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('¡Tiempo terminado!'),
-        content:
-            const Text('Se acabó el tiempo. ¿Quieres intentarlo de nuevo?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                difficulty = '';
-                flippedCards = [];
-                matchedCards = [];
-                firstSelectedIndex = null;
-              });
-              _audioService.restoreBackgroundMusic();
-              _audioService.stopTimeUpSound();
-            },
-            child: const Text('Jugar de nuevo'),
+        contentPadding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth:
+                isTablet ? 500 : double.infinity, // Máximo ancho para tablet
+            maxHeight: isTablet ? 600 : double.infinity,
           ),
-        ],
+          child: Container(
+            padding: EdgeInsets.all(isTablet ? 32.0 : 20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.timer_off,
+                  size: isTablet ? 64 : 56,
+                  color: StyleColor.redDark,
+                ),
+                SizedBox(height: isTablet ? 20.0 : 16),
+                Text(
+                  '¡Tiempo terminado!',
+                  style: isTablet
+                      ? StylesApp(context).textStyleBody24.copyWith(
+                            color: StyleColor.redDark,
+                            fontWeight: FontWeight.bold,
+                          )
+                      : StylesApp(context).textStyleBody20.copyWith(
+                            color: StyleColor.redDark,
+                          ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: isTablet ? 12.0 : 8),
+                Text(
+                  'Se acabó el tiempo. ¿Quieres intentarlo de nuevo?',
+                  style: isTablet
+                      ? StylesApp(context).textStyleBody18.copyWith(
+                            color: StyleColor.black,
+                          )
+                      : StylesApp(context).textStyleBody16.copyWith(
+                            color: StyleColor.black,
+                          ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: isTablet ? 24.0 : 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ButtonThemeWidget(
+                      text: "Jugar de nuevo",
+                      width: isTablet ? 200 : null,
+                      height: isTablet ? 50 : null,
+                      buttonStyle: isTablet
+                          ? StylesApp(context).btnWidgetSmall
+                          : StylesApp(context).btnWidgetSmall,
+                      onPressed: () {
+                        Navigator.pop(context);
+                        setState(() {
+                          difficulty = '';
+                          flippedCards = [];
+                          matchedCards = [];
+                          firstSelectedIndex = null;
+                        });
+                        _audioService.restoreBackgroundMusic();
+                        _audioService.stopTimeUpSound();
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -456,6 +615,7 @@ class _MemoryScreenState extends State<MemoryScreen>
         Navigator.pushNamed(context, "/layoutPage");
         _audioService.stopBackgroundMusic();
       },
+      // isTablet: isTablet,
     );
   }
 
@@ -464,7 +624,6 @@ class _MemoryScreenState extends State<MemoryScreen>
       return;
 
     await _audioService.playCardTapSound();
-    // 🔥 Verificar música después de un breve delay
     Future.delayed(const Duration(milliseconds: 100), () {
       if (!_isDisposed) {
         _audioService.restoreBackgroundMusic();
@@ -473,16 +632,12 @@ class _MemoryScreenState extends State<MemoryScreen>
     setState(() => flippedCards[index] = true);
 
     if (firstSelectedIndex == null) {
-      // Primera carta seleccionada
       firstSelectedIndex = index;
     } else {
-      // Segunda carta seleccionada
       canFlip = false;
       final secondIndex = index;
-      // Verificar si hay coincidencia
       if (lisMemory[firstSelectedIndex!].pair == lisMemory[secondIndex].pair) {
-        // Coincidencia encontrada
-        await _audioService.playMatchSound(); // Sonido de coincidencia
+        await _audioService.playMatchSound();
         if (_isDisposed) return;
 
         setState(() {
@@ -494,7 +649,6 @@ class _MemoryScreenState extends State<MemoryScreen>
         firstSelectedIndex = null;
         canFlip = true;
 
-        // Verificar si el juego ha terminado
         if (matchedCards.every((matched) => matched)) {
           setState(() {
             _playWin = true;
@@ -504,8 +658,7 @@ class _MemoryScreenState extends State<MemoryScreen>
           if (!_isDisposed) _showDialogFinallyPlay();
         }
       } else {
-        // No hay coincidencia, voltear de nuevo después de un retraso
-        await _audioService.playNoMatchSound(); // Sonido de no coincidencia
+        await _audioService.playNoMatchSound();
         if (_isDisposed) return;
 
         Future.delayed(const Duration(milliseconds: 1000), () {
@@ -536,10 +689,8 @@ class _MemoryScreenState extends State<MemoryScreen>
   Future<void> _preloadImages() async {
     if (_isDisposed) return;
 
-    // Muestra un indicador de carga mientras precarga las imágenes
     LoadingService().showLoading(context);
     try {
-      // Iterar sobre todas las MemoryModel y precarga sus imágenes
       final List<Future<void>> precacheFutures = [];
       for (final memoryItem in lisMemory) {
         final imageUrl = "${GraphQLConfig.urlServidor}${memoryItem.img.urlImg}";
@@ -556,17 +707,485 @@ class _MemoryScreenState extends State<MemoryScreen>
       if (!_isDisposed) LoadingService().hideLoading();
     }
   }
+
+  _buildSceneTablet() {
+    return Column(
+      children: [
+        SizedBox(height: 32.0),
+        // Contenedor principal con dos columnas
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 24.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // COLUMNA IZQUIERDA: Información y controles
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: StyleColor.white,
+                      borderRadius: BorderRadius.circular(16.0),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 16,
+                          offset: Offset(0, 6),
+                          color: StyleColor.black.withValues(alpha: 0.1),
+                        ),
+                      ],
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Título
+                          Container(
+                            margin: EdgeInsets.only(bottom: 24.0),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.memory,
+                                  size: 48,
+                                  color: StyleColor.turquoise,
+                                ),
+                                SizedBox(height: 12),
+                                Text(
+                                  "Memoria Bíblica",
+                                  style: StylesApp(context)
+                                      .textStyleBody24
+                                      .copyWith(
+                                        color: StyleColor.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  "¡Encuentra los pares para ganar!",
+                                  style: StylesApp(context)
+                                      .textStyleBody18
+                                      .copyWith(
+                                        color: StyleColor.grayDark,
+                                        height: 1.4,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Dificultad seleccionada
+                          Container(
+                            padding: EdgeInsets.all(16.0),
+                            margin: EdgeInsets.only(bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: _getDifficultyColor(difficulty)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(
+                                color: _getDifficultyColor(difficulty),
+                                width: 2.0,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.person_4,
+                                  color: _getDifficultyColor(difficulty),
+                                  size: 28,
+                                ),
+                                SizedBox(width: 12),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Dificultad",
+                                      style: StylesApp(context)
+                                          .textStyleBody16
+                                          .copyWith(
+                                            color: StyleColor.grayDark,
+                                          ),
+                                    ),
+                                    Text(
+                                      difficulty,
+                                      style: StylesApp(context)
+                                          .textStyleBody20
+                                          .copyWith(
+                                            color:
+                                                _getDifficultyColor(difficulty),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Tiempo transcurrido
+                          Container(
+                            padding: EdgeInsets.all(20.0),
+                            decoration: BoxDecoration(
+                              color: StyleColor.blueLight.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(
+                                color: StyleColor.cosmicBlue,
+                                width: 2.0,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.timer,
+                                      color: StyleColor.cosmicBlue,
+                                      size: 32,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      "Tiempo",
+                                      style: StylesApp(context)
+                                          .textStyleBody16
+                                          .copyWith(
+                                            color: StyleColor.black,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 12),
+                                CountDownWidget(
+                                  win: _playWin,
+                                  initialCount: getTimeLevel(difficulty),
+                                  onFinished: () {
+                                    if (!_playWin && !_isDisposed) {
+                                      _audioService.playTimeUpSound();
+                                      _showTimeUpDialog();
+                                    }
+                                  },
+                                  isTablet: true,
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  "Tiempo restante",
+                                  style: StylesApp(context)
+                                      .textStyleBody14
+                                      .copyWith(
+                                        color: StyleColor.grayDark,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Estadísticas
+                          Container(
+                            margin: EdgeInsets.only(top: 20.0),
+                            padding: EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: StyleColor.orange.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Cartas encontradas:",
+                                      style: StylesApp(context)
+                                          .textStyleBody16
+                                          .copyWith(
+                                            color: StyleColor.grayDark,
+                                          ),
+                                    ),
+                                    Text(
+                                      "${matchedCards.where((matched) => matched).length ~/ 2}",
+                                      style: StylesApp(context)
+                                          .textStyleBody20
+                                          .copyWith(
+                                            color: StyleColor.orange,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Total de pares:",
+                                      style: StylesApp(context)
+                                          .textStyleBody16
+                                          .copyWith(
+                                            color: StyleColor.grayDark,
+                                          ),
+                                    ),
+                                    Text(
+                                      "${lisMemory.length ~/ 2}",
+                                      style: StylesApp(context)
+                                          .textStyleBody20
+                                          .copyWith(
+                                            color: StyleColor.greenDark,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Botón de reinicio
+                          Container(
+                            margin: EdgeInsets.only(top: 24.0),
+                            child: ButtonThemeWidget(
+                              text: "Cambiar dificultad",
+                              width: double.infinity,
+                              height: 48,
+                              buttonStyle: StylesApp(context)
+                                  .btnWidgetSmall
+                                  .copyWith(
+                                    backgroundColor: WidgetStatePropertyAll(
+                                      StyleColor.grayMedium.withOpacity(0.8),
+                                    ),
+                                  ),
+                              onPressed: () {
+                                setState(() {
+                                  difficulty = '';
+                                  _playWin = false;
+                                  flippedCards = [];
+                                  matchedCards = [];
+                                  firstSelectedIndex = null;
+                                });
+                                _audioService.restoreBackgroundMusic();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(width: 24.0),
+
+                // COLUMNA DERECHA: Juego de memoria
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    padding: EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: StyleColor.white,
+                      borderRadius: BorderRadius.circular(16.0),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 16,
+                          offset: Offset(0, 6),
+                          color: StyleColor.black.withValues(alpha: 0.1),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        // Instrucciones rápidas
+                        // Container(
+                        //   margin: EdgeInsets.only(bottom: 16.0),
+                        //   padding: EdgeInsets.all(12.0),
+                        //   decoration: BoxDecoration(
+                        //     color: StyleColor.turquoise.withOpacity(0.1),
+                        //     borderRadius: BorderRadius.circular(12.0),
+                        //   ),
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.center,
+                        //     children: [
+                        //       Icon(
+                        //         Icons.info_outline,
+                        //         color: StyleColor.turquoise,
+                        //         size: 24,
+                        //       ),
+                        //       SizedBox(width: 12),
+                        //       Expanded(
+                        //         child: Text(
+                        //           "Haz clic en las cartas para encontrar los pares",
+                        //           style: StylesApp(context)
+                        //               .textStyleBody16
+                        //               .copyWith(
+                        //                 color: StyleColor.black,
+                        //               ),
+                        //           maxLines: 2,
+                        //           overflow: TextOverflow.ellipsis,
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
+
+                        // Grid de cartas
+                        Expanded(
+                          child: GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: _getGridColumnCount(),
+                              crossAxisSpacing: 12.0,
+                              mainAxisSpacing: 12.0,
+                              childAspectRatio: 1.6,
+                            ),
+                            itemCount: lisMemory.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return MemoryCard(
+                                card: lisMemory[index],
+                                isFlipped: flippedCards.isNotEmpty
+                                    ? flippedCards[index]
+                                    : false,
+                                isMatched: matchedCards.isNotEmpty
+                                    ? matchedCards[index]
+                                    : false,
+                                onTap: () => _handleCardTap(index),
+                                isTablet: true,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 24.0),
+      ],
+    );
+  }
+
+  _buildSceneMobile() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        SizedBox(height: isTablet ? 32.0 : 20),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: isTablet ? 32.0 : 16.0),
+          child: Text(
+            "¡Encuentra los pares para ganar!",
+            style: isTablet
+                ? StylesApp(context).textStyleBody24.copyWith(
+                      color: StyleColor.black,
+                      fontWeight: FontWeight.bold,
+                    )
+                : StylesApp(context).textStyleBody20.copyWith(
+                      color: StyleColor.black,
+                    ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        SizedBox(height: isTablet ? 24.0 : 20),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isTablet ? 40.0 : 16.0,
+              vertical: isTablet ? 8.0 : 0,
+            ),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isTablet ? _getGridColumnCount() : 4,
+                crossAxisSpacing: isTablet ? 12.0 : 8.0,
+                mainAxisSpacing: isTablet ? 12.0 : 8.0,
+                childAspectRatio: isTablet ? 0.9 : 1.0,
+              ),
+              itemCount: lisMemory.length,
+              itemBuilder: (BuildContext context, int index) {
+                return MemoryCard(
+                  card: lisMemory[index],
+                  isFlipped:
+                      flippedCards.isNotEmpty ? flippedCards[index] : false,
+                  isMatched:
+                      matchedCards.isNotEmpty ? matchedCards[index] : false,
+                  onTap: () => _handleCardTap(index),
+                  isTablet: isTablet,
+                );
+              },
+            ),
+          ),
+        ),
+        SizedBox(height: isTablet ? 24.0 : 20),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: isTablet ? 32.0 : 16.0),
+          child: Column(
+            children: [
+              Text(
+                "Dificultad: $difficulty",
+                style: isTablet
+                    ? StylesApp(context).textStyleBody18.copyWith(
+                          color: StyleColor.black,
+                          fontWeight: FontWeight.w600,
+                        )
+                    : StylesApp(context).textStyleBody15.copyWith(
+                          color: StyleColor.black,
+                        ),
+              ),
+              SizedBox(height: isTablet ? 12.0 : 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.timer,
+                    color: StyleColor.cosmicBlue,
+                    size: isTablet ? 28 : 24,
+                  ),
+                  SizedBox(width: isTablet ? 12.0 : 8),
+                  Text(
+                    "Tiempo Restante: ",
+                    style: isTablet
+                        ? StylesApp(context).textStyleBody18.copyWith(
+                              color: StyleColor.black,
+                            )
+                        : StylesApp(context).textStyleBody15.copyWith(
+                              color: StyleColor.black,
+                            ),
+                  ),
+                  CountDownWidget(
+                    win: _playWin,
+                    initialCount: getTimeLevel(difficulty),
+                    onFinished: () {
+                      if (!_playWin && !_isDisposed) {
+                        _audioService.playTimeUpSound();
+                        _showTimeUpDialog();
+                      }
+                    },
+                    isTablet: isTablet,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: isTablet ? 32.0 : 20),
+      ],
+    );
+  }
 }
 
 class CountDownWidget extends StatefulWidget {
   final int initialCount;
   final bool win;
   final VoidCallback? onFinished;
-  const CountDownWidget(
-      {super.key,
-      required this.initialCount,
-      this.onFinished,
-      this.win = false});
+  final bool isTablet;
+  const CountDownWidget({
+    super.key,
+    required this.initialCount,
+    this.onFinished,
+    this.win = false,
+    this.isTablet = false,
+  });
 
   @override
   State<CountDownWidget> createState() => _CountDownWidgetState();
@@ -582,7 +1201,7 @@ class _CountDownWidgetState extends State<CountDownWidget> {
   void initState() {
     super.initState();
     _currentCount = widget.initialCount;
-    _audioService = AudioService(); // Initialize the audio service
+    _audioService = AudioService();
     _startCountDown();
   }
 
@@ -590,16 +1209,44 @@ class _CountDownWidgetState extends State<CountDownWidget> {
   void dispose() {
     _isDisposed = true;
     _timer?.cancel();
-    _audioService.dispose(); // Liberar recursos del audio
+    _audioService.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      "$_currentCount",
-      style: StylesApp(context).textStyCompleteLevelTitle.copyWith(
-          color: _currentCount <= 10 ? StyleColor.redDark : StyleColor.black),
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      padding: EdgeInsets.symmetric(
+        horizontal: widget.isTablet ? 12.0 : 8.0,
+        vertical: widget.isTablet ? 6.0 : 4.0,
+      ),
+      decoration: BoxDecoration(
+        color: _currentCount <= 10
+            ? StyleColor.redLight.withOpacity(0.2)
+            : StyleColor.blueLight.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(widget.isTablet ? 12.0 : 8.0),
+        border: Border.all(
+          color:
+              _currentCount <= 10 ? StyleColor.redDark : StyleColor.cosmicBlue,
+          width: widget.isTablet ? 2.0 : 1.5,
+        ),
+      ),
+      child: Text(
+        "$_currentCount",
+        style: widget.isTablet
+            ? StylesApp(context).textStyleBody24.copyWith(
+                  color: _currentCount <= 10
+                      ? StyleColor.redDark
+                      : StyleColor.cosmicBlue,
+                  fontWeight: FontWeight.bold,
+                )
+            : StylesApp(context).textStyCompleteLevelTitle.copyWith(
+                  color: _currentCount <= 10
+                      ? StyleColor.redDark
+                      : StyleColor.black,
+                ),
+      ),
     );
   }
 
@@ -639,6 +1286,7 @@ class MemoryCard extends StatelessWidget {
   final bool isFlipped;
   final bool isMatched;
   final VoidCallback onTap;
+  final bool isTablet;
 
   const MemoryCard({
     super.key,
@@ -646,6 +1294,7 @@ class MemoryCard extends StatelessWidget {
     required this.isFlipped,
     required this.isMatched,
     required this.onTap,
+    this.isTablet = false,
   });
 
   @override
@@ -671,19 +1320,33 @@ class MemoryCard extends StatelessWidget {
       key: const ValueKey('front'),
       decoration: BoxDecoration(
         color: StyleColor.white,
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(isTablet ? 12.0 : 8.0),
         boxShadow: [
           BoxShadow(
-            blurRadius: 12,
+            blurRadius: isTablet ? 16 : 12,
             color: StyleColor.black.withValues(alpha: 0.25),
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Center(
-        child: Image.network(
-          "${GraphQLConfig.urlServidor}${card.img.urlImg}",
-          fit: BoxFit.contain,
+        child: Padding(
+          padding: EdgeInsets.all(isTablet ? 8.0 : 4.0),
+          child: Image.network(
+            "${GraphQLConfig.urlServidor}${card.img.urlImg}",
+            fit: BoxFit.contain,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Center(
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -694,11 +1357,19 @@ class MemoryCard extends StatelessWidget {
       key: const ValueKey('back'),
       decoration: BoxDecoration(
         color: StyleColor.cosmicBlue,
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(isTablet ? 12.0 : 8.0),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            StyleColor.cosmicBlue,
+            StyleColor.blueDark,
+          ],
+        ),
         boxShadow: [
           BoxShadow(
-            blurRadius: 12,
-            color: StyleColor.black.withValues(alpha: 0.25),
+            blurRadius: isTablet ? 16 : 12,
+            color: StyleColor.black.withValues(alpha: 0.3),
             offset: const Offset(0, 4),
           ),
         ],
@@ -706,7 +1377,7 @@ class MemoryCard extends StatelessWidget {
       child: Center(
         child: Icon(
           Icons.question_mark,
-          size: 40,
+          size: isTablet ? 48 : 40,
           color: StyleColor.white,
         ),
       ),

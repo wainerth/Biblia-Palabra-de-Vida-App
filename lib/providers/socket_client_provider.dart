@@ -13,8 +13,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
+
 
 class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
   IO.Socket? _socket;
@@ -48,22 +47,7 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
-// Función para obtener el timezone del dispositivo
-  String getDeviceTimeZone() {
-    try {
-      // Inicializar timezone database
-      tz.initializeTimeZones();
 
-      // Obtener la ubicación local
-      final location = tz.local;
-
-      // Obtener el nombre del timezone (ej: "America/New_York")
-      return location.name;
-    } catch (e) {
-      // Fallback si hay error
-      return 'UTC';
-    }
-  }
 
   // Método para inicializar TODO el sistema de notificaciones
   Future<void> initializeNotificationSystem() async {

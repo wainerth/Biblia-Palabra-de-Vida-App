@@ -313,8 +313,10 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
     final responseDelete = await deleteVerseFavorite(userData!.userId, verseId);
     if (responseDelete.error != null) {
       LoadingService().hideLoading();
+      if (mounted) {
       await showCustomDialog(context,
           message: responseDelete.error!, dialogType: DialogType.error);
+      }
       return;
     } else {
       await _loadData(pagination.currentPage, itemPerPageValue);

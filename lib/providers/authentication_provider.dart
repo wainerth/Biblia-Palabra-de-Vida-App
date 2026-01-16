@@ -42,6 +42,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
       // si no hay datos , el usuario no esta autenticado
       if (userToken == null || userDataString == null) {
+
         await _clearUserSession(context);
         return AuthCheckResult.notAuthenticated(
             reason: 'No hay sesión guardada');

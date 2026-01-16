@@ -45,11 +45,11 @@ class SecurityUtils {
   static bool isStrongPassword(String password) {
     if (password.length < 6) return false;
 
-    final hasUpperCase = RegExp(r'[A-Z]').hasMatch(password);
-    final hasLowerCase = RegExp(r'[a-z]').hasMatch(password);
+    // final hasUpperCase = RegExp(r'[A-Z]').hasMatch(password);
+    // final hasLowerCase = RegExp(r'[a-z]').hasMatch(password);
     // final hasDigits = RegExp(r'[0-9]').hasMatch(password);
-    final hasSpecialChars =
-        RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
+    // final hasSpecialChars =
+        // RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
 
     return true; //hasUpperCase && hasLowerCase && hasSpecialChars;
   }

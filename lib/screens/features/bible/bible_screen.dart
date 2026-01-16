@@ -71,7 +71,6 @@ class _BibleScreenState extends State<BibleScreen> {
   // ==========================================================================
   BibleScreenState _screenState = BibleScreenState.loading;
   bool _showSkeleton = true;
-  bool _hasError = false;
   String? errorMessage;
 
   // ==========================================================================
@@ -111,13 +110,11 @@ class _BibleScreenState extends State<BibleScreen> {
   bool _isManualScroll = false;
   bool _showDrawer = false;
   Timer? _loadTimeoutTimer;
-  Completer<void>? _initialLoadCompleter;
 
   // ==========================================================================
   // 8. GETTERS COMPUTADOS
   // ==========================================================================
   bool get _isLoading => _screenState == BibleScreenState.loading;
-  bool get _showContent => _screenState == BibleScreenState.content;
   bool get _showError => _screenState == BibleScreenState.error;
 
   // ==========================================================================
@@ -346,64 +343,67 @@ class _BibleScreenState extends State<BibleScreen> {
     }
   }
 
- Future<void> _loadInitialChapter() async {
-  if (currentBook == null) return;
+  Future<void> _loadInitialChapter() async {
+    if (currentBook == null) return;
 
-  try {
-    // 1. Obtener el número de capítulo guardado
-    final chapterNumberStr = await PreferencesManager().getChapterSelected() ?? '1';
-    final chapterNumber = int.tryParse(chapterNumberStr) ?? 1;
-    
-    if (kDebugMode) {
-      print('📖 Intentando cargar capítulo guardado: $chapterNumber');
-    }
+    try {
+      // 1. Obtener el número de capítulo guardado
+      final chapterNumberStr =
+          await PreferencesManager().getChapterSelected() ?? '1';
+      final chapterNumber = int.tryParse(chapterNumberStr) ?? 1;
 
-    // 2. Cargar TODOS los capítulos del libro
-    final response = await getChapterWithVerses(currentBook!.id);
-
-    if (response.error == null && response.data.isNotEmpty) {
-      // 3. Buscar el capítulo específico por número
-      ChapterModel? foundChapter;
-      
-      for (var chapterData in response.data) {
-        final chapter = ChapterModel.fromJson(chapterData);
-        if (chapter.chapter == chapterNumber) {
-          foundChapter = chapter;
-          break;
-        }
-      }
-      
-      // 4. Si no se encuentra el capítulo, usar el primero
-      currentChapter = foundChapter ?? ChapterModel.fromJson(response.data.first);
-      verses = currentChapter!.verses ?? [];
-      
-      // 5. Actualizar el conteo de capítulos del libro
-      currentBook = currentBook?.copyWith(chapters: response.data.length);
-      
       if (kDebugMode) {
-        print('✅ Capítulo cargado: ${currentChapter!.chapter} (guardado: $chapterNumber)');
-        print('✅ Versículos: ${verses.length}');
-        print('✅ Total capítulos en libro: ${currentBook!.chapters}');
+        print('📖 Intentando cargar capítulo guardado: $chapterNumber');
       }
 
-      validateNextAndPrevious();
-      
-      // 6. Actualizar estado
-      setState(() {
-        _screenState = BibleScreenState.content;
-        _showSkeleton = false;
-      });
-      
-      return;
-    }
-  } catch (e) {
-    if (kDebugMode) print('❌ Error en _loadInitialChapter: $e');
-  }
+      // 2. Cargar TODOS los capítulos del libro
+      final response = await getChapterWithVerses(currentBook!.id);
 
-  // 7. Fallback: cargar todos los capítulos
-  if (kDebugMode) print('⚠️ Usando fallback loadChapters');
-  await loadChapters(currentBook!, false);
-}
+      if (response.error == null && response.data.isNotEmpty) {
+        // 3. Buscar el capítulo específico por número
+        ChapterModel? foundChapter;
+
+        for (var chapterData in response.data) {
+          final chapter = ChapterModel.fromJson(chapterData);
+          if (chapter.chapter == chapterNumber) {
+            foundChapter = chapter;
+            break;
+          }
+        }
+
+        // 4. Si no se encuentra el capítulo, usar el primero
+        currentChapter =
+            foundChapter ?? ChapterModel.fromJson(response.data.first);
+        verses = currentChapter!.verses ?? [];
+
+        // 5. Actualizar el conteo de capítulos del libro
+        currentBook = currentBook?.copyWith(chapters: response.data.length);
+
+        if (kDebugMode) {
+          print(
+              '✅ Capítulo cargado: ${currentChapter!.chapter} (guardado: $chapterNumber)');
+          print('✅ Versículos: ${verses.length}');
+          print('✅ Total capítulos en libro: ${currentBook!.chapters}');
+        }
+
+        validateNextAndPrevious();
+
+        // 6. Actualizar estado
+        setState(() {
+          _screenState = BibleScreenState.content;
+          _showSkeleton = false;
+        });
+
+        return;
+      }
+    } catch (e) {
+      if (kDebugMode) print('❌ Error en _loadInitialChapter: $e');
+    }
+
+    // 7. Fallback: cargar todos los capítulos
+    if (kDebugMode) print('⚠️ Usando fallback loadChapters');
+    await loadChapters(currentBook!, false);
+  }
 
   Future<void> _handleNavigationArguments() async {
     final args =
@@ -460,7 +460,6 @@ class _BibleScreenState extends State<BibleScreen> {
     if (mounted) {
       setState(() {
         _screenState = BibleScreenState.error;
-        _hasError = true;
         _showSkeleton = false;
         errorMessage = 'Error al cargar: ${error.toString()}';
       });
@@ -700,7 +699,6 @@ class _BibleScreenState extends State<BibleScreen> {
               onPressed: () {
                 setState(() {
                   _screenState = BibleScreenState.loading;
-                  _hasError = false;
                 });
                 _initializeScreen();
               },
@@ -811,7 +809,7 @@ class _BibleScreenState extends State<BibleScreen> {
         color: currentTheme.backgroundColor,
         border: Border(
           right: BorderSide(
-            color: currentTheme.buttonColor.withOpacity(0.3),
+            color: currentTheme.buttonColor.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -1044,8 +1042,8 @@ class _BibleScreenState extends State<BibleScreen> {
                                 divisions: 9,
                                 label: _getSpeedLabel(_speechRate),
                                 activeColor: currentTheme.buttonColor,
-                                inactiveColor:
-                                    currentTheme.buttonColor.withOpacity(0.3),
+                                inactiveColor: currentTheme.buttonColor
+                                    .withValues(alpha: 0.3),
                                 onChanged: (value) async {
                                   setState(() => _speechRate = value);
                                   await flutterTts.setSpeechRate(value);
@@ -1198,10 +1196,10 @@ class _BibleScreenState extends State<BibleScreen> {
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: currentTheme.buttonColor.withOpacity(0.1),
+        color: currentTheme.buttonColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: currentTheme.buttonColor.withOpacity(0.3),
+          color: currentTheme.buttonColor.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -1248,7 +1246,7 @@ class _BibleScreenState extends State<BibleScreen> {
               Icon(
                 Icons.book_outlined,
                 size: 60,
-                color: currentTheme.textColor.withOpacity(0.5),
+                color: currentTheme.textColor.withValues(alpha: 0.5),
               ),
               SizedBox(height: 16),
               Text(
@@ -1263,7 +1261,7 @@ class _BibleScreenState extends State<BibleScreen> {
               Text(
                 'Capítulo ${currentChapter?.chapter ?? ''}',
                 style: TextStyle(
-                  color: currentTheme.textColor.withOpacity(0.7),
+                  color: currentTheme.textColor.withValues(alpha: 0.7),
                   fontSize: 14,
                 ),
               ),
@@ -1272,11 +1270,11 @@ class _BibleScreenState extends State<BibleScreen> {
                 onPressed: () {
                   _retryLoadChapter();
                 },
-                child: Text('Reintentar carga'),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: currentTheme.buttonTextColor,
                   backgroundColor: currentTheme.buttonColor,
                 ),
+                child: Text('Reintentar carga'),
               ),
             ],
           ),
@@ -1442,7 +1440,7 @@ class _BibleScreenState extends State<BibleScreen> {
                 height: 30,
                 margin: EdgeInsets.only(right: 12, top: 4),
                 decoration: BoxDecoration(
-                  color: currentTheme.backgroundColor.withOpacity(0.3),
+                  color: currentTheme.backgroundColor.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
@@ -1455,7 +1453,8 @@ class _BibleScreenState extends State<BibleScreen> {
                       height: 16,
                       margin: EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: currentTheme.backgroundColor.withOpacity(0.3),
+                        color:
+                            currentTheme.backgroundColor.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -1464,7 +1463,8 @@ class _BibleScreenState extends State<BibleScreen> {
                       height: 16,
                       margin: EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: currentTheme.backgroundColor.withOpacity(0.3),
+                        color:
+                            currentTheme.backgroundColor.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -1472,7 +1472,8 @@ class _BibleScreenState extends State<BibleScreen> {
                       width: MediaQuery.of(context).size.width * 0.5,
                       height: 16,
                       decoration: BoxDecoration(
-                        color: currentTheme.backgroundColor.withOpacity(0.3),
+                        color:
+                            currentTheme.backgroundColor.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -1551,7 +1552,7 @@ class _BibleScreenState extends State<BibleScreen> {
             Icon(
               Icons.menu_book_rounded,
               size: 80,
-              color: currentTheme.buttonColor.withOpacity(0.3),
+              color: currentTheme.buttonColor.withValues(alpha: 0.3),
             ),
             SizedBox(height: 20),
 
@@ -1575,7 +1576,7 @@ class _BibleScreenState extends State<BibleScreen> {
                 '${currentBook?.modernName ?? 'seleccionado'} no contiene versículos disponibles.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: currentTheme.textColor.withOpacity(0.7),
+                  color: currentTheme.textColor.withValues(alpha: 0.7),
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -1588,10 +1589,10 @@ class _BibleScreenState extends State<BibleScreen> {
               padding: EdgeInsets.all(12),
               margin: EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                color: currentTheme.buttonColor.withOpacity(0.1),
+                color: currentTheme.buttonColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: currentTheme.buttonColor.withOpacity(0.2),
+                  color: currentTheme.buttonColor.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
@@ -1700,7 +1701,7 @@ class _BibleScreenState extends State<BibleScreen> {
           Text(
             label,
             style: TextStyle(
-              color: currentTheme.textColor.withOpacity(0.6),
+              color: currentTheme.textColor.withValues(alpha: 0.6),
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -1774,7 +1775,9 @@ class _BibleScreenState extends State<BibleScreen> {
                 await Future.delayed(Duration(seconds: 1));
 
                 LoadingService().hideLoading();
-                Navigator.pop(ctx);
+                if (mounted) {
+                  Navigator.pop(ctx);
+                }
 
                 _showSnackBar('Reporte enviado. ¡Gracias por tu ayuda!');
 
@@ -2263,7 +2266,7 @@ class _BibleScreenState extends State<BibleScreen> {
   }
 
   // ==========================================================================
-  // 30. MÉTODOS DE MODALES Y DIALOGOS
+  // 30. MÉTODOS DE MODALES Y DIÁLOGOS
   // ==========================================================================
 
   void openModal() {
@@ -2321,61 +2324,63 @@ class _BibleScreenState extends State<BibleScreen> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Center(
-          child: Container(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.sizeOf(context).height * 0.50,
-              maxHeight: MediaQuery.sizeOf(context).height * 0.50,
-            ),
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    constraints: BoxConstraints(minHeight: 213),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: (video.url.contains('youtube.com') ||
-                              video.url.contains('youtu.be'))
-                          ? PlayerYoutubeWidget(videoUrl: video.url)
-                          : PlayerNoYoutube(
-                              url: "${GraphQLConfig.urlServidor}${video.url}"),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Center(
+            child: Container(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.sizeOf(context).height * 0.50,
+                maxHeight: MediaQuery.sizeOf(context).height * 0.50,
+              ),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
                     child: Container(
-                      padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.7),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close,
                         color: Colors.white,
-                        size: 20.0,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      constraints: BoxConstraints(minHeight: 213),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: (video.url.contains('youtube.com') ||
+                                video.url.contains('youtu.be'))
+                            ? PlayerYoutubeWidget(videoUrl: video.url)
+                            : PlayerNoYoutube(
+                                url:
+                                    "${GraphQLConfig.urlServidor}${video.url}"),
                       ),
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withValues(alpha: 0.7),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 20.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
   }
 
   Future<void> _changeBibleVersion() async {
@@ -2481,27 +2486,28 @@ class _BibleScreenState extends State<BibleScreen> {
           PaginationInfo.fromJson(responseFavorite.data['meta']);
 
       LoadingService().hideLoading();
-
-      showGeneralDialog(
-        context: context,
-        barrierDismissible: false,
-        transitionDuration: Duration(milliseconds: 500),
-        pageBuilder: (_, __, ___) {
-          return DialogFavoriteVerseWidget(
-            currentTheme: currentTheme,
-            paginationInfo: objPagination,
-            versionId: currentVersion!.id,
-            favoriteVerses: listFavorite,
-            onDeleted: (verseId) {
-              final indexToDelete = _favoriteVerses
-                  .indexWhere((verse) => verse.verse.id == verseId);
-              if (indexToDelete != -1) {
-                setState(() => _favoriteVerses.removeAt(indexToDelete));
-              }
-            },
-          );
-        },
-      );
+      if (mounted) {
+        showGeneralDialog(
+          context: context,
+          barrierDismissible: false,
+          transitionDuration: Duration(milliseconds: 500),
+          pageBuilder: (_, __, ___) {
+            return DialogFavoriteVerseWidget(
+              currentTheme: currentTheme,
+              paginationInfo: objPagination,
+              versionId: currentVersion!.id,
+              favoriteVerses: listFavorite,
+              onDeleted: (verseId) {
+                final indexToDelete = _favoriteVerses
+                    .indexWhere((verse) => verse.verse.id == verseId);
+                if (indexToDelete != -1) {
+                  setState(() => _favoriteVerses.removeAt(indexToDelete));
+                }
+              },
+            );
+          },
+        );
+      }
     } catch (e) {
       LoadingService().hideLoading();
       _showSnackBar(e.toString());
@@ -2558,7 +2564,8 @@ class _BibleScreenState extends State<BibleScreen> {
               children: colors.map((color) {
                 return GestureDetector(
                   onTap: () {
-                    final hexColor = color.value
+                    final hexColor = color
+                        .toARGB32()
                         .toRadixString(16)
                         .padLeft(8, '0')
                         .toUpperCase()
@@ -2849,13 +2856,15 @@ class _BibleScreenState extends State<BibleScreen> {
   Future<void> loadVideoByChapter(String id) async {
     final responseVideo = await getVideoByChapter(id);
     if (responseVideo.error != null) {
-      await showCustomDialogWithAction(context,
-          message: responseVideo.error!,
-          dialogType: DialogTypeAction.error,
-          buttonOk: "re intentar",
-          textButton: "Volver",
-          actionCallbackOk: () {},
-          actionCallback: () {});
+      if (mounted) {
+        await showCustomDialogWithAction(context,
+            message: responseVideo.error!,
+            dialogType: DialogTypeAction.error,
+            buttonOk: "re intentar",
+            textButton: "Volver",
+            actionCallbackOk: () {},
+            actionCallback: () {});
+      }
       return;
     }
 

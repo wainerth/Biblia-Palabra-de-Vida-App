@@ -17,10 +17,6 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 // Importar los nuevos componentes
-import 'responsive_layout.dart';
-import 'question_header.dart';
-import 'question_card.dart';
-import 'progress_controls.dart';
 
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
@@ -132,7 +128,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   //función que se encarga de cargar los datos iniciales de la pantalla
   ///
   Future<void> _generateData(BuildContext context) async {
-     setState (()=>isLoading = true);
+    setState(() => isLoading = true);
 
     errorMessage = null;
     LoadingService().showLoading(context);
@@ -337,7 +333,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               failedAttempts: failedAttempts,
               scoreLastAttempt: 0,
               completed: false,
-              level: LevelUser(levelNumber: 0, id: "", name: ""),
+              level: LevelUser(levelNumber: level!.levelNumber, id: "", name: ""),
               status: true);
           activityIsCompleted = true;
           showStepCompleted = true;
@@ -358,7 +354,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
               failedAttempts: failedAttempts,
               scoreLastAttempt: 0,
               completed: false,
-              level: LevelUser(levelNumber: level!.levelNumber, id: "", name: ""),
+              level:
+                  LevelUser(levelNumber: level!.levelNumber, id: "", name: ""),
               status: true);
           activityIsCompleted = true;
           showStepCompleted = true;
@@ -628,9 +625,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           ProgressControls(
                             fontSize: fontSizeText,
                             currentValue: currentIndex.toDouble(),
-                            maxValue: questions.length > 1
-                                ? (questions.length - 1).toDouble()
-                                : questions.length.toDouble(),
+                            maxValue: _calculateProgressValue(),
                             onFontSizeChanged: _updateFontSize,
                             isTablet: true,
                           ),
@@ -881,7 +876,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text("Nivel actual",
-              style: StylesApp(context).textStyleBody12.copyWith(fontSize: 12, color: Colors.grey[600])),
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(fontSize: 12, color: Colors.grey[600])),
           Text(level!.name,
               style: StylesApp(context).textStyleBody16.copyWith(
                   fontSize: 16,
@@ -889,7 +886,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   color: Colors.teal)),
           SizedBox(height: 4),
           Text("Paso $numberQuestion",
-              style: StylesApp(context).textStyleBody14.copyWith(fontSize: 14, color: Colors.grey[700])),
+              style: StylesApp(context)
+                  .textStyleBody14
+                  .copyWith(fontSize: 14, color: Colors.grey[700])),
         ],
       ),
     );
@@ -1085,9 +1084,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ],
               ),
             ),
-            // SizedBox(
-            //   height: 10,
-            // ),
             Container(
               width: 158,
               // height: 175,
@@ -1113,10 +1109,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         height: 80,
                       ),
                     ),
-                    // Divider(
-                    //   color: Colors.black.withValues(alpha: 0.50),
-                    //   height: 3,
-                    // ),
                     Text(
                       "${prize?.biblicalName}",
                       style: StylesApp(context)
@@ -1334,20 +1326,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       );
                     }
                   }
-                  // if (responseDownloadCertificate.data != null) {
-                  //   final url =
-                  //       "${GraphQLConfig.urlServidor}${responseDownloadCertificate.data['url']}";
-                  //   if (await canLaunchUrl(Uri.parse(url))) {
-                  //     await launchUrl(Uri.parse(url),
-                  //         mode: LaunchMode.externalApplication);
-                  //   } else {
-                  //     await showCustomDialog(
-                  //       context,
-                  //       message: "No se pudo abrir el enlace de descarga.",
-                  //       dialogType: DialogType.error,
-                  //     );
-                  //   }
-                  // }
                 } catch (e) {
                   await showCustomDialog(
                     context,
@@ -1411,34 +1389,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     height: 32,
                     buttonStyle: StylesApp(context).btnWidgetSmall,
                     onPressed: () async {
-                      // if (certificateCreated != null) {
                       Navigator.popAndPushNamed(context, '/layoutPage1');
-                      // } else {
-                      //   try {
-                      //     final responseCreateCertificate =
-                      //         await createCertificate(
-                      //             userData?.userId, courseId);
-                      //     if (responseCreateCertificate.error != null) {
-                      //       await showCustomDialog(
-                      //         context,
-                      //         message: responseCreateCertificate.error!,
-                      //         dialogType: DialogType.error,
-                      //       );
-                      //       return;
-                      //     }
-                      //     certificateCreated =
-                      //         ResponseCertificateCreated.fromJson(
-                      //             responseCreateCertificate.data);
-                      //   } catch (e) {
-                      //     await showCustomDialog(
-                      //       context,
-                      //       message: e.toString(),
-                      //       dialogType: DialogType.error,
-                      //     );
-                      //     return;
-                      //   }
-                      //   Navigator.popAndPushNamed(context, '/layoutPage1');
-                      // }
                     },
                   ),
                 ),
@@ -1449,6 +1400,20 @@ class _QuestionScreenState extends State<QuestionScreen> {
         ),
       ),
     );
+  }
+
+  double _calculateProgressValue() {
+    // Validar que haya historias
+    if (questions.isEmpty) return 1.0;
+
+    // Calcular progreso seguro
+    final double totalItems = questions.length.toDouble();
+    final double maxPage = totalItems > 1 ? totalItems - 1 : totalItems;
+
+    // Evitar división por cero
+    if (maxPage <= 0) return 1.0;
+
+    return maxPage;
   }
 
   Future<void> _checkForStreakCelebration() async {

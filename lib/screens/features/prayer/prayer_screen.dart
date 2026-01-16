@@ -21,6 +21,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
   bool isPrayerGroup = false;
   bool showRequestPrayer = false;
   String? groupId;
+
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -31,14 +32,18 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: StyleColor.white,
         centerTitle: true,
         leading: IconButton.filled(
           style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(StyleColor.orange),
-              foregroundColor: WidgetStatePropertyAll(StyleColor.white)),
+            backgroundColor: WidgetStatePropertyAll(StyleColor.orange),
+            foregroundColor: WidgetStatePropertyAll(StyleColor.white),
+          ),
           padding: EdgeInsets.all(0),
           onPressed: () {
             if (showRequestPrayer) {
@@ -53,163 +58,551 @@ class _PrayerScreenState extends State<PrayerScreen> {
           color: StyleColor.white,
           icon: Icon(
             Icons.arrow_back,
-            size: 30,
+            size: isTablet ? 36 : 30,
           ),
         ),
         backgroundColor: StyleColor.white,
         actions: [
           Image.asset(
             "assets/kawaii_fire.png",
-            height: 52.0,
+            height: isTablet ? 64.0 : 52.0,
             fit: BoxFit.contain,
           )
         ],
       ),
       backgroundColor: StyleColor.turquoise,
       body: SafeArea(
-        //  HeadScreenNotAvatar(
-        //           title: "Pedidos de Oración",
-        //           onRoute: () {
-        //             Navigator.pushNamed(context, "/layoutPage");
-        //           },
-        //         ),
         child: isLoading
             ? LoadingIndicator()
-            : Column(
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: const AssetImage("assets/elipsisTop.png"),
-                        fit: BoxFit.cover,
-                        alignment: Alignment.bottomCenter,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: 48.0,
-                        ),
-                        Center(
-                          child: Text(
-                            textAlign: TextAlign.center,
-                            'Pedidos de Oración',
-                            style: StylesApp(context).textStyleTitleOrange,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 35.sp,
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height - 40,
-                      decoration: BoxDecoration(
-                        color: Color(0XFF12CBC4),
-              
-                      ),
-                      child: Center(
-                          child: isPrayerGroup && !showRequestPrayer
-                              ? _buildPrayerStart(context)
-                              : _buildButtonActions(context)),
-                    ),
-                  ),
-                ],
-              ),
+            : isPrayerGroup && !showRequestPrayer
+                ? _buildPrayerStart(context, isTablet)
+                : isTablet
+                    ? _buildTwoColumnLayout(context)
+                    : _buildMobileLayout(context),
       ),
     );
   }
 
-  _buildButtonActions(BuildContext context) {
-    var isWideScreen = MediaQuery.of(context).size.width > 600;
+  // DISEÑO DE DOS COLUMNAS PARA TABLET
+  Widget _buildTwoColumnLayout(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // COLUMNA IZQUIERDA - Header y acciones principales
+        Expanded(
+          flex: 5,
+          child: Column(
+            children: [
+              // Header en columna izquierda
+              Container(
+                width: double.infinity,
+                height: 100.0,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: const AssetImage("assets/elipsisTop.png"),
+                    fit: BoxFit.cover,
+                    alignment: Alignment.bottomCenter,
+                  ),
+                ),
+                // color: Colors.transparent,
+                child: Center(
+                  child: Text(
+                    'Pedidos de Oración',
+                    style: StylesApp(context).textStyleTitleOrange.copyWith(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+
+              // Contenido de la columna izquierda
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        StyleColor.turquoise.withValues(alpha: 0.9),
+                        Color(0XFF12CBC4),
+                      ],
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 20.0),
+                        // Botón "Ver respuestas"
+                        ButtonThemeWidget(
+                          text: "Ver respuestas de tus Pedidos de oración",
+                          width: double.infinity,
+                          height: 60,
+                          buttonStyle:
+                              StylesApp(context).btnWidgetSmall.copyWith(
+                                    textStyle: WidgetStatePropertyAll(
+                                      TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                          textCenter: true,
+                          onPressed: () {
+                            Navigator.pushNamed(context, "/listRequestPage");
+                          },
+                        ),
+
+                        SizedBox(height: 30.0),
+
+                        // Título "Hacer Pedido de Oración"
+                        Text(
+                          "Hacer Pedido de Oración",
+                          style: StylesApp(context).textStyleBody5.copyWith(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: StyleColor.blueDark,
+                              ),
+                        ),
+
+                        SizedBox(height: 25.0),
+
+                        // Botón para solicitar oración (deshabilita para mostrar categorías)
+                        Container(
+                          width: double.infinity,
+                          constraints: BoxConstraints(minHeight: 100.0),
+                          decoration: BoxDecoration(
+                            color: StyleColor.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 12,
+                                offset: Offset(0, 6),
+                              ),
+                            ],
+                            border: Border.all(
+                              color: StyleColor.orange.withValues(alpha: 0.3),
+                              width: 2,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 10,
+                                children: [
+                                  Icon(
+                                    Icons.handshake_rounded,
+                                    size: 40,
+                                    color: StyleColor.orange,
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    "Selecciona una categoría",
+                                    style: StylesApp(context)
+                                        .textStyleBody18
+                                        .copyWith(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w700,
+                                          color: StyleColor.blueDark,
+                                        ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                "Elige de la lista a la derecha",
+                                style:
+                                    StylesApp(context).textStyleBody15.copyWith(
+                                          fontSize: 15,
+                                          color: Colors.grey[600],
+                                        ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 40.0),
+
+                        // Información adicional
+                        Container(
+                          padding: EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: StyleColor.white.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: StyleColor.blue.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.lightbulb,
+                                      color: StyleColor.orange, size: 22),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    "¿Cómo funciona?",
+                                    style: StylesApp(context)
+                                        .textStyleBody16
+                                        .copyWith(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: StyleColor.blueDark,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                "1. Selecciona una categoría de la lista\n"
+                                "2. Completa tu petición de oración\n"
+                                "3. Nuestro equipo intercederá por ti\n"
+                                "4. Recibirás notificaciones de respuestas",
+                                style:
+                                    StylesApp(context).textStyleBody12.copyWith(
+                                          fontSize: 13,
+                                          color: Colors.grey[700],
+                                          height: 1.6,
+                                        ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 30.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // COLUMNA DERECHA - Categorías
+        Expanded(
+          flex: 7,
+          child: Container(
+            color: Color(0XFF12CBC4),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 40.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Título de categorías
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: StyleColor.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.category,
+                            color: StyleColor.orange, size: 24),
+                        SizedBox(width: 12),
+                        Text(
+                          "Categorías de Oración",
+                          style: StylesApp(context).textStyleBody20.copyWith(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: StyleColor.blueDark,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 15.0),
+
+                  // Lista de categorías
+                  Expanded(
+                    child: requestTypes.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: StyleColor.orange,
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  "Cargando categorías...",
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        fontSize: 16.sp,
+                                        color: Colors.white,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: requestTypes.length,
+                            itemBuilder: (context, index) {
+                              return _buildCategoryListItem(
+                                  requestTypes[index], index, context);
+                            },
+                          ),
+                  ),
+
+                  SizedBox(height: 20.0),
+
+                  // Pie de información
+                  Container(
+                    padding: EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: StyleColor.white.withValues(alpha: 0.8),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      "💬 Cada petición es tratada con absoluta confidencialidad y respeto. "
+                      "Tu privacidad es nuestra prioridad.",
+                      style: StylesApp(context).textStyleBody12.copyWith(
+                            // fontSize: 12.sp,
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Item de categoría para lista vertical
+  Widget _buildCategoryListItem(
+      ModelData category, int index, BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => goToRequest(category),
+          child: Container(
+            width: double.infinity,
+            height: 65,
+            decoration: BoxDecoration(
+              color: generateColor(index).withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: generateColor(index).withValues(alpha: 0.3),
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  // Número de categoría
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "${index + 1}",
+                        style: StylesApp(context).textStyleBody16.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: generateColor(index),
+                            ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(width: 15),
+
+                  // Nombre de categoría
+                  Expanded(
+                    child: Text(
+                      category.label,
+                      style: StylesApp(context).textStyleBody16.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+
+                  SizedBox(width: 10),
+
+                  // Flecha indicadora
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // DISEÑO MÓVIL (se mantiene exactamente igual)
+  Widget _buildMobileLayout(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: const AssetImage("assets/elipsisTop.png"),
+              fit: BoxFit.cover,
+              alignment: Alignment.bottomCenter,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 48.0),
+              Center(
+                child: Text(
+                  'Pedidos de Oración',
+                  style: StylesApp(context).textStyleTitleOrange,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              SizedBox(height: 35.sp),
+            ],
+          ),
+        ),
+        SizedBox(height: 15),
+        Expanded(
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(color: Color(0XFF12CBC4)),
+            child: Center(
+              child: _buildButtonActionsMobile(context),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildButtonActionsMobile(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          if (isLoading) ...{
-            Center(
-              child: LoadingIndicator(),
-            )
-          } else ...{
-            ButtonThemeWidget(
-              text: "Ver respuestas de tus Pedidos de oración",
-              width: 264.sp,
-              height: 52.sp,
-              buttonStyle: StylesApp(context).btnWidgetSmall,
-              textCenter: true,
-              onPressed: () {
-                Navigator.pushNamed(context, "/listRequestPage");
-              },
-            ),
-            SizedBox(
-              height: 84.0,
-            ),
-            Text(
-              "Hacer Pedido de Oración",
-              style: StylesApp(context).textStyleBody5,
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            isWideScreen
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10.sp,
-                        mainAxisSpacing: 10.sp,
-                        childAspectRatio: 3,
+          ButtonThemeWidget(
+            text: "Ver respuestas de tus Pedidos de oración",
+            width: 264.sp,
+            height: 52.sp,
+            buttonStyle: StylesApp(context).btnWidgetSmall,
+            textCenter: true,
+            onPressed: () {
+              Navigator.pushNamed(context, "/listRequestPage");
+            },
+          ),
+          SizedBox(height: 84.0),
+          Text(
+            "Hacer Pedido de Oración",
+            style: StylesApp(context).textStyleBody5,
+          ),
+          SizedBox(height: 5.0),
+          Column(
+            children: [
+              for (var index = 0; index < requestTypes.length; index++) ...{
+                ButtonThemeWidget(
+                  textCenter: true,
+                  text: requestTypes[index].label,
+                  buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                        backgroundColor:
+                            WidgetStatePropertyAll(generateColor(index)),
                       ),
-                      itemCount: requestTypes.length,
-                      itemBuilder: (context, index) {
-                        return ButtonThemeWidget(
-                          text: requestTypes[index].label,
-                          buttonStyle:
-                              StylesApp(context).btnWidgetSmall.copyWith(
-                                    backgroundColor: WidgetStatePropertyAll(
-                                        generateColor(index)),
-                                  ),
-                          width: 285.sp,
-                          height: 30,
-                          onPressed: () => goToRequest(requestTypes[index]),
-                        );
-                      },
-                    ),
-                  )
-                : Column(
-                    children: [
-                      for (var index = 0;
-                          index < requestTypes.length;
-                          index++) ...{
-                        ButtonThemeWidget(
-                          textCenter: true,
-                          text: requestTypes[index].label,
-                          buttonStyle:
-                              StylesApp(context).btnWidgetSmall.copyWith(
-                                    backgroundColor: WidgetStatePropertyAll(
-                                        generateColor(index)),
-                                  ),
-                          width: 285.sp,
-                          height: StylesApp(context).btnHeight.height,
-                          onPressed: () => goToRequest(requestTypes[index]),
-                        ),
-                        SizedBox(
-                          height: 8.sp,
-                        )
-                      }
-                    ],
+                  width: 285.sp,
+                  height: StylesApp(context).btnHeight.height,
+                  onPressed: () => goToRequest(requestTypes[index]),
+                ),
+                SizedBox(height: 8.sp)
+              }
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrayerStart(BuildContext context, bool isTablet) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ButtonThemeWidget(
+            text: "Tomar Pedidos de oración",
+            width: isTablet ? 400.sp : 264.sp,
+            height: isTablet ? 60.sp : 52.sp,
+            buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                  textStyle: WidgetStatePropertyAll(
+                    TextStyle(fontSize: isTablet ? 18.sp : null),
                   ),
-          }
+                ),
+            textCenter: true,
+            onPressed: () {
+              Navigator.pushNamed(context, "/takePrayerPage", arguments: {
+                "groupId": groupId,
+              });
+            },
+          ),
+          SizedBox(height: isTablet ? 25.sp : 10.sp),
+          ButtonThemeWidget(
+            text: "Hacer Pedido de Oración",
+            width: isTablet ? 400.sp : 264.sp,
+            height: isTablet ? 60.sp : 52.sp,
+            buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                  textStyle: WidgetStatePropertyAll(
+                    TextStyle(fontSize: isTablet ? 18.sp : null),
+                  ),
+                ),
+            textCenter: true,
+            onPressed: () {
+              setState(() {
+                showRequestPrayer = true;
+              });
+            },
+          ),
+          if (isTablet) SizedBox(height: 40.sp),
         ],
       ),
     );
@@ -219,18 +612,19 @@ class _PrayerScreenState extends State<PrayerScreen> {
     setState(() {
       isLoading = true;
     });
+
     await funcIsPrayerGroup();
+
     try {
       final prayerTypeResponse = await getAllPrayerRequestTypes();
       if (prayerTypeResponse.error != null) {
-        setState(() {
-          isLoading = true;
-        });
-        await showCustomDialog(
-          context,
-          message: prayerTypeResponse.error!,
-          dialogType: DialogType.error,
-        );
+        if (mounted) {
+          await showCustomDialog(
+            context,
+            message: prayerTypeResponse.error!,
+            dialogType: DialogType.error,
+          );
+        }
         return;
       }
 
@@ -243,31 +637,21 @@ class _PrayerScreenState extends State<PrayerScreen> {
                 (type) => ModelData(label: type.name, value: type.id))
             .toList();
       });
-      setState(() {
-        isLoading = false;
-      });
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      await showCustomDialog(
-        context,
-        message: e.toString(),
-        dialogType: DialogType.error,
-      );
+      if (mounted) {
+        await showCustomDialog(
+          context,
+          message: e.toString(),
+          dialogType: DialogType.error,
+        );
+      }
     } finally {
-
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
-
-
-
-
-
-
-    
   }
 
   Future<void> funcIsPrayerGroup() async {
@@ -275,56 +659,25 @@ class _PrayerScreenState extends State<PrayerScreen> {
     final userId = userProvider.currentUser?.userId ?? '';
     if (userId.isEmpty) {
       isPrayerGroup = false;
-    }
-    final response = await isMemberPrayerGroup(userId);
-    if (response.error != null) {
-      await showCustomDialog(
-        context,
-        message: response.error!,
-        dialogType: DialogType.error,
-      );
       return;
     }
+
+    final response = await isMemberPrayerGroup(userId);
+    if (response.error != null) {
+      if (mounted) {
+        await showCustomDialog(
+          context,
+          message: response.error!,
+          dialogType: DialogType.error,
+        );
+      }
+      return;
+    }
+
     setState(() {
       isPrayerGroup = response.data['successful'];
       groupId = response.data['id'];
     });
-  }
-
-  Widget _buildPrayerStart(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ButtonThemeWidget(
-            text: "Tomar Pedidos de oración",
-            width: 264.sp,
-            height: 52.sp,
-            buttonStyle: StylesApp(context).btnWidgetSmall,
-            textCenter: true,
-            onPressed: () {
-              Navigator.pushNamed(context, "/takePrayerPage", arguments: {
-                "groupId": groupId,
-              });
-            },
-          ),
-          SizedBox(height: 10.sp),
-          ButtonThemeWidget(
-            text: "Hacer Pedido de Oración",
-            width: 264.sp,
-            height: 52.sp,
-            buttonStyle: StylesApp(context).btnWidgetSmall,
-            textCenter: true,
-            onPressed: () {
-              setState(() {
-                showRequestPrayer = true;
-              });
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   goToRequest(type) {
@@ -344,6 +697,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
       StyleColor.starlightBlue,
       StyleColor.twilightBlue,
     ];
-    return color[position];
+    return color[position % color.length];
   }
 }

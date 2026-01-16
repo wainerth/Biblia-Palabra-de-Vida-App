@@ -183,6 +183,7 @@ Future<ResponseData> loginGoogle() async {
 // Mutation Register User
 Future<ResponseData> register(SignupInput dataToRegister) async {
   final GraphQLClient client = createClient();
+  final timezone = await getDeviceTimeZone();
   operationName = 'RegisterUser';
   final MutationOptions mutateGql = MutationOptions(
       operationName: operationName,
@@ -217,7 +218,8 @@ Future<ResponseData> register(SignupInput dataToRegister) async {
           "countryId": dataToRegister.countryId,
           "cityId": dataToRegister.city,
           "identifier": dataToRegister.identifier,
-          "isBaptized": dataToRegister.isBaptized
+          "isBaptized": dataToRegister.isBaptized,
+          "timezone":timezone
         },
       },
       fetchPolicy: FetchPolicy.noCache);
@@ -489,9 +491,9 @@ Future resetPassword(email, password) async {
 
 Future logout() async {
   final GoogleSignIn googleSignIn = GoogleSignIn();
-  if (googleSignIn != null) {
+  // if (googleSignIn != null) {
     await googleSignIn.signOut();
-  }
+  // }
   final deviceInfo = await PreferencesManager().getDeviceInfo();
   final String token = await PreferencesManager().getUserToken() ?? '';
   String userId = await PreferencesManager().getUserId();

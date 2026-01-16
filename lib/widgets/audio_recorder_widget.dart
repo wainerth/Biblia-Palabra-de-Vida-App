@@ -489,7 +489,7 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget>
                           ),
                           borderRadius: BorderRadius.circular(100)),
                       child: IconButton(
-                        iconSize: 35.sp,
+                        iconSize: 30.sp,
                         onPressed: startRecording,
                         icon: Icon(
                           Icons.mic,

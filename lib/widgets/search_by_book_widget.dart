@@ -148,7 +148,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           });
         }
       } catch (e) {
-        if(!mounted) return;
+        if (!mounted) return;
         await showCustomDialog(context,
             message: 'Error al cargar los datos: $e',
             dialogType: DialogType.error);
@@ -592,9 +592,10 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         }
       }
     } catch (e) {
-      print('Error loading verses: $e');
       if (mounted) {
-        setState(() => verses = []);
+        if (mounted) {
+          setState(() => verses = []);
+        }
       }
     } finally {
       if (mounted) {

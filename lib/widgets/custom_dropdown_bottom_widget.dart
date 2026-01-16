@@ -2,6 +2,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/material.dart';
 
 class CustomDropdownBottomWidget<T> extends StatefulWidget {
   final List<ModelData> items;
@@ -10,6 +11,7 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
   final String hintText;
   final bool border;
   final EdgeInsetsGeometry? contentPadding;
+  final Widget? leadingIcon;
 
   const CustomDropdownBottomWidget({
     super.key,
@@ -20,6 +22,7 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
     this.border = true,
     this.contentPadding =
         const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+    this.leadingIcon,
   });
 
   @override
@@ -32,15 +35,31 @@ class _CustomDropdownBottomWidgetState<T>
   final FocusNode _focusNode = FocusNode();
   final Color disabledColor = Colors.grey[400]!;
   String _searchText = '';
+  TextEditingController? _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
 
   @override
   void dispose() {
+    _focusNode.dispose();
+    _searchController?.dispose();
     super.dispose();
   }
 
-  cleanSearch() {
+  void cleanSearch() {
     setState(() {
       _searchText = '';
+      _searchController?.clear();
+    });
+  }
+
+  void _updateSearchText(String value) {
+    setState(() {
+      _searchText = value;
     });
   }
 
@@ -62,6 +81,10 @@ class _CustomDropdownBottomWidgetState<T>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              if (widget.leadingIcon != null) ...[
+                widget.leadingIcon!,
+                const SizedBox(width: 8),
+              ],
               Expanded(
                 child: Text(
                   widget.selectedItem?.label ?? widget.hintText,
@@ -87,6 +110,9 @@ class _CustomDropdownBottomWidgetState<T>
 
   void _showBottomSheet() {
     FocusScope.of(context).unfocus();
+    // Sincronizar el controlador con el texto actual
+    _searchController?.text = _searchText;
+    
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -97,52 +123,52 @@ class _CustomDropdownBottomWidgetState<T>
   }
 
   Widget _buildBottomSheetContent() {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return SingleChildScrollView(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8.0),
+            child: TextFormField(
+              controller: _searchController,
+              style: StylesApp(context).textStyleSmallBlack,
+              decoration:
+                  StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                        hintText: 'Buscar...',
+                        hintStyle: StylesApp(context).textStyleBody14.copyWith(
+                              color: StyleColor.grayMedium,
+                            ),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: _searchController?.text.isNotEmpty == true
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  // Limpiar el controlador y el estado
+                                  _searchController?.clear();
+                                  _updateSearchText('');
+                                  // Forzar rebuild del modal
+                                  if (context.mounted) {
+                                    (context as Element).markNeedsBuild();
+                                  }
+                                },
+                              )
+                            : null,
+                      ),
+              onChanged: (value) {
+                _updateSearchText(value);
+              },
+            ),
           ),
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8.0),
-                child: TextFormField(
-                  style: StylesApp(context).textStyleSmallBlack,
-                  decoration:
-                      StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                            hintText: 'Buscar...',
-                            border: const OutlineInputBorder(),
-                            suffixIcon: _searchText.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () {
-                                      setState(() {
-                                        _searchText = '';
-                                      });
-                                    },
-                                  )
-                                : null,
-                          ),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchText = value;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildFilteredList(),
-            ],
-          ),
-        );
-      },
+          const SizedBox(height: 10),
+          _buildFilteredList(),
+        ],
+      ),
     );
   }
 
-  // Widget para construir la lista filtrada
   Widget _buildFilteredList() {
     List<ModelData> filteredItems = widget.items
         .where((item) =>
@@ -152,16 +178,18 @@ class _CustomDropdownBottomWidgetState<T>
     return SizedBox(
       height: MediaQuery.sizeOf(context).height * 0.4,
       child: ListView.builder(
-        shrinkWrap:
-            true, // Importante para que el ListView no intente expandirse infinitamente
+        shrinkWrap: true,
         itemCount: filteredItems.length,
         itemBuilder: (context, index) {
           final item = filteredItems[index];
           return ListTile(
+            leading: widget.leadingIcon,
             title: Center(child: Text(item.label)),
+            titleTextStyle:
+                StylesApp(context).textStyleBody14.copyWith(color: StyleColor.black),
             onTap: () {
               widget.onChanged(item);
-              cleanSearch();
+              cleanSearch(); // Esto ahora limpia ambos: controlador y estado
               Navigator.pop(context);
             },
           );

@@ -36,6 +36,12 @@ class _ReddleScreenState extends State<ReddleScreen> {
   int failedAttempts = 3;
   late AudioService _audioService;
 
+  // Función para determinar si es tablet
+  bool get isTablet {
+    final width = MediaQuery.of(context).size.width;
+    return width >= 600;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -49,12 +55,14 @@ class _ReddleScreenState extends State<ReddleScreen> {
           await getAllGuessCharacters(null, null, difficulty, null);
       if (guessResponse.error != null) {
         LoadingService().hideLoading();
-        await showCustomDialogWithAction(context,
-            message: guessResponse.error!,
-            dialogType: DialogTypeAction.error,
-            buttonOk: "Ok", actionCallbackOk: () {
-          Navigator.pop(context);
-        });
+        if (mounted) {
+          await showCustomDialogWithAction(context,
+              message: guessResponse.error!,
+              dialogType: DialogTypeAction.error,
+              buttonOk: "Ok", actionCallbackOk: () {
+            Navigator.pop(context);
+          });
+        }
         setState(() {
           difficulty = '';
         });
@@ -73,12 +81,14 @@ class _ReddleScreenState extends State<ReddleScreen> {
         });
       } else {
         LoadingService().hideLoading();
-        await showCustomDialogWithAction(context,
-            message: "No hay personajes disponibles para esta dificultad",
-            dialogType: DialogTypeAction.info,
-            buttonOk: "Ok", actionCallbackOk: () {
-          Navigator.pop(context);
-        });
+        if (mounted) {
+          await showCustomDialogWithAction(context,
+              message: "No hay personajes disponibles para esta dificultad",
+              dialogType: DialogTypeAction.info,
+              buttonOk: "Ok", actionCallbackOk: () {
+            Navigator.pop(context);
+          });
+        }
         setState(() {
           difficulty = '';
         });
@@ -86,12 +96,15 @@ class _ReddleScreenState extends State<ReddleScreen> {
       }
     } catch (e) {
       LoadingService().hideLoading();
+        if (mounted) {
+
       await showCustomDialogWithAction(context,
           message: e.toString(),
           dialogType: DialogTypeAction.error,
           buttonOk: "Ok", actionCallbackOk: () {
         Navigator.pop(context);
       });
+        }
       setState(() {
         difficulty = '';
       });
@@ -178,139 +191,501 @@ class _ReddleScreenState extends State<ReddleScreen> {
   }
 
   Widget _buildSelectedDifficulty() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        GestureDetector(
-          onTap: () async {
-            setState(() {
-              difficulty = "F";
-            });
-            await loadCharacters();
-          },
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(12.0),
-            constraints: BoxConstraints(minHeight: 80),
-            decoration: BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(
-                  color: StyleColor.cosmicBlue,
-                  strokeAlign: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                      color: StyleColor.black.withValues(alpha: 0.25))
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(Icons.face_2_rounded),
-                Text(
-                  "Fácil",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: StyleColor.black),
-                ),
-              ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: isTablet ? 500 : double.infinity,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: isTablet ? 20.0 : 0),
+            Text(
+              "Selecciona la dificultad",
+              style: isTablet
+                  ? StylesApp(context).textStyleBody24.copyWith(
+                        color: StyleColor.black,
+                        fontWeight: FontWeight.bold,
+                      )
+                  : StylesApp(context).textStyleBody20.copyWith(
+                        color: StyleColor.black,
+                      ),
+              textAlign: TextAlign.center,
             ),
-          ),
+            SizedBox(height: isTablet ? 40.0 : 20.0),
+            _buildDifficultyButton("Fácil", Icons.face_2_rounded),
+            SizedBox(height: isTablet ? 24.0 : 15),
+            _buildDifficultyButton("Medio", Icons.face_2_rounded),
+            SizedBox(height: isTablet ? 24.0 : 15),
+            _buildDifficultyButton("Difícil", Icons.face_2_rounded),
+            SizedBox(height: isTablet ? 40.0 : 15),
+          ],
         ),
-        SizedBox(
-          height: 15,
-        ),
-        GestureDetector(
-          onTap: () async {
-            setState(() {
-              difficulty = "I";
-            });
-            await loadCharacters();
-          },
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(12.0),
-            constraints: BoxConstraints(minHeight: 80),
-            decoration: BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(
-                  color: StyleColor.cosmicBlue,
-                  strokeAlign: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                      color: StyleColor.black.withValues(alpha: 0.25))
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(Icons.face_2_rounded),
-                Text(
-                  "Medio",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: StyleColor.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 15,
-        ),
-        GestureDetector(
-          onTap: () async {
-            setState(() {
-              difficulty = "D";
-            });
-            await loadCharacters();
-          },
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(12.0),
-            constraints: BoxConstraints(minHeight: 80),
-            decoration: BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(
-                  color: StyleColor.cosmicBlue,
-                  strokeAlign: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                      color: StyleColor.black.withValues(alpha: 0.25))
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(Icons.face_2_rounded),
-                Text(
-                  "Difícil",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: StyleColor.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 15,
-        ),
-      ],
+      ),
     );
   }
 
+  Widget _buildDifficultyButton(String level, IconData icon) {
+    return GestureDetector(
+      onTap: () => _selectDifficulty(_getDifficultyCharacter(level)),
+      child: Container(
+        padding: EdgeInsets.all(isTablet ? 16.0 : 8.0),
+        margin: EdgeInsets.symmetric(
+          horizontal: isTablet ? 60.0 : 12.0,
+          vertical: isTablet ? 8.0 : 0,
+        ),
+        constraints: BoxConstraints(
+          minHeight: isTablet ? 100 : 80,
+          minWidth: isTablet ? 300 : double.infinity,
+        ),
+        decoration: BoxDecoration(
+          color: StyleColor.white,
+          border: Border.all(
+            color: StyleColor.cosmicBlue,
+            strokeAlign: 0.5,
+            width: isTablet ? 2.0 : 1.0,
+          ),
+          borderRadius: BorderRadius.circular(isTablet ? 16.0 : 8.0),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: isTablet ? 16 : 12,
+              offset: Offset(0, isTablet ? 6 : 4),
+              color: StyleColor.black.withValues(alpha: isTablet ? 0.2 : 0.25),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: isTablet ? 32 : 24,
+              color: _getDifficultyColor(level),
+            ),
+            SizedBox(width: isTablet ? 20.0 : 12.0),
+            Text(
+              level,
+              style: isTablet
+                  ? StylesApp(context).textStyleBody24.copyWith(
+                        color: _getDifficultyColor(level),
+                        fontWeight: FontWeight.w600,
+                      )
+                  : StylesApp(context).textStyleBody20.copyWith(
+                        color: StyleColor.black,
+                      ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDifficulty(String level) async {
+    if (!mounted) return;
+    setState(() {
+      difficulty = level;
+    });
+    await loadCharacters();
+  }
+
   Widget _buildPlayScene() {
-    return SingleChildScrollView(
+    return isTablet ? _buildSceneTablet() : _buildSceneMobile();
+  }
+
+  _buildSceneTablet() {
+    return Container(
+      padding: EdgeInsets.all(0),
+      child: Column(
+        children: [
+          // Header con oportunidades
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+            margin: EdgeInsets.only(bottom: 20.0),
+            decoration: BoxDecoration(
+              color: StyleColor.cosmicBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Adivinanza Bíblica",
+                      style: StylesApp(context).textStyleBody20.copyWith(
+                            color: StyleColor.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    Text(
+                      "Dificultad: $difficulty",
+                      style: StylesApp(context)
+                          .textStyleBody14
+                          .copyWith(color: StyleColor.grayDark),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Oportunidades",
+                      style: StylesApp(context)
+                          .textStyleBody14
+                          .copyWith(color: StyleColor.grayDark),
+                    ),
+                    Row(
+                      children: [
+                        Image.asset(
+                          failedAttempts > 2
+                              ? "assets/fire_rachaActive.png"
+                              : "assets/fire_rachaInactive.png",
+                          width: 24,
+                        ),
+                        SizedBox(width: 4),
+                        Image.asset(
+                          failedAttempts > 1
+                              ? "assets/fire_rachaActive.png"
+                              : "assets/fire_rachaInactive.png",
+                          width: 24,
+                        ),
+                        SizedBox(width: 4),
+                        Image.asset(
+                          failedAttempts > 0
+                              ? "assets/fire_rachaActive.png"
+                              : "assets/fire_rachaInactive.png",
+                          width: 24,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Contenedor principal con dos columnas
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // COLUMNA IZQUIERDA: Imagen y entrada de texto
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: EdgeInsets.all(20.0),
+                    margin: EdgeInsets.only(right: 12.0),
+                    decoration: BoxDecoration(
+                      color: StyleColor.white,
+                      borderRadius: BorderRadius.circular(16.0),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 16,
+                          offset: Offset(0, 6),
+                          color: StyleColor.black.withValues(alpha: 0.1),
+                        ),
+                      ],
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Progreso
+                          Container(
+                            padding: EdgeInsets.all(12.0),
+                            margin: EdgeInsets.only(bottom: 16.0),
+                            decoration: BoxDecoration(
+                              color: StyleColor.turquoise.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Progreso: ",
+                                  style: StylesApp(context)
+                                      .textStyleBody15
+                                      .copyWith(
+                                        color: StyleColor.black,
+                                      ),
+                                ),
+                                Text(
+                                  personajes.isNotEmpty
+                                      ? "${personajes.indexOf(personajeActual!) + 1}/${personajes.length}"
+                                      : "0/0",
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        color: StyleColor.turquoise,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Imagen del personaje
+                          Container(
+                            width: 220,
+                            height: 220,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: mostrarImagen && personajeActual != null
+                                  ? StyleColor.white
+                                  : Colors.grey[400],
+                              boxShadow: [
+                                BoxShadow(
+                                  offset: Offset(0, 6),
+                                  color:
+                                      StyleColor.black.withValues(alpha: 0.25),
+                                  blurRadius: 16,
+                                )
+                              ],
+                            ),
+                            child: Center(
+                              child: mostrarImagen && personajeActual != null
+                                  ? Image.network(
+                                      "${GraphQLConfig.urlServidor}${personajeActual!.character.img.urlImg}",
+                                      fit: BoxFit.contain,
+                                    )
+                                  : Icon(
+                                      Icons.question_mark_sharp,
+                                      size: 120,
+                                      color: StyleColor.grayMedium,
+                                    ),
+                            ),
+                          ),
+
+                          SizedBox(height: 24),
+
+                          // Título y pregunta
+                          Text(
+                            '¿Quién es este personaje?',
+                            style: StylesApp(context).textStyleBody20.copyWith(
+                                  color: StyleColor.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+
+                          SizedBox(height: 16),
+
+                          // Campo de texto para respuesta
+                          TextFormField(
+                            controller: nameCharacter,
+                            focusNode: _focusNode,
+                            textInputAction: TextInputAction.done,
+                            onTapOutside: (event) {
+                              _focusNode.unfocus();
+                            },
+                            decoration: StylesApp(context)
+                                .inputDecorationOutlineStyle
+                                .copyWith(
+                                  hintText: "Ingrese el nombre del personaje",
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: EdgeInsets.all(16.0),
+                                ),
+                            style: StylesApp(context)
+                                .textStyleBody14
+                                .copyWith(color: StyleColor.black),
+                          ),
+
+                          SizedBox(height: 20),
+
+                          // Botón de verificar
+                          ButtonThemeWidget(
+                            text: "Verificar Respuesta",
+                            width: double.infinity,
+                            height: 50,
+                            buttonStyle: StylesApp(context)
+                                .btnWidgetSmall
+                                .copyWith(
+                                  backgroundColor: WidgetStatePropertyAll(
+                                    nameCharacter.text.isEmpty
+                                        ? StyleColor.grayMedium.withValues(alpha: 0.5)
+                                        : StyleColor.turquoise,
+                                  ),
+                                ),
+                            disabled: nameCharacter.text.isEmpty,
+                            onPressed: nameCharacter.text.isEmpty
+                                ? null
+                                : () {
+                                    _verificarRespuesta(
+                                        nameCharacter.text.trim());
+                                  },
+                          ),
+
+                          // Feedback de respuesta
+                          if (respuestaSeleccionada != null && mostrarImagen)
+                            Container(
+                              margin: EdgeInsets.only(top: 20),
+                              padding: EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                color: respuestaCorrecta
+                                    ? StyleColor.greenDark.withValues(alpha: 0.1)
+                                    : StyleColor.redDark.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12.0),
+                                border: Border.all(
+                                  color: respuestaCorrecta
+                                      ? StyleColor.greenDark
+                                      : StyleColor.redDark,
+                                  width: 2.0,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    respuestaCorrecta
+                                        ? Icons.check_circle
+                                        : Icons.cancel,
+                                    color: respuestaCorrecta
+                                        ? StyleColor.greenDark
+                                        : StyleColor.redDark,
+                                    size: 24,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Flexible(
+                                    child: Text(
+                                      respuestaCorrecta
+                                          ? '¡Correcto!'
+                                          : 'Incorrecto, era ${personajeActual?.character.name}',
+                                      style: StylesApp(context)
+                                          .textStyleBody16
+                                          .copyWith(
+                                            color: _getColorText(),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // COLUMNA DERECHA: Pistas
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    padding: EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: StyleColor.white,
+                      borderRadius: BorderRadius.circular(16.0),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 16,
+                          offset: Offset(0, 6),
+                          color: StyleColor.black.withValues(alpha: 0.1),
+                        ),
+                      ],
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Header de pistas
+                          Container(
+                            padding: EdgeInsets.all(16.0),
+                            margin: EdgeInsets.only(bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: StyleColor.orange.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(
+                                color: StyleColor.orange,
+                                width: 2.0,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.lightbulb,
+                                  color: StyleColor.orange,
+                                  size: 28,
+                                ),
+                                SizedBox(width: 12),
+                                Text(
+                                  "Pistas del Personaje",
+                                  style: StylesApp(context)
+                                      .textStyleBody28
+                                      .copyWith(
+                                        color: StyleColor.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Lista de pistas con altura fija
+                          Column(
+                            children: _buildOpcionesTablet(personajes.isNotEmpty
+                                ? personajes.first
+                                : null),
+                          ),
+
+                          SizedBox(height: 20),
+
+                          // Información adicional
+                          Container(
+                            padding: EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: StyleColor.blueLight.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Instrucciones:",
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        color: StyleColor.black,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  "1. Observa las pistas cuidadosamente\n"
+                                  "2. Escribe el nombre del personaje\n"
+                                  "3. Tienes 3 oportunidades\n"
+                                  "4. ¡Diviértete aprendiendo!",
+                                  style: StylesApp(context)
+                                      .textStyleBody14
+                                      .copyWith(
+                                        color: StyleColor.grayDark,
+                                        height: 1.5,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  _buildSceneMobile() {
+    SingleChildScrollView(
       child: Stack(children: [
         Positioned(
           top: 0,
@@ -450,6 +825,71 @@ class _ReddleScreenState extends State<ReddleScreen> {
     );
   }
 
+// Versión mejorada de pistas para tablet
+  List<Widget> _buildOpcionesTablet(GuessCharacter? personaje) {
+    if (personaje == null) {
+      return [
+        Container(
+          padding: EdgeInsets.all(24.0),
+          child: Center(
+            child: Text(
+              "Cargando pistas...",
+              style: StylesApp(context).textStyleBody16,
+            ),
+          ),
+        ),
+      ];
+    }
+
+    final opciones = personaje.clues;
+    return opciones.map((opcion) {
+      return Container(
+        padding: EdgeInsets.all(16.0),
+        margin: EdgeInsets.only(bottom: 12.0),
+        decoration: BoxDecoration(
+          color: StyleColor.cosmicBlue.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: StyleColor.cosmicBlue,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: StyleColor.cosmicBlue,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  "${opciones.indexOf(opcion) + 1}",
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                opcion.description,
+                style: StylesApp(context).textStyleBody14.copyWith(
+                      color: StyleColor.black,
+                      height: 1.5,
+                    ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }).toList();
+  }
+
   List<Widget> _buildOpciones(GuessCharacter personaje) {
     final opciones = personaje.clues;
     print(personaje.character.name);
@@ -494,8 +934,15 @@ class _ReddleScreenState extends State<ReddleScreen> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('¡Oportunidades Agotadas!'),
-        content: const Text(
-            'Haz Fallado Los Intentos Permitidos. ¿Quieres intentarlo de nuevo?'),
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isTablet ? 500 : double.infinity,
+            maxHeight:
+                isTablet ? 450 : MediaQuery.of(context).size.height * 0.5,
+          ),
+          child: const Text(
+              'Haz Fallado Los Intentos Permitidos. ¿Quieres intentarlo de nuevo?'),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -533,17 +980,19 @@ class _ReddleScreenState extends State<ReddleScreen> {
           await saveResultPlay(userData!.userId, tipo, 'adivinanza');
       if (responseSaveResult.error != null) {
         LoadingService().hideLoading();
-        await showCustomDialogWithAction(context,
-            message: responseSaveResult.error!,
-            dialogType: DialogTypeAction.error,
-            buttonOk: "Volver",
-            actionCallbackOk: () {
-              Navigator.pop(context);
-            },
-            textButton: "Reintentar",
-            actionCallback: () {
-              _showDialogFinallyPlay();
-            });
+        if (mounted) {
+          await showCustomDialogWithAction(context,
+              message: responseSaveResult.error!,
+              dialogType: DialogTypeAction.error,
+              buttonOk: "Volver",
+              actionCallbackOk: () {
+                Navigator.pop(context);
+              },
+              textButton: "Reintentar",
+              actionCallback: () {
+                _showDialogFinallyPlay();
+              });
+        }
         return;
       }
 
@@ -551,8 +1000,74 @@ class _ReddleScreenState extends State<ReddleScreen> {
           await getAllResultGame(userData.userId, 'adivinanza');
       if (responseResult.error != null) {
         LoadingService().hideLoading();
+        if (mounted) {
+          await showCustomDialogWithAction(context,
+              message: responseSaveResult.error!,
+              dialogType: DialogTypeAction.error,
+              buttonOk: "Volver",
+              actionCallbackOk: () {
+                Navigator.pop(context);
+              },
+              textButton: "Reintentar",
+              actionCallback: () {
+                _showDialogFinallyPlay();
+              });
+        }
+        return;
+      }
+      LoadingService().hideLoading();
+      final ResultGameModel infoResult =
+          ResultGameModel.fromJson(responseResult.data);
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("${infoResult.message.resultTitle}"),
+            content: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: isTablet ? 500 : double.infinity,
+                maxHeight:
+                    isTablet ? 450 : MediaQuery.of(context).size.height * 0.5,
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    "${infoResult.message.resultDescription}",
+                    style: StylesApp(context)
+                        .textStyleBody16
+                        .copyWith(color: StyleColor.black),
+                  ),
+                  Text(
+                      "Categoría:  ${infoResult.message.category} Dificultad: ${infoResult.message.difficulty}"),
+                  Text("Puntaje obtenido:  ${infoResult.score}")
+                ],
+              ),
+            ),
+            actions: [
+              ButtonThemeWidget(
+                text: "Jugar de nuevo",
+                buttonStyle: StylesApp(context).btnWidgetSmall,
+                onPressed: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    difficulty = '';
+                    personajes = [];
+                    personajeActual = null;
+                    failedAttempts = 3;
+                    mostrarImagen = false;
+                    respuestaSeleccionada = '';
+                  });
+                },
+              )
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      LoadingService().hideLoading();
+      if (mounted) {
         await showCustomDialogWithAction(context,
-            message: responseSaveResult.error!,
+            message: e.toString(),
             dialogType: DialogTypeAction.error,
             buttonOk: "Volver",
             actionCallbackOk: () {
@@ -562,61 +1077,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
             actionCallback: () {
               _showDialogFinallyPlay();
             });
-        return;
       }
-      LoadingService().hideLoading();
-
-      final ResultGameModel infoResult =
-          ResultGameModel.fromJson(responseResult.data);
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("${infoResult.message.resultTitle}"),
-          content: Column(
-            children: [
-              Text(
-                "${infoResult.message.resultDescription}",
-                style: StylesApp(context)
-                    .textStyleBody16
-                    .copyWith(color: StyleColor.black),
-              ),
-              Text(
-                  "Categoría:  ${infoResult.message.category} Dificultad: ${infoResult.message.difficulty}"),
-              Text("Puntaje obtenido:  ${infoResult.score}")
-            ],
-          ),
-          actions: [
-            ButtonThemeWidget(
-              text: "Jugar de nuevo",
-              buttonStyle: StylesApp(context).btnWidgetSmall,
-              onPressed: () {
-                Navigator.pop(context);
-                setState(() {
-                  difficulty = '';
-                  personajes = [];
-                  personajeActual = null;
-                  failedAttempts = 3;
-                  mostrarImagen = false;
-                  respuestaSeleccionada = '';
-                });
-              },
-            )
-          ],
-        ),
-      );
-    } catch (e) {
-      LoadingService().hideLoading();
-      await showCustomDialogWithAction(context,
-          message: e.toString(),
-          dialogType: DialogTypeAction.error,
-          buttonOk: "Volver",
-          actionCallbackOk: () {
-            Navigator.pop(context);
-          },
-          textButton: "Reintentar",
-          actionCallback: () {
-            _showDialogFinallyPlay();
-          });
     } finally {
       LoadingService().hideLoading();
     }
@@ -629,5 +1090,31 @@ class _ReddleScreenState extends State<ReddleScreen> {
       respuestaSeleccionada = '';
       personajeActual = personajes[personajes.indexOf(personajeActual!) + 1];
     });
+  }
+
+  Color _getDifficultyColor(String level) {
+    switch (level) {
+      case "Fácil":
+        return StyleColor.greenDark;
+      case "Medio":
+        return StyleColor.orange;
+      case "Difícil":
+        return StyleColor.redDark;
+      default:
+        return StyleColor.black;
+    }
+  }
+
+  String _getDifficultyCharacter(String level) {
+    switch (level) {
+      case "Fácil":
+        return 'F';
+      case "Medio":
+        return 'I';
+      case "Difícil":
+        return 'D';
+      default:
+        return 'F';
+    }
   }
 }

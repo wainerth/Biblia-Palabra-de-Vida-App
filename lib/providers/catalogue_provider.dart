@@ -84,8 +84,8 @@ class CatalogueProvider extends ChangeNotifier {
     _serviceStatus = {}; // Map para tracker estado de cada servicio
 
     // Cargar servicios críticos primero (países y códigos de área)
-    await _loadWithRetry('Countries', _loadAllCountriesWithIsolates, retries: 3);
-    await _loadWithRetry('AreaCodes', _loadAreasCodeWithIsolates, retries: 3);
+    // await _loadWithRetry('Countries', _loadAllCountriesWithIsolates, retries: 3);
+    // await _loadWithRetry('AreaCodes', _loadAreasCodeWithIsolates, retries: 3);
 
     // Cargar servicios no críticos en paralelo
     await Future.wait([

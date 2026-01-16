@@ -2,7 +2,6 @@ import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/models/notification_model.dart';
 import 'package:biblia_palabra_de_vida_app/providers/socket_client_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -20,9 +19,10 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   List<NotificationModel> notifications = [];
   Map<String, List<NotificationModel>> groupedNotifications = {};
-  List<String> sortedDateKeys = []; // ✅ Cambiado a List<String>
+  List<String> sortedDateKeys = [];
   String error = '';
   bool loading = false;
+  NotificationModel? selectedNotification;
 
   @override
   void initState() {
@@ -34,115 +34,924 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton.filled(
-          style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(StyleColor.orange),
-              foregroundColor: WidgetStatePropertyAll(StyleColor.white)),
-          padding: EdgeInsets.all(0),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          splashColor: StyleColor.orange,
-          color: StyleColor.white,
-          icon: Icon(
-            Icons.arrow_back,
-            size: 30,
-          ),
-        ),
-        title: Text("Notificaciones"),
-        titleTextStyle: StylesApp(context)
-            .textStyleBody20
-            .copyWith(color: StyleColor.white),
-        backgroundColor: StyleColor.turquoise,
-      ),
+      appBar:
+          isTablet ? _buildTabletAppBar(context) : _buildMobileAppBar(context),
       body: SafeArea(
-        child: RefreshIndicator(
-          color: Colors.blue,
-          backgroundColor: Colors.white,
-          displacement: 40,
-          onRefresh: () => loadAllNotifications(),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                right: 0,
-                child: TextButton(
-                  // style: StylesApp(context).btnWidgetSmall,
-                  onPressed: () async {
-                    String userId = await PreferencesManager().getUserId();
-                    setState(() => loading = true);
-                    final ResponseData responseMarkedAllRead =
-                        await markAllAsReadNotifications(userId);
-                    if (responseMarkedAllRead.error != null) {
-                      setState(() => loading = false);
-                      await showCustomDialog(context,
-                          message: responseMarkedAllRead.error!,
-                          dialogType: DialogType.error);
-                      return;
-                    }
-                    await loadAllNotifications();
-                  },
-                  child: Row(
-                    spacing: 4.0,
-                    children: [
-                      Text("Leer Todas"),
-                      Icon(
-                        Icons.checklist_outlined,
-                        color: StyleColor.turquoise,
-                      )
-                    ],
-                  ),
+        child: isTablet
+            ? _buildTabletLayout(context)
+            : _buildMobileLayout(context),
+      ),
+    );
+  }
+
+  // APPBAR PARA TABLET
+  AppBar _buildTabletAppBar(BuildContext context) {
+    return AppBar(
+      toolbarHeight: 100,
+      centerTitle: false,
+       leadingWidth: 45, // ← CRUCIAL
+  leading: Padding(
+    padding: const EdgeInsets.only(left: 10),
+    child: SizedBox(
+      width: 40,
+      height: 40,
+      child: IconButton(
+        style: IconButton.styleFrom(
+          backgroundColor: StyleColor.orange,
+          foregroundColor: StyleColor.white,
+          shape: const CircleBorder(),
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(35, 35),
+          fixedSize: const Size(35, 35),
+          iconSize: 20,
+        ),
+        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.arrow_back),
+      ),
+    ),
+  ),
+      backgroundColor: StyleColor.turquoise,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            "Notificaciones",
+            style: StylesApp(context).textStyleTitleOrange.copyWith(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+          ),
+          SizedBox(height: 4),
+          if (notifications.isNotEmpty)
+            Text(
+              "${notifications.length} notificaciones",
+              style: StylesApp(context).textStyleBody14.copyWith(
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: loading
-                        ? Center(child: LoadingIndicator())
-                        : error.isNotEmpty
-                            ? Center(
-                                child: BuildErrorWidget(
-                                  errorMessage: error,
-                                  onRetry: () async => loadAllNotifications(),
-                                  onBack: () => Navigator.pop(context),
-                                ),
-                              )
-                            : notifications.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      "No tienes notificaciones.",
-                                      style: StylesApp(context)
-                                          .textStyleBody7
-                                          .copyWith(color: StyleColor.black),
-                                    ),
-                                  )
-                                : _buildNotificationList(),
+            ),
+        ],
+      ),
+      actions: [
+        if (notifications.isNotEmpty && notifications.any((n) => !n.isRead))
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0),
+            child: TextButton(
+              onPressed: () async {
+                await _markAllAsRead();
+              },
+              child: Row(
+                children: [
+                  Text(
+                    "Marcar todas como leídas",
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(
+                    Icons.checklist_outlined,
+                    color: Colors.white,
+                    size: 24,
                   ),
                 ],
               ),
-            ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  // APPBAR PARA MÓVIL (original)
+  AppBar _buildMobileAppBar(BuildContext context) {
+    return AppBar(
+      centerTitle: true,
+      leading: IconButton.filled(
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(StyleColor.orange),
+          foregroundColor: WidgetStatePropertyAll(StyleColor.white),
+        ),
+        padding: EdgeInsets.all(0),
+        onPressed: () => Navigator.pop(context),
+        splashColor: StyleColor.orange,
+        color: StyleColor.white,
+        icon: Icon(Icons.arrow_back, size: 30),
+      ),
+      title: Text(
+        "Notificaciones",
+        style: StylesApp(context)
+            .textStyleBody20
+            .copyWith(color: StyleColor.white, fontSize: 20.0),
+      ),
+      backgroundColor: StyleColor.turquoise,
+    );
+  }
+
+  // DISEÑO PARA TABLET A DOS COLUMNAS
+  Widget _buildTabletLayout(BuildContext context) {
+    return Container(
+      color: Color(0xFFF5F5F5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // COLUMNA IZQUIERDA - Lista de notificaciones
+          Expanded(
+            flex: 4,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: Offset(0, 0),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  // Estadísticas
+                  if (!loading && error.isEmpty && notifications.isNotEmpty)
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: StyleColor.turquoise.withValues(alpha: 0.1),
+                        border: Border(
+                          bottom:
+                              BorderSide(color: Colors.grey[300]!, width: 1),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildStatCard(
+                            context,
+                            'Total',
+                            '${notifications.length}',
+                            Icons.notifications,
+                            StyleColor.orange,
+                          ),
+                          _buildStatCard(
+                            context,
+                            'No leídas',
+                            '${notifications.where((n) => !n.isRead).length}',
+                            Icons.notifications_active,
+                            StyleColor.blue,
+                          ),
+                          _buildStatCard(
+                            context,
+                            'Leídas',
+                            '${notifications.where((n) => n.isRead).length}',
+                            Icons.notifications_none,
+                            StyleColor.greenMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Lista de notificaciones
+                  Expanded(
+                    child: RefreshIndicator(
+                      color: StyleColor.orange,
+                      backgroundColor: Colors.white,
+                      onRefresh: () => loadAllNotifications(),
+                      child: loading
+                          ? Center(child: LoadingIndicator())
+                          : error.isNotEmpty
+                              ? Center(
+                                  child: BuildErrorWidget(
+                                    errorMessage: error,
+                                    onRetry: () async => loadAllNotifications(),
+                                    onBack: () => Navigator.pop(context),
+                                  ),
+                                )
+                              : notifications.isEmpty
+                                  ? Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.notifications_off,
+                                            size: 80,
+                                            color: Colors.grey[300],
+                                          ),
+                                          SizedBox(height: 20),
+                                          Text(
+                                            "No tienes notificaciones",
+                                            style: StylesApp(context)
+                                                .textStyleBody16
+                                                .copyWith(
+                                                    fontSize: 16.0,
+                                                    color: Colors.grey[600]),
+                                          ),
+                                          SizedBox(height: 10),
+                                          Text(
+                                            "Cuando recibas notificaciones,\naparecerán aquí",
+                                            textAlign: TextAlign.center,
+                                            style: StylesApp(context)
+                                                .textStyleBody14
+                                                .copyWith(
+                                                  fontSize: 14,
+                                                  color: Colors.grey[400],
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : _buildTabletNotificationList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // COLUMNA DERECHA - Detalle de notificación seleccionada
+          Expanded(
+            flex: 6,
+            child: Container(
+              color: Colors.white,
+              child: selectedNotification != null
+                  ? _buildNotificationDetailPanel(context)
+                  : _buildEmptyDetailPanel(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Lista de notificaciones para tablet
+  Widget _buildTabletNotificationList() {
+    return ListView.separated(
+      padding: EdgeInsets.all(20.0),
+      itemCount: sortedDateKeys.length,
+      separatorBuilder: (_, index) => SizedBox(height: 24.0),
+      itemBuilder: (context, sectionIndex) {
+        final dateKey = sortedDateKeys[sectionIndex];
+        final dateNotifications = groupedNotifications[dateKey] ?? [];
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Encabezado de fecha
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              decoration: BoxDecoration(
+                color: StyleColor.turquoise.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _getDateIcon(dateKey),
+                    color: StyleColor.orange,
+                    size: 18,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    dateKey,
+                    style: StylesApp(context).textStyleBody16.copyWith(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w700,
+                          color: StyleColor.blueDark,
+                        ),
+                  ),
+                  Spacer(),
+                  Text(
+                    '${dateNotifications.length}',
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: StyleColor.orange,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 12),
+
+            // Lista de notificaciones de esta fecha
+            ListView.separated(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: dateNotifications.length,
+              separatorBuilder: (_, __) => SizedBox(height: 12.0),
+              itemBuilder: (context, index) {
+                final notification = dateNotifications[index];
+                return _buildTabletNotificationItem(notification);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Item de notificación para tablet
+  Widget _buildTabletNotificationItem(NotificationModel notification) {
+    final DateTime notificationDate =
+        _parseNotificationDate(notification.createdAt);
+    final bool isSelected = selectedNotification == notification;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isSelected
+            ? StyleColor.turquoise.withValues(alpha: 0.2)
+            : notification.isRead
+                ? Colors.white
+                : Colors.blue[50],
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(
+          color: isSelected
+              ? StyleColor.orange
+              : notification.isRead
+                  ? Colors.grey[300]!
+                  : StyleColor.blue.withValues(alpha: 0.3),
+          width: isSelected ? 2 : 1,
+        ),
+        boxShadow: [
+          if (!notification.isRead)
+            BoxShadow(
+              color: Colors.blue.withValues(alpha: 0.1),
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () {
+            setState(() {
+              selectedNotification = notification;
+            });
+            // Marcar como leída al seleccionar
+            // if (!notification.isRead) {
+            //   _markAsRead(notification);
+            // }
+          },
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icono de estado
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: notification.isRead
+                        ? Colors.grey[300]
+                        : StyleColor.orange,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      notification.isRead
+                          ? Icons.notifications_none
+                          : Icons.notifications_active,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+
+                SizedBox(width: 12),
+
+                // Contenido
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              notification.title,
+                              style:
+                                  StylesApp(context).textStyleBody16.copyWith(
+                                        fontSize: 16.0,
+                                        color: notification.isRead
+                                            ? Colors.grey[700]
+                                            : StyleColor.blueDark,
+                                        fontWeight: notification.isRead
+                                            ? FontWeight.w500
+                                            : FontWeight.w700,
+                                      ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            _formatTime(notificationDate),
+                            style: StylesApp(context).textStyleBody12.copyWith(
+                                  fontSize: 12,
+                                  color: Colors.grey[500],
+                                ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        notification.message,
+                        style: StylesApp(context).textStyleBody14.copyWith(
+                              fontSize: 14.0,
+                              color: notification.isRead
+                                  ? Colors.grey[600]
+                                  : Colors.grey[700],
+                            ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (notification.actionLabel.isNotEmpty) ...[
+                        SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: StyleColor.orange.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              notification.actionLabel,
+                              style:
+                                  StylesApp(context).textStyleBody12.copyWith(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: StyleColor.orange,
+                                      ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  // Panel de detalle para columna derecha
+  Widget _buildNotificationDetailPanel(BuildContext context) {
+    final notification = selectedNotification!;
+    final DateTime notificationDate =
+        _parseNotificationDate(notification.createdAt);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(30),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Detalles de la Notificación",
+                style: StylesApp(context).textStyleBody24.copyWith(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: StyleColor.blueDark,
+                    ),
+              ),
+              IconButton(
+                icon: Icon(Icons.close, color: Colors.grey),
+                onPressed: () {
+                  setState(() {
+                    selectedNotification = null;
+                  });
+                },
+              ),
+            ],
+          ),
+
+          SizedBox(height: 20),
+
+          // Información principal
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: notification.isRead
+                            ? Colors.grey[300]
+                            : StyleColor.orange,
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          notification.isRead
+                              ? Icons.notifications_none
+                              : Icons.notifications_active,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            notification.title,
+                            style: StylesApp(context).textStyleBody20.copyWith(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: StyleColor.blueDark,
+                                ),
+                          ),
+                          SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(Icons.calendar_today,
+                                  size: 16, color: Colors.grey),
+                              SizedBox(width: 6),
+                              Text(
+                                '${_getDateKey(notificationDate)} a las ${_formatTime(notificationDate)}',
+                                style:
+                                    StylesApp(context).textStyleBody14.copyWith(
+                                          fontSize: 14,
+                                          color: Colors.grey[600],
+                                        ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 25),
+
+                // Mensaje completo
+                Text(
+                  "Mensaje",
+                  style: StylesApp(context).textStyleBody16.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: StyleColor.blueDark,
+                      ),
+                ),
+                SizedBox(height: 10),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    notification.message,
+                    style: StylesApp(context).textStyleBody15.copyWith(
+                          fontSize: 15,
+                          color: Colors.grey[800],
+                          height: 1.6,
+                        ),
+                  ),
+                ),
+
+                SizedBox(height: 25),
+
+                // Acción (si existe)
+                if (notification.actionLabel.isNotEmpty) ...[
+                  Text(
+                    "Acción",
+                    style: StylesApp(context).textStyleBody16.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: StyleColor.blueDark,
+                        ),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: StyleColor.orange.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          color: StyleColor.orange.withValues(alpha: 0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.open_in_new,
+                                color: StyleColor.orange, size: 20),
+                            SizedBox(width: 10),
+                            Text(
+                              notification.actionLabel,
+                              style:
+                                  StylesApp(context).textStyleBody16.copyWith(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: StyleColor.orange,
+                                      ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 15),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: () =>
+                                _handleNotificationAction(notification),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: StyleColor.orange,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 30, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "Ir a la acción",
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                ),
+                                SizedBox(width: 8),
+                                Icon(Icons.arrow_forward, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          SizedBox(height: 30),
+
+          // Botones de acción
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (!notification.isRead)
+                OutlinedButton(
+                  onPressed: () async {
+                    await _markAsRead(notification);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    side: BorderSide(color: StyleColor.greenMedium),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check,
+                          color: StyleColor.greenMedium, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        "Marcar como leída",
+                        style: StylesApp(context).textStyleBody16.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: StyleColor.greenMedium,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              SizedBox(width: 15),
+              OutlinedButton(
+                onPressed: () {
+                  setState(() {
+                    selectedNotification = null;
+                  });
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  side: BorderSide(color: Colors.grey),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.close, color: Colors.grey, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      "Cerrar",
+                      style: StylesApp(context).textStyleBody16.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Panel vacío para columna derecha
+  Widget _buildEmptyDetailPanel(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.notifications,
+            size: 80,
+            color: Colors.grey[300],
+          ),
+          SizedBox(height: 20),
+          Text(
+            'Selecciona una notificación',
+            style: StylesApp(context).textStyleBody20.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[500],
+                ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Haz clic en una notificación de la lista\npara ver sus detalles aquí',
+            textAlign: TextAlign.center,
+            style: StylesApp(context).textStyleBody15.copyWith(
+                  fontSize: 15,
+                  color: Colors.grey[400],
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Tarjeta de estadísticas
+  Widget _buildStatCard(BuildContext context, String title, String value,
+      IconData icon, Color color) {
+    return Column(
+      children: [
+        Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Center(
+            child: Icon(icon, color: color, size: 24),
+          ),
+        ),
+        SizedBox(height: 8),
+        Text(
+          value,
+          style: StylesApp(context).textStyleBody18.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: StyleColor.blueDark,
+              ),
+        ),
+        Text(
+          title,
+          style: StylesApp(context).textStyleBody12.copyWith(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+        ),
+      ],
+    );
+  }
+
+  // Icono según la fecha
+  IconData _getDateIcon(String dateKey) {
+    switch (dateKey) {
+      case 'Hoy':
+        return Icons.today;
+      case 'Ayer':
+        return Icons.history;
+      default:
+        return Icons.calendar_month;
+    }
+  }
+
+  // DISEÑO MÓVIL (se mantiene exactamente igual)
+  Widget _buildMobileLayout(BuildContext context) {
+    return RefreshIndicator(
+      color: Colors.blue,
+      backgroundColor: Colors.white,
+      displacement: 40,
+      onRefresh: () => loadAllNotifications(),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            right: 0,
+            child: TextButton(
+              onPressed: () async {
+                await _markAllAsRead();
+              },
+              child: Row(
+                spacing: 4.0,
+                children: [
+                  Text("Leer Todas"),
+                  Icon(
+                    Icons.checklist_outlined,
+                    color: StyleColor.turquoise,
+                  )
+                ],
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: loading
+                    ? Center(child: LoadingIndicator())
+                    : error.isNotEmpty
+                        ? Center(
+                            child: BuildErrorWidget(
+                              errorMessage: error,
+                              onRetry: () async => loadAllNotifications(),
+                              onBack: () => Navigator.pop(context),
+                            ),
+                          )
+                        : notifications.isEmpty
+                            ? Center(
+                                child: Text(
+                                  "No tienes notificaciones.",
+                                  style: StylesApp(context)
+                                      .textStyleBody7
+                                      .copyWith(color: StyleColor.black),
+                                ),
+                              )
+                            : _buildNotificationList(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Los métodos existentes se mantienen igual desde aquí...
   Widget _buildNotificationList() {
     return ListView.separated(
       padding: EdgeInsets.all(16.0),
@@ -252,52 +1061,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () async {
-                        final responseMarkReadNotification =
-                            await markAsReadOneNotification(notification.id!);
-
-                        if (responseMarkReadNotification.error != null) {
-                          await showCustomDialogWithAction(
-                            context,
-                            dialogType: DialogTypeAction.error,
-                            message: responseMarkReadNotification.error!,
-                            actionCallback: () {
-                              Navigator.pop(context);
-                            },
-                            buttonOk: "Ok",
-                          );
-                          return;
-                        } else {
-                          if (responseMarkReadNotification.data != null) {
-                            if (!responseMarkReadNotification.data['success']) {
-                              await showCustomDialog(
-                                context,
-                                dialogType: DialogType.error,
-                                message: responseMarkReadNotification
-                                    .data['message'],
-                              );
-                              return;
-                            }
-                          }
-                        }
-                        // Tu lógica de navegación aquí
-                          if (getRouterScreen(notification.model.toLowerCase(),
-                                    notification.variables)
-                                .arguments !=
-                            null) {
-                          Navigator.pushNamed(
-                              context,
-                              getRouterScreen(notification.model.toLowerCase(),
-                                      notification.variables)
-                                  .routeName,
-                              arguments: getRouterScreen(notification.model.toLowerCase(),
-                                      notification.variables)
-                                  .arguments);
-                        } else {
-                          Navigator.pushNamed(
-                              context,
-                              getRouterScreen(notification.model.toLowerCase(), null)
-                                  .routeName);
-                        }
+                        await _handleNotificationAction(notification);
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: StyleColor.blueDark,
@@ -319,6 +1083,80 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
+  // Métodos auxiliares para manejar notificaciones
+  Future<void> _markAllAsRead() async {
+    setState(() => loading = true);
+    String userId = await PreferencesManager().getUserId();
+    final ResponseData responseMarkedAllRead =
+        await markAllAsReadNotifications(userId);
+
+    if (responseMarkedAllRead.error != null && mounted) {
+      setState(() => loading = false);
+      await showCustomDialog(context,
+          message: responseMarkedAllRead.error!, dialogType: DialogType.error);
+      return;
+    }
+
+    await loadAllNotifications();
+  }
+
+  Future<void> _markAsRead(NotificationModel notification) async {
+    final responseMarkReadNotification =
+        await markAsReadOneNotification(notification.id!);
+
+    if (responseMarkReadNotification.error != null && mounted) {
+      await showCustomDialogWithAction(
+        context,
+        dialogType: DialogTypeAction.error,
+        message: responseMarkReadNotification.error!,
+        actionCallback: () => Navigator.pop(context),
+        buttonOk: "Ok",
+      );
+      return;
+    }
+
+    if (responseMarkReadNotification.data != null &&
+        !responseMarkReadNotification.data['success'] &&
+        mounted) {
+      await showCustomDialog(
+        context,
+        dialogType: DialogType.error,
+        message: responseMarkReadNotification.data['message'],
+      );
+      return;
+    }
+
+    // Actualizar la notificación localmente
+    setState(() {
+      notification = notification.copyWith(isRead: true);
+      if (selectedNotification?.id == notification.id) {
+        selectedNotification = notification;
+      }
+    });
+  }
+
+  Future<void> _handleNotificationAction(NotificationModel notification) async {
+    await _markAsRead(notification);
+
+    if (getRouterScreen(
+                notification.model.toLowerCase(), notification.variables)
+            .arguments !=
+        null) {
+      Navigator.pushNamed(
+          context,
+          getRouterScreen(
+                  notification.model.toLowerCase(), notification.variables)
+              .routeName,
+          arguments: getRouterScreen(
+                  notification.model.toLowerCase(), notification.variables)
+              .arguments);
+    } else {
+      Navigator.pushNamed(context,
+          getRouterScreen(notification.model.toLowerCase(), null).routeName);
+    }
+  }
+
+  // Los métodos restantes se mantienen igual...
   String _formatTime(DateTime date) {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
@@ -338,7 +1176,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       final responseNotification = await getAllNotification(
           1, null, useData != null ? useData.userId : '');
 
-      if (responseNotification.error != null) {
+      if (responseNotification.error != null && mounted) {
         setState(() => loading = false);
         await showCustomDialog(context,
             message: responseNotification.error!, dialogType: DialogType.error);
@@ -351,22 +1189,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 (notify) => NotificationModel.fromJson(notify))
             .toList();
 
-        // Agrupar y ordenar notificaciones
         groupedNotifications = groupNotificationsByDate(notifications);
         sortedDateKeys = _sortDateKeys(groupedNotifications);
         loading = false;
       });
     } catch (e) {
-      setState(() {
-        error = "Error al leer las notificaciones: ${e.toString()}";
-        loading = false;
-      });
-      await showCustomDialog(context,
-          message: error, dialogType: DialogType.error);
+      if (mounted) {
+        setState(() {
+          error = "Error al leer las notificaciones: ${e.toString()}";
+          loading = false;
+        });
+        await showCustomDialog(context,
+            message: error, dialogType: DialogType.error);
+      }
     }
   }
 
-  // Función para agrupar notificaciones por fecha
   Map<String, List<NotificationModel>> groupNotificationsByDate(
       List<NotificationModel> notifications) {
     Map<String, List<NotificationModel>> groupedNotifications = {};
@@ -393,7 +1231,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       if (dateInput is DateTime) {
         result = dateInput;
       } else if (dateInput is String) {
-        // Intentar parseo ISO primero
         result = DateTime.tryParse(dateInput) ??
             _parseCustomFormat(dateInput) ??
             (throw FormatException('Formato no válido'));
@@ -436,7 +1273,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
-  // Función para obtener la clave de fecha
   String _getDateKey(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -453,7 +1289,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
-  // Función para ordenar las fechas
   List<String> _sortDateKeys(
       Map<String, List<NotificationModel>> groupedNotifications) {
     final keys = groupedNotifications.keys.toList();
@@ -464,7 +1299,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       if (a == 'Ayer') return -1;
       if (b == 'Ayer') return 1;
 
-      // Para otras fechas, ordenar de más reciente a más antigua
       final dateA = _parseDateKey(a);
       final dateB = _parseDateKey(b);
 

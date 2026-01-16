@@ -79,19 +79,21 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
         setState(() {
           loading = false;
         });
-        await showCustomDialogWithAction(context,
-            message: responseCharacter.error!,
-            dialogType: DialogTypeAction.info,
-            buttonOk: 'Volver',
-            actionCallbackOk: () {
-              Navigator.pop(context);
-            },
-            showAction: true,
-            textButton: 'Reintentar',
-            actionCallback: () async {
-              Navigator.pop(context);
-              await _loadData(1, limit, "");
-            });
+        if (mounted) {
+          await showCustomDialogWithAction(context,
+              message: responseCharacter.error!,
+              dialogType: DialogTypeAction.info,
+              buttonOk: 'Volver',
+              actionCallbackOk: () {
+                Navigator.pop(context);
+              },
+              showAction: true,
+              textButton: 'Reintentar',
+              actionCallback: () async {
+                Navigator.pop(context);
+                await _loadData(1, limit, "");
+              });
+        }
 
         return;
       }
@@ -110,19 +112,21 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
       setState(() {
         loading = false;
       });
-      await showCustomDialogWithAction(context,
-          message: e.toString(),
-          dialogType: DialogTypeAction.info,
-          buttonOk: 'Volver',
-          actionCallbackOk: () {
-            Navigator.pop(context);
-          },
-          showAction: true,
-          textButton: 'Reintentar',
-          actionCallback: () async {
-            Navigator.pop(context);
-            await _loadData(1, limit, "");
-          });
+      if (mounted) {
+        await showCustomDialogWithAction(context,
+            message: e.toString(),
+            dialogType: DialogTypeAction.info,
+            buttonOk: 'Volver',
+            actionCallbackOk: () {
+              Navigator.pop(context);
+            },
+            showAction: true,
+            textButton: 'Reintentar',
+            actionCallback: () async {
+              Navigator.pop(context);
+              await _loadData(1, limit, "");
+            });
+      }
     }
   }
 

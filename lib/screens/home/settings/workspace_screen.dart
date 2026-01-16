@@ -532,10 +532,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   }
 
   // ============ MANTENER EL RESTO DE LOS MÉTODOS EXISTENTES ============
-  // (_buildStoriesSection, _buildGridViewSection, _buildProverbsSection,
-  // _buildPositionSection, getDailyProverb, loadGetOneReflection, etc.)
-
-  // ... (mantener todos los métodos existentes sin cambios desde _buildStoriesSection hasta el final)
 
   _buildStoriesSection(BuildContext context, reflection) {
     return Column(

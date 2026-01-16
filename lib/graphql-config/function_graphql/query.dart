@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'dart:async';
 
@@ -392,7 +391,7 @@ Future<ResponseData> getRewardObtained(String sectionId) async {
 Future<ResponseData> getPrizeByUserId(String userId, String courseId) async {
   String? userToken = await PreferencesManager().getUserToken();
   final GraphQLClient client = createClient(authToken: userToken);
-  operationName = 'GetProzeByUserId';
+  operationName = 'GetPrizeByUserId';
 
   final QueryOptions options = QueryOptions(
     operationName: operationName,
@@ -3114,4 +3113,93 @@ Future<ResponseData> getCitiesByState(
   } catch (e) {
     return handleGenericError(e, "Obtener todas las ciudades por estado");
   }
+}
+
+Future<ResponseData> getCountries({
+  String query = '',
+  int page = 1,
+  int limit = 20,
+}) async {
+  final offset = (page - 1) * limit;
+  final GraphQLClient client = createClient();
+  final options = QueryOptions(
+    operationName: "GetAllCountryWithCodeAreas",
+    document: gql(r'''
+          query GetAllCountryWithCodeAreas($limit: Int, $offset: Int, $search: String) {
+            getAllCountryWithCodeAreas(limit: $limit, offset: $offset, search: $search) {
+              id
+
+              
+              name
+              areaCodeCountry {
+                id
+                code
+              }
+            }
+          }
+        '''),
+    variables: <String, dynamic>{
+      "limit": limit,
+      "offset": offset,
+      "search": query,
+    },
+     fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getAllCountryWithCodeAreas'] == null) {
+      return ResponseData(
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener todas las ciudades por estado.',
+          error:
+              'Error al obtener todas las ciudades por estado: no se devolvieron datos',
+          errorType: ErrorType.noData);
+    }
+
+    return ResponseData(
+      data: data['getAllCountryWithCodeAreas'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Obtener todas las ciudades por estado");
+  }
+  // try {
+  //   final result = await _client.query(options);
+
+  //   if (result.hasException) {
+  //     throw Exception('Error GraphQL: ${result.exception}');
+  //   }
+
+  //   final data = result.data?['getAllCountryWithCodeAreas'] as List? ?? [];
+
+  //   // Convertir de Country a ModelData
+  //   final countries = data.map((json) {
+  //     final country = Country.fromJson(json);
+  //     return ModelData(
+  //       value: country.id,
+  //       label: country.name,
+  //       originalData: country,
+  //     );
+  //   }).toList();
+
+  //   // Calcular si hay más páginas
+  //   final hasMore = countries.length >= limit;
+
+  //   return PaginationModel(
+  //     items: countries,
+  //     currentPage: page,
+  //     totalPages:
+  //         hasMore ? page + 1 : page, // Simplificado - ajusta según tu API
+  //     hasMore: hasMore,
+  //   );
+  // } catch (e) {
+  //   print('Error buscando países: $e');
+  //   throw Exception('Error buscando países: $e');
+  // }
 }

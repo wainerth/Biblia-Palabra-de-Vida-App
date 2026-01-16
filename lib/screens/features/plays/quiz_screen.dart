@@ -48,6 +48,12 @@ class _QuizScreenState extends State<QuizScreen> {
   bool _isAnswerSelected = false;
   bool _suggestionSelected = false;
   bool _isCorrect = false;
+
+  bool get isTablet {
+    final width = MediaQuery.of(context).size.width;
+    return width >= 600;
+  }
+
   @override
   void initState() {
     _audioService = AudioService(); // Initialize the audio service
@@ -99,138 +105,109 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Widget _buildSelectedDifficulty() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        GestureDetector(
-          onTap: () async {
-            setState(() {
-              difficulty = "F";
-            });
-            await loadQuestions();
-          },
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(12.0),
-            constraints: BoxConstraints(minHeight: 80),
-            decoration: BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(
-                  color: StyleColor.cosmicBlue,
-                  strokeAlign: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                      color: StyleColor.black.withValues(alpha: 0.25))
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(Icons.face_2_rounded),
-                Text(
-                  "Fácil",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: StyleColor.black),
-                ),
-              ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: isTablet ? 500 : double.infinity,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: isTablet ? 20.0 : 0),
+            Text(
+              "Selecciona la dificultad",
+              style: isTablet
+                  ? StylesApp(context).textStyleBody24.copyWith(
+                        color: StyleColor.black,
+                        fontWeight: FontWeight.bold,
+                      )
+                  : StylesApp(context).textStyleBody20.copyWith(
+                        color: StyleColor.black,
+                      ),
+              textAlign: TextAlign.center,
             ),
-          ),
+            SizedBox(height: isTablet ? 40.0 : 20.0),
+            _buildDifficultyButton("Fácil", Icons.face_2_rounded),
+            SizedBox(height: isTablet ? 24.0 : 15),
+            _buildDifficultyButton("Medio", Icons.face_2_rounded),
+            SizedBox(height: isTablet ? 24.0 : 15),
+            _buildDifficultyButton("Difícil", Icons.face_2_rounded),
+            SizedBox(height: isTablet ? 40.0 : 15),
+          ],
         ),
-        SizedBox(
-          height: 15,
-        ),
-        GestureDetector(
-          onTap: () async {
-            setState(() {
-              difficulty = "I";
-            });
-            await loadQuestions();
-          },
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(12.0),
-            constraints: BoxConstraints(minHeight: 80),
-            decoration: BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(
-                  color: StyleColor.cosmicBlue,
-                  strokeAlign: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                      color: StyleColor.black.withValues(alpha: 0.25))
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(Icons.face_2_rounded),
-                Text(
-                  "Medio",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: StyleColor.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 15,
-        ),
-        GestureDetector(
-          onTap: () async {
-            setState(() {
-              difficulty = "D";
-            });
-            await loadQuestions();
-          },
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(12.0),
-            constraints: BoxConstraints(minHeight: 80),
-            decoration: BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(
-                  color: StyleColor.cosmicBlue,
-                  strokeAlign: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                      color: StyleColor.black.withValues(alpha: 0.25))
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(Icons.face_2_rounded),
-                Text(
-                  "Difícil",
-                  style: StylesApp(context)
-                      .textStyleBody20
-                      .copyWith(color: StyleColor.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 15,
-        ),
-      ],
+      ),
     );
   }
 
+  Widget _buildDifficultyButton(String level, IconData icon) {
+    return GestureDetector(
+      onTap: () => _selectDifficulty(_getDifficultyCharacter(level)),
+      child: Container(
+        padding: EdgeInsets.all(isTablet ? 16.0 : 8.0),
+        margin: EdgeInsets.symmetric(
+          horizontal: isTablet ? 60.0 : 12.0,
+          vertical: isTablet ? 8.0 : 0,
+        ),
+        constraints: BoxConstraints(
+          minHeight: isTablet ? 100 : 80,
+          minWidth: isTablet ? 300 : double.infinity,
+        ),
+        decoration: BoxDecoration(
+          color: StyleColor.white,
+          border: Border.all(
+            color: StyleColor.cosmicBlue,
+            strokeAlign: 0.5,
+            width: isTablet ? 2.0 : 1.0,
+          ),
+          borderRadius: BorderRadius.circular(isTablet ? 16.0 : 8.0),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: isTablet ? 16 : 12,
+              offset: Offset(0, isTablet ? 6 : 4),
+              color: StyleColor.black.withValues(alpha: isTablet ? 0.2 : 0.25),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: isTablet ? 32 : 24,
+              color: _getDifficultyColor(level),
+            ),
+            SizedBox(width: isTablet ? 20.0 : 12.0),
+            Text(
+              level,
+              style: isTablet
+                  ? StylesApp(context).textStyleBody24.copyWith(
+                        color: _getDifficultyColor(level),
+                        fontWeight: FontWeight.w600,
+                      )
+                  : StylesApp(context).textStyleBody20.copyWith(
+                        color: StyleColor.black,
+                      ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDifficulty(String level) async {
+    if (!mounted) return;
+    setState(() {
+      difficulty = _getDifficultyCharacter(level);
+    });
+    await loadQuestions();
+  }
+
   Widget _buildPlayScene() {
+    return isTablet ? _buildSceneTablet() : _buildSceneMobile();
+  }
+
+  _buildSceneMobile() {
     return Column(
       children: [
         Row(
@@ -324,6 +301,7 @@ class _QuizScreenState extends State<QuizScreen> {
                           // await funcAnswerValidate();
                         },
                         isAnswerSelected: _isAnswerSelected,
+                        isTablet: true,
                       ),
                     ),
                 },
@@ -368,6 +346,280 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
+  _buildSceneTablet() {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          // Header con oportunidades y progreso
+          Container(
+            padding: EdgeInsets.all(20.0),
+            margin: EdgeInsets.only(bottom: 20.0),
+            decoration: BoxDecoration(
+              color: StyleColor.cosmicBlue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Progreso
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Progreso",
+                      style: StylesApp(context)
+                          .textStyleBody14
+                          .copyWith(color: StyleColor.grayDark),
+                    ),
+                    SizedBox(height: 4),
+                    Container(
+                      width: 200,
+                      child: LinearProgressIndicator(
+                        borderRadius: BorderRadius.circular(8.0),
+                        minHeight: 12.0,
+                        value: currentIndex / (questions.length - 1),
+                        backgroundColor: Color(0xFFC4C4C4),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0XFFF27728),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      "${currentIndex + 1}/${questions.length}",
+                      style: StylesApp(context).textStyleBody14.copyWith(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+
+                // Oportunidades
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Oportunidades",
+                      style: StylesApp(context)
+                          .textStyleBody14
+                          .copyWith(color: StyleColor.grayDark),
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Image.asset(
+                          failedAttempts > 2
+                              ? "assets/fire_rachaActive.png"
+                              : "assets/fire_rachaInactive.png",
+                          width: 24,
+                        ),
+                        SizedBox(width: 4),
+                        Image.asset(
+                          failedAttempts > 1
+                              ? "assets/fire_rachaActive.png"
+                              : "assets/fire_rachaInactive.png",
+                          width: 24,
+                        ),
+                        SizedBox(width: 4),
+                        Image.asset(
+                          failedAttempts > 0
+                              ? "assets/fire_rachaActive.png"
+                              : "assets/fire_rachaInactive.png",
+                          width: 24,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Contenedor principal con dos columnas
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // COLUMNA IZQUIERDA: Pregunta
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: EdgeInsets.all(20.0),
+                    margin: EdgeInsets.only(right: 12.0),
+                    decoration: BoxDecoration(
+                      color: Color(0XFFFFBB00),
+                      borderRadius: BorderRadius.circular(16.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.25),
+                          offset: Offset(0.0, 6.0),
+                          blurRadius: 12.0,
+                        ),
+                      ],
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            currentQuestion.isOrdering
+                                ? Icons.sort
+                                : Icons.question_answer,
+                            size: 48,
+                            color: Colors.white,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            currentQuestion.question,
+                            style: StylesApp(context).textStyleBody20.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.4,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 16),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Text(
+                              currentQuestion.isOrdering
+                                  ? "Pregunta de Ordenamiento"
+                                  : "Pregunta de Selección",
+                              style:
+                                  StylesApp(context).textStyleBody14.copyWith(
+                                        color: Colors.white,
+                                      ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // COLUMNA DERECHA: Opciones/Respuestas
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    padding: EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: StyleColor.white,
+                      borderRadius: BorderRadius.circular(16.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 12,
+                          offset: Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Indicador del tipo de pregunta
+                        Container(
+                          padding: EdgeInsets.all(12.0),
+                          margin: EdgeInsets.only(bottom: 20.0),
+                          decoration: BoxDecoration(
+                            color: currentQuestion.isOrdering
+                                ? StyleColor.turquoise.withOpacity(0.1)
+                                : StyleColor.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: currentQuestion.isOrdering
+                                  ? StyleColor.turquoise
+                                  : StyleColor.orange,
+                              width: 2.0,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                currentQuestion.isOrdering
+                                    ? Icons.info_outline
+                                    : Icons.help_outline,
+                                color: currentQuestion.isOrdering
+                                    ? StyleColor.turquoise
+                                    : StyleColor.orange,
+                                size: 24,
+                              ),
+                              SizedBox(width: 12),
+                              Text(
+                                currentQuestion.isOrdering
+                                    ? "Ordena las opciones correctamente"
+                                    : "Selecciona la respuesta correcta",
+                                style:
+                                    StylesApp(context).textStyleBody16.copyWith(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (questions.isNotEmpty)
+                          // Área de preguntas/opciones
+                          Expanded(
+                            child: currentQuestion.isOrdering
+                                ? OrderingQuestionDraggableWidget(
+                                    orderedCompleted: orderedCompleted,
+                                    orderedAnswers: orderedAnswers,
+                                    currentQuestion: currentQuestion,
+                                    options: options,
+                                    answerSelected: (context, index) =>
+                                        verifyOrdered(context, index),
+                                    showError: showError,
+                                    onContinue: funcAnswerValidate,
+                                    // isTablet: isTablet,
+                                  )
+                                : SelectionQuestionWidget(
+                                    suggestionSelected: _suggestionSelected,
+                                    selectionCompleted: _selectionCompleted,
+                                    isCorrect: _isCorrect,
+                                    currentQuestion: currentQuestion,
+                                    options: options,
+                                    answerSelected: (context, index) {
+                                      _answerSelected(context, index);
+                                    },
+                                    callBackContinue: () async {
+                                      // await funcAnswerValidate();
+                                    },
+                                    isAnswerSelected: _isAnswerSelected,
+                                    // isTablet: isTablet,
+                                  ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
   void verifyOrdered(BuildContext context, int index) {
     bool isCorrectOrder = true;
     for (int i = 0; i < orderedAnswers.length; i++) {
@@ -395,7 +647,6 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   funcAnswerValidate() async {
-
     if (failedAttempts > 0 && currentIndex < questions.length - 1) {
       setState(() {
         currentIndex++;
@@ -447,41 +698,41 @@ class _QuizScreenState extends State<QuizScreen> {
     });
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: Duration(hours: 24),
-        content: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-          children: [
-            Icon(
-            _isCorrect ? Icons.check_circle : Icons.error,
-            color: Colors.white,
-            ),
-            SizedBox(width: 8),
-            Text(
-            _isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!',
-            style: StylesApp(context).textStyleBody12,
-            ),
-          ],
+        SnackBar(
+          duration: Duration(hours: 24),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    _isCorrect ? Icons.check_circle : Icons.error,
+                    color: Colors.white,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    _isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!',
+                    style: StylesApp(context).textStyleBody12,
+                  ),
+                ],
+              ),
+              // botón de siguiente
+              TextButton(
+                onPressed: () async {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  await funcAnswerValidate();
+                },
+                child: Text(
+                  'Siguiente',
+                  style: StylesApp(context)
+                      .textStyleBody12
+                      .copyWith(color: Colors.white),
+                ),
+              ),
+            ],
           ),
-          // botón de siguiente
-          TextButton(
-          onPressed: () async {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            await funcAnswerValidate();
-          },
-          child: Text(
-            'Siguiente',
-            style: StylesApp(context)
-              .textStyleBody12
-              .copyWith(color: Colors.white),
-          ),
-          ),
-        ],
+          backgroundColor: _isCorrect ? Colors.green : Colors.red,
         ),
-        backgroundColor: _isCorrect ? Colors.green : Colors.red,
-      ),
       );
     }
   }
@@ -673,6 +924,32 @@ class _QuizScreenState extends State<QuizScreen> {
           });
     } finally {
       LoadingService().hideLoading();
+    }
+  }
+
+  Color _getDifficultyColor(String level) {
+    switch (level) {
+      case "Fácil":
+        return StyleColor.greenDark;
+      case "Medio":
+        return StyleColor.orange;
+      case "Difícil":
+        return StyleColor.redDark;
+      default:
+        return StyleColor.black;
+    }
+  }
+
+  String _getDifficultyCharacter(String level) {
+    switch (level) {
+      case "Fácil":
+        return 'F';
+      case "Medio":
+        return 'I';
+      case "Difícil":
+        return 'D';
+      default:
+        return 'F';
     }
   }
 }

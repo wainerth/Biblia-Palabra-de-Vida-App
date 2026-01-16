@@ -61,7 +61,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
       child: Column(
         children: [
           // IDENTIFICADOR DE USUARIO
-          Container(
+          SizedBox(
             width: _formWidth,
             height: StylesApp(context).sizeTextFormField.height,
             child: TextFormField(
@@ -88,7 +88,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
           SizedBox(height: _isTablet ? 28.0 : 23.0),
 
           // CORREO ELECTRÓNICO
-          Container(
+          SizedBox(
             width: _formWidth,
             height: StylesApp(context).sizeTextFormField.height,
             child: TextFormField(
@@ -117,7 +117,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
           SizedBox(height: _isTablet ? 28.0 : 23.0),
 
           // NOMBRE DE USUARIO
-          Container(
+          SizedBox(
             width: formWidth,
             height: StylesApp(context).sizeTextFormField.height,
             child: TextFormField(
@@ -143,7 +143,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
           SizedBox(height: _isTablet ? 28.0 : 23.0),
 
           // CONTRASEÑA
-          Container(
+          SizedBox(
             width: _formWidth,
             height: StylesApp(context).sizeTextFormField.height,
             child: TextFormField(
@@ -184,7 +184,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
           SizedBox(height: _isTablet ? 28.0 : 23.0),
 
           // CONFIRMAR CONTRASEÑA
-          Container(
+          SizedBox(
             width: _formWidth,
             height: StylesApp(context).sizeTextFormField.height,
             child: TextFormField(

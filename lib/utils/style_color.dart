@@ -21,7 +21,9 @@ class StyleColor {
   static const Color greenLight = Color(0XFF8ADF85);
   static const Color greenMedium = Color(0XFF2E8C39);
   static const Color greenDark = Color(0xFF1B5E20);
+  static const Color blue = Color(0xFF0A55C6);
   static const Color blueDark = Color(0XFF1D1CBD);
+  static const Color blueLight = Color.fromARGB(255, 103, 164, 255);
   static const Color redDark = Color(0XFFBF0000);
   static const Color grayMedium = Color(0XFF868784);
   static const Color grayDark = Color(0XFF5C5A5A);
