@@ -73,13 +73,30 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-        alignment: Alignment.bottomCenter,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero, // Elimina las esquinas redondeadas
+      alignment: Alignment.bottomCenter,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero, // Elimina las esquinas redondeadas
+      ),
+      insetPadding: EdgeInsets.only(top: 50),
+      backgroundColor: Colors.white.withValues(alpha: 0.1),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: isTablet(context) ? 600 : double.infinity,
         ),
-        insetPadding: EdgeInsets.only(top: 50),
-        backgroundColor: Colors.white,
-        child: _isInitialized ? _buildContent() : _buildLoadingState());
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(12.0),
+        topRight: Radius.circular(12.0),
+          ),
+          child: Container(
+        decoration: BoxDecoration(
+          color: StyleColor.white,
+        ),
+        child: _isInitialized ? _buildContent() : _buildLoadingState(),
+          ),
+        ),
+      ),
+      );
   }
 
   // Widget para el estado de carga
@@ -472,7 +489,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
 
   Future<void> _loadStates(
       String id, int? limit, int? offset, String? search) async {
-        if (!mounted) return ;
+    if (!mounted) return;
     setState(() {
       loadingState = true;
       _statesList.clear(); // Limpiar la lista antes de cargar nuevos datos

@@ -71,22 +71,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
         LoadingService().hideLoading();
       } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Imagen muy grande'),
-              content: Text(
-                  'La imagen seleccionada excede el tamaño máximo de 5MB.'),
-              actions: [
-                TextButton(
-                  child: Text('Aceptar'),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            );
-          },
-        );
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Imagen muy grande'),
+                content: Text(
+                    'La imagen seleccionada excede el tamaño máximo de 5MB.'),
+                actions: [
+                  TextButton(
+                    child: Text('Aceptar'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       }
     }
   }
@@ -542,7 +544,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   style: StylesApp(context)
                                       .textStyleBody12
                                       .copyWith(
-                                        color: Colors.white.withValues(alpha: 0.9),
+                                        color:
+                                            Colors.white.withValues(alpha: 0.9),
                                         // fontSize: 12.0,
                                       ),
                                 ),
@@ -582,103 +585,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (route != null) {
                   Navigator.popAndPushNamed(context, route);
                 } else {
-                  showDialog(
-                    useSafeArea: true,
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return Container(
-                        constraints: BoxConstraints(
-                            maxWidth: isTablet(context)
-                                ? MediaQuery.sizeOf(context).width * .60
-                                : MediaQuery.sizeOf(context).width),
-                        child: EditDetailDialogWidget(
-                          data: data,
-                          onSave: (List<ModelData> dta) async {
-                            LoadingService().showLoading(context);
-                            final userProvider = Provider.of<UserProvider>(
-                              context,
-                              listen: false,
-                            );
-                            final catalogueProvider =
-                                Provider.of<CatalogueProvider>(
-                              context,
-                              listen: false,
-                            );
-                            final user = userProvider.currentUser;
-
-                            final dataToSend = UpdateDataProfile(
-                              identifier: user?.identifier ?? '',
-                              name: user?.name ?? '',
-                              lastname: user?.lastname ?? '',
-                              birthdate: user?.birthdate ?? '',
-                              country:
-                                  user?.country != null ? user!.country : null,
-                              state: user?.state,
-                              city: user?.city,
-                              gender: user?.gender ?? '',
-                              isBaptized: user?.isBaptized,
-                              profileAreaCode: user?.profileAreaCode,
-                              phoneNumber: user?.phoneNumber ?? '',
-                              church: user!.userChurch.isNotEmpty
-                                  ? user.userChurch
-                                      .where((ch) => ch.status == true)
-                                      .firstOrNull
-                                  : null,
-                            );
-
-                            final UserProfile dataEnviar = UserProfile(
-                              userId: user.userId,
-                              dataProfiles: updateFromModelData(
-                                context,
-                                dataToSend,
-                                dta,
-                                catalogueProvider.allCountries,
-                                catalogueProvider.allChurches,
-                              ),
-                            );
-
-                            final responseUpdateProfile =
-                                await userProvider.updateProfile(dataEnviar);
-
-                            if (responseUpdateProfile.error != null) {
-                              LoadingService().hideLoading();
-                              if (mounted) {
-                                await showCustomDialog(
-                                  context,
-                                  message: responseUpdateProfile.error!,
-                                  dialogType: DialogType.error,
-                                );
-                              }
-
-                              return;
-                            }
-
-                            if (dataEnviar.dataProfiles.church != null) {
-                              final response =
-                                  await userProvider.updateUserChurch(
-                                user.userId,
-                                dataEnviar.dataProfiles.church!.id,
-                                catalogueProvider.allChurches,
-                              );
-
-                              if (response.error != null) {
-                                LoadingService().hideLoading();
-                                await showCustomDialog(
-                                  context,
-                                  message: response.error!,
-                                  dialogType: DialogType.error,
-                                );
-                              }
-                            }
-
-                            Navigator.pop(context);
-                            LoadingService().hideLoading();
-                          },
-                        ),
-                      );
-                    },
-                  );
+                  _openDialogEdit(data);
                 }
               },
               child: Container(
@@ -733,6 +640,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
       print("La cadena Base64 parece válida.");
     }
     return true;
+  }
+
+  void _openDialogEdit(List<ModelData> data) {
+    showDialog(
+        useSafeArea: true,
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return EditDetailDialogWidget(
+            data: data,
+            onSave: (List<ModelData> dta) async {
+              LoadingService().showLoading(context);
+              final userProvider =
+                  Provider.of<UserProvider>(context, listen: false);
+              final catalogueProvider =
+                  Provider.of<CatalogueProvider>(context, listen: false);
+              final user = userProvider.currentUser;
+              // servicio de actualización
+              final dataToSend = UpdateDataProfile(
+                identifier: user?.identifier ?? '',
+                name: user?.name ?? '',
+                lastname: user?.lastname ?? '',
+                birthdate: user?.birthdate ?? '',
+                country: user?.country != null ? user!.country : null,
+                state: user?.state,
+                city: user?.city,
+                gender: user?.gender ?? '',
+                isBaptized: user?.isBaptized,
+                profileAreaCode: user?.profileAreaCode,
+                phoneNumber: user?.phoneNumber ?? '',
+                church: user!.userChurch.isNotEmpty
+                    ? user.userChurch
+                        .where((ch) => ch.status == true)
+                        .firstOrNull
+                    : null,
+              );
+              final UserProfile dataEnviar = UserProfile(
+                  userId: user.userId,
+                  dataProfiles: updateFromModelData(
+                      context,
+                      dataToSend,
+                      dta,
+                      catalogueProvider.allCountries,
+                      catalogueProvider.allChurches));
+
+              final responseUpdateProfile =
+                  await userProvider.updateProfile(dataEnviar);
+              if (responseUpdateProfile.error != null) {
+                LoadingService().hideLoading();
+                await showCustomDialog(
+                  context,
+                  message: responseUpdateProfile.error!,
+                  dialogType: DialogType.error,
+                );
+                return;
+              }
+              if (dataEnviar.dataProfiles.church != null) {
+                final response = await userProvider.updateUserChurch(
+                    user.userId,
+                    dataEnviar.dataProfiles.church!.id,
+                    catalogueProvider.allChurches);
+
+                if (response.error != null) {
+                  LoadingService().hideLoading();
+                  if (mounted) {
+                    await showCustomDialog(
+                      context,
+                      message: response.error!,
+                      dialogType: DialogType.error,
+                    );
+                  }
+                }
+              }
+
+              Navigator.pop(context);
+              LoadingService().hideLoading();
+            },
+          );
+        });
   }
 }
 
@@ -855,90 +841,8 @@ class _CardColumnWidgetState extends State<CardColumnWidget> {
                       if (widget.route != null) {
                         Navigator.popAndPushNamed(context, widget.route!);
                       } else {
-                        // Abrir el diálogo de edición
-                        showDialog(
-                            useSafeArea: true,
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) {
-                              return EditDetailDialogWidget(
-                                data: widget.data,
-                                onSave: (List<ModelData> dta) async {
-                                  LoadingService().showLoading(context);
-                                  final userProvider =
-                                      Provider.of<UserProvider>(context,
-                                          listen: false);
-                                  final catalogueProvider =
-                                      Provider.of<CatalogueProvider>(context,
-                                          listen: false);
-                                  final user = userProvider.currentUser;
-                                  // servicio de actualización
-                                  final dataToSend = UpdateDataProfile(
-                                    identifier: user?.identifier ?? '',
-                                    name: user?.name ?? '',
-                                    lastname: user?.lastname ?? '',
-                                    birthdate: user?.birthdate ?? '',
-                                    country: user?.country != null
-                                        ? user!.country
-                                        : null,
-                                    state: user?.state,
-                                    city: user?.city,
-                                    gender: user?.gender ?? '',
-                                    isBaptized: user?.isBaptized,
-                                    profileAreaCode: user?.profileAreaCode,
-                                    phoneNumber: user?.phoneNumber ?? '',
-                                    church: user!.userChurch.isNotEmpty
-                                        ? user.userChurch
-                                            .where((ch) => ch.status == true)
-                                            .firstOrNull
-                                        : null,
-                                  );
-                                  final UserProfile dataEnviar = UserProfile(
-                                      userId: user.userId,
-                                      dataProfiles: updateFromModelData(
-                                          context,
-                                          dataToSend,
-                                          dta,
-                                          catalogueProvider.allCountries,
-                                          catalogueProvider.allChurches));
-
-                                  final responseUpdateProfile =
-                                      await userProvider
-                                          .updateProfile(dataEnviar);
-                                  if (responseUpdateProfile.error != null) {
-                                    LoadingService().hideLoading();
-                                    await showCustomDialog(
-                                      context,
-                                      message: responseUpdateProfile.error!,
-                                      dialogType: DialogType.error,
-                                    );
-                                    return;
-                                  }
-                                  if (dataEnviar.dataProfiles.church != null) {
-                                    final response =
-                                        await userProvider.updateUserChurch(
-                                            user.userId,
-                                            dataEnviar.dataProfiles.church!.id,
-                                            catalogueProvider.allChurches);
-
-                                    if (response.error != null) {
-                                      LoadingService().hideLoading();
-                                      if (mounted) {
-                                      await showCustomDialog(
-                                        context,
-                                        message: response.error!,
-                                        dialogType: DialogType.error,
-                                      );
-
-                                      }
-                                    }
-                                  }
-
-                                  Navigator.pop(context);
-                                  LoadingService().hideLoading();
-                                },
-                              );
-                            });
+                        // Abrir el diálogo de edición Tablet
+                        _openDialogEdit(widget.data);
                       }
                     },
                     icon: Icon(
@@ -971,5 +875,84 @@ class _CardColumnWidgetState extends State<CardColumnWidget> {
           ),
       ],
     );
+  }
+
+  void _openDialogEdit(List<ModelData> data) {
+    showDialog(
+        useSafeArea: true,
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return EditDetailDialogWidget(
+            data: data,
+            onSave: (List<ModelData> dta) async {
+              LoadingService().showLoading(context);
+              final userProvider =
+                  Provider.of<UserProvider>(context, listen: false);
+              final catalogueProvider =
+                  Provider.of<CatalogueProvider>(context, listen: false);
+              final user = userProvider.currentUser;
+              // servicio de actualización
+              final dataToSend = UpdateDataProfile(
+                identifier: user?.identifier ?? '',
+                name: user?.name ?? '',
+                lastname: user?.lastname ?? '',
+                birthdate: user?.birthdate ?? '',
+                country: user?.country != null ? user!.country : null,
+                state: user?.state,
+                city: user?.city,
+                gender: user?.gender ?? '',
+                isBaptized: user?.isBaptized,
+                profileAreaCode: user?.profileAreaCode,
+                phoneNumber: user?.phoneNumber ?? '',
+                church: user!.userChurch.isNotEmpty
+                    ? user.userChurch
+                        .where((ch) => ch.status == true)
+                        .firstOrNull
+                    : null,
+              );
+              final UserProfile dataEnviar = UserProfile(
+                  userId: user.userId,
+                  dataProfiles: updateFromModelData(
+                      context,
+                      dataToSend,
+                      dta,
+                      catalogueProvider.allCountries,
+                      catalogueProvider.allChurches));
+
+              final responseUpdateProfile =
+                  await userProvider.updateProfile(dataEnviar);
+              if (responseUpdateProfile.error != null) {
+                LoadingService().hideLoading();
+                await showCustomDialog(
+                  context,
+                  message: responseUpdateProfile.error!,
+                  dialogType: DialogType.error,
+                );
+                return;
+              }
+              if (dataEnviar.dataProfiles.church != null) {
+                final response = await userProvider.updateUserChurch(
+                    user.userId,
+                    dataEnviar.dataProfiles.church!.id,
+                    catalogueProvider.allChurches);
+
+                if (response.error != null) {
+                  LoadingService().hideLoading();
+                  if (mounted) {
+                    await showCustomDialog(
+                      context,
+                      message: response.error!,
+                      dialogType: DialogType.error,
+                    );
+                  }
+                }
+              }
+
+              Navigator.pop(context);
+              LoadingService().hideLoading();
+            },
+          );
+        });
   }
 }

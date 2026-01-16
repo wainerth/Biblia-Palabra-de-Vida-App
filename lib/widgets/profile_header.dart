@@ -60,22 +60,22 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             top: 10,
             left: 15,
             child: Container(
-                height: 35.sp,
-                width: 35.sp,
+                height: 35,
+                width: 35,
                 decoration: BoxDecoration(
                     color: Color(0XFFFD8C43),
-                    borderRadius: BorderRadius.circular(35.sp)),
+                    borderRadius: BorderRadius.circular(35)),
                 child: IconButton(
                     constraints: BoxConstraints(maxHeight: 35.0),
                     padding: EdgeInsets.all(0),
-                    iconSize: 35.sp,
+                    iconSize: 35,
                     color: Colors.white,
                     onPressed: () {
                       Navigator.pop(context);
                     },
                     icon: Icon(
                       Icons.arrow_back,
-                      size: 35.sp,
+                      size: 35,
                     ))),
           ),
           Column(
