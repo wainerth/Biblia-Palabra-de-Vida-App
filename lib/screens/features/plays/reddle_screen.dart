@@ -685,7 +685,12 @@ class _ReddleScreenState extends State<ReddleScreen> {
   }
 
   _buildSceneMobile() {
-    SingleChildScrollView(
+    if (personajeActual == null) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    return SingleChildScrollView(
       child: Stack(children: [
         Positioned(
           top: 0,

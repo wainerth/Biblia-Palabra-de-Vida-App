@@ -107,8 +107,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       final responseNotification = await getAllNotification(
           1, 15, useData != null ? useData.userId : '');
       if (responseNotification.error != null) {
+        if (mounted) {
         await showCustomDialog(context,
             message: responseNotification.error!, dialogType: DialogType.error);
+        }
         return;
       }
       setState(() {
@@ -860,7 +862,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                 onPressed: () {
                                   Clipboard.setData(ClipboardData(
                                       text:
-                                          "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}."));
+                                          " ${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible"));
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                         content: Text(
@@ -914,12 +916,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Center(
                                   child: Text(
-                                    "${dailyWord.verse!.text}.",
+                                    "${dailyWord.verse!.text}",
                                     style: StylesApp(context)
                                         .textStyleBody5
                                         .copyWith(
                                           color: Colors.black,
-                                          fontSize: 10.sp,
+                                          // fontSize: 10.sp,
                                         ),
                                   ),
                                 ),

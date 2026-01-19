@@ -45,8 +45,7 @@ class BibleHeaderWidget extends StatelessWidget {
         Positioned.fill(
           child: SvgPicture.asset(
             "assets/elipsisTopColor.svg",
-            colorFilter: ColorFilter.mode(currentTheme.appBarColor,
-                BlendMode.color), // currentTheme.appBarColor, // Color dinámico
+            color: currentTheme.appBarColor, // Color dinámico
             fit: BoxFit.cover,
             alignment: Alignment.bottomCenter,
           ),

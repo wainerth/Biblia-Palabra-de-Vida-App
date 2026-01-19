@@ -76,11 +76,12 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
     final currentTheme = themeProvider.themeData;
 
     return Scaffold(
-      backgroundColor: StyleColor.turquoise,
-      body: isTablet
-          ? _buildTabletLayout(context, currentTheme)
-          : _buildMobileLayout(context, currentTheme),
-    );
+        // backgroundColor: StyleColor.turquoise,
+        body: SafeArea(
+          child: isTablet
+              ? _buildTabletLayout(context, currentTheme)
+              : _buildMobileLayout(context, currentTheme),
+        ));
   }
 
   // DISEÑO PARA TABLET A DOS COLUMNAS
@@ -939,119 +940,99 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
 
   // DISEÑO MÓVIL (se mantiene exactamente igual)
   Widget _buildMobileLayout(BuildContext context, BibleTheme currentTheme) {
-    return Column(
-      children: [
-        HeadScreenNotAvatar(
-          title: "Respuestas de\n Pedidos de Oración",
-          onRoute: () {
-            Navigator.pop(context);
-          },
-        ),
-
-        // Container(
-        //   width: MediaQuery.of(context).size.width,
-        //   decoration: BoxDecoration(
-        //     image: DecorationImage(
-        //       image: const AssetImage("assets/elipsisTop.png"),
-        //       fit: BoxFit.cover,
-        //       alignment: Alignment.bottomCenter,
-        //     ),
-        //   ),
-        //   child: Column(
-        //     crossAxisAlignment: CrossAxisAlignment.center,
-        //     children: [
-        //       SizedBox(height: 48.0),
-        //       Center(
-        //         child: Text(
-        //           textAlign: TextAlign.center,
-        //           'Pedidos de Oración',
-        //           style: StylesApp(context).textStyleTitleOrange,
-        //         ),
-        //       ),
-        //       SizedBox(height: 35.sp),
-        //     ],
-        //   ),
-        // ),
-        SizedBox(height: 15),
-        if (isLoading) ...{
-          Center(
-            child: LoadingIndicator(),
-          )
-        } else ...{
-          if (errorMessage != null) ...{
-            BuildErrorWidget(
-              errorMessage: errorMessage!,
-              onRetry: () async => _generateData(
-                  context, pagination.currentPage, itemPerPageValue),
-              onBack: () => Navigator.pop(context),
+    return Container(
+      decoration: BoxDecoration(
+        color: StyleColor.turquoise
+      ),
+      child: Column(
+        children: [
+          HeadScreenNotAvatar(
+            title: "Respuestas de\n Pedidos de Oración",
+            onRoute: () {
+              Navigator.pop(context);
+            },
+          ),
+          SizedBox(height: 15),
+          if (isLoading) ...{
+            Center(
+              child: LoadingIndicator(),
             )
           } else ...{
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.0),
-              child: TextFormField(
-                readOnly: listRequest.isEmpty || loading,
-                controller: searchTextController,
-                style: StylesApp(context).textStyleSmallBlack,
-                decoration:
-                    StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                          hintText: 'Buscar...',
-                          border: OutlineInputBorder(),
-                          suffixIcon: searchText.isNotEmpty
-                              ? IconButton(
-                                  icon: Icon(Icons.clear),
-                                  onPressed: () {
-                                    setState(() {
-                                      cleanSearch();
-                                    });
-                                  },
-                                )
-                              : Icon(Icons.search),
-                        ),
-                onChanged: (value) {
-                  setState(() {
-                    searchText = value;
-                  });
-                  _onSearchChanged(value);
-                },
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                  itemCount: listRequest.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _cardListItem(context, index);
-                  }),
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom,
-                top: 8.0,
-              ),
-              child: CustomPagination(
-                pagination: PaginationInfo(
-                  currentPage: pagination.currentPage,
-                  itemsPerPage: pagination.itemsPerPage,
-                  totalPages: pagination.totalPages,
-                  hasPreviousPage: pagination.hasPreviousPage,
-                  hasNextPage: pagination.hasNextPage,
-                  totalItems: pagination.totalItems,
-                ),
-                itemPerPageValue: itemPerPageValue,
-                onPageChanged: (newPage, newPerPage) async {
-                  if (listRequest.isNotEmpty) {
+            if (errorMessage != null) ...{
+              BuildErrorWidget(
+                errorMessage: errorMessage!,
+                onRetry: () async => _generateData(
+                    context, pagination.currentPage, itemPerPageValue),
+                onBack: () => Navigator.pop(context),
+              )
+            } else ...{
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.0),
+                child: TextFormField(
+                  readOnly: listRequest.isEmpty || loading,
+                  controller: searchTextController,
+                  style: StylesApp(context).textStyleSmallBlack,
+                  decoration:
+                      StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                            hintText: 'Buscar...',
+                            border: OutlineInputBorder(),
+                            suffixIcon: searchText.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(Icons.clear),
+                                    onPressed: () {
+                                      setState(() {
+                                        cleanSearch();
+                                      });
+                                    },
+                                  )
+                                : Icon(Icons.search),
+                          ),
+                  onChanged: (value) {
                     setState(() {
-                      itemPerPageValue = newPerPage;
+                      searchText = value;
                     });
-                    await _generateData(context, newPage, newPerPage);
-                  }
-                },
-                itemsPerPage: itemsPerPage,
-                currentTheme: currentTheme,
+                    _onSearchChanged(value);
+                  },
+                ),
               ),
-            ),
+              Expanded(
+                child: ListView.builder(
+                    itemCount: listRequest.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return _cardListItem(context, index);
+                    }),
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).padding.bottom,
+                  top: 8.0,
+                ),
+                child: CustomPagination(
+                  pagination: PaginationInfo(
+                    currentPage: pagination.currentPage,
+                    itemsPerPage: pagination.itemsPerPage,
+                    totalPages: pagination.totalPages,
+                    hasPreviousPage: pagination.hasPreviousPage,
+                    hasNextPage: pagination.hasNextPage,
+                    totalItems: pagination.totalItems,
+                  ),
+                  itemPerPageValue: itemPerPageValue,
+                  onPageChanged: (newPage, newPerPage) async {
+                    if (listRequest.isNotEmpty) {
+                      setState(() {
+                        itemPerPageValue = newPerPage;
+                      });
+                      await _generateData(context, newPage, newPerPage);
+                    }
+                  },
+                  itemsPerPage: itemsPerPage,
+                  currentTheme: currentTheme,
+                ),
+              ),
+            }
           }
-        }
-      ],
+        ],
+      ),
     );
   }
 

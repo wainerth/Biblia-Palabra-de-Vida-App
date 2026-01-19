@@ -94,29 +94,6 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                       : _buildMobileInfoLayout(context),
 
                   SizedBox(height: isTablet ? 30.0 : 21.0),
-                  Container(
-                    child: Column(
-                      children: [
-                        if (widget.dataSeleccionada.audioPrayer != null) ...[
-                          SizedBox(height: 15),
-                          Text(
-                            "Audio de la Petición",
-                            style: StylesApp(context).textStyleBody14.copyWith(
-                                  color: StyleColor.orange,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                          SizedBox(height: 10),
-                          AudioPlayerWidget(
-                            pathUrl:
-                                "${GraphQLConfig.urlServidor}${widget.dataSeleccionada.audioPrayer!.url}",
-                            showImage: false,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: isTablet ? 30.0 : 21.0),
                   // Sección de mensaje
                   _buildMessageSection(context),
 
@@ -324,6 +301,31 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                     ),
                   ),
                 ),
+                if (widget.dataSeleccionada.audioPrayer != null) ...[
+                  SizedBox(height: isTablet ? 30.0 : 21.0),
+                  Container(
+                    child: Column(
+                      children: [
+                        if (widget.dataSeleccionada.audioPrayer != null) ...[
+                          SizedBox(height: 15),
+                          Text(
+                            "Audio de la Petición",
+                            style: StylesApp(context).textStyleBody14.copyWith(
+                                  color: StyleColor.orange,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          SizedBox(height: 10),
+                          AudioPlayerWidget(
+                            pathUrl:
+                                "${GraphQLConfig.urlServidor}${widget.dataSeleccionada.audioPrayer!.url}",
+                            showImage: false,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ]
               ],
             ),
           ),
@@ -376,8 +378,6 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
         ),
         SizedBox(height: 10),
         _buildInfoItem("Descripción:", widget.dataSeleccionada.prayerDetails),
-
-        // Audio de la petición (si existe)
         if (widget.dataSeleccionada.audioPrayer != null) ...[
           SizedBox(height: 15),
           Text(

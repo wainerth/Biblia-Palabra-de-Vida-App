@@ -34,6 +34,15 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   bool _isInitialized = false;
   String? initialPhoneCode;
 
+  // Variables para controlar la selección inicial
+  String? _initialStateId;
+  String? _initialStateName;
+  String? _initialCityId;
+  String? _initialCityName;
+  bool _isLoadingLocation = false;
+  bool _autoSelectStateAfterLoad = false;
+  bool _autoSelectCityAfterLoad = false;
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -45,7 +54,6 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     for (var item in _editingData) {
       if (item.label == 'Tel.') {
         initialPhoneCode = item.originalData?.code;
-
         _controllers.add(TextEditingController(
             text: item.value.isNotEmpty ? item.value.split(' ')[1] : ''));
       } else {
@@ -54,9 +62,13 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     }
 
     // Inicializar valores de país, estado y ciudad si existen
-    _initializeLocationValues().then((_) {
-      setState(() {
-        _isInitialized = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeLocationValues().then((_) {
+        if (mounted) {
+          setState(() {
+            _isInitialized = true;
+          });
+        }
       });
     });
   }
@@ -66,7 +78,6 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     for (var controller in _controllers) {
       controller.dispose();
     }
-
     super.dispose();
   }
 
@@ -75,7 +86,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     return Dialog(
       alignment: Alignment.bottomCenter,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero, // Elimina las esquinas redondeadas
+        borderRadius: BorderRadius.zero,
       ),
       insetPadding: EdgeInsets.only(top: 50),
       backgroundColor: Colors.white.withValues(alpha: 0.1),
@@ -85,21 +96,20 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(12.0),
-        topRight: Radius.circular(12.0),
+            topLeft: Radius.circular(12.0),
+            topRight: Radius.circular(12.0),
           ),
           child: Container(
-        decoration: BoxDecoration(
-          color: StyleColor.white,
-        ),
-        child: _isInitialized ? _buildContent() : _buildLoadingState(),
+            decoration: BoxDecoration(
+              color: StyleColor.white,
+            ),
+            child: _isInitialized ? _buildContent() : _buildLoadingState(),
           ),
         ),
       ),
-      );
+    );
   }
 
-  // Widget para el estado de carga
   Widget _buildLoadingState() {
     return Container(
       color: StyleColor.turquoise,
@@ -123,7 +133,6 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     );
   }
 
-  //Method buildField
   Widget _buildField(
       ModelData item,
       int index,
@@ -135,7 +144,6 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
       List<Country> listCatalogue) {
     if (item.label == 'Tel.') {
       return SizedBox(
-        // width: formWidth,
         child: Stack(
           children: [
             IntlPhoneFieldWithValidation(
@@ -151,7 +159,6 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                 try {
                   AreaCode? code = await AreaCodeSearchService()
                       .getCodeAreaByCode(phone.countryCode);
-
                   _editingData[index] = ModelData(
                       label: _editingData[index].label,
                       clave: _editingData[index].clave,
@@ -161,8 +168,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                       originalData: code);
                 } catch (e) {
                   if (kDebugMode) {
-                    print(
-                        'Código de Area no encontrado para: ${phone.countryCode}');
+                    print('Código de Area no encontrado para: ${phone.countryCode}');
                   }
                 }
               },
@@ -231,9 +237,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
             ? DateFormat("dd/MM/yyyy").parse(item.value)
             : DateTime.now().subtract(Duration(days: 15 * 365)),
         onChanged: (value) {
-          if (kDebugMode) {
-            print(value);
-          }
+          if (kDebugMode) print(value);
           _editingData[index] = ModelData(
             label: _editingData[index].label,
             value: value,
@@ -244,23 +248,22 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
       );
     } else if (item.label == 'Bautizo') {
       return RadioButtonWidget<bool>(
-          // Ejemplo con opciones de tipo String
-          label: "Bautizado:",
-          value: item.value == 'Bautizado',
-          onChanged: (newValue) => {
-                setState(() {
-                  _editingData[index] = ModelData(
-                    label: _editingData[index].label,
-                    value: newValue! ? "Bautizado" : "No Bautizado",
-                    clave: _editingData[index].clave,
-                    showLabel: _editingData[index].showLabel,
-                  );
-                })
-              },
-          options: [
-            RadioButtonOption(value: true, label: "Si"),
-            RadioButtonOption(value: false, label: "No")
-          ]);
+        label: "Bautizado:",
+        value: item.value == 'Bautizado',
+        onChanged: (newValue) {
+          setState(() {
+            _editingData[index] = ModelData(
+              label: _editingData[index].label,
+              value: newValue! ? "Bautizado" : "No Bautizado",
+              clave: _editingData[index].clave,
+              showLabel: _editingData[index].showLabel,
+            );
+          });
+        },
+        options: [
+          RadioButtonOption(value: true, label: "Si"),
+          RadioButtonOption(value: false, label: "No")
+        ]);
     } else if (item.label == 'País') {
       return Container(
         constraints: BoxConstraints(
@@ -269,31 +272,47 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         ),
         child: OptimizedSearchableDropdown(
           hintText: "Seleccione un país",
-          defaultValueId: _selectedCountryId, // <-- Pasar el ID directamente
-          selectedItem:
-              null, // <-- Dejar como null, el widget lo cargará automáticamente
+          defaultValueId: _selectedCountryId,
+          selectedItem: null,
           onChanged: (ModelData? newValue) async {
             if (newValue != null) {
               setState(() {
                 _editingData[index] = ModelData(
-                    label: _editingData[index].label,
-                    value: newValue.label,
-                    clave: _editingData[index].clave,
-                    showLabel: _editingData[index].showLabel,
-                    originalData: _editingData[index].originalData);
+                  label: _editingData[index].label,
+                  value: newValue.label,
+                  clave: _editingData[index].clave,
+                  showLabel: _editingData[index].showLabel,
+                  originalData: newValue.originalData,
+                );
+                _selectedCountryId = newValue.value;
               });
+              
+              // Limpiar estados y ciudades anteriores
+              setState(() {
+                _statesList.clear();
+                _citiesList.clear();
+              });
+              
+              // Si hay estado inicial guardado, activar autoselección
+              if (_initialStateId != null && _initialStateName != null) {
+                _autoSelectStateAfterLoad = true;
+              }
+              
               await _loadStates(newValue.value, null, null, null);
             } else {
               setState(() {
-                _statesList
-                    .clear(); // Limpiar la lista antes de cargar nuevos datos
-                _citiesList.clear(); // Limpiar la lista de ciudades también
+                _statesList.clear();
+                _citiesList.clear();
+                _selectedCountryId = null;
+                _initialStateId = null;
+                _initialStateName = null;
+                _initialCityId = null;
+                _initialCityName = null;
               });
             }
           },
           searchFunction: _searchCountries,
-          fetchItemById: (id) =>
-              CountrySearchService().getCountryById(id), // <-- Añadir esto
+          fetchItemById: (id) => CountrySearchService().getCountryById(id),
           showClearButton: true,
           border: true,
           leadingIcon: Icon(
@@ -315,22 +334,36 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
               hintText: "Seleccione un Estado",
               items: _statesList,
               onChanged: (ModelData? newValue) async {
-                setState(() {
-                  _editingData[index] = ModelData<StateModel>(
-                    label: _editingData[index].label,
-                    value: newValue!.label,
-                    clave: _editingData[index].clave,
-                    showLabel: _editingData[index].showLabel,
-                    originalData: StateModel.fromJson(newValue.originalData),
-                  );
-                });
-                await _loadCities(newValue!.value, null, null, null);
+                if (newValue != null) {
+                  setState(() {
+                    _editingData[index] = ModelData<StateModel>(
+                      label: _editingData[index].label,
+                      value: newValue.label,
+                      clave: _editingData[index].clave,
+                      showLabel: _editingData[index].showLabel,
+                      originalData: StateModel.fromJson(newValue.originalData),
+                    );
+                    _initialStateId = newValue.value;
+                    _initialStateName = newValue.label;
+                  });
+                  
+                  // Si hay ciudad inicial guardada, activar autoselección
+                  if (_initialCityId != null && _initialCityName != null) {
+                    _autoSelectCityAfterLoad = true;
+                  }
+                  
+                  await _loadCities(newValue.value, null, null, null);
+                } else {
+                  setState(() {
+                    _citiesList.clear();
+                    _initialStateId = null;
+                    _initialStateName = null;
+                    _initialCityId = null;
+                    _initialCityName = null;
+                  });
+                }
               },
-              selectedItem: item.value.isNotEmpty && _statesList.isNotEmpty
-                  ? _statesList.firstWhere(
-                      (element) => element.label == item.value,
-                      orElse: () => _statesList.first)
-                  : null,
+              selectedItem: _findSelectedState(item),
               leadingIcon: Icon(
                 Icons.location_city,
                 color: StyleColor.cosmicBlue,
@@ -361,21 +394,26 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
               hintText: "Seleccione una Ciudad",
               items: _citiesList,
               onChanged: (ModelData? newValue) {
-                setState(() {
-                  _editingData[index] = ModelData<CityModel>(
-                    label: _editingData[index].label,
-                    value: newValue!.label,
-                    clave: _editingData[index].clave,
-                    showLabel: _editingData[index].showLabel,
-                    originalData: CityModel.fromJson(newValue.originalData),
-                  );
-                });
+                if (newValue != null) {
+                  setState(() {
+                    _editingData[index] = ModelData<CityModel>(
+                      label: _editingData[index].label,
+                      value: newValue.label,
+                      clave: _editingData[index].clave,
+                      showLabel: _editingData[index].showLabel,
+                      originalData: CityModel.fromJson(newValue.originalData),
+                    );
+                    _initialCityId = newValue.value;
+                    _initialCityName = newValue.label;
+                  });
+                } else {
+                  setState(() {
+                    _initialCityId = null;
+                    _initialCityName = null;
+                  });
+                }
               },
-              selectedItem: item.value.isNotEmpty && _citiesList.isNotEmpty
-                  ? _citiesList.firstWhere(
-                      (element) => element.label == item.value,
-                      orElse: () => _citiesList.first)
-                  : null,
+              selectedItem: _findSelectedCity(item),
               leadingIcon: Icon(
                 Icons.location_city,
                 color: StyleColor.cosmicBlue,
@@ -442,110 +480,263 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   }
 
   Future<void> _initializeLocationValues() async {
-    setState(() {});
-    // final catalogueProvider =
-    //     Provider.of<CatalogueProvider>(context, listen: false);
+    if (!mounted) return;
+    
+    setState(() {
+      _isLoadingLocation = true;
+    });
 
-    // Buscar país si existe en los datos
-    final countryItem = _editingData.firstWhere(
-      (item) => item.label == 'País',
-      orElse: () => ModelData(label: '', value: '', clave: ''),
-    );
-
-    if (countryItem.value.isNotEmpty) {
-      Country? country;
-      final searchInitial = await CountrySearchService()
-          .getCountryById(countryItem.originalData.id);
-      if (searchInitial == null) {
-        country = Country(id: '', name: '', countryCode: null);
-      } else {
-        country = Country(
-            id: searchInitial.value,
-            name: searchInitial.label,
-            countryCode: searchInitial.originalData.countryCode);
-      }
-      if (country.id.isNotEmpty) {
-        _selectedCountryId = country.id;
-        await _loadStates(country.id, null, null, null);
-      }
-    }
-
-    // Buscar estado si existe en los datos
-    final stateItem = _editingData.firstWhere(
-      (item) => item.label == 'Estado',
-      orElse: () => ModelData(label: '', value: '', clave: ''),
-    );
-
-    if (stateItem.value.isNotEmpty && _selectedCountryId != null) {
-      final ModelData state = _statesList.firstWhere(
-        (s) => s.label == stateItem.value,
-        orElse: () => ModelData(value: '', label: ''),
+    try {
+      // 1. Buscar país si existe en los datos
+      final countryItem = _editingData.firstWhere(
+        (item) => item.label == 'País',
+        orElse: () => ModelData(label: '', value: '', clave: ''),
       );
-      if (state.value.isNotEmpty) {
-        await _loadCities(state.value, null, null, null);
+
+      if (countryItem.value.isNotEmpty && countryItem.originalData != null) {
+        // Extraer ID del país
+        dynamic originalData = countryItem.originalData;
+        if (originalData is Country) {
+          _selectedCountryId = originalData.id;
+        } else if (originalData is Map<String, dynamic>) {
+          _selectedCountryId = originalData['id']?.toString();
+        } else if (originalData is String) {
+          _selectedCountryId = originalData;
+        }
+        
+        // Guardar datos de estado si existen
+        final stateItem = _editingData.firstWhere(
+          (item) => item.label == 'Estado',
+          orElse: () => ModelData(label: '', value: '', clave: ''),
+        );
+        
+        if (stateItem.value.isNotEmpty) {
+          _initialStateName = stateItem.value;
+          if (stateItem.originalData != null) {
+            dynamic stateOriginalData = stateItem.originalData;
+            if (stateOriginalData is StateModel) {
+              _initialStateId = stateOriginalData.id?.toString();
+            } else if (stateOriginalData is Map<String, dynamic>) {
+              _initialStateId = stateOriginalData['id']?.toString();
+            }
+          }
+        }
+        
+        // Guardar datos de ciudad si existen
+        final cityItem = _editingData.firstWhere(
+          (item) => item.label == 'Ciudad',
+          orElse: () => ModelData(label: '', value: '', clave: ''),
+        );
+        
+        if (cityItem.value.isNotEmpty) {
+          _initialCityName = cityItem.value;
+          if (cityItem.originalData != null) {
+            dynamic cityOriginalData = cityItem.originalData;
+            if (cityOriginalData is CityModel) {
+              _initialCityId = cityOriginalData.id?.toString();
+            } else if (cityOriginalData is Map<String, dynamic>) {
+              _initialCityId = cityOriginalData['id']?.toString();
+            }
+          }
+        }
+        
+        // Si hay país, cargar sus estados
+        if (_selectedCountryId != null && _selectedCountryId!.isNotEmpty) {
+          _autoSelectStateAfterLoad = _initialStateId != null;
+          await _loadStates(_selectedCountryId!, null, null, null);
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error inicializando valores de ubicación: $e");
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingLocation = false;
+        });
       }
     }
   }
 
-  Future<void> _loadStates(
-      String id, int? limit, int? offset, String? search) async {
+  Future<void> _loadStates(String id, int? limit, int? offset, String? search) async {
     if (!mounted) return;
+    
     setState(() {
       loadingState = true;
-      _statesList.clear(); // Limpiar la lista antes de cargar nuevos datos
-      _citiesList.clear(); // Limpiar la lista de ciudades también
+      _statesList.clear();
+      _citiesList.clear();
     });
+    
     try {
       final stateResponse = await getStatesByCountry(id, limit, offset, search);
 
-      if (stateResponse.data != null) {
+      if (stateResponse.data != null && mounted) {
         setState(() {
           _statesList = stateResponse.data!
               .map<ModelData>((state) => ModelData(
                   label: state['name'],
-                  value: state['id'],
+                  value: state['id'].toString(),
                   originalData: state))
               .toList();
         });
+        
+        // Después de cargar estados, si hay que autoseleccionar
+        if (_autoSelectStateAfterLoad && _initialStateId != null) {
+          _autoSelectStateAfterLoad = false;
+          
+          final stateToSelect = _findStateById(_initialStateId!);
+          if (stateToSelect != null) {
+            // Encontrar el índice del estado en _editingData
+            final stateIndex = _editingData.indexWhere((item) => item.label == 'Estado');
+            if (stateIndex != -1) {
+              // Actualizar _editingData con el estado seleccionado
+              setState(() {
+                _editingData[stateIndex] = ModelData<StateModel>(
+                  label: _editingData[stateIndex].label,
+                  value: stateToSelect.label,
+                  clave: _editingData[stateIndex].clave,
+                  showLabel: _editingData[stateIndex].showLabel,
+                  originalData: StateModel.fromJson(stateToSelect.originalData),
+                );
+                _initialStateId = stateToSelect.value;
+                _initialStateName = stateToSelect.label;
+              });
+              
+              // Cargar ciudades del estado seleccionado
+              _autoSelectCityAfterLoad = _initialCityId != null;
+              await _loadCities(_initialStateId!, null, null, null);
+            }
+          }
+        }
       }
-      setState(() => loadingState = false);
     } catch (e) {
-      setState(() => loadingState = false);
       if (kDebugMode) {
-        print("Error loading states: $e");
+        print("Error cargando estados: $e");
+      }
+    } finally {
+      if (mounted) {
+        setState(() => loadingState = false);
       }
     }
   }
 
-  Future<void> _loadCities(
-      String id, int? limit, int? offset, String? search) async {
+  Future<void> _loadCities(String id, int? limit, int? offset, String? search) async {
+    if (!mounted) return;
+    
     setState(() {
       loadingCity = true;
-      _citiesList.clear(); // Limpiar la lista de ciudades también
+      _citiesList.clear();
     });
+    
     try {
       final cityResponse = await getCitiesByState(id, limit, offset, search);
 
-      if (cityResponse.data != null) {
+      if (cityResponse.data != null && mounted) {
         setState(() {
           _citiesList = cityResponse.data!
               .map<ModelData>((city) => ModelData(
-                  value: city['id'], label: city['name'], originalData: city))
+                  value: city['id'].toString(),
+                  label: city['name'],
+                  originalData: city))
               .toList();
         });
+        
+        // Después de cargar ciudades, si hay que autoseleccionar
+        if (_autoSelectCityAfterLoad && _initialCityId != null) {
+          _autoSelectCityAfterLoad = false;
+          
+          final cityToSelect = _findCityById(_initialCityId!);
+          if (cityToSelect != null) {
+            // Encontrar el índice de la ciudad en _editingData
+            final cityIndex = _editingData.indexWhere((item) => item.label == 'Ciudad');
+            if (cityIndex != -1) {
+              setState(() {
+                _editingData[cityIndex] = ModelData<CityModel>(
+                  label: _editingData[cityIndex].label,
+                  value: cityToSelect.label,
+                  clave: _editingData[cityIndex].clave,
+                  showLabel: _editingData[cityIndex].showLabel,
+                  originalData: CityModel.fromJson(cityToSelect.originalData),
+                );
+                _initialCityId = cityToSelect.value;
+                _initialCityName = cityToSelect.label;
+              });
+            }
+          }
+        }
       }
-      setState(() => loadingCity = false);
     } catch (e) {
-      setState(() => loadingCity = false);
       if (kDebugMode) {
-        print("Error loading City: $e");
+        print("Error cargando ciudades: $e");
       }
+    } finally {
+      if (mounted) {
+        setState(() => loadingCity = false);
+      }
+    }
+  }
+
+  // Métodos auxiliares para buscar
+  ModelData? _findStateById(String id) {
+    if (_statesList.isEmpty) return null;
+    try {
+      return _statesList.firstWhere((state) => state.value == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  ModelData? _findCityById(String id) {
+    if (_citiesList.isEmpty) return null;
+    try {
+      return _citiesList.firstWhere((city) => city.value == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  ModelData? _findSelectedState(ModelData item) {
+    if (item.value.isEmpty || _statesList.isEmpty) return null;
+    
+    // Primero buscar por ID si lo tenemos
+    if (_initialStateId != null) {
+      final state = _findStateById(_initialStateId!);
+      if (state != null) return state;
+    }
+    
+    // Buscar por nombre
+    try {
+      return _statesList.firstWhere((element) => element.label == item.value);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  ModelData? _findSelectedCity(ModelData item) {
+    if (item.value.isEmpty || _citiesList.isEmpty) return null;
+    
+    // Primero buscar por ID si lo tenemos
+    if (_initialCityId != null) {
+      final city = _findCityById(_initialCityId!);
+      if (city != null) return city;
+    }
+    
+    // Buscar por nombre
+    try {
+      return _citiesList.firstWhere((element) => element.label == item.value);
+    } catch (e) {
+      return null;
     }
   }
 
   Widget _buildContent() {
-    final catalogueProvider =
-        Provider.of<CatalogueProvider>(context, listen: false);
+    // Mostrar loading si aún se está cargando la ubicación
+    if (_isLoadingLocation) {
+      return _buildLoadingState();
+    }
+    
+    final catalogueProvider = Provider.of<CatalogueProvider>(context, listen: false);
 
     final List<ModelData> dropDownList = catalogueProvider.allCountries
         .map((country) => ModelData(value: country.id, label: country.name))
@@ -580,9 +771,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                     Navigator.pop(context);
                   },
                 ),
-                SizedBox(
-                  height: 30,
-                ),
+                SizedBox(height: 30),
                 Expanded(
                   flex: 2,
                   child: Container(
@@ -603,7 +792,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                                   children: [
                                     _buildField(
                                       item,
-                                      index, // Pasa el índice
+                                      index,
                                       dropDownList,
                                       prefixCode,
                                       optionsSex,
@@ -611,9 +800,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                                       catalogueProvider.allChurches,
                                       catalogueProvider.allCountries,
                                     ),
-                                    SizedBox(
-                                      height: 12.0,
-                                    )
+                                    SizedBox(height: 12.0)
                                   ],
                                 );
                               },
@@ -636,9 +823,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 40,
-                ),
+                SizedBox(height: 40),
               ],
             ),
           ),
@@ -647,14 +832,10 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     );
   }
 
-  // Widget para el estado de error
-
   void _saveData() {
     if (_formKey.currentState!.validate()) {
-      // si la validación es exitosa, guardar los cambios
       widget.onSave(_editingData);
     } else {
-      // si hay errores de validación, mostrar mensajes
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Por favor, corrija los errores en el formulario.'),
@@ -664,12 +845,11 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     }
   }
 
-  Future<PaginationModel<ModelData>> _searchCountries(
-      String query, int page) async {
+  Future<PaginationModel<ModelData>> _searchCountries(String query, int page) async {
     return _countrySearchService.searchCountries(
       query: query,
       page: page,
-      limit: 15, // Menos items por página para mejor rendimiento
+      limit: 15,
     );
   }
 }

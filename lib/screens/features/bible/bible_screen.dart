@@ -1365,9 +1365,9 @@ class _BibleScreenState extends State<BibleScreen> {
               label: 'Copiar versículo',
               onPressed: () {
                 final reference =
-                    "${currentBook?.modernName} ${currentChapter?.chapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''}";
+                    "${currentVersion?.version} \n ${currentBook?.modernName} ${currentChapter?.chapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''}";
                 Clipboard.setData(
-                  ClipboardData(text: "$reference\n$selectedTextWithNumbers"),
+                  ClipboardData(text: "$reference\n$selectedTextWithNumbers  \n ${GraphQLConfig.urlServidor}OfficialBible"),
                 );
                 _showSnackBar('Versículo copiado');
                 selectableRegionState.hideToolbar();
@@ -1376,11 +1376,12 @@ class _BibleScreenState extends State<BibleScreen> {
             CustomContextMenuItem(
               icon: Icons.share,
               label: 'Compartir versículo',
-              onPressed: () {
+              onPressed: () async {
                 final reference =
-                    "${currentBook?.modernName} ${currentChapter?.chapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''}";
+                    "${currentVersion?.version} \n ${currentBook?.modernName} ${currentChapter?.chapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''} ";
+
                 SharePlus.instance.share(ShareParams(
-                  text: "$reference\n$selectedTextWithNumbers",
+                  text: "$reference \n $selectedTextWithNumbers \n ${GraphQLConfig.urlServidor}OfficialBible",
                   subject: 'Versículo de ${currentBook?.modernName}',
                 ));
                 selectableRegionState.hideToolbar();

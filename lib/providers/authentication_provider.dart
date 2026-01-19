@@ -199,12 +199,14 @@ class AuthenticationProvider extends ChangeNotifier {
     if (!context.mounted) return;
 
     await showCustomDialogWithAction(
+      
       context,
       message: "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
       dialogType: DialogTypeAction.info,
       buttonOk: "Ok",
       actionCallbackOk: () async {
         await _clearUserSession(context);
+        navigatorKey.currentState?.popUntil((route) => route.isFirst);
       },
     );
   }

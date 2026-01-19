@@ -301,7 +301,6 @@ class _QuizScreenState extends State<QuizScreen> {
                           // await funcAnswerValidate();
                         },
                         isAnswerSelected: _isAnswerSelected,
-                        isTablet: true,
                       ),
                     ),
                 },

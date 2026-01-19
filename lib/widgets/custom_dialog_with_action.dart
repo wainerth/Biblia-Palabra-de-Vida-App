@@ -66,7 +66,7 @@ class CustomDialogWithAction extends StatelessWidget {
           Flexible(
             child: Text(
               title,
-              style: TextStyle(
+              style: StylesApp(context).textStyleBody16.copyWith(
                 color: color,
                 fontSize: isTablet ? 20 : 16,
                 fontWeight: FontWeight.bold,
@@ -83,7 +83,7 @@ class CustomDialogWithAction extends StatelessWidget {
         child: SingleChildScrollView(
           child: Text(
             message,
-            style: TextStyle(
+            style: StylesApp(context).textStyleBody15.copyWith(
               fontSize: isTablet ? 17 : 15,
               color: Colors.black87,
             ),
@@ -108,7 +108,7 @@ class CustomDialogWithAction extends StatelessWidget {
               ),
               child: Text(
                 buttonOk,
-                style: TextStyle(
+                style: StylesApp(context).textStyleBody14.copyWith(
                   fontSize: isTablet ? 16 : 14,
                   color: Colors.white,
                 ),
@@ -130,7 +130,7 @@ class CustomDialogWithAction extends StatelessWidget {
                 ),
                 child: Text(
                   textButtonAction,
-                  style: TextStyle(
+                  style: StylesApp(context).textStyleBody14.copyWith(
                     fontSize: isTablet ? 16 : 14,
                     color: color,
                   ),
