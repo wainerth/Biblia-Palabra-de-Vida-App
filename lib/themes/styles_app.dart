@@ -43,9 +43,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 18.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 18.sp;
+      return 42;
     } else {
-      return 16.sp;
+      return 42;
     }
   }
 
@@ -57,9 +57,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 22.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 16.sp;
+      return 20.sp;
     } else {
-      return 16.sp;
+      return 42;
     }
   }
 
@@ -131,7 +131,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 10.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 10.sp;
+      return 16;
     } else {
       return 10.sp;
     }
@@ -201,9 +201,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 10.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 10.sp;
+      return 16;
     } else {
-      return 10.sp;
+      return 16;
     }
   }
 
@@ -215,9 +215,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 10.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 10.sp;
+      return 16;
     } else {
-      return 10.sp;
+      return 16;
     }
   }
 
@@ -313,7 +313,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 12.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 12.sp;
+      return 16;
     } else {
       return 10.sp;
     }
@@ -972,9 +972,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 20.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 20.sp;
+      return 20;
     } else {
-      return 20.sp;
+      return 20;
     }
   }
 

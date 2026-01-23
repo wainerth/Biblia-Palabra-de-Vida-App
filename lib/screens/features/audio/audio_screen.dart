@@ -16,7 +16,7 @@ class AudioScreen extends StatefulWidget {
 
 class _AudioScreenState extends State<AudioScreen> {
   static const platform =
-      MethodChannel('com.labibliapalabradevida.app/appchecker');
+      MethodChannel('com.renuevo.palabradevidabiblia/appchecker');
   final String appName = "amistad Online"; // Ajusta esto
   final String appPackageName = "amistad.online2"; // Ajusta esto
   String playStoreUrl = "";

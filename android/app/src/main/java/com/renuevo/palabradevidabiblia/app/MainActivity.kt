@@ -1,4 +1,4 @@
-package com.labibliapalabradevida.app
+package com.renuevo.palabradevidabiblia
 
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
@@ -7,7 +7,7 @@ import io.flutter.plugin.common.MethodChannel
 import android.content.pm.PackageManager
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "com.labibliapalabradevida.app/appchecker"
+    private val CHANNEL = "com.renuevo.palabradevidabiblia/appchecker"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

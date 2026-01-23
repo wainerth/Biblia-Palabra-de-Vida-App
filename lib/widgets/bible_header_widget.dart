@@ -38,7 +38,7 @@ class BibleHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<BibleThemeProvider>(context);
+    final themeProvider = Provider.of<BibleThemeProvider>(context, listen: false);
     final currentTheme = themeProvider.themeData;
     return SafeArea(
       child: Stack(children: [

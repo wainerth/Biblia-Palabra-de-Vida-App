@@ -84,7 +84,7 @@ class RelatedCharacters {
       haveMoreCharacters: json['haveMoreCharacters'],
       color: json['color'],
       img: Img.fromJson(json['img']),
-      typeNameChar: json['typeNameChar'],
+      typeNameChar: json['typeNameChar'] ?? '',
     );
   }
   Map<String, dynamic> toJson() {

@@ -189,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     if (user.error != null) {
                                       LoadingService().hideLoading();
                                       await showCustomDialog(context,
-                                          message: user.userFriendlyError! ,
+                                          message: user.userFriendlyError ?? '' ,
                                           messageDetail: user.error ?? '',
                                           showDetails: true,
                                           dialogType: DialogType.error);

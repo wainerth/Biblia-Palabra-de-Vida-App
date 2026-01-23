@@ -62,6 +62,8 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   List<VerseModel> _selectedItems = [];
   VerseModel? verseSelected;
 
+  final ScrollController _chaptersScrollController = ScrollController();
+  GlobalKey _selectedChapterKey = GlobalKey();
   // Función para determinar si es tablet
   bool get isTablet {
     final mediaQuery = MediaQuery.of(context);
@@ -136,10 +138,13 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         }
         if (widget.chapter != null) {
           setState(() {
-            chapterSelected = widget.chapter;
-            initialChapter = [chapterSelected!];
-            // _chaptersExpanded = false;
+            // Usar firstWhereOrNull en lugar de firstWhere
+            chapterSelected = chapters.firstWhereOrNull(
+                    (chapter) => chapter.chapter == widget.chapter!.chapter) ??
+                chapters.first; // Usar null-aware operator
+            initialChapter = chapterSelected != null ? [chapterSelected!] : [];
           });
+
           await loadVerses(chapterSelected!.id!);
           setState(() {
             _versesExpanded = true;
@@ -171,51 +176,125 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
               Container(
                 padding: horizontalPadding,
                 constraints: BoxConstraints(
-                  minWidth:
-                      isTablet ? 200.0 : 160.0, // Min width mayor en tablet
+                  minWidth: isTablet ? 200.0 : 160.0,
                   maxWidth: maxDropdownWidth,
                 ),
-                // Dropdown de versiones de la biblia
                 child: CustomDropdownBottomWidget(
                   hintText: "Seleccione la version",
                   items: bibleVersions,
                   onChanged: (ModelData? version) async {
-                    if (kDebugMode) {
-                      print("version seleccionada ${version!.value}");
-                    }
-                    setState(() {
-                      versionSelected = version;
-                      _chaptersExpanded = true;
-                      // _versesExpanded = false;
-                    });
-                    // leemos los libros de esta version y tomamos el primero
-                    await loadBookByVersion(version!.value);
-                    setState(() {
-                      bookSelected = ModelData(
-                          label: books.first.label,
-                          value: books.first.value,
-                          originalData: books.first.originalData);
-                      _chaptersExpanded = true;
-                      // _versesExpanded = false;
-                    });
-                    // leemos los capítulos de esta version y tomamos el primero
-                    await getChapterByBook(bookSelected!.value);
-                    if (chapters.isEmpty) return;
-                    setState(() {
-                      chapterSelected = chapters.first;
-                      initialChapter = [chapterSelected!];
-                      // _chaptersExpanded = false;
-                    });
-                    // leemos los versículos y seleccionamos el primero
-                    await loadVerses(chapterSelected!.id!);
+                    if (version == null) return;
 
-                    setState(() {
-                      _versesExpanded = true;
-                      _selectedItems.add(verses.first);
-                    });
+                    try {
+                      setState(() {
+                        versionSelected = version;
+                        _chaptersExpanded = true;
+                      });
+
+                      // Cargar libros de la nueva versión
+                      await loadBookByVersion(version.value);
+
+                      // Verificar que hay libros
+                      if (books.isEmpty) {
+                        throw Exception(
+                            'No hay libros disponibles para esta versión');
+                      }
+
+                      // Intentar mantener el libro seleccionado anteriormente
+                      ModelData? newBookSelected;
+
+                      if (bookSelected != null &&
+                          bookSelected!.originalData != null) {
+                        final currentBookNumber =
+                            bookSelected!.originalData!.numberBook;
+
+                        // Usar firstWhereOrNull en lugar de firstWhere
+                        newBookSelected = books.firstWhereOrNull((book) =>
+                            book.originalData!.numberBook == currentBookNumber);
+
+                        // Si no encontramos el libro por número, usar el primero
+                        if (newBookSelected == null) {
+                          newBookSelected = books.first;
+                        }
+                      } else {
+                        // Si no había libro seleccionado, usar el primero
+                        newBookSelected = books.first;
+                      }
+
+                      setState(() {
+                        bookSelected = newBookSelected;
+                        _chaptersExpanded = true;
+                      });
+
+                      // Cargar capítulos del nuevo libro
+                      await getChapterByBook(bookSelected!.value);
+
+                      // Verificar que hay capítulos
+                      if (chapters.isEmpty) {
+                        throw Exception(
+                            'No hay capítulos disponibles para este libro');
+                      }
+
+                      // Intentar mantener el capítulo seleccionado anteriormente
+                      ChapterModel? newChapterSelected;
+
+                      if (chapterSelected != null) {
+                        final currentChapterNumber = chapterSelected!.chapter;
+
+                        // Usar firstWhereOrNull en lugar de firstWhere
+                        newChapterSelected = chapters.firstWhereOrNull(
+                            (chapter) =>
+                                chapter.chapter == currentChapterNumber);
+
+                        // Si no encontramos el capítulo por número, usar el primero
+                        if (newChapterSelected == null) {
+                          newChapterSelected = chapters.first;
+                        }
+                      } else {
+                        // Si no había capítulo seleccionado, usar el primero
+                        newChapterSelected = chapters.first;
+                      }
+
+                      setState(() {
+                        chapterSelected = newChapterSelected;
+                        initialChapter = newChapterSelected != null
+                            ? [newChapterSelected!]
+                            : [];
+                      });
+
+                      // Cargar versículos del nuevo capítulo
+                      if (chapterSelected != null) {
+                        await loadVerses(chapterSelected!.id!);
+
+                        // Seleccionar el primer versículo
+                        setState(() {
+                          _versesExpanded = true;
+                          _selectedItems =
+                              verses.isNotEmpty ? [verses.first] : [];
+                          verseSelected =
+                              verses.isNotEmpty ? verses.first : null;
+                        });
+                      }
+                    } catch (e) {
+                      // Manejo de errores
+                      if (mounted) {
+                        setState(() {
+                          bookSelected = null;
+                          chapterSelected = null;
+                          verses = [];
+                          _selectedItems = [];
+                          verseSelected = null;
+                        });
+
+                        await showCustomDialog(context,
+                            message:
+                                'Error al cambiar versión: ${e.toString()}',
+                            dialogType: DialogType.error);
+                      }
+                    }
                   },
                   selectedItem: versionSelected!.value.isNotEmpty
-                      ? bibleVersions.firstWhere((element) =>
+                      ? bibleVersions.firstWhereOrNull((element) =>
                           element.value.toLowerCase() ==
                           versionSelected?.value.toLowerCase())
                       : null,
@@ -234,16 +313,15 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                   hintText: "Seleccione el Libro",
                   items: books,
                   onChanged: (ModelData? book) async {
-                    if (kDebugMode) {
-                      print("Libro seleccionada ${book!.value}");
-                    }
+                   if (book == null) return;
+
                     setState(() {
                       bookSelected = book;
                       _chaptersExpanded = true;
                       // _versesExpanded = false;
                     });
 
-                    await getChapterByBook(book!.value);
+                    await getChapterByBook(book.value);
                     setState(() {
                       initialChapter =
                           chapters.isNotEmpty ? [chapters.first] : [];
@@ -260,15 +338,21 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                       setState(() {
                         _versesExpanded = true;
                         _selectedItems.add(verses.first);
-                        verseSelected = verses.first;
+                        verseSelected = verseSelected != null
+                            ? verses.firstWhere(
+                                (verse) => verse.verse == verseSelected!.verse,
+                                orElse: () => verses.first)
+                            : verses.first;
                       });
                     }
                   },
                   selectedItem: bookSelected!.value.isNotEmpty
-                      ? books.firstWhere((element) =>
+                      ? books.firstWhereOrNull((element) =>
                           element.value.toLowerCase() ==
                           bookSelected?.value.toLowerCase())
-                      : null,
+                      : books.isNotEmpty
+                          ? books.first
+                          : null,
                 ),
               ),
               SizedBox(height: spacingHeight),
@@ -339,6 +423,10 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                               print(
                                   'Capítulo seleccionado: ${chapter.first.id}');
                             }
+                            // Hacer scroll después de un pequeño delay para que se renderice
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              _scrollToSelectedChapter();
+                            });
                             await loadVerses(chapter.first.id!);
                             setState(() {
                               chapterSelected = chapter.first;
@@ -520,16 +608,20 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   /// Leemos los libros que corresponden a la version de la biblia
   loadBookByVersion(String versionId) {
     setState(() {
-      bookSelected = ModelData(label: '', value: '');
+      // bookSelected = ModelData(label: '', value: '');
       chapters = [];
       verses = [];
       final VersionModel currenVersion =
           listBibleVersions.firstWhere((x) => x.id == versionId);
 
-      books = currenVersion.books
-          .map((book) => ModelData(
-              label: book.modernName, value: book.id, originalData: book))
-          .toList();
+      if (currenVersion != null && currenVersion.books.isNotEmpty) {
+        books = currenVersion.books
+            .map((book) => ModelData(
+                label: book.modernName, value: book.id, originalData: book))
+            .toList();
+      } else {
+        books = []; // Asegurar que books no sea null
+      }
     });
   }
 
@@ -601,6 +693,17 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       if (mounted) {
         setState(() => loadingVerses = false);
       }
+    }
+  }
+
+  void _scrollToSelectedChapter() {
+    if (_selectedChapterKey.currentContext != null) {
+      Scrollable.ensureVisible(
+        _selectedChapterKey.currentContext!,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        alignment: 0.1, // Aparece cerca del borde superior
+      );
     }
   }
 }

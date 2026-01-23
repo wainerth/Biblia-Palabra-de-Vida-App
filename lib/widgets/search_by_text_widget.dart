@@ -54,36 +54,36 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
   Timer? _debounceTimer;
 
   String _searchText = '';
+
+  final FocusNode _searchFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        listBibleVersions =
-            Provider.of<CatalogueProvider>(context, listen: false)
-                .allBibleVersion
-                .map((v) => v)
-                .toList();
-        bibleVersions = Provider.of<CatalogueProvider>(context, listen: false)
-            .allBibleVersion
-            .map((v) => ModelData(value: v.id, label: v.version))
-            .toList();
-      });
-      if (widget.version != null) {
-        setState(() {
-          versionSelected = ModelData(
-              label: widget.version!.version,
-              value: widget.version!.id,
-              originalData: widget.version);
-        });
-      }
-    });
+    // Inicializar datos de manera síncrona
+    final catalogueProvider =
+        Provider.of<CatalogueProvider>(context, listen: false);
+    listBibleVersions = catalogueProvider.allBibleVersion;
+    bibleVersions = catalogueProvider.allBibleVersion
+        .map((v) => ModelData(value: v.id, label: v.version))
+        .toList();
+
+    if (widget.version != null) {
+      versionSelected = ModelData(
+        label: widget.version!.version,
+        value: widget.version!.id,
+        originalData: widget.version,
+      );
+    }
   }
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
-    searchTextController.dispose();
+    if (mounted) {
+      _debounceTimer?.cancel();
+      searchTextController.dispose();
+      _searchFocusNode.dispose();
+    }
     super.dispose();
   }
 
@@ -134,6 +134,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                 children: [
                   Expanded(
                     child: TextFormField(
+                      focusNode: _searchFocusNode,
                       readOnly: versionSelected!.value.isEmpty || loading,
                       controller: searchTextController,
                       style: StylesApp(context).textStyleSmallBlack,
@@ -146,14 +147,18 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                                 ? IconButton(
                                     icon: Icon(Icons.clear),
                                     onPressed: () {
-                                      setState(() {
+                                      if (!mounted) return;
+                                      // setState(() {
                                         cleanSearch();
-                                      });
+                                        _searchFocusNode
+                                            .unfocus(); // ← Desenfocar al limpiar
+                                      // });
                                     },
                                   )
-                                : Icon(Icons.search),
+                                : null,
                           ),
                       onChanged: (value) {
+                        if (!mounted) return;
                         setState(() {
                           _searchText = value;
                         });
@@ -161,19 +166,36 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                     ),
                   ),
                   SizedBox(width: 8.0), // Espacio entre el input y el botón
-                  ElevatedButton(
+                  IconButton(
+                    style: StylesApp(context).btnPrimary.copyWith(
+                          minimumSize: WidgetStatePropertyAll(Size(50, 50)),
+                          maximumSize: null,
+                          backgroundColor: _searchText.isNotEmpty
+                              ? WidgetStatePropertyAll(currentTheme.buttonColor)
+                              : WidgetStatePropertyAll(
+                                  currentTheme.buttonColor.withOpacity(0.5)),
+                        ),
+                    color: currentTheme.buttonColor,
+                    icon: Icon(Icons.search),
                     onPressed: _searchText.isNotEmpty
                         ? () {
                             _onSearchChanged(_searchText);
                           }
                         : null,
-                    child: Text(
-                      'Buscar',
-                      style: StylesApp(context)
-                          .textStyleBody14
-                          .copyWith(color: currentTheme.buttonTextColor),
-                    ),
                   ),
+                  // ElevatedButton(
+                  //   onPressed: _searchText.isNotEmpty
+                  //       ? () {
+                  //           _onSearchChanged(_searchText);
+                  //         }
+                  //       : null,
+                  //   child: Text(
+                  //     'Buscar',
+                  //     style: StylesApp(context)
+                  //         .textStyleBody14
+                  //         .copyWith(color: currentTheme.buttonTextColor),
+                  //   ),
+                  // ),
                 ],
               ),
             ],
@@ -333,9 +355,23 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
 
     _debounceTimer = Timer(Duration(milliseconds: 800), () {
-      FocusScope.of(context).unfocus();
+      // VERIFICACIÓN CRÍTICA
+      if (!mounted) return;
+
+      // Quitar el focus de manera segura
+      _safeUnfocus();
       _performSearch(query);
     });
+  }
+
+  void _safeUnfocus() {
+    // Método 1: Usar FocusManager (más seguro)
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    // Método 2: Usar el focus node directamente
+    // if (_searchFocusNode.hasFocus) {
+    //   _searchFocusNode.unfocus();
+    // }
   }
 
   void _performSearch(String query) async {

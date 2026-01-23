@@ -35,7 +35,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _autoValidate = false;
 
-  File? audioFile;
+  // File? audioFile;
   List<ModelData> options = [];
   ModelData subtypeSelected =
       ModelData(label: "Seleccione una opción", value: "");
@@ -245,10 +245,10 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                           _buildInstructionStep(
                               "3", "Describe detalladamente tu petición"),
                           SizedBox(height: 12),
-                          _buildInstructionStep(
-                              "4", "Graba un audio si lo deseas (opcional)"),
-                          SizedBox(height: 12),
-                          _buildInstructionStep("5",
+                          // _buildInstructionStep(
+                          //     "4", "Graba un audio si lo deseas (opcional)"),
+                          // SizedBox(height: 12),
+                          _buildInstructionStep("4",
                               "Presiona Enviar para compartir tu petición"),
                         ],
                       ),
@@ -570,67 +570,67 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                       SizedBox(height: 10),
 
                       // Grabación de audio
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Grabación de Audio (Opcional)",
-                            style: StylesApp(context).textStyleBody16.copyWith(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: StyleColor.blueDark,
-                                ),
-                          ),
-                          SizedBox(height: 8),
-                          AudioRecorderWidget(
-                            onAudioRecorded: (File file) {
-                              setState(() {
-                                audioFile = file;
-                              });
-                            },
-                          ),
-                          if (audioFile != null) ...[
-                            SizedBox(height: 10),
-                            Container(
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color:
-                                    StyleColor.blueLight.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: StyleColor.blue),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.audio_file,
-                                    color: StyleColor.blue,
-                                    size: 30,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      "Audio grabado listo para enviar",
-                                      style: StylesApp(context)
-                                          .textStyleBody16
-                                          .copyWith(
-                                              fontSize: 12,
-                                              color: StyleColor.blueDark),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.close, size: 20),
-                                    onPressed: () {
-                                      setState(() {
-                                        audioFile = null;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                      // Column(
+                      //   crossAxisAlignment: CrossAxisAlignment.start,
+                      //   children: [
+                      //     // Text(
+                      //     //   "Grabación de Audio (Opcional)",
+                      //     //   style: StylesApp(context).textStyleBody16.copyWith(
+                      //     //         fontSize: 16,
+                      //     //         fontWeight: FontWeight.w600,
+                      //     //         color: StyleColor.blueDark,
+                      //     //       ),
+                      //     // ),
+                      //     // SizedBox(height: 8),
+                      //     //   AudioRecorderWidget(
+                      //     //     onAudioRecorded: (File file) {
+                      //     //       setState(() {
+                      //     //         audioFile = file;
+                      //     //       });
+                      //     //     },
+                      //     //   ),
+                      //     //   if (audioFile != null) ...[
+                      //     //     SizedBox(height: 10),
+                      //     //     Container(
+                      //     //       padding: EdgeInsets.all(12),
+                      //     //       decoration: BoxDecoration(
+                      //     //         color:
+                      //     //             StyleColor.blueLight.withValues(alpha: 0.2),
+                      //     //         borderRadius: BorderRadius.circular(8),
+                      //     //         border: Border.all(color: StyleColor.blue),
+                      //     //       ),
+                      //     //       child: Row(
+                      //     //         children: [
+                      //     //           Icon(
+                      //     //             Icons.audio_file,
+                      //     //             color: StyleColor.blue,
+                      //     //             size: 30,
+                      //     //           ),
+                      //     //           SizedBox(width: 10),
+                      //     //           Expanded(
+                      //     //             child: Text(
+                      //     //               "Audio grabado listo para enviar",
+                      //     //               style: StylesApp(context)
+                      //     //                   .textStyleBody16
+                      //     //                   .copyWith(
+                      //     //                       fontSize: 12,
+                      //     //                       color: StyleColor.blueDark),
+                      //     //             ),
+                      //     //           ),
+                      //     //           IconButton(
+                      //     //             icon: Icon(Icons.close, size: 20),
+                      //     //             onPressed: () {
+                      //     //               setState(() {
+                      //     //                 audioFile = null;
+                      //     //               });
+                      //     //             },
+                      //     //           ),
+                      //     //         ],
+                      //     //       ),
+                      //     //     ),
+                      //     //   ],
+                      //   ],
+                      // ),
                       SizedBox(height: 20),
 
                       // Botón Enviar
@@ -771,17 +771,17 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                 ),
               ),
               SizedBox(height: 18.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 26.0),
-                child: AudioRecorderWidget(
-                  onAudioRecorded: (File file) {
-                    setState(() {
-                      audioFile = file;
-                    });
-                  },
-                ),
-              ),
-              SizedBox(height: 10),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 26.0),
+              //   child: AudioRecorderWidget(
+              //     onAudioRecorded: (File file) {
+              //       setState(() {
+              //         audioFile = file;
+              //       });
+              //     },
+              //   ),
+              // ),
+              // SizedBox(height: 10),
               ButtonThemeWidget(
                 text: "Enviar",
                 buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -849,7 +849,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
     try {
       // almaceno en Model para formatear
       final requestData = RequestPrayerModel(
-        audio: audioFile,
+        audio: null,
         description: _descriptionController.text,
         prayerFor: _recipientName.text,
         prayerSubTypeId: subtypeSelected.value,

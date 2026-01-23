@@ -140,7 +140,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     if (kDebugMode) {
       print('=== TABLET DIAGNOSTIC ===');
       print('Ancho: ${mediaQuery.size.width}');

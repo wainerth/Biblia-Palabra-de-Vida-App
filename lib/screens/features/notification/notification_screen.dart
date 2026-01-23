@@ -32,6 +32,227 @@ class _NotificationScreenState extends State<NotificationScreen> {
     super.initState();
   }
 
+  // MÉTODO MEJORADO PARA MARCAR COMO LEÍDA
+  Future<void> _markAsRead(NotificationModel notification) async {
+    // Si ya está leída, no hacer nada
+    if (notification.isRead) return;
+
+    LoadingService().showLoading(context);
+
+    try {
+      final responseMarkReadNotification =
+          await markAsReadOneNotification(notification.id!);
+
+      if (responseMarkReadNotification.error != null) {
+        if (mounted) {
+          await showCustomDialogWithAction(
+            context,
+            dialogType: DialogTypeAction.error,
+            message: responseMarkReadNotification.error!,
+            actionCallback: () => Navigator.pop(context),
+            buttonOk: "Ok",
+          );
+        }
+        return;
+      }
+
+      if (responseMarkReadNotification.data != null &&
+          !responseMarkReadNotification.data['success']) {
+        if (mounted) {
+          await showCustomDialog(
+            context,
+            dialogType: DialogType.error,
+            message: responseMarkReadNotification.data['message'],
+          );
+        }
+        return;
+      }
+
+      // ACTUALIZAR ESTADO COMPLETO
+      _updateNotificationStatus(notification.id!, true);
+    } catch (e) {
+      if (mounted) {
+        await showCustomDialog(
+          context,
+          dialogType: DialogType.error,
+          message: 'Error al marcar como leída: ${e.toString()}',
+        );
+      }
+    } finally {
+      LoadingService().hideLoading();
+    }
+  }
+
+  // MÉTODO PARA ACTUALIZAR EL ESTADO DE UNA NOTIFICACIÓN
+  void _updateNotificationStatus(String notificationId, bool isRead) {
+    if (!mounted) return;
+
+    setState(() {
+      // 1. Actualizar en la lista principal
+      for (int i = 0; i < notifications.length; i++) {
+        if (notifications[i].id == notificationId) {
+          notifications[i] = notifications[i].copyWith(isRead: isRead);
+          break;
+        }
+      }
+
+      // 2. Actualizar en groupedNotifications
+      for (final key in groupedNotifications.keys) {
+        for (int i = 0; i < groupedNotifications[key]!.length; i++) {
+          if (groupedNotifications[key]![i].id == notificationId) {
+            groupedNotifications[key]![i] =
+                groupedNotifications[key]![i].copyWith(isRead: isRead);
+            break;
+          }
+        }
+      }
+
+      // 3. Actualizar selectedNotification si es la misma
+      if (selectedNotification?.id == notificationId) {
+        selectedNotification = selectedNotification!.copyWith(isRead: isRead);
+      }
+
+      // 4. Reordenar las fechas si es necesario
+      _reorganizeNotificationGroups();
+    });
+  }
+
+  // REORGANIZAR GRUPOS DESPUÉS DE ACTUALIZAR
+  void _reorganizeNotificationGroups() {
+    final Map<String, List<NotificationModel>> newGrouped = {};
+
+    for (var notification in notifications) {
+      final dateKey =
+          _getDateKey(_parseNotificationDate(notification.createdAt));
+
+      if (!newGrouped.containsKey(dateKey)) {
+        newGrouped[dateKey] = [];
+      }
+
+      newGrouped[dateKey]!.add(notification);
+    }
+
+    setState(() {
+      groupedNotifications = newGrouped;
+      sortedDateKeys = _sortDateKeys(groupedNotifications);
+    });
+  }
+
+  // MÉTODO MEJORADO PARA CARGAR NOTIFICACIONES
+  Future<void> loadAllNotifications() async {
+    if (!mounted) return;
+
+    setState(() {
+      error = '';
+      loading = true;
+    });
+
+    try {
+      // Limpiar notificaciones del socket
+      final socketProvider =
+          Provider.of<SocketClientProvider>(context, listen: false);
+      socketProvider.cleanNotification();
+
+      // Obtener usuario
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userData = userProvider.currentUser;
+
+      if (userData == null || userData.userId.isEmpty) {
+        throw Exception('Usuario no autenticado');
+      }
+
+      // Obtener notificaciones
+      final responseNotification =
+          await getAllNotification(1, null, userData.userId);
+
+      if (responseNotification.error != null) {
+        throw Exception(responseNotification.error!);
+      }
+
+      // Procesar notificaciones
+      final rawNotifications = responseNotification.data['data'] ?? [];
+      final List<NotificationModel> loadedNotifications = [];
+
+      for (var notify in rawNotifications) {
+        try {
+          final notification = NotificationModel.fromJson(notify);
+          // Asegurar que la fecha se parsea correctamente
+          final parsedDate = _parseNotificationDate(notification.createdAt);
+          loadedNotifications.add(notification.copyWith(
+            createdAt: parsedDate.toIso8601String(), // Mantener la fecha parseada como String
+          ));
+        } catch (e) {
+          print('Error procesando notificación: $e');
+        }
+      }
+
+      // Actualizar estado
+      if (mounted) {
+        setState(() {
+          notifications = loadedNotifications;
+          groupedNotifications = groupNotificationsByDate(loadedNotifications);
+          sortedDateKeys = _sortDateKeys(groupedNotifications);
+          loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          error = "Error al cargar notificaciones: ${e.toString()}";
+          loading = false;
+        });
+      }
+    }
+  }
+
+  // MÉTODO MEJORADO PARA MARCAR TODAS COMO LEÍDAS
+  Future<void> _markAllAsRead() async {
+    if (notifications.isEmpty || !notifications.any((n) => !n.isRead)) return;
+
+    LoadingService().showLoading(context);
+
+    try {
+      String userId = await PreferencesManager().getUserId();
+      final ResponseData responseMarkedAllRead =
+          await markAllAsReadNotifications(userId);
+
+      if (responseMarkedAllRead.error != null) {
+        throw Exception(responseMarkedAllRead.error!);
+      }
+
+      // Actualizar todas las notificaciones localmente
+      if (mounted) {
+        setState(() {
+          // Actualizar todas las notificaciones
+          notifications =
+              notifications.map((n) => n.copyWith(isRead: true)).toList();
+
+          // Actualizar groupedNotifications
+          groupedNotifications = groupNotificationsByDate(notifications);
+          sortedDateKeys = _sortDateKeys(groupedNotifications);
+
+          // Actualizar selectedNotification si existe
+          if (selectedNotification != null) {
+            selectedNotification = selectedNotification!.copyWith(isRead: true);
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        await showCustomDialog(
+          context,
+          message: 'Error: ${e.toString()}',
+          dialogType: DialogType.error,
+        );
+      }
+    } finally {
+      LoadingService().hideLoading();
+    }
+  }
+
+  // ACTUALIZAR CONTADOR GLOBAL DE NOTIFICACIONES
+  
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -53,27 +274,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return AppBar(
       toolbarHeight: 100,
       centerTitle: false,
-       leadingWidth: 45, // ← CRUCIAL
-  leading: Padding(
-    padding: const EdgeInsets.only(left: 10),
-    child: SizedBox(
-      width: 40,
-      height: 40,
-      child: IconButton(
-        style: IconButton.styleFrom(
-          backgroundColor: StyleColor.orange,
-          foregroundColor: StyleColor.white,
-          shape: const CircleBorder(),
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(35, 35),
-          fixedSize: const Size(35, 35),
-          iconSize: 20,
+      leadingWidth: 45, // ← CRUCIAL
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: StyleColor.orange,
+              foregroundColor: StyleColor.white,
+              shape: const CircleBorder(),
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(35, 35),
+              fixedSize: const Size(35, 35),
+              iconSize: 20,
+            ),
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back),
+          ),
         ),
-        onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back),
       ),
-    ),
-  ),
       backgroundColor: StyleColor.turquoise,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1083,58 +1304,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  // Métodos auxiliares para manejar notificaciones
-  Future<void> _markAllAsRead() async {
-    setState(() => loading = true);
-    String userId = await PreferencesManager().getUserId();
-    final ResponseData responseMarkedAllRead =
-        await markAllAsReadNotifications(userId);
-
-    if (responseMarkedAllRead.error != null && mounted) {
-      setState(() => loading = false);
-      await showCustomDialog(context,
-          message: responseMarkedAllRead.error!, dialogType: DialogType.error);
-      return;
-    }
-
-    await loadAllNotifications();
-  }
-
-  Future<void> _markAsRead(NotificationModel notification) async {
-    final responseMarkReadNotification =
-        await markAsReadOneNotification(notification.id!);
-
-    if (responseMarkReadNotification.error != null && mounted) {
-      await showCustomDialogWithAction(
-        context,
-        dialogType: DialogTypeAction.error,
-        message: responseMarkReadNotification.error!,
-        actionCallback: () => Navigator.pop(context),
-        buttonOk: "Ok",
-      );
-      return;
-    }
-
-    if (responseMarkReadNotification.data != null &&
-        !responseMarkReadNotification.data['success'] &&
-        mounted) {
-      await showCustomDialog(
-        context,
-        dialogType: DialogType.error,
-        message: responseMarkReadNotification.data['message'],
-      );
-      return;
-    }
-
-    // Actualizar la notificación localmente
-    setState(() {
-      notification = notification.copyWith(isRead: true);
-      if (selectedNotification?.id == notification.id) {
-        selectedNotification = notification;
-      }
-    });
-  }
-
   Future<void> _handleNotificationAction(NotificationModel notification) async {
     await _markAsRead(notification);
 
@@ -1161,50 +1330,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  Future loadAllNotifications() async {
-    setState(() {
-      error = '';
-      if (!loading) loading = true;
-    });
-
-    Provider.of<SocketClientProvider>(context, listen: false)
-        .cleanNotification();
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final useData = userProvider.currentUser;
-
-    try {
-      final responseNotification = await getAllNotification(
-          1, null, useData != null ? useData.userId : '');
-
-      if (responseNotification.error != null && mounted) {
-        setState(() => loading = false);
-        await showCustomDialog(context,
-            message: responseNotification.error!, dialogType: DialogType.error);
-        return;
-      }
-
-      setState(() {
-        notifications = responseNotification.data['data']
-            .map<NotificationModel>(
-                (notify) => NotificationModel.fromJson(notify))
-            .toList();
-
-        groupedNotifications = groupNotificationsByDate(notifications);
-        sortedDateKeys = _sortDateKeys(groupedNotifications);
-        loading = false;
-      });
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          error = "Error al leer las notificaciones: ${e.toString()}";
-          loading = false;
-        });
-        await showCustomDialog(context,
-            message: error, dialogType: DialogType.error);
-      }
-    }
-  }
-
   Map<String, List<NotificationModel>> groupNotificationsByDate(
       List<NotificationModel> notifications) {
     Map<String, List<NotificationModel>> groupedNotifications = {};
@@ -1226,28 +1351,52 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   DateTime _parseNotificationDate(dynamic dateInput) {
     try {
-      DateTime result;
-
+      // Si ya es DateTime, devolverlo
       if (dateInput is DateTime) {
-        result = dateInput;
-      } else if (dateInput is String) {
-        result = DateTime.tryParse(dateInput) ??
-            _parseCustomFormat(dateInput) ??
-            (throw FormatException('Formato no válido'));
-      } else {
-        throw ArgumentError('Tipo no soportado: ${dateInput.runtimeType}');
+        return dateInput;
       }
 
-      return DateTime(
-        result.year,
-        result.month,
-        result.day,
-        result.hour,
-        result.minute,
-      );
+      // Si es String, intentar parsear
+      if (dateInput is String) {
+        // Intentar formato ISO
+        DateTime? parsed = DateTime.tryParse(dateInput);
+        if (parsed != null) return parsed;
+
+        // Intentar formato personalizado dd/MM/yyyy HH:mm
+        final match = RegExp(r'^(\d{2})/(\d{2})/(\d{4}) (\d{2}):(\d{2})')
+            .firstMatch(dateInput);
+        if (match != null) {
+          return DateTime(
+            int.parse(match.group(3)!),
+            int.parse(match.group(2)!),
+            int.parse(match.group(1)!),
+            int.parse(match.group(4)!),
+            int.parse(match.group(5)!),
+          );
+        }
+
+        // Intentar otros formatos comunes
+        final formats = [
+          'yyyy-MM-dd HH:mm:ss',
+          'yyyy/MM/dd HH:mm:ss',
+          'dd-MM-yyyy HH:mm:ss',
+        ];
+
+        for (var format in formats) {
+          try {
+            // Implementar parsing según formato si es necesario
+          } catch (_) {}
+        }
+
+        throw FormatException('Formato de fecha no reconocido: $dateInput');
+      }
+
+      // Si no es ninguno de los anteriores, usar fecha mínima
+      return DateTime(2000);
     } catch (e) {
-      print('Error parsing date: $dateInput - Error: $e');
-      return DateTime.now();
+      print('Error parsing notification date: $dateInput - $e');
+      // Usar una fecha del pasado para evitar confusiones
+      return DateTime(2000);
     }
   }
 

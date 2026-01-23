@@ -7,8 +7,8 @@ class GraphQLConfig {
   static const String authToken = '';
   static const bool development = false;
   static const String urlApkRadio = 'https://apk.e-droid.net/apk/app3557953-xlahe3.apk?v=5';
-  static const String clientId = '823422522259-lsaj5empb8t54pims7m727krgrcfu6lf.apps.googleusercontent.com';
-  static const String serverClientId = '945681325893-ckla49hrnakacrpc9fc21vie6ub9o9o3.apps.googleusercontent.com';
+  static const String clientId = '945681325893-14cjnnp2o5kctmlpti54nctcacdt1h00.apps.googleusercontent.com';// '823422522259-lsaj5empb8t54pims7m727krgrcfu6lf.apps.googleusercontent.com';
+  static const String serverClientId = '945681325893-14cjnnp2o5kctmlpti54nctcacdt1h00.apps.googleusercontent.com';//'945681325893-ckla49hrnakacrpc9fc21vie6ub9o9o3.apps.googleusercontent.com';
   static const String clientId_pro = '945681325893-1pui41okanrgp41gfd2r74m90el7n290.apps.googleusercontent.com';
   static const String emailContact = 'labibliarenuevodevida@gmail.com';
   static const String stripePaymentLink = "https://buy.stripe.com/test_xxxxxxxxxxxx";

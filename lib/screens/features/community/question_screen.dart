@@ -778,7 +778,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ? 'Culminaste el Paso ${levelProgress!.level.levelNumber}'
               : "Intenta nuevamente el\n Paso ${levelProgress!.level.levelNumber} para avanzar",
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: StylesApp(context).textStyleBody16.copyWith(
             color: Colors.white,
             fontSize: isTablet(context) ? 20 : 16,
           ),
@@ -788,7 +788,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           Text(
             'Haz ganado\n ${levelProgress!.energy} LMs de energía',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: StylesApp(context).textStyleBody16.copyWith(
               color: Colors.white,
               fontSize: isTablet(context) ? 18 : 16,
             ),
@@ -811,7 +811,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           SizedBox(height: 12),
           Text(
             "${levelProgress!.energy.toStringAsFixed(0)} lms",
-            style: TextStyle(
+            style: StylesApp(context).textStyleBody16.copyWith(
               color: Color(0XFFFD8C43),
               fontSize: isTablet(context) ? 18 : 16,
             ),
@@ -820,7 +820,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         ],
         ButtonThemeWidget(
           text: "Continuar",
-          width: isTablet(context) ? double.infinity : 132,
+          width: isTablet(context) ? 200 : 132,
           height: isTablet(context) ? 48 : 32,
           buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                 textStyle: WidgetStatePropertyAll(

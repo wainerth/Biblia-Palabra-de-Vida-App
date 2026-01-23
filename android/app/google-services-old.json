@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "483076700531",
+    "project_id": "palabra-de-vida-notifica-a12f8",
+    "storage_bucket": "palabra-de-vida-notifica-a12f8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:483076700531:android:0be7a445a5af7c9d4d2d06",
+        "android_client_info": {
+          "package_name": "com.labibliapalabradevida.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAD9bEN0aJv7RPaPUBwNV3V4FwY5oW0CTg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

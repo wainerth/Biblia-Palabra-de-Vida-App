@@ -199,12 +199,12 @@ class CatalogueProvider extends ChangeNotifier {
 
   Future<void> _retryService(String serviceName) async {
     switch (serviceName) {
-      case 'Countries':
-        await _loadAllCountriesWithIsolates();
-        break;
-      case 'AreaCodes':
-        await _loadAreasCodeWithIsolates();
-        break;
+      // case 'Countries':
+      //   await _loadAllCountriesWithIsolates();
+      //   break;
+      // case 'AreaCodes':
+      //   await _loadAreasCodeWithIsolates();
+      //   break;
       case 'Churches':
         await _loadChurches();
         break;
@@ -260,66 +260,66 @@ class CatalogueProvider extends ChangeNotifier {
     throw Exception('Failed to create GraphQL client after $retries attempts');
   }
 
-  Future<void> _loadAllCountriesWithIsolates() async {
-    final receivePort = ReceivePort();
-    await Isolate.spawn(_countriesLoader, receivePort.sendPort);
+  // Future<void> _loadAllCountriesWithIsolates() async {
+  //   final receivePort = ReceivePort();
+  //   await Isolate.spawn(_countriesLoader, receivePort.sendPort);
 
-    await for (var message in receivePort) {
-      if (message is List<Country>) {
-        allCountries.addAll(message);
-        notifyListeners();
-      } else if (message == 'completed') {
-        if (kDebugMode && allCountries.isNotEmpty) {
-          if (kDebugMode) {
-            print("countries cargados...");
-          }
-        }
-        break;
-      }
-    }
-  }
+  //   await for (var message in receivePort) {
+  //     if (message is List<Country>) {
+  //       allCountries.addAll(message);
+  //       notifyListeners();
+  //     } else if (message == 'completed') {
+  //       if (kDebugMode && allCountries.isNotEmpty) {
+  //         if (kDebugMode) {
+  //           print("countries cargados...");
+  //         }
+  //       }
+  //       break;
+  //     }
+  //   }
+  // }
 
-  static void _countriesLoader(SendPort sendPort) async {
-    final client = createClient();
-    var offset = 0;
-    const limit = 20;
-    var hasMore = true;
+  // static void _countriesLoader(SendPort sendPort) async {
+  //   final client = createClient();
+  //   var offset = 0;
+  //   const limit = 20;
+  //   var hasMore = true;
 
-    while (hasMore) {
-      final options = QueryOptions(
-        operationName: "GetAllCountryWithCodeAreas",
-        document: gql(r'''
-        query GetAllCountryWithCodeAreas($limit: Int, $offset: Int, $search: String) {
-          getAllCountryWithCodeAreas(limit: $limit, offset: $offset, search: $search) {
-            id
-            name
-            areaCodeCountry {
-              id
-              code
-            }
-          }
-        }
-        '''),
-        variables: <String, dynamic>{
-          "limit": limit,
-          "offset": offset,
-          "search": ""
-        },
-        fetchPolicy: FetchPolicy.noCache,
-      );
+  //   while (hasMore) {
+  //     final options = QueryOptions(
+  //       operationName: "GetAllCountryWithCodeAreas",
+  //       document: gql(r'''
+  //       query GetAllCountryWithCodeAreas($limit: Int, $offset: Int, $search: String) {
+  //         getAllCountryWithCodeAreas(limit: $limit, offset: $offset, search: $search) {
+  //           id
+  //           name
+  //           areaCodeCountry {
+  //             id
+  //             code
+  //           }
+  //         }
+  //       }
+  //       '''),
+  //       variables: <String, dynamic>{
+  //         "limit": limit,
+  //         "offset": offset,
+  //         "search": ""
+  //       },
+  //       fetchPolicy: FetchPolicy.noCache,
+  //     );
 
-      final result = await client.query(options);
-      final data = result.data?['getAllCountryWithCodeAreas'] as List? ?? [];
-      final countries = data.map((i) => Country.fromJson(i)).toList();
+  //     final result = await client.query(options);
+  //     final data = result.data?['getAllCountryWithCodeAreas'] as List? ?? [];
+  //     final countries = data.map((i) => Country.fromJson(i)).toList();
 
-      sendPort.send(countries);
-      offset += countries.length;
-      hasMore = countries.length >= limit;
-      await Future.delayed(Duration(milliseconds: 300));
-    }
+  //     sendPort.send(countries);
+  //     offset += countries.length;
+  //     hasMore = countries.length >= limit;
+  //     await Future.delayed(Duration(milliseconds: 300));
+  //   }
 
-    sendPort.send('completed');
-  }
+  //   sendPort.send('completed');
+  // }
 
   Future<void> _loadChurches() async {
     try {
@@ -464,60 +464,60 @@ class CatalogueProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadAreasCodeWithIsolates() async {
-    final receivePort = ReceivePort();
-    await Isolate.spawn(_areasCodeLoader, receivePort.sendPort);
+  // Future<void> _loadAreasCodeWithIsolates() async {
+  //   final receivePort = ReceivePort();
+  //   await Isolate.spawn(_areasCodeLoader, receivePort.sendPort);
 
-    await for (var message in receivePort) {
-      if (message is List<AreaCode>) {
-        allAreasCode.addAll(message);
-        notifyListeners();
-      } else if (message == 'completed') {
-        if (kDebugMode) {
-          print("areas code cargados...");
-        }
-        break;
-      }
-    }
-  }
+  //   await for (var message in receivePort) {
+  //     if (message is List<AreaCode>) {
+  //       allAreasCode.addAll(message);
+  //       notifyListeners();
+  //     } else if (message == 'completed') {
+  //       if (kDebugMode) {
+  //         print("areas code cargados...");
+  //       }
+  //       break;
+  //     }
+  //   }
+  // }
 
-  static void _areasCodeLoader(SendPort sendPort) async {
-    final client = createClient();
-    var offset = 0;
-    const limit = 20;
-    var hasMore = true;
+  // static void _areasCodeLoader(SendPort sendPort) async {
+  //   final client = createClient();
+  //   var offset = 0;
+  //   const limit = 20;
+  //   var hasMore = true;
 
-    while (hasMore) {
-      final options = QueryOptions(
-        operationName: "GetAllAreaCodes",
-        document: gql(r'''
-         query GetAllAreaCodes($limit: Int, $offset: Int, $search: String) {
-            getAllAreaCodes(limit: $limit, offset: $offset, search: $search) {
-              id
-              code
-            }
-          }
-        '''),
-        variables: <String, dynamic>{
-          "limit": limit,
-          "offset": offset,
-          "search": ""
-        },
-        fetchPolicy: FetchPolicy.noCache,
-      );
+  //   while (hasMore) {
+  //     final options = QueryOptions(
+  //       operationName: "GetAllAreaCodes",
+  //       document: gql(r'''
+  //        query GetAllAreaCodes($limit: Int, $offset: Int, $search: String) {
+  //           getAllAreaCodes(limit: $limit, offset: $offset, search: $search) {
+  //             id
+  //             code
+  //           }
+  //         }
+  //       '''),
+  //       variables: <String, dynamic>{
+  //         "limit": limit,
+  //         "offset": offset,
+  //         "search": ""
+  //       },
+  //       fetchPolicy: FetchPolicy.noCache,
+  //     );
 
-      final result = await client.query(options);
-      final data = result.data?['getAllAreaCodes'] as List? ?? [];
-      final areas = data.map((i) => AreaCode.fromJson(i)).toList();
+  //     final result = await client.query(options);
+  //     final data = result.data?['getAllAreaCodes'] as List? ?? [];
+  //     final areas = data.map((i) => AreaCode.fromJson(i)).toList();
 
-      sendPort.send(areas);
-      offset += areas.length;
-      hasMore = areas.length >= limit;
-      await Future.delayed(Duration(milliseconds: 300));
-    }
+  //     sendPort.send(areas);
+  //     offset += areas.length;
+  //     hasMore = areas.length >= limit;
+  //     await Future.delayed(Duration(milliseconds: 300));
+  //   }
 
-    sendPort.send('completed');
-  }
+  //   sendPort.send('completed');
+  // }
 
   Future<void> loadBibleVersions() async {
     try {

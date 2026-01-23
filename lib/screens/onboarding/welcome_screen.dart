@@ -48,18 +48,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           Expanded(
             flex: isTablet ? 6 : 4,
             child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: StyleColor.black)
-              ),
+              decoration:
+                  BoxDecoration(border: Border.all(color: StyleColor.black)),
               height: MediaQuery.sizeOf(context).height,
               child: PageView(
                 controller: _controller,
                 onPageChanged: (index) {
                   setState(() => _isLastPage = index == 4);
                 },
-                children: isTablet
-                    ? _buildTabletPages() 
-                    : _buildMobilePages(),
+                children: isTablet ? _buildTabletPages() : _buildMobilePages(),
               ),
             ),
           ),
@@ -119,7 +116,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           flex: 5,
           child: _buildTabletImageSection(image: image, backImages: backImages),
         ),
-    
+
         // Columna derecha - Contenido
         Expanded(
           flex: 6,
@@ -140,7 +137,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        // border: Border.all( color:  StyleColor.black),
+          // border: Border.all( color:  StyleColor.black),
           // gradient: LinearGradient(
           //   begin: Alignment.topLeft,
           //   end: Alignment.bottomRight,
@@ -150,17 +147,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       child: Stack(
         children: [
           if (backImages.isNotEmpty) _buildTabletBackgroundImages(backImages),
-           Positioned(
+          Positioned(
             bottom: 40,
-             child: Center(
+            child: Center(
               child: Image.asset(
                 image,
                 width: MediaQuery.sizeOf(context).width * 0.4,
                 height: MediaQuery.sizeOf(context).height * 0.6,
                 fit: BoxFit.contain,
               ),
-                       ),
-           ),
+            ),
+          ),
         ],
       ),
     );
@@ -201,26 +198,35 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     required String verse,
   }) {
     return Container(
-      height: double.infinity,
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+      constraints: BoxConstraints(
+        minHeight: MediaQuery.of(context).size.height,
+      ),
+      decoration: BoxDecoration(
+          // border: Border.all( color:  StyleColor.black),
+          ),  
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           if (title.isNotEmpty) ...{
             TextWithGradient(
               text: title,
               font: StylesApp(context).textWithGradient,
             ),
+            const SizedBox(height: 20),
+          } else ...{
+            SizedBox(height: 50),
           },
-            const SizedBox(height: 40),
           _buildDescriptionTableBox(
-              context,
-              subTitle,
-              description,
-              StylesApp(context).textStyleTitle,
-              StylesApp(context).textStyleTitleAlegra),
+            context,
+            subTitle,
+            description,
+            StylesApp(context).textStyleTitle,
+            StylesApp(context).textStyleTitleAlegra,
+          ),
+          // SizedBox(height: 20), // Espacio extra
         ],
       ),
     );
@@ -307,6 +313,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget _buildDescriptionTableBox(BuildContext context, String subTitle,
       String description, TextStyle fontTitle, TextStyle fontBody) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       // width: double.infinity,
       decoration: BoxDecoration(
         // border: Border.all( color:  StyleColor.black),
@@ -597,6 +604,4 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       ),
     );
   }
-
-  _buildMobileLayout() {}
 }

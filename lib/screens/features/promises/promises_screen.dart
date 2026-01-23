@@ -559,29 +559,31 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
               offset: Offset(0, 4))
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(widget.onePromise.images.isNotEmpty
-                ? widget.onePromise.images
-                : ''),
-            SizedBox(height: 16),
-            Text(
-              widget.onePromise.title,
-              style: StylesApp(context).textStyleBodyOrange15,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-            Text(
-              widget.onePromise.description,
-              textAlign: TextAlign.center,
-              style: StylesApp(context)
-                  .textStyleBody12
-                  .copyWith(color: Colors.black),
-            ),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(widget.onePromise.images.isNotEmpty
+                  ? widget.onePromise.images
+                  : ''),
+              SizedBox(height: 16),
+              Text(
+                widget.onePromise.title,
+                style: StylesApp(context).textStyleBodyOrange15,
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 8),
+              Text(
+                widget.onePromise.description,
+                textAlign: TextAlign.center,
+                style: StylesApp(context)
+                    .textStyleBody12
+                    .copyWith(color: Colors.black),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -617,44 +619,46 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
               icon: Icon(Icons.share, color: Colors.white),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}",
-                  style: StylesApp(context)
-                      .textStyleBody4
-                      .copyWith(color: Colors.white),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 16),
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}",
+                    style: StylesApp(context)
+                        .textStyleBody4
+                        .copyWith(color: Colors.white),
+                    textAlign: TextAlign.center,
                   ),
-                  child: Text(
-                    widget.redeemedPromise!.verse!.text!,
+                  SizedBox(height: 16),
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      widget.redeemedPromise!.verse!.text!,
+                      textAlign: TextAlign.center,
+                      style: StylesApp(context)
+                          .textStyleBody14
+                          .copyWith(color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Image.asset("assets/star_complete.png", width: 50, height: 50),
+                  SizedBox(height: 10),
+                  Text(
+                    "Haz ganado una mini estrella\n ${widget.redeemedPromise!.energyPoint} Lms de energía",
                     textAlign: TextAlign.center,
                     style: StylesApp(context)
-                        .textStyleBody14
-                        .copyWith(color: Colors.white),
+                        .textStyleBody12
+                        .copyWith(color: StyleColor.yellowLight),
                   ),
-                ),
-                SizedBox(height: 20),
-                Image.asset("assets/star_complete.png", width: 50, height: 50),
-                SizedBox(height: 10),
-                Text(
-                  "Haz ganado una mini estrella\n ${widget.redeemedPromise!.energyPoint} Lms de energía",
-                  textAlign: TextAlign.center,
-                  style: StylesApp(context)
-                      .textStyleBody12
-                      .copyWith(color: StyleColor.yellowLight),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

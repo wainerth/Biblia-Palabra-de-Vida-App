@@ -42,7 +42,6 @@ class AuthenticationProvider extends ChangeNotifier {
 
       // si no hay datos , el usuario no esta autenticado
       if (userToken == null || userDataString == null) {
-
         await _clearUserSession(context);
         return AuthCheckResult.notAuthenticated(
             reason: 'No hay sesión guardada');
@@ -199,7 +198,6 @@ class AuthenticationProvider extends ChangeNotifier {
     if (!context.mounted) return;
 
     await showCustomDialogWithAction(
-      
       context,
       message: "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
       dialogType: DialogTypeAction.info,
@@ -254,18 +252,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      if (e is TimeoutException) {
-        return ResponseData(data: null, error: "Request timed out");
-      } else if (e is SocketException) {
-        return ResponseData(data: null, error: "No Internet Connection");
-      } else if (e is FormatException) {
-        // Example: JSON parsing error
-        return ResponseData(data: null, error: "Invalid data format");
-      } else {
-        return ResponseData(
-            data: null,
-            error: "An unexpected error occurred: $e"); // Generic error
-      }
+      return handleGenericError(e, "Login con usuario y contraseña");
     }
   }
 
@@ -338,23 +325,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      if (kDebugMode) {
-        print("Error during login: $e");
-      } // Print the error for debugging.  Crucial!
-
-      // More specific error handling if needed:
-      if (e is TimeoutException) {
-        return ResponseData(data: null, error: "Request timed out");
-      } else if (e is SocketException) {
-        return ResponseData(data: null, error: "No Internet Connection");
-      } else if (e is FormatException) {
-        // Example: JSON parsing error
-        return ResponseData(data: null, error: "Invalid data format");
-      } else {
-        return ResponseData(
-            data: null,
-            error: "An unexpected error occurred: $e"); // Generic error
-      }
+      return handleGenericError(e, "login con Google");
     }
   }
 
@@ -423,23 +394,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       return ResponseData(data: response.data, error: error);
     } catch (e) {
-      if (kDebugMode) {
-        print("Error during recovery Password  : $e");
-      } // Print the error for debugging.  Crucial!
-
-      // More specific error handling if needed:
-      if (e is TimeoutException) {
-        return ResponseData(data: null, error: "Request timed out");
-      } else if (e is SocketException) {
-        return ResponseData(data: null, error: "No Internet Connection");
-      } else if (e is FormatException) {
-        // Example: JSON parsing error
-        return ResponseData(data: null, error: "Invalid data format");
-      } else {
-        return ResponseData(
-            data: null,
-            error: "An unexpected error occurred: $e"); // Generic error
-      }
+      return handleGenericError(e, "Recuperar Contraseña");
     }
   }
 

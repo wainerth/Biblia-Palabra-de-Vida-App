@@ -5,6 +5,7 @@ import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RankingScreen extends StatefulWidget {
@@ -16,7 +17,6 @@ class RankingScreen extends StatefulWidget {
 
 class _RankingScreenState extends State<RankingScreen> {
   List<League> leagues = [];
-
   String? errorMessage;
   bool isLoading = true;
 
@@ -104,34 +104,170 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     }
   }
 
+  // Nueva función para determinar si es tablet
+  bool _isTablet(BuildContext context) {
+    final shortestSide = MediaQuery.of(context).size.shortestSide;
+    return shortestSide >= 600;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool isTablet = _isTablet(context);
+    
     return Scaffold(
       backgroundColor: StyleColor.turquoise,
       body: SafeArea(
-        child: Column(
-          children: [
-            // body
-            Expanded(
-              child: SizedBox(
-                child: Column(
-                  children: [
-                    // Pestañas
-                    if (!noActiveLigue) LeagueTimeRemaining(),
-                    _buildLeagueTabs(),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(left: 8, top: 0, right: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                        ),
-                        child: noActiveLigue
-                            ? _buildNoLeagueWidget()
-                            : _buildRankingList(),
-                      ),
+        child: isTablet ? _buildTabletLayout() : _buildMobileLayout(),
+      ),
+    );
+  }
+
+  // Layout para móvil (manteniendo el diseño actual)
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        Expanded(
+          child: SizedBox(
+            child: Column(
+              children: [
+                if (!noActiveLigue) LeagueTimeRemaining(),
+                _buildLeagueTabs(),
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(left: 8, top: 0, right: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
                     ),
-                  ],
+                    child: noActiveLigue
+                        ? _buildNoLeagueWidget()
+                        : _buildRankingList(),
+                  ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Layout para tablet con 2 columnas
+  Widget _buildTabletLayout() {
+    return Row(
+      children: [
+        // Columna izquierda: Ligas y tabs (30% del ancho)
+        Container(
+          width: MediaQuery.of(context).size.width * 0.3,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              right: BorderSide(color: Colors.black, width: 1.0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(2, 0),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              if (!noActiveLigue) 
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: LeagueTimeRemaining(),
+                ),
+              _buildTabletLeagueList(),
+            ],
+          ),
+        ),
+        
+        // Columna derecha: Ranking (70% del ancho)
+        Expanded(
+          child: Container(
+            margin: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: noActiveLigue
+                ? _buildNoLeagueWidget()
+                : _buildRankingList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Lista de ligas optimizada para tablet
+  Widget _buildTabletLeagueList() {
+    return Expanded(
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: widget.ranking.length,
+        itemBuilder: (context, index) => _buildTabletLeagueItem(index),
+      ),
+    );
+  }
+
+  Widget _buildTabletLeagueItem(int index) {
+    final league = widget.ranking[index];
+    final isActive = league.id == activeLeagueId;
+
+    return GestureDetector(
+      onTap: () => _showLeagueDetails(league),
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isActive ? StyleColor.turquoise.withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? StyleColor.turquoise : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Icono de la liga
+            Container(
+              width: 50,
+              height: 50,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Color(int.parse("0xFF${league.colorBack}")),
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(int.parse("0xFF${league.colorFront}")),
+                    blurRadius: 0,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  color: Color(int.parse("0xFF${league.colorFront}")),
+                ),
+                child: Image.network(
+                  GraphQLConfig.urlServidor + league.img!.urlImg,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            SizedBox(width: 12),
+            // Nombre de la liga
+            Expanded(
+              child: Text(
+                league.name,
+                style: StylesApp(context).textStyleBody16.copyWith(
+                  color: isActive ? StyleColor.turquoise : Colors.black,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -140,6 +276,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     );
   }
 
+  // Tabs de ligas para móvil (manteniendo el diseño original)
   Widget _buildLeagueTabs() {
     return Container(
       decoration: BoxDecoration(
@@ -263,7 +400,6 @@ class _RankingScreenViewState extends State<RankingScreenView> {
   }
 
   Widget _buildRankingList() {
-    // Cargar los miembros de la liga
     return ListView.builder(
       shrinkWrap: true,
       itemCount: members.length,
@@ -276,7 +412,6 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     final isCurrentUser = (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username);
     final position = index + 1;
 
-    // Widgets para zonas especiales
     if (position == 6) return _buildPromotionZone(index);
     if (position == 11) return _buildRelegationZone(index);
 
@@ -565,11 +700,9 @@ class LeagueTimeRemaining extends StatelessWidget {
 
   DateTime _getFechaFinDeSemana() {
     final now = DateTime.now();
-    final currentWeekday = now.weekday; // 1 para Lunes, 7 para Domingo
-    // Calcular cuántos días faltan hasta el Domingo (último día de la semana)
+    final currentWeekday = now.weekday;
     final daysUntilEndOfWeek = DateTime.daysPerWeek - currentWeekday;
     final endOfWeek = now.add(Duration(days: daysUntilEndOfWeek));
-    // Establecer la hora al final del día (23:59:59)
     return DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59);
   }
 
@@ -584,7 +717,6 @@ class LeagueTimeRemaining extends StatelessWidget {
         final now = DateTime.now();
         final fechaFin = _getFechaFinDeSemana();
         final difference = fechaFin.difference(now);
-        // Asegurarse de que la diferencia no sea negativa
         return difference.isNegative ? Duration.zero : difference;
       }),
       builder: (context, snapshot) {

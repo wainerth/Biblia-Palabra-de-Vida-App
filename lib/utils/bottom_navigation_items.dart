@@ -144,47 +144,47 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Icon(
-            Icons.audiotrack,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.blueDark,
-          ),
-          Text(
-            'Radio',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.blueDark,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
-              color: StyleColor.blueDark,
-              borderRadius: BorderRadius.circular(5),
-            ),
-          )
-        ],
-      ),
-      icon: Column(
-        children: [
-          Icon(
-            Icons.audiotrack,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.blueDark,
-          ),
-          Text(
-            'Radio',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.blueDark,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
+    // BottomNavigationBarItem(
+    //   activeIcon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.audiotrack,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.blueDark,
+    //       ),
+    //       Text(
+    //         'Radio',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.blueDark,
+    //             ),
+    //       ),
+    //       Container(
+    //         width: double.infinity,
+    //         height: 2,
+    //         decoration: BoxDecoration(
+    //           color: StyleColor.blueDark,
+    //           borderRadius: BorderRadius.circular(5),
+    //         ),
+    //       )
+    //     ],
+    //   ),
+    //   icon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.audiotrack,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.blueDark,
+    //       ),
+    //       Text(
+    //         'Radio',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.blueDark,
+    //             ),
+    //       ),
+    //     ],
+    //   ),
+    //   label: '',
+    // ),
     if (GraphQLConfig.development)
       BottomNavigationBarItem(
         activeIcon: Column(
@@ -410,47 +410,47 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Icon(
-            Icons.audiotrack,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.blueDark,
-          ),
-          Text(
-            'Radio',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.blueDark,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
-              color: StyleColor.blueDark,
-              borderRadius: BorderRadius.circular(5),
-            ),
-          )
-        ],
-      ),
-      icon: Column(
-        children: [
-          Icon(
-            Icons.audiotrack,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.blueDark,
-          ),
-          Text(
-            'Radio',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.blueDark,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
+    // BottomNavigationBarItem(
+    //   activeIcon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.audiotrack,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.blueDark,
+    //       ),
+    //       Text(
+    //         'Radio',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.blueDark,
+    //             ),
+    //       ),
+    //       Container(
+    //         width: double.infinity,
+    //         height: 2,
+    //         decoration: BoxDecoration(
+    //           color: StyleColor.blueDark,
+    //           borderRadius: BorderRadius.circular(5),
+    //         ),
+    //       )
+    //     ],
+    //   ),
+    //   icon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.audiotrack,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.blueDark,
+    //       ),
+    //       Text(
+    //         'Radio',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.blueDark,
+    //             ),
+    //       ),
+    //     ],
+    //   ),
+    //   label: '',
+    // ),
     if (GraphQLConfig.development)
       BottomNavigationBarItem(
         activeIcon: Column(
@@ -1244,47 +1244,47 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Icon(
-            Icons.music_note_rounded,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.blueDark,
-          ),
-          Text(
-            'Radio',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.greenDark,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
-              color: StyleColor.blueDark,
-              borderRadius: BorderRadius.circular(5),
-            ),
-          )
-        ],
-      ),
-      icon: Column(
-        children: [
-          Icon(
-            Icons.music_note_rounded,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.blueDark,
-          ),
-          Text(
-            'Radio',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.blueDark,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
+    // BottomNavigationBarItem(
+    //   activeIcon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.music_note_rounded,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.blueDark,
+    //       ),
+    //       Text(
+    //         'Radio',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.greenDark,
+    //             ),
+    //       ),
+    //       Container(
+    //         width: double.infinity,
+    //         height: 2,
+    //         decoration: BoxDecoration(
+    //           color: StyleColor.blueDark,
+    //           borderRadius: BorderRadius.circular(5),
+    //         ),
+    //       )
+    //     ],
+    //   ),
+    //   icon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.music_note_rounded,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.blueDark,
+    //       ),
+    //       Text(
+    //         'Radio',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.blueDark,
+    //             ),
+    //       ),
+    //     ],
+    //   ),
+    //   label: '',
+    // ),
     if (GraphQLConfig.development)
       BottomNavigationBarItem(
         activeIcon: Column(
@@ -1509,47 +1509,47 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
       ),
       label: '',
     ),
-    BottomNavigationBarItem(
-      activeIcon: Column(
-        children: [
-          Icon(
-            Icons.audiotrack,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.blueDark,
-          ),
-          Text(
-            'Radio',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.blueDark,
-                ),
-          ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            decoration: BoxDecoration(
-              color: StyleColor.blueDark,
-              borderRadius: BorderRadius.circular(5),
-            ),
-          )
-        ],
-      ),
-      icon: Column(
-        children: [
-          Icon(
-            Icons.audiotrack,
-            size: StylesApp(context).sizeIconBottomBar,
-            color: StyleColor.blueDark,
-          ),
-          Text(
-            'Radio',
-            style: StylesApp(context).textStyleBody10.copyWith(
-                  color: StyleColor.blueDark,
-                ),
-          ),
-        ],
-      ),
-      label: '',
-    ),
+    // BottomNavigationBarItem(
+    //   activeIcon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.audiotrack,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.blueDark,
+    //       ),
+    //       Text(
+    //         'Radio',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.blueDark,
+    //             ),
+    //       ),
+    //       Container(
+    //         width: double.infinity,
+    //         height: 2,
+    //         decoration: BoxDecoration(
+    //           color: StyleColor.blueDark,
+    //           borderRadius: BorderRadius.circular(5),
+    //         ),
+    //       )
+    //     ],
+    //   ),
+    //   icon: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.audiotrack,
+    //         size: StylesApp(context).sizeIconBottomBar,
+    //         color: StyleColor.blueDark,
+    //       ),
+    //       Text(
+    //         'Radio',
+    //         style: StylesApp(context).textStyleBody10.copyWith(
+    //               color: StyleColor.blueDark,
+    //             ),
+    //       ),
+    //     ],
+    //   ),
+    //   label: '',
+    // ),
     if (GraphQLConfig.development)
       BottomNavigationBarItem(
         activeIcon: Column(

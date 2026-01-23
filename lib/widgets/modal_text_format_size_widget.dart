@@ -74,7 +74,7 @@ class _ModalTextFormatSizeWidgetState extends State<ModalTextFormatSizeWidget> {
                           ...BibleThemeType.values.map((theme) {
                             final currentTheme = BibleTheme.themes[theme];
                             final isSelected =
-                                Provider.of<BibleThemeProvider>(context)
+                                Provider.of<BibleThemeProvider>(context, listen: false)
                                         .currentTheme ==
                                     theme;
 
@@ -169,13 +169,13 @@ class _ModalTextFormatSizeWidgetState extends State<ModalTextFormatSizeWidget> {
                               ),
                             );
                           }),
-                          ...Provider.of<BibleThemeProvider>(context)
+                          ...Provider.of<BibleThemeProvider>(context, listen: false)
                               .customThemes
                               .map((customTheme) {
                             final isSelected =
-                                Provider.of<BibleThemeProvider>(context)
+                                Provider.of<BibleThemeProvider>(context, listen: false)
                                         .isCustomTheme &&
-                                    Provider.of<BibleThemeProvider>(context)
+                                    Provider.of<BibleThemeProvider>(context, listen: false)
                                             .currentCustomTheme
                                             ?.id ==
                                         customTheme.id;

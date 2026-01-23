@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_client.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
@@ -88,19 +88,7 @@ class UserProvider extends ChangeNotifier {
 
       return ResponseData(data: data, error: null);
     } catch (e) {
-      if (e is TimeoutException) {
-        return ResponseData(data: null, error: "Request timed out");
-      } else if (e is SocketException) {
-        return ResponseData(data: null, error: "No Internet Connection");
-      } else if (e is FormatException) {
-        // Example: JSON parsing error
-
-        return ResponseData(data: null, error: "Invalid data format");
-      } else {
-        return ResponseData(
-            data: null,
-            error: "An unexpected error occurred: $e"); // Generic error
-      }
+      return handleGenericError(e, "Actualizar imagen de perfil");
     }
   }
 
@@ -130,16 +118,7 @@ class UserProvider extends ChangeNotifier {
       setUser(_user);
       return ResponseData(data: response.data, error: null);
     } catch (e) {
-      if (e is TimeoutException) {
-        return ResponseData(data: null, error: "Request timed out");
-      } else if (e is SocketException) {
-        return ResponseData(data: null, error: "No Internet Connection");
-      } else if (e is FormatException) {
-        return ResponseData(data: null, error: "Invalid data format");
-      } else {
-        return ResponseData(
-            data: null, error: "An unexpected error occurred: $e");
-      }
+      return handleGenericError(e, "Actualizar perfil de usuario");
     }
   }
 
@@ -208,16 +187,7 @@ class UserProvider extends ChangeNotifier {
       setUser(_user);
       return ResponseData(data: response.data, error: null);
     } catch (e) {
-      if (e is TimeoutException) {
-        return ResponseData(data: null, error: "Request timed out");
-      } else if (e is SocketException) {
-        return ResponseData(data: null, error: "No Internet Connection");
-      } else if (e is FormatException) {
-        return ResponseData(data: null, error: "Invalid data format");
-      } else {
-        return ResponseData(
-            data: null, error: "An unexpected error occurred: $e");
-      }
+      return handleGenericError(e, "Actualizar iglesia de usuario");
     }
   }
 

@@ -66,26 +66,33 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
 
   @override
   Widget build(BuildContext context) {
+    bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
     return Dialog(
+
       backgroundColor: Colors.transparent,
       elevation: 0,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Stack(children: [
-            _buildContent(),
-            Positioned(
-              top: 10,
-              right: 0,
-              child: IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(Icons.close_rounded),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth:isTablet ?  400 : double.infinity,
+        ),
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Stack(children: [
+              _buildContent(),
+              Positioned(
+                top: 10,
+                right: 0,
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.close_rounded),
+                ),
               ),
-            ),
-          ]),
+            ]),
+          ),
         ),
       ),
     );

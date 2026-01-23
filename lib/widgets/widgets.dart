@@ -104,3 +104,4 @@ export 'package:biblia_palabra_de_vida_app/widgets/question_header.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/optimized_searchable_dropdown_form_field.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/optimized_searchable_dropdown.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/custom_snack_bar.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/color_picker_bottom_sheet.dart';

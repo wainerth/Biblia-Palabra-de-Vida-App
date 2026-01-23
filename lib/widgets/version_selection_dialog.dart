@@ -1,6 +1,8 @@
 import 'package:biblia_palabra_de_vida_app/models/model_data.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class VersionSelectionDialog extends StatefulWidget {
   final List<ModelData> versions;
@@ -27,6 +29,9 @@ class _VersionSelectionDialogState extends State<VersionSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider =
+        Provider.of<BibleThemeProvider>(context, listen: false);
+    final currentTheme = themeProvider.themeData;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -35,7 +40,7 @@ class _VersionSelectionDialogState extends State<VersionSelectionDialog> {
           Text(
             'Seleccione la versión de la Biblia',
             style: StylesApp(context).textStyleBody16.copyWith(
-                  color: Colors.orange,
+                  color: currentTheme.textColor,
                 ),
           ),
           const SizedBox(height: 20),
@@ -55,7 +60,10 @@ class _VersionSelectionDialogState extends State<VersionSelectionDialog> {
             height: 27.0,
             text: "Aceptar",
             onPressed: () => Navigator.pop(context, selectedVersion),
-            buttonStyle: StylesApp(context).btnWidgetSmall,
+            buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                  backgroundColor:
+                      WidgetStatePropertyAll(currentTheme.buttonColor),
+                ),
           ),
         ],
       ),

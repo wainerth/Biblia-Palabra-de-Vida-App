@@ -81,7 +81,41 @@ class ProgressControls extends StatelessWidget {
   Widget _buildTabletControls(BuildContext context) {
     return Column(
       children: [
+       
         Container(
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Column(
+            children: [
+              LinearProgressIndicator(
+                value: currentValue / maxValue,
+                backgroundColor: Color(0xFFC4C4C4),
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0XFFF27728)),
+              ),
+              SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Progreso", style: StylesApp(context).textStyleBody14.copyWith(
+                    fontSize: 14.0,
+                    color:  Colors.grey[600]
+                  ),),
+                  Text("${currentValue.toInt()}/${maxValue.toInt()}", style: StylesApp(context).textStyleBody14.copyWith(
+                    fontSize: 14.0,
+                    color:  Colors.grey[600]
+                  ),),
+                ],
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 20),
+
+         Container(
           padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -119,38 +153,6 @@ class ProgressControls extends StatelessWidget {
                   ),
                   SizedBox(width: 12),
                   Icon(Icons.text_increase, size: 20, color: Colors.grey[600]),
-                ],
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 20),
-        Container(
-          padding: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: Column(
-            children: [
-              LinearProgressIndicator(
-                value: currentValue / maxValue,
-                backgroundColor: Color(0xFFC4C4C4),
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0XFFF27728)),
-              ),
-              SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Progreso", style: StylesApp(context).textStyleBody14.copyWith(
-                    fontSize: 14.0,
-                    color:  Colors.grey[600]
-                  ),),
-                  Text("${currentValue.toInt()}/${maxValue.toInt()}", style: StylesApp(context).textStyleBody14.copyWith(
-                    fontSize: 14.0,
-                    color:  Colors.grey[600]
-                  ),),
                 ],
               ),
             ],

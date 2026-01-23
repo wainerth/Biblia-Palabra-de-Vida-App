@@ -252,13 +252,13 @@ Future<String> copyChapter(VersionModel? currentVersion, BookModel? currentBook,
   for (var verse in chapter.verses!) {
     buffer.write('${verse.verse} ${verse.text}\n');
   }
-  return "${currentVersion?.version}\n ${currentBook?.modernName}-${currentBook?.numberBook} \n  ${buffer.toString()} \n$baseUrl";
+  return "${currentVersion?.version}\n ${currentBook?.modernName} Capitulo ${chapter.chapter} \n  ${buffer.toString()} \n$baseUrl";
 }
 
 Future<void> copyToClipboard(BuildContext context, dynamic data) async {
   final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
   final copyString =
-      "${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
+      "${data.book.modernName}\n${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
   await Clipboard.setData(ClipboardData(text: copyString));
 
   // Mostrar diálogo de confirmación
@@ -273,7 +273,7 @@ Future<void> copyToClipboard(BuildContext context, dynamic data) async {
 Future<void> shareVerse(BuildContext context, dynamic data) async {
   final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
   final shareText =
-      "${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
+      "${data.book.modernName }\n${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
   await SharePlus.instance.share(ShareParams(
     text: shareText,
     subject:
@@ -329,6 +329,23 @@ ResponseData handleGenericError(dynamic e, String operationName) {
       data: null,
       userFriendlyError: "$operationName Formato de datos no válido",
       error: "$operationName:  ${e.toString()}",
+    );
+  } else if (e is PlatformException) {
+    // Manejo específico para errores de Google Sign-In
+    if (e.code == 'network_error' ||
+        e.message?.contains('ApiException: 7') == true ||
+        e.message?.contains('NETWORK_ERROR') == true) {
+      return ResponseData(
+        data: null,
+        userFriendlyError: "$operationName Error de conexión a Internet",
+        error: "$operationName: Network error (Google Sign-In)",
+      );
+    }
+    // Otros errores de PlatformException
+    return ResponseData(
+      data: null,
+      userFriendlyError: "$operationName Error en el servicio",
+      error: "$operationName: ${e.code} - ${e.message}",
     );
   } else {
     return ResponseData(

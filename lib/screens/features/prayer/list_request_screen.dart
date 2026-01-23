@@ -347,8 +347,9 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color:
-            isSelected ? StyleColor.white.withValues(alpha: 0.80) : Colors.white,
+        color: isSelected
+            ? StyleColor.white.withValues(alpha: 0.80)
+            : Colors.white,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -1327,25 +1328,60 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                   if (responseDelete.error != null) {
                     if (mounted) {
                       await showCustomDialog(context,
-                          message: responseDelete.error!,
+                          messageDetail: responseDelete.error!,
+                          message: responseDelete.userFriendlyError!,
+                          showDetails: true,
                           dialogType: DialogType.error);
                     }
                     return;
                   }
+
                   if (mounted) {
                     Navigator.of(context).pop();
+
+                    // Aquí está la clave: actualizar el estado COMPLETAMENTE
                     setState(() {
+                      // 1. Eliminar el item de la lista
                       listRequest.removeWhere((item) => item.requestId == id);
-                      // Si se elimina la seleccionada, limpiar panel de detalles
+
+                      // 2. Actualizar el total de items en la paginación
+                      pagination = PaginationInfo(
+                        currentPage: pagination.currentPage,
+                        totalPages: pagination.totalPages,
+                        itemsPerPage: pagination.itemsPerPage,
+                        totalItems:
+                            pagination.totalItems - 1, // Restar 1 del total
+                        hasPreviousPage: pagination.hasPreviousPage,
+                        hasNextPage: pagination.hasNextPage,
+                      );
+
+                      // 3. Verificar si necesitamos ajustar la página actual
+                      if (listRequest.isEmpty && pagination.currentPage > 1) {
+                        // Si la página actual quedó vacía y no es la primera página
+                        // ir a la página anterior
+                        _loadPreviousPageIfNeeded();
+                      }
+
+                      // 4. Limpiar selección si se eliminó
                       if (dataSeleccionada?.requestId == id) {
                         dataSeleccionada = null;
                       }
                     });
+
+                    // Mostrar mensaje de éxito
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Petición eliminada correctamente'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
                   }
                 } catch (e) {
                   if (mounted) {
                     await showCustomDialog(context,
-                        message: e.toString(), dialogType: DialogType.error);
+                        messageDetail: "Inténtalo de nuevo más tarde.",
+                        message: e.toString(),
+                        dialogType: DialogType.error);
                   }
                   return;
                 }
@@ -1355,5 +1391,25 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
         );
       },
     );
+  }
+
+// Método para cargar la página anterior si es necesario
+  void _loadPreviousPageIfNeeded() async {
+    if (listRequest.isEmpty && pagination.currentPage > 1) {
+      try {
+        LoadingService().showLoading(context);
+        await _generateData(
+            context, pagination.currentPage - 1, itemPerPageValue);
+        LoadingService().hideLoading();
+      } catch (e) {
+        LoadingService().hideLoading();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            'Error al cargar página anterior: ${e.toString()}'),
+            backgroundColor: StyleColor.redLight,
+          ),
+        );
+      }
+    }
   }
 }

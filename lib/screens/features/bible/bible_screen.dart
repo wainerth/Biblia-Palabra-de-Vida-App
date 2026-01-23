@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:biblia_palabra_de_vida_app/class/bible_version_selector.dart';
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
@@ -15,7 +14,6 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
@@ -106,7 +104,8 @@ class _BibleScreenState extends State<BibleScreen> {
   // ==========================================================================
   // 7. VARIABLES DE NAVEGACIÓN Y UI
   // ==========================================================================
-  int? scrollToVerse;
+  int? scrollToVerseStart;
+  int? scrollToVerseEnd;
   bool _isManualScroll = false;
   bool _showDrawer = false;
   Timer? _loadTimeoutTimer;
@@ -116,6 +115,62 @@ class _BibleScreenState extends State<BibleScreen> {
   // ==========================================================================
   bool get _isLoading => _screenState == BibleScreenState.loading;
   bool get _showError => _screenState == BibleScreenState.error;
+
+  final Set<int> _selectedVerses = <int>{};
+  // En tu clase de estado
+  bool _showSelectionToolbar = false;
+  // List<VerseModel> _selectedVerseModels = [];
+
+  final GlobalKey _toolbarKey = GlobalKey();
+
+// Getter para obtener los versículos seleccionados
+  List<VerseModel> get _getSelectedVerses {
+    return _selectedVerses.map((index) => verses[index]).toList();
+  }
+
+// Verificar si alguno de los versículos seleccionados ya tiene resaltado
+  bool get _hasAnyHighlightedSelection {
+    return _getSelectedVerses.any(
+        (verse) => verse.highlights != null && verse.highlights!.isNotEmpty);
+  }
+
+  bool _isVerseSelected(int index) {
+    return _selectedVerses.contains(index);
+  }
+
+  void _onVerseTap(int index, VerseModel verse) {
+    setState(() {
+      if (_selectedVerses.contains(index)) {
+        // Deselection si ya está seleccionado
+        _selectedVerses.remove(index);
+      } else {
+        // Seleccionar si no está seleccionado
+        _selectedVerses.add(index);
+      }
+    });
+
+    if (kDebugMode) {
+      print(
+          'Versículo ${verse.verse} ${_selectedVerses.contains(index) ? 'seleccionado' : 'deseleccionado'}');
+    }
+
+    // Mostrar/ocultar toolbar si hay selección
+    _updateToolbarVisibility();
+  }
+
+  void _updateToolbarVisibility() {
+    // _showSelectionToolbar = _selectedVerses.isNotEmpty;
+    if (_selectedVerses.isNotEmpty) {
+      _showToolbar();
+    } else {
+      _hideToolbar();
+    }
+  }
+
+// Función para obtener los versículos seleccionados
+  List<VerseModel> getSelectedVerses() {
+    return _selectedVerses.map((index) => verses[index]).toList();
+  }
 
   // ==========================================================================
   // 9. INIT STATE
@@ -182,12 +237,13 @@ class _BibleScreenState extends State<BibleScreen> {
       _handleScroll();
       if (scrollController.position.isScrollingNotifier.value) {
         if (!_isManualScroll) return;
-        if (scrollToVerse != null && scrollToVerse! > 0) {
-          setState(() {
-            scrollToVerse = null;
-            _isManualScroll = false;
-          });
-        }
+        // if (scrollToVerseStart != null && scrollToVerseStart! > 0) {
+        //   setState(() {
+        //     scrollToVerseStart = null;
+        //     scrollToVerseEnd = null;
+        //     // _isManualScroll = false;
+        //   });
+        // }
       }
     });
   }
@@ -529,11 +585,19 @@ class _BibleScreenState extends State<BibleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<BibleThemeProvider>(context);
+    final themeProvider =
+        Provider.of<BibleThemeProvider>(context, listen: false);
     currentTheme = themeProvider.themeData;
 
-    return Consumer<BibleThemeProvider>(
-      builder: (context, themeProvider, child) {
+    return Selector<BibleThemeProvider, BibleTheme>(
+      selector: (_, provider) => provider.themeData,
+      shouldRebuild: (previous, next) {
+        // Solo reconstruir si el tema realmente cambió
+        return previous.name != next.name ||
+            previous.backgroundColor != next.backgroundColor ||
+            previous.textColor != next.textColor;
+      },
+      builder: (context, currentTheme, child) {
         return _buildMainContent(currentTheme);
       },
     );
@@ -557,6 +621,26 @@ class _BibleScreenState extends State<BibleScreen> {
         : _buildMobileLayout(theme);
   }
 
+  void _showToolbar() {
+    // Posicionar el toolbar en el centro vertical, a la derecha
+    setState(() {
+      _showSelectionToolbar = true;
+      // _selectedVerseModels = _getSelectedVerses;
+    });
+  }
+
+  void _hideToolbar() {
+    setState(() {
+      _showSelectionToolbar = false;
+    });
+  }
+
+  void _clearSelection() {
+    setState(() {
+      _selectedVerses.clear();
+      _showSelectionToolbar = false;
+    });
+  }
   // ==========================================================================
   // 18. ESTADOS DE UI
   // ==========================================================================
@@ -773,7 +857,13 @@ class _BibleScreenState extends State<BibleScreen> {
             if (!_showDrawer)
               BibleHeaderWidget(
                 spacingBottom: 10.0,
-                onSearchBible: openModal,
+                onSearchBible: () {
+                  setState(() {
+                    scrollToVerseStart = null;
+                    scrollToVerseEnd = null;
+                  });
+                  openModal();
+                },
                 versionName:
                     currentVersion != null ? currentVersion!.version : '',
                 title: currentBook != null ? currentBook!.modernName : '',
@@ -873,7 +963,13 @@ class _BibleScreenState extends State<BibleScreen> {
                   showButton: false,
                   topPosition: null,
                   bottomPosition: 10.0,
-                  onSearchBible: openModal,
+                  onSearchBible: () {
+                    setState(() {
+                      scrollToVerseStart = null;
+                      scrollToVerseEnd = null;
+                    });
+                    openModal();
+                  },
                   versionName:
                       currentVersion != null ? currentVersion!.version : '',
                   title: currentBook != null ? currentBook!.modernName : '',
@@ -895,6 +991,7 @@ class _BibleScreenState extends State<BibleScreen> {
   Widget _buildBibleContent(BibleTheme currentTheme) {
     return Column(
       children: [
+        // este es el Contenedor de la biblia es donde se cargan los versículos de un capitulo
         Expanded(
           child: Stack(
             children: [
@@ -908,8 +1005,10 @@ class _BibleScreenState extends State<BibleScreen> {
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
                       children: [
+                        // indicador del drawer lateral para navegar
                         if (_showDrawer) _buildDrawerIndicator(currentTheme),
                         const SizedBox(height: 40),
+                        // Contenido de la Biblia
                         _buildContinuousText(),
                         SizedBox(height: kBottomNavigationBarHeight + 45),
                       ],
@@ -917,6 +1016,7 @@ class _BibleScreenState extends State<BibleScreen> {
                   ),
                 ),
               ),
+              _buildSelectionToolbar(),
               Positioned(
                 top: 0,
                 right: 0,
@@ -941,7 +1041,13 @@ class _BibleScreenState extends State<BibleScreen> {
                       ),
                       _buildIconButton(
                         icon: Icons.search_rounded,
-                        onPressed: openModal,
+                        onPressed: () {
+                          setState(() {
+                            scrollToVerseStart = null;
+                            scrollToVerseEnd = null;
+                          });
+                          openModal();
+                        },
                       ),
                       _buildIconButton(
                         icon: Icons.star,
@@ -1163,8 +1269,15 @@ class _BibleScreenState extends State<BibleScreen> {
               child: ListView(
                 children: [
                   BibleHeaderWidget(
+                    showButton: false,
                     spacingBottom: 10.0,
-                    onSearchBible: openModal,
+                    onSearchBible: () {
+                      setState(() {
+                        scrollToVerseStart = null;
+                        scrollToVerseEnd = null;
+                      });
+                      openModal();
+                    },
                     versionName:
                         currentVersion != null ? currentVersion!.version : '',
                     title: currentBook != null ? currentBook!.modernName : '',
@@ -1228,203 +1341,109 @@ class _BibleScreenState extends State<BibleScreen> {
   // ==========================================================================
 
   Widget _buildContinuousText() {
+    // si se esta cargando la biblia o esta en precarga
     if (_screenState == BibleScreenState.loading || _showSkeleton) {
       return _buildLoadingVerses();
     }
-
+    // si no hubo contenido a mostrar
     if (verses.isEmpty && _screenState == BibleScreenState.content) {
       return _buildNoVersesMessage();
     }
-
-    if (verses.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.book_outlined,
-                size: 60,
-                color: currentTheme.textColor.withValues(alpha: 0.5),
-              ),
-              SizedBox(height: 16),
-              Text(
-                'No hay versículos para mostrar',
-                style: TextStyle(
-                  color: currentTheme.textColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Capítulo ${currentChapter?.chapter ?? ''}',
-                style: TextStyle(
-                  color: currentTheme.textColor.withValues(alpha: 0.7),
-                  fontSize: 14,
-                ),
-              ),
-              SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  _retryLoadChapter();
-                },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: currentTheme.buttonTextColor,
-                  backgroundColor: currentTheme.buttonColor,
-                ),
-                child: Text('Reintentar carga'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final fullTextWithNumbers =
-        verses.map((v) => "${v.verse} ${v.text}").join(' ');
+    verses.map((v) => "${v.verse} ${v.text}").join(' ');
 
     return SelectableText.rich(
-      key: _selectableTextKey,
+      enableInteractiveSelection: false,
       TextSpan(
-        children: verses.asMap().entries.map((entry) {
+        children: verses.asMap().entries.expand((entry) {
           final index = entry.key;
           final verse = entry.value;
           _verseKeys[index] ??= GlobalKey();
 
-          return TextSpan(
-            children: [
-              WidgetSpan(
-                alignment: PlaceholderAlignment.baseline,
-                baseline: TextBaseline.alphabetic,
+          final isInScrollRange = _isVerseInScrollRange(verse.verse);
+          final isFirstInRange = scrollToVerseStart != null &&
+              verse.verse.toString() == scrollToVerseStart.toString();
+
+          return [
+            WidgetSpan(
+              alignment: PlaceholderAlignment.baseline,
+              baseline: TextBaseline.alphabetic,
+              child: GestureDetector(
+                onTap: () => _showVersePopupMenu(context, verse),
                 child: Stack(
                   key: _verseKeys[index],
                   alignment: Alignment.center,
                   children: [
-                    SelectionContainer.disabled(
-                      child: GestureDetector(
-                        onTap: () => _showVersePopupMenu(context, verse),
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            left: verse.verse == 1 ? 4.0 : 4.0,
-                            right: 4.0,
-                          ),
-                          child: Transform.translate(
-                            offset: Offset(0, -4),
-                            child: Stack(
-                              children: [
-                                if (scrollToVerse != null &&
-                                    scrollToVerse == verses.indexOf(verse))
-                                  _buildVerseIndicator(),
-                                SizedBox(
-                                  child: Text(
-                                    "${verse.verse}",
-                                    style: StylesApp(context)
-                                        .textStyleBody16
-                                        .copyWith(
-                                          fontFamily: fontFamilySet.label,
-                                          fontSize: fontSizeNumber,
-                                          fontWeight: FontWeight.bold,
-                                          color: currentPlayingVerseIndex ==
-                                                  verses.indexOf(verse)
-                                              ? Colors.blue
-                                              : currentTheme
-                                                  .verseHighlightColor,
-                                        ),
+                    Transform.translate(
+                      offset: Offset(0, -4),
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: isInScrollRange
+                                  ? StyleColor.white
+                                  : _isVerseSelected(index)
+                                      ? Colors.blue.withValues(alpha: 0.3)
+                                      : Colors.transparent,
+                              borderRadius: BorderRadius.circular(4),
+                              border: isInScrollRange
+                                  ? Border.all(
+                                      color: StyleColor.blueDark,
+                                      width: isFirstInRange ? 2 : 1,
+                                    )
+                                  : null,
+                            ),
+                            child: Text(
+                              "${verse.verse}",
+                              style: StylesApp(context)
+                                  .textStyleBody16
+                                  .copyWith(
+                                    fontFamily: fontFamilySet.label,
+                                    fontSize: fontSizeNumber,
+                                    fontWeight: FontWeight.bold,
+                                    color: isInScrollRange
+                                        ? StyleColor.blueDark
+                                        : currentPlayingVerseIndex ==
+                                                verses.indexOf(verse)
+                                            ? Colors.blue
+                                            : currentTheme.verseHighlightColor,
                                   ),
-                                ),
-                              ],
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              ..._buildHighlightedTextSpansForSelection(verse),
-            ],
-          );
+            ),
+            // Usamos la función _buildHighlightedTextSpansForSelection modificada
+            ..._buildHighlightedTextSpansForSelectionWithTap(verse, index)
+                .map((span) {
+              if (isInScrollRange && span is TextSpan) {
+                return TextSpan(
+                  text: span.text,
+                  style: span.style?.copyWith(
+                    backgroundColor:_isVerseSelected(index)
+                    ? Colors.blue.withValues(alpha: 0.2)
+                    : StyleColor.white, // Fondo para texto
+                    color:_isVerseSelected(index)
+                    ? currentTheme.textColor
+                    : StyleColor.blueDark, // Texto azul oscuro
+                    fontWeight: FontWeight.w600,
+                  ),
+                  recognizer: span.recognizer,
+                );
+              }
+              return span;
+            }),
+            // TextSpan(text: " "), // Espacio entre versículos
+          ];
         }).toList(),
       ),
-      contextMenuBuilder: (context, selectableRegionState) {
-        final selection = selectableRegionState.textEditingValue.selection;
-        final selectedTextWithNumbers =
-            selection.textInside(fullTextWithNumbers);
-        final selectedVerses =
-            _getVersesInSelectionFromOriginalSelection(selection);
-        final overlapsHighlights =
-            _selectionOverlapsHighlights(selection, fullTextWithNumbers);
-
-        return CustomContextMenu(
-          anchors: selectableRegionState.contextMenuAnchors,
-          children: [
-            CustomContextMenuItem(
-              icon: Icons.content_copy,
-              label: 'Copiar versículo',
-              onPressed: () {
-                final reference =
-                    "${currentVersion?.version} \n ${currentBook?.modernName} ${currentChapter?.chapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''}";
-                Clipboard.setData(
-                  ClipboardData(text: "$reference\n$selectedTextWithNumbers  \n ${GraphQLConfig.urlServidor}OfficialBible"),
-                );
-                _showSnackBar('Versículo copiado');
-                selectableRegionState.hideToolbar();
-              },
-            ),
-            CustomContextMenuItem(
-              icon: Icons.share,
-              label: 'Compartir versículo',
-              onPressed: () async {
-                final reference =
-                    "${currentVersion?.version} \n ${currentBook?.modernName} ${currentChapter?.chapter}:${selectedVerses.isNotEmpty ? selectedVerses.first.verse : ''} ";
-
-                SharePlus.instance.share(ShareParams(
-                  text: "$reference \n $selectedTextWithNumbers \n ${GraphQLConfig.urlServidor}OfficialBible",
-                  subject: 'Versículo de ${currentBook?.modernName}',
-                ));
-                selectableRegionState.hideToolbar();
-              },
-            ),
-            if (!overlapsHighlights)
-              CustomContextMenuItem(
-                icon: selectedVerses.length > 1
-                    ? Icons.format_paint
-                    : Icons.highlight,
-                label: selectedVerses.length > 1
-                    ? 'Resaltar ${selectedVerses.length} versículos'
-                    : 'Resaltar versículo',
-                onPressed: () {
-                  _showColorPickerForSelection(
-                    context,
-                    selectedVerses,
-                    selection.start,
-                    selection.end,
-                    selectedVerses.length > 1,
-                  );
-                  selectableRegionState.hideToolbar();
-                },
-              ),
-          ],
-        );
-      },
-      onSelectionChanged: (selection, cause) {
-        if (selection.isValid && !selection.isCollapsed) {
-          final overlaps =
-              _selectionOverlapsHighlights(selection, fullTextWithNumbers);
-          if (overlaps) {
-            Future.delayed(Duration.zero, () {
-              final renderObject =
-                  _selectableTextKey.currentContext?.findRenderObject();
-              if (renderObject is RenderEditable) {
-                renderObject.selection =
-                    TextSelection.collapsed(offset: selection.baseOffset);
-              }
-            });
-          }
-        }
-      },
+      style: TextStyle(
+        fontSize: fontSizeNumber,
+        fontFamily: fontFamilySet.label,
+      ),
     );
   }
 
@@ -1514,30 +1533,6 @@ class _BibleScreenState extends State<BibleScreen> {
     }
   }
 
-  Widget _buildVerseIndicator() {
-    return StreamBuilder<bool>(
-      stream: Stream.periodic(
-        const Duration(milliseconds: 700),
-        (i) => i % 2 == 0,
-      ),
-      builder: (context, snapshot) {
-        final active = snapshot.data ?? true;
-        return AnimatedOpacity(
-          duration: const Duration(milliseconds: 350),
-          opacity: active ? 1.0 : 0.35,
-          child: Transform.translate(
-            offset: active ? const Offset(6, 0) : const Offset(0, 0),
-            child: Icon(
-              weight: 75.0,
-              Icons.swap_horizontal_circle_rounded,
-              size: 22,
-              color: StyleColor.blueDark,
-            ),
-          ),
-        );
-      },
-    );
-  }
 // ==========================================================================
 // MÉTODO PARA MOSTRAR MENSAJE CUANDO NO HAY VERSÍCULOS
 // ==========================================================================
@@ -1800,55 +1795,38 @@ class _BibleScreenState extends State<BibleScreen> {
   // 24. MÉTODOS DE TEXTO Y RESALTADOS
   // ==========================================================================
 
-  List<VerseModel> _getVersesInSelectionFromOriginalSelection(
-      TextSelection selection) {
-    List<VerseModel> selectedVerses = [];
-
-    if (!selection.isValid || selection.isCollapsed) {
-      return selectedVerses;
-    }
-
-    int currentPosition = 0;
-
-    for (final verse in verses) {
-      final verseText = verse.text;
-      final verseNumber = "${verse.verse} ";
-      final verseNumberLength = verseNumber.length;
-
-      final verseStart = currentPosition;
-      final verseEnd = currentPosition + verseNumberLength + verseText.length;
-
-      if (selection.start < verseEnd && selection.end > verseStart) {
-        final selectionStartInVerse =
-            selection.start - verseStart - verseNumberLength;
-        final selectionEndInVerse =
-            selection.end - verseStart - verseNumberLength;
-
-        final start = selectionStartInVerse.clamp(0, verseText.length);
-        final end = selectionEndInVerse.clamp(0, verseText.length);
-
-        if (start < end) {
-          selectedVerses.add(VerseModel(
-            id: verse.id,
-            verse: verse.verse,
-            text: verse.text,
-            highlights: verse.highlights,
-            posIni: start,
-            posFin: end,
-          ));
-        }
-      }
-
-      currentPosition += verseNumberLength + verseText.length + 1;
-    }
-
-    return selectedVerses;
-  }
-
-  List<TextSpan> _buildHighlightedTextSpansForSelection(VerseModel verse) {
+  List<TextSpan> _buildHighlightedTextSpansForSelectionWithTap(
+      VerseModel verse, int index) {
     final text = " ${verse.text} ";
     final spans = <TextSpan>[];
     int currentPos = 0;
+
+    final bool isVerseSelected = _isVerseSelected(index);
+
+    // Crear un solo TextSpan para todo el versículo con tap
+    if (verse.highlights == null || verse.highlights!.isEmpty) {
+      // Si no hay resaltados, todo el texto es un solo span
+      spans.add(TextSpan(
+        text: text,
+        recognizer: TapGestureRecognizer()
+          ..onTap = () => _onVerseTap(index, verse),
+        style: StylesApp(context).textStyleBody14.copyWith(
+              decoration: _isFavorite(verse) ? TextDecoration.underline : null,
+              color: currentPlayingVerseIndex == index
+                  ? Colors.green
+                  : currentTheme.textColor,
+              backgroundColor: isVerseSelected
+                  ? Colors.blue.withValues(alpha: 0.3)
+                  : Colors.transparent,
+              decorationThickness: 4.0,
+              decorationColor: StyleColor.yellowLight,
+              fontFamily: fontFamilySet.label,
+              fontSize: fontSizeVerse,
+              fontWeight: FontWeight.w400,
+            ),
+      ));
+      return spans;
+    }
 
     verse.highlights!.sort((a, b) => a!.startIndex.compareTo(b!.startIndex));
 
@@ -1862,12 +1840,17 @@ class _BibleScreenState extends State<BibleScreen> {
       if (currentPos < displayStartIndex) {
         spans.add(TextSpan(
           text: text.substring(currentPos, displayStartIndex),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => _onVerseTap(index, verse),
           style: StylesApp(context).textStyleBody14.copyWith(
                 decoration:
                     _isFavorite(verse) ? TextDecoration.underline : null,
-                color: currentPlayingVerseIndex == verses.indexOf(verse)
-                    ? Colors.blue
+                color: currentPlayingVerseIndex == index
+                    ? Colors.green
                     : currentTheme.textColor,
+                backgroundColor: isVerseSelected
+                    ? Colors.blue.withValues(alpha: 0.2)
+                    : Colors.transparent,
                 decorationThickness: 4.0,
                 decorationColor: StyleColor.yellowLight,
                 fontFamily: fontFamilySet.label,
@@ -1878,26 +1861,26 @@ class _BibleScreenState extends State<BibleScreen> {
       }
 
       spans.add(TextSpan(
-        recognizer: LongPressGestureRecognizer()
-          ..onLongPress = () {
-            if (kDebugMode) {
-              print('Long press en versículo ${verse.verse}');
-            }
-            _showHighlightOptions(context, highlight);
-          },
         text: text.substring(displayStartIndex, displayEndIndex),
+        // Usar TapGestureRecognizer con timer para detectar long press
+        recognizer: TapAndLongPressRecognizer(
+          onTap: () => _onVerseTap(index, verse),
+          onLongPress: () => _handleLongPress(highlight),
+        ),
         style: StylesApp(context).textStyleBody14.copyWith(
               decoration: _isFavorite(verse) ? TextDecoration.underline : null,
-              color: currentPlayingVerseIndex == verses.indexOf(verse)
-                  ? Colors.blue
+              color: currentPlayingVerseIndex == index
+                  ? Colors.green
                   : currentTheme.textColor,
+              // IMPORTANTE: No sobrescribir el color de resaltado cuando está seleccionado
+              backgroundColor: isVerseSelected 
+                  ? Colors.blue.withValues(alpha: 0.2)
+                  : Color(int.parse('0XFF${formatColor(highlight.color)}'))
+                      .withAlpha(77),
               decorationThickness: 4.0,
               decorationColor: StyleColor.yellowLight,
               fontFamily: fontFamilySet.label,
               fontSize: fontSizeVerse,
-              backgroundColor:
-                  Color(int.parse('0XFF${formatColor(highlight.color)}'))
-                      .withAlpha(77),
               fontWeight: FontWeight.w400,
             ),
       ));
@@ -1908,11 +1891,16 @@ class _BibleScreenState extends State<BibleScreen> {
     if (currentPos < text.length) {
       spans.add(TextSpan(
         text: text.substring(currentPos),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () => _onVerseTap(index, verse),
         style: StylesApp(context).textStyleBody14.copyWith(
               decoration: _isFavorite(verse) ? TextDecoration.underline : null,
-              color: currentPlayingVerseIndex == verses.indexOf(verse)
-                  ? Colors.blue
+              color: currentPlayingVerseIndex == index
+                  ? Colors.green
                   : currentTheme.textColor,
+              backgroundColor: isVerseSelected
+                  ? Colors.blue.withValues(alpha: 0.2)
+                  : Colors.transparent,
               decorationThickness: 4.0,
               decorationColor: StyleColor.yellowLight,
               fontFamily: fontFamilySet.label,
@@ -1925,28 +1913,175 @@ class _BibleScreenState extends State<BibleScreen> {
     return spans;
   }
 
-  bool _selectionOverlapsHighlights(TextSelection selection, String fullText) {
-    for (final verse in verses) {
-      for (final highlight in verse.highlights!) {
-        final verseStart = _getVerseGlobalStart(verse, fullText);
-        final highlightStart = verseStart + highlight!.startIndex;
-        final highlightEnd = verseStart + highlight.endIndex;
+// // Función corregida con mejor manejo del timer
+//   TapGestureRecognizer _createTapAndLongPressRecognizer(
+//       int index, VerseModel verse, HighlightRangeModel highlight) {
+//     Timer? _longPressTimer;
+//     bool _longPressTriggered = false;
+//     bool _tapHandled = false;
 
-        if (selection.start < highlightEnd && selection.end > highlightStart) {
-          return true;
-        }
-      }
+//     return TapGestureRecognizer()
+//       ..onTapDown = (TapDownDetails details) {
+//         _longPressTriggered = false;
+//         _tapHandled = false;
+
+//         // Iniciar timer para long press
+//         _longPressTimer = Timer(const Duration(milliseconds: 800), () {
+//           if (!_tapHandled) {
+//             _longPressTriggered = true;
+//             _handleLongPress(highlight);
+//           }
+//         });
+//       }
+//       ..onTapUp = (TapUpDetails details) {
+//         if (!_longPressTriggered) {
+//           _tapHandled = true;
+//           _longPressTimer?.cancel();
+//           // Pequeño delay para asegurar que no fue long press
+//           Future.delayed(const Duration(milliseconds: 50), () {
+//             if (!_longPressTriggered) {
+//               _onVerseTap(index, verse);
+//             }
+//           });
+//         }
+//       }
+//       ..onTapCancel = () {
+//         _tapHandled = true;
+//         _longPressTimer?.cancel();
+//       };
+//   }
+
+// Widget del toolbar flotante
+  Widget _buildSelectionToolbar() {
+    if (!_showSelectionToolbar || _selectedVerses.isEmpty) {
+      return SizedBox.shrink();
     }
-    return false;
+
+    return Positioned(
+      left: 16, // Ajusta según tu layout
+      top: MediaQuery.of(context).padding.top + 60, // Debajo del status bar
+      child: Container(
+        key: _toolbarKey,
+        decoration: BoxDecoration(
+          color: currentTheme.backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(0, 4),
+            ),
+          ],
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Contador de versículos seleccionados
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle, size: 16, color: Colors.blue),
+                  SizedBox(width: 6),
+                  Text(
+                    '${_selectedVerses.length}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[800],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Botones del toolbar
+            _buildToolbarButton(
+              icon: Icons.content_copy,
+              iconColor: currentTheme.buttonColor,
+              label: 'Copiar',
+              onTap: _copySelectedVerses,
+            ),
+            Divider(height: 1, color: Colors.grey[300]),
+
+            _buildToolbarButton(
+              icon: Icons.share,
+              iconColor: currentTheme.buttonColor,
+              label: 'Compartir',
+              onTap: _shareSelectedVerses,
+            ),
+            Divider(height: 1, color: Colors.grey[300]),
+
+            if (!_hasAnyHighlightedSelection)
+              _buildToolbarButton(
+                icon: Icons.highlight,
+                iconColor: currentTheme.buttonColor,
+                label: 'Resaltar',
+                onTap: _showHighlightColorPicker,
+              ),
+
+            if (!_hasAnyHighlightedSelection)
+              Divider(height: 1, color: Colors.grey[300]),
+
+            _buildToolbarButton(
+              icon: Icons.clear_all,
+              iconColor: currentTheme.buttonColor,
+              label: 'Limpiar',
+              onTap: _clearSelection,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  int _getVerseGlobalStart(VerseModel verse, String fullText) {
-    int position = 0;
-    for (final v in verses) {
-      if (v.id == verse.id) break;
-      position += "${v.verse} ${v.text}".length + 1;
+// Widget para cada botón del toolbar
+  Widget _buildToolbarButton({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          // width: 160, // Ancho fijo para el toolbar
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: iconColor),
+              SizedBox(width: 12),
+              // Expanded(
+              //   child: Text(
+              //     label,
+              //     style: TextStyle(
+              //       fontSize: 14,
+              //       fontWeight: FontWeight.w500,
+              //       color: Colors.grey[800],
+              //     ),
+              //   ),
+              // ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleLongPress(HighlightRangeModel highlight) {
+    if (kDebugMode) {
+      print('Long press en texto resaltado');
     }
-    return position;
+    _showHighlightOptions(context, highlight);
   }
 
   // ==========================================================================
@@ -2125,7 +2260,8 @@ class _BibleScreenState extends State<BibleScreen> {
 
     setState(() {
       _screenState = BibleScreenState.skeleton;
-      scrollToVerse = null;
+      scrollToVerseStart = null;
+      scrollToVerseEnd = null;
       currentPlayingVerseIndex = null;
       _isManualScroll = false;
     });
@@ -2180,7 +2316,8 @@ class _BibleScreenState extends State<BibleScreen> {
 
     setState(() {
       _screenState = BibleScreenState.skeleton;
-      scrollToVerse = null;
+      scrollToVerseStart = null;
+      scrollToVerseEnd = null;
       currentPlayingVerseIndex = null;
       _isManualScroll = false;
     });
@@ -2271,52 +2408,28 @@ class _BibleScreenState extends State<BibleScreen> {
   // ==========================================================================
 
   void openModal() {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      transitionDuration: Duration(milliseconds: 500),
-      pageBuilder: (_, __, ___) {
-        return Dialog(
-          backgroundColor: currentTheme.backgroundColor,
-          insetPadding: isTablet(context)
-              ? EdgeInsets.symmetric(horizontal: 50, vertical: 0)
-              : EdgeInsets.zero,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: isTablet(context) ? 900 : double.infinity,
-              maxHeight: isTablet(context) ? 700 : double.infinity,
-            ),
-            child: SizedBox(
-              width: isTablet(context)
-                  ? MediaQuery.of(context).size.width * 0.85
-                  : MediaQuery.of(context).size.width,
-              height: isTablet(context)
-                  ? MediaQuery.of(context).size.height * 0.85
-                  : MediaQuery.of(context).size.height,
-              child: SearchBibleWidget(
-                currentVersion: currentVersion!,
-                currentBook: currentBook!,
-                currentChapter: currentChapter!,
-                onActionBook: (InputDataSearchModel data) async {
-                  await loadVersionAndChapter(data);
-                },
-                onActionTabText: (InputDataSearchModel data) async {
-                  await loadVersionAndChapter(data);
-                },
-                onActionTheme: (InputDataSearchModel data) async {
-                  await loadVersionAndChapter(data);
-                },
-              ),
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
-          child: child,
-        );
-      },
+     _clearSelection();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SearchBibleWidget(
+          currentVersion: currentVersion!,
+          currentBook: currentBook!,
+          currentChapter: currentChapter!,
+          onActionBook: (InputDataSearchModel data) async {
+            await loadVersionAndChapter(data);
+            // Navigator.pop(context); // Cerrar la pantalla
+          },
+          onActionTabText: (InputDataSearchModel data) async {
+            await loadVersionAndChapter(data);
+            // Navigator.pop(context); // Cerrar la pantalla
+          },
+          onActionTheme: (InputDataSearchModel data) async {
+            await loadVersionAndChapter(data);
+            // Navigator.pop(context); // Cerrar la pantalla
+          },
+        ),
+        fullscreenDialog: true, // Para que se vea como modal
+      ),
     );
   }
 
@@ -2519,92 +2632,31 @@ class _BibleScreenState extends State<BibleScreen> {
   // 32. MÉTODOS DE RESALTADO
   // ==========================================================================
 
-  void _showColorPickerForSelection(BuildContext context,
-      List<VerseModel> verses, int start, int end, bool isContinue) {
-    final colors = [
-      const Color(0xFFEE5A24),
-      const Color(0xFFF79F1F),
-      const Color(0xFFFFC312),
-      const Color(0xFFFFD55F),
-      const Color(0xFFC4E538),
-      const Color(0xFFA3CB38),
-      const Color(0xFF009432),
-      const Color(0xFF006266),
-      const Color(0xFF12CBC4),
-      const Color(0xFF1289A7),
-      const Color(0xFF0652DD),
-      const Color(0xFF1B1464),
-      const Color(0xFF5758BB),
-      const Color(0xFF9980FA),
-      const Color(0xFFD980FA),
-      const Color(0xFFFDA7DF),
-      const Color(0xFF833471),
-      const Color(0xFFB53471),
-      const Color(0xFF6F1E51),
-      const Color(0xFFED4C67),
-      const Color(0xFFEA2027),
-    ];
+  void _showHighlightColorPicker() {
+    // Obtener versículos seleccionados
+    final selectedVerses = _getSelectedVerses;
 
     showModalBottomSheet(
       context: context,
-      builder: (ctx) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Resaltar selección',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          Divider(),
-          SizedBox(
-            height: 80,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: colors.map((color) {
-                return GestureDetector(
-                  onTap: () {
-                    final hexColor = color
-                        .toARGB32()
-                        .toRadixString(16)
-                        .padLeft(8, '0')
-                        .toUpperCase()
-                        .substring(2);
+      builder: (ctx) => ColorPickerBottomSheet(
+        selectedVerses: selectedVerses,
+        onColorSelected: (color) {
+          // Convertir color a formato HEX
+          final hexColor = color
+              .toARGB32()
+              .toRadixString(16)
+              .padLeft(8, '0')
+              .toUpperCase()
+              .substring(2);
 
-                    final List<VerseModel> newVerses = [];
-                    for (final verse in verses) {
-                      final verseText = "${verse.verse} ${verse.text}";
-                      final startPos = max(0, verse.posIni!);
-                      final endPos = min(verse.posFin!, verseText.length);
-                      if (startPos < endPos) {
-                        newVerses.add(verse);
-                      }
-                    }
-                    _addHighlight(newVerses, hexColor);
-                    Navigator.pop(ctx);
-                  },
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    margin: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(width: 2),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.cancel),
-            title: Text('Cancelar'),
-            onTap: () => Navigator.pop(ctx),
-          ),
-          SizedBox(height: 30),
-        ],
+          // Llamar a tu función existente _addHighlight
+          _addHighlight(selectedVerses, hexColor);
+
+          // Limpiar selección
+          _clearSelection();
+
+          Navigator.pop(ctx);
+        },
       ),
     );
   }
@@ -2616,7 +2668,7 @@ class _BibleScreenState extends State<BibleScreen> {
         id: verse.id!,
         verse: verse.verse,
         startIndex: verse.posIni!,
-        endIndex: verse.posFin!,
+        endIndex: verse.text.length - 1,
         color: color,
       ));
     }
@@ -2627,7 +2679,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
     if (responseCreate.error != null) {
       LoadingService().hideLoading();
-      _showSnackBar(responseCreate.error!);
+      _showSnackBar(responseCreate.userFriendlyError!);
       return;
     }
 
@@ -2768,12 +2820,24 @@ class _BibleScreenState extends State<BibleScreen> {
         verses = currentChapter!.verses!;
         currentBook = currentBook!.copyWith(chapters: allChapters.length - 1);
       });
-
+// Variables adicionales en tu clase
+      int _scrollToIndexStart = 0; // Índice en la lista para scroll
+      int _scrollToIndexEnd = 0; // Índice en la lista para scroll
       if (verses.isNotEmpty) {
-        final startIndex = verses.indexWhere((v) => v.id == data.startVerseId);
+        int startIndex = verses.indexWhere((v) => v.id == data.startVerseId);
+        int endIndex = verses.indexWhere((v) => v.id == data.endVerseId);
         if (startIndex != -1) {
-          setState(() => scrollToVerse = startIndex);
-          _scrollToKeyVerse(startIndex);
+          // startIndex +=1;
+          setState(() {
+            _scrollToIndexStart = startIndex;
+            _scrollToIndexEnd = endIndex != -1 ? endIndex : startIndex;
+            // Para el resaltado (números de versículos)
+            scrollToVerseStart = verses[startIndex].verse;
+            scrollToVerseEnd = endIndex != -1
+                ? verses[endIndex].verse
+                : verses[startIndex].verse;
+          });
+          _scrollToKeyVerse(_scrollToIndexStart);
         }
       }
 
@@ -2801,15 +2865,16 @@ class _BibleScreenState extends State<BibleScreen> {
       if (key?.currentContext != null && scrollController.hasClients) {
         Scrollable.ensureVisible(
           key!.currentContext!,
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 1),
           curve: Curves.easeInOut,
           alignment: 0.1,
-        ).then((_) {
-          setState(() => _isManualScroll = false);
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) setState(() => _isManualScroll = true);
-          });
-        });
+        );
+        // .then((_) {
+        //   setState(() => _isManualScroll = false);
+        //   Future.delayed(const Duration(seconds: 2), () {
+        //     if (mounted) setState(() => _isManualScroll = true);
+        //   });
+        // });
       } else {
         _scrollToVerseFallback(startIndex);
       }
@@ -2829,7 +2894,7 @@ class _BibleScreenState extends State<BibleScreen> {
             final lines = (textLength / 50).ceil();
             estimatedHeight += lines * lineHeight + 16;
           }
-          estimatedHeight += 40.0;
+          // estimatedHeight += 40.0;
 
           await scrollController.animateTo(
             estimatedHeight.clamp(
@@ -2960,6 +3025,54 @@ class _BibleScreenState extends State<BibleScreen> {
 
     await completer.future;
   }
+
+  void _copySelectedVerses() {
+    if (getSelectedVerses().isEmpty) {
+      _showSnackBar('No hay versículos seleccionados para copiar');
+      return;
+    }
+    final versesToCopy =
+        getSelectedVerses().map((v) => "${v.verse} ${v.text}\n").join(' ');
+    final reference =
+        "${currentVersion?.version}\n${currentBook?.modernName} ${currentChapter?.chapter}:${getSelectedVerses().first.verse}${getSelectedVerses().first != getSelectedVerses().last ? '-' : ''}${getSelectedVerses().first != getSelectedVerses().last ? getSelectedVerses().last.verse : ''}";
+    Clipboard.setData(
+      ClipboardData(
+          text:
+              "$reference\n$versesToCopy ${GraphQLConfig.urlServidor}OfficialBible"),
+    );
+    _showSnackBar('Versículo copiado');
+  }
+
+  void _shareSelectedVerses() {
+    if (getSelectedVerses().isEmpty) {
+      _showSnackBar('No hay versículos seleccionados para copiar');
+      return;
+    }
+    final versesToCopy =
+        getSelectedVerses().map((v) => "${v.verse} ${v.text}\n").join(' ');
+    final reference =
+        "${currentVersion?.version}\n${currentBook?.modernName} ${currentChapter?.chapter}:${getSelectedVerses().first.verse}${getSelectedVerses().first != getSelectedVerses().last ? '-' : ''}${getSelectedVerses().first != getSelectedVerses().last ? getSelectedVerses().last.verse : ''}";
+    SharePlus.instance.share(ShareParams(
+      text:
+          "$reference\n$versesToCopy ${GraphQLConfig.urlServidor}OfficialBible",
+      subject: 'Versículo de ${currentBook?.modernName}',
+    ));
+  }
+
+  bool _isVerseInScrollRange(int verseNumber) {
+    if (scrollToVerseStart == null && scrollToVerseEnd == null) {
+      return false;
+    }
+
+    if (scrollToVerseEnd == null) {
+      // Es un solo versículo
+      return verseNumber == scrollToVerseStart;
+    }
+
+    // Es un rango
+    return verseNumber >= scrollToVerseStart! &&
+        verseNumber <= scrollToVerseEnd!;
+  }
 }
 
 // ============================================================================
@@ -2988,5 +3101,68 @@ List<VerseModel> getVersesInRange(
     return result;
   } on FormatException {
     throw FormatException('Los IDs deben ser números válidos');
+  }
+}
+
+// Crea un gesture recognizer personalizado
+class TapAndLongPressRecognizer extends OneSequenceGestureRecognizer {
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+
+  Timer? _longPressTimer;
+  bool _longPressHandled = false;
+  int? _currentPointer;
+
+  TapAndLongPressRecognizer({
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  @override
+  void addPointer(PointerDownEvent event) {
+    startTrackingPointer(event.pointer);
+    _currentPointer = event.pointer;
+    _longPressHandled = false;
+
+    // Iniciar timer para long press
+    _longPressTimer = Timer(const Duration(milliseconds: 500), () {
+      if (_currentPointer == event.pointer && !_longPressHandled) {
+        _longPressHandled = true;
+        onLongPress();
+        stopTrackingPointer(event.pointer);
+      }
+    });
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event is PointerUpEvent && !_longPressHandled) {
+      _longPressTimer?.cancel();
+      onTap();
+      stopTrackingPointer(event.pointer);
+    } else if (event is PointerCancelEvent) {
+      _longPressTimer?.cancel();
+      stopTrackingPointer(event.pointer);
+    }
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    _longPressTimer?.cancel();
+    stopTrackingPointer(pointer);
+  }
+
+  @override
+  void dispose() {
+    _longPressTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  String get debugDescription => 'tap and long press recognizer';
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    // TODO: implement didStopTrackingLastPointer
   }
 }

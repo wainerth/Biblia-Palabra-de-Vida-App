@@ -1141,19 +1141,19 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
   Future<void> _handleAssistPrayer(PrayerModel prayer, int index) async {
     LoadingService().showLoading(context);
     try {
-      // final responseChangeStatus =
-      //     await changeStatusRequest(prayer.requestId, "En Proceso");
-      // if (responseChangeStatus.error != null) {
-      //   LoadingService().hideLoading();
-      //   if (mounted) {
-      //     await showCustomDialog(
-      //       context,
-      //       message: responseChangeStatus.error!,
-      //       dialogType: DialogType.error,
-      //     );
-      //   }
-      //   return;
-      // }
+      final responseChangeStatus =
+          await changeStatusRequest(prayer.requestId, "En Proceso");
+      if (responseChangeStatus.error != null) {
+        LoadingService().hideLoading();
+        if (mounted) {
+          await showCustomDialog(
+            context,
+            message: responseChangeStatus.error!,
+            dialogType: DialogType.error,
+          );
+        }
+        return;
+      }
       LoadingService().hideLoading();
     } catch (e) {
       LoadingService().hideLoading();
