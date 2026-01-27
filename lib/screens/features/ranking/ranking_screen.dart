@@ -5,7 +5,6 @@ import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RankingScreen extends StatefulWidget {
@@ -165,7 +164,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(2, 0),
               ),
@@ -221,7 +220,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
         margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isActive ? StyleColor.turquoise.withOpacity(0.1) : Colors.white,
+          color: isActive ? StyleColor.turquoise.withValues(alpha: 0.1) : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isActive ? StyleColor.turquoise : Colors.transparent,
@@ -285,7 +284,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
             const Border(bottom: BorderSide(color: Colors.black, width: 1.0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 4,
             offset: const Offset(0, 4),
           ),
@@ -489,7 +488,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     required bool showSpecialZones,
   }) {
     final position = index + 1;
-    final positionColor = _getPositionColor(position);
+    _getPositionColor(position);
     final isTopThree = position <= 3;
 
     return Container(

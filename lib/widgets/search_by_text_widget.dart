@@ -57,10 +57,32 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
 
   final FocusNode _searchFocusNode = FocusNode();
 
+  // Función para determinar si es tablet
+  bool get isTablet {
+    final mediaQuery = MediaQuery.of(context);
+    return mediaQuery.size.width >= 600;
+  }
+
+  // Función para obtener el padding horizontal según el dispositivo
+  EdgeInsets get horizontalPadding {
+    if (isTablet) {
+      return const EdgeInsets.symmetric(horizontal: 24.0);
+    }
+    return const EdgeInsets.symmetric(horizontal: 12.0);
+  }
+
+  // Función para obtener el tamaño de los espacios según el dispositivo
+  double get spacingHeight {
+    if (isTablet) {
+      return 35;
+    }
+    return 25;
+  }
+
   @override
   void initState() {
     super.initState();
-    // Inicializar datos de manera síncrona
+    // Inicializar datos de manera sincronía
     final catalogueProvider =
         Provider.of<CatalogueProvider>(context, listen: false);
     listBibleVersions = catalogueProvider.allBibleVersion;
@@ -75,14 +97,29 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
         originalData: widget.version,
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+        });
+
+        // Configurar listeners de manera segura
+        _searchFocusNode.addListener(_onFocusChanged);
+      }
+    });
+  }
+
+  void _onFocusChanged() {
+    // Este método se llama cuando el foco cambia
+    // Puedes agregar lógica aquí si es necesario
   }
 
   @override
   void dispose() {
     if (mounted) {
+      _searchFocusNode.removeListener(_onFocusChanged);
+      _searchFocusNode.dispose();
       _debounceTimer?.cancel();
       searchTextController.dispose();
-      _searchFocusNode.dispose();
     }
     super.dispose();
   }
@@ -92,29 +129,169 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
     final themeProvider =
         Provider.of<BibleThemeProvider>(context, listen: false);
     currentTheme = themeProvider.themeData;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 25.0,
+        SizedBox(height: spacingHeight),
+
+        if (!isTablet)
+          _buildMobileSearchHeader()
+        else
+          _buildTabletSearchHeader(),
+
+        SizedBox(height: spacingHeight),
+
+        // Resultados de búsqueda
+        Expanded(
+          child: _buildSearchResults(),
         ),
-        Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: 12.0,
+
+        // Paginación
+        _buildPagination(),
+      ],
+    );
+  }
+
+  // ============ MÓVIL: Cabecera de búsqueda ============
+  Widget _buildMobileSearchHeader() {
+    return Container(
+      padding: horizontalPadding,
+      constraints: BoxConstraints(
+        minWidth: 160.0,
+        maxWidth: StylesApp(context).sizeTextFormField.width,
+      ),
+      child: Column(
+        children: [
+          CustomDropdownBottomWidget(
+            hintText: "Seleccione la versión",
+            items: bibleVersions,
+            onChanged: (ModelData? version) async {
+              if (kDebugMode) {
+                print("Versión seleccionada ${version!.value}");
+              }
+              setState(() {
+                versionSelected = version;
+              });
+            },
+            selectedItem: versionSelected!.value.isNotEmpty
+                ? bibleVersions.firstWhere((element) =>
+                    element.value.toLowerCase() ==
+                    versionSelected?.value.toLowerCase())
+                : null,
           ),
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
-          ),
-          child: Column(
+          SizedBox(height: spacingHeight),
+          Row(
             children: [
-              SizedBox(
+              Expanded(
+                child: TextFormField(
+                  focusNode: _searchFocusNode,
+                  readOnly: versionSelected!.value.isEmpty || loading,
+                  controller: searchTextController,
+                  style: StylesApp(context).textStyleSmallBlack.copyWith(
+                        fontSize: isTablet ? 16 : 14,
+                      ),
+                  decoration:
+                      StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                            hintText: 'Buscar palabra o frase...',
+                            hintStyle: TextStyle(
+                              fontSize: isTablet ? 15 : 14,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            suffixIcon: _searchText.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(Icons.clear),
+                                    onPressed: () {
+                                      _safeClearSearch();
+                                    },
+                                  )
+                                : null,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: isTablet ? 20 : 16,
+                              vertical: isTablet ? 18 : 14,
+                            ),
+                          ),
+                  onChanged: (value) {
+                    if (!mounted) return;
+                    _handleSearchChange(value);
+                  },
+                ),
+              ),
+              SizedBox(width: 8.0),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: _searchText.isNotEmpty
+                      ? currentTheme.buttonColor
+                      : currentTheme.buttonColor.withValues(alpha: 0.5),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.search,
+                      color: Colors.white, size: isTablet ? 28 : 24),
+                  onPressed: _searchText.isNotEmpty
+                      ? () {
+                          _onSearchChanged(_searchText);
+                        }
+                      : null,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============ TABLET: Cabecera de búsqueda ============
+  Widget _buildTabletSearchHeader() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        children: [
+          // Título de búsqueda
+          Row(
+            children: [
+              Icon(
+                Icons.search,
+                color: currentTheme.buttonColor,
+                size: 28,
+              ),
+              SizedBox(width: 12),
+              Text(
+                "Búsqueda por Texto",
+                style: StylesApp(context).textStyleBody18.copyWith(
+                      color: currentTheme.textColor,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+
+          // Selector de versión y campo de búsqueda en fila
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Selector de versión
+              Container(
+                width: 250,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: currentTheme.buttonColor,
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 12),
                 child: CustomDropdownBottomWidget(
-                  hintText: "Seleccione la version",
+                  border: false,
+                  hintText: "Versión bíblica",
                   items: bibleVersions,
                   onChanged: (ModelData? version) async {
                     if (kDebugMode) {
-                      print("version seleccionada ${version!.value}");
+                      print("Versión seleccionada ${version!.value}");
                     }
                     setState(() {
                       versionSelected = version;
@@ -127,256 +304,619 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                       : null,
                 ),
               ),
-              SizedBox(
-                height: 25.0,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      focusNode: _searchFocusNode,
-                      readOnly: versionSelected!.value.isEmpty || loading,
-                      controller: searchTextController,
-                      style: StylesApp(context).textStyleSmallBlack,
-                      decoration: StylesApp(context)
-                          .inputDecorationOutlineStyle
-                          .copyWith(
-                            hintText: 'Buscar...',
-                            border: OutlineInputBorder(),
+
+              SizedBox(width: 16),
+
+              // Campo de búsqueda
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: currentTheme.buttonColor,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          focusNode: _searchFocusNode,
+                          readOnly: versionSelected!.value.isEmpty || loading,
+                          controller: searchTextController,
+                          style:
+                              StylesApp(context).textStyleSmallBlack.copyWith(
+                                    fontSize: 16,
+                                  ),
+                          decoration: InputDecoration(
+                            hintText:
+                                'Escribe aquí la palabra o frase a buscar...',
+                            hintStyle: TextStyle(
+                              color: currentTheme.textColor.withValues(alpha: 0.6),
+                              fontSize: 15,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 18,
+                            ),
                             suffixIcon: _searchText.isNotEmpty
                                 ? IconButton(
-                                    icon: Icon(Icons.clear),
+                                    icon: Icon(Icons.clear,
+                                        color: currentTheme.textColor
+                                            .withValues(alpha: 0.7)),
                                     onPressed: () {
-                                      if (!mounted) return;
-                                      // setState(() {
-                                        cleanSearch();
-                                        _searchFocusNode
-                                            .unfocus(); // ← Desenfocar al limpiar
-                                      // });
+                                      _safeClearSearch();
                                     },
                                   )
                                 : null,
                           ),
-                      onChanged: (value) {
-                        if (!mounted) return;
-                        setState(() {
-                          _searchText = value;
-                        });
-                      },
-                    ),
-                  ),
-                  SizedBox(width: 8.0), // Espacio entre el input y el botón
-                  IconButton(
-                    style: StylesApp(context).btnPrimary.copyWith(
-                          minimumSize: WidgetStatePropertyAll(Size(50, 50)),
-                          maximumSize: null,
-                          backgroundColor: _searchText.isNotEmpty
-                              ? WidgetStatePropertyAll(currentTheme.buttonColor)
-                              : WidgetStatePropertyAll(
-                                  currentTheme.buttonColor.withOpacity(0.5)),
+                          onChanged: (value) {
+                            if (!mounted) return;
+                            _handleSearchChange(value);
+                          },
                         ),
-                    color: currentTheme.buttonColor,
-                    icon: Icon(Icons.search),
-                    onPressed: _searchText.isNotEmpty
-                        ? () {
-                            _onSearchChanged(_searchText);
-                          }
-                        : null,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: _searchText.isNotEmpty
+                              ? currentTheme.buttonColor
+                              : currentTheme.buttonColor.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
+                          ),
+                        ),
+                        child: IconButton(
+                          icon:
+                              Icon(Icons.search, color: Colors.white, size: 28),
+                          onPressed: _searchText.isNotEmpty
+                              ? () {
+                                  _onSearchChanged(_searchText);
+                                }
+                              : null,
+                        ),
+                      ),
+                    ],
                   ),
-                  // ElevatedButton(
-                  //   onPressed: _searchText.isNotEmpty
-                  //       ? () {
-                  //           _onSearchChanged(_searchText);
-                  //         }
-                  //       : null,
-                  //   child: Text(
-                  //     'Buscar',
-                  //     style: StylesApp(context)
-                  //         .textStyleBody14
-                  //         .copyWith(color: currentTheme.buttonTextColor),
-                  //   ),
-                  // ),
-                ],
+                ),
               ),
             ],
           ),
-        ),
-        SizedBox(
-          height: 25.0,
-        ),
-        // body de los resultados de la búsqueda
-        Expanded(
-          child: loading
-              ? LoadingIndicator()
-              : searchResult.isEmpty
-                  ? SizedBox(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Center(
-                            child: Text(
-                              textAlign: TextAlign.center,
-                              "No hay resultados...",
-                              style: StylesApp(context)
-                                  .textStyleBody18
-                                  .copyWith(color: currentTheme.textColor),
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: searchResult.length,
-                      itemBuilder: (context, int index) {
-                        return CardSearchTextWidget(
-                          data: searchResult[index],
-                          currentTheme: currentTheme,
-                          onAction: () {
-                            showModalBottomSheet(
-                                backgroundColor: currentTheme.backgroundColor,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      ListTile(
-                                        title: Text("Ver Capitulo",
-                                            style: StylesApp(context)
-                                                .textStyleBody12
-                                                .copyWith(
-                                                    color: currentTheme
-                                                        .textColor)),
-                                        trailing: Icon(
-                                          Icons.play_arrow_outlined,
-                                          color: currentTheme.buttonColor,
-                                          size: 25,
-                                        ),
-                                        onTap: () {
-                                          final InputDataSearchModel inputData =
-                                              InputDataSearchModel(
-                                            bookId: searchResult[index].book.id,
-                                            chapterId:
-                                                searchResult[index].chapter.id!,
-                                            startVerseId:
-                                                searchResult[index].verse.id,
-                                            endVerseId: "",
-                                            versionId: versionSelected!.value,
-                                          );
-                                          if (widget.onActionTabText != null) {
-                                            widget.onActionTabText!(inputData);
-                                          }
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                      Divider(
-                                        color: StyleColor.grayMedium,
-                                        height: 2.0,
-                                        thickness: 4.0,
-                                      ),
-                                      ListTile(
-                                        title: Text("Copiar",
-                                            style: StylesApp(context)
-                                                .textStyleBody12
-                                                .copyWith(
-                                                    color: currentTheme
-                                                        .textColor)),
-                                        trailing: Icon(Icons.file_copy,
-                                            color: currentTheme.buttonColor,
-                                            size: 25),
-                                        onTap: () {
-                                          _copyToClipboard(
-                                              context, searchResult[index]);
-                                        },
-                                      ),
-                                      Divider(
-                                        color: StyleColor.grayMedium,
-                                        height: 2,
-                                        thickness: 4.0,
-                                      ),
-                                      ListTile(
-                                        title: Text("Favoritos",
-                                            style: StylesApp(context)
-                                                .textStyleBody12
-                                                .copyWith(
-                                                    color: currentTheme
-                                                        .textColor)),
-                                        trailing: Icon(Icons.star_border,
-                                            color: currentTheme.buttonColor,
-                                            size: 25),
-                                        onTap: () {
-                                          addVerseFavorite(
-                                              context, searchResult[index]);
-                                        },
-                                      ),
-                                      Divider(
-                                        color: StyleColor.grayMedium,
-                                        height: 2,
-                                        thickness: 4.0,
-                                      ),
-                                    ],
-                                  );
-                                });
-                          },
-                        );
-                      },
-                    ),
-        ),
 
-        CustomPagination(
-          pagination: PaginationInfo(
-              currentPage: pagination.currentPage,
-              itemsPerPage: pagination.itemsPerPage,
-              totalPages: pagination.totalPages,
-              hasPreviousPage: pagination.hasPreviousPage,
-              hasNextPage: pagination.hasNextPage,
-              totalItems: pagination.totalItems),
-          itemPerPageValue: itemPerPageValue,
-          currentTheme: currentTheme,
-          onPageChanged: (newPage, newPerPage) async {
-            if (versionSelected!.value.isNotEmpty) {
-              setState(() {
-                itemPerPageValue = newPerPage;
-              });
-              await _loadData(
-                newPage,
-                newPerPage,
-                versionSelected!.value,
-                _searchText,
-              );
-            }
-          },
-          itemsPerPage: itemsPerPage, // Opcional: personaliza los valores
-        )
-      ],
+          // Información de búsqueda
+          if (_searchText.isNotEmpty && searchResult.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: currentTheme.buttonColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: currentTheme.buttonColor.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: currentTheme.buttonColor,
+                          size: 18,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          "${pagination.totalItems} resultados para '$_searchText'",
+                          style: StylesApp(context).textStyleBody12.copyWith(
+                                color: currentTheme.textColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Spacer(),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: currentTheme.backgroundColor,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: currentTheme.buttonColor,
+                      ),
+                    ),
+                    child: Text(
+                      "Página ${pagination.currentPage} de ${pagination.totalPages}",
+                      style: StylesApp(context).textStyleBody12.copyWith(
+                            color: currentTheme.textColor.withValues(alpha: 0.7),
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 
+  // ============ Resultados de búsqueda ============
+  Widget _buildSearchResults() {
+    if (loading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              color: currentTheme.buttonColor,
+            ),
+            SizedBox(height: 16),
+            Text(
+              "Buscando...",
+              style: StylesApp(context).textStyleBody14.copyWith(
+                    color: currentTheme.textColor.withValues(alpha: 0.7),
+                  ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (searchResult.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return _buildResultsList();
+  }
+
+  Widget _buildEmptyState() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: horizontalPadding,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: isTablet ? 100 : 50),
+            Icon(
+              Icons.search_off,
+              size: isTablet ? 80 : 60,
+              color: currentTheme.textColor.withValues(alpha: 0.3),
+            ),
+            SizedBox(height: 20),
+            Text(
+              "No hay resultados",
+              style: StylesApp(context).textStyleBody18.copyWith(
+                    color: currentTheme.textColor,
+                    fontSize: isTablet ? 22 : 18,
+                  ),
+            ),
+            SizedBox(height: 12),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet ? 100 : 20,
+              ),
+              child: Text(
+                versionSelected!.value.isEmpty
+                    ? "Selecciona una versión bíblica para comenzar tu búsqueda"
+                    : "Escribe una palabra o frase en el campo de búsqueda para encontrar versículos relacionados",
+                textAlign: TextAlign.center,
+                style: StylesApp(context).textStyleBody14.copyWith(
+                      color: currentTheme.textColor.withValues(alpha: 0.6),
+                      fontSize: isTablet ? 16 : 14,
+                    ),
+              ),
+            ),
+            SizedBox(height: isTablet ? 100 : 50),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultsList() {
+    if (isTablet) {
+      // Diseño para tablet (grid de 2 columnas)
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 2.0, // Rectángulos más anchos
+          ),
+          itemCount: searchResult.length,
+          itemBuilder: (context, index) {
+            return _buildTabletResultCard(searchResult[index]);
+          },
+        ),
+      );
+    } else {
+      // Diseño para móvil (lista)
+      return ListView.builder(
+        padding: horizontalPadding,
+        itemCount: searchResult.length,
+        itemBuilder: (context, int index) {
+          return _buildMobileResultCard(searchResult[index]);
+        },
+      );
+    }
+  }
+
+  Widget _buildMobileResultCard(WordSearchResult data) {
+    return Card(
+      margin: EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: CardSearchTextWidget(
+        data: data,
+        currentTheme: currentTheme,
+        onAction: () {
+          _showMobileOptionsModal(data);
+        },
+      ),
+    );
+  }
+
+  Widget _buildTabletResultCard(WordSearchResult data) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: currentTheme.buttonColor,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Encabezado con referencia bíblica
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: currentTheme.buttonColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: currentTheme.buttonColor,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      "${data.book.modernName} ${data.chapter.chapter}:${data.verse.verse}",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                ],
+              ),
+            ),
+
+            // Texto del versículo
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  child: Text(
+                    data.verse.text,
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                          color: currentTheme.textColor,
+                          fontSize: 15,
+                          height: 1.4,
+                        ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Acciones
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: currentTheme.buttonColor,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildTabletActionButton(
+                    icon: Icons.play_arrow,
+                    label: "Ver",
+                    onTap: () => _navigateToChapter(data),
+                  ),
+                  _buildTabletActionButton(
+                    icon: Icons.content_copy,
+                    label: "Copiar",
+                    onTap: () => _copyToClipboard(context, data),
+                  ),
+                  _buildTabletActionButton(
+                    icon: Icons.star_border,
+                    label: "Favorito",
+                    onTap: () => addVerseFavorite(context, data),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabletActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: currentTheme.buttonColor,
+            size: 22,
+          ),
+          SizedBox(height: 4),
+          Text(
+            label,
+            style: StylesApp(context).textStyleBody12.copyWith(
+                  color: currentTheme.textColor.withValues(alpha: 0.7),
+                  fontSize: 11,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============ Paginación ============
+  Widget _buildPagination() {
+    if (searchResult.isEmpty) return SizedBox();
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 24 : 12,
+        vertical: 12,
+      ),
+      child: CustomPagination(
+        pagination: PaginationInfo(
+          currentPage: pagination.currentPage,
+          itemsPerPage: pagination.itemsPerPage,
+          totalPages: pagination.totalPages,
+          hasPreviousPage: pagination.hasPreviousPage,
+          hasNextPage: pagination.hasNextPage,
+          totalItems: pagination.totalItems,
+        ),
+        itemPerPageValue: itemPerPageValue,
+        currentTheme: currentTheme,
+        onPageChanged: (newPage, newPerPage) async {
+          if (versionSelected!.value.isNotEmpty) {
+            setState(() {
+              itemPerPageValue = newPerPage;
+            });
+            await _loadData(
+              newPage,
+              newPerPage,
+              versionSelected!.value,
+              _searchText,
+            );
+          }
+        },
+        itemsPerPage: itemsPerPage,
+      ),
+    );
+  }
+
+  // ============ MÉTODOS AUXILIARES ============
+  void _showMobileOptionsModal(WordSearchResult data) {
+    showModalBottomSheet(
+      backgroundColor: currentTheme.backgroundColor,
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Encabezado del modal
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: currentTheme.buttonColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: currentTheme.buttonColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        "${data.book.numberBook} ${data.chapter.chapter}:${data.verse.verse}",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        data.book.modernName,
+                        style: StylesApp(context).textStyleBody14.copyWith(
+                              color: currentTheme.textColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Opciones
+              ListTile(
+                leading: Icon(
+                  Icons.play_arrow_outlined,
+                  color: currentTheme.buttonColor,
+                  size: 28,
+                ),
+                title: Text(
+                  "Ver Capítulo",
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        color: currentTheme.textColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  color: currentTheme.textColor.withValues(alpha: 0.5),
+                  size: 18,
+                ),
+                onTap: () {
+                  final InputDataSearchModel inputData = InputDataSearchModel(
+                    bookId: data.book.id,
+                    chapterId: data.chapter.id!,
+                    startVerseId: data.verse.id,
+                    endVerseId: "",
+                    versionId: versionSelected!.value,
+                  );
+                  if (widget.onActionTabText != null) {
+                    widget.onActionTabText!(inputData);
+                  }
+                  Navigator.pop(context);
+                },
+              ),
+
+              Divider(
+                color: currentTheme.buttonColor,
+                height: 1,
+              ),
+
+              ListTile(
+                leading: Icon(
+                  Icons.content_copy,
+                  color: currentTheme.buttonColor,
+                  size: 28,
+                ),
+                title: Text(
+                  "Copiar Versículo",
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        color: currentTheme.textColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  color: currentTheme.textColor.withValues(alpha: 0.5),
+                  size: 18,
+                ),
+                onTap: () {
+                  _copyToClipboard(context, data);
+                  Navigator.pop(context);
+                },
+              ),
+
+              Divider(
+                color: currentTheme.buttonColor,
+                height: 1,
+              ),
+
+              ListTile(
+                leading: Icon(
+                  Icons.star_border,
+                  color: currentTheme.buttonColor,
+                  size: 28,
+                ),
+                title: Text(
+                  "Agregar a Favoritos",
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        color: currentTheme.textColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  color: currentTheme.textColor.withValues(alpha: 0.5),
+                  size: 18,
+                ),
+                onTap: () {
+                  addVerseFavorite(context, data);
+                  Navigator.pop(context);
+                },
+              ),
+
+              SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateToChapter(WordSearchResult data) {
+    final InputDataSearchModel inputData = InputDataSearchModel(
+      bookId: data.book.id,
+      chapterId: data.chapter.id!,
+      startVerseId: data.verse.id,
+      endVerseId: "",
+      versionId: versionSelected!.value,
+    );
+    
+    if (widget.onActionTabText != null) {
+      widget.onActionTabText!(inputData);
+    }
+  }
+
+  // ============ MÉTODOS EXISTENTES (MANTENIDOS) ============
   void _onSearchChanged(String query) {
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
 
     _debounceTimer = Timer(Duration(milliseconds: 800), () {
-      // VERIFICACIÓN CRÍTICA
       if (!mounted) return;
-
-      // Quitar el focus de manera segura
       _safeUnfocus();
       _performSearch(query);
     });
   }
 
   void _safeUnfocus() {
-    // Método 1: Usar FocusManager (más seguro)
     FocusManager.instance.primaryFocus?.unfocus();
-
-    // Método 2: Usar el focus node directamente
-    // if (_searchFocusNode.hasFocus) {
-    //   _searchFocusNode.unfocus();
-    // }
   }
 
   void _performSearch(String query) async {
-    if (query.isEmpty) return; // No buscar si está vacío
-
+    if (query.isEmpty) return;
     try {
       _loadData(1, itemPerPageValue, versionSelected!.value, query);
     } catch (e) {
@@ -384,13 +924,6 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
         print("error al filtrar $e");
       }
     }
-  }
-
-  void cleanSearch() {
-    setState(() {
-      _searchText = '';
-      searchTextController.text = '';
-    });
   }
 
   Future<void> _loadData(
@@ -440,6 +973,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
         // Mostrar diálogo de confirmación
         await showCustomDialog(
           currentContext,
+          showDetails: false,
           message:
               "El capítulo ${data.chapter.chapter} del libro ${data.book.modernName}\nse ha copiado con éxito al portapapeles",
           dialogType: DialogType.info,
@@ -476,5 +1010,28 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
         }
       }
     }
+  }
+
+  void _safeClearSearch() {
+    if (!mounted) return;
+
+    setState(() {
+      _searchText = '';
+      searchTextController.text = '';
+    });
+
+    Future.delayed(Duration(milliseconds: 100), () {
+      if (mounted && _searchFocusNode.hasFocus) {
+        _searchFocusNode.unfocus();
+      }
+    });
+  }
+
+  void _handleSearchChange(String value) {
+    if (!mounted) return;
+
+    setState(() {
+      _searchText = value;
+    });
   }
 }

@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/utils/currency_config.dart';
 import 'package:biblia_palabra_de_vida_app/utils/currency_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -112,7 +113,7 @@ class _DonationAmountSelectorState extends State<DonationAmountSelector> {
 
   void _handleCustomAmountInput(String value, CurrencyConfig config) {
     if (value.isEmpty) {
-      // Resetear a valores por defecto si está vacío
+      // Reset a valores por defecto si está vacío
       _resetToDefaultValue(config);
       return;
     }
@@ -241,7 +242,7 @@ class _DonationAmountSelectorState extends State<DonationAmountSelector> {
 
         const SizedBox(height: 20),
 
-        // Montos fijos en USD con equivalentes
+        // Monto fijos en USD con equivalentes
         Row(
           spacing: 4.0,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -406,7 +407,7 @@ class _DonationAmountSelectorState extends State<DonationAmountSelector> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                '💡 Montos en Bolívares pueden variar rápidamente',
+                '💡 Monto en Bolívares pueden variar rápidamente',
                 style: StylesApp(context).textStyleBody12.copyWith(
                       color: Colors.orange[700],
                       fontStyle: FontStyle.italic,
@@ -506,7 +507,7 @@ class _DonationAmountSelectorState extends State<DonationAmountSelector> {
     }
   }
 
-// Función auxiliar para resetear a valor por defecto
+// Función auxiliar para reset a valor por defecto
   void _resetToDefaultValue(CurrencyConfig config) {
     if (config.decimalDigits == 0) {
       _customAmountController.text = '0';
@@ -565,7 +566,7 @@ class _DonationAmountSelectorState extends State<DonationAmountSelector> {
         TextSelection.collapsed(offset: _customAmountController.text.length);
   }
 
-// Parsear amount según configuración
+// Parse amount según configuración
   double? _parseAmount(String value, CurrencyConfig config) {
     try {
       return double.parse(value);
@@ -604,12 +605,11 @@ class _DonationAmountSelectorState extends State<DonationAmountSelector> {
 
   void _processValidAmount(double amount) {
     // Tu lógica para procesar el monto válido
-    print('Monto válido: $amount');
+    if (kDebugMode) {
+      print('Monto válido: $amount');
+    }
   }
 
-  void _yourOriginalLogic(String value) {
-    // Aquí va cualquier lógica adicional que ya tuvieras en tu _handleCustomAmountInput original
-  }
 }
 
 // Formateado actualizado para ser dinámico

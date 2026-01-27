@@ -18,9 +18,9 @@ class SearchBibleWidget extends StatefulWidget {
   final VersionModel currentVersion;
   final BookModel currentBook;
   final ChapterModel currentChapter;
-  final void Function(InputDataSearchModel searchData) onActionBook;
-  final void Function(InputDataSearchModel searchData) onActionTabText;
-  final void Function(InputDataSearchModel searchData) onActionTheme;
+  final Future<void> Function(InputDataSearchModel data) onActionBook;
+  final Future<void> Function(InputDataSearchModel data) onActionTabText;
+  final Future<void> Function(InputDataSearchModel data) onActionTheme;
   const SearchBibleWidget({
     super.key,
     required this.currentVersion,
@@ -87,8 +87,15 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
   // diseño para Tablet
   Widget _buildTabletLayout() {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Container(
-        color: currentTheme.backgroundColor,
+        decoration: BoxDecoration(
+          color: currentTheme.backgroundColor,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(isTablet(context) ? 20 : 0),
+            topRight: Radius.circular(isTablet(context) ? 20 : 0),
+          ),
+        ),
         width: double.infinity,
         height: double.infinity,
         child: Column(
@@ -98,14 +105,14 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
             SizedBox(
               height: 16,
             ),
-    
+
             // contenido principal en dos columnas
             Expanded(
               child: Row(
                 children: [
                   // Columna Izquierda
                   Container(
-                    width: 200,
+                    width: MediaQuery.sizeOf(context).width * 0.25,
                     decoration: BoxDecoration(
                       color: StyleColor.white,
                       boxShadow: [
@@ -218,22 +225,19 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
 
   // 🔥 MÉTODO PARA CONSTRUIR APP BAR RESPONSIVE
   Widget _buildAppBar() {
+    // Header con botón de cerrar
     return Container(
-      padding: isTablet(context)
-          ? EdgeInsets.symmetric(horizontal: 20, vertical: 0)
-          : EdgeInsets.zero,
+      height: 60,
       decoration: BoxDecoration(
-        color: StyleColor.turquoise,
-        borderRadius: isTablet(context)
-            ? BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              )
-            : BorderRadius.zero,
+        color: currentTheme.appBarColor,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(isTablet(context) ? 20 : 0),
+          topRight: Radius.circular(isTablet(context) ? 20 : 0),
+        ),
       ),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          // Botón de cerrar
           Container(
             height: isTablet(context) ? 40 : 25,
             width: isTablet(context) ? 40 : 25,
@@ -253,22 +257,13 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
               icon: Icon(Icons.close),
             ),
           ),
-
-          SizedBox(width: isTablet(context) ? 16 : 12),
-
-          // Título
-          Expanded(
-            child: Text(
-              'Búsqueda',
-              style: isTablet(context)
-                  ? StylesApp(context).textStyleBody18.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      )
-                  : StylesApp(context).textStyleBody7.copyWith(
-                        color: Colors.white,
-                      ),
-            ),
+          SizedBox(width: 16),
+          Text(
+            'Buscar en la Biblia',
+            style: StylesApp(context).textStyleBody18.copyWith(
+                  color: currentTheme.buttonTextColor,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
@@ -340,7 +335,7 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
         labelColor: Colors.white,
         labelStyle: StylesApp(context).textStyleBody12,
         indicatorSize: TabBarIndicatorSize.tab,
-         tabAlignment: TabAlignment.start,
+        tabAlignment: TabAlignment.start,
         automaticIndicatorColorAdjustment: true,
         indicatorWeight: 0,
         indicatorPadding: EdgeInsets.all(0),
@@ -417,7 +412,6 @@ class _SearchBibleWidgetState extends State<SearchBibleWidget> {
       SearchByCharacterWidget(),
     ];
   }
-
 
   // 🔥 ICONOS PARA LOS TABS VERTICALES
   IconData _getTabIcon(int index) {

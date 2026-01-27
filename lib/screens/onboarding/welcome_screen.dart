@@ -204,7 +204,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       ),
       decoration: BoxDecoration(
           // border: Border.all( color:  StyleColor.black),
-          ),  
+          ),
       child: Column(
         // mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -233,12 +233,182 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   Widget _buildTabletEndPage() {
-    return const Row(
+    return Stack(
       children: [
-        Expanded(
-          child: EndIntroScreen(), // Tu pantalla final existente
+        // Fondo similar a las páginas anteriores
+        Container(
+          color: Color(0xfff0f4f8),
+        ),
+
+        // Imagen de fondo sutil (si tienes)
+        Positioned.fill(
+          child: Image.asset(
+            'assets/background_player.jpg',
+            fit: BoxFit.cover,
+            opacity: AlwaysStoppedAnimation(0.1),
+          ),
+        ),
+
+        Row(
+          children: [
+            // Contenido principal (continuación del estilo)
+            Expanded(
+              flex: 2,
+              child: Container(
+                padding: EdgeInsets.all(50),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Título similar a páginas anteriores
+                      Text(
+                        'PALABRA DE VIDA',
+                        style: StylesApp(context).textStyleBody32.copyWith(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff2c3e50),
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                  
+                      // Subtítulo
+                      Text(
+                        '¡Tu preparación está completa!',
+                        style: StylesApp(context).textStyleBody18.copyWith(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xffF27728), // Mismo naranja que antes
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                  
+                      // Descripción
+                      Text(
+                        'Ahora tienes acceso completo a:',
+                        style: StylesApp(context).textStyleBody20.copyWith(
+                          fontSize: 22,
+                          color: Color(0xff555555),
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                  
+                      // Características
+                      _buildFeature('📚 Biblia completa en múltiples versiones'),
+                      // _buildFeature('📖 Planes de lectura diaria'),
+                      _buildFeature('🎧 Biblia Interactiva con lector para escuchar'),
+                      _buildFeature('💭 Predicas inspiradores'),
+                      _buildFeature('⭐ Progreso Estudio Bíblico'),
+                      SizedBox(height: 50),
+                  
+                      // Versículo final
+                      Container(
+                        padding: EdgeInsets.all(25),
+                        decoration: BoxDecoration(
+                          color: Color(0xff12CBC4).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(
+                            color: Color(0xff12CBC4).withOpacity(0.3),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '"Lámpara es a mis pies tu palabra, Y lumbrera a mi camino."',
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Color(0xff2c3e50),
+                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Salmos 119:105',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Color(0xff12CBC4),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 40),
+                  
+                      // // Botón (consistente con el flujo)
+                      // ElevatedButton(
+                      //   onPressed: () {
+                      //     // Completar onboarding
+                      //   },
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor: Color(0xff12CBC4),
+                      //     padding:
+                      //         EdgeInsets.symmetric(vertical: 18, horizontal: 40),
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(10),
+                      //     ),
+                      //   ),
+                      //   child: Text(
+                      //     'COMENZAR MI VIAJE ESPIRITUAL',
+                      //     style: TextStyle(
+                      //       fontSize: 18,
+                      //       fontWeight: FontWeight.bold,
+                      //       letterSpacing: 1,
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Tu diseño gráfico
+            Expanded(
+              flex: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      Color(0xffE8F3FF),
+                      Colors.white,
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: EndIntroScreen(),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildFeature(String text) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle, color: Color(0xff12CBC4), size: 22),
+          SizedBox(width: 15),
+          Expanded(
+            child: Text(
+              text,
+              style: StylesApp(context).textStyleBody18.copyWith(
+                fontSize: 18,
+                color: Color(0xff333333),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

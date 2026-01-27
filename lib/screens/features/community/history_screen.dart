@@ -107,7 +107,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       final ResponseData responseCourse = await loadOneCourse(
         userData!.userId,
-        courseId!,
+        courseId,
       );
 
       if (!mounted) return;
@@ -119,7 +119,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       course = CourseDetail.fromJson(removeTypename(responseCourse.data));
 
       // obtenemos sección
-      final ResponseData stageResponse = await loadStageById(sectionId!);
+      final ResponseData stageResponse = await loadStageById(sectionId);
 
       if (stageResponse.error != null) {
         errorMessage = stageResponse.error;
@@ -127,7 +127,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
       stage = Stage.fromJson(stageResponse.data);
       // obtenemos el nivel
-      final levelResponse = await loadOneLevel(levelId!);
+      final levelResponse = await loadOneLevel(levelId);
 
       if (levelResponse.error != null) {
         errorMessage = levelResponse.error;
@@ -2000,7 +2000,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       orElse: () => ModelData(label: "", value: ""),
     );
 
-    ResponseReferenceBiblicalModel? _localReference = reference;
+    ResponseReferenceBiblicalModel? localReference = reference;
     showModalBottomSheet(
       backgroundColor: StyleColor.white,
       context: context,
@@ -2025,7 +2025,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 children: [
                   Text(
                     textAlign: TextAlign.center,
-                    "Biblia  Version\n ${_localReference!.bibleName}",
+                    "Biblia  Version\n ${localReference!.bibleName}",
                     style: StylesApp(context)
                         .textStyleBody18
                         .copyWith(color: StyleColor.black),
@@ -2063,7 +2063,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             }
 
                             setModalState(() {
-                              _localReference =
+                              localReference =
                                   ResponseReferenceBiblicalModel.fromJson(
                                       responseDetailLink.data);
                             });
@@ -2081,7 +2081,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: _localReference?.verses.length,
+                      itemCount: localReference?.verses.length,
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
                           margin: EdgeInsets.only(
@@ -2115,17 +2115,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                           CopyModelVerse(
                                             book: Book(
                                               modernName:
-                                                  _localReference?.bookName,
+                                                  localReference?.bookName,
                                             ),
                                             chapter: ChapterModel(
                                               chapter: int.parse(
-                                                  _localReference!
+                                                  localReference!
                                                       .chapterNumber),
                                             ),
                                             verse: VerseModel(
-                                              verse: _localReference!
+                                              verse: localReference!
                                                   .verses[index].verse!,
-                                              text: _localReference!
+                                              text: localReference!
                                                   .verses[index].text!,
                                             ),
                                           ),
@@ -2144,16 +2144,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         CopyModelVerse(
                                           book: Book(
                                             modernName:
-                                                _localReference?.bookName,
+                                                localReference?.bookName,
                                           ),
                                           chapter: ChapterModel(
                                             chapter: int.parse(
-                                                _localReference!.chapterNumber),
+                                                localReference!.chapterNumber),
                                           ),
                                           verse: VerseModel(
-                                            verse: _localReference!
+                                            verse: localReference!
                                                 .verses[index].verse!,
-                                            text: _localReference!
+                                            text: localReference!
                                                 .verses[index].text!,
                                           ),
                                         ),
@@ -2176,7 +2176,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   Center(
                                     child: Text.rich(TextSpan(children: [
                                       TextSpan(
-                                        text: _localReference?.bookName,
+                                        text: localReference?.bookName,
                                         style: StylesApp(context)
                                             .textStyleBody16
                                             .copyWith(
@@ -2184,7 +2184,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ),
                                       TextSpan(
                                         text:
-                                            "  ${_localReference?.chapterNumber}:${_localReference?.verses[index].verse}",
+                                            "  ${localReference?.chapterNumber}:${localReference?.verses[index].verse}",
                                         style: StylesApp(context)
                                             .textStyleBody14
                                             .copyWith(color: StyleColor.black),
@@ -2197,7 +2197,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   Center(
                                     child: Text(
                                       textAlign: TextAlign.center,
-                                      '"${_localReference?.verses[index].text}"',
+                                      '"${localReference?.verses[index].text}"',
                                       style: StylesApp(context)
                                           .textStyleBody12
                                           .copyWith(color: StyleColor.black),

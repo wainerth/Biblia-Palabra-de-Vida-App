@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:biblia_palabra_de_vida_app/models/model_data.dart';
-import 'package:biblia_palabra_de_vida_app/screens/features/offerings/offerings_screen.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -18,7 +17,7 @@ class _TransferFormState extends State<TransferForm> {
   final _formKey = GlobalKey<FormState>();
   final _bancoOrigenController = TextEditingController();
   final _titularController = TextEditingController();
-  final _identificacionController = TextEditingController();
+  final _identificationController = TextEditingController();
   final _numeroCuentaController = TextEditingController();
   final _numeroReferenciaController = TextEditingController();
 
@@ -39,7 +38,7 @@ class _TransferFormState extends State<TransferForm> {
   void dispose() {
     _bancoOrigenController.dispose();
     _titularController.dispose();
-    _identificacionController.dispose();
+    _identificationController.dispose();
     _numeroCuentaController.dispose();
     _numeroReferenciaController.dispose();
     super.dispose();
@@ -129,11 +128,11 @@ class _TransferFormState extends State<TransferForm> {
           ),
           const SizedBox(height: 16),
 
-          // IdentificaciÃ³n
+          // Identificación
           TextFormField(
-            controller: _identificacionController,
+            controller: _identificationController,
             decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                  labelText: 'NÃºmero de IdentificaciÃ³n',
+                  labelText: 'Número de Identificación',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8)),
                   prefixIcon: const Icon(Icons.badge),
@@ -141,24 +140,24 @@ class _TransferFormState extends State<TransferForm> {
             keyboardType: TextInputType.number,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Por favor ingrese el nÃºmero de identificaciÃ³n';
+                return 'Por favor ingrese el número de identificación';
               }
               if (value.length < 6) {
-                return 'La identificaciÃ³n debe tener al menos 6 dÃ­gitos';
+                return 'La identificación debe tener al menos 6 dígitos';
               }
               if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                return 'Solo se permiten nÃºmeros';
+                return 'Solo se permiten números';
               }
               return null;
             },
           ),
           const SizedBox(height: 16),
 
-          // NÃºmero de cuenta
+          // Número de cuenta
           TextFormField(
             controller: _numeroCuentaController,
             decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                  labelText: 'NÃºmero de Cuenta',
+                  labelText: 'Número de Cuenta',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8)),
                   prefixIcon: const Icon(Icons.credit_card),
@@ -166,24 +165,24 @@ class _TransferFormState extends State<TransferForm> {
             keyboardType: TextInputType.number,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Por favor ingrese el nÃºmero de cuenta';
+                return 'Por favor ingrese el número de cuenta';
               }
               if (value.length < 4) {
-                return 'El nÃºmero de cuenta debe tener al menos 4 dÃ­gitos';
+                return 'El número de cuenta debe tener al menos 4 dígitos';
               }
               if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                return 'Solo se permiten nÃºmeros';
+                return 'Solo se permiten números';
               }
               return null;
             },
           ),
           const SizedBox(height: 16),
 
-          // NÃºmero de referencia
+          // Número de referencia
           TextFormField(
             controller: _numeroReferenciaController,
             decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                  labelText: 'NÃºmero de Referencia',
+                  labelText: 'Número de Referencia',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8)),
                   prefixIcon: const Icon(Icons.receipt),
@@ -191,13 +190,13 @@ class _TransferFormState extends State<TransferForm> {
             keyboardType: TextInputType.number,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Por favor ingrese el nÃºmero de referencia';
+                return 'Por favor ingrese el número de referencia';
               }
               if (value.length < 4) {
-                return 'El nÃºmero de referencia debe tener al menos 4 dÃ­gitos';
+                return 'El número de referencia debe tener al menos 4 dígitos';
               }
               if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                return 'Solo se permiten nÃºmeros';
+                return 'Solo se permiten números';
               }
               return null;
             },

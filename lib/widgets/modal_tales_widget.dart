@@ -74,13 +74,14 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // bool isTablet = MediaQuery.sizeOf(context).width > 600;
     return Dialog(
       insetPadding: isTablet
           ? EdgeInsets.symmetric(
               horizontal: 50.w, vertical: 40.h) // Más margen en tablet
           : EdgeInsets.all(0), // Pantalla completa en móvil
       child: Container(
-        width: double.infinity,
+        width: isTablet ? 600 : double.infinity,
         height: isTablet ? 0.8.sh : null, // Altura fija en tablet
         decoration: BoxDecoration(color: Colors.white),
         child: Column(
@@ -132,7 +133,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                     style: StylesApp(context).textStyleBody12.copyWith(
                           color: Colors.black,
                           fontSize: isTablet
-                              ? 16.sp
+                              ? 16
                               : 12.sp, // Texto más grande en tablet
                         ),
                     focusNode: focusNode,
@@ -220,20 +221,23 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                         ],
                         borderRadius: BorderRadius.circular(40),
                       ),
-                      child: IconButton(
-                        onPressed: _localPagination!.hasPreviousPage
-                            ? () async {
-                                await loadMoreReflection(
-                                    _localPagination!.currentPage - 1,
-                                    limit,
-                                    title);
-                              }
-                            : null,
-                        icon: Icon(
-                          Icons.arrow_back,
-                          size: isTablet ? 20.sp : 20.sp,
+                      child: Center(
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: _localPagination!.hasPreviousPage
+                              ? () async {
+                                  await loadMoreReflection(
+                                      _localPagination!.currentPage - 1,
+                                      limit,
+                                      title);
+                                }
+                              : null,
+                          icon: Icon(
+                            Icons.arrow_back,
+                            size: isTablet ? 20.sp : 20.sp,
+                          ),
+                          color: Colors.white,
                         ),
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -253,20 +257,23 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                         ],
                         borderRadius: BorderRadius.circular(40),
                       ),
-                      child: IconButton(
-                        onPressed: _localPagination!.hasNextPage
-                            ? () async {
-                                await loadMoreReflection(
-                                    _localPagination!.currentPage + 1,
-                                    limit,
-                                    title);
-                              }
-                            : null,
-                        icon: Icon(
-                          Icons.arrow_forward,
-                          size: isTablet ? 18.sp : 20.sp,
+                      child: Center(
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: _localPagination!.hasNextPage
+                              ? () async {
+                                  await loadMoreReflection(
+                                      _localPagination!.currentPage + 1,
+                                      limit,
+                                      title);
+                                }
+                              : null,
+                          icon: Icon(
+                            Icons.arrow_forward,
+                            size: isTablet ? 18.sp : 20.sp,
+                          ),
+                          color: Colors.white,
                         ),
-                        color: Colors.white,
                       ),
                     ),
                   )
@@ -294,7 +301,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                     taleSelected?.name ?? '',
                     style: StylesApp(context).textStyleBody12.copyWith(
                           color: StyleColor.turquoise,
-                          fontSize: isTablet ? 16.sp : 12.sp,
+                          fontSize: isTablet ? 16 : 12.sp,
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -360,7 +367,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
           buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                 textStyle: WidgetStatePropertyAll(
                   StylesApp(context).textStyleBody12.copyWith(
-                        fontSize: 14.sp, // Texto más grande en tablet
+                        fontSize: 14, // Texto más grande en tablet
                       ),
                 ),
               ),

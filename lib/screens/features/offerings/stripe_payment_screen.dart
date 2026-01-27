@@ -31,7 +31,7 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
 
   bool _isProcessing = false;
   bool _rememberCard = false;
-  bool _isCardValid = false;
+  final bool _isCardValid = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -117,11 +117,11 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
         return;
       }
 
-      final paymentIntentData =
-          paymentIntentResult.data!['createStripePaymentIntent'];
-      final String clientSecret = paymentIntentData['clientSecret'];
-      final String paymentIntentId = paymentIntentData['paymentIntentId'];
-      final String donationId = paymentIntentData['donationId'];
+      // final paymentIntentData =
+      //     paymentIntentResult.data!['createStripePaymentIntent'];
+      // final String clientSecret = paymentIntentData['clientSecret'];
+      // final String paymentIntentId = paymentIntentData['paymentIntentId'];
+      // final String donationId = paymentIntentData['donationId'];
 
       // 3. Confirmar el pago con Stripe
       // final paymentResult = await Stripe.instance.confirmPayment(
@@ -176,47 +176,47 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
     }
   }
 
-  void _showSuccessDialog(String donationId) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green, size: 30),
-              SizedBox(width: 10),
-              Text('¡Pago Exitoso!', style: TextStyle(color: Colors.green)),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Tu donación ha sido procesada exitosamente.'),
-              SizedBox(height: 10),
-              Text('Monto: \$${widget.amount.toStringAsFixed(2)}'),
-              SizedBox(height: 10),
-              Text('ID de Donación: $donationId',
-                  style: TextStyle(fontSize: 12, color: Colors.grey)),
-              SizedBox(height: 10),
-              Text('Gracias por tu generosidad.',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Cerrar diálogo
-                Navigator.pop(context); // Volver a pantalla anterior
-              },
-              child: Text('Aceptar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showSuccessDialog(String donationId) {
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Row(
+  //           children: [
+  //             Icon(Icons.check_circle, color: Colors.green, size: 30),
+  //             SizedBox(width: 10),
+  //             Text('¡Pago Exitoso!', style: TextStyle(color: Colors.green)),
+  //           ],
+  //         ),
+  //         content: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text('Tu donación ha sido procesada exitosamente.'),
+  //             SizedBox(height: 10),
+  //             Text('Monto: \$${widget.amount.toStringAsFixed(2)}'),
+  //             SizedBox(height: 10),
+  //             Text('ID de Donación: $donationId',
+  //                 style: TextStyle(fontSize: 12, color: Colors.grey)),
+  //             SizedBox(height: 10),
+  //             Text('Gracias por tu generosidad.',
+  //                 style: TextStyle(fontWeight: FontWeight.bold)),
+  //           ],
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.pop(context); // Cerrar diálogo
+  //               Navigator.pop(context); // Volver a pantalla anterior
+  //             },
+  //             child: Text('Aceptar'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -278,7 +278,7 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
-              color: StyleColor.turquoise.withOpacity(0.1),
+              color: StyleColor.turquoise.withValues(alpha: 0.1),
               child: Column(
                 children: [
                   Row(
@@ -367,7 +367,7 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
                         height: 50,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.grey.withOpacity(0.5),
+                            color: Colors.grey.withValues(alpha: 0.5),
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -442,7 +442,7 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Tu información está protegida con encriptación de nivel bancario',
+                                'Tu información está protegida con encriptado de nivel bancario',
                                 style:
                                     StylesApp(context).textStyleBody12.copyWith(
                                           color: Colors.grey[600],
@@ -501,7 +501,7 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
                     : ButtonThemeWidget(
                         buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                               backgroundColor:
-                                  MaterialStateProperty.all(StyleColor.orange),
+                                  WidgetStateProperty.all(StyleColor.orange),
                             ),
                         text: 'Donar \$${widget.amount.toStringAsFixed(2)}',
                         onPressed: _isCardValid ? _processPayment : null,

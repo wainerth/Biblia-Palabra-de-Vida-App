@@ -571,8 +571,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
         children: [
           ButtonThemeWidget(
             text: "Tomar Pedidos de oración",
-            width: isTablet ? 400.sp : 264.sp,
-            height: isTablet ? 60.sp : 52.sp,
+            width: isTablet ? 400 : 264.sp,
+            height: isTablet ? 60 : 52.sp,
             buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                   textStyle: WidgetStatePropertyAll(
                     TextStyle(fontSize: isTablet ? 18.sp : null),
@@ -588,8 +588,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
           SizedBox(height: isTablet ? 25.sp : 10.sp),
           ButtonThemeWidget(
             text: "Hacer Pedido de Oración",
-            width: isTablet ? 400.sp : 264.sp,
-            height: isTablet ? 60.sp : 52.sp,
+            width: isTablet ? 400 : 264.sp,
+            height: isTablet ? 60 : 52.sp,
             buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                   textStyle: WidgetStatePropertyAll(
                     TextStyle(fontSize: isTablet ? 18.sp : null),

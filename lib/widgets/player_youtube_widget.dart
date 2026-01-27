@@ -18,7 +18,6 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget>
   bool _isPlayerReady = false;
   OverlayEntry? _fullScreenOverlay;
   bool _isFullScreen = false;
-  bool _isDisposed = false;
 
   @override
   void initState() {

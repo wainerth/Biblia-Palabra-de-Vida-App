@@ -20,6 +20,7 @@ class OptimizedSearchableDropdown extends StatefulWidget {
   final double? height;
   final bool showClearButton;
   final String? defaultValueId;
+  final bool compact;
 
   const OptimizedSearchableDropdown({
     super.key,
@@ -35,6 +36,7 @@ class OptimizedSearchableDropdown extends StatefulWidget {
     this.height,
     this.showClearButton = true,
     this.defaultValueId,
+    this.compact = false,
   });
 
   @override
@@ -344,86 +346,89 @@ class _OptimizedSearchableDropdownState
 
   @override
   Widget build(BuildContext context) {
-    final height = widget.height ?? StylesApp(context).sizeTextFormField.height;
+    final effectiveHeight = widget.height ?? 56.0;
+    final effectivePadding = widget.padding ??
+        EdgeInsets.symmetric(
+          horizontal: widget.compact ? 12 : 16,
+          vertical: widget.compact ? 8 : 12,
+        );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Campo del dropdown
-        GestureDetector(
-          onTap: _showSearchModal,
-          child: Container(
-            height: height,
-            decoration: widget.border
-                ? BoxDecoration(
-                    color: StyleColor.white,
-                    border: Border.all(
-                      color: _state.selectedItem != null
-                          ? StyleColor.cosmicBlue.withValues(alpha: .5)
-                          : StyleColor.black,
-                      width: _state.selectedItem != null ? 1.5 : 1,
-                    ),
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: .05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  )
-                : BoxDecoration(
-                    color: StyleColor.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-            child: Padding(
-              padding: widget.padding ??
-                  const EdgeInsets.symmetric(
-                    horizontal: 12.0,
-                    vertical: 8.0,
-                  ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (widget.leadingIcon != null) ...[
-                    widget.leadingIcon!,
-                    const SizedBox(width: 8),
-                  ],
-                  Expanded(
-                    child: Text(
-                      _state.selectedItem?.label ?? widget.hintText,
-                      style: StylesApp(context).textStyleBody14.copyWith(
-                            color: _state.selectedItem != null
-                                ? Colors.black
-                                : Colors.grey.shade600,
-                            fontWeight: _state.selectedItem != null
-                                ? FontWeight.w500
-                                : FontWeight.normal,
-                          ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                  if (_state.selectedItem != null && widget.showClearButton)
-                    IconButton(
-                      icon: const Icon(Icons.clear, size: 18),
-                      onPressed: _clearSelection,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      tooltip: 'Limpiar selección',
-                    ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_drop_down,
-                    color: Colors.grey.shade600,
-                    size: 24,
-                  ),
-                ],
+    return GestureDetector(
+      onTap: _showSearchModal,
+      child: Container(
+        height: effectiveHeight,
+        padding: EdgeInsets.zero,
+        decoration: widget.border
+            ? BoxDecoration(
+                color: StyleColor.white,
+                border: Border.all(
+                  color: _state.selectedItem != null
+                      ? StyleColor.cosmicBlue.withValues(alpha: .5)
+                      : StyleColor.black,
+                  width: _state.selectedItem != null ? 1.5 : 1,
+                ),
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: widget.compact
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: .05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+              )
+            : BoxDecoration(
+                color: StyleColor.white,
+                borderRadius: BorderRadius.circular(8.0),
               ),
-            ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: effectivePadding.horizontal, vertical: 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (widget.leadingIcon != null) ...[
+                SizedBox(
+                  width: widget.compact ? 18 : 18,
+                  height: widget.compact ? 18 : 18,
+                  child: widget.leadingIcon,
+                ),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  _state.selectedItem?.label ?? widget.hintText,
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        color: _state.selectedItem != null
+                            ? Colors.black
+                            : Colors.grey.shade600,
+                        fontWeight: _state.selectedItem != null
+                            ? FontWeight.w500
+                            : FontWeight.normal,
+                      ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+              if (_state.selectedItem != null && widget.showClearButton)
+                IconButton(
+                  icon: Icon(Icons.clear, size: widget.compact ? 16 : 18),
+                  onPressed: _clearSelection,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  tooltip: 'Limpiar selección',
+                ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.arrow_drop_down,
+                color: Colors.grey.shade600,
+                size: widget.compact ? 20 : 24,
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

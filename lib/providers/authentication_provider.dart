@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
@@ -15,14 +14,13 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import '../main.dart';
 
 class AuthenticationProvider extends ChangeNotifier {
-  final CatalogueProvider _catalogueProvider;
   final BuildContext context;
   String? token;
   bool isAuthenticated = false;
   bool _isCheckingAuth = false;
   bool _isLoading = false;
 
-  AuthenticationProvider(this.context, this._catalogueProvider);
+  AuthenticationProvider(this.context);
   bool get isLoading => _isLoading;
 
   Future<AuthCheckResult> checkAuthentication(BuildContext context) async {
@@ -33,7 +31,6 @@ class AuthenticationProvider extends ChangeNotifier {
     _isCheckingAuth = true;
     _isLoading = true;
 
-    // notifyListeners();
 
     try {
       // Obtener datos almacenados
@@ -312,7 +309,7 @@ class AuthenticationProvider extends ChangeNotifier {
       final userResponse = await loginGoogle();
       var error = userResponse.error;
       if (error != null) {
-        return ResponseData(data: null, error: error);
+        return ResponseData(data: null, userFriendlyError: userResponse.userFriendlyError, error: error);
       }
       final userId = userResponse.data["id"];
       final token = userResponse.data["userJwtToken"]["token"];
@@ -404,10 +401,13 @@ class AuthenticationProvider extends ChangeNotifier {
       return false;
     }
     // limpio el socket
-    Provider.of<SocketClientProvider>(context, listen: false)
-        .cleanNotification();
-    Provider.of<SocketClientProvider>(context, listen: false).cleanSocket();
     if (navigatorKey.currentState != null) {
+      Provider.of<SocketClientProvider>(navigatorKey.currentContext!,
+              listen: false)
+          .cleanNotification();
+      Provider.of<SocketClientProvider>(navigatorKey.currentContext!,
+              listen: false)
+          .cleanSocket();
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
       navigatorKey.currentState!.pushReplacementNamed('/homePage');
 

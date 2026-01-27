@@ -5,7 +5,7 @@ class SecurityUtils {
     return emailRegex.hasMatch(email);
   }
 
-  // Sanitizar inputs - eliminar caracteres peligrosos (VERSIÓN CORREGIDA)
+  // Sanitizer inputs - eliminar caracteres peligrosos (VERSIÓN CORREGIDA)
   static String sanitizeInput(String input) {
     return input
         .trim()

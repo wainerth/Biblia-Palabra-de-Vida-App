@@ -1,6 +1,5 @@
 // bible_cache.dart
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:flutter/foundation.dart';
 
 class BibleCache {
   static final BibleCache _instance = BibleCache._internal();

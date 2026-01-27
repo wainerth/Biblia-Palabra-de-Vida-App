@@ -33,7 +33,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   final FocusNode focusNode = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _autoValidate = false;
+  final bool _autoValidate = false;
 
   // File? audioFile;
   List<ModelData> options = [];
@@ -839,7 +839,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
     if (!_validateField()) {
       if (mounted) {
         await showCustomDialog(context,
-            message: "Faltan campos Obligatorois",
+            message: "Faltan campos Obligatorios",
             dialogType: DialogType.error);
       }
       return;

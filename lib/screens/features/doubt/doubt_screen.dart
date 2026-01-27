@@ -13,6 +13,20 @@ class DoubtScreen extends StatelessWidget {
     return shortestSide >= 600;
   }
 
+  // Método para determinar la acción del botón de retroceso
+  void _handleBackButton(BuildContext context) {
+    // Verificar si hay rutas anteriores en el Navigator
+    final bool canPop = Navigator.canPop(context);
+
+    if (canPop) {
+      // Si puede hacer pop, significa que llegamos por Navigator.push
+      Navigator.pop(context);
+    } else {
+      // Si no puede hacer pop, significa que llegamos directamente (por bottomBar)
+      Navigator.pushNamed(context, "/layoutPage");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isTablet = _isTablet(context);
@@ -28,7 +42,7 @@ class DoubtScreen extends StatelessWidget {
           ),
           padding: EdgeInsets.all(0),
           onPressed: () {
-            Navigator.pushNamed(context, "/layoutPage");
+            _handleBackButton(context);
           },
           splashColor: StyleColor.orange,
           color: StyleColor.white,
@@ -255,7 +269,7 @@ class DoubtScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 30),
-            
+
                   // Texto descriptivo
                   Text(
                     'Aquí ALgunas de las preguntas más frecuentes sobre la app y su uso.',
@@ -269,11 +283,11 @@ class DoubtScreen extends StatelessWidget {
                         ),
                   ),
                   const SizedBox(height: 30),
-            
+
                   // Botón de contacto
                   _buildContactButton(context),
                   const SizedBox(height: 20),
-            
+
                   // Información de contacto adicional
                   GestureDetector(
                     onTap: () async {
@@ -282,17 +296,18 @@ class DoubtScreen extends StatelessWidget {
                         path: GraphQLConfig.emailContact,
                         queryParameters: {
                           'subject': 'Consulta - Biblia Palabra de Vida',
-                          'body': 'Hola, tengo una consulta sobre la aplicación:',
+                          'body':
+                              'Hola, tengo una consulta sobre la aplicación:',
                         },
                       );
-            
+
                       if (await canLaunchUrl(emailLaunchUri)) {
                         await launchUrl(emailLaunchUri);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content:
-                                Text('No se pudo abrir la aplicación de correo'),
+                            content: Text(
+                                'No se pudo abrir la aplicación de correo'),
                           ),
                         );
                       }
@@ -332,7 +347,7 @@ class DoubtScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 30),
-            
+
                   // Copyright
                   Text(
                     '© 2025 Biblia Palabra de Vida',
@@ -421,9 +436,9 @@ class DoubtScreen extends StatelessWidget {
     return SingleChildScrollView(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
         ),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -514,7 +529,7 @@ class DoubtScreen extends StatelessWidget {
       margin: forTablet ? const EdgeInsets.only(bottom: 8) : null,
       decoration: forTablet
           ? BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             )
           : null,

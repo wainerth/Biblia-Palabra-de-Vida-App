@@ -293,7 +293,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                 _citiesList.clear();
               });
               
-              // Si hay estado inicial guardado, activar autoselección
+              // Si hay estado inicial guardado, activar auto selección
               if (_initialStateId != null && _initialStateName != null) {
                 _autoSelectStateAfterLoad = true;
               }
@@ -347,7 +347,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                     _initialStateName = newValue.label;
                   });
                   
-                  // Si hay ciudad inicial guardada, activar autoselección
+                  // Si hay ciudad inicial guardada, activar auto selección
                   if (_initialCityId != null && _initialCityName != null) {
                     _autoSelectCityAfterLoad = true;
                   }
@@ -515,7 +515,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           if (stateItem.originalData != null) {
             dynamic stateOriginalData = stateItem.originalData;
             if (stateOriginalData is StateModel) {
-              _initialStateId = stateOriginalData.id?.toString();
+              _initialStateId = stateOriginalData.id.toString();
             } else if (stateOriginalData is Map<String, dynamic>) {
               _initialStateId = stateOriginalData['id']?.toString();
             }
@@ -533,7 +533,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           if (cityItem.originalData != null) {
             dynamic cityOriginalData = cityItem.originalData;
             if (cityOriginalData is CityModel) {
-              _initialCityId = cityOriginalData.id?.toString();
+              _initialCityId = cityOriginalData.id.toString();
             } else if (cityOriginalData is Map<String, dynamic>) {
               _initialCityId = cityOriginalData['id']?.toString();
             }
@@ -581,7 +581,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
               .toList();
         });
         
-        // Después de cargar estados, si hay que autoseleccionar
+        // Después de cargar estados, si hay que auto seleccionar
         if (_autoSelectStateAfterLoad && _initialStateId != null) {
           _autoSelectStateAfterLoad = false;
           
@@ -642,7 +642,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
               .toList();
         });
         
-        // Después de cargar ciudades, si hay que autoseleccionar
+        // Después de cargar ciudades, si hay que auto seleccionar
         if (_autoSelectCityAfterLoad && _initialCityId != null) {
           _autoSelectCityAfterLoad = false;
           

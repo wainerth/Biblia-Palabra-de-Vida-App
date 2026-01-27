@@ -7,6 +7,7 @@ import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -179,7 +180,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
           // Asegurar que la fecha se parsea correctamente
           final parsedDate = _parseNotificationDate(notification.createdAt);
           loadedNotifications.add(notification.copyWith(
-            createdAt: parsedDate.toIso8601String(), // Mantener la fecha parseada como String
+            createdAt: parsedDate
+                .toIso8601String(), // Mantener la fecha parseada como String
           ));
         } catch (e) {
           print('Error procesando notificación: $e');
@@ -251,7 +253,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   // ACTUALIZAR CONTADOR GLOBAL DE NOTIFICACIONES
-  
 
   @override
   Widget build(BuildContext context) {
@@ -1374,51 +1375,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
             int.parse(match.group(5)!),
           );
         }
-
-        // Intentar otros formatos comunes
-        final formats = [
-          'yyyy-MM-dd HH:mm:ss',
-          'yyyy/MM/dd HH:mm:ss',
-          'dd-MM-yyyy HH:mm:ss',
-        ];
-
-        for (var format in formats) {
-          try {
-            // Implementar parsing según formato si es necesario
-          } catch (_) {}
-        }
-
         throw FormatException('Formato de fecha no reconocido: $dateInput');
       }
 
       // Si no es ninguno de los anteriores, usar fecha mínima
       return DateTime(2000);
     } catch (e) {
-      print('Error parsing notification date: $dateInput - $e');
+      if (kDebugMode) {
+        print('Error parsing notification date: $dateInput - $e');
+      }
       // Usar una fecha del pasado para evitar confusiones
       return DateTime(2000);
-    }
-  }
-
-  DateTime? _parseCustomFormat(String dateString) {
-    try {
-      final parts = dateString.split(' ');
-      if (parts.length != 2) return null;
-
-      final dateParts = parts[0].split('/');
-      final timeParts = parts[1].split(':');
-
-      if (dateParts.length != 3 || timeParts.length < 2) return null;
-
-      return DateTime(
-        int.parse(dateParts[2]),
-        int.parse(dateParts[1]),
-        int.parse(dateParts[0]),
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1]),
-      );
-    } catch (e) {
-      return null;
     }
   }
 

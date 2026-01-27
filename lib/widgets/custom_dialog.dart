@@ -163,7 +163,7 @@ class _CustomDialogState extends State<CustomDialog> {
               ],
 
               // Botón para mostrar/ocultar detalles (SIEMPRE visible si hay errorDetail)
-              if (widget.errorDetail != null) ...[
+              if (widget.errorDetail != null && widget.showDetails) ...[
                 const SizedBox(height: 8),
                 GestureDetector(
                   onTap: () {

@@ -17,13 +17,14 @@ class ValidatedRadioGroup<T> extends FormField<T> {
           builder: (FormFieldState<T> field) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 GestureDetector(
                   onTap: () {
                     field.didChange(field.value);
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
                     width: double.infinity,
                     decoration: BoxDecoration(
                       border: Border.all(
@@ -35,43 +36,52 @@ class ValidatedRadioGroup<T> extends FormField<T> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          label,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: field.hasError ? Colors.red : Colors.black,
+                        if (label.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text(
+                              label,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: field.hasError ? Colors.red : Colors.black,
+                              ),
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 8),
+                          SizedBox(height: 8),
+                        ],
                         Wrap(
-                          spacing: 16.0,
+                          spacing: 16.0, // Espacio entre opciones
                           children: options.map((option) {
-                            return Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<T>(
-                                  value: option.value,
-                                  groupValue: field.value,
-                                  onChanged: (T? newValue) {
-                                    field.didChange(newValue);
-                                    onChanged(newValue);
-                                  },
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    field.didChange(option.value);
-                                    onChanged(option.value);
-                                  },
-                                  child: Text(
-                                    option.label,
-                                    style:StylesApp(field.context).textStyleBody14.copyWith(
-                                      color: field.hasError 
-                                          ? Colors.red 
-                                          : Colors.black,
+                            return IntrinsicWidth(
+                              child: GestureDetector(
+                                onTap: () {
+                                  field.didChange(option.value);
+                                  onChanged(option.value);
+                                },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Radio<T>(
+                                      value: option.value,
+                                      groupValue: field.value,
+                                      onChanged: (T? newValue) {
+                                        field.didChange(newValue);
+                                        onChanged(newValue);
+                                      },
                                     ),
-                                  ),
+                                    Text(
+                                      option.label,
+                                      style: StylesApp(field.context)
+                                          .textStyleBody14
+                                          .copyWith(
+                                            color: field.hasError
+                                                ? Colors.red
+                                                : Colors.black,
+                                          ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             );
                           }).toList(),
                         ),

@@ -1590,8 +1590,8 @@ class _MapScreenState extends State<MapScreen>
 
   int getTotalLevelsCount() {
     // Prioridad 1: stage.levelCount
-    if (stage != null && stage!.levelCount != null && stage!.levelCount! > 0) {
-      return stage!.levelCount!;
+    if (stage != null && stage!.levelCount > 0) {
+      return stage!.levelCount;
     }
 
     // Prioridad 2: stage.numberOfLevels

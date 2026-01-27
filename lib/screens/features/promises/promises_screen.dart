@@ -293,7 +293,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Botón de retroceso
-              Container(
+              SizedBox(
                 width: 45,
                 height: 45,
                 child: IconButton(
@@ -322,10 +322,11 @@ class _PromisesScreenState extends State<PromisesScreen> {
                       children: [
                         Text(
                           'Promesas',
-                          style: StylesApp(context).textStyleTitleOrange.copyWith(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                              ),
+                          style:
+                              StylesApp(context).textStyleTitleOrange.copyWith(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                         ),
                         if (userData != null && promises.isNotEmpty)
                           SizedBox(height: 8),
@@ -334,7 +335,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 6),
                             decoration: BoxDecoration(
-                              color: StyleColor.orange.withOpacity(0.1),
+                              color: StyleColor.orange.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -419,7 +420,8 @@ class _PromisesScreenState extends State<PromisesScreen> {
                             ),
                           )
                         : GridView.builder(
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: _getCrossAxisCount(context),
                               crossAxisSpacing: 20,
                               mainAxisSpacing: 20,
@@ -433,8 +435,8 @@ class _PromisesScreenState extends State<PromisesScreen> {
                                 updateData: (bool value) {
                                   if (value) {
                                     setState(() {
-                                      promises[index] =
-                                          promises[index].copyWith(hasViewed: value);
+                                      promises[index] = promises[index]
+                                          .copyWith(hasViewed: value);
                                       didChangeDependencies();
                                     });
                                   }
@@ -447,7 +449,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
         // Mensaje de actualización
         Container(
           padding: EdgeInsets.all(16),
-          color: StyleColor.turquoise.withOpacity(0.1),
+          color: StyleColor.turquoise.withValues(alpha: 0.1),
           child: Text(
             'Las promesas se actualizarán cada 24 horas',
             style: StylesApp(context)
@@ -470,13 +472,6 @@ class _PromisesScreenState extends State<PromisesScreen> {
   }
 
   // Calcular aspect ratio según orientación
-  double _getChildAspectRatio(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width > 1200) return 0.8;
-    if (width > 1000) return 0.8;
-    if (width > 700) return 0.8;
-    return 0.8;
-  }
 }
 
 // La clase CardPromiseWidget se mantiene igual sin cambios
@@ -611,10 +606,11 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
             right: 10,
             child: IconButton(
               onPressed: () async {
-                await Share.share(
-                  "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}\n${widget.redeemedPromise!.verse!.text}.",
+                await SharePlus.instance.share(ShareParams(
+                  text:
+                      "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}\n${widget.redeemedPromise!.verse!.text}.",
                   subject: "Promesa",
-                );
+                ));
               },
               icon: Icon(Icons.share, color: Colors.white),
             ),
@@ -636,7 +632,7 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
                   Container(
                     padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -648,7 +644,8 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  Image.asset("assets/star_complete.png", width: 50, height: 50),
+                  Image.asset("assets/star_complete.png",
+                      width: 50, height: 50),
                   SizedBox(height: 10),
                   Text(
                     "Haz ganado una mini estrella\n ${widget.redeemedPromise!.energyPoint} Lms de energía",

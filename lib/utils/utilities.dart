@@ -163,11 +163,13 @@ UpdateDataProfile updateFromModelData(context, UpdateDataProfile dataToSend,
   return datos;
 }
 
-Future<void> showCustomDialog(BuildContext context,
-    {required String message,
-    String messageDetail = '',
-    showDetails = false,
-    required DialogType dialogType}) async {
+Future<void> showCustomDialog(
+  BuildContext context, {
+  required String message,
+  String messageDetail = '',
+  showDetails = false,
+  required DialogType dialogType,
+}) async {
   await showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -263,6 +265,7 @@ Future<void> copyToClipboard(BuildContext context, dynamic data) async {
 
   // Mostrar diálogo de confirmación
   await showCustomDialog(
+    showDetails: false,
     context,
     message:
         "El capítulo ${data.chapter.chapter} del libro ${data.book.modernName}\nse ha copiado con éxito al portapapeles",
@@ -273,7 +276,7 @@ Future<void> copyToClipboard(BuildContext context, dynamic data) async {
 Future<void> shareVerse(BuildContext context, dynamic data) async {
   final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
   final shareText =
-      "${data.book.modernName }\n${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
+      "${data.book.modernName}\n${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
   await SharePlus.instance.share(ShareParams(
     text: shareText,
     subject:

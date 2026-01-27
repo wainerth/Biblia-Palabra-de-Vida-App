@@ -64,7 +64,7 @@ class _OrderingQuestionDraggableStateWidget
               padding: EdgeInsets.all(16.0),
               margin: EdgeInsets.only(bottom: 20.0),
               decoration: BoxDecoration(
-                color: StyleColor.turquoise.withOpacity(0.1),
+                color: StyleColor.turquoise.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12.0),
                 border: Border.all(
                   color: StyleColor.turquoise,
@@ -148,7 +148,7 @@ class _OrderingQuestionDraggableStateWidget
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: Offset(0, 4),
           ),
@@ -192,23 +192,20 @@ class _OrderingQuestionDraggableStateWidget
                     height: widget.isTablet ? 60 : 40,
                     decoration: BoxDecoration(
                       color: widget.orderedAnswers.isNotEmpty &&
-                              index < widget.orderedAnswers.length &&
-                              widget.orderedAnswers[index] != null
+                              index < widget.orderedAnswers.length
                           ? StyleColor.turquoise
-                          : Color(0XFFC4C4C4).withOpacity(0.3),
+                          : Color(0XFFC4C4C4).withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12.0),
                       border: Border.all(
                         color: widget.orderedAnswers.isNotEmpty &&
-                                index < widget.orderedAnswers.length &&
-                                widget.orderedAnswers[index] != null
+                                index < widget.orderedAnswers.length
                             ? StyleColor.turquoise
                             : Colors.grey[300]!,
                         width: 2.0,
                       ),
                     ),
                     child: widget.orderedAnswers.isNotEmpty &&
-                            index < widget.orderedAnswers.length &&
-                            widget.orderedAnswers[index] != null
+                            index < widget.orderedAnswers.length
                         ? Stack(
                             children: [
                               Row(
@@ -312,7 +309,7 @@ class _OrderingQuestionDraggableStateWidget
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: Offset(0, 4),
           ),
@@ -348,7 +345,7 @@ class _OrderingQuestionDraggableStateWidget
                               borderRadius: BorderRadius.circular(12.0),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   blurRadius: 8,
                                   offset: Offset(0, 4),
                                 ),
@@ -475,7 +472,7 @@ class _OrderingQuestionDraggableStateWidget
         borderRadius: BorderRadius.circular(20.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20,
             offset: Offset(0, 10),
           ),
@@ -489,8 +486,8 @@ class _OrderingQuestionDraggableStateWidget
             padding: EdgeInsets.all(20.0),
             decoration: BoxDecoration(
               color: widget.showError
-                  ? StyleColor.redLight.withOpacity(0.1)
-                  : StyleColor.greenDark.withOpacity(0.1),
+                  ? StyleColor.redLight.withValues(alpha: 0.1)
+                  : StyleColor.greenDark.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16.0),
               border: Border.all(
                 color: widget.showError
@@ -531,7 +528,7 @@ class _OrderingQuestionDraggableStateWidget
           Container(
             padding: EdgeInsets.all(20.0),
             decoration: BoxDecoration(
-              color: StyleColor.blueLight.withOpacity(0.1),
+              color: StyleColor.blueLight.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16.0),
               border: Border.all(
                 color: StyleColor.cosmicBlue,
@@ -672,15 +669,13 @@ class _OrderingQuestionDraggableStateWidget
               constraints: BoxConstraints(minHeight: 40.0),
               decoration: BoxDecoration(
                 color: widget.orderedAnswers.isNotEmpty &&
-                        index < widget.orderedAnswers.length &&
-                        widget.orderedAnswers[index] != null
+                        index < widget.orderedAnswers.length
                     ? StyleColor.turquoise
                     : Color(0XFFC4C4C4),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: widget.orderedAnswers.isNotEmpty &&
-                      index < widget.orderedAnswers.length &&
-                      widget.orderedAnswers[index] != null
+                      index < widget.orderedAnswers.length 
                   ? Stack(
                       children: [
                         Row(

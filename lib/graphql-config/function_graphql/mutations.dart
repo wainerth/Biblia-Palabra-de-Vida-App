@@ -1,5 +1,5 @@
-import 'package:biblia_palabra_de_vida_app/class/RateLimiter.dart';
-import 'package:biblia_palabra_de_vida_app/class/SecurityUtils.dart';
+import 'package:biblia_palabra_de_vida_app/class/rate_limiter.dart';
+import 'package:biblia_palabra_de_vida_app/class/security_utils.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -219,7 +219,7 @@ Future<ResponseData> register(SignupInput dataToRegister) async {
           "cityId": dataToRegister.city,
           "identifier": dataToRegister.identifier,
           "isBaptized": dataToRegister.isBaptized,
-          "timezone":timezone
+          "timezone": timezone
         },
       },
       fetchPolicy: FetchPolicy.noCache);
@@ -492,7 +492,7 @@ Future resetPassword(email, password) async {
 Future logout() async {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   // if (googleSignIn != null) {
-    await googleSignIn.signOut();
+  await googleSignIn.signOut();
   // }
   final deviceInfo = await PreferencesManager().getDeviceInfo();
   final String token = await PreferencesManager().getUserToken() ?? '';
@@ -1468,7 +1468,7 @@ Future<ResponseData> deleteDevice(String userId, String deviceId) async {
   );
   try {
     final QueryResult result = await client.mutate(mutateGql);
-    if (kDebugMode) {
+    if (result.hasException) {
       return ResponseData.fromQueryResult(result);
     }
 

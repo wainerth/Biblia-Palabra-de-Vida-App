@@ -243,9 +243,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 16.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 16.sp;
+      return 16;
     } else {
-      return 16.sp;
+      return 16;
     }
   }
 
@@ -271,9 +271,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 12.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 12.sp;
+      return 14;
     } else {
-      return 12.sp;
+      return 14;
     }
   }
 

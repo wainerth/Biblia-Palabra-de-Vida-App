@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class PayPalPaymentScreen extends StatefulWidget {
   final double amount;
@@ -20,7 +18,6 @@ class PayPalPaymentScreen extends StatefulWidget {
 
 class _PayPalPaymentScreenState extends State<PayPalPaymentScreen> {
   bool _isLoading = true;
-  bool _paymentCompleted = false;
   // late WebViewController _webViewController;
 
   @override
@@ -76,64 +73,6 @@ class _PayPalPaymentScreenState extends State<PayPalPaymentScreen> {
   }
 
   // Alternativa con WebView
-  Widget _buildPayPalWebView() {
-    return Column(
-      children: [
-        // Header informativo
-        Container(
-          padding: const EdgeInsets.all(16),
-          color: Colors.blue[50],
-          child: Row(
-            children: [
-              Icon(Icons.info, color: Colors.blue[700], size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Serás redirigido a PayPal para completar tu donación de forma segura',
-                  style: StylesApp(context).textStyleBody14.copyWith(
-                        color: Colors.blue[700],
-                      ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Container(
-            color: Colors.grey[200],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.payment,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Integración con PayPal',
-                    style: StylesApp(context).textStyleBody18.copyWith(
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Aquí se cargaría el WebView de PayPal',
-                    style: StylesApp(context).textStyleBody14.copyWith(
-                          color: Colors.grey[500],
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   void _showSuccessDialog() {
     showDialog(
@@ -236,7 +175,7 @@ class _PayPalPaymentScreenState extends State<PayPalPaymentScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
-              color: StyleColor.turquoise.withOpacity(0.1),
+              color: StyleColor.turquoise.withValues(alpha: 0.1),
               child: Column(
                 children: [
                   Row(
@@ -369,7 +308,7 @@ class _PayPalPaymentScreenState extends State<PayPalPaymentScreen> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -429,7 +368,7 @@ class _PayPalPaymentScreenState extends State<PayPalPaymentScreen> {
             width: double.infinity,
             child: ButtonThemeWidget(
               buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                    backgroundColor: MaterialStateProperty.all(Colors.blue[700]),
+                    backgroundColor: WidgetStatePropertyAll(Colors.blue[700]),
                   ),
               text: 'Continuar con PayPal',
               onPressed: _startPayPalPayment,

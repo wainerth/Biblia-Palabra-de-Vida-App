@@ -54,9 +54,7 @@ void main() async {
             create: (_) => catalogueProvider),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
         ChangeNotifierProvider<AuthenticationProvider>(
-          create: (context) => AuthenticationProvider(
-              context, context.read<CatalogueProvider>()),
-        ),
+            create: (context) => AuthenticationProvider(context)),
         ChangeNotifierProvider(create: (_) => BibleThemeProvider()),
       ],
       child: ScreenUtilInit(

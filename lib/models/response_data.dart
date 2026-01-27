@@ -87,7 +87,7 @@ class ResponseData {
     }
 
     // Extraer mensaje más limpio si es posible
-    final cleanedMessage = _cleanErrorMessage(errorMessage ?? 'Error Desconocido');
+    final cleanedMessage = _cleanErrorMessage(errorMessage);
     
     return ErrorInfo(
       message: cleanedMessage,

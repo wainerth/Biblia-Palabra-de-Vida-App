@@ -40,6 +40,7 @@ final Map<String, WidgetBuilder> routes = {
   '/reddlePage': (BuildContext context) => ReddleScreen(),
   '/quizPage': (BuildContext context) => QuizScreen(),
   '/aboutScreen': (BuildContext context) => AboutScreen(),
+  '/faqScreen': (BuildContext context) => DoubtScreen(),
   '/notificationPage': (BuildContext context) => NotificationScreen(),
   '/offeringPage': (BuildContext context) => OfferingsScreen(),
   '/stripe_payment': (context) {

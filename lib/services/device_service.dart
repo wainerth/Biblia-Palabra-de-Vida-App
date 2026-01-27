@@ -16,25 +16,25 @@ class DeviceService {
         'platform': 'ios',
         'appVersion': packageInfo.version,
         'appBuild': packageInfo.buildNumber,
-        'deviceModel': iosInfo.model ?? 'iPhone',
-        'osVersion': iosInfo.systemVersion ?? '',
-        'deviceName': iosInfo.name ?? '',
-        'systemName': iosInfo.systemName ?? 'iOS',
+        'deviceModel': iosInfo.model,
+        'osVersion': iosInfo.systemVersion,
+        'deviceName': iosInfo.name,
+        'systemName': iosInfo.systemName,
         'deviceType': _getIOSDeviceType(iosInfo),
         'isPhysicalDevice': iosInfo.isPhysicalDevice,
       };
     } else if (deviceInfo is AndroidDeviceInfo) {
       final androidInfo = deviceInfo;
       deviceData = {
-        'deviceId': androidInfo.id ?? _generateFallbackId(),
+        'deviceId': androidInfo.id,
         'platform': 'android',
         'appVersion': packageInfo.version,
         'appBuild': packageInfo.buildNumber,
-        'deviceModel': androidInfo.model ?? '',
-        'osVersion': androidInfo.version.release ?? '',
-        'deviceBrand': androidInfo.brand ?? '',
-        'deviceManufacturer': androidInfo.manufacturer ?? '',
-        'sdkVersion': androidInfo.version.sdkInt?.toString() ?? '',
+        'deviceModel': androidInfo.model,
+        'osVersion': androidInfo.version.release,
+        'deviceBrand': androidInfo.brand,
+        'deviceManufacturer': androidInfo.manufacturer,
+        'sdkVersion': androidInfo.version.sdkInt.toString(),
         'isPhysicalDevice': androidInfo.isPhysicalDevice,
       };
     }
@@ -47,7 +47,7 @@ class DeviceService {
   }
 
   static String _getIOSDeviceType(IosDeviceInfo iosInfo) {
-    final model = iosInfo.utsname.machine ?? '';
+    final model = iosInfo.utsname.machine;
     if (model.contains('iPad')) return 'tablet';
     if (model.contains('iPod')) return 'ipod';
     return 'phone';
