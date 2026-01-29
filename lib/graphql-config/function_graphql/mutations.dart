@@ -217,6 +217,7 @@ Future<ResponseData> register(SignupInput dataToRegister) async {
           "phoneNumber": dataToRegister.phoneNumber,
           "countryId": dataToRegister.countryId,
           "cityId": dataToRegister.city,
+          "stateId":dataToRegister.state,
           "identifier": dataToRegister.identifier,
           "isBaptized": dataToRegister.isBaptized,
           "timezone": timezone

@@ -146,12 +146,9 @@ class _AboutScreenState extends State<AboutScreen> {
                   if (await canLaunchUrl(emailLaunchUri)) {
                     await launchUrl(emailLaunchUri);
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content:
-                            Text('No se pudo abrir la aplicación de correo'),
-                      ),
-                    );
+                    showSnackBar("No se pudo abrir la aplicación de correo",
+                        type: SnackBarType.error);
+                   
                   }
                 },
                 child: Text(
@@ -463,13 +460,8 @@ class _AboutScreenState extends State<AboutScreen> {
                                       if (await canLaunchUrl(emailLaunchUri)) {
                                         await launchUrl(emailLaunchUri);
                                       } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                'No se pudo abrir la aplicación de correo'),
-                                          ),
-                                        );
+                                        showSnackBar("No se pudo abrir la aplicación de correo",
+                        type: SnackBarType.error);
                                       }
                                     },
                                     child: Row(

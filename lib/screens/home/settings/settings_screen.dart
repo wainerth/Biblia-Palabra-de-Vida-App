@@ -1,9 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -528,10 +526,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SizedBox(height: 10),
               Text(
                 "Se cerrará tu sesión actual y deberás iniciar sesión nuevamente",
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
+                style: StylesApp(context).textStyleBody14.copyWith(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 25),
@@ -544,10 +542,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       height: 45,
                       text: "Cancelar",
                       buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                            backgroundColor: MaterialStateProperty.all(
+                            backgroundColor: WidgetStateProperty.all(
                               Colors.grey[300],
                             ),
-                            foregroundColor: MaterialStateProperty.all(
+                            foregroundColor: WidgetStateProperty.all(
                               Colors.black87,
                             ),
                           ),
@@ -563,10 +561,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       height: 45,
                       text: "Cerrar Sesión",
                       buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                            backgroundColor: MaterialStateProperty.all(
+                            backgroundColor: WidgetStateProperty.all(
                               StyleColor.redLight,
                             ),
-                            foregroundColor: MaterialStateProperty.all(
+                            foregroundColor: WidgetStateProperty.all(
                               Colors.white,
                             ),
                           ),

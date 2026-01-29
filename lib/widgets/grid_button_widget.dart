@@ -125,6 +125,9 @@ class _GridButtonWidgetState<T extends GridItem>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.currentTheme == null) {
+      
+    }
     return widget.loading
         ? Center(child: LoadingIndicator())
         : GridView.builder(

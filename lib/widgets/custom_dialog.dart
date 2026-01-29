@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -140,13 +141,11 @@ class _CustomDialogState extends State<CustomDialog> {
                   alignment: Alignment.centerRight,
                   child: TextButton.icon(
                     onPressed: () {
-                      Clipboard.setData(ClipboardData(text: widget.errorDetail!));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Error copiado al portapapeles'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
+                      Clipboard.setData(
+                          ClipboardData(text: widget.errorDetail!));
+                      showSnackBar('Error copiado al portapapeles',
+                          type: SnackBarType.error);
+                     
                     },
                     icon: Icon(Icons.copy, size: 16),
                     label: Text(
@@ -183,9 +182,7 @@ class _CustomDialogState extends State<CustomDialog> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _showErrorDetails
-                            ? 'Ocultar detalles'
-                            : 'Ver detalles',
+                        _showErrorDetails ? 'Ocultar detalles' : 'Ver detalles',
                         style: StylesApp(context).textStyleBody10.copyWith(
                               color: Colors.blue,
                               fontWeight: FontWeight.w500,

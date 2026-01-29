@@ -108,8 +108,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           1, 15, useData != null ? useData.userId : '');
       if (responseNotification.error != null) {
         if (mounted) {
-        await showCustomDialog(context,
-            message: responseNotification.error!, dialogType: DialogType.error);
+          await showCustomDialog(context,
+              message: responseNotification.error!,
+              dialogType: DialogType.error);
         }
         return;
       }
@@ -206,7 +207,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      iconSize: isTablet ? 70 :  35,
+                      iconSize: isTablet ? 70 : 35,
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
@@ -863,11 +864,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                   Clipboard.setData(ClipboardData(
                                       text:
                                           " ${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible"));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Proverbio copiado al portapapeles')),
-                                  );
+                                  showSnackBar(
+                                      "Proverbio copiado al portapapeles",
+                                      type: SnackBarType.success);
                                 },
                               ),
                             ),
@@ -1441,13 +1440,15 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
                               getRouterScreen(notification.model.toLowerCase(),
                                       notification.variables)
                                   .routeName,
-                              arguments: getRouterScreen(notification.model.toLowerCase(),
+                              arguments: getRouterScreen(
+                                      notification.model.toLowerCase(),
                                       notification.variables)
                                   .arguments);
                         } else {
                           Navigator.pushNamed(
                               context,
-                              getRouterScreen(notification.model.toLowerCase(), null)
+                              getRouterScreen(
+                                      notification.model.toLowerCase(), null)
                                   .routeName);
                         }
                       },

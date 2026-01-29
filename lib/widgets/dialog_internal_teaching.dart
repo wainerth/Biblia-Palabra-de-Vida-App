@@ -72,7 +72,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
   // ============ DIALOG PARA TABLET ============
   Widget _buildTabletDialog() {
     return Dialog(
-      insetPadding: EdgeInsets.all(40),
+      backgroundColor: widget.currentTheme.backgroundColor,
+      insetPadding: EdgeInsets.all(0),
       child: SizedBox(
         width: 700,
         height: 800,
@@ -387,6 +388,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
     final GlobalKey widgetKey = GlobalKey();
 
     return Card(
+      color: widget.currentTheme.backgroundColor,
       key: widgetKey,
       elevation: 2,
       shape: RoundedRectangleBorder(

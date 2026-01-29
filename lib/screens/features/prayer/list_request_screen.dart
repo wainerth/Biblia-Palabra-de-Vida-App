@@ -1367,14 +1367,8 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                         dataSeleccionada = null;
                       }
                     });
+showSnackBar("Petición eliminada correctamente", type: SnackBarType.success);
 
-                    // Mostrar mensaje de éxito
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Petición eliminada correctamente'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
                   }
                 } catch (e) {
                   if (mounted) {
@@ -1403,12 +1397,8 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
         LoadingService().hideLoading();
       } catch (e) {
         LoadingService().hideLoading();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-            'Error al cargar página anterior: ${e.toString()}'),
-            backgroundColor: StyleColor.redLight,
-          ),
-        );
+        showSnackBar("Error al cargar página anterior: ${e.toString()}", type: SnackBarType.error);
+        
       }
     }
   }

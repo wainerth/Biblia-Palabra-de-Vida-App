@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
@@ -108,81 +108,124 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     }
   }
 
+  // Future<void> downloadFile(
+  //     BuildContext context1, String url, String fileName) async {
+  //   LoadingService().showLoading(context);
+  //   Directory? downloadDir;
+
+  //   try {
+  //     // Obtengo los diferentes directorios dependiendo de la plataforma
+  //     if (Platform.isAndroid) {
+  //       downloadDir = await _getInternalDownloadDirectory();
+  //       // internalDir = await getExternalStorageDirectory();
+  //     } else {
+  //       downloadDir = await getApplicationDocumentsDirectory();
+  //     }
+
+  //     // tomo el directorio de descarga si tengo permisos uso el externo si no el interno
+  //     // Crear directorio si no existe
+  //     final savedDir = Directory('${downloadDir?.path}/Download');
+
+  //     if (!await savedDir.exists()) {
+  //       await savedDir.create(recursive: true);
+  //     }
+
+  //     // ✅ VERIFICAR que tenemos permisos de escritura (no storage)
+  //     final canWrite = await _checkWritePermission(downloadDir!);
+  //     if (!canWrite) {
+  //       throw Exception('No se pudo escribir en el directorio');
+  //     }
+
+  //     Future.delayed(Duration(seconds: 1));
+  //     final taskId = await FlutterDownloader.enqueue(
+  //       url: url,
+  //       savedDir: savedDir.path,
+  //       fileName: "$fileName.mp3",
+  //       showNotification: true,
+  //       openFileFromNotification: Platform.isIOS ? false : true,
+  //     );
+
+  //     if (kDebugMode) {
+  //       print('Descarga iniciada con ID: $taskId');
+  //     }
+  //     if (taskId != null) {
+  //       if (mounted) {
+  //         showSnackBar(
+  //             '✅ Descarga iniciada. El archivo se guardará en: ${savedDir.path}',
+  //             type: SnackBarType.success);
+  //       }
+  //     } else {
+  //       if (mounted) {
+  //         showSnackBar('Error al iniciar la descarga.',
+  //             type: SnackBarType.error);
+  //       }
+  //     }
+
+  //     LoadingService().hideLoading();
+  //   } catch (e) {
+  //     LoadingService().hideLoading();
+  //     if (mounted) {
+  //       await showCustomDialog(context,
+  //           message: e.toString(), dialogType: DialogType.error);
+  //     }
+  //   } finally {
+  //     LoadingService().hideLoading();
+  //   }
+  // }
+
   Future<void> downloadFile(
       BuildContext context1, String url, String fileName) async {
     LoadingService().showLoading(context);
-    Directory? downloadDir;
 
     try {
-      // Obtengo los diferentes directorios dependiendo de la plataforma
-      if (Platform.isAndroid) {
-        downloadDir = await _getInternalDownloadDirectory();
-        // internalDir = await getExternalStorageDirectory();
-      } else {
-        downloadDir = await getApplicationDocumentsDirectory();
-      }
+      // 1. Obtener directorio INTERNO (NO requiere permisos)
+      final directory = await getApplicationDocumentsDirectory();
+      final downloadDir = Directory('${directory.path}/Biblia_Audios');
 
-      // tomo el directorio de descarga si tengo permisos uso el externo si no el interno
       // Crear directorio si no existe
-      final savedDir = Directory('${downloadDir?.path}/Download');
-
-      if (!await savedDir.exists()) {
-        await savedDir.create(recursive: true);
+      if (!await downloadDir.exists()) {
+        await downloadDir.create(recursive: true);
       }
 
-      // ✅ VERIFICAR que tenemos permisos de escritura (no storage)
-      final canWrite = await _checkWritePermission(downloadDir!);
-      if (!canWrite) {
-        throw Exception('No se pudo escribir en el directorio');
-      }
+      // 2. Crear nombre de archivo seguro
+      final safeFileName = _getSafeFileName(fileName);
+      final filePath = '${downloadDir.path}/$safeFileName.mp3';
 
-      Future.delayed(Duration(seconds: 1));
-      final taskId = await FlutterDownloader.enqueue(
-        url: url,
-        savedDir: savedDir.path,
-        fileName: "$fileName.mp3",
-        showNotification: true,
-        openFileFromNotification: Platform.isIOS ? false : true,
+      // 3. Descargar directamente con Dio (más simple)
+      final dio = Dio();
+      await dio.download(
+        url,
+        filePath,
+        onReceiveProgress: (received, total) {
+          if (kDebugMode) {
+            if (total != -1) {
+              final progress = (received / total * 100).toStringAsFixed(0);
+              print('📥 Descargando: $progress%');
+            }
+          }
+        },
       );
 
-      if (kDebugMode) {
-        print('Descarga iniciada con ID: $taskId');
-      }
-      if (taskId != null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: StyleColor.turquoise,
-              content: Text(
-                '✅ Descarga iniciada. El archivo se guardará en: ${savedDir.path}',
-                style: StylesApp(context).textStyleBody12,
-              ),
-            ),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: StyleColor.redLight,
-              content: Text(
-                'Error al iniciar la descarga.',
-                style: StylesApp(context).textStyleBody12,
-              ),
-            ),
-          );
-        }
-      }
-
       LoadingService().hideLoading();
+
+      // 4. Mostrar éxito y opciones
+      if (mounted) {
+        showSnackBar(
+          '✅ Audio descargado correctamente',
+          type: SnackBarType.success,
+        );
+
+        // 5. Mostrar opciones al usuario
+        await _showDownloadOptions(context, filePath, safeFileName);
+      }
     } catch (e) {
       LoadingService().hideLoading();
       if (mounted) {
-        await showCustomDialog(context,
-            message: e.toString(), dialogType: DialogType.error);
+        showSnackBar(
+          '❌ Error al descargar: ${e.toString()}',
+          type: SnackBarType.error,
+        );
       }
-    } finally {
-      LoadingService().hideLoading();
     }
   }
 
@@ -430,13 +473,10 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                                         context;
                                                     if (currentContext
                                                         .mounted) {
-                                                      ScaffoldMessenger.of(
-                                                              currentContext)
-                                                          .showSnackBar(
-                                                        SnackBar(
-                                                            content: Text(
-                                                                'Error al compartir el audio')),
-                                                      );
+                                                      showSnackBar(
+                                                          'Error al compartir el audio',
+                                                          type: SnackBarType
+                                                              .error);
                                                     }
                                                   }
                                                 }
@@ -577,15 +617,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
       // 3. Notificar éxito
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: StyleColor.turquoise,
-            content: Text(
-              '✅ Descarga completada: $fileName.mp3',
-              style: StylesApp(context).textStyleBody12,
-            ),
-          ),
-        );
+        showSnackBar('✅ Descarga completada: $fileName.mp3',
+            type: SnackBarType.success);
       }
 
       // 4. (Opcional) Abrir el archivo o notificar al sistema
@@ -594,15 +627,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       if (kDebugMode) print('🚫 Error descarga directa: $e');
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: StyleColor.redLight,
-            content: Text(
-              '❌ Error descargando: ${e.toString()}',
-              style: StylesApp(context).textStyleBody12,
-            ),
-          ),
-        );
+        showSnackBar('❌ Error descargando: ${e.toString()}',
+            type: SnackBarType.error);
       }
     } finally {
       LoadingService().hideLoading();
@@ -619,6 +645,178 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 'UPDATE downloaded_files SET status=3 WHERE file_path="$filePath"');
       } catch (e) {
         if (kDebugMode) print('⚠️ No se pudo notificar al sistema: $e');
+      }
+    }
+  }
+
+  // Agregar esta función en AudioPlayerWidgetState
+  Future<void> _showDownloadOptions(
+      BuildContext context, String filePath, String fileName) async {
+    await showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.check_circle, color: Colors.green),
+              title: Text('Descarga completada'),
+              subtitle: Text('$fileName.mp3'),
+            ),
+            Divider(height: 1),
+            // ListTile(
+            //   leading: Icon(Icons.play_arrow, color: Colors.blue),
+            //   title: Text('Escuchar ahora'),
+            //   onTap: () {
+            //     Navigator.pop(context);
+            //     // Aquí puedes reproducir el audio descargado
+            //     _playLocalAudio(filePath);
+            //   },
+            // ),
+            ListTile(
+              leading: Icon(Icons.share, color: Colors.green),
+              title: Text('Compartir audio'),
+              onTap: () {
+                Navigator.pop(context);
+                _shareAudioFile(filePath, fileName);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.save_alt, color: Colors.orange),
+              title: Text('Guardar en galería (opcional)'),
+              subtitle: Text('Requiere permiso de almacenamiento'),
+              onTap: () async {
+                Navigator.pop(context);
+                // SOLO aquí pedir permiso para guardar externamente
+                await _saveToExternalStorage(filePath, fileName);
+              },
+            ),
+            SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _shareAudioFile(String filePath, String fileName) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        await Share.shareXFiles(
+          [XFile(filePath)],
+          text: 'Audio de la Biblia - $fileName',
+          subject: 'Palabra de Vida',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnackBar('Error al compartir', type: SnackBarType.error);
+      }
+    }
+  }
+
+  Future<void> _saveToExternalStorage(String filePath, String fileName) async {
+    try {
+      // SOLO para Android
+      if (Platform.isAndroid) {
+        // Solicitar permiso SOLO cuando el usuario quiera guardar externamente
+        final status = await Permission.storage.request();
+
+        if (!status.isGranted) {
+          if (mounted) {
+            showSnackBar(
+              'Permiso necesario para guardar en galería',
+              type: SnackBarType.warning,
+            );
+          }
+          return;
+        }
+
+        // Obtener directorio público de Descargas
+        final externalDir = await getExternalStorageDirectory();
+        if (externalDir != null) {
+          final publicDir = Directory('${externalDir.path}/Download/Biblia');
+
+          if (!await publicDir.exists()) {
+            await publicDir.create(recursive: true);
+          }
+
+          final sourceFile = File(filePath);
+          final destFile = File('${publicDir.path}/$fileName.mp3');
+
+          await sourceFile.copy(destFile.path);
+
+          if (mounted) {
+            showSnackBar(
+              '✅ Audio guardado en Descargas/Biblia',
+              type: SnackBarType.success,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnackBar('Error al guardar: $e', type: SnackBarType.error);
+      }
+    }
+  }
+
+  String _getSafeFileName(String fileName) {
+    // Limpiar nombre de archivo
+    return fileName
+        .replaceAll(RegExp(r'[^\w\s-]'), '') // Quitar caracteres especiales
+        .replaceAll(RegExp(r'\s+'), '_') // Espacios a guiones bajos
+        .toLowerCase();
+  }
+
+  Future<void> _playLocalAudio(String filePath) async {
+    try {
+      // Verificar si el archivo existe
+      final file = File(filePath);
+      if (!await file.exists()) {
+        showSnackBar('El archivo no existe', type: SnackBarType.error);
+        return;
+      }
+
+      // Detener reproducción actual si hay
+      if (_isPlaying) {
+        await player.stop();
+        setState(() {
+          _isPlaying = false;
+          _position = Duration.zero;
+        });
+      }
+
+      // Reproducir archivo local
+      setState(() {
+        loading = true;
+      });
+
+      await player.play(DeviceFileSource(filePath));
+
+      setState(() {
+        loading = false;
+        _isPlaying = true;
+      });
+
+      if (kDebugMode) {
+        print('▶️ Reproduciendo audio local: $filePath');
+      }
+    } catch (e) {
+      setState(() {
+        loading = false;
+        _isPlaying = false;
+      });
+
+      if (mounted) {
+        showSnackBar(
+          'Error al reproducir archivo local: ${e.toString()}',
+          type: SnackBarType.error,
+        );
+      }
+
+      if (kDebugMode) {
+        print('❌ Error reproduciendo local: $e');
       }
     }
   }

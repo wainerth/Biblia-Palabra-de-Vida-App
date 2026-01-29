@@ -97,26 +97,11 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
         originalData: widget.version,
       );
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-        });
-
-        // Configurar listeners de manera segura
-        _searchFocusNode.addListener(_onFocusChanged);
-      }
-    });
-  }
-
-  void _onFocusChanged() {
-    // Este método se llama cuando el foco cambia
-    // Puedes agregar lógica aquí si es necesario
   }
 
   @override
   void dispose() {
     if (mounted) {
-      _searchFocusNode.removeListener(_onFocusChanged);
       _searchFocusNode.dispose();
       _debounceTimer?.cancel();
       searchTextController.dispose();
@@ -166,6 +151,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
           CustomDropdownBottomWidget(
             hintText: "Seleccione la versión",
             items: bibleVersions,
+            currentTheme: currentTheme,
             onChanged: (ModelData? version) async {
               if (kDebugMode) {
                 print("Versión seleccionada ${version!.value}");
@@ -184,39 +170,108 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
           Row(
             children: [
               Expanded(
-                child: TextFormField(
-                  focusNode: _searchFocusNode,
-                  readOnly: versionSelected!.value.isEmpty || loading,
-                  controller: searchTextController,
-                  style: StylesApp(context).textStyleSmallBlack.copyWith(
-                        fontSize: isTablet ? 16 : 14,
-                      ),
-                  decoration:
-                      StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                            hintText: 'Buscar palabra o frase...',
-                            hintStyle: TextStyle(
-                              fontSize: isTablet ? 15 : 14,
+                child: FocusScope(
+                  node: FocusScopeNode(),
+                  child: TextFormField(
+                    focusNode: _searchFocusNode,
+                    readOnly: versionSelected!.value.isEmpty || loading,
+                    controller: searchTextController,
+                    style: StylesApp(context).textStyleSmallBlack.copyWith(
+                          color: currentTheme.textColor,
+                          fontSize: isTablet ? 16 : 14,
+                        ),
+                    decoration: StylesApp(context)
+                        .inputDecorationOutlineStyle
+                        .copyWith(
+                          fillColor: currentTheme.backgroundColor,
+                          hintText: 'Buscar palabra o frase...',
+                          hintStyle: StylesApp(context)
+                              .textStyleBody12
+                              .copyWith(
+                                color: currentTheme.textColor.withOpacity(0.7),
+                                fontSize: isTablet ? 15 : 14,
+                              ),
+                          // Border configurado con currentTheme
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color:
+                                  currentTheme.buttonColor, // Color del borde
+                              width: 1.0,
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: currentTheme.textColor.withOpacity(
+                                  0.6), // Borde cuando está habilitado
+                              width: 1.0,
                             ),
-                            suffixIcon: _searchText.isNotEmpty
-                                ? IconButton(
-                                    icon: Icon(Icons.clear),
-                                    onPressed: () {
-                                      _safeClearSearch();
-                                    },
-                                  )
-                                : null,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: isTablet ? 20 : 16,
-                              vertical: isTablet ? 18 : 14,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: currentTheme
+                                  .textColor, // Borde cuando está enfocado
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.red, // Borde de error
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          disabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: currentTheme.textColor.withOpacity(
+                                  0.3), // Borde cuando está deshabilitado
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          suffixIcon: _searchText.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.clear,
+                                    color: currentTheme
+                                        .buttonColor, // Color del icono
+                                  ),
+                                  onPressed: () {
+                                    _safeClearSearch();
+                                  },
+                                )
+                              : null,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: isTablet ? 20 : 16,
+                            vertical: isTablet ? 18 : 14,
+                          ),
+                          // Icono de búsqueda a la izquierda
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Icon(
+                              Icons.search,
+                              color: currentTheme.buttonColor,
+                              size: isTablet ? 24 : 20,
                             ),
                           ),
-                  onChanged: (value) {
-                    if (!mounted) return;
-                    _handleSearchChange(value);
-                  },
+                          // Estilo del texto dentro
+                          filled: true,
+                          labelStyle: TextStyle(
+                            color: currentTheme.textColor,
+                          ),
+                        ),
+                    onChanged: (value) {
+                      if (!mounted) return;
+                      _handleSearchChange(value);
+                    },
+                    onTap: () {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        // Pequeño delay para asegurar que el teclado se muestra suavemente
+                      });
+                    },
+                  ),
                 ),
               ),
               SizedBox(width: 8.0),
@@ -288,6 +343,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                 child: CustomDropdownBottomWidget(
                   border: false,
                   hintText: "Versión bíblica",
+                  currentTheme: currentTheme,
                   items: bibleVersions,
                   onChanged: (ModelData? version) async {
                     if (kDebugMode) {
@@ -326,41 +382,49 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          focusNode: _searchFocusNode,
-                          readOnly: versionSelected!.value.isEmpty || loading,
-                          controller: searchTextController,
-                          style:
-                              StylesApp(context).textStyleSmallBlack.copyWith(
-                                    fontSize: 16,
-                                  ),
-                          decoration: InputDecoration(
-                            hintText:
-                                'Escribe aquí la palabra o frase a buscar...',
-                            hintStyle: TextStyle(
-                              color: currentTheme.textColor.withValues(alpha: 0.6),
-                              fontSize: 15,
+                        child: FocusScope(
+                          node: FocusScopeNode(),
+                          child: TextFormField(
+                            focusNode: _searchFocusNode,
+                            readOnly: versionSelected!.value.isEmpty || loading,
+                            controller: searchTextController,
+                            style:
+                                StylesApp(context).textStyleSmallBlack.copyWith(
+                                      color: currentTheme.textColor,
+                                      fontSize: 16,
+                                    ),
+                            decoration: InputDecoration(
+                              hintText:
+                                  'Escribe aquí la palabra o frase a buscar...',
+                              hintStyle: TextStyle(
+                                color: currentTheme.textColor
+                                    .withValues(alpha: 0.6),
+                                fontSize: 15,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 18,
+                              ),
+                              suffixIcon: _searchText.isNotEmpty
+                                  ? IconButton(
+                                      icon: Icon(Icons.clear,
+                                          color: currentTheme.textColor
+                                              .withValues(alpha: 0.7)),
+                                      onPressed: () {
+                                        _safeClearSearch();
+                                      },
+                                    )
+                                  : null,
                             ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 18,
-                            ),
-                            suffixIcon: _searchText.isNotEmpty
-                                ? IconButton(
-                                    icon: Icon(Icons.clear,
-                                        color: currentTheme.textColor
-                                            .withValues(alpha: 0.7)),
-                                    onPressed: () {
-                                      _safeClearSearch();
-                                    },
-                                  )
-                                : null,
+                            onChanged: (value) {
+                              if (!mounted) return;
+                              _handleSearchChange(value);
+                            },
+                            onTap: () {
+                              _searchFocusNode.requestFocus();
+                            },
                           ),
-                          onChanged: (value) {
-                            if (!mounted) return;
-                            _handleSearchChange(value);
-                          },
                         ),
                       ),
                       Container(
@@ -436,7 +500,8 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                     child: Text(
                       "Página ${pagination.currentPage} de ${pagination.totalPages}",
                       style: StylesApp(context).textStyleBody12.copyWith(
-                            color: currentTheme.textColor.withValues(alpha: 0.7),
+                            color:
+                                currentTheme.textColor.withValues(alpha: 0.7),
                           ),
                     ),
                   ),
@@ -531,7 +596,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 2.0, // Rectángulos más anchos
+            // childAspectRatio: 2.0, // Rectángulos más anchos
           ),
           itemCount: searchResult.length,
           itemBuilder: (context, index) {
@@ -570,6 +635,8 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
 
   Widget _buildTabletResultCard(WordSearchResult data) {
     return Card(
+      color: currentTheme.backgroundColor,
+      shadowColor: currentTheme.buttonColor,
       elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -806,6 +873,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                   size: 18,
                 ),
                 onTap: () {
+                  Navigator.pop(context);
                   final InputDataSearchModel inputData = InputDataSearchModel(
                     bookId: data.book.id,
                     chapterId: data.chapter.id!,
@@ -816,7 +884,6 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                   if (widget.onActionTabText != null) {
                     widget.onActionTabText!(inputData);
                   }
-                  Navigator.pop(context);
                 },
               ),
 
@@ -894,7 +961,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
       endVerseId: "",
       versionId: versionSelected!.value,
     );
-    
+
     if (widget.onActionTabText != null) {
       widget.onActionTabText!(inputData);
     }
@@ -1020,11 +1087,11 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
       searchTextController.text = '';
     });
 
-    Future.delayed(Duration(milliseconds: 100), () {
-      if (mounted && _searchFocusNode.hasFocus) {
-        _searchFocusNode.unfocus();
-      }
-    });
+    // Future.delayed(Duration(milliseconds: 100), () {
+    //   if (mounted && _searchFocusNode.hasFocus) {
+    //     _searchFocusNode.unfocus();
+    //   }
+    // });
   }
 
   void _handleSearchChange(String value) {

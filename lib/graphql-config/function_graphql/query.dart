@@ -3143,7 +3143,7 @@ Future<ResponseData> getCountries({
       "offset": offset,
       "search": query,
     },
-     fetchPolicy: FetchPolicy.noCache,
+    fetchPolicy: FetchPolicy.noCache,
   );
   try {
     final QueryResult result = await client.query(options);
@@ -3169,37 +3169,55 @@ Future<ResponseData> getCountries({
   } catch (e) {
     return handleGenericError(e, "Obtener todas las ciudades por estado");
   }
-  // try {
-  //   final result = await _client.query(options);
+}
 
-  //   if (result.hasException) {
-  //     throw Exception('Error GraphQL: ${result.exception}');
-  //   }
+Future<ResponseData> getCodeAreas({
+  String query = '',
+  int page = 1,
+  int limit = 20,
+}) async {
+  final offset = (page - 1) * limit;
+  final GraphQLClient client = createClient();
+  final options = QueryOptions(
+    operationName: "GetAllAreaCodes",
+    document: gql(r'''
+         query GetAllAreaCodes($limit: Int, $offset: Int, $search: String) {
+            getAllAreaCodes(limit: $limit, offset: $offset, search: $search) {
+              id
+              code
+            }
+          }
+        '''),
+    variables: <String, dynamic>{
+      "limit": limit,
+      "offset": offset,
+      "search": query
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
 
-  //   final data = result.data?['getAllCountryWithCodeAreas'] as List? ?? [];
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
 
-  //   // Convertir de Country a ModelData
-  //   final countries = data.map((json) {
-  //     final country = Country.fromJson(json);
-  //     return ModelData(
-  //       value: country.id,
-  //       label: country.name,
-  //       originalData: country,
-  //     );
-  //   }).toList();
+    final data = removeTypename(result.data);
+    if (data['getAllAreaCodes'] == null) {
+      return ResponseData(
+          data: null,
+          userFriendlyError:
+              'No se pudieron obtener tLos codigos de area.',
+          error:
+              'Error al obtener todas las ciudades por estado: no se devolvieron datos',
+          errorType: ErrorType.noData);
+    }
 
-  //   // Calcular si hay más páginas
-  //   final hasMore = countries.length >= limit;
-
-  //   return PaginationModel(
-  //     items: countries,
-  //     currentPage: page,
-  //     totalPages:
-  //         hasMore ? page + 1 : page, // Simplificado - ajusta según tu API
-  //     hasMore: hasMore,
-  //   );
-  // } catch (e) {
-  //   print('Error buscando países: $e');
-  //   throw Exception('Error buscando países: $e');
-  // }
+    return ResponseData(
+      data: data['getAllAreaCodes'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Obtener todas las ciudades por estado");
+  }
 }

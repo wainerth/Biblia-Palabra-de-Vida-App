@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class LiabilityNoticeWidget extends StatefulWidget {
@@ -13,7 +14,6 @@ class LiabilityNoticeWidget extends StatefulWidget {
 class _LiabilityNoticeWidgetState extends State<LiabilityNoticeWidget> {
   bool _isChecked = false;
 
-  
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -103,26 +103,25 @@ class _LiabilityNoticeWidgetState extends State<LiabilityNoticeWidget> {
                     child: ButtonThemeWidget(
                       text: "Aceptar",
                       buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                        backgroundColor:  !_isChecked ? WidgetStateProperty.all(StyleColor.grayMedium) : null
-                      ),
+                          backgroundColor: !_isChecked
+                              ? WidgetStateProperty.all(StyleColor.grayMedium)
+                              : null),
                       disabled: !_isChecked,
                       width: 239.0,
                       height: 41.0,
-                      onPressed: !_isChecked ? null : () {
-                        if (_isChecked) {
-                          Navigator.pop(context);
-                          widget.openModalInfo();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Es obligatorio aceptar las condiciones del aviso de responsabilidad'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          Navigator.of(context).pop();
-                        }
-                      },
+                      onPressed: !_isChecked
+                          ? null
+                          : () {
+                              if (_isChecked) {
+                                Navigator.pop(context);
+                                widget.openModalInfo();
+                              } else {
+                                showSnackBar(
+                                    'Es obligatorio aceptar las condiciones del aviso de responsabilidad',
+                                    type: SnackBarType.error);
+                                Navigator.of(context).pop();
+                              }
+                            },
                     ),
                   ),
                   SizedBox(

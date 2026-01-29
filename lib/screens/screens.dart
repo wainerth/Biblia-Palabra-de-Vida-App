@@ -42,6 +42,7 @@ export 'package:biblia_palabra_de_vida_app/screens/features/settings/about_scree
 
 //Features
 export 'package:biblia_palabra_de_vida_app/screens/features/bible/bible_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/bible/search_bible_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/audio/audio_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/favorite/favorite_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/community/community_screen.dart';

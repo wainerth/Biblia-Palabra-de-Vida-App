@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -182,11 +183,7 @@ class DoubtScreen extends StatelessWidget {
               if (await canLaunchUrl(emailLaunchUri)) {
                 await launchUrl(emailLaunchUri);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('No se pudo abrir la aplicación de correo'),
-                  ),
-                );
+                showSnackBar("'No se pudo abrir la aplicación de correo'", type: SnackBarType.error);
               }
             },
             child: Padding(
@@ -304,12 +301,8 @@ class DoubtScreen extends StatelessWidget {
                       if (await canLaunchUrl(emailLaunchUri)) {
                         await launchUrl(emailLaunchUri);
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'No se pudo abrir la aplicación de correo'),
-                          ),
-                        );
+                        showSnackBar("No se pudo abrir la aplicación de correo", type: SnackBarType.error);
+
                       }
                     },
                     child: Column(
@@ -488,11 +481,8 @@ class DoubtScreen extends StatelessWidget {
         if (await canLaunchUrl(emailLaunchUri)) {
           await launchUrl(emailLaunchUri);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('No se pudo abrir la aplicación de correo'),
-            ),
-          );
+          showSnackBar("No se pudo abrir la aplicación de correo", type: SnackBarType.error);
+          
         }
       },
       style: ElevatedButton.styleFrom(

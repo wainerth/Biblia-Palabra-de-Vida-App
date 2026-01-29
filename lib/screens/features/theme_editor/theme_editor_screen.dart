@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
@@ -325,9 +326,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
 
   Future<void> _saveTheme(BuildContext context) async {
     if (_nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor ingresa un nombre para el tema')),
-      );
+      showSnackBar("Por favor ingresa un nombre para el tema",
+                        type: SnackBarType.info);
       return;
     }
 

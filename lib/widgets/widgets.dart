@@ -1,4 +1,6 @@
 // Paquetes de Flutter y terceros
+export 'package:biblia_palabra_de_vida_app/widgets/rebuild_debugger.dart';
+
 export 'package:flutter/material.dart';
 export 'package:audioplayers/audioplayers.dart';
 
@@ -51,6 +53,7 @@ export 'package:biblia_palabra_de_vida_app/widgets/custom_dialog.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/custom_dialog_with_action.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/custom_modal_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/dialog_internal_character.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/dialog_reference.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/dialog_internal_teaching.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/modal_tales_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/prayer_request_modal.dart';
@@ -105,3 +108,6 @@ export 'package:biblia_palabra_de_vida_app/widgets/optimized_searchable_dropdown
 export 'package:biblia_palabra_de_vida_app/widgets/optimized_searchable_dropdown.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/custom_snack_bar.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/color_picker_bottom_sheet.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/improved_slow_connection_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/card_search_text_widget.dart';
+

@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -12,18 +13,19 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
   final bool border;
   final EdgeInsetsGeometry? contentPadding;
   final Widget? leadingIcon;
+  final BibleTheme? currentTheme;
 
-  const CustomDropdownBottomWidget({
-    super.key,
-    required this.items,
-    required this.selectedItem,
-    required this.onChanged,
-    required this.hintText,
-    this.border = true,
-    this.contentPadding =
-        const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-    this.leadingIcon,
-  });
+  const CustomDropdownBottomWidget(
+      {super.key,
+      required this.items,
+      required this.selectedItem,
+      required this.onChanged,
+      required this.hintText,
+      this.border = true,
+      this.contentPadding =
+          const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      this.leadingIcon,
+      this.currentTheme});
 
   @override
   State<CustomDropdownBottomWidget<T>> createState() =>
@@ -71,8 +73,12 @@ class _CustomDropdownBottomWidgetState<T>
         height: StylesApp(context).sizeTextFormField.height,
         decoration: widget.border
             ? BoxDecoration(
-                color: StyleColor.white,
-                border: Border.all(color: StyleColor.black),
+                color: widget.currentTheme != null
+                    ? widget.currentTheme!.backgroundColor
+                    : Colors.white,
+                border: Border.all(color:widget.currentTheme != null
+                    ? widget.currentTheme!.textColor
+                    : Colors.black),
                 borderRadius: BorderRadius.circular(8.0),
               )
             : null,
@@ -90,7 +96,9 @@ class _CustomDropdownBottomWidgetState<T>
                   widget.selectedItem?.label ?? widget.hintText,
                   style: StylesApp(context).textStyleBody14.copyWith(
                         color: widget.selectedItem != null
-                            ? Colors.black
+                            ? widget.currentTheme != null
+                                ? widget.currentTheme!.textColor
+                                : Colors.black
                             : Colors.grey.shade600,
                       ),
                   overflow: TextOverflow.ellipsis,
@@ -112,9 +120,11 @@ class _CustomDropdownBottomWidgetState<T>
     FocusScope.of(context).unfocus();
     // Sincronizar el controlador con el texto actual
     _searchController?.text = _searchText;
-    
+
     showModalBottomSheet(
-      backgroundColor: Colors.white,
+      backgroundColor: widget.currentTheme != null
+          ? widget.currentTheme!.backgroundColor
+          : Colors.white,
       context: context,
       builder: (BuildContext context) {
         return _buildBottomSheetContent();
@@ -185,8 +195,10 @@ class _CustomDropdownBottomWidgetState<T>
           return ListTile(
             leading: widget.leadingIcon,
             title: Center(child: Text(item.label)),
-            titleTextStyle:
-                StylesApp(context).textStyleBody14.copyWith(color: StyleColor.black),
+            titleTextStyle: StylesApp(context).textStyleBody14.copyWith(
+                color: widget.currentTheme != null
+                    ? widget.currentTheme!.textColor
+                    : StyleColor.black),
             onTap: () {
               widget.onChanged(item);
               cleanSearch(); // Esto ahora limpia ambos: controlador y estado

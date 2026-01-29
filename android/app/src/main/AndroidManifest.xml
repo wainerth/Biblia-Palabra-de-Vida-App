@@ -11,14 +11,13 @@
     
     <!-- Para cambiar foto de perfil (Android 13+) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <!-- Para grabar audio (en la sección de Oraciones (Función  Opcional) -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <!-- Para descargar audio al teléfono (los cuentos si el usuario quiere descargarlos Opcional) -->
-    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+
+    <!-- Para guardar en almacenamiento externo (OPCIONAL) -->
+<uses-permission 
+    android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    android:maxSdkVersion="29" />
     
     <queries>
-        <!-- Necesario para Android 11+ (se le muestran al usuario Diálogos para verificar o confirmar si quiere usar esta app Opcional ) --> 
-        <package android:name="amistad.online2" /> 
 
         <intent>
             <action android:name="android.intent.action.VIEW" />
@@ -46,7 +45,6 @@
             </intent-filter>
         </service>
 
-            <!-- android:screenOrientation="portrait"  -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

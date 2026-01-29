@@ -257,8 +257,9 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                     }
                     return PhoneValidatorService.validatePhoneNumber(phone);
                   },
-                  onChanged: (phone) {
+                  onChanged: (phone) async {
                     if (kDebugMode) {
+                      print("Estoy en Personal Info ...");
                       print('Country Code: ${phone.countryCode}');
                       print('Complete Number: ${phone.completeNumber}');
                       print('Country ISO: ${phone.countryISOCode}');
@@ -276,13 +277,14 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                       widget.prefixNumberController.text = phone.countryCode;
                     });
                     try {
-                      AreaCode code = Provider.of<CatalogueProvider>(context,
-                              listen: false)
-                          .allAreasCode
-                          .firstWhere(
-                              (areaCode) => areaCode.code == phone.countryCode);
-                      widget.onPrefixSelected(
-                          ModelData(label: code.code, value: code.id));
+                      final areaCodeFound = await _areaCodeSearchService
+                          .getCodeAreaByCode(phone.countryCode);
+                      if (areaCodeFound != null) {
+                        AreaCode code = AreaCode(
+                            id: areaCodeFound.id, code: areaCodeFound.code);
+                        widget.onPrefixSelected(
+                            ModelData(label: code.code, value: code.id));
+                      }
                     } catch (e) {
                       if (kDebugMode) {
                         print(
@@ -642,8 +644,9 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                         }
                         return PhoneValidatorService.validatePhoneNumber(phone);
                       },
-                      onChanged: (phone) {
+                      onChanged: (phone) async {
                         if (kDebugMode) {
+                          print("Personal Info tablet");
                           print('Country Code: ${phone.countryCode}');
                           print('Complete Number: ${phone.completeNumber}');
                           print('Country ISO: ${phone.countryISOCode}');
@@ -662,14 +665,14 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                               phone.countryCode;
                         });
                         try {
-                          AreaCode code = Provider.of<CatalogueProvider>(
-                                  context,
-                                  listen: false)
-                              .allAreasCode
-                              .firstWhere((areaCode) =>
-                                  areaCode.code == phone.countryCode);
-                          widget.onPrefixSelected(
-                              ModelData(label: code.code, value: code.id));
+                          final areaCodeFound = await _areaCodeSearchService
+                              .getCodeAreaByCode(phone.countryCode);
+                          if (areaCodeFound != null) {
+                            AreaCode code = AreaCode(
+                                id: areaCodeFound.id, code: areaCodeFound.code);
+                            widget.onPrefixSelected(
+                                ModelData(label: code.code, value: code.id));
+                          }
                         } catch (e) {
                           if (kDebugMode) {
                             print(

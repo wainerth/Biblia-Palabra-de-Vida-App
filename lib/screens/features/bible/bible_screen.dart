@@ -31,6 +31,8 @@ enum BibleScreenState {
 }
 
 const Duration _kLoadTimeout = Duration(seconds: 10);
+const double _kScrollThreshold = 50.0;
+
 // ============================================================================
 // CLASE PRINCIPAL
 // ============================================================================
@@ -105,7 +107,7 @@ class _BibleScreenState extends State<BibleScreen> {
   // ==========================================================================
   int? scrollToVerseStart;
   int? scrollToVerseEnd;
-  final bool _showDrawer = false;
+  bool _showDrawer = false;
   Timer? _loadTimeoutTimer;
   late BibleThemeProvider _themeProvider;
   bool _isThemeListenerRegistered = false;
@@ -178,7 +180,7 @@ class _BibleScreenState extends State<BibleScreen> {
     super.initState();
     _initTTS();
     _initSpeechRate();
-
+    _setupScrollListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeScreen();
     });
@@ -241,7 +243,7 @@ class _BibleScreenState extends State<BibleScreen> {
         isPlaying = false;
         currentPlayingVerseIndex = null;
       });
-      _showSnackBar("Error en TTS: $msg");
+      showSnackBar("Error en TTS: $msg", type: SnackBarType.error);
     });
   }
 
@@ -252,6 +254,20 @@ class _BibleScreenState extends State<BibleScreen> {
     await flutterTts.setSpeechRate(_speechRate);
   }
 
+  void _setupScrollListener() {
+    scrollController.addListener(() {
+      _handleScroll();
+      // if (scrollController.position.isScrollingNotifier.value) {
+      //   if (!_isManualScroll) return;
+      //   if (scrollToVerse != null && scrollToVerse! > 0) {
+      //     setState(() {
+      //       scrollToVerse = null;
+      //       _isManualScroll = false;
+      //     });
+      //   }
+      // }
+    });
+  }
   // ==========================================================================
   // 12. INICIALIZACIÓN PRINCIPAL CON TIME-OUT
   // ==========================================================================
@@ -555,7 +571,8 @@ class _BibleScreenState extends State<BibleScreen> {
       setState(() => currentPlayingVerseIndex = verses.indexOf(verse));
       await flutterTts.speak("Versículo ${verse.verse}. ${verse.text}");
     } catch (e) {
-      _showSnackBar("Error al leer versículo: ${e.toString()}");
+      showSnackBar("Error al leer versículo: ${e.toString()}",
+          type: SnackBarType.error);
     } finally {
       setState(() => isPlaying = false);
       await flutterTts.stop();
@@ -591,11 +608,7 @@ class _BibleScreenState extends State<BibleScreen> {
     //     Provider.of<BibleThemeProvider>(context, listen: false);
     // currentTheme = themeProvider.themeData;
 
-    return Builder(
-      builder: (context) {
-        return _buildMainContent(currentTheme);
-      },
-    );
+    return _buildMainContent(currentTheme);
   }
 
   Widget _buildMainContent(BibleTheme theme) {
@@ -641,6 +654,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
   Widget _buildLoadingScreen() {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: currentTheme.backgroundColor,
       body: Center(
         child: Column(
@@ -660,6 +674,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
   Widget _buildSkeletonScreen(BibleTheme theme) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: theme.backgroundColor,
       body: SafeArea(
         child: Column(
@@ -757,6 +772,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
   Widget _buildErrorScreen() {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: currentTheme.backgroundColor,
       body: Center(
         child: Column(
@@ -805,6 +821,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
   Widget _buildTableLayout(BibleTheme currentTheme) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
       backgroundColor: currentTheme.backgroundColor,
       body: SafeArea(
@@ -826,6 +843,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
   Widget _buildMobileLayout(BibleTheme currentTheme) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
       backgroundColor: currentTheme.backgroundColor,
       endDrawer: _buildNavigationDrawer(currentTheme),
@@ -852,11 +870,7 @@ class _BibleScreenState extends State<BibleScreen> {
               BibleHeaderWidget(
                 spacingBottom: 10.0,
                 onSearchBible: () {
-                  setState(() {
-                    scrollToVerseStart = null;
-                    scrollToVerseEnd = null;
-                  });
-                  openModal();
+                  openSearchScreen();
                 },
                 versionName:
                     currentVersion != null ? currentVersion!.version : '',
@@ -962,7 +976,7 @@ class _BibleScreenState extends State<BibleScreen> {
                       scrollToVerseStart = null;
                       scrollToVerseEnd = null;
                     });
-                    openModal();
+                    openSearchScreen();
                   },
                   versionName:
                       currentVersion != null ? currentVersion!.version : '',
@@ -1040,7 +1054,7 @@ class _BibleScreenState extends State<BibleScreen> {
                             scrollToVerseStart = null;
                             scrollToVerseEnd = null;
                           });
-                          openModal();
+                          openSearchScreen();
                         },
                       ),
                       _buildIconButton(
@@ -1270,7 +1284,7 @@ class _BibleScreenState extends State<BibleScreen> {
                         scrollToVerseStart = null;
                         scrollToVerseEnd = null;
                       });
-                      openModal();
+                      openSearchScreen();
                     },
                     versionName:
                         currentVersion != null ? currentVersion!.version : '',
@@ -2248,94 +2262,19 @@ class _BibleScreenState extends State<BibleScreen> {
     });
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
   // ==========================================================================
   // 30. MÉTODOS DE MODALES Y DIÁLOGOS
   // ==========================================================================
 
-  void openModal() {
-    _clearSelection();
-
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Cerrar',
-      transitionDuration: Duration(milliseconds: 300),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return SafeArea(
-          child: Center(
-            child: Container(
-              margin: EdgeInsets.all(20),
-              constraints: BoxConstraints(
-                // maxWidth: 600,
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
-              ),
-              decoration: BoxDecoration(
-                color: currentTheme.backgroundColor,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black54,
-                    blurRadius: 20,
-                    offset: Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: SearchBibleWidget(
-                  currentVersion: currentVersion!,
-                  currentBook: currentBook!,
-                  currentChapter: currentChapter!,
-                  onActionBook: (InputDataSearchModel data) async {
-                    try {
-                      await loadVersionAndChapter(data);
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    } catch (e) {
-                      if (kDebugMode) print('Error: $e');
-                    }
-                  },
-                  onActionTabText: (InputDataSearchModel data) async {
-                    try {
-                      await loadVersionAndChapter(data);
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    } catch (e) {
-                      print('Error: $e');
-                    }
-                  },
-                  onActionTheme: (InputDataSearchModel data) async {
-                    try {
-                      await loadVersionAndChapter(data);
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    } catch (e) {
-                      print('Error: $e');
-                    }
-                  },
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOut,
-          ),
-          child: child,
-        );
+// En BibleScreen, cambia openSearchScreen():
+  Future<void> openSearchScreen() async {
+    Navigator.pushNamed(
+      context,
+      '/searchBiblePage',
+      arguments: {
+        'version': currentVersion,
+        'book': currentBook,
+        'chapter': currentChapter,
       },
     );
   }
@@ -2471,9 +2410,9 @@ class _BibleScreenState extends State<BibleScreen> {
   Future<void> _copyChapter() async {
     final text = await copyChapter(currentVersion, currentBook, currentChapter);
     Clipboard.setData(ClipboardData(text: text));
-    _showSnackBar(
-      "El capítulo ${currentChapter!.chapter} del libro ${currentBook!.modernName} se ha copiado con éxito al portapapeles",
-    );
+    showSnackBar(
+        "El capítulo ${currentChapter!.chapter} del libro ${currentBook!.modernName} se ha copiado con éxito al portapapeles",
+        type: SnackBarType.success);
   }
 
   Future<void> _shareChapter() async {
@@ -2497,7 +2436,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
       if (responseFavorite.error != null) {
         LoadingService().hideLoading();
-        _showSnackBar(responseFavorite.error!);
+        showSnackBar(responseFavorite.error!, type: SnackBarType.error);
         return;
       }
 
@@ -2533,7 +2472,7 @@ class _BibleScreenState extends State<BibleScreen> {
       }
     } catch (e) {
       LoadingService().hideLoading();
-      _showSnackBar(e.toString());
+      showSnackBar(e.toString(), type: SnackBarType.error);
     }
   }
 
@@ -2588,7 +2527,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
     if (responseCreate.error != null) {
       LoadingService().hideLoading();
-      _showSnackBar(responseCreate.userFriendlyError!);
+      showSnackBar(responseCreate.userFriendlyError!, type: SnackBarType.error);
       return;
     }
 
@@ -2633,7 +2572,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
     if (responseRemove.error != null) {
       LoadingService().hideLoading();
-      _showSnackBar(responseRemove.error!);
+      showSnackBar(responseRemove.error!, type: SnackBarType.error);
       return;
     }
 
@@ -2656,7 +2595,7 @@ class _BibleScreenState extends State<BibleScreen> {
         final responseRemove =
             await deleteVerseFavorite(userData!.userId, verse.id!);
         if (responseRemove.error != null) {
-          _showSnackBar(responseRemove.error!);
+          showSnackBar(responseRemove.error!, type: SnackBarType.error);
           LoadingService().hideLoading();
           return;
         }
@@ -2669,7 +2608,7 @@ class _BibleScreenState extends State<BibleScreen> {
             await createNewVerseFavoriteByUser(userData!.userId, verse.id!);
 
         if (responseAddFavorite.error != null) {
-          _showSnackBar(responseAddFavorite.error!);
+          showSnackBar(responseAddFavorite.error!, type: SnackBarType.error);
           LoadingService().hideLoading();
           return;
         }
@@ -2685,7 +2624,7 @@ class _BibleScreenState extends State<BibleScreen> {
       LoadingService().hideLoading();
     } catch (e) {
       LoadingService().hideLoading();
-      _showSnackBar(e.toString());
+      showSnackBar(e.toString(), type: SnackBarType.error);
     }
   }
 
@@ -2909,7 +2848,8 @@ class _BibleScreenState extends State<BibleScreen> {
         if (!isPlaying) break;
       }
     } catch (e) {
-      _showSnackBar("Error al leer capítulo: ${e.toString()}");
+      showSnackBar("Error al leer capítulo: ${e.toString()}",
+          type: SnackBarType.error);
     } finally {
       setState(() {
         isPlaying = false;
@@ -2936,33 +2876,55 @@ class _BibleScreenState extends State<BibleScreen> {
 
   void _copySelectedVerses() {
     if (getSelectedVerses().isEmpty) {
-      _showSnackBar('No hay versículos seleccionados para copiar');
+      showSnackBar('No hay versículos seleccionados para copiar',
+          type: SnackBarType.info);
       return;
     }
+
+    // Obtener versículos seleccionados y ordenarlos
+    final selectedVerses = getSelectedVerses();
+
+    // Ordenar por número de versículo (de menor a mayor)
+    selectedVerses.sort((a, b) => a.verse.compareTo(b.verse));
+
+    // Crear el texto ordenado
     final versesToCopy =
-        getSelectedVerses().map((v) => "${v.verse} ${v.text}\n").join(' ');
+        selectedVerses.map((v) => "${v.verse} ${v.text}\n").join(' ');
+
+    // Referencia ordenada (primer y último versículo después de ordenar)
+    final firstVerse = selectedVerses.first;
+    final lastVerse = selectedVerses.last;
     final reference =
-        "${currentVersion?.version}\n${currentBook?.modernName} ${currentChapter?.chapter}:${getSelectedVerses().first.verse}${getSelectedVerses().first != getSelectedVerses().last ? '-' : ''}${getSelectedVerses().first != getSelectedVerses().last ? getSelectedVerses().last.verse : ''}";
+        "${currentVersion?.version}\n${currentBook?.modernName} ${currentChapter?.chapter}:${firstVerse.verse}${selectedVerses.length > 1 ? '-' : ''}${selectedVerses.length > 1 ? lastVerse.verse : ''}";
+
     Clipboard.setData(
       ClipboardData(
-          text:
-              "$reference\n$versesToCopy ${GraphQLConfig.urlServidor}OfficialBible"),
+        text:
+            "$reference\n$versesToCopy ${GraphQLConfig.urlServidor}OfficialBible",
+      ),
     );
-    _showSnackBar('Versículo copiado');
+    showSnackBar('Versículos copiados', type: SnackBarType.success);
   }
 
   void _shareSelectedVerses() {
     if (getSelectedVerses().isEmpty) {
-      _showSnackBar('No hay versículos seleccionados para copiar');
+      showSnackBar('No hay versículos seleccionados para copiar',
+          type: SnackBarType.info);
       return;
     }
-    final versesToCopy =
-        getSelectedVerses().map((v) => "${v.verse} ${v.text}\n").join(' ');
+    // Obtener versículos seleccionados y ordenarlos
+    final selectedVerses = getSelectedVerses();
+
+    // Ordenar por número de versículo (de menor a mayor)
+    selectedVerses.sort((a, b) => a.verse.compareTo(b.verse));
+
+    final versesToShare =
+        selectedVerses.map((v) => "${v.verse} ${v.text}\n").join(' ');
     final reference =
         "${currentVersion?.version}\n${currentBook?.modernName} ${currentChapter?.chapter}:${getSelectedVerses().first.verse}${getSelectedVerses().first != getSelectedVerses().last ? '-' : ''}${getSelectedVerses().first != getSelectedVerses().last ? getSelectedVerses().last.verse : ''}";
     SharePlus.instance.share(ShareParams(
       text:
-          "$reference\n$versesToCopy ${GraphQLConfig.urlServidor}OfficialBible",
+          "$reference\n$versesToShare ${GraphQLConfig.urlServidor}OfficialBible",
       subject: 'Versículo de ${currentBook?.modernName}',
     ));
   }
@@ -2980,6 +2942,16 @@ class _BibleScreenState extends State<BibleScreen> {
     // Es un rango
     return verseNumber >= scrollToVerseStart! &&
         verseNumber <= scrollToVerseEnd!;
+  }
+
+  void _handleScroll() {
+    final scrollPosition = scrollController.position;
+
+    if (scrollPosition.pixels > _kScrollThreshold && !_showDrawer) {
+      setState(() => _showDrawer = true);
+    } else if (scrollPosition.pixels <= _kScrollThreshold && _showDrawer) {
+      setState(() => _showDrawer = false);
+    }
   }
 }
 
@@ -3063,6 +3035,7 @@ class TapAndLongPressRecognizer extends OneSequenceGestureRecognizer {
   @override
   void dispose() {
     _longPressTimer?.cancel();
+    
     super.dispose();
   }
 

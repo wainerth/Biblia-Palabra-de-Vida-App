@@ -215,7 +215,7 @@ class AreaCodeSearchService {
       final result = await client.query(options);
       if (result.hasException || result.data == null) return null;
 
-      final json = result.data?['getCodeAreaById'];
+      final json = result.data?['getCodeAreaByCode'];
       if (json == null) return null;
 
       final codeArea = AreaCode.fromJson(json);

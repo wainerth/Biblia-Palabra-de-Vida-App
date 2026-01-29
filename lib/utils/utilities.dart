@@ -2,8 +2,10 @@ import 'dart:async' show TimeoutException;
 import 'dart:io' show SocketException;
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/services/country_search_service.dart';
+import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +16,13 @@ import 'package:timezone/data/latest.dart' as tz;
 
 export 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 export 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
+
+enum SnackBarType {
+  success,
+  error,
+  warning,
+  info,
+}
 
 Map<String, dynamic> removeTypename(values) {
   if (values is Map<String, dynamic>) {
@@ -372,6 +381,63 @@ Size getDesignSize() {
   }
 }
 
+void showSnackBar(String message, {SnackBarType type = SnackBarType.info}) {
+  Color backgroundColor;
+  Duration duration;
+  IconData? icon;
+
+  switch (type) {
+    case SnackBarType.success:
+      backgroundColor = Colors.green;
+      duration = const Duration(seconds: 2);
+      icon = Icons.check_circle;
+      break;
+    case SnackBarType.error:
+      backgroundColor = Colors.red;
+      duration = const Duration(seconds: 4);
+      icon = Icons.error;
+      break;
+    case SnackBarType.warning:
+      backgroundColor = Colors.orange;
+      duration = const Duration(seconds: 3);
+      icon = Icons.warning;
+      break;
+    case SnackBarType.info:
+      backgroundColor = Colors.blue;
+      duration = const Duration(seconds: 2);
+      icon = Icons.info;
+      break;
+  }
+
+  final snackBar = SnackBar(
+    content: Row(
+      children: [
+        if (icon != null)
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Icon(icon, color: Colors.white, size: 20),
+          ),
+        Expanded(
+          child: Text(
+            message,
+            style: StylesApp(navigatorKey.currentContext!)
+                .textStyleBody12
+                .copyWith(color: Colors.white),
+          ),
+        ),
+      ],
+    ),
+    backgroundColor: backgroundColor,
+    duration: duration,
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  );
+  if (navigatorKey.currentState != null) {
+    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(snackBar);
+  }
+}
 // bool isTablet(BuildContext? context) {
 //   // Use window metrics instead of MediaQuery to avoid accessing a possibly
 //   // deactivated BuildContext (e.g. from dispose).
@@ -422,5 +488,23 @@ Future<String> getDeviceTimeZone() async {
   } catch (e) {
     // Fallback si hay error
     return 'UTC';
+  }
+}
+
+// Agrega esta función para prevenir reconstrucciones
+class KeyboardUtils {
+  static void safeFocusChange(
+      BuildContext context, FocusNode focusNode, bool hasFocus) {
+    if (hasFocus) {
+      // Cuando el teclado se abre, hacer un pequeño delay para evitar jank
+      Future.delayed(Duration(milliseconds: 100), () {
+        // Scroll suave para mostrar el campo
+        Scrollable.ensureVisible(
+          context,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      });
+    }
   }
 }

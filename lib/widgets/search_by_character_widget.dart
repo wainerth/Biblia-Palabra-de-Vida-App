@@ -195,45 +195,46 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: spacingHeight),
-        
         Container(
+          // color: currentTheme.backgroundColor,
           padding: horizontalPadding,
           constraints: BoxConstraints(
             minWidth: 160.0,
             maxWidth: StylesApp(context).sizeTextFormField.width,
           ),
-          child: TextFormField(
-            controller: searchTextController,
-            style: StylesApp(context).textStyleSmallBlack,
-            decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                  hintText: 'Buscar Personaje...',
-                  border: OutlineInputBorder(),
-                  suffixIcon: _searchText.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              cleanSearch();
-                            });
-                          },
-                        )
-                      : Icon(Icons.search),
-                ),
-            onChanged: (value) {
-              setState(() {
-                _searchText = value;
-              });
-              _onSearchChanged(value);
-            },
+          child: FocusScope(
+            node: FocusScopeNode(),
+            child: TextFormField(
+              controller: searchTextController,
+              style: StylesApp(context).textStyleSmallBlack,
+              decoration:
+                  StylesApp(context).inputDecorationOutlineStyle.copyWith(
+                        hintText: 'Buscar Personaje...',
+                        border: OutlineInputBorder(),
+                        suffixIcon: _searchText.isNotEmpty
+                            ? IconButton(
+                                icon: Icon(Icons.clear),
+                                onPressed: () {
+                                  setState(() {
+                                    cleanSearch();
+                                  });
+                                },
+                              )
+                            : Icon(Icons.search),
+                      ),
+              onChanged: (value) {
+                setState(() {
+                  _searchText = value;
+                });
+                _onSearchChanged(value);
+              },
+            ),
           ),
         ),
-        
         SizedBox(height: spacingHeight),
-        
         Expanded(
           child: _buildMobileResults(),
         ),
-        
         _buildPagination(),
       ],
     );
@@ -265,9 +266,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 20),
-          
+
           // CAMPO DE BÚSQUEDA
           Container(
             decoration: BoxDecoration(
@@ -286,39 +287,42 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextFormField(
-                    controller: searchTextController,
-                    style: StylesApp(context).textStyleSmallBlack.copyWith(
-                          fontSize: 16,
+                  child: FocusScope(
+                    node: FocusScopeNode(),
+                    child: TextFormField(
+                      controller: searchTextController,
+                      style: StylesApp(context).textStyleSmallBlack.copyWith(
+                            fontSize: 16,
+                          ),
+                      decoration: InputDecoration(
+                        hintText: 'Escribe aquí el nombre del personaje...',
+                        hintStyle: TextStyle(
+                          color: currentTheme.textColor.withValues(alpha: 0.6),
+                          fontSize: 15,
                         ),
-                    decoration: InputDecoration(
-                      hintText: 'Escribe aquí el nombre del personaje...',
-                      hintStyle: TextStyle(
-                        color: currentTheme.textColor.withValues(alpha: 0.6),
-                        fontSize: 15,
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 18,
+                        ),
+                        suffixIcon: _searchText.isNotEmpty
+                            ? IconButton(
+                                icon: Icon(Icons.clear,
+                                    color: currentTheme.textColor
+                                        .withValues(alpha: 0.7)),
+                                onPressed: () {
+                                  cleanSearch();
+                                },
+                              )
+                            : null,
                       ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 18,
-                      ),
-                      suffixIcon: _searchText.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(Icons.clear,
-                                  color: currentTheme.textColor
-                                      .withValues(alpha: 0.7)),
-                              onPressed: () {
-                                cleanSearch();
-                              },
-                            )
-                          : null,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchText = value;
+                        });
+                        _onSearchChanged(value);
+                      },
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _searchText = value;
-                      });
-                      _onSearchChanged(value);
-                    },
                   ),
                 ),
                 Container(
@@ -341,7 +345,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
               ],
             ),
           ),
-          
+
           // INFORMACIÓN DE BÚSQUEDA
           if (_searchText.isNotEmpty && characters.isNotEmpty)
             Padding(
@@ -388,7 +392,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                     child: Text(
                       "Página ${pagination.currentPage} de ${pagination.totalPages}",
                       style: StylesApp(context).textStyleBody12.copyWith(
-                            color: currentTheme.textColor.withValues(alpha: 0.7),
+                            color:
+                                currentTheme.textColor.withValues(alpha: 0.7),
                           ),
                     ),
                   ),
@@ -433,7 +438,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 1.3, // Rectángulos más cuadrados
+          // childAspectRatio: 1.3, // Rectángulos más cuadrados
         ),
         itemCount: characters.length,
         itemBuilder: (context, index) {
@@ -486,8 +491,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
   // ============ TARJETA DE PERSONAJE PARA TABLET ============
   Widget _buildTabletCharacterCard(CharacterModel character) {
     final color = Color(int.parse('0XFF${character.color}')).withAlpha(77);
-    
+
     return Card(
+      color: color,
       elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -513,7 +519,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                 ),
               ),
             ),
-            
+
             // CONTENIDO
             Expanded(
               child: Padding(
@@ -546,18 +552,19 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                             ),
                             child: Text(
                               character.typeNameChar,
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style:
+                                  StylesApp(context).textStyleBody10.copyWith(
+                                        color: currentTheme.textColor,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                             ),
                           ),
                       ],
                     ),
-                    
+
                     SizedBox(height: 8),
-                    
+
                     // IMAGEN (si existe)
                     if (character.img.urlImg.isNotEmpty)
                       Container(
@@ -566,21 +573,23 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           image: DecorationImage(
-                            image: NetworkImage("${GraphQLConfig.urlServidor}${character.img.urlImg}"),
+                            image: NetworkImage(
+                                "${GraphQLConfig.urlServidor}${character.img.urlImg}"),
                             fit: BoxFit.fitHeight,
                           ),
                         ),
                       ),
-                    
+
                     SizedBox(height: character.img.urlImg.isNotEmpty ? 12 : 8),
-                    
+
                     // DESCRIPCIÓN
                     Expanded(
                       child: SingleChildScrollView(
                         child: Text(
                           character.description,
                           style: StylesApp(context).textStyleBody14.copyWith(
-                                color: currentTheme.textColor.withValues(alpha: 0.8),
+                                color: currentTheme.textColor
+                                    .withValues(alpha: 0.8),
                                 fontSize: 13,
                                 height: 1.4,
                               ),
@@ -589,17 +598,20 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                         ),
                       ),
                     ),
-                    
+
                     // INDICADOR DE PERSONAJES RELACIONADOS
                     if (character.haveMoreCharacters)
                       Container(
                         margin: EdgeInsets.only(top: 8),
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: currentTheme.buttonColor.withValues(alpha: 0.1),
+                          color:
+                              currentTheme.buttonColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                            color: currentTheme.buttonColor.withValues(alpha: 0.3),
+                            color:
+                                currentTheme.buttonColor.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -613,10 +625,11 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                             SizedBox(width: 4),
                             Text(
                               'Tiene ${character.relatedCharacters.length} relacionados',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: currentTheme.buttonColor,
-                              ),
+                              style:
+                                  StylesApp(context).textStyleBody12.copyWith(
+                                        fontSize: 12,
+                                        color: currentTheme.buttonColor,
+                                      ),
                             ),
                           ],
                         ),
@@ -625,7 +638,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                 ),
               ),
             ),
-            
+
             // BOTÓN DE ACCIÓN
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -774,10 +787,11 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          insetPadding: isTablet ? EdgeInsets.all(40) : EdgeInsets.all(16),
+          backgroundColor: currentTheme.backgroundColor,
+          insetPadding: isTablet ? EdgeInsets.all(40) : EdgeInsets.all(0),
           child: SizedBox(
             width: isTablet ? 600 : double.infinity,
-            height: isTablet ? 700 : MediaQuery.of(context).size.height * 0.8,
+            height: isTablet ? 700 : MediaQuery.of(context).size.height,
             child: Column(
               children: [
                 // ENCABEZADO
@@ -785,19 +799,21 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
                     color: StyleColor.turquoise,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(12),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Personajes Relacionados',
-                        style: StylesApp(context).textStyleBody18.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      Expanded(
+                        child: Text(
+                          'Personajes Relacionados',
+                          style: StylesApp(context).textStyleBody18.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
                       ),
                       IconButton(
                         icon: Icon(Icons.close, color: Colors.white),
@@ -806,7 +822,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                     ],
                   ),
                 ),
-                
+
                 // TÍTULO DEL PERSONAJE PRINCIPAL
                 Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -820,7 +836,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
                             image: DecorationImage(
-                              image: NetworkImage(GraphQLConfig.urlServidor + character.img.urlImg),
+                              image: NetworkImage(GraphQLConfig.urlServidor +
+                                  character.img.urlImg),
                               fit: BoxFit.fitHeight,
                             ),
                             border: Border.all(
@@ -835,17 +852,19 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                           children: [
                             Text(
                               character.name,
-                              style: StylesApp(context).textStyleBody16.copyWith(
-                                    color: currentTheme.textColor,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              style:
+                                  StylesApp(context).textStyleBody16.copyWith(
+                                        color: currentTheme.textColor,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                             ),
                             if (character.typeNameChar.isNotEmpty)
                               Text(
                                 character.typeNameChar,
                                 style: TextStyle(
-                                  color: currentTheme.textColor.withValues(alpha: 0.7),
+                                  color: currentTheme.textColor
+                                      .withValues(alpha: 0.7),
                                   fontSize: 14,
                                 ),
                               ),
@@ -855,13 +874,14 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                     ],
                   ),
                 ),
-                
+
                 // LISTA DE PERSONAJES RELACIONADOS
                 Expanded(
                   child: isTablet
                       ? GridView.builder(
                           padding: EdgeInsets.all(16),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
@@ -899,7 +919,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
 
   Widget _buildRelatedCharacterCard(CharacterModel character) {
     final color = Color(int.parse('0XFF${character.color}')).withAlpha(77);
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -925,9 +945,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              
+
               SizedBox(height: 12),
-              
+
               // IMAGEN
               if (character.img.urlImg.isNotEmpty)
                 Container(
@@ -936,14 +956,15 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(6),
                     image: DecorationImage(
-                      image: NetworkImage(GraphQLConfig.urlServidor + character.img.urlImg),
+                      image: NetworkImage(
+                          GraphQLConfig.urlServidor + character.img.urlImg),
                       fit: BoxFit.fitHeight,
                     ),
                   ),
                 ),
-              
+
               SizedBox(height: character.img.urlImg.isNotEmpty ? 12 : 8),
-              
+
               // NOMBRE
               Text(
                 character.name,
@@ -954,9 +975,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              
+
               SizedBox(height: 4),
-              
+
               // TIPO
               if (character.typeNameChar.isNotEmpty)
                 Text(
@@ -966,9 +987,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                     fontSize: 12,
                   ),
                 ),
-              
+
               Spacer(),
-              
+
               // BOTÓN VER DETALLES
               Align(
                 alignment: Alignment.centerRight,
@@ -1009,7 +1030,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
 
   void _performSearch(String query) async {
     if (query.isEmpty) return;
-    
+
     try {
       _loadData(1, itemPerPageValue, query);
     } catch (e) {
@@ -1035,7 +1056,7 @@ class DialogInternalCharacter extends StatelessWidget {
   final CharacterModel data;
   final BibleTheme currentTheme;
   final bool isTablet;
-  
+
   const DialogInternalCharacter({
     super.key,
     required this.data,
@@ -1046,8 +1067,9 @@ class DialogInternalCharacter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = Color(int.parse('0XFF${data.color}')).withAlpha(77);
-    
+
     return Dialog(
+      backgroundColor: Color(int.parse('0XFF${data.color}')),
       insetPadding: isTablet ? EdgeInsets.all(40) : EdgeInsets.all(16),
       child: SizedBox(
         width: isTablet ? 600 : double.infinity,
@@ -1080,7 +1102,7 @@ class DialogInternalCharacter extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // CONTENIDO CON SCROLL
             Expanded(
               child: SingleChildScrollView(
@@ -1101,7 +1123,8 @@ class DialogInternalCharacter extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               image: DecorationImage(
-                                image: NetworkImage(GraphQLConfig.urlServidor + data.img.urlImg),
+                                image: NetworkImage(GraphQLConfig.urlServidor +
+                                    data.img.urlImg),
                                 fit: BoxFit.cover,
                               ),
                               border: Border.all(
@@ -1117,7 +1140,7 @@ class DialogInternalCharacter extends StatelessWidget {
                               ],
                             ),
                           ),
-                        
+
                         // INFORMACIÓN
                         Expanded(
                           child: Column(
@@ -1125,15 +1148,16 @@ class DialogInternalCharacter extends StatelessWidget {
                             children: [
                               Text(
                                 data.name,
-                                style: StylesApp(context).textStyleBody18.copyWith(
-                                      color: currentTheme.textColor,
-                                      fontSize: isTablet ? 24 : 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                style:
+                                    StylesApp(context).textStyleBody18.copyWith(
+                                          color: currentTheme.textColor,
+                                          fontSize: isTablet ? 24 : 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                               ),
-                              
+
                               SizedBox(height: 8),
-                              
+
                               if (data.typeNameChar.isNotEmpty)
                                 Container(
                                   padding: EdgeInsets.symmetric(
@@ -1151,9 +1175,9 @@ class DialogInternalCharacter extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              
+
                               SizedBox(height: 12),
-                              
+
                               // COLOR INDICADOR
                               Row(
                                 children: [
@@ -1181,18 +1205,20 @@ class DialogInternalCharacter extends StatelessWidget {
                         ),
                       ],
                     ),
-                    
+
                     SizedBox(height: 24),
-                    
+
                     // DESCRIPCIÓN
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: currentTheme.backgroundColor.withValues(alpha: 0.1),
+                        color:
+                            currentTheme.backgroundColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: currentTheme.buttonColor.withValues(alpha: 0.2),
+                          color:
+                              currentTheme.buttonColor.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
@@ -1208,16 +1234,15 @@ class DialogInternalCharacter extends StatelessWidget {
                               SizedBox(width: 8),
                               Text(
                                 'Descripción',
-                                style: StylesApp(context).textStyleBody16.copyWith(
-                                      color: currentTheme.textColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                style:
+                                    StylesApp(context).textStyleBody16.copyWith(
+                                          color: currentTheme.textColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                               ),
                             ],
                           ),
-                          
                           SizedBox(height: 12),
-                          
                           Text(
                             data.description,
                             style: StylesApp(context).textStyleBody14.copyWith(
@@ -1230,9 +1255,9 @@ class DialogInternalCharacter extends StatelessWidget {
                         ],
                       ),
                     ),
-                    
+
                     SizedBox(height: 20),
-                    
+
                     // INFORMACIÓN ADICIONAL
                     if (data.newTestament)
                       Container(
@@ -1262,7 +1287,7 @@ class DialogInternalCharacter extends StatelessWidget {
                           ],
                         ),
                       ),
-                    
+
                     SizedBox(height: 30),
                   ],
                 ),

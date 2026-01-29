@@ -744,13 +744,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 selectedDataArea: _selectedDataArea,
                 selectedData: _selectedData,
                 selectedCountry: _selectedCountry,
-                onPrefixSelected: (newValue) {
+                onPrefixSelected: (ModelData? newValue) {
                   setState(() {
                     _selectedDataArea = newValue;
 
-                    _selectedPrefix = prefixCodes
-                        .firstWhere((country) => country.id == newValue!.value);
-                    _prefixNumberController.text = newValue!.value;
+                    _selectedPrefix = AreaCode(
+                        id: _selectedDataArea!.value,
+                        code: _selectedDataArea!.label);
                   });
                 },
                 onCountrySelected: (newValue) {
@@ -803,12 +803,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final bool isValid = _formKey.currentState?.validate() ?? false;
         if (!isValid) {
-          // Mostrar mensaje de error si quieres
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text('Por favor completa todos los campos requeridos')),
-          );
+          showSnackBar('Por favor completa todos los campos requeridos',
+              type: SnackBarType.info);
           return;
         }
 
@@ -834,6 +830,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       password: _passwordController.text,
       phoneNumber:
           _phoneNumberController.text.replaceAll(RegExp(r'[^\d]+'), ''),
+      city: null,
+      state: null,
       username: _userNameController.text,
       isBaptized: setIsBaptized,
       gender: setGender,
@@ -848,7 +846,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await showCustomDialog(context,
           messageDetail: response.error!,
           message: response.userFriendlyError!,
-          showDetails: false,
+          showDetails: true,
           dialogType: DialogType.error);
     } else {
       Navigator.popAndPushNamed(context, '/layoutPage');

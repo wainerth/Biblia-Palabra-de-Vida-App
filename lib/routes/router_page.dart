@@ -18,6 +18,16 @@ final Map<String, WidgetBuilder> routes = {
   '/introAventurePage': (BuildContext context) => IntroAventureScreen(),
   '/aventurePage': (BuildContext context) => AventureScreen(),
   '/bibliaPage': (BuildContext context) => BibleScreen(),
+  '/searchBiblePage': (BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+
+    return SearchBibleScreen(
+      version: args?['version'],
+      book: args?['book'],
+      chapter: args?['chapter'],
+    );
+  },
   '/communityPage': (BuildContext context) =>
       GraphQLConfig.development ? CommunityScreen() : SoonScreen(),
   '/profilePage': (BuildContext context) => ProfileScreen(),
@@ -48,8 +58,8 @@ final Map<String, WidgetBuilder> routes = {
     return StripePaymentScreen(
       amount: args['amount'],
       description: args['description'],
-      currency: args['currency'] ,
-      donorName: args['donorName'], 
+      currency: args['currency'],
+      donorName: args['donorName'],
       donorEmail: args['donorEmail'],
     );
   },

@@ -81,12 +81,6 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                   },
                   onCountryChanged: (country) {
                     controller.text = '';
-                    if (kDebugMode) {
-                      print('Country changed to: ${country.code}');
-                      print('Country dial code: ${country.dialCode}');
-                      print('Country min length: ${country.minLength}');
-                      print('Country max length: ${country.maxLength}');
-                    }
                   },
                 ),
               ],

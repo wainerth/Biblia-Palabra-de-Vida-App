@@ -158,7 +158,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
   @override
   Widget build(BuildContext context) {
     final themeProvider =
-        Provider.of<BibleThemeProvider>(context, listen: false);
+        context.read<BibleThemeProvider>();
     currentTheme = themeProvider.themeData;
 
     // Layout condicional según dispositivo
@@ -487,7 +487,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 1.2, // Rectángulos más cuadrados
+          // childAspectRatio: 1.2, // Rectángulos más cuadrados
         ),
         itemCount: teachings.length,
         itemBuilder: (context, index) {
@@ -500,6 +500,8 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
   // ============ TARJETA DE TEMA PARA TABLET ============
   Widget _buildTabletTeachingCard(TeachingModel teaching) {
     return Card(
+      color: currentTheme.backgroundColor,
+      shadowColor: currentTheme.backgroundColor,
       elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -747,6 +749,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
+          backgroundColor: currentTheme.backgroundColor,
           insetPadding: EdgeInsets.symmetric(
             horizontal: isTablet ? MediaQuery.of(context).size.width * 0.12 : 16.0,
             vertical: isTablet ? 40.0 : 24.0,
@@ -783,7 +786,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
   }
 
   void _performSearch(String query) async {
-    if (query.isEmpty) return;
+    // if (query.isEmpty) return;
 
     try {
       _loadData(1, itemPerPageValue, query);

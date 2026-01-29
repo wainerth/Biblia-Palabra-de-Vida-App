@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -291,11 +292,7 @@ class _PlayerYoutubeWidgetState extends State<PlayerYoutubeWidget>
       );
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se puede abrir YouTube'),
-          ),
-        );
+        showSnackBar('No se puede abrir Youtube', type: SnackBarType.error);
       }
     }
   }

@@ -10,6 +10,7 @@ class SignupInput {
   String? phoneNumber;
   String? countryId; // Assuming countryId is an integer
   String? city;
+  String? state;
   String? identifier;
   bool? isBaptized;
 
@@ -25,6 +26,7 @@ class SignupInput {
     this.phoneNumber,
     this.countryId,
     this.city,
+    this.state,
     this.identifier,
     this.isBaptized,
   });
@@ -40,8 +42,9 @@ class SignupInput {
         birthdate: json['birthdate'],
         gender: json['gender'],
         phoneNumber: json['phoneNumber'],
-        countryId: json['countryId'] , // Parse countryId as int
+        countryId: json['countryId'], // Parse countryId as int
         city: json['city'],
+        state: json['city'],
         identifier: json['identifier'],
         isBaptized: json['isBaptized'],
       );
@@ -59,6 +62,7 @@ class SignupInput {
         'phoneNumber': phoneNumber,
         'countryId': countryId,
         'city': city,
+        'state': state,
         'identifier': identifier,
         'isBaptized': isBaptized,
       };
@@ -66,6 +70,6 @@ class SignupInput {
   // A convenient method to print the object's values (for debugging)
   @override
   String toString() {
-    return 'SignupInput{username: $username, email: $email, codeAreaId: $codeAreaId, password: $password, name: $name, lastname: $lastname, birthdate: $birthdate, gender: $gender, phoneNumber: $phoneNumber, countryId: $countryId, city: $city, identifier: $identifier, isBaptized: $isBaptized}';
+    return 'SignupInput{username: $username, email: $email, codeAreaId: $codeAreaId, password: $password, name: $name, lastname: $lastname, birthdate: $birthdate, gender: $gender, phoneNumber: $phoneNumber, countryId: $countryId, city: $city, state: $state, identifier: $identifier, isBaptized: $isBaptized}';
   }
 }

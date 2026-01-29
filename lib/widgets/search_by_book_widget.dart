@@ -63,7 +63,6 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
   List<VerseModel> _selectedItems = [];
   VerseModel? verseSelected;
 
-
   // Función para determinar si es tablet
   bool get isTablet {
     final mediaQuery = MediaQuery.of(context);
@@ -302,6 +301,8 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                 // COLUMNA IZQUIERDA: CAPÍTULOS
                 Expanded(
                   child: Card(
+                    shadowColor: currentTheme.buttonColor,
+                    color: currentTheme.backgroundColor,
                     elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -392,6 +393,8 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                 // COLUMNA DERECHA: VERSÍCULOS
                 Expanded(
                   child: Card(
+                    shadowColor: currentTheme.buttonColor,
+                    color: currentTheme.backgroundColor,
                     elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -495,11 +498,15 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
             ),
           ),
           // Switch de rango (en tablet va en la columna de versículos)
-          if (widget.showSelectedRange)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: _buildRangeSwitchTablet(),
-            ),
+          if (widget.showSelectedRange) ...[
+          SizedBox(height: spacingHeight),
+
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: _buildRangeSwitchTablet(),
+          ),
+
+          ]
         ],
       ),
     );
@@ -565,7 +572,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           border: Border.all(
             color: isSelected
                 ? currentTheme.buttonColor
-                : currentTheme.backgroundColor,
+                : currentTheme.buttonColor,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -603,7 +610,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           border: Border.all(
             color: isSelected
                 ? currentTheme.buttonColor
-                : currentTheme.backgroundColor,
+                : currentTheme.buttonColor,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected

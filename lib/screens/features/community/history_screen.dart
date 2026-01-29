@@ -1820,9 +1820,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       setState(() {
         isPlaying = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error en TTS: $msg")),
-      );
+      showSnackBar("Error en TTS: $msg", type: SnackBarType.error);
     });
   }
 
@@ -1934,12 +1932,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 if (responseDetailLink.error != null) {
                   LoadingService().hideLoading();
                   if (mounted) {
-                  await showCustomDialog(context,
-                      showDetails: true,
-                      messageDetail: responseDetailLink.error!,
-                      message: responseDetailLink.userFriendlyError!,
-                      dialogType: DialogType.error);
-
+                    await showCustomDialog(context,
+                        showDetails: true,
+                        messageDetail: responseDetailLink.error!,
+                        message: responseDetailLink.userFriendlyError!,
+                        dialogType: DialogType.error);
                   }
                   return;
                 }
@@ -2118,9 +2115,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                   localReference?.bookName,
                                             ),
                                             chapter: ChapterModel(
-                                              chapter: int.parse(
-                                                  localReference!
-                                                      .chapterNumber),
+                                              chapter: int.parse(localReference!
+                                                  .chapterNumber),
                                             ),
                                             verse: VerseModel(
                                               verse: localReference!

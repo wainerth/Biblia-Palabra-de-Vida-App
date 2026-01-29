@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/utils/currency_config.dart';
 import 'package:biblia_palabra_de_vida_app/utils/currency_manager.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -593,10 +594,7 @@ class _DonationAmountSelectorState extends State<DonationAmountSelector> {
   void _showAmountError(String message) {
     // Depende de cómo manejes los errores en tu app
     // Puedes usar un SnackBar, cambiar el color del border, etc.
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: Colors.red,
-    ));
+    showSnackBar(message, type: SnackBarType.error);
   }
 
   void _clearAmountError() {
@@ -609,7 +607,6 @@ class _DonationAmountSelectorState extends State<DonationAmountSelector> {
       print('Monto válido: $amount');
     }
   }
-
 }
 
 // Formateado actualizado para ser dinámico
