@@ -148,6 +148,7 @@ class _MyAppState extends State<MyApp> {
       print('Orientación: ${mediaQuery.orientation}');
       print('========================');
     }
+    
     return MaterialApp(
       title: 'Palabra de Vida',
       navigatorKey: navigatorKey,
