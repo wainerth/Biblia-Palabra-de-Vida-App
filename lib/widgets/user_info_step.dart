@@ -37,7 +37,7 @@ class UserInfoStep extends StatefulWidget {
 
 class _UserInfoStepState extends State<UserInfoStep> {
   bool get _isTablet {
-    final shortestSide = MediaQuery.sizeOf(context).shortestSide;
+    final shortestSide = MediaQuery.sizeOf(context).width;
     return shortestSide > 600;
   }
 

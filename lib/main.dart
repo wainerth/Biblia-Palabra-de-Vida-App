@@ -1,6 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/improved_slow_connection_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -181,7 +180,7 @@ class _MyAppState extends State<MyApp> {
   void _applyOrientationPolicy() {
     try {
       final shortestSide = MediaQuery.of(context).size.shortestSide;
-      final bool isTablet = shortestSide >= 600; // standard heuristic
+      final bool isTablet = shortestSide >= 550; // standard heuristic
 
       if (isTablet) {
         SystemChrome.setPreferredOrientations([

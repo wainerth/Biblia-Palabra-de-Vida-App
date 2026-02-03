@@ -116,53 +116,66 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
           ),
           const SizedBox(height: 40),
 
-          // Lista de sugerencias
+          // Lista de sugerencias CON SCROLL
           Expanded(
-            child: ListView.separated(
-              itemCount: suggestions.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 20),
-              itemBuilder: (context, index) {
-                final suggestion = suggestions[index];
-                return _buildSuggestionCard(
-                  context,
-                  icon: suggestion['icon'] as IconData,
-                  title: suggestion['title'] as String,
-                  description: suggestion['description'] as String,
-                  color: suggestion['color'] as Color,
-                );
-              },
-            ),
-          ),
-
-          // Consejo adicional
-          Container(
-            margin: const EdgeInsets.only(top: 30),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: StyleColor.blueHigh.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: StyleColor.blueHigh.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.psychology_outlined,
-                  color: StyleColor.blueHigh,
-                  size: 24,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    'Cada etapa te acerca más a comprender la sabiduría divina',
-                    style: StylesApp(context).textStyleBody12.copyWith(
-                          color: StyleColor.blueHigh,
-                          fontStyle: FontStyle.italic,
-                        ),
+            // <-- El Expanded DEBE estar aquí, no dentro del ListView
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Lista de sugerencias
+                  ListView.separated(
+                    shrinkWrap: true, // <-- IMPORTANTE: shrinkWrap
+                    physics:
+                        const NeverScrollableScrollPhysics(), // <-- Deshabilitar scroll interno
+                    itemCount: suggestions.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 20),
+                    itemBuilder: (context, index) {
+                      final suggestion = suggestions[index];
+                      return _buildSuggestionCard(
+                        context,
+                        icon: suggestion['icon'] as IconData,
+                        title: suggestion['title'] as String,
+                        description: suggestion['description'] as String,
+                        color: suggestion['color'] as Color,
+                      );
+                    },
                   ),
-                ),
-              ],
+
+                  // Consejo adicional
+                  Container(
+                    margin: const EdgeInsets.only(top: 30),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: StyleColor.blueHigh.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: StyleColor.blueHigh.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.psychology_outlined,
+                          color: StyleColor.blueHigh,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            'Cada etapa te acerca más a comprender la sabiduría divina',
+                            style: StylesApp(context).textStyleBody12.copyWith(
+                                  color: StyleColor.blueHigh,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -268,8 +268,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 children: [
                   if (loading) //_isPlaying && _position == null && _duration == null)
                     SizedBox(
-                      width: 25.sp,
-                      height: 25.sp,
+                      width: 25,
+                      height: 25,
                       child: CircularProgressIndicator(
                         color: widget.controlsColor,
                         strokeWidth: 2.0,
@@ -294,7 +294,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                           },
                     icon: Icon(
                       _isPlaying ? Icons.pause : Icons.play_arrow,
-                      size: 25.sp,
+                      size: 25,
                       color: widget.controlsColor,
                     ),
                   ),
@@ -304,7 +304,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             Expanded(
               flex: 2,
               child: Text.rich(
-                style: TextStyle(color: widget.actionColor, fontSize: 12.sp),
+                style: TextStyle(color: widget.actionColor, fontSize: 12),
                 TextSpan(
                   text: _position != null && _durationText.isNotEmpty
                       ? '${_positionText.substring(3)} / ${_durationText.substring(3)}'
@@ -359,7 +359,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       icon: Icon(
                         volume > 0 ? Icons.volume_up : Icons.volume_off,
                         color: widget.controlsColor,
-                        size: 25.sp,
+                        size: 25,
                       ),
                     ),
                   ),

@@ -60,12 +60,11 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+    final _isTablet = isTablet(context);
 
     return Scaffold(
       body: SafeArea(
-        child: isTablet
+        child: _isTablet
             ? _buildTabletLayout(context)
             : _buildMobileLayout(context),
       ),
@@ -1367,8 +1366,8 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                         dataSeleccionada = null;
                       }
                     });
-showSnackBar("Petición eliminada correctamente", type: SnackBarType.success);
-
+                    showSnackBar("Petición eliminada correctamente",
+                        type: SnackBarType.success);
                   }
                 } catch (e) {
                   if (mounted) {
@@ -1397,8 +1396,8 @@ showSnackBar("Petición eliminada correctamente", type: SnackBarType.success);
         LoadingService().hideLoading();
       } catch (e) {
         LoadingService().hideLoading();
-        showSnackBar("Error al cargar página anterior: ${e.toString()}", type: SnackBarType.error);
-        
+        showSnackBar("Error al cargar página anterior: ${e.toString()}",
+            type: SnackBarType.error);
       }
     }
   }

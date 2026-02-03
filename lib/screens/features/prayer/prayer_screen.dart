@@ -32,8 +32,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+    final _isTablet = isTablet(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -58,14 +57,14 @@ class _PrayerScreenState extends State<PrayerScreen> {
           color: StyleColor.white,
           icon: Icon(
             Icons.arrow_back,
-            size: isTablet ? 36 : 30,
+            size: _isTablet ? 36 : 30,
           ),
         ),
         backgroundColor: StyleColor.white,
         actions: [
           Image.asset(
             "assets/kawaii_fire.png",
-            height: isTablet ? 64.0 : 52.0,
+            height: _isTablet ? 64.0 : 52.0,
             fit: BoxFit.contain,
           )
         ],
@@ -75,8 +74,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
         child: isLoading
             ? LoadingIndicator()
             : isPrayerGroup && !showRequestPrayer
-                ? _buildPrayerStart(context, isTablet)
-                : isTablet
+                ? _buildPrayerStart(context, _isTablet)
+                : _isTablet
                     ? _buildTwoColumnLayout(context)
                     : _buildMobileLayout(context),
       ),

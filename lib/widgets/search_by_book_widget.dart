@@ -176,33 +176,38 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         Provider.of<BibleThemeProvider>(context, listen: false);
     currentTheme = themeProvider.themeData;
 
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Layout condicional según dispositivo
-          if (!isTablet) _buildMobileLayout() else _buildTabletLayout(),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Layout condicional según dispositivo
 
-          // Botón Aceptar (compartido)
-          SizedBox(height: spacingHeight),
-          Padding(
-            padding: horizontalPadding,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ButtonThemeWidget(
-                  text: "Aceptar",
-                  width: isTablet ? 200 : null,
-                  height: isTablet ? 50 : null,
-                  buttonStyle: StylesApp(context).btnWidgetSmall,
-                  onPressed: _onAcceptPressed,
-                )
-              ],
+        Expanded(
+          child: SingleChildScrollView(
+            child: Container(
+              child: !isTablet ? _buildMobileLayout() : _buildTabletLayout(),
             ),
           ),
-          SizedBox(height: spacingHeight),
-        ],
-      ),
+        ),
+
+        // Botón Aceptar (compartido)
+        SizedBox(height: spacingHeight),
+        Padding(
+          padding: horizontalPadding,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ButtonThemeWidget(
+                text: "Aceptar",
+                width: isTablet ? 200 : null,
+                height: isTablet ? 50 : null,
+                buttonStyle: StylesApp(context).btnWidgetSmall,
+                onPressed: _onAcceptPressed,
+              )
+            ],
+          ),
+        ),
+        SizedBox(height: spacingHeight),
+      ],
     );
   }
 
@@ -499,13 +504,11 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           ),
           // Switch de rango (en tablet va en la columna de versículos)
           if (widget.showSelectedRange) ...[
-          SizedBox(height: spacingHeight),
-
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: _buildRangeSwitchTablet(),
-          ),
-
+            SizedBox(height: spacingHeight),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: _buildRangeSwitchTablet(),
+            ),
           ]
         ],
       ),
@@ -754,7 +757,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                 currentTheme: currentTheme,
                 rangeSelect: verseRange,
                 initiallySelected: _selectedItems,
-                onTap: (verse) {
+                onTap: (List<VerseModel> verse) {
                   setState(() {
                     _selectedItems = verse;
                     verseSelected = verse.isNotEmpty ? verse.first : null;
@@ -791,13 +794,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     WidgetStatePropertyAll(StyleColor.grayMedium),
                 value: verseRange,
                 onChanged: (bool value) {
-                  setState(() {
-                    verseRange = value;
-                    _selectedItems = [];
-                    if (!value && verseSelected != null) {
-                      _selectedItems = [verseSelected!];
-                    }
-                  });
+                  _switchRangeSelected(value);
                 },
               ),
             ),
@@ -841,13 +838,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
               trackOutlineColor: WidgetStatePropertyAll(StyleColor.grayMedium),
               value: verseRange,
               onChanged: (bool value) {
-                setState(() {
-                  verseRange = value;
-                  _selectedItems = [];
-                  if (!value && verseSelected != null) {
-                    _selectedItems = [verseSelected!];
-                  }
-                });
+                _switchRangeSelected(value);
               },
             ),
           ),
@@ -862,6 +853,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
     if (version == null) return;
 
     try {
+      // guardamos la version y expando chapters
       setState(() {
         versionSelected = version;
         _chaptersExpanded = true;
@@ -873,6 +865,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         throw Exception('No hay libros disponibles para esta versión');
       }
 
+      // guardamos libros
       ModelData? newBookSelected;
       if (bookSelected != null && bookSelected!.originalData != null) {
         final currentBookNumber = bookSelected!.originalData!.numberBook;
@@ -884,7 +877,6 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
 
       setState(() {
         bookSelected = newBookSelected;
-        _chaptersExpanded = true;
       });
 
       await getChapterByBook(bookSelected!.value);
@@ -892,15 +884,16 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       if (chapters.isEmpty) {
         throw Exception('No hay capítulos disponibles para este libro');
       }
-
+      // buscamos chapter si ya hay uno previo usar ese si no el primero
       ChapterModel? newChapterSelected;
-      if (chapterSelected != null) {
-        final currentChapterNumber = chapterSelected!.chapter;
-        newChapterSelected = chapters.firstWhereOrNull(
-            (chapter) => chapter.chapter == currentChapterNumber);
-      }
-
-      newChapterSelected ??= chapters.first;
+      // if (chapterSelected != null) {
+      // final currentChapterNumber = chapterSelected!.chapter;
+      newChapterSelected = chapterSelected != null
+          ? chapters.firstWhere(
+              (chapter) => chapter.chapter == chapterSelected?.chapter,
+              orElse: () => chapters.first)
+          : chapters.first;
+      // }
 
       setState(() {
         chapterSelected = newChapterSelected;
@@ -911,8 +904,28 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         await loadVerses(chapterSelected!.id!);
         setState(() {
           _versesExpanded = true;
-          _selectedItems = verses.isNotEmpty ? [verses.first] : [];
-          verseSelected = verses.isNotEmpty ? verses.first : null;
+          if (_selectedItems.isNotEmpty) {
+            final startVerse = _selectedItems
+                .map((v) => v.verse)
+                .reduce((a, b) => a < b ? a : b);
+            final endVerse = _selectedItems
+                .map((v) => v.verse)
+                .reduce((a, b) => a > b ? a : b);
+
+            final rangeVerses = verses
+                .where((v) => v.verse >= startVerse && v.verse <= endVerse)
+                .toList();
+            _selectedItems =
+                rangeVerses.isNotEmpty ? rangeVerses : [verses.first];
+          } else {
+            _selectedItems = verses.isNotEmpty ? [verses.first] : [];
+          }
+          verseSelected = verseSelected != null
+              ? verses.firstWhere((verse) => verse.id == versionSelected?.value,
+                  orElse: () => verses.first)
+              : verses.isNotEmpty
+                  ? verses.first
+                  : null;
         });
       }
     } catch (e) {
@@ -1110,5 +1123,15 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         setState(() => loadingVerses = false);
       }
     }
+  }
+
+  void _switchRangeSelected(bool value) {
+    setState(() {
+      verseRange = value;
+      _selectedItems = [];
+      if (!value && verseSelected != null) {
+        _selectedItems = [verseSelected!];
+      }
+    });
   }
 }

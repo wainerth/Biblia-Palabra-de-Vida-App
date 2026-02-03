@@ -1,4 +1,9 @@
 import 'dart:io';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
@@ -8,11 +13,6 @@ import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ProgressDetailScreen extends StatefulWidget {
   const ProgressDetailScreen({super.key});
@@ -61,13 +61,12 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     final LoginUser? userData = userProvider.currentUser;
     titles = userData?.title;
 
-    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
-
     return Scaffold(
       body: SafeArea(
-        child: isTablet
-            ? _buildTabletLayout(context, userData!)
-            : _buildMobileLayout(context, userData!),
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(context, userData!),
+          tablet: _buildTabletLayout(context, userData),
+        ),
       ),
     );
   }
@@ -412,7 +411,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
 
             // Botón Continuar centrado
             Center(
-              child: Container(
+              child: SizedBox(
                 width: 300,
                 child: ButtonThemeWidget(
                   text: "Continuar Aventura",
@@ -673,7 +672,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
 
   Future<dynamic> _dialogAwards(BuildContext context) async {
     // Detectar si estamos en tablet
-    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+    final bool _isTablet = isTablet(context);
 
     // Variables locales para el estado del diálogo
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -798,10 +797,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                         physics: AlwaysScrollableScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount:
-                              isTablet ? 4 : 3, // Más columnas en tablet
-                          crossAxisSpacing: isTablet ? 12 : 8.0,
-                          mainAxisSpacing: isTablet ? 12 : 8.0,
-                          childAspectRatio: isTablet ? 0.9 : 1.0,
+                              _isTablet ? 4 : 3, // Más columnas en tablet
+                          crossAxisSpacing: _isTablet ? 12 : 8.0,
+                          mainAxisSpacing: _isTablet ? 12 : 8.0,
+                          childAspectRatio: _isTablet ? 0.9 : 1.0,
                         ),
                         itemCount: awards.length,
                         itemBuilder: (BuildContext context, int index) {
@@ -816,9 +815,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                             child: Opacity(
                               opacity: award.unLockPrize ? 1 : 0.5,
                               child: Container(
-                                width: isTablet ? null : 80.0,
-                                height: isTablet ? null : 80.0,
-                                margin: isTablet
+                                width: _isTablet ? null : 80.0,
+                                height: _isTablet ? null : 80.0,
+                                margin: _isTablet
                                     ? null
                                     : EdgeInsets.only(bottom: 4),
                                 decoration: BoxDecoration(
@@ -842,8 +841,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Container(
-                                        width: isTablet ? 60 : 40,
-                                        height: isTablet ? 60 : 40,
+                                        width: _isTablet ? 60 : 40,
+                                        height: _isTablet ? 60 : 40,
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(8),
@@ -890,10 +889,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       ),
                     ),
 
-                    SizedBox(height: isTablet ? 16 : 10.0),
+                    SizedBox(height: _isTablet ? 16 : 10.0),
 
                     // Controles de paginación para tablet
-                    if (isTablet) ...{
+                    if (_isTablet) ...{
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.0),
                         child: Column(
@@ -1091,35 +1090,35 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     ScrollController scrollController = ScrollController();
 
     // Detectar si estamos en tablet
-    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+    final bool _isTablet = isTablet(context);
 
     return Container(
-      margin: isTablet
+      margin: _isTablet
           ? EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)
           : EdgeInsets.symmetric(horizontal: 7.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: isTablet
+            padding: _isTablet
                 ? EdgeInsets.only(left: 8.0, bottom: 12.0)
                 : EdgeInsets.zero,
             child: Text(
               textAlign: TextAlign.left,
               "Títulos Alcanzados",
-              style: isTablet
+              style: _isTablet
                   ? StylesApp(context).textStyCalendar.copyWith(fontSize: 20)
                   : StylesApp(context).textStyCalendar,
             ),
           ),
           Container(
             constraints: BoxConstraints(
-              minHeight: isTablet ? 110 : 75,
+              minHeight: _isTablet ? 110 : 75,
             ),
-            height: isTablet ? 110.sp : 85.sp,
+            height: _isTablet ? 110.sp : 85.sp,
             decoration: BoxDecoration(
               color: Color(0XFFFFF2C2),
-              borderRadius: BorderRadius.circular(isTablet ? 12.0 : 8.0),
+              borderRadius: BorderRadius.circular(_isTablet ? 12.0 : 8.0),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withValues(alpha: 0.25),
@@ -1130,18 +1129,18 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             child: Scrollbar(
               controller: scrollController,
               thumbVisibility: true,
-              thickness: isTablet ? 6.0 : 4.0,
-              radius: Radius.circular(isTablet ? 3.0 : 2.0),
+              thickness: _isTablet ? 6.0 : 4.0,
+              radius: Radius.circular(_isTablet ? 3.0 : 2.0),
               child: ListView.builder(
                 controller: scrollController,
                 scrollDirection: Axis.horizontal,
-                padding: isTablet
+                padding: _isTablet
                     ? EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0)
                     : EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                 itemCount: titles!.length,
                 itemBuilder: (BuildContext context, int index) {
                   return Padding(
-                    padding: isTablet
+                    padding: _isTablet
                         ? EdgeInsets.only(right: 12.0)
                         : EdgeInsets.only(right: 5.0),
                     child: GestureDetector(
@@ -1156,14 +1155,14 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       },
                       child: Container(
                         constraints: BoxConstraints(
-                          minWidth: isTablet ? 100.0 : 80.0,
+                          minWidth: _isTablet ? 100.0 : 80.0,
                         ),
-                        width: isTablet ? 100.0 : 80.0,
-                        height: isTablet ? 100.0 : 80.0,
+                        width: _isTablet ? 100.0 : 80.0,
+                        height: _isTablet ? 100.0 : 80.0,
                         decoration: BoxDecoration(
                           color: Color(0XFFC7AA34),
                           borderRadius:
-                              BorderRadius.circular(isTablet ? 12.0 : 8.0),
+                              BorderRadius.circular(_isTablet ? 12.0 : 8.0),
                           boxShadow: [
                             BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.25),
@@ -1172,7 +1171,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                           ],
                         ),
                         child: Padding(
-                          padding: isTablet
+                          padding: _isTablet
                               ? EdgeInsets.all(8.0)
                               : EdgeInsets.only(
                                   left: 3.0, top: 6.0, right: 6.0),
@@ -1180,11 +1179,11 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
-                                width: isTablet ? 70 : 60,
-                                height: isTablet ? 50 : 40,
+                                width: _isTablet ? 70 : 60,
+                                height: _isTablet ? 50 : 40,
                                 decoration: BoxDecoration(
                                   borderRadius:
-                                      BorderRadius.circular(isTablet ? 10 : 8),
+                                      BorderRadius.circular(_isTablet ? 10 : 8),
                                   image: DecorationImage(
                                     image: NetworkImage(
                                       '${GraphQLConfig.urlServidor}${titles![index].img.urlImg}',
@@ -1193,7 +1192,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: isTablet ? 6 : 4),
+                              SizedBox(height: _isTablet ? 6 : 4),
                               Expanded(
                                 child: Center(
                                   child: Text(
@@ -1202,7 +1201,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                     softWrap: true,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: isTablet
+                                    style: _isTablet
                                         ? StylesApp(context)
                                             .textStyleBody10
                                             .copyWith(

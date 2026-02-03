@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -18,6 +22,12 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController textEmail = TextEditingController();
   TextEditingController textPass = TextEditingController();
   bool _obscureTextPass = true;
+
+  @override
+  void initState() {
+   
+    super.initState();
+  }
 
   Widget _buildLoginForm(BuildContext context) {
     final authProvider =
@@ -119,13 +129,38 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
 
                     if (user.error != null) {
-                      LoadingService().hideLoading();
-                      // ignore: use_build_context_synchronously
-                      await showCustomDialog(context,
-                          message: user.userFriendlyError!,
-                          messageDetail: user.error ?? '',
-                          showDetails: true,
-                          dialogType: DialogType.error);
+                      final Map<String, dynamic> jsonError =
+                          json.decode(user.error.replaceAll("'", '"'));
+                      if (user.error.contains(
+                          "Por favor verifica tu correo electrónico primero")) {
+                        final timeZone = await getDeviceTimeZone();
+                        final response = await resendVerificationCode(
+                            jsonError['email'], timeZone);
+
+                        if (response.error != null) {
+                          await showCustomDialog(context,
+                              message: response.error!,
+                              dialogType: DialogType.error);
+                        }
+                        final data =
+                            VerificationResponse.fromJson(VerificationResponse(
+                          userId: 'data.userId',
+                          showVerifyPinModal: true,
+                        ).toMap());
+                        LoadingService().hideLoading();
+
+                        _showDialogVerify(
+                            context, data.toJson(), jsonError['email']);
+                      } else {
+                        LoadingService().hideLoading();
+
+                        // ignore: use_build_context_synchronously
+                        await showCustomDialog(context,
+                            message: user.userFriendlyError!,
+                            messageDetail: user.error ?? '',
+                            showDetails: true,
+                            dialogType: DialogType.error);
+                      }
                     } else {
                       LoadingService().hideLoading();
                       if (!mounted) return;
@@ -160,7 +195,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       LoadingService().hideLoading();
                       await showCustomDialog(context,
                           message: user.userFriendlyError ?? '',
-                          messageDetail: user.error ?? 'Error al Iniciar Sessión con Google',
+                          messageDetail: user.error ??
+                              'Error al Iniciar Sessión con Google',
                           showDetails: true,
                           dialogType: DialogType.error);
                     } else {
@@ -287,9 +323,10 @@ class _LoginScreenState extends State<LoginScreen> {
           // Columna derecha: Footer en fondo blanco
           Expanded(
             child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
+              padding: const EdgeInsets.symmetric(vertical: 40),
               child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 30),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 40, horizontal: 30),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -345,18 +382,52 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool _isTablet = isTablet(context);
     return Scaffold(
       body: SafeArea(
         child: SizedBox(
           height: MediaQuery.sizeOf(context).height,
           width: MediaQuery.sizeOf(context).width,
-          child: isTablet(context)
+          child: _isTablet
               ? _buildTabletLayout(context)
               : SingleChildScrollView(
                   child: _buildMobileLayout(context),
                 ),
         ),
       ),
+    );
+  }
+
+  void _showDialogVerify(
+      BuildContext context, Map<String, dynamic> data, String email) {
+    showVerifyPinDialog(
+      context: context,
+      email: email,
+      onPinVerified: (pin) async {
+        // Aquí llamas a tu API o lógica de verificación
+        final response = await context
+            .read<AuthenticationProvider>()
+            .verifyPinWithApi(email, pin);
+        if (response.error != null) {
+          await showCustomDialog(context,
+              message: response.error!, dialogType: DialogType.error);
+          _showDialogVerify(context, data, email);
+        } else {
+          Navigator.popAndPushNamed(context, '/layoutPage');
+        }
+      },
+      onResendCode: () async {
+        // Lógica para reenviar el código
+        print('Reenviando código a $email');
+        final timeZone = await getDeviceTimeZone();
+        final response = await resendVerificationCode(email, timeZone);
+
+        if (response.error != null) {
+          await showCustomDialog(context,
+              message: response.error!, dialogType: DialogType.error);
+          _showDialogVerify(context, data, email);
+        }
+      },
     );
   }
 }

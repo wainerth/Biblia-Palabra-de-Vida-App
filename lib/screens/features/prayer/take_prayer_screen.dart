@@ -70,18 +70,18 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+    isTablet(context);
     final themeProvider = Provider.of<BibleThemeProvider>(context);
     final currentTheme = themeProvider.themeData;
 
     return Scaffold(
         // backgroundColor: StyleColor.turquoise,
         body: SafeArea(
-          child: isTablet
-              ? _buildTabletLayout(context, currentTheme)
-              : _buildMobileLayout(context, currentTheme),
-        ));
+      child: ResponsiveLayout(
+        mobile: _buildMobileLayout(context, currentTheme),
+        tablet: _buildTabletLayout(context, currentTheme),
+      ),
+    ));
   }
 
   // DISEÑO PARA TABLET A DOS COLUMNAS
@@ -941,9 +941,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
   // DISEÑO MÓVIL (se mantiene exactamente igual)
   Widget _buildMobileLayout(BuildContext context, BibleTheme currentTheme) {
     return Container(
-      decoration: BoxDecoration(
-        color: StyleColor.turquoise
-      ),
+      decoration: BoxDecoration(color: StyleColor.turquoise),
       child: Column(
         children: [
           HeadScreenNotAvatar(

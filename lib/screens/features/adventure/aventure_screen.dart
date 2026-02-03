@@ -47,7 +47,7 @@ class _AventureScreenState extends State<AventureScreen> {
   // Determinar si es tablet
   bool get isTablet {
     final mediaQuery = MediaQuery.of(context);
-    return mediaQuery.size.shortestSide >= 600;
+    return mediaQuery.size.width >= 600;
   }
 
   @override

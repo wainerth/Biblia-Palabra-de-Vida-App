@@ -26,7 +26,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
   int limit = 12;
 
   // Detectar si es tablet
-  bool get isTablet => 1.sw > 600; // Ancho mayor a 600 puntos
+  bool get isTablet => 1.sw > 550.0; // Ancho mayor a 600 puntos
 
   @override
   void initState() {
@@ -47,11 +47,11 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
     if (response.error != null) {
       LoadingService().hideLoading();
       if (mounted) {
-      await showCustomDialog(
-        context,
-        message: response.error!,
-        dialogType: DialogType.error,
-      );
+        await showCustomDialog(
+          context,
+          message: response.error!,
+          dialogType: DialogType.error,
+        );
       }
       return;
     }
@@ -74,7 +74,6 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // bool isTablet = MediaQuery.sizeOf(context).width > 600;
     return Dialog(
       insetPadding: isTablet
           ? EdgeInsets.symmetric(
@@ -204,7 +203,10 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
               child: Stack(
                 children: [
                   // Layout diferente para tablet vs móvil
-                  isTablet ? _buildTabletLayout() : _buildMobileLayout(),
+                  ResponsiveLayout(
+                    mobile: _buildMobileLayout(),
+                    tablet: _buildTabletLayout(),
+                  ),
                   Positioned(
                     bottom: isTablet ? 15.h : 5.h,
                     left: isTablet ? 15.w : 5.w,

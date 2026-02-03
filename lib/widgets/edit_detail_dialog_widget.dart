@@ -764,11 +764,11 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
 
     return Stack(
       children: [
-        SingleChildScrollView(
-          child: Container(
-            color: StyleColor.turquoise,
-            width: double.infinity,
-            height: MediaQuery.sizeOf(context).height * 0.6,
+        Container(
+          color: StyleColor.turquoise,
+          width: double.infinity,
+          height: MediaQuery.sizeOf(context).height * 0.6,
+          child: SingleChildScrollView(
             child: Column(
               children: [
                 HeadScreenNotAvatar(

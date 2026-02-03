@@ -177,14 +177,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
       for (var notify in rawNotifications) {
         try {
           final notification = NotificationModel.fromJson(notify);
-          // Asegurar que la fecha se parsea correctamente
+          // Asegurar que la fecha se parse correctamente
           final parsedDate = _parseNotificationDate(notification.createdAt);
           loadedNotifications.add(notification.copyWith(
             createdAt: parsedDate
-                .toIso8601String(), // Mantener la fecha parseada como String
+                .toIso8601String(), // Mantener la fecha parse como String
           ));
         } catch (e) {
-          print('Error procesando notificación: $e');
+          if (kDebugMode) {
+            print('Error procesando notificación: $e');
+          }
         }
       }
 
@@ -256,16 +258,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+    final _isTablet = isTablet(context);
 
     return Scaffold(
       appBar:
-          isTablet ? _buildTabletAppBar(context) : _buildMobileAppBar(context),
+          _isTablet ? _buildTabletAppBar(context) : _buildMobileAppBar(context),
       body: SafeArea(
-        child: isTablet
-            ? _buildTabletLayout(context)
-            : _buildMobileLayout(context),
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(context),
+          tablet: _buildTabletLayout(context),
+        ),
       ),
     );
   }
@@ -1357,7 +1359,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         return dateInput;
       }
 
-      // Si es String, intentar parsear
+      // Si es String, intentar parser
       if (dateInput is String) {
         // Intentar formato ISO
         DateTime? parsed = DateTime.tryParse(dateInput);

@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/services/streak_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -26,12 +28,7 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
-  final options = [
-    {"option": "A", "color": "A8A1E7"},
-    {"option": "B", "color": "C3F0F9"},
-    {"option": "C", "color": "E1D8D8"},
-    {"option": "D", "color": "A8B9F1"}
-  ];
+  final options = AppConstants.listOption;
 
   LoginUser? userData;
   late Map<String, dynamic> config;
@@ -105,18 +102,125 @@ class _QuestionScreenState extends State<QuestionScreen> {
   int MEDIUM_SCORE = 0;
   int LOW_SCORE = 0;
 
+  // Añade estas variables para TTS
+  FlutterTts flutterTts = FlutterTts();
+  bool isTtsEnabled = false;
+  bool isTtsSpeaking = false;
+  double ttsVolume = 1.0;
+  double ttsRate = 0.5;
+  double ttsPitch = 1.0;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generateData(context);
       getFontSizeText();
+      _initTts();
     });
   }
 
   @override
   void dispose() {
+    flutterTts.stop();
     super.dispose();
+  }
+
+  // Inicializar TTS
+  Future<void> _initTts() async {
+    // Verificar preferencias de usuario para TTS
+    bool? savedTtsEnabled = await PreferencesManager().getTtsEnabled();
+    setState(() {
+      // isTtsEnabled = savedTtsEnabled ?? false;
+    });
+
+    // Configurar TTS
+    await flutterTts.setVolume(ttsVolume);
+    await flutterTts.setSpeechRate(ttsRate);
+    await flutterTts.setPitch(ttsPitch);
+    await flutterTts.setLanguage("es-ES");
+
+    // Configurar handlers de eventos
+    flutterTts.setStartHandler(() {
+      setState(() {
+        isTtsSpeaking = true;
+      });
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isTtsSpeaking = false;
+      });
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        isTtsSpeaking = false;
+      });
+      if (kDebugMode) {
+        print("TTS Error: $msg");
+      }
+    });
+  }
+
+  // Leer pregunta actual
+  Future<void> _speakQuestion() async {
+    if (!isTtsEnabled || currentQuestion.question.isEmpty) return;
+
+    String textToSpeak = "Pregunta $numberQuestion de ${questions.length}. "
+        "${currentQuestion.question}";
+
+    await flutterTts.speak(textToSpeak);
+  }
+
+  // Leer opciones de respuesta
+  Future<void> _speakOptions() async {
+    if (!isTtsEnabled || currentAnswers.isEmpty) return;
+
+    StringBuffer optionsText = StringBuffer();
+    optionsText.write("Opciones: ");
+
+    for (int i = 0; i < currentAnswers.length; i++) {
+      optionsText.write("Opción ${String.fromCharCode(65 + i)}: ");
+      optionsText.write(currentAnswers[i].answer);
+      if (i < currentAnswers.length - 1) {
+        optionsText.write(". ");
+      }
+    }
+
+    await flutterTts.speak(optionsText.toString());
+  }
+
+  // Leer respuesta específica
+  Future<void> _speakAnswer(int index) async {
+    if (!isTtsEnabled || index >= currentAnswers.length) return;
+
+    String textToSpeak = "Opción ${String.fromCharCode(65 + index)}: "
+        "${currentAnswers[index].answer}";
+
+    await flutterTts.speak(textToSpeak);
+  }
+
+  // Detener TTS
+  Future<void> _stopTts() async {
+    await flutterTts.stop();
+    setState(() {
+      isTtsSpeaking = false;
+    });
+  }
+
+  // Alternar estado TTS
+  Future<void> _toggleTts() async {
+    bool newState = !isTtsEnabled;
+    setState(() {
+      isTtsEnabled = newState;
+    });
+
+    await PreferencesManager().setTtsEnabled(newState);
+
+    if (!newState) {
+      await _stopTts();
+    }
   }
 
   Future<void> getFontSizeText() async {
@@ -213,6 +317,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
   /// Función que se encarga de marcar respuesta seleccionada
   ///
   void _answerSelected(BuildContext context, int index) {
+    // Primero leer la opción seleccionada
+    if (isTtsEnabled) {
+      _speakAnswer(index);
+    }
+
     setState(() {
       _isAnswerSelected = true;
       _suggestionSelected = false;
@@ -244,7 +353,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   void _showAnswerSnackbar(BuildContext context) {
-    
+    // Leer feedback de respuesta
+    if (isTtsEnabled) {
+      String feedback =
+          _isCorrect ? "¡Respuesta correcta!" : "Respuesta incorrecta";
+      flutterTts.speak(feedback);
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: Duration(hours: 24),
@@ -334,7 +449,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
               failedAttempts: failedAttempts,
               scoreLastAttempt: 0,
               completed: false,
-              level: LevelUser(levelNumber: level!.levelNumber, id: "", name: ""),
+              level:
+                  LevelUser(levelNumber: level!.levelNumber, id: "", name: ""),
               status: true);
           activityIsCompleted = true;
           showStepCompleted = true;
@@ -573,6 +689,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         _buildCommonHeader(),
         if (_shouldShowQuestionContent()) ...[
           SizedBox(height: 19),
+          _buildTtsControls(),
           QuestionCard(
             question: currentQuestion.question,
             numberQuestion: numberQuestion,
@@ -580,6 +697,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             failedAttempts: failedAttempts,
             fontSize: fontSizeText,
             isTablet: false,
+            onSpeakQuestion: isTtsEnabled ? _speakQuestion : null,
           ),
           SizedBox(height: 38),
           Expanded(child: _buildQuestionBody()),
@@ -587,6 +705,74 @@ class _QuestionScreenState extends State<QuestionScreen> {
           Expanded(child: _buildResultScreen(context)),
         ],
       ],
+    );
+  }
+
+// Widget para controles TTS
+  Widget _buildTtsControls() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Botón para activar/desactivar TTS
+          IconButton(
+            icon: Icon(
+              isTtsEnabled ? Icons.volume_up : Icons.volume_off,
+              color: isTtsEnabled ? Colors.blue : Colors.grey,
+            ),
+            onPressed: _toggleTts,
+            tooltip: isTtsEnabled ? "Desactivar lectura" : "Activar lectura",
+          ),
+
+          // Controles de TTS solo si está activado
+          if (isTtsEnabled) ...[
+            // Botón para leer pregunta
+            IconButton(
+              icon: Icon(
+                isTtsSpeaking ? Icons.stop : Icons.play_arrow,
+                color: Colors.blue,
+              ),
+              onPressed: isTtsSpeaking ? _stopTts : _speakQuestion,
+              tooltip: isTtsSpeaking ? "Detener lectura" : "Leer pregunta",
+            ),
+
+            // Botón para leer opciones
+            IconButton(
+              icon: Icon(Icons.list, color: Colors.blue),
+              onPressed: _speakOptions,
+              tooltip: "Leer opciones",
+            ),
+          ],
+
+          // Espaciador
+          Spacer(),
+
+          // Opcional: ajustar velocidad
+          if (isTtsEnabled && isTablet(context))
+            Row(
+              children: [
+                Icon(Icons.speed, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
+                Text(
+                  "Velocidad",
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                SizedBox(width: 8),
+                Slider(
+                  value: ttsRate,
+                  min: 0.0,
+                  max: 1.0,
+                  divisions: 10,
+                  onChanged: (value) async {
+                    setState(() => ttsRate = value);
+                    await flutterTts.setSpeechRate(value);
+                  },
+                ),
+              ],
+            ),
+        ],
+      ),
     );
   }
 
@@ -614,6 +800,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          _buildTtsControls(),
                           QuestionCard(
                             question: currentQuestion.question,
                             numberQuestion: numberQuestion,
@@ -621,6 +808,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                             failedAttempts: failedAttempts,
                             fontSize: fontSizeText,
                             isTablet: true,
+                            onSpeakQuestion:
+                                isTtsEnabled ? _speakQuestion : null,
                           ),
                           SizedBox(height: 20),
                           ProgressControls(
@@ -780,9 +969,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
               : "Intenta nuevamente el\n Paso ${levelProgress!.level.levelNumber} para avanzar",
           textAlign: TextAlign.center,
           style: StylesApp(context).textStyleBody16.copyWith(
-            color: Colors.white,
-            fontSize: isTablet(context) ? 20 : 16,
-          ),
+                color: Colors.white,
+                fontSize: isTablet(context) ? 20 : 16,
+              ),
         ),
         if (levelProgress!.score > 0 && !showReview) ...[
           SizedBox(height: isTablet(context) ? 20 : 8),
@@ -790,9 +979,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
             'Haz ganado\n ${levelProgress!.energy} LMs de energía',
             textAlign: TextAlign.center,
             style: StylesApp(context).textStyleBody16.copyWith(
-              color: Colors.white,
-              fontSize: isTablet(context) ? 18 : 16,
-            ),
+                  color: Colors.white,
+                  fontSize: isTablet(context) ? 18 : 16,
+                ),
           ),
         ],
       ],
@@ -813,9 +1002,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
           Text(
             "${levelProgress!.energy.toStringAsFixed(0)} lms",
             style: StylesApp(context).textStyleBody16.copyWith(
-              color: Color(0XFFFD8C43),
-              fontSize: isTablet(context) ? 18 : 16,
-            ),
+                  color: Color(0XFFFD8C43),
+                  fontSize: isTablet(context) ? 18 : 16,
+                ),
           ),
           SizedBox(height: 20),
         ],

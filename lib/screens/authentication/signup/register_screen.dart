@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
@@ -76,6 +77,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadCountry(context);
+      // _showDialogVerify(
+      //     context,
+      //     VerificationResponse(
+      //       userId: "2",
+      //       showVerifyPinModal: true,
+      //     ).toMap(),
+      //     "pedpab.12@gmail.com");
     });
   }
 
@@ -348,254 +356,261 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // Layout para tablet con 2 columnas
   Widget _buildTabletLayout(BuildContext context) {
-    return Container(
-      height: MediaQuery.sizeOf(context).height,
-      width: MediaQuery.sizeOf(context).width,
-      decoration: BoxDecoration(
-        color: Color(0Xff12CBC4),
-      ),
-      child: Row(
-        children: [
-          // Columna izquierda: Logo y título (40% del ancho)
-          Expanded(
-            flex: 4,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(0Xff12CBC4),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 40),
-                    HeadWidget(
-                      showLeftStar: _currentStep == 0,
-                      showRightStar: _currentStep != 0,
-                      title: "¡La Biblia\n  Palabra De\n Vida!",
-                      subtitle: "Registro",
-                    ),
-                    SizedBox(height: 30),
-
-                    // Indicador de pasos
-                    _buildStepIndicator(),
-                    SizedBox(height: 40),
-
-                    // Información adicional
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildInfoItem(
-                              icon: Icons.security,
-                              text: "Datos seguros y protegidos",
-                            ),
-                            SizedBox(height: 20),
-                            _buildInfoItem(
-                              icon: Icons.speed,
-                              text: "Registro rápido y sencillo",
-                            ),
-                            SizedBox(height: 20),
-                            _buildInfoItem(
-                              icon: Icons.people,
-                              text: "Únete a nuestra comunidad",
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Enlace a login
-                    if (_currentStep == 0)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 30),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/loginPage');
-                          },
-                          child: Text.rich(
-                            TextSpan(children: [
-                              TextSpan(
-                                text: '¿Ya tienes cuenta? ',
-                                style:
-                                    StylesApp(context).textStyleBody16.copyWith(
-                                          color: StyleColor.white
-                                              .withValues(alpha: 0.8),
-                                          fontSize: 16,
-                                        ),
-                              ),
-                              TextSpan(
-                                text: 'Inicia sesión',
-                                style:
-                                    StylesApp(context).textStyleBody16.copyWith(
-                                          color: StyleColor.white,
-                                          fontSize: 18,
-                                          // decoration: TextDecoration.underline,
-                                        ),
-                              ),
-                            ]),
-                            style: StylesApp(context).textStyleBody16.copyWith(
-                                  color: StyleColor.white,
-                                  fontSize: 16,
-                                  // decoration: TextDecoration.underline,
-                                ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Columna derecha: Formulario (60% del ancho)
-          Expanded(
-            flex: 6,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+    return SingleChildScrollView(
+      child: Container(
+        height: MediaQuery.sizeOf(context).height,
+        width: MediaQuery.sizeOf(context).width,
+        decoration: BoxDecoration(
+          color: Color(0Xff12CBC4),
+        ),
+        child: Row(
+          children: [
+            // Columna izquierda: Logo y título (40% del ancho)
+            Expanded(
+              flex: 4,
               child: Container(
                 decoration: BoxDecoration(
-                  color: StyleColor.white,
+                  color: Color(0Xff12CBC4),
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    bottomLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 30,
-                      offset: Offset(-5, 0),
-                    ),
-                  ],
                 ),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 40),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Botón de retroceso (solo en paso 2)
-                        if (_currentStep == 1)
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _currentStep--;
-                              });
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(bottom: 30),
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: StyleColor.orange,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.arrow_back,
-                                color: StyleColor.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 40),
+                      HeadWidget(
+                        showLeftStar: _currentStep == 0,
+                        showRightStar: _currentStep != 0,
+                        title: "¡La Biblia\n  Palabra De\n Vida!",
+                        subtitle: "Registro",
+                      ),
+                      SizedBox(height: 30),
 
-                        // Título del paso actual
-                        Text(
-                          _currentStep == 0
-                              ? "Información de Usuario"
-                              : "Información Personal",
-                          style: StylesApp(context).textStyleBody20.copyWith(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0Xff12CBC4),
-                              ),
-                        ),
-                        SizedBox(height: 10),
+                      // Indicador de pasos
+                      _buildStepIndicator(),
+                      SizedBox(height: 40),
 
-                        // Descripción del paso
-                        Text(
-                          _currentStep == 0
-                              ? "Completa tus datos básicos para crear tu cuenta"
-                              : "Completa tu información personal para continuar",
-                          style: StylesApp(context).textStyleBody14.copyWith(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                        ),
-                        SizedBox(height: 30),
-
-                        // Formulario
-                        Form(
-                          key: _formKey,
-                          autovalidateMode: _autoValidate
-                              ? AutovalidateMode.always
-                              : AutovalidateMode.disabled,
+                      // Información adicional
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              if (_currentStep == 0) ...[
-                                _buildTabletUserInfoStep(),
-                              ] else if (_currentStep == 1) ...[
-                                _buildTabletPersonalInfoStep(),
-                              ],
-                              SizedBox(height: 12),
-
-                              // Botón de acción
-                              Container(
-                                width: 400,
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    initRegister();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: StyleColor.orange,
-                                    foregroundColor: StyleColor.white,
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 16, horizontal: 40),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 4,
-                                    shadowColor: StyleColor.orange
-                                        .withValues(alpha: 0.3),
-                                  ),
-                                  child: Text(
-                                    _currentStep == 0
-                                        ? "Continuar →"
-                                        : "Registrarse",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
+                              _buildInfoItem(
+                                icon: Icons.security,
+                                text: "Datos seguros y protegidos",
                               ),
-
-                              // Espaciado adicional para tablet
-                              SizedBox(height: 10),
+                              SizedBox(height: 20),
+                              _buildInfoItem(
+                                icon: Icons.speed,
+                                text: "Registro rápido y sencillo",
+                              ),
+                              SizedBox(height: 20),
+                              _buildInfoItem(
+                                icon: Icons.people,
+                                text: "Únete a nuestra comunidad",
+                              ),
                             ],
                           ),
                         ),
-                      ],
+                      ),
+
+                      // Enlace a login
+                      if (_currentStep == 0)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 30),
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/loginPage');
+                            },
+                            child: Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                  text: '¿Ya tienes cuenta? ',
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        color: StyleColor.white
+                                            .withValues(alpha: 0.8),
+                                        fontSize: 16,
+                                      ),
+                                ),
+                                TextSpan(
+                                  text: 'Inicia sesión',
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        color: StyleColor.white,
+                                        fontSize: 18,
+                                        // decoration: TextDecoration.underline,
+                                      ),
+                                ),
+                              ]),
+                              style:
+                                  StylesApp(context).textStyleBody16.copyWith(
+                                        color: StyleColor.white,
+                                        fontSize: 16,
+                                        // decoration: TextDecoration.underline,
+                                      ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Columna derecha: Formulario (60% del ancho)
+            Expanded(
+              flex: 6,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: StyleColor.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      bottomLeft: Radius.circular(30),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 30,
+                        offset: Offset(-5, 0),
+                      ),
+                    ],
+                  ),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 40),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Botón de retroceso (solo en paso 2)
+                          if (_currentStep == 1)
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _currentStep--;
+                                });
+                              },
+                              child: Container(
+                                margin: EdgeInsets.only(bottom: 30),
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: StyleColor.orange,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.2),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.arrow_back,
+                                  color: StyleColor.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+
+                          // Título del paso actual
+                          Text(
+                            _currentStep == 0
+                                ? "Información de Usuario"
+                                : "Información Personal",
+                            style: StylesApp(context).textStyleBody20.copyWith(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0Xff12CBC4),
+                                ),
+                          ),
+                          SizedBox(height: 10),
+
+                          // Descripción del paso
+                          Text(
+                            _currentStep == 0
+                                ? "Completa tus datos básicos para crear tu cuenta"
+                                : "Completa tu información personal para continuar",
+                            style: StylesApp(context).textStyleBody14.copyWith(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                          ),
+                          SizedBox(height: 30),
+
+                          // Formulario
+                          Form(
+                            key: _formKey,
+                            autovalidateMode: _autoValidate
+                                ? AutovalidateMode.always
+                                : AutovalidateMode.disabled,
+                            child: Column(
+                              children: [
+                                if (_currentStep == 0) ...[
+                                  _buildTabletUserInfoStep(),
+                                ] else if (_currentStep == 1) ...[
+                                  _buildTabletPersonalInfoStep(),
+                                ],
+                                SizedBox(height: 12),
+
+                                // Botón de acción
+                                Container(
+                                  width: 400,
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      initRegister();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: StyleColor.orange,
+                                      foregroundColor: StyleColor.white,
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 16, horizontal: 40),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      elevation: 4,
+                                      shadowColor: StyleColor.orange
+                                          .withValues(alpha: 0.3),
+                                    ),
+                                    child: Text(
+                                      _currentStep == 0
+                                          ? "Continuar →"
+                                          : "Registrarse",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Espaciado adicional para tablet
+                                SizedBox(height: 10),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -849,7 +864,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
           showDetails: true,
           dialogType: DialogType.error);
     } else {
-      Navigator.popAndPushNamed(context, '/layoutPage');
+      final data = VerificationResponse.fromJson(response.data);
+      if (data.showVerifyPinModal) {
+        // levantar diálogo  de verificador de pin
+        _showDialogVerify(context, response.data, _emailController.text);
+      } else {
+        Navigator.popAndPushNamed(context, '/layoutPage');
+      }
     }
+  }
+
+  // En tu código original
+  void _showDialogVerify(
+      BuildContext context, Map<String, dynamic> data, String email) {
+    showVerifyPinDialog(
+      context: context,
+      email: email,
+      onPinVerified: (pin) async {
+        // Aquí llamas a tu API o lógica de verificación
+        final response = await context
+            .read<AuthenticationProvider>()
+            .verifyPinWithApi(email, pin);
+        if (response.error != null) {
+          await showCustomDialog(context,
+              message: response.error!, dialogType: DialogType.error);
+          _showDialogVerify(context, data, email);
+        } else {
+          Navigator.popAndPushNamed(context, '/layoutPage');
+        }
+      },
+      onResendCode: () async {
+        // Lógica para reenviar el código
+        print('Reenviando código a $email');
+        final timeZone = await getDeviceTimeZone();
+        final response = await resendVerificationCode(email, timeZone);
+
+        if (response.error != null) {
+          await showCustomDialog(context,
+              message: response.error!, dialogType: DialogType.error);
+          _showDialogVerify(context, data, email);
+        }
+      },
+    );
   }
 }

@@ -62,11 +62,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isTablet) {
-      return _buildTabletDialog();
-    } else {
-      return _buildMobileDialog();
-    }
+    return ResponsiveLayout(
+        mobile: _buildMobileDialog(), tablet: _buildTabletDialog());
   }
 
   // ============ DIALOG PARA TABLET ============
@@ -160,11 +157,12 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                       padding: EdgeInsets.all(20),
                       margin: EdgeInsets.only(bottom: 24),
                       decoration: BoxDecoration(
-                        color: widget.currentTheme.buttonColor.withValues(alpha: 0.1),
+                        color: widget.currentTheme.buttonColor
+                            .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color:
-                              widget.currentTheme.buttonColor.withValues(alpha: 0.3),
+                          color: widget.currentTheme.buttonColor
+                              .withValues(alpha: 0.3),
                           width: 2,
                         ),
                       ),
@@ -199,8 +197,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                             .withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color:
-                              widget.currentTheme.buttonColor.withValues(alpha: 0.1),
+                          color: widget.currentTheme.buttonColor
+                              .withValues(alpha: 0.1),
                         ),
                       ),
                       child: Column(
@@ -250,8 +248,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                             .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color:
-                              widget.currentTheme.buttonColor.withValues(alpha: 0.2),
+                          color: widget.currentTheme.buttonColor
+                              .withValues(alpha: 0.2),
                           width: 1.5,
                         ),
                       ),
@@ -456,7 +454,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
               child: Text(
                 reference.verse.text,
                 style: StylesApp(context).textStyleBody12.copyWith(
-                      color: widget.currentTheme.textColor.withValues(alpha: 0.8),
+                      color:
+                          widget.currentTheme.textColor.withValues(alpha: 0.8),
                       fontSize: 13,
                       height: 1.4,
                     ),
@@ -474,7 +473,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                   color: widget.currentTheme.buttonColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(
-                    color: widget.currentTheme.buttonColor.withValues(alpha: 0.3),
+                    color:
+                        widget.currentTheme.buttonColor.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(

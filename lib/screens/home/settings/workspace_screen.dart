@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -164,28 +165,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth >= 768;
+    final _isTablet = isTablet(context);
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
 
-    final cardList = [
-      {
-        'label': 'Aventura',
-        'img': 'assets/aventure.gif',
-        'route': '/introAventurePage',
-      },
-      {
-        'label': 'La Biblia',
-        'img': 'assets/biblia.png',
-        'route': '/bibliaPage',
-      },
-      {
-        'label': 'Comunidad',
-        'img': 'assets/comunidad.png',
-        'route': '/communityPage',
-      },
-    ];
+    final cardList = AppConstants.homeCards;
 
     return SafeArea(
       child: SizedBox(
@@ -200,14 +184,14 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 child: Visibility(
                   visible: true,
                   child: Container(
-                    width: isTablet ? 70 : 35,
-                    height: isTablet ? 70 : 35,
+                    width: _isTablet ? 70 : 35,
+                    height: _isTablet ? 70 : 35,
                     decoration: const BoxDecoration(
                       color: Colors.transparent,
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      iconSize: isTablet ? 70 : 35,
+                      iconSize: _isTablet ? 70 : 35,
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
@@ -226,12 +210,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         children: [
                           Icon(
                             Icons.notifications,
-                            size: isTablet ? 60 : 40,
+                            size: _isTablet ? 60 : 40,
                             color: StyleColor.redLight,
                           ),
                           Positioned(
-                            right: isTablet ? 22 : 6,
-                            top: isTablet ? 18 : 12,
+                            right: _isTablet ? 22 : 6,
+                            top: _isTablet ? 18 : 12,
                             child: Container(
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(
@@ -263,16 +247,17 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 children: [
                   const SizedBox(height: 15.0),
                   // Sección de cards superiores - Responsive
-                  isTablet
+                  _isTablet
                       ? _buildTabletCardSection(context, cardList)
                       : _buildMobileCardSection(context, cardList),
 
                   const SizedBox(height: 12.0),
 
                   // Layout principal responsive
-                  isTablet
-                      ? _buildTabletLayout(context)
-                      : _buildMobileLayout(context),
+                  ResponsiveLayout(
+                    mobile: _buildMobileLayout(context),
+                    tablet: _buildTabletLayout(context),
+                  ),
 
                   SizedBox(height: kBottomNavigationBarHeight - 40),
                 ],
@@ -353,7 +338,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   // Cards superiores para móvil
   Widget _buildMobileCardSection(
-      BuildContext context, List<Map<String, String>> cards) {
+      BuildContext context, List<Map<String, dynamic>> cards) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -368,7 +353,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   // Cards superiores para tablet
   Widget _buildTabletCardSection(
-      BuildContext context, List<Map<String, String>> cards) {
+      BuildContext context, List<Map<String, dynamic>> cards) {
     final filteredCards = cards
         .where((card) =>
             !(card['label'] == 'Comunidad' && !GraphQLConfig.development))
@@ -385,7 +370,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
-  Widget _buildTabletCard(BuildContext context, Map<String, String> card) {
+  Widget _buildTabletCard(BuildContext context, Map<String, dynamic> card) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -410,7 +395,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 textAlign: TextAlign.center,
                 style: StylesApp(context).textStyleBody4.copyWith(
                       color: const Color(0xFFFD8C43),
-                      fontSize: 16.sp,
+                      fontSize: 14.sp,
                     ),
               ),
             ],
@@ -420,7 +405,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
-  Widget _buildCard(BuildContext context, Map<String, String> card) {
+  Widget _buildCard(BuildContext context, Map<String, dynamic> card) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: GestureDetector(
@@ -456,7 +441,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   }
 
   Future<void> _onCardTap(
-      BuildContext context, Map<String, String> card) async {
+      BuildContext context, Map<String, dynamic> card) async {
     await _loadProgress(context);
     if (card['label'] == 'Aventura') {
       if (error) return;
@@ -589,7 +574,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               icon: Icon(
                 Icons.add_circle_outline_sharp,
                 color: StyleColor.orange,
-                size: 20.sp,
+                size: 20,
               ),
             )
           ],
@@ -851,14 +836,14 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         children: [
                           Center(
                             child: SizedBox(
-                              width: 16.sp,
-                              height: 16.sp,
+                              width: 20,
+                              height: 20,
                               child: IconButton(
                                 padding: EdgeInsets.zero,
                                 icon: Icon(
                                   Icons.copy,
                                   color: Colors.white,
-                                  size: 16.sp,
+                                  size: 20,
                                 ),
                                 onPressed: () {
                                   Clipboard.setData(ClipboardData(
@@ -872,14 +857,14 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                             ),
                           ),
                           SizedBox(
-                            width: 16.sp,
-                            height: 16.sp,
+                            width: 20,
+                            height: 20,
                             child: IconButton(
                               padding: EdgeInsets.zero,
                               icon: Icon(
                                 Icons.share,
                                 color: Colors.white,
-                                size: 16.sp,
+                                size: 20,
                               ),
                               onPressed: () async {
                                 await SharePlus.instance.share(ShareParams(
@@ -985,7 +970,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                         )
                                       : Image.asset(
                                           'assets/no-image.jpg',
-                                          fit: BoxFit.cover,
+                                          fit: BoxFit.contain,
                                           alignment: Alignment.center,
                                         ),
                                 ),
@@ -1039,9 +1024,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(
-                              width:
-                                  StylesApp(context).sizeContainerAvatar.width -
-                                      10,
+                              width: 59,
                               child: Image.asset(
                                 'assets/kawaii_fire.png',
                                 alignment: Alignment.center,
@@ -1103,7 +1086,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               ),
               Positioned(
                 right: -3,
-                top: -15,
+                top: -10,
                 child: SizedBox(
                   width: 40.0.sp,
                   height: 30.0.sp,
@@ -1112,7 +1095,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                       Navigator.pushNamed(context, '/profilePage');
                     },
                     icon: const Icon(
-                      Icons.fast_forward_outlined,
+                      Icons.account_circle,
                       color: Colors.white,
                       size: 30.0,
                     ),

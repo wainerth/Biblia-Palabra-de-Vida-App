@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -24,7 +25,7 @@ class CustomModalWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    bool isTablet = MediaQuery.sizeOf(context).width >= 600;
+    bool _isTablet = isTablet(context);
   final ScrollController scrollController = ScrollController();
 
     return Dialog(
@@ -35,7 +36,7 @@ class CustomModalWidget extends StatelessWidget {
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: isTablet ? 400.0 : double.infinity,
+          maxWidth: _isTablet ? 400.0 : double.infinity,
         ),
         child: SingleChildScrollView(
           child: Column(

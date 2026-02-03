@@ -2,8 +2,8 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/services/device_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -29,11 +29,6 @@ class _AboutScreenState extends State<AboutScreen> {
         _versionApp = info;
       });
     }
-  }
-
-  // Método para verificar si estamos en tablet
-  bool _isTablet(BuildContext context) {
-    return isTablet(context); // Asumo que ya tienes esta función
   }
 
   Widget _buildMobileLayout() {
@@ -148,7 +143,6 @@ class _AboutScreenState extends State<AboutScreen> {
                   } else {
                     showSnackBar("No se pudo abrir la aplicación de correo",
                         type: SnackBarType.error);
-                   
                   }
                 },
                 child: Text(
@@ -216,7 +210,7 @@ class _AboutScreenState extends State<AboutScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withValues(alpha: 0.3),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -253,7 +247,7 @@ class _AboutScreenState extends State<AboutScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -274,10 +268,10 @@ class _AboutScreenState extends State<AboutScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.3)),
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3)),
                       ),
                       child: Column(
                         children: [
@@ -389,7 +383,8 @@ class _AboutScreenState extends State<AboutScreen> {
                             // Divider
                             Container(
                               height: 1,
-                              color: const Color(0xFF12CBC4).withOpacity(0.3),
+                              color: const Color(0xFF12CBC4)
+                                  .withValues(alpha: 0.3),
                             ),
 
                             const SizedBox(height: 30),
@@ -423,11 +418,12 @@ class _AboutScreenState extends State<AboutScreen> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF12CBC4).withOpacity(0.1),
+                                color: const Color(0xFF12CBC4)
+                                    .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(
-                                  color:
-                                      const Color(0xFF12CBC4).withOpacity(0.2),
+                                  color: const Color(0xFF12CBC4)
+                                      .withValues(alpha: 0.2),
                                 ),
                               ),
                               child: Column(
@@ -460,8 +456,9 @@ class _AboutScreenState extends State<AboutScreen> {
                                       if (await canLaunchUrl(emailLaunchUri)) {
                                         await launchUrl(emailLaunchUri);
                                       } else {
-                                        showSnackBar("No se pudo abrir la aplicación de correo",
-                        type: SnackBarType.error);
+                                        showSnackBar(
+                                            "No se pudo abrir la aplicación de correo",
+                                            type: SnackBarType.error);
                                       }
                                     },
                                     child: Row(
@@ -544,7 +541,10 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _isTablet(context) ? _buildTabletLayout() : _buildMobileLayout();
+    return ResponsiveLayout(
+      mobile: _buildMobileLayout(),
+      tablet: _buildTabletLayout(),
+    );
   }
 
   Future<Map<String, dynamic>> _loadDeviceInfo() async {

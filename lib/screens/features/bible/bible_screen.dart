@@ -604,10 +604,6 @@ class _BibleScreenState extends State<BibleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final themeProvider =
-    //     Provider.of<BibleThemeProvider>(context, listen: false);
-    // currentTheme = themeProvider.themeData;
-
     return _buildMainContent(currentTheme);
   }
 
@@ -624,9 +620,10 @@ class _BibleScreenState extends State<BibleScreen> {
       return _buildSkeletonScreen(theme);
     }
 
-    return isTablet(context)
-        ? _buildTableLayout(theme)
-        : _buildMobileLayout(theme);
+    return ResponsiveLayout(
+      mobile: _buildMobileLayout(theme),
+      tablet: _buildTableLayout(theme),
+    );
   }
 
   void _showToolbar() {
@@ -3035,7 +3032,7 @@ class TapAndLongPressRecognizer extends OneSequenceGestureRecognizer {
   @override
   void dispose() {
     _longPressTimer?.cancel();
-    
+
     super.dispose();
   }
 

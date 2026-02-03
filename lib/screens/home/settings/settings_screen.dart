@@ -105,123 +105,127 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Columna izquierda: Información general y título
             Expanded(
               flex: 4,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: StyleColor.turquoise,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
+              child: SingleChildScrollView(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: StyleColor.turquoise,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
+                    ),
                   ),
-                ),
-                child: Column(
-                  children: [
-                    HeadScreenNotAvatar(
-                      title: "Configuración",
-                      onRoute: () {
-                        Navigator.pushNamed(context, "/layoutPage");
-                      },
-                    ),
-                    SizedBox(height: 40),
-
-                    // Información de la app
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.2),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.3),
-                                width: 2,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.settings,
-                              size: 60,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(height: 30),
-                          Text(
-                            'Ajustes de la App',
-                            style: StylesApp(context).textStyleBody18.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24,
-                                ),
-                          ),
-                          SizedBox(height: 15),
-                          Container(
-                            padding: EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HeadScreenNotAvatar(
+                        title: "Configuración",
+                        onRoute: () {
+                          Navigator.pushNamed(context, "/layoutPage");
+                        },
+                      ),
+                      SizedBox(height: 40),
+                  
+                      // Información de la app
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
                                 color: Colors.white.withValues(alpha: 0.2),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.3),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.settings,
+                                size: 60,
+                                color: Colors.white,
                               ),
                             ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Biblia Palabra de Vida',
-                                  style: StylesApp(context)
-                                      .textStyleBody14
-                                      .copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 18,
-                                      ),
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  'Versión 2.0.0',
-                                  style: StylesApp(context)
-                                      .textStyleBody14
-                                      .copyWith(
-                                        color:
-                                            Colors.white.withValues(alpha: 0.8),
-                                        fontSize: 14,
-                                      ),
-                                ),
-                                SizedBox(height: 5),
-                                Text(
-                                  '© 2024 Todos los derechos reservados',
-                                  style: StylesApp(context)
-                                      .textStyleBody12
-                                      .copyWith(
-                                        color:
-                                            Colors.white.withValues(alpha: 0.6),
-                                        fontSize: 12,
-                                      ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                            SizedBox(height: 30),
+                            Text(
+                              'Ajustes de la App',
+                              style: StylesApp(context).textStyleBody18.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                  ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    Spacer(),
-
-                    // Información adicional
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Text(
-                        'Personaliza tu experiencia de estudio bíblico',
-                        style: StylesApp(context).textStyleBody14.copyWith(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 14,
-                              fontStyle: FontStyle.italic,
+                            SizedBox(height: 15),
+                            Container(
+                              padding: EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Biblia Palabra de Vida',
+                                    style: StylesApp(context)
+                                        .textStyleBody14
+                                        .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 18,
+                                        ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    'Versión 2.0.0',
+                                    style: StylesApp(context)
+                                        .textStyleBody14
+                                        .copyWith(
+                                          color:
+                                              Colors.white.withValues(alpha: 0.8),
+                                          fontSize: 14,
+                                        ),
+                                  ),
+                                  SizedBox(height: 5),
+                                  Text(
+                                    '© 2024 Todos los derechos reservados',
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(
+                                          color:
+                                              Colors.white.withValues(alpha: 0.6),
+                                          fontSize: 12,
+                                        ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
-                        textAlign: TextAlign.center,
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                  
+                      SizedBox(height: 40), 
+                  
+                      // Información adicional
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                          'Personaliza tu experiencia de estudio bíblico',
+                          style: StylesApp(context).textStyleBody14.copyWith(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 14,
+                                fontStyle: FontStyle.italic,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(height: 40), 
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -14,8 +14,14 @@ class SelectionQuestionWidget extends StatefulWidget {
   final bool isTablet;
   final List<Map<String, String>> options;
   final Function(BuildContext context, int) answerSelected;
-
   final void Function() callBackContinue;
+
+  // Nuevas propiedades para TTS
+  final bool isTtsEnabled;
+  final Function(int index)? onSpeakOption;
+  final Function()? onSpeakQuestion;
+  final Function()? onSpeakAllOptions;
+
   const SelectionQuestionWidget({
     super.key,
     required this.currentQuestion,
@@ -28,6 +34,11 @@ class SelectionQuestionWidget extends StatefulWidget {
     required this.isAnswerSelected,
     this.fontSize = 14.0,
     this.isTablet = false,
+    // Nuevos parámetros TTS
+    this.isTtsEnabled = false,
+    this.onSpeakOption,
+    this.onSpeakQuestion,
+    this.onSpeakAllOptions,
   });
 
   @override
@@ -52,11 +63,26 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
               child: Column(
                 children: [
                   if (widget.isTablet) ...[
-                    Text(
-                      "Selecciona la respuesta correcta",
-                      style: StylesApp(context).textStyleBody16.copyWith(
-                            fontWeight: FontWeight.bold,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Selecciona la respuesta correcta",
+                          style: StylesApp(context).textStyleBody16.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        // Botón para leer todas las opciones (solo en tablet)
+                        if (widget.isTtsEnabled &&
+                            widget.onSpeakAllOptions != null)
+                          IconButton(
+                            icon: Icon(Icons.volume_up, size: 20),
+                            onPressed: widget.onSpeakAllOptions,
+                            tooltip: "Leer todas las opciones",
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
                           ),
+                      ],
                     ),
                     SizedBox(height: 16),
                   ],
@@ -86,7 +112,7 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
     } catch (e, st) {
       if (kDebugMode) {
         print('Error en SelectionQuestionWidget: $e');
-        print('Stack Trace: $st'); // Imprime el Stack Trace completo
+        print('Stack Trace: $st');
       }
       return Center(child: Text("Error: $e"));
     }
@@ -95,11 +121,24 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
   Widget _buildOptionItem(BuildContext context, int index) {
     currentAnswers = widget.currentQuestion.answers;
     final answer = currentAnswers[index];
+
     return GestureDetector(
       onTap: widget.isAnswerSelected
           ? null
           : () {
+              // Primero leer la opción si TTS está activado
+              if (widget.isTtsEnabled && widget.onSpeakOption != null) {
+                widget.onSpeakOption!(index);
+              }
               widget.answerSelected(context, index);
+            },
+      onLongPress: widget.isAnswerSelected
+          ? null
+          : () {
+              // Leer opción al mantener presionado
+              if (widget.isTtsEnabled && widget.onSpeakOption != null) {
+                widget.onSpeakOption!(index);
+              }
             },
       child: Container(
         margin: widget.isTablet
@@ -113,9 +152,6 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
                   ? StyleColor.turquoise.withValues(alpha: 0.30)
                   : StyleColor.turquoise,
           borderRadius: BorderRadius.circular(8.0),
-          // border: !widget.isCorrect
-          //     ? Border.all(color: Colors.redAccent, width: 3.0)
-          //     : null,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.25),
@@ -126,34 +162,46 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
           ],
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical:  widget.isTablet ? 12.0 : 12.0),
+          padding: EdgeInsets.symmetric(
+              horizontal: 12.0, vertical: widget.isTablet ? 12.0 : 12.0),
           child: Row(
             spacing: 10.0,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                flex: 0,
-                child: Container(
-                  width: 32.0,
-                  height: 32.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(32.0),
-                    color: Color(
-                      int.parse('0xFF${widget.options[index]["color"]}'),
+              Row(
+                children: [
+                  // Botón de altavoz para TTS
+                  if (widget.isTtsEnabled && widget.onSpeakOption != null)
+                    IconButton(
+                      icon: Icon(Icons.volume_up, size: 16),
+                      onPressed: () => widget.onSpeakOption!(index),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      tooltip: "Escuchar opción",
                     ),
+                  SizedBox(width: 4),
+                  Container(
+                    width: 32.0,
+                    height: 32.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(32.0),
+                      color: Color(
+                        int.parse('0xFF${widget.options[index]["color"]}'),
+                      ),
+                    ),
+                    child: Center(
+                        child: Text(
+                      widget.currentQuestion.answers[index].option ?? "",
+                      style: widget.isTablet
+                          ? StylesApp(context)
+                              .textStyleBody14
+                              .copyWith(color: Colors.black)
+                          : StylesApp(context)
+                              .textStyleBody12
+                              .copyWith(color: Colors.black),
+                    )),
                   ),
-                  child: Center(
-                      child: Text(
-                    widget.currentQuestion.answers[index].option ?? "",
-                    style: widget.isTablet
-                        ? StylesApp(context)
-                            .textStyleBody14
-                            .copyWith(color: Colors.black)
-                        : StylesApp(context)
-                            .textStyleBody12
-                            .copyWith(color: Colors.black),
-                  )),
-                ),
+                ],
               ),
               Expanded(
                 flex: 2,
@@ -162,13 +210,11 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
                     textAlign: TextAlign.center,
                     widget.currentQuestion.answers[index].answer,
                     style: widget.isTablet
-                        ? StylesApp(context)
-                            .textStyleBody14
-                        : StylesApp(context)
-                            .textStyleBody12,
+                        ? StylesApp(context).textStyleBody14
+                        : StylesApp(context).textStyleBody12,
                   ),
                 ),
-              ), // Display the answer text
+              ),
             ],
           ),
         ),

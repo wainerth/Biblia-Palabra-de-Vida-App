@@ -17,26 +17,18 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // void _initializeCatalogues() async {
-  //   final catalogueProvider =
-  //       Provider.of<CatalogueProvider>(context, listen: false);
-  //   catalogueProvider.initialize();
-  // }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isTablet = screenWidth >= 600; // Umbral para tablets
-
     return Scaffold(
       body: SizedBox(
         height: MediaQuery.sizeOf(context).height,
         child: Stack(
           children: [
             SingleChildScrollView(
-              child: isTablet
-                  ? Center(child: _buildTabletLayout())
-                  : _buildMobileLayout(),
+              child: ResponsiveLayout(
+                mobile: _buildMobileLayout(),
+                tablet: _buildTabletLayout(),
+              ),
             ),
             Positioned(
               bottom: 10,
@@ -44,10 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Align(
                 alignment: Alignment.bottomRight,
                 child: TweenAnimationBuilder<double>(
-                  duration:
-                      const Duration(seconds: 1), // Duration of the animation
-                  tween: Tween(begin: 1.0, end: 1.1), // Scale from 1.0 to 1.1
-                  curve: Curves.easeInOut, // Use curve directly here
+                  duration: const Duration(seconds: 1),
+                  tween: Tween(begin: 1.0, end: 1.1),
+                  curve: Curves.easeInOut,
                   builder: (context, scale, child) {
                     return Transform.scale(
                       scale: scale,
@@ -56,12 +47,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.pushNamed(context, '/introPage');
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Colors.transparent, // Transparent background
+                          backgroundColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
                             side: const BorderSide(
                               color: Colors.transparent,
-                              width: 2.0, // Border width
+                              width: 2.0,
                             ),
                             borderRadius: BorderRadius.circular(10),
                           ),

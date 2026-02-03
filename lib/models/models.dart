@@ -1,4 +1,3 @@
-
 export 'package:biblia_palabra_de_vida_app/models/audio.dart';
 export 'package:biblia_palabra_de_vida_app/models/video.dart';
 
@@ -91,3 +90,4 @@ export 'package:biblia_palabra_de_vida_app/models/delivery_option.dart';
 
 export 'package:biblia_palabra_de_vida_app/models/auth_check_result.dart';
 export 'package:biblia_palabra_de_vida_app/models/pagination_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/response_initialized_register.dart';

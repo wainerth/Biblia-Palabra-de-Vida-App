@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
@@ -26,23 +27,7 @@ class _PreachScreenState extends State<PreachScreen> {
   LoginUser? userData;
   Map<String, List<Preach>> groupedPreaches = {};
   final List<Preach> favorites = [];
-  List tabs = [
-    {
-      "title": 'Mensaje',
-      "placeholder": 'Mensaje a buscar',
-      "icon": Icons.message,
-    },
-    {
-      "title": 'Predicador',
-      "placeholder": 'Nombre del predicador a buscar',
-      "icon": Icons.person,
-    },
-    {
-      "title": 'Favoritas',
-      "placeholder": 'Favorito a buscar',
-      "icon": Icons.favorite,
-    }
-  ];
+  List tabs = AppConstants.tabsPreach;
 
   // Función para determinar si es tablet
   bool get isTablet {
@@ -154,9 +139,8 @@ class _PreachScreenState extends State<PreachScreen> {
         await addToFavoritePreach(userData!.userId, preach.id);
     if (responseAddFavorite.error != null) {
       if (mounted) {
-      await showCustomDialog(context,
-          message: responseAddFavorite.error!, dialogType: DialogType.error);
-
+        await showCustomDialog(context,
+            message: responseAddFavorite.error!, dialogType: DialogType.error);
       }
       return;
     }
@@ -170,9 +154,9 @@ class _PreachScreenState extends State<PreachScreen> {
         await removePreachFavorite(userData!.userId, preach.id);
     if (responseRemoveFavorite.error != null) {
       if (mounted) {
-
-      await showCustomDialog(context,
-          message: responseRemoveFavorite.error!, dialogType: DialogType.error);
+        await showCustomDialog(context,
+            message: responseRemoveFavorite.error!,
+            dialogType: DialogType.error);
       }
       return;
     }
@@ -542,9 +526,10 @@ class _PreachScreenState extends State<PreachScreen> {
                                       decoration: InputDecoration(
                                         hintText: tabs[_selectedIndex]
                                             ["placeholder"],
-                                        hintStyle: StylesApp(context).textStyleBody12.copyWith(
-                                          color:StyleColor.grayMedium
-                                        ),
+                                        hintStyle: StylesApp(context)
+                                            .textStyleBody12
+                                            .copyWith(
+                                                color: StyleColor.grayMedium),
                                         filled: true,
                                         fillColor: Colors.grey[50],
                                         contentPadding: EdgeInsets.symmetric(
@@ -947,7 +932,8 @@ class MessageCardTablet extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: StyleColor.turquoise.withValues(alpha: 0.1),
+                              color:
+                                  StyleColor.turquoise.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -971,126 +957,3 @@ class MessageCardTablet extends StatelessWidget {
   }
 }
 
-// Mantener el MessageCard original para móvil sin cambios
-class MessageCard extends StatefulWidget {
-  final String id;
-  final String imageUrl;
-  final String urlVideo;
-  final String title;
-  final String author;
-  final String date;
-  final List<ReferenceModel>? references;
-  final Icon iconFavorite;
-  final void Function()? onPressed;
-
-  const MessageCard({
-    super.key,
-    required this.imageUrl,
-    required this.title,
-    required this.author,
-    required this.date,
-    this.references,
-    required this.urlVideo,
-    this.onPressed,
-    required this.iconFavorite,
-    required this.id,
-  });
-
-  @override
-  State<MessageCard> createState() => _MessageCardState();
-}
-
-class _MessageCardState extends State<MessageCard> {
-  @override
-  Widget build(BuildContext context) {
-    Preach valores = Preach(
-      id: widget.id,
-      title: widget.title,
-      video: VideoPreach(img: null, url: widget.urlVideo),
-      preachers: widget.author,
-      references: widget.references,
-      createdAt: widget.date,
-    );
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => VideoPlayerScreen(data: valores),
-          ),
-        );
-      },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          children: [
-            // Imagen
-            Expanded(
-              flex: 1,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: GestureDetector(
-                    key: GlobalKey(),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              VideoPlayerScreen(data: valores),
-                        ),
-                      );
-                    },
-                    child: SizedBox(
-                      width: 200,
-                      height: 110,
-                      child: FadeInImage.memoryNetwork(
-                        placeholder: kTransparentImage,
-                        image: widget.imageUrl,
-                        width: 100,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-                    )),
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Contenido
-            Expanded(
-              flex: 1,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.title,
-                    style: StylesApp(context).textStyleBody14.copyWith(
-                          color: StyleColor.turquoise,
-                        ),
-                    overflow: TextOverflow.visible,
-                    softWrap: true,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.author.replaceAll(". ", ".\n"),
-                    style: StylesApp(context).textStyleBody14.copyWith(
-                          color: StyleColor.orange,
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.date,
-                    style: StylesApp(context).textStyleBody14.copyWith(
-                        color: Colors.black, fontWeight: FontWeight.w800),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: widget.iconFavorite,
-              onPressed: widget.onPressed,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

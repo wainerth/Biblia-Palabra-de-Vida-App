@@ -781,7 +781,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                             margin: EdgeInsets.only(bottom: 20.0),
                             decoration: BoxDecoration(
                               color: _getDifficultyColor(difficulty)
-                                  .withOpacity(0.1),
+                                  .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12.0),
                               border: Border.all(
                                 color: _getDifficultyColor(difficulty),
@@ -828,7 +828,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                           Container(
                             padding: EdgeInsets.all(20.0),
                             decoration: BoxDecoration(
-                              color: StyleColor.blueLight.withOpacity(0.1),
+                              color: StyleColor.blueLight.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12.0),
                               border: Border.all(
                                 color: StyleColor.cosmicBlue,
@@ -887,7 +887,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                             margin: EdgeInsets.only(top: 20.0),
                             padding: EdgeInsets.all(16.0),
                             decoration: BoxDecoration(
-                              color: StyleColor.orange.withOpacity(0.05),
+                              color: StyleColor.orange.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                             child: Column(
@@ -954,7 +954,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                                   .btnWidgetSmall
                                   .copyWith(
                                     backgroundColor: WidgetStatePropertyAll(
-                                      StyleColor.grayMedium.withOpacity(0.8),
+                                      StyleColor.grayMedium.withValues(alpha: 0.8),
                                     ),
                                   ),
                               onPressed: () {
@@ -1000,7 +1000,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                         //   margin: EdgeInsets.only(bottom: 16.0),
                         //   padding: EdgeInsets.all(12.0),
                         //   decoration: BoxDecoration(
-                        //     color: StyleColor.turquoise.withOpacity(0.1),
+                        //     color: StyleColor.turquoise.withValues(alpha: 0.1),
                         //     borderRadius: BorderRadius.circular(12.0),
                         //   ),
                         //   child: Row(
@@ -1223,8 +1223,8 @@ class _CountDownWidgetState extends State<CountDownWidget> {
       ),
       decoration: BoxDecoration(
         color: _currentCount <= 10
-            ? StyleColor.redLight.withOpacity(0.2)
-            : StyleColor.blueLight.withOpacity(0.2),
+            ? StyleColor.redLight.withValues(alpha: 0.2)
+            : StyleColor.blueLight.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(widget.isTablet ? 12.0 : 8.0),
         border: Border.all(
           color:

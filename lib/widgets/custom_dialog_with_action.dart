@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/material.dart';
 
 enum DialogTypeAction { info, warning, error }
@@ -25,8 +26,8 @@ class CustomDialogWithAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
-    
+    final _isTablet = isTablet(context);
+
     IconData icon;
     Color color;
     String title;
@@ -51,42 +52,42 @@ class CustomDialogWithAction extends StatelessWidget {
 
     return AlertDialog(
       scrollable: true,
-      insetPadding: isTablet 
+      insetPadding: _isTablet
           ? EdgeInsets.symmetric(horizontal: 100, vertical: 100)
           : EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      contentPadding: EdgeInsets.all(isTablet ? 24 : 16),
+      contentPadding: EdgeInsets.all(_isTablet ? 24 : 16),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isTablet ? 20 : 16),
+        borderRadius: BorderRadius.circular(_isTablet ? 20 : 16),
       ),
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: isTablet ? 28 : 24),
+          Icon(icon, color: color, size: _isTablet ? 28 : 24),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               title,
               style: StylesApp(context).textStyleBody16.copyWith(
-                color: color,
-                fontSize: isTablet ? 20 : 16,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: color,
+                    fontSize: _isTablet ? 20 : 16,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
         ],
       ),
       content: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: isTablet ? 400 : 300,
-          maxHeight: isTablet ? 300 : 200,
+          maxWidth: _isTablet ? 400 : 300,
+          maxHeight: _isTablet ? 300 : 200,
         ),
         child: SingleChildScrollView(
           child: Text(
             message,
             style: StylesApp(context).textStyleBody15.copyWith(
-              fontSize: isTablet ? 17 : 15,
-              color: Colors.black87,
-            ),
+                  fontSize: _isTablet ? 17 : 15,
+                  color: Colors.black87,
+                ),
           ),
         ),
       ),
@@ -99,41 +100,41 @@ class CustomDialogWithAction extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,
                 padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 24 : 16,
-                  vertical: isTablet ? 12 : 8,
+                  horizontal: _isTablet ? 24 : 16,
+                  vertical: _isTablet ? 12 : 8,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(isTablet ? 10 : 8),
+                  borderRadius: BorderRadius.circular(_isTablet ? 10 : 8),
                 ),
               ),
               child: Text(
                 buttonOk,
                 style: StylesApp(context).textStyleBody14.copyWith(
-                  fontSize: isTablet ? 16 : 14,
-                  color: Colors.white,
-                ),
+                      fontSize: _isTablet ? 16 : 14,
+                      color: Colors.white,
+                    ),
               ),
             ),
             if (showAction) ...[
-              SizedBox(width: isTablet ? 16 : 12),
+              SizedBox(width: _isTablet ? 16 : 12),
               OutlinedButton(
                 onPressed: actionCallback,
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isTablet ? 24 : 16,
-                    vertical: isTablet ? 12 : 8,
+                    horizontal: _isTablet ? 24 : 16,
+                    vertical: _isTablet ? 12 : 8,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(isTablet ? 10 : 8),
+                    borderRadius: BorderRadius.circular(_isTablet ? 10 : 8),
                   ),
                   side: BorderSide(color: color),
                 ),
                 child: Text(
                   textButtonAction,
                   style: StylesApp(context).textStyleBody14.copyWith(
-                    fontSize: isTablet ? 16 : 14,
-                    color: color,
-                  ),
+                        fontSize: _isTablet ? 16 : 14,
+                        color: color,
+                      ),
                 ),
               ),
             ],
@@ -143,4 +144,3 @@ class CustomDialogWithAction extends StatelessWidget {
     );
   }
 }
-

@@ -206,7 +206,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           // border: Border.all( color:  StyleColor.black),
           ),
       child: Column(
-        // mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -219,12 +219,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           } else ...{
             SizedBox(height: 50),
           },
-          _buildDescriptionTableBox(
-            context,
-            subTitle,
-            description,
-            StylesApp(context).textStyleTitle,
-            StylesApp(context).textStyleTitleAlegra,
+          Expanded(
+            child: _buildDescriptionTableBox(
+              context,
+              subTitle,
+              description,
+              StylesApp(context).textStyleTitle,
+              StylesApp(context).textStyleTitleAlegra,
+            ),
           ),
           // SizedBox(height: 20), // Espacio extra
         ],
@@ -513,33 +515,36 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
               ),
             ),
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.5,
-              // minHeight: 200.0,
-            ),
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFD8C43),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 24.0, horizontal: 24.0),
-                child: Text(
-                  description,
-                  textAlign: TextAlign.center,
-                  style: fontBody.copyWith(
-                    fontSize: 22,
-                    color: Colors.white,
+          Expanded(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.5,
+                // minHeight: 200.0,
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFD8C43),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0),
+                  child: Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    style: fontBody.copyWith(
+                      fontSize: 22,
+                      height: 1,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

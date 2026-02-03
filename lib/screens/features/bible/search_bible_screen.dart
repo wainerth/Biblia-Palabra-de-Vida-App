@@ -1,5 +1,7 @@
 // screens/search_bible_route_screen.dart
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/search_by_book_widget.dart';
@@ -34,12 +36,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
   bool isInitialized = false;
   var _selectedIndex = 0;
 
-  List tabs = [
-    {"title": 'Libro', "placeholder": 'Buscar por libro'},
-    {"title": 'Texto', "placeholder": 'Buscar por texto'},
-    {"title": 'Tema', "placeholder": 'Buscar por tema'},
-    {"title": 'Personajes', "placeholder": 'Buscar personajes'},
-  ];
+  List tabs = AppConstants.tabsSearchBible;
 
   @override
   void initState() {
@@ -57,7 +54,9 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
 
       setState(() => isInitialized = true);
     } catch (e) {
-      print("Error initializing search screen: $e");
+      if (kDebugMode) {
+        print("Error initializing search screen: $e");
+      }
     }
   }
 
@@ -123,7 +122,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                   int index = entry.key;
                   var tab = entry.value;
                   bool isSelected = _selectedIndex == index;
-          
+
                   return GestureDetector(
                     onTap: () => setState(() => _selectedIndex = index),
                     child: Container(
@@ -142,7 +141,8 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                           ),
                         ),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Row(
                         children: [
                           Icon(
@@ -154,10 +154,11 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                           Expanded(
                             child: Text(
                               tab["title"],
-                              style: StylesApp(context).textStyleBody14.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                              style:
+                                  StylesApp(context).textStyleBody14.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -172,7 +173,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -202,7 +203,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
               color: currentTheme.backgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
+                  color: Colors.black.withValues(alpha: 0.25),
                   spreadRadius: 0,
                   offset: const Offset(0, 4),
                 )

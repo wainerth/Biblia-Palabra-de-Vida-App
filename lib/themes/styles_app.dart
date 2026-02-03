@@ -14,7 +14,7 @@ class StylesApp {
   }
 
   bool get isTablet {
-    final shortestSide = MediaQuery.sizeOf(context).shortestSide;
+    final shortestSide = MediaQuery.sizeOf(context).width;
     return shortestSide > 600;
   }
 
@@ -117,9 +117,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 18.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 18.sp;
+      return 18;
     } else {
-      return 16.sp;
+      return 16;
     }
   }
 
@@ -229,9 +229,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 15.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 16.sp;
+      return 16;
     } else {
-      return 16.sp;
+      return 16;
     }
   }
 
@@ -285,9 +285,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 18.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 18.sp;
+      return 18;
     } else {
-      return 16.sp;
+      return 16;
     }
   }
 
@@ -299,9 +299,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 22.sp;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 22.sp;
+      return 30;
     } else {
-      return 16.sp;
+      return 16;
     }
   }
 
@@ -327,9 +327,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return Size(double.infinity, 65.0.sp);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(double.infinity, 80.0.sp);
+      return Size(double.infinity, 60.0);
     } else {
-      return Size(700.0.sp, 80.0.sp);
+      return Size(400.0, 60.0);
     }
   }
 
@@ -908,9 +908,9 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().lg) {
       return Size(90.0, 90.0);
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return Size(150.0, 250.0);
+      return Size(100.0, 100.0);
     } else {
-      return Size(59.0, 59.0);
+      return Size(100.0, 100.0);
     }
   }
 
@@ -1022,28 +1022,3 @@ class SizeScreensApp {
   final double lg = 720;
   final double xlg = 1024; //tabletas
 }
-
-// Teléfonos pequeños:
-
-// Ancho: 320px - 360px
-// Altura: 568px - 640px
-// Teléfonos medianos:
-
-// Ancho: 375px - 414px
-// Altura: 667px - 736px
-// Teléfonos grandes:
-
-// Ancho: 414px - 480px
-// Altura: 736px - 853px
-// Tabletas pequeñas:
-
-// Ancho: 600px - 720px
-// Altura: 960px - 1024px
-// Tabletas grandes:
-
-// Ancho: 768px - 1024px
-// Altura: 1024px - 1366px
-// Pantallas de escritorio:
-
-// Ancho: 1024px y superior
-// Altura: 768px y superior

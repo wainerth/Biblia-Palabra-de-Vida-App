@@ -287,6 +287,7 @@ class PreferencesManager {
     await _ensureInitialized();
     await _prefs!.setString(_deviceInfoKey, jsonEncode(deviceData));
   }
+
   // Métodos para manejo de modelos complejos
   Future<String> getLastPlayDate() async {
     await _ensureInitialized();
@@ -308,5 +309,15 @@ class PreferencesManager {
   Future<void> clearOne(String key) async {
     await _ensureInitialized();
     await _prefs!.remove(key);
+  }
+
+  Future<void> setTtsEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tts_enabled', value);
+  }
+
+  Future<bool?> getTtsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('tts_enabled');
   }
 }

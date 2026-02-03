@@ -31,7 +31,6 @@ class AuthenticationProvider extends ChangeNotifier {
     _isCheckingAuth = true;
     _isLoading = true;
 
-
     try {
       // Obtener datos almacenados
       String? userToken = await PreferencesManager().getUserToken();
@@ -309,7 +308,10 @@ class AuthenticationProvider extends ChangeNotifier {
       final userResponse = await loginGoogle();
       var error = userResponse.error;
       if (error != null) {
-        return ResponseData(data: null, userFriendlyError: userResponse.userFriendlyError, error: error);
+        return ResponseData(
+            data: null,
+            userFriendlyError: userResponse.userFriendlyError,
+            error: error);
       }
       final userId = userResponse.data["id"];
       final token = userResponse.data["userJwtToken"]["token"];
@@ -330,28 +332,45 @@ class AuthenticationProvider extends ChangeNotifier {
     String? error;
     try {
       // get to mutation  GraphQl
-      final registerResponse = await register(dataToRegister);
+      final registerResponse = await initializedRegister(dataToRegister);
       if (registerResponse.error != null) {
         return ResponseData(
             data: null,
             userFriendlyError: registerResponse.userFriendlyError,
             error: registerResponse.error);
       }
-      final userId = registerResponse.data["id"];
-      final token = registerResponse.data["userJwtToken"]["token"];
-      await PreferencesManager().setUserToken(token);
+      final data = ResponseInitializedRegister.fromJson(registerResponse.data);
 
-      // consultamos perfil del usuario
-      final ResponseData response = await loadProfileUser(userId, token);
-      error = response.error;
-      if (error != null) {
+      if (data.success &&
+          (data.message.contains(
+                  'Registro actualizado. Te hemos enviado un nuevo código de verificación.') ||
+              data.message.contains(
+                  'Registro exitoso. Te hemos enviado un código de verificación a tu correo.'))) {
         return ResponseData(
-            data: null,
-            error: error,
-            userFriendlyError: response.userFriendlyError);
-      }
+          data: VerificationResponse(
+            userId: data.userId,
+            showVerifyPinModal: true,
+          ).toMap(),
+          error: null,
+        );
+      } else {
+        // seguimos flujo normal
+        final userId = registerResponse.data["id"];
+        final token = registerResponse.data["userJwtToken"]["token"];
+        await PreferencesManager().setUserToken(token);
 
-      return ResponseData(data: response.data, error: error);
+        // consultamos perfil del usuario
+        final ResponseData response = await loadProfileUser(userId, token);
+        error = response.error;
+        if (error != null) {
+          return ResponseData(
+              data: null,
+              error: error,
+              userFriendlyError: response.userFriendlyError);
+        }
+
+        return ResponseData(data: response.data, error: error);
+      }
     } catch (e) {
       return handleGenericError(e, "Registrar Usuario");
     }
@@ -421,4 +440,33 @@ class AuthenticationProvider extends ChangeNotifier {
     token = null;
     notifyListeners();
   }
+
+  Future<ResponseData> verifyPinWithApi(String email, String pin) async {
+    // llamamos a verificar pin
+    final verifyPin = await verifyPinAndCompleteRegistration(email, pin);
+    if (verifyPin.error != null) {
+      return ResponseData(data: null, error: verifyPin.error);
+    }
+
+    // lamamos a leer perfil del usuario
+    try {
+      final userId = verifyPin.data["id"];
+      final token = verifyPin.data["userJwtToken"]["token"];
+
+      await PreferencesManager().setUserToken(token);
+
+      // consultamos perfil del usuario
+      final ResponseData response = await loadProfileUser(userId, token);
+
+      if (response.error != null) {
+        return ResponseData(data: null, error: response.error);
+      }
+
+      return ResponseData(data: response.data, error: null);
+    } catch (e) {
+      return handleGenericError(e, "Login con usuario y contraseña");
+    }
+  }
+
+  Future<void> resendVerificationCode(email) async {}
 }

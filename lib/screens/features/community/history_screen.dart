@@ -1,4 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -51,7 +53,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       _confettiController = ConfettiController(duration: Duration(seconds: 10));
       _initTTS(); // Inicializar TTS
       _generateData(context);
-      // _controllerPage.addListener(_pageListener);
       getFontSizeText();
     });
   }
@@ -152,7 +153,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
             .map((story) => History.fromJson(removeTypename(story)))
             .cast<History>()
             .toList();
-
+        // stories.insert(
+        //     0,
+        //     History(
+        //       id: '11111111111',
+        //       orderCard: 1,
+        //       level: IntermediateLevel(unLockLevel: true, levelNumber: 2),
+        //       status: 1,
+        //       text:
+        //           ' texto normal  y texto en idioma  וַיָּמָת יוֹסֵף בֶּן־מֵאָה וָעֶשֶׂר שָׁנִים וַיַּחַנְטוּ אֹתוֹ וַיִּישֶׂם בָּאָרוֹן בְּמִצְרָֽיִם',
+        //       img: Img(urlImg: 'assets/intro.png'),
+        //       audio: null,
+        //       video: null,
+        //     ));
+        // stories.insert(
+        //     1,
+        //     History(
+        //       id: '11111111111',
+        //       orderCard: 1,
+        //       level: IntermediateLevel(unLockLevel: true, levelNumber: 2),
+        //       status: 1,
+        //       text:
+        //           'Love is patient, love is kind. It does not envy, it does not boast, it is not proud. It does not dishonor others, it is not self-seeking, it is not easily angered, it keeps no record of wrongs.',
+        //       img: Img(urlImg: 'assets/intro.png'),
+        //       audio: null,
+        //       video: null,
+        //     ));
         isPlaying = true;
       });
       _togglePlayPause(stories[0]);
@@ -947,6 +973,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     SizedBox(width: 8),
                     Icon(Icons.text_increase,
                         size: 20, color: Colors.grey[600]),
+                    IconButton(
+                      onPressed: () {
+                        _copyStory(stories[storyIndex]);
+                      },
+                      icon: Icon(
+                        Icons.copy,
+                        color: StyleColor.turquoise,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -1269,7 +1304,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               color: Colors.black,
                             ),
                       ),
-                    )
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        _copyStory(stories[storyIndex]);
+                      },
+                      icon: Icon(
+                        Icons.copy,
+                        color: StyleColor.turquoise,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1799,6 +1843,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     flutterTts = FlutterTts();
 
     await flutterTts.setLanguage("es-ES"); // Configurar idioma
+    await flutterTts.setSharedInstance(true);
+
+    // 2. Establecer idioma hebreo
     // await flutterTts.setVoice({"name": "es-es-x-ana-local", "locale": "es-ES"});
     await flutterTts.setSpeechRate(0.5); // Velocidad de habla (0-1)
     await flutterTts.setVolume(1.0); // Volumen (0-1)
@@ -1823,6 +1870,150 @@ class _HistoryScreenState extends State<HistoryScreen> {
       showSnackBar("Error en TTS: $msg", type: SnackBarType.error);
     });
   }
+// Agrega estas funciones en tu clase _HistoryScreenState
+
+  String _detectLanguage(String text) {
+    // 1. Primero verificar hebreo (más específico)
+    final hebrewRegex = RegExp(r'[\u0590-\u05FF\uFB1D-\uFB4F]');
+    final hebrewCount = hebrewRegex.allMatches(text).length;
+
+    if (hebrewCount > 0) {
+      print("✅ Detectado HEBREO por caracteres hebreos: $hebrewCount");
+      return "hebrew";
+    }
+
+    // 2. Palabras clave ESPECÍFICAS en español (prioridad alta)
+    final spanishKeywords = AppConstants.spanishKeywords;
+
+    // 3. Palabras clave en inglés
+    final englishKeywords = AppConstants.englishKeywords;
+
+    // 4. Contar ocurrencias
+    int spanishScore = 0;
+    int englishScore = 0;
+
+    final textLower = text.toLowerCase();
+
+    for (final keyword in spanishKeywords) {
+      // Buscar palabra completa (con límites de palabra)
+      final pattern = RegExp(r'\b' + RegExp.escape(keyword) + r'\b');
+      spanishScore += pattern.allMatches(textLower).length;
+    }
+
+    for (final keyword in englishKeywords) {
+      final pattern = RegExp(r'\b' + RegExp.escape(keyword) + r'\b');
+      englishScore += pattern.allMatches(textLower).length;
+    }
+
+    // 5. Verificar tildes españolas (caracteres especiales)
+    final spanishTildesRegex = RegExp(r'[áéíóúÁÉÍÓÚñÑ]');
+    final spanishTildesCount = spanishTildesRegex.allMatches(text).length;
+    spanishScore += spanishTildesCount * 3; // Peso extra por tildes
+
+    if (kDebugMode) {
+      print("""
+  🔍 Análisis de idioma:
+  - Puntos español: $spanishScore (keywords: ${spanishScore - spanishTildesCount}, tildes: $spanishTildesCount)
+  - Puntos inglés: $englishScore
+  """);
+    }
+
+    // 6. Decidir idioma (umbral mínimo)
+    if (spanishScore > englishScore && spanishScore >= 2) {
+      if (kDebugMode) {
+        print("✅ Idioma detectado: ESPAÑOL");
+      }
+      return "spanish";
+    } else if (englishScore > spanishScore && englishScore >= 2) {
+      if (kDebugMode) {
+        print("✅ Idioma detectado: INGLÉS");
+      }
+      return "english";
+    }
+
+    // 7. Si está muy parejo o no hay keywords, usar REGLAS POR DEFECTO
+    final totalLetters =
+        text.replaceAll(RegExp(r'[^a-zA-ZáéíóúÁÉÍÓÚñÑ]'), '').length;
+    if (totalLetters > 0) {
+      // Porcentaje de tildes
+      final tildesPercentage = spanishTildesCount / totalLetters;
+
+      if (tildesPercentage > 0.02) {
+        // 2% de tildes → español
+        if (kDebugMode) {
+          print("✅ Español detectado por tildes ($tildesPercentage%)");
+        }
+        return "spanish";
+      }
+    }
+
+    // 8. DEFAULT: Español para textos bíblicos (tu caso)
+    print("⚠️ Idioma no claro, usando ESPAÑOL por defecto");
+    return "spanish";
+  }
+
+  /// Configurar FlutterTTS según idioma detectado
+  Future<void> _configureTTSForLanguage(String language) async {
+    try {
+      switch (language.toLowerCase()) {
+        case "hebrew":
+        case "he":
+        case "iw":
+          // Intentar diferentes códigos de hebreo
+          final hebrewCodes = ["he-IL", "he", "iw-IL", "iw"];
+          bool configured = false;
+
+          for (final code in hebrewCodes) {
+            if (await flutterTts.isLanguageAvailable(code)) {
+              await flutterTts.setLanguage(code);
+              await flutterTts.setSpeechRate(0.3); // Más lento para hebreo
+              if (kDebugMode) {
+                print("✅ TTS configurado para HEBREO con código: $code");
+              }
+              configured = true;
+              break;
+            }
+          }
+
+          if (!configured) {
+            if (kDebugMode) {
+              print("⚠️ Voz hebrea no disponible, usando español");
+            }
+            await flutterTts.setLanguage("es-ES");
+          }
+          break;
+
+        case "spanish":
+        case "es":
+          await flutterTts.setLanguage("es-ES");
+          await flutterTts.setSpeechRate(_speechRate);
+          if (kDebugMode) {
+            print("✅ TTS configurado para ESPAÑOL");
+          }
+          break;
+
+        case "english":
+        case "en":
+          await flutterTts.setLanguage("en-US");
+          await flutterTts.setSpeechRate(_speechRate);
+          if (kDebugMode) {
+            print("✅ TTS configurado para INGLÉS");
+          }
+          break;
+
+        default:
+          await flutterTts.setLanguage("es-ES");
+          if (kDebugMode) {
+            print("✅ TTS configurado para ESPAÑOL (por defecto)");
+          }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("❌ Error configurando TTS: $e");
+      }
+      await flutterTts.setLanguage("es-ES"); // Fallback
+    }
+  }
 
   String _getSpeedLabel(double speed) {
     if (speed <= 0.4) return 'Lento';
@@ -1842,7 +2033,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
         RegExp(r'\{\(([^\/\)]+)(?:\/[^\)]*)?\)\}'),
         (Match match) => (match.group(1) ?? '').trim(),
       );
-// 2. Eliminar todos los emojis del texto
+      // 2. DETECTAR IDIOMA automáticamente
+      final detectedLanguage = _detectLanguage(cleanText);
+
+      // 3. CONFIGURAR TTS para ese idioma
+      await _configureTTSForLanguage(detectedLanguage);
+
+      // 4. Eliminar todos los emojis del texto
       String textWithoutEmojis = cleanText.replaceAll(
         RegExp(
           r'[\u{1F600}-\u{1F64F}' // Emoticons
@@ -2254,5 +2451,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   initConfetti() {
     _confettiController.play();
+  }
+
+  void _copyStory(History story) {
+    Clipboard.setData(ClipboardData(text: story.text));
+    showSnackBar("Historia copiada al portapapeles",
+        type: SnackBarType.success);
   }
 }

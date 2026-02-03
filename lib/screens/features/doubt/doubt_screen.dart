@@ -2,17 +2,12 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DoubtScreen extends StatelessWidget {
   const DoubtScreen({super.key});
-
-  // Método para detectar si es tablet
-  bool _isTablet(BuildContext context) {
-    final shortestSide = MediaQuery.of(context).size.shortestSide;
-    return shortestSide >= 600;
-  }
 
   // Método para determinar la acción del botón de retroceso
   void _handleBackButton(BuildContext context) {
@@ -30,7 +25,7 @@ class DoubtScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isTablet = _isTablet(context);
+    final bool _isTablet = isTablet(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF12CBC4),
@@ -58,14 +53,15 @@ class DoubtScreen extends StatelessWidget {
           style: StylesApp(context).textStyleBody20.copyWith(
                 color: StyleColor.orange,
                 fontFamily: 'LuckiestGuy',
-                fontSize: isTablet ? 24 : 20,
+                fontSize: _isTablet ? 24 : 20,
               ),
         ),
       ),
       body: SafeArea(
-        child: isTablet
-            ? _buildTabletLayout(context)
-            : _buildMobileLayout(context),
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(context),
+          tablet: _buildTabletLayout(context),
+        ),
       ),
     );
   }
@@ -183,7 +179,8 @@ class DoubtScreen extends StatelessWidget {
               if (await canLaunchUrl(emailLaunchUri)) {
                 await launchUrl(emailLaunchUri);
               } else {
-                showSnackBar("'No se pudo abrir la aplicación de correo'", type: SnackBarType.error);
+                showSnackBar("'No se pudo abrir la aplicación de correo'",
+                    type: SnackBarType.error);
               }
             },
             child: Padding(
@@ -301,8 +298,8 @@ class DoubtScreen extends StatelessWidget {
                       if (await canLaunchUrl(emailLaunchUri)) {
                         await launchUrl(emailLaunchUri);
                       } else {
-                        showSnackBar("No se pudo abrir la aplicación de correo", type: SnackBarType.error);
-
+                        showSnackBar("No se pudo abrir la aplicación de correo",
+                            type: SnackBarType.error);
                       }
                     },
                     child: Column(
@@ -431,7 +428,8 @@ class DoubtScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+          border:
+              Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
         ),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -481,8 +479,8 @@ class DoubtScreen extends StatelessWidget {
         if (await canLaunchUrl(emailLaunchUri)) {
           await launchUrl(emailLaunchUri);
         } else {
-          showSnackBar("No se pudo abrir la aplicación de correo", type: SnackBarType.error);
-          
+          showSnackBar("No se pudo abrir la aplicación de correo",
+              type: SnackBarType.error);
         }
       },
       style: ElevatedButton.styleFrom(

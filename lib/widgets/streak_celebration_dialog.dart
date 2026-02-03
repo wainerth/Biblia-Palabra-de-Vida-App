@@ -3,6 +3,7 @@ import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/services/audio_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/material.dart';
 
 class StreakCelebrationDialog extends StatefulWidget {
@@ -66,14 +67,14 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
 
   @override
   Widget build(BuildContext context) {
-    bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+    bool _isTablet =  isTablet(context);
     return Dialog(
 
       backgroundColor: Colors.transparent,
       elevation: 0,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth:isTablet ?  400 : double.infinity,
+          maxWidth:_isTablet ?  400 : double.infinity,
         ),
         child: ScaleTransition(
           scale: _scaleAnimation,

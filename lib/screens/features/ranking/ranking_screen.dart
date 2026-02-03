@@ -103,20 +103,17 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     }
   }
 
-  // Nueva función para determinar si es tablet
-  bool _isTablet(BuildContext context) {
-    final shortestSide = MediaQuery.of(context).size.shortestSide;
-    return shortestSide >= 600;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bool isTablet = _isTablet(context);
-    
+    bool _isTablet = isTablet(context);
+
     return Scaffold(
       backgroundColor: StyleColor.turquoise,
       body: SafeArea(
-        child: isTablet ? _buildTabletLayout() : _buildMobileLayout(),
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(),
+          tablet: _buildTabletLayout(),
+        ),
       ),
     );
   }
@@ -172,7 +169,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
           ),
           child: Column(
             children: [
-              if (!noActiveLigue) 
+              if (!noActiveLigue)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: LeagueTimeRemaining(),
@@ -181,7 +178,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
             ],
           ),
         ),
-        
+
         // Columna derecha: Ranking (70% del ancho)
         Expanded(
           child: Container(
@@ -190,9 +187,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: noActiveLigue
-                ? _buildNoLeagueWidget()
-                : _buildRankingList(),
+            child: noActiveLigue ? _buildNoLeagueWidget() : _buildRankingList(),
           ),
         ),
       ],
@@ -220,7 +215,9 @@ class _RankingScreenViewState extends State<RankingScreenView> {
         margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isActive ? StyleColor.turquoise.withValues(alpha: 0.1) : Colors.white,
+          color: isActive
+              ? StyleColor.turquoise.withValues(alpha: 0.1)
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isActive ? StyleColor.turquoise : Colors.transparent,
@@ -262,9 +259,10 @@ class _RankingScreenViewState extends State<RankingScreenView> {
               child: Text(
                 league.name,
                 style: StylesApp(context).textStyleBody16.copyWith(
-                  color: isActive ? StyleColor.turquoise : Colors.black,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                ),
+                      color: isActive ? StyleColor.turquoise : Colors.black,
+                      fontWeight:
+                          isActive ? FontWeight.bold : FontWeight.normal,
+                    ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -408,7 +406,9 @@ class _RankingScreenViewState extends State<RankingScreenView> {
 
   Widget _buildRankingItem(int index) {
     final member = members[index];
-    final isCurrentUser = (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username);
+    final isCurrentUser =
+        (members[index].userId == userData?.currentUser?.userId &&
+            members[index].username == userData?.currentUser?.username);
     final position = index + 1;
 
     if (position == 6) return _buildPromotionZone(index);
@@ -434,7 +434,9 @@ class _RankingScreenViewState extends State<RankingScreenView> {
         _buildMemberRow(
           index: index,
           member: members[index],
-          isCurrentUser: (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username),
+          isCurrentUser:
+              (members[index].userId == userData?.currentUser?.userId &&
+                  members[index].username == userData?.currentUser?.username),
           showSpecialZones: true,
         ),
       ],
@@ -453,7 +455,9 @@ class _RankingScreenViewState extends State<RankingScreenView> {
         _buildMemberRow(
           index: index,
           member: members[index],
-          isCurrentUser: (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username),
+          isCurrentUser:
+              (members[index].userId == userData?.currentUser?.userId &&
+                  members[index].username == userData?.currentUser?.username),
           showSpecialZones: true,
         ),
       ],

@@ -6,6 +6,7 @@ import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/services/country_search_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/simple_timezone.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -438,25 +439,7 @@ void showSnackBar(String message, {SnackBarType type = SnackBarType.info}) {
     ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(snackBar);
   }
 }
-// bool isTablet(BuildContext? context) {
-//   // Use window metrics instead of MediaQuery to avoid accessing a possibly
-//   // deactivated BuildContext (e.g. from dispose).
-//   final window = WidgetsBinding.instance.window;
-//   final physicalSize = window.physicalSize;
-//   final pixelRatio = window.devicePixelRatio;
-//   final logicalSize = physicalSize / pixelRatio;
-//   final size = logicalSize;
-//   final aspectRatio = size.width / size.height;
-//   final shortestSide = size.shortestSide;
 
-//   // Para Chrome, considera también el aspect ratio
-//   if (shortestSide > 600) return true;
-
-//   // Si el ancho es grande pero el aspect ratio es de desktop
-//   if (size.width > 800 && aspectRatio > 1.3) return true;
-
-//   return false;
-// }
 bool isTablet(BuildContext? context) {
   try {
     WidgetsFlutterBinding.ensureInitialized();
@@ -468,7 +451,7 @@ bool isTablet(BuildContext? context) {
     final logicalSize = view.physicalSize / view.devicePixelRatio;
 
     // Lógica simple: si el lado más corto es > 600px, es tablet
-    return logicalSize.shortestSide > 600;
+    return logicalSize.shortestSide > 550.0;
   } catch (e) {
     return false;
   }
@@ -477,14 +460,9 @@ bool isTablet(BuildContext? context) {
 // Función para obtener el timezone del dispositivo
 Future<String> getDeviceTimeZone() async {
   try {
-    // Inicializar timezone database
-    tz.initializeTimeZones();
-
-    // Obtener la ubicación local
-    final location = tz.local;
-
     // Obtener el nombre del timezone (ej: "America/New_York")
-    return location.name;
+    final userTimezone = SimpleTimeZone.currentIANA;
+    return userTimezone;
   } catch (e) {
     // Fallback si hay error
     return 'UTC';
