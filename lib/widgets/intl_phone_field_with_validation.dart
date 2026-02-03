@@ -3,6 +3,7 @@ import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl_phone_field/country_picker_dialog.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
 import 'package:intl_phone_field/countries.dart';
@@ -48,7 +49,17 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                
                 IntlPhoneField(
+                  pickerDialogStyle: PickerDialogStyle(
+                    countryNameStyle: StylesApp(field.context).textStyleBody16.copyWith(
+                      color: StyleColor.black
+                    ),
+                    backgroundColor: Colors.white,
+                    width: isTablet(field.context) 
+                    ? 400.0
+                    : double.infinity,
+                  ),
                   initialCountryCode: determineInitialCountryCode(),
                   controller: controller,
                   style: StylesApp(field.context)
@@ -62,9 +73,11 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                       disableLengthCheck, // 🔹 DESACTIVA VALIDACIÓN POR DEFECTO
                   keyboardType: TextInputType.phone,
                   inputFormatters: [], // 🔹 PERMITE MÁS FLEXIBILIDAD
+                   
                   decoration: StylesApp(field.context)
                       .inputDecorationOutlineStyle
                       .copyWith(
+                       
                         hintText: "Número de teléfono",
                         errorText: field.hasError ? field.errorText : null,
                         border: OutlineInputBorder(

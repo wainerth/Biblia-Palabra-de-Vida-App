@@ -2447,22 +2447,31 @@ class _BibleScreenState extends State<BibleScreen> {
       LoadingService().hideLoading();
       if (mounted) {
         showGeneralDialog(
+
           context: context,
           barrierDismissible: false,
           transitionDuration: Duration(milliseconds: 500),
           pageBuilder: (_, __, ___) {
-            return DialogFavoriteVerseWidget(
-              currentTheme: currentTheme,
-              paginationInfo: objPagination,
-              versionId: currentVersion!.id,
-              favoriteVerses: listFavorite,
-              onDeleted: (verseId) {
-                final indexToDelete = _favoriteVerses
-                    .indexWhere((verse) => verse.verse.id == verseId);
-                if (indexToDelete != -1) {
-                  setState(() => _favoriteVerses.removeAt(indexToDelete));
-                }
-              },
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isTablet(context) ? 600 : double.infinity,
+                ),
+                child: DialogFavoriteVerseWidget(
+                  currentTheme: currentTheme,
+                  paginationInfo: objPagination,
+                  versionId: currentVersion!.id,
+                  favoriteVerses: listFavorite,
+                  onDeleted: (verseId) {
+                    final indexToDelete = _favoriteVerses
+                        .indexWhere((verse) => verse.verse.id == verseId);
+                    if (indexToDelete != -1) {
+                      setState(() => _favoriteVerses.removeAt(indexToDelete));
+                    }
+                  },
+                ),
+              ),
             );
           },
         );

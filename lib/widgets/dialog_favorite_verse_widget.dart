@@ -62,13 +62,17 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        // appBar: AppBar(),
+        backgroundColor: Colors.transparent,
         body: Container(
+          clipBehavior: Clip.antiAliasWithSaveLayer,
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             color: widget.currentTheme.backgroundColor,
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8.0),
+              topRight: Radius.circular(8.0),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,6 +123,7 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
                             itemCount: _favoriteVerses.length,
                             itemBuilder: (BuildContext context, int index) {
                               return Container(
+                                
                                 margin: EdgeInsets.only(
                                     top: 6.0,
                                     left: 4.0,
@@ -314,8 +319,8 @@ class _DialogFavoriteVerseWidgetState extends State<DialogFavoriteVerseWidget> {
     if (responseDelete.error != null) {
       LoadingService().hideLoading();
       if (mounted) {
-      await showCustomDialog(context,
-          message: responseDelete.error!, dialogType: DialogType.error);
+        await showCustomDialog(context,
+            message: responseDelete.error!, dialogType: DialogType.error);
       }
       return;
     } else {
