@@ -1024,7 +1024,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(
-                              width: 59,
+                              width: isTablet(context) ? 59 : 30,
                               child: Image.asset(
                                 'assets/kawaii_fire.png',
                                 alignment: Alignment.center,

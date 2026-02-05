@@ -25,7 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void initState() {
-   
     super.initState();
   }
 
@@ -129,10 +128,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
 
                     if (user.error != null) {
-                      final Map<String, dynamic> jsonError =
-                          json.decode(user.error.replaceAll("'", '"'));
                       if (user.error.contains(
                           "Por favor verifica tu correo electrónico primero")) {
+                        final Map<String, dynamic> jsonError =
+                            json.decode(user.error.replaceAll("'", '"'));
                         final timeZone = await getDeviceTimeZone();
                         final response = await resendVerificationCode(
                             jsonError['email'], timeZone);

@@ -196,8 +196,21 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
       children: [
         SizedBox(height: spacingHeight),
         Container(
-          // color: currentTheme.backgroundColor,
-          padding: horizontalPadding,
+          clipBehavior: Clip.antiAliasWithSaveLayer,
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: currentTheme.buttonColor,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
           constraints: BoxConstraints(
             minWidth: 160.0,
             maxWidth: StylesApp(context).sizeTextFormField.width,
@@ -206,22 +219,65 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
             node: FocusScopeNode(),
             child: TextFormField(
               controller: searchTextController,
-              style: StylesApp(context).textStyleSmallBlack,
-              decoration:
-                  StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                        hintText: 'Buscar Personaje...',
-                        border: OutlineInputBorder(),
-                        suffixIcon: _searchText.isNotEmpty
-                            ? IconButton(
-                                icon: Icon(Icons.clear),
-                                onPressed: () {
-                                  setState(() {
-                                    cleanSearch();
-                                  });
-                                },
-                              )
-                            : Icon(Icons.search),
-                      ),
+              style: StylesApp(context).textStyleSmallBlack.copyWith(
+                    color: currentTheme.textColor,
+                  ),
+              decoration: InputDecoration(
+                hintText: 'Buscar Personaje...',
+                fillColor: currentTheme.backgroundColor,
+                filled: true,
+                hintStyle: StylesApp(context).textStyleBody15.copyWith(
+                      color: currentTheme.textColor.withValues(alpha: 0.6),
+                    ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+
+                  borderSide: BorderSide.none, // Sin borde visible
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: currentTheme.textColor
+                        .withValues(alpha: 0.6), // Borde cuando está habilitado
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: currentTheme.textColor, // Borde cuando está enfocado
+                    width: 2.0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.red, // Borde de error
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: currentTheme.textColor.withValues(
+                        alpha: 0.3), // Borde cuando está deshabilitado
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                suffixIcon: _searchText.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.clear,
+                          color: currentTheme.buttonColor,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            cleanSearch();
+                          });
+                        },
+                      )
+                    : Icon(Icons.search, color: currentTheme.buttonColor),
+              ),
               onChanged: (value) {
                 setState(() {
                   _searchText = value;
@@ -300,7 +356,15 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                           color: currentTheme.textColor.withValues(alpha: 0.6),
                           fontSize: 15,
                         ),
-                        border: InputBorder.none,
+                        fillColor: currentTheme.backgroundColor,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomLeft: Radius.circular(12),
+                          ),
+                          borderSide: BorderSide.none, // Sin borde visible
+                        ),
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 18,

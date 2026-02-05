@@ -511,7 +511,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
                         "Aún no has obtenido títulos",
-                        style: StylesApp(context).textStyleBody6,
+                        style: StylesApp(context).textStyleBody6.copyWith(
+                          color: StyleColor.grayDark
+                        ),
                       ),
                     ),
                   )

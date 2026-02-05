@@ -104,7 +104,10 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
 
   @override
   Widget build(BuildContext context) {
-    return _isTablet ? _buildTabletLayout() : _buildMobileLayout();
+    return ResponsiveLayout(
+      mobile: _buildMobileLayout(),
+      tablet: _buildTabletLayout(),
+    );
   }
 
   // Layout para móvil (manteniendo el diseño actual)
@@ -741,13 +744,15 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                   children: [
                     Icon(Icons.info_outline, color: Colors.blue),
                     SizedBox(width: 8),
-                    Text(
-                      'Formato del número de teléfono',
-                      style: StylesApp(context).textStyleBody16.copyWith(
-                            color: StyleColor.grayDark,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                    Expanded(
+                      child: Text(
+                        'Formato del número de teléfono',
+                        style: StylesApp(context).textStyleBody16.copyWith(
+                              color: StyleColor.grayDark,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                      ),
                     ),
                   ],
                 ),

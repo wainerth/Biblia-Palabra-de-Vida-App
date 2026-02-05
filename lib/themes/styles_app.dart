@@ -10,7 +10,7 @@ class StylesApp {
 
   double get screenWidth {
     // Retrieve the screen width from the context or another source
-    return MediaQuery.of(context).size.width;
+    return MediaQuery.of(context).size.shortestSide;
   }
 
   bool get isTablet {
@@ -228,7 +228,9 @@ class StylesApp {
       return 15.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
       return 15.sp;
-    } else if (screenWidth <= SizeScreensApp().xlg) {
+    }else if (screenWidth <= SizeScreensApp().tablet) {
+      return 16;
+    }  else if (screenWidth <= SizeScreensApp().xlg) {
       return 16;
     } else {
       return 16;
@@ -241,9 +243,11 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().md) {
       return 16.sp;
     } else if (screenWidth <= SizeScreensApp().lg) {
-      return 16.sp;
-    } else if (screenWidth <= SizeScreensApp().xlg) {
       return 16;
+    } else if (screenWidth <= SizeScreensApp().tablet) {
+      return 20;
+    } else if (screenWidth <= SizeScreensApp().xlg) {
+      return 12;
     } else {
       return 16;
     }
@@ -1019,6 +1023,7 @@ class SizeScreensApp {
   final double xsm = 360;
   final double sm = 414;
   final double md = 480;
-  final double lg = 720;
+  final double lg = 550.0;
+  final double tablet = 768;
   final double xlg = 1024; //tabletas
 }

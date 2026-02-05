@@ -39,6 +39,12 @@ class _PromisesScreenState extends State<PromisesScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    LoadingService().hideLoading();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final userProvider = Provider.of<UserProvider>(context, listen: false);

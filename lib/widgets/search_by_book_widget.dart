@@ -219,14 +219,23 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
 
         // Selector de versión
         Container(
-          padding: horizontalPadding,
+          clipBehavior: Clip.antiAliasWithSaveLayer,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: currentTheme.buttonColor,
+            ),
+          ),
           constraints: BoxConstraints(
             minWidth: 160.0,
             maxWidth: maxDropdownWidth,
           ),
+          padding: EdgeInsets.symmetric(horizontal: 12),
           child: CustomDropdownBottomWidget(
-            hintText: "Seleccione la version",
+            hintText: "Seleccione la versión",
             items: bibleVersions,
+            border: false,
+            currentTheme: currentTheme,
             onChanged: _onVersionChanged,
             selectedItem: versionSelected!.value.isNotEmpty
                 ? bibleVersions.firstWhereOrNull((element) =>
@@ -241,6 +250,13 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         // Selector de libro
         Container(
           padding: horizontalPadding,
+           clipBehavior: Clip.antiAliasWithSaveLayer,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: currentTheme.buttonColor,
+            ),
+          ),
           constraints: BoxConstraints(
             minWidth: 160.0,
             maxWidth: maxDropdownWidth,
@@ -248,6 +264,8 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           child: CustomDropdownBottomWidget(
             hintText: "Seleccione el Libro",
             items: books,
+            border: false,
+            currentTheme: currentTheme,
             onChanged: _onBookChanged,
             selectedItem: bookSelected!.value.isNotEmpty
                 ? books.firstWhereOrNull((element) =>
@@ -519,16 +537,19 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
 
   Widget _buildVersionSelectorTablet() {
     return Container(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        // border: Border.all(
-        //   color: currentTheme.borderColor,
-        // ),
+        border: Border.all(
+          color: currentTheme.buttonColor,
+        ),
       ),
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: CustomDropdownBottomWidget(
         hintText: "Seleccione la versión",
         items: bibleVersions,
+        border: false,
+        currentTheme: currentTheme,
         onChanged: _onVersionChanged,
         selectedItem: versionSelected!.value.isNotEmpty
             ? bibleVersions.firstWhereOrNull((element) =>
@@ -543,15 +564,17 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        // border: Border.all(
-        //   color: currentTheme.borderColor,
-        // ),
+        border: Border.all(
+          color: currentTheme.buttonColor,
+        ),
       ),
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: CustomDropdownBottomWidget(
         hintText: "Seleccione el libro",
         items: books,
         onChanged: _onBookChanged,
+        border: false,
+        currentTheme: currentTheme,
         selectedItem: bookSelected!.value.isNotEmpty
             ? books.firstWhereOrNull((element) =>
                 element.value.toLowerCase() ==

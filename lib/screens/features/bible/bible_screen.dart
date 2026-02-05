@@ -2779,10 +2779,14 @@ class _BibleScreenState extends State<BibleScreen> {
         await showCustomDialogWithAction(context,
             message: responseVideo.error!,
             dialogType: DialogTypeAction.error,
-            buttonOk: "re intentar",
+            buttonOk: "Re intentar",
             textButton: "Volver",
-            actionCallbackOk: () {},
-            actionCallback: () {});
+            actionCallbackOk: () {
+               _retryLoadChapter();
+            },
+            actionCallback: () {
+               _retryLoadChapter();
+            });
       }
       return;
     }

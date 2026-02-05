@@ -220,6 +220,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             SizedBox(height: 50),
           },
           Expanded(
+              flex: 0,
             child: _buildDescriptionTableBox(
               context,
               subTitle,
@@ -496,6 +497,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           SizedBox(
@@ -516,10 +518,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
           Expanded(
+              flex: 0,
             child: Container(
               constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width * 0.5,
-                // minHeight: 200.0,
+                minHeight: 200.0,
               ),
               margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
@@ -527,7 +530,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),

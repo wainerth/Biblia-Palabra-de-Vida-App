@@ -157,8 +157,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider =
-        context.read<BibleThemeProvider>();
+    final themeProvider = context.read<BibleThemeProvider>();
     currentTheme = themeProvider.themeData;
 
     // Layout condicional según dispositivo
@@ -200,37 +199,97 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
         SizedBox(
           height: 25.0,
         ),
-        Container(
-          padding: EdgeInsets.symmetric(
+        Padding(
+           padding: EdgeInsets.symmetric(
             horizontal: 12.0,
           ),
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
-          ),
-          child: TextFormField(
-            controller: searchTextController,
-            style: StylesApp(context).textStyleSmallBlack,
-            decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                  hintText: 'Buscar Tema...',
-                  border: OutlineInputBorder(),
-                  suffixIcon: _searchText.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              cleanSearch();
-                            });
-                          },
-                        )
-                      : Icon(Icons.search),
+          child: Container(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: currentTheme.buttonColor,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
                 ),
-            onChanged: (value) {
-              setState(() {
-                _searchText = value;
-              });
-              _onSearchChanged(value);
-            },
+              ],
+            ),
+            constraints: BoxConstraints(
+              minWidth: 160.0,
+              maxWidth: StylesApp(context).sizeTextFormField.width,
+            ),
+            child: TextFormField(
+              controller: searchTextController,
+               style: StylesApp(context).textStyleSmallBlack.copyWith(
+                color: currentTheme.textColor,
+                            fontSize: 16,
+                          ),
+              decoration: InputDecoration(
+                fillColor: currentTheme.backgroundColor,
+                filled: true,
+                hintStyle: StylesApp(context).textStyleBody15.copyWith(
+                      color: currentTheme.textColor.withValues(alpha: 0.6),
+                      fontSize: 15,
+                    ),
+                hintText: 'Buscar Tema...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none, // Sin borde visible
+                ),
+                enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: currentTheme.textColor.withValues(
+                              alpha: 0.6), // Borde cuando está habilitado
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: currentTheme
+                              .textColor, // Borde cuando está enfocado
+                          width: 2.0,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.red, // Borde de error
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: currentTheme.textColor.withValues(
+                              alpha: 0.3), // Borde cuando está deshabilitado
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                suffixIcon: _searchText.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear, color: currentTheme.buttonColor,),
+                        onPressed: () {
+                          setState(() {
+                            cleanSearch();
+                          });
+                        },
+                      )
+                    : Icon(Icons.search, color: currentTheme.buttonColor),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchText = value;
+                });
+                _onSearchChanged(value);
+              },
+            ),
           ),
         ),
         SizedBox(
@@ -324,6 +383,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
           // CAMPO DE BÚSQUEDA
           Container(
             decoration: BoxDecoration(
+              color: Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: currentTheme.buttonColor,
@@ -342,15 +402,25 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                   child: TextFormField(
                     controller: searchTextController,
                     style: StylesApp(context).textStyleSmallBlack.copyWith(
+                      color: currentTheme.textColor,
                           fontSize: 16,
                         ),
                     decoration: InputDecoration(
                       hintText: 'Escribe aquí el tema bíblico...',
-                      hintStyle: TextStyle(
-                        color: currentTheme.textColor.withValues(alpha: 0.6),
-                        fontSize: 15,
+                      hintStyle: StylesApp(context).textStyleBody15.copyWith(
+                            color:
+                                currentTheme.textColor.withValues(alpha: 0.6),
+                            fontSize: 15,
+                          ),
+                      fillColor: currentTheme.backgroundColor,
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          bottomLeft: Radius.circular(12),
+                        ),
+                        borderSide: BorderSide.none, // Sin borde visible
                       ),
-                      border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 18,
@@ -570,7 +640,8 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                     Center(
                       child: Container(
                         // width: MediaQuery.,
-                        constraints: BoxConstraints(minHeight: 81, maxHeight: 81),
+                        constraints:
+                            BoxConstraints(minHeight: 81, maxHeight: 81),
                         child: Image.network(
                             // color: widget.currentTheme.textColor,
                             '${GraphQLConfig.urlServidor}${teaching.img.urlImg}'),
@@ -751,13 +822,16 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
         return Dialog(
           backgroundColor: currentTheme.backgroundColor,
           insetPadding: EdgeInsets.symmetric(
-            horizontal: isTablet ? MediaQuery.of(context).size.width * 0.12 : 16.0,
+            horizontal:
+                isTablet ? MediaQuery.of(context).size.width * 0.12 : 16.0,
             vertical: isTablet ? 40.0 : 24.0,
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: isTablet ? 600.0 : double.infinity,
-              maxHeight: isTablet ? MediaQuery.of(context).size.height * 0.85 : double.infinity,
+              maxHeight: isTablet
+                  ? MediaQuery.of(context).size.height * 0.85
+                  : double.infinity,
             ),
             child: DialogInternalTeaching(
               data: teaching,

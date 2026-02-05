@@ -66,7 +66,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // IDENTIFICADOR DE USUARIO
+          // NÚMERO DE DOCUMENTO DE USUARIO
           SizedBox(
             width: _formWidth,
             height: StylesApp(context).sizeTextFormField.height,
@@ -78,17 +78,24 @@ class _UserInfoStepState extends State<UserInfoStep> {
               ],
               decoration:
                   StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                        hintText: "Identificador de usuario",
+                        hintText: "Número de documento",
+                        suffixIcon: IconButton(
+                            icon: Icon(
+                              Icons.info_outline,
+                              color: Colors.grey,
+                              size: 22,
+                            ),
+                            onPressed: () => _showInfoDialogDocument()),
                       ),
               style: StylesApp(context)
                   .textStyleBody12
                   .copyWith(color: StyleColor.black),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "El identificador es obligatorio";
-                }
-                return null;
-              },
+              // validator: (value) {
+              //   if (value == null || value.isEmpty) {
+              //     return "El identificador es obligatorio";
+              //   }
+              //   return null;
+              // },
             ),
           ),
           SizedBox(height: 23.0),
@@ -131,19 +138,24 @@ class _UserInfoStepState extends State<UserInfoStep> {
               decoration:
                   StylesApp(context).inputDecorationOutlineStyle.copyWith(
                         hintText: "Nombre de Usuario",
+                        suffixIcon: IconButton(
+                          onPressed: () => _showInfoDialogUserName(),
+                          icon: Icon(Icons.info_outline,
+                              color: Colors.grey, size: 22),
+                        ),
                       ),
               style: StylesApp(context)
                   .textStyleBody12
                   .copyWith(color: StyleColor.black),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "El Nombre de Usuario es obligatorio";
-                }
-                if (value.contains(' ')) {
-                  return "El Nombre de Usuario no puede contener espacios";
-                }
-                return null;
-              },
+              // validator: (value) {
+              //   if (value == null || value.isEmpty) {
+              //     return "El Nombre de Usuario es obligatorio";
+              //   }
+              //   if (value.contains(' ')) {
+              //     return "El Nombre de Usuario no puede contener espacios";
+              //   }
+              //   return null;
+              // },
             ),
           ),
           SizedBox(height: 23.0),
@@ -259,8 +271,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                         ),
                         SizedBox(height: 8),
                         SizedBox(
-                          height:
-                              StylesApp(context).sizeTextFormField.height ,
+                          height: StylesApp(context).sizeTextFormField.height,
                           child: TextFormField(
                             controller: widget.userIdController,
                             keyboardType: TextInputType.number,
@@ -309,8 +320,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                         ),
                         SizedBox(height: 8),
                         SizedBox(
-                          height:
-                              StylesApp(context).sizeTextFormField.height,
+                          height: StylesApp(context).sizeTextFormField.height,
                           child: TextFormField(
                             controller: widget.userNameController,
                             decoration: StylesApp(context)
