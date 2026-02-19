@@ -8,15 +8,17 @@ import 'package:intl_phone_field/phone_number.dart';
 import 'package:intl_phone_field/countries.dart';
 
 class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
-  IntlPhoneFieldWithValidation({
-    super.key,
-    required TextEditingController controller,
-    String? initialPhoneCode,
-    String? initialCountryCode,
-    super.validator,
-    ValueChanged<PhoneNumber>? onChanged,
-    bool disableLengthCheck = true,
-  }) : super(
+  IntlPhoneFieldWithValidation(
+      {super.key,
+      required TextEditingController controller,
+      String? initialPhoneCode,
+      String? initialCountryCode,
+      super.validator,
+      ValueChanged<PhoneNumber>? onChanged,
+      bool disableLengthCheck = true,
+      hintText,
+      invalidNumberMessage})
+      : super(
           builder: (FormFieldState<PhoneNumber> field) {
             String determineInitialCountryCode() {
               if (initialCountryCode != null &&
@@ -48,16 +50,13 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
                 IntlPhoneField(
                   pickerDialogStyle: PickerDialogStyle(
-                    countryNameStyle: StylesApp(field.context).textStyleBody16.copyWith(
-                      color: StyleColor.black
-                    ),
+                    countryNameStyle: StylesApp(field.context)
+                        .textStyleBody16
+                        .copyWith(color: StyleColor.black),
                     backgroundColor: Colors.white,
-                    width: isTablet(field.context) 
-                    ? 400.0
-                    : double.infinity,
+                    width: isTablet(field.context) ? 400.0 : double.infinity,
                   ),
                   initialCountryCode: determineInitialCountryCode(),
                   controller: controller,
@@ -72,12 +71,11 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                       disableLengthCheck, // 🔹 DESACTIVA VALIDACIÓN POR DEFECTO
                   keyboardType: TextInputType.phone,
                   inputFormatters: [], // 🔹 PERMITE MÁS FLEXIBILIDAD
-                   
+
                   decoration: StylesApp(field.context)
                       .inputDecorationOutlineStyle
                       .copyWith(
-                       
-                        hintText: "Número de teléfono",
+                        hintText: hintText,
                         errorText: field.hasError ? field.errorText : null,
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
@@ -86,7 +84,7 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                         ),
                       ),
                   languageCode: "es",
-                  invalidNumberMessage: "Número de Teléfono Invalido!",
+                  invalidNumberMessage: invalidNumberMessage,
                   onChanged: (phone) {
                     field.didChange(phone);
                     onChanged?.call(phone);

@@ -101,6 +101,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     List<NotificationModel> notifies = [];
     Provider.of<SocketClientProvider>(context, listen: false)
         .cleanNotification();
+    final translationProvider = context.read<AppTranslationProvider>();
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final useData = userProvider.currentUser;
 
@@ -127,7 +129,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
         }
       });
     } catch (e) {
-      String error = "Error al leer las notificaciones:  ${e.toString()}";
+      String error =
+          "${translationProvider.tr('workspace.errors.load_notifications')}:  ${e.toString()}";
       if (mounted) {
         await showCustomDialog(context,
             message: error, dialogType: DialogType.error);
@@ -165,8 +168,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final _isTablet = isTablet(context);
+    final translationProvider = context.read<AppTranslationProvider>();
     final userProvider = Provider.of<UserProvider>(context);
+    final _isTablet = isTablet(context);
     dataUser = userProvider.currentUser;
 
     final cardList = AppConstants.homeCards;
@@ -248,15 +252,17 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                   const SizedBox(height: 15.0),
                   // Sección de cards superiores - Responsive
                   _isTablet
-                      ? _buildTabletCardSection(context, cardList)
-                      : _buildMobileCardSection(context, cardList),
+                      ? _buildTabletCardSection(
+                          context, cardList, translationProvider)
+                      : _buildMobileCardSection(
+                          context, cardList, translationProvider),
 
                   const SizedBox(height: 12.0),
 
                   // Layout principal responsive
                   ResponsiveLayout(
-                    mobile: _buildMobileLayout(context),
-                    tablet: _buildTabletLayout(context),
+                    mobile: _buildMobileLayout(context, translationProvider),
+                    tablet: _buildTabletLayout(context, translationProvider),
                   ),
 
                   SizedBox(height: kBottomNavigationBarHeight - 40),
@@ -270,25 +276,29 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   }
 
   // ============ LAYOUT PARA MÓVIL ============
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Column(
       children: [
         dataUser != null
-            ? _buildPositionSection(context, dataUser)
+            ? _buildPositionSection(context, dataUser, translationProvider)
             : Container(),
         const SizedBox(height: 12.0),
-        _buildProverbsSection(context, loadingDaily, errorDaily, dailyWord),
-        _buildStoriesSection(context, reflection),
+        _buildProverbsSection(
+            context, loadingDaily, errorDaily, dailyWord, translationProvider),
+        _buildStoriesSection(context, reflection, translationProvider),
         const SizedBox(height: 12.0),
-        _buildGridViewSection(context),
+        _buildGridViewSection(context, translationProvider),
         const SizedBox(height: 12.0),
-        if (GraphQLConfig.development) _buildLibrarySection(context),
+        if (GraphQLConfig.development)
+          _buildLibrarySection(context, translationProvider),
       ],
     );
   }
 
   // ============ LAYOUT PARA TABLET ============
-  Widget _buildTabletLayout(BuildContext context) {
+  Widget _buildTabletLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
@@ -303,13 +313,15 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 child: Column(
                   children: [
                     dataUser != null
-                        ? _buildPositionSection(context, dataUser)
+                        ? _buildPositionSection(
+                            context, dataUser, translationProvider)
                         : Container(),
                     const SizedBox(height: 16.0),
-                    _buildProverbsSection(
-                        context, loadingDaily, errorDaily, dailyWord),
+                    _buildProverbsSection(context, loadingDaily, errorDaily,
+                        dailyWord, translationProvider),
                     const SizedBox(height: 16.0),
-                    _buildStoriesSection(context, reflection),
+                    _buildStoriesSection(
+                        context, reflection, translationProvider),
                   ],
                 ),
               ),
@@ -319,10 +331,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 flex: 5,
                 child: Column(
                   children: [
-                    _buildGridViewSection(context),
+                    _buildGridViewSection(context, translationProvider),
                     const SizedBox(height: 16.0),
                     if (GraphQLConfig.development)
-                      _buildLibrarySection(context),
+                      _buildLibrarySection(context, translationProvider),
                   ],
                 ),
               ),
@@ -338,14 +350,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   // Cards superiores para móvil
   Widget _buildMobileCardSection(
-      BuildContext context, List<Map<String, dynamic>> cards) {
+      BuildContext context,
+      List<Map<String, dynamic>> cards,
+      AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: cards
             .where((card) =>
-                !(card['label'] == 'Comunidad' && !GraphQLConfig.development))
-            .map((card) => _buildCard(context, card))
+                (card['key'] != 'Comunidad' && !GraphQLConfig.development))
+            .map((card) => _buildCard(context, card, translationProvider))
             .toList(),
       ),
     );
@@ -353,10 +367,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   // Cards superiores para tablet
   Widget _buildTabletCardSection(
-      BuildContext context, List<Map<String, dynamic>> cards) {
+      BuildContext context,
+      List<Map<String, dynamic>> cards,
+      AppTranslationProvider translationProvider) {
     final filteredCards = cards
         .where((card) =>
-            !(card['label'] == 'Comunidad' && !GraphQLConfig.development))
+            (card['key'] != 'Comunidad' && !GraphQLConfig.development))
         .toList();
 
     return Container(
@@ -364,13 +380,14 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: filteredCards
-            .map((card) => _buildTabletCard(context, card))
+            .map((card) => _buildTabletCard(context, card, translationProvider))
             .toList(),
       ),
     );
   }
 
-  Widget _buildTabletCard(BuildContext context, Map<String, dynamic> card) {
+  Widget _buildTabletCard(BuildContext context, Map<String, dynamic> card,
+      AppTranslationProvider translationProvider) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -391,7 +408,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               ),
               const SizedBox(height: 8.0),
               Text(
-                card['label']!,
+                translationProvider.tr(card['label']!),
                 textAlign: TextAlign.center,
                 style: StylesApp(context).textStyleBody4.copyWith(
                       color: const Color(0xFFFD8C43),
@@ -405,7 +422,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
-  Widget _buildCard(BuildContext context, Map<String, dynamic> card) {
+  Widget _buildCard(BuildContext context, Map<String, dynamic> card,
+      AppTranslationProvider translationProvider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: GestureDetector(
@@ -428,7 +446,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             ),
             const SizedBox(height: 8.0),
             Text(
-              card['label']!,
+              translationProvider.tr(card['label']!),
               textAlign: TextAlign.center,
               style: StylesApp(context).textStyleBody4.copyWith(
                     color: const Color(0xFFFD8C43),
@@ -442,8 +460,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   Future<void> _onCardTap(
       BuildContext context, Map<String, dynamic> card) async {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     await _loadProgress(context);
-    if (card['label'] == 'Aventura') {
+    if (card['key'] == 'Aventura') {
       if (error) return;
       if (progressUser != null && progressUser!.success == true) {
         if (progressUser!.message.contains('El curso ya fue finalizado')) {
@@ -451,8 +471,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             context,
             message: progressUser!.message,
             dialogType: DialogTypeAction.info,
-            buttonOk: "Ver más cursos",
-            textButton: "ir Al curso",
+            buttonOk:
+                translationProvider.tr('workspace.dialogs.see_more_courses'),
+            textButton:
+                translationProvider.tr('workspace.dialogs.go_to_course'),
             showAction: true,
             actionCallbackOk: () {
               Navigator.pushNamed(context, '/layoutPage1',
@@ -486,7 +508,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     }
   }
 
-  Widget _buildLibrarySection(BuildContext context) {
+  Widget _buildLibrarySection(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/layoutLibrary');
@@ -503,7 +526,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Librería Cristiana",
+              translationProvider.tr('workspace.sections.christian_library'),
               style: StylesApp(context).textStyleBody7,
             ),
             Padding(
@@ -521,7 +544,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   // ============ MANTENER EL RESTO DE LOS MÉTODOS EXISTENTES ============
 
-  _buildStoriesSection(BuildContext context, reflection) {
+  _buildStoriesSection(BuildContext context, reflection,
+      AppTranslationProvider translationProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -529,7 +553,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Cuentos para reflexionar",
+              translationProvider.tr('workspace.sections.stories_to_reflect'),
               style: StylesApp(context)
                   .textStyleBody5
                   .copyWith(color: const Color(0xFFFE8D43)),
@@ -592,7 +616,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
-  _buildGridViewSection(BuildContext context) {
+  _buildGridViewSection(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Wrap(
       spacing: 0.0,
       children: [
@@ -610,8 +635,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                     context,
                     message: progressUser!.message,
                     dialogType: DialogTypeAction.info,
-                    buttonOk: "Ver más cursos",
-                    textButton: "ir Al curso",
+                    buttonOk: translationProvider
+                        .tr('workspace.dialogs.see_more_courses'),
+                    textButton: translationProvider
+                        .tr('workspace.dialogs.go_to_course'),
                     showAction: true,
                     actionCallbackOk: () {
                       Navigator.pushNamed(context, '/layoutPage1',
@@ -644,7 +671,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             },
             child: CardOptionWidget(
                 imageBackground: "assets/ranking.png",
-                labelCard: "Aventura",
+                labelCard: translationProvider.tr('workspace.cards.adventure'),
                 gradientColors: [
                   const Color(0XFFA731EC),
                   const Color(0XFF620188)
@@ -657,7 +684,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             onTap: () => Navigator.pushNamed(context, '/preachPage'),
             child: CardOptionWidget(
                 imageBackground: "assets/predicas.png",
-                labelCard: "Prédicas",
+                labelCard:
+                    translationProvider.tr('workspace.sections.preachings'),
                 gradientColors: [
                   const Color(0XFF1FEFEC),
                   const Color(0XFF0159A7),
@@ -670,7 +698,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             onTap: () => Navigator.pushNamed(context, '/playPage'),
             child: CardOptionWidget(
                 imageBackground: "assets/games.png",
-                labelCard: "Juegos",
+                labelCard: translationProvider.tr('workspace.sections.games'),
                 gradientColors: [
                   const Color(0XFF3531F3),
                   const Color(0XFF040681)
@@ -683,7 +711,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             onTap: () => Navigator.pushNamed(context, '/promisePage'),
             child: CardOptionWidget(
                 imageBackground: "assets/promesas.png",
-                labelCard: "Promesas",
+                labelCard:
+                    translationProvider.tr('workspace.sections.promises'),
                 gradientColors: [
                   const Color(0XFF58AC5F),
                   const Color(0XFF2F6624),
@@ -730,8 +759,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     }
   }
 
-  _buildProverbsSection(BuildContext context, bool loadingDaily,
-      bool errorDaily, DailyWord dailyWord) {
+  _buildProverbsSection(
+      BuildContext context,
+      bool loadingDaily,
+      bool errorDaily,
+      DailyWord dailyWord,
+      AppTranslationProvider translationProvider) {
     bool loading = false;
     return Container(
       decoration: BoxDecoration(
@@ -850,7 +883,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                       text:
                                           " ${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible"));
                                   showSnackBar(
-                                      "Proverbio copiado al portapapeles",
+                                      translationProvider.tr(
+                                          'workspace.daily_proverb.copy_success'),
                                       type: SnackBarType.success);
                                 },
                               ),
@@ -870,7 +904,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                 await SharePlus.instance.share(ShareParams(
                                   text:
                                       "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible",
-                                  subject: "Proverbio del día",
+                                  subject: translationProvider.tr(
+                                      'workspace.daily_proverb.share_subject'),
                                 ));
                               },
                             ),
@@ -919,7 +954,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
-  _buildPositionSection(BuildContext context, userData) {
+  _buildPositionSection(BuildContext context, userData,
+      AppTranslationProvider translationProvider) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF12CBC4),
@@ -1001,7 +1037,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                 child: Center(
                                   child: Text(
                                     textAlign: TextAlign.center,
-                                    "${userData?.league != null ? userData.league.leagueName : 'El rebaño te espera!'}",
+                                    "${userData?.league != null ? userData.league.leagueName : translationProvider.tr('workspace.user_profile.welcome_herd')}",
                                     style: userData?.league != null
                                         ? StylesApp(context)
                                             .textStyleBody6
@@ -1062,7 +1098,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         child: Center(
                           child: Text(
                             textAlign: TextAlign.center,
-                            "Const: ${userData.streakDaysCount} Dias",
+                            translationProvider
+                                .tr('workspace.user_profile.streak_days')
+                                .replaceFirst(
+                                    '%s', userData.streakDaysCount.toString()),
                             style: StylesApp(context)
                                 .textStyleBody6
                                 .copyWith(color: Colors.white),
@@ -1073,7 +1112,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         flex: 1,
                         child: Center(
                           child: Text(
-                            " ${userData.energyPoints} Lms.",
+                            translationProvider
+                                .tr('workspace.user_profile.energy_points')
+                                .replaceFirst(
+                                    '%s', userData.energyPoints.toString()),
                             style: StylesApp(context)
                                 .textStyleBody6
                                 .copyWith(color: Colors.white),
@@ -1186,6 +1228,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
       decoration: BoxDecoration(
@@ -1211,7 +1254,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Notificaciones",
+                translationProvider.tr('workspace.notifications'),
                 style: StylesApp(context).textStyleBody5.copyWith(
                     color: StyleColor.black, fontWeight: FontWeight.bold),
               ),
@@ -1221,7 +1264,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
 
                   Navigator.pushNamed(context, '/notificationPage');
                 },
-                child: Text("Ver Todas...",
+                child: Text(translationProvider.tr('workspace.see_all'),
                     style: StylesApp(context)
                         .textStyleBody14
                         .copyWith(color: StyleColor.turquoise)),
@@ -1255,7 +1298,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("No leídas"),
+                      Text(translationProvider.tr('workspace.unread')),
                       if (unreadNotifications.isNotEmpty) ...[
                         SizedBox(width: 4),
                         Container(
@@ -1278,7 +1321,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
                     ],
                   ),
                 ),
-                Tab(text: "Leídas"),
+                Tab(text: translationProvider.tr('workspace.read')),
               ],
             ),
           ),
@@ -1298,12 +1341,14 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
   }
 
   Widget _buildNotificationsList(List<NotificationModel> notificationsToShow) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return notificationsToShow.isEmpty
         ? Center(
             child: Text(
               _tabController.index == 0
-                  ? "No tienes notificaciones no leídas."
-                  : "No tienes notificaciones leídas.",
+                  ? translationProvider.tr('workspace.no_unread_notifications')
+                  : translationProvider.tr('workspace.no_read_notifications'),
               style: StylesApp(context)
                   .textStyleBody7
                   .copyWith(color: StyleColor.black),

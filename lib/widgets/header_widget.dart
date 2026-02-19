@@ -1,6 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/login_user.dart';
-import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,6 +18,8 @@ class HeaderWidget extends StatefulWidget {
 class _HeaderWidgetState extends State<HeaderWidget> {
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final LoginUser? userData = userProvider.currentUser;
 
@@ -49,9 +51,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                               "${GraphQLConfig.urlServidor}${userData?.imgProfileUser?.urlImg}?timestamp=${DateTime.now().millisecondsSinceEpoch}",
                             ),
                             onBackgroundImageError: (_, __) {
-                              setState(() {
-                                
-                              });
+                              setState(() {});
                             },
                           )
                         : CircleAvatar(
@@ -74,7 +74,9 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   style: StylesApp(context).textStyleBody12,
                   TextSpan(
                     children: [
-                      TextSpan(text: "Exp: "),
+                      TextSpan(
+                          text:
+                              "${translationProvider.tr('header_adventure.experience')} : "),
                       TextSpan(text: "${userData?.expTotalUser}")
                     ],
                   ),
@@ -83,8 +85,14 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   style: StylesApp(context).textStyleBody12,
                   TextSpan(
                     children: [
-                      TextSpan(text: "Racha: "),
-                      TextSpan(text: "${userData?.streakDaysCount} días")
+                      TextSpan(
+                          text:
+                              "${translationProvider.tr('header_adventure.streak')} : "),
+                      TextSpan(
+                          text: translationProvider
+                              .tr('header_adventure.days')
+                              .replaceAll(
+                                  "%s", userData!.streakDaysCount.toString()))
                     ],
                   ),
                 )
@@ -99,19 +107,6 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Row(
-                //   children: [
-                //     // Text(
-                //     //   "3",
-                //     //   style: StylesApp(context).textStyleBody12,
-                //     // ),
-                //     // Icon(
-                //     //   size: 16.sp,
-                //     //   Icons.star,
-                //     //   color: Colors.white,
-                //     // )
-                //   ],
-                // ),
                 IconButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/profilePage');

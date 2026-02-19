@@ -1,5 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -56,6 +56,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -73,11 +75,12 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                   ),
                   child: Column(
                     children: [
-                      const HeadWidget(
+                      HeadWidget(
                         showLeftStar: false,
                         showRightStar: true,
-                        title: "¡La Biblia\n  Palabra De\n Vida!",
-                        subtitle: "Recuperar\n Contraseña",
+                        title: translationProvider.tr('recover_password.title'),
+                        subtitle:
+                            translationProvider.tr('recover_password.subtitle'),
                       ),
                       const SizedBox(
                         height: 46.0,
@@ -93,14 +96,15 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                 Center(
                                   child: Text(
                                     textAlign: TextAlign.center,
-                                    "Ingrese su correo electrónico para buscar tu cuenta",
+                                    translationProvider
+                                        .tr('recover_password.step1_title'),
                                     style: StylesApp(context).textStyleBody5,
                                   ),
                                 ),
                                 const SizedBox(
                                   height: 32.0,
                                 ),
-                                Container(
+                                SizedBox(
                                   width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: _emailController,
@@ -108,19 +112,22 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
-                                          hintText: "Correo electrónico",
+                                          hintText: translationProvider
+                                              .tr('recover_password.email'),
                                         ),
                                     style: StylesApp(context)
                                         .textStyleBody12
                                         .copyWith(color: StyleColor.black),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return "El correo es obligatorio";
+                                        return translationProvider.tr(
+                                            'recover_password.email_required');
                                       }
                                       final RegExp emailRegExp = RegExp(
                                           r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+(.[a-zA-Z]+)?$");
                                       if (!emailRegExp.hasMatch(value)) {
-                                        return 'Ingrese un correo electrónico válido';
+                                        return translationProvider.tr(
+                                            'recover_password.email_invalid');
                                       }
                                       return null;
                                     },
@@ -143,13 +150,15 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
-                                            hintText: "Código de recuperación"),
+                                            hintText: translationProvider.tr(
+                                                'recover_password.recovery_code')),
                                     style: StylesApp(context)
                                         .textStyleBody12
                                         .copyWith(color: StyleColor.black),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return "El Código de recuperación es obligatorio";
+                                        return translationProvider.tr(
+                                            'recover_password.recovery_code_required');
                                       }
                                       return null;
                                     },
@@ -166,7 +175,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
-                                          hintText: "Contraseña",
+                                          hintText: translationProvider.tr(
+                                              'recover_password.new_password'),
                                           suffixIcon: IconButton(
                                             icon: Icon(
                                               _obscureTextPass
@@ -186,10 +196,12 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                         .copyWith(color: StyleColor.black),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return "La contraseña es obligatoria";
+                                        return translationProvider.tr(
+                                            'recover_password.new_password_required');
                                       }
                                       if (value.length < 6) {
-                                        return "la contraseña debe contener al menos 6 caracteres";
+                                        return translationProvider.tr(
+                                            'recover_password.password_min_length');
                                       }
                                       return null;
                                     },
@@ -198,7 +210,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                 const SizedBox(
                                   height: 23,
                                 ),
-                                Container(
+                                SizedBox(
                                   width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: _confirmPasswordController,
@@ -206,7 +218,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
-                                          hintText: "Confirmar Contraseña",
+                                          hintText: translationProvider.tr(
+                                              'recover_password.confirm_password'),
                                           suffixIcon: IconButton(
                                             icon: Icon(
                                               _obscureTextRepeat
@@ -226,7 +239,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                         .copyWith(color: StyleColor.black),
                                     validator: (value) {
                                       if (value != _passwordController.text) {
-                                        return "Las contraseñas no coinciden";
+                                        return translationProvider.tr(
+                                            'recover_password.confirm_password_mismatch');
                                       }
                                       return null;
                                     },
@@ -238,8 +252,10 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                               ),
                               ButtonThemeWidget(
                                 text: _currentStep == 0
-                                    ? "Continuar"
-                                    : "Restablecer",
+                                    ? translationProvider
+                                        .tr('recover_password.continue_button')
+                                    : translationProvider
+                                        .tr('recover_password.reset_button'),
                                 textStyle: StylesApp(context).buttonTextStyle,
                                 onPressed: () async {
                                   final authProvider =

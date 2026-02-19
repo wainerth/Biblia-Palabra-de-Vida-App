@@ -1,5 +1,7 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
     return Scaffold(
       body: SizedBox(
         height: MediaQuery.sizeOf(context).height,
@@ -26,8 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             SingleChildScrollView(
               child: ResponsiveLayout(
-                mobile: _buildMobileLayout(),
-                tablet: _buildTabletLayout(),
+                mobile: _buildMobileLayout(translationProvider),
+                tablet: _buildTabletLayout(translationProvider),
               ),
             ),
             Positioned(
@@ -57,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         child: Text(
-                          'Ver intro',
+                          translationProvider.tr('home_screen.view_intro'),
                           style: StylesApp(context).textStyleBody5,
                         ),
                       ),
@@ -76,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Layout para móviles (una columna)
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -111,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 40.0,
         ),
         TextWithGradient(
-          text: "REGISTRA UNA\n CUENTA GRATIS",
+          text: translationProvider.tr("home_screen.register_free_account"),
           font: StylesApp(context).textWithGradient,
         ),
         const SizedBox(
@@ -122,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               ButtonThemeWidget(
-                text: "Crear una cuenta",
+                text: translationProvider.tr('home_screen.create_account'),
                 buttonStyle: StylesApp(context).btnPrimary,
                 onPressed: () {
                   Navigator.pushNamed(context, '/registerPage');
@@ -134,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 28,
               ),
               ButtonThemeWidget(
-                text: "Iniciar Sesión",
+                text: translationProvider.tr('home_screen.login'),
                 buttonStyle: StylesApp(context).btnSecondary,
                 onPressed: () {
                   Navigator.pushNamed(context, '/loginPage');
@@ -153,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Layout para tablets (dos columnas)
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(AppTranslationProvider translationProvider) {
     return SizedBox(
       height: MediaQuery.sizeOf(context).height,
       child: Padding(
@@ -208,14 +211,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextWithGradient(
-                    text: "REGISTRA UNA\n CUENTA GRATIS",
+                    text: translationProvider
+                        .tr('home_screen.register_free_account'),
                     font: StylesApp(context).textWithGradient,
                   ),
                   const SizedBox(height: 53),
                   Column(
                     children: [
                       ButtonThemeWidget(
-                        text: "Crear una cuenta",
+                        text: translationProvider
+                            .tr('home_screen.create_account'),
                         buttonStyle: StylesApp(context).btnPrimary,
                         onPressed: () {
                           Navigator.pushNamed(context, '/registerPage');
@@ -225,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 28),
                       ButtonThemeWidget(
-                        text: "Iniciar Sesión",
+                        text: translationProvider.tr('home_screen.login'),
                         buttonStyle: StylesApp(context).btnSecondary,
                         onPressed: () {
                           Navigator.pushNamed(context, '/loginPage');

@@ -31,11 +31,11 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
   final FocusNode focusNode = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final bool _autoValidate = false;
+  final _translationProvider = AppTranslationProvider();
 
   // File? audioFile;
   List<ModelData> options = [];
-  ModelData subtypeSelected =
-      ModelData(label: "Seleccione una opción", value: "");
+  ModelData? subtypeSelected;
 
   bool get isTablet {
     final width = MediaQuery.of(context).size.width;
@@ -62,7 +62,10 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
             .map<PrayerSubTypeModel>(
                 (json) => PrayerSubTypeModel.fromJson(json))
             .toList();
-
+        options.add(ModelData(
+            label: _translationProvider
+                .tr('request_prayer_screen.form.request_type.hint'),
+            value: ""));
         options = subTypes
             .map<ModelData>((subType) => ModelData(
                   label: subType.name,
@@ -108,9 +111,10 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: isTablet
-            ? _buildTabletLayout(context)
-            : _buildMobileLayout(context),
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(context),
+          tablet: _buildTabletLayout(context),
+        ),
       ),
     );
   }
@@ -155,7 +159,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            "Pedidos de Oración",
+                            _translationProvider
+                                .tr('request_prayer_screen.title'),
                             style: StylesApp(context)
                                 .textStyleTitleOrange
                                 .copyWith(
@@ -191,7 +196,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                           SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              "Categoría: ${widget.args['label']}",
+                              "${_translationProvider.tr('request_prayer_screen.category')}: ${widget.args['label']}",
                               style:
                                   StylesApp(context).textStyleBody18.copyWith(
                                         fontSize: 18,
@@ -222,7 +227,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                   color: StyleColor.orange, size: 26),
                               SizedBox(width: 10),
                               Text(
-                                "Instrucciones",
+                                _translationProvider.tr(
+                                    'request_prayer_screen.instructions.title'),
                                 style:
                                     StylesApp(context).textStyleBody20.copyWith(
                                           fontSize: 20,
@@ -234,19 +240,27 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                           ),
                           SizedBox(height: 15),
                           _buildInstructionStep(
-                              "1", "Selecciona el tipo específico de pedido"),
-                          SizedBox(height: 12),
-                          _buildInstructionStep("2",
-                              "Ingresa el nombre de la persona por quien orar"),
+                              "1",
+                              _translationProvider.tr(
+                                  'request_prayer_screen.instructions.step_1')),
                           SizedBox(height: 12),
                           _buildInstructionStep(
-                              "3", "Describe detalladamente tu petición"),
+                              "2",
+                              _translationProvider.tr(
+                                  'request_prayer_screen.instructions.step_2')),
+                          SizedBox(height: 12),
+                          _buildInstructionStep(
+                              "3",
+                              _translationProvider.tr(
+                                  'request_prayer_screen.instructions.step_3')),
                           SizedBox(height: 12),
                           // _buildInstructionStep(
                           //     "4", "Graba un audio si lo deseas (opcional)"),
                           // SizedBox(height: 12),
-                          _buildInstructionStep("4",
-                              "Presiona Enviar para compartir tu petición"),
+                          _buildInstructionStep(
+                              "4",
+                              _translationProvider.tr(
+                                  'request_prayer_screen.instructions.step_4')),
                         ],
                       ),
                     ),
@@ -288,7 +302,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                           color: StyleColor.orange, size: 24),
                                       SizedBox(width: 10),
                                       Text(
-                                        "Versículo del día",
+                                        _translationProvider.tr(
+                                            'request_preyer_screen.daily_verse.title'),
                                         style: StylesApp(context)
                                             .textStyleBody18
                                             .copyWith(
@@ -323,7 +338,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                               AdaptiveSnackBar
                                                   .showCopiedMessage(
                                                 context,
-                                                'Proverbio copiado al portapapeles',
+                                                _translationProvider.tr(
+                                                    'request_preyer_screen.daily_verse.copied_message'),
                                               );
                                             },
                                           ),
@@ -344,7 +360,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                                 .share(ShareParams(
                                               text:
                                                   "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible",
-                                              subject: "Proverbio del día",
+                                              subject: _translationProvider.tr(
+                                                  'request_preyer_screen.daily_verse.share_subject'),
                                             ));
                                           },
                                         ),
@@ -405,7 +422,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Completar Solicitud",
+                        _translationProvider
+                            .tr('request_preyer_screen.form.title'),
                         style: StylesApp(context).textStyleBody24.copyWith(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
@@ -414,7 +432,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        "Completa los siguientes campos para enviar tu petición",
+                        _translationProvider
+                            .tr('request_preyer_screen.form.subtitle'),
                         style: StylesApp(context).textStyleBody15.copyWith(
                               fontSize: 15,
                               color: Colors.grey[600],
@@ -427,7 +446,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Tipo de Pedido",
+                            _translationProvider.tr(
+                                'request_preyer_screen.form.request_type.label'),
                             style: StylesApp(context).textStyleBody16.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -443,7 +463,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                             ),
                             child: CustomDropdownWithValidation<
                                 PrayerSubTypeModel>(
-                              hintText: "Selecciona una opción",
+                              hintText: _translationProvider.tr(
+                                  'request_preyer_screen.form.request_type.hint'),
                               items: options,
                               border: true,
                               onChanged: (ModelData? newValue) {
@@ -453,7 +474,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                               },
                               validator: (value) {
                                 if (value == null) {
-                                  return "Por favor selecciona un Tipo de pedido";
+                                  return _translationProvider.tr(
+                                      'request_preyer_screen.form.request_type.validation');
                                 }
                                 return null;
                               },
@@ -468,7 +490,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Nombre de por quien Orar",
+                            _translationProvider.tr(
+                                'request_preyer_screen.form.recipient_name.label'),
                             style: StylesApp(context).textStyleBody16.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -491,7 +514,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                   .textStyleBody12
                                   .copyWith(
                                       fontSize: 12, color: StyleColor.redLight),
-                              hintText: "Ejemplo: Juan Pérez",
+                              hintText: _translationProvider.tr(
+                                  'request_preyer_screen.form.recipient_name.hint'),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.0),
                                 borderSide: BorderSide.none,
@@ -502,7 +526,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                             controller: _recipientName,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return "debe Colocar Por quien es la Oración";
+                                return _translationProvider.tr(
+                                    'request_preyer_screen.form.recipient_name.validation');
                               }
                               return null;
                             },
@@ -516,7 +541,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Describe tu pedido de oración",
+                            _translationProvider.tr(
+                                'request_preyer_screen.form.description.label'),
                             style: StylesApp(context).textStyleBody16.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -550,8 +576,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                         fontSize: 16,
                                       ),
                                   decoration: InputDecoration(
-                                    hintText:
-                                        'Describe tu pedido de oración...',
+                                    hintText: _translationProvider.tr(
+                                        'request_preyer_screen.form.description.hint'),
                                     hintStyle: StylesApp(context)
                                         .textStyleBody14
                                         .copyWith(color: Colors.grey[500]),
@@ -633,7 +659,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                       // Botón Enviar
                       Center(
                         child: ButtonThemeWidget(
-                          text: "Enviar Petición",
+                          text: _translationProvider
+                              .tr('request_preyer_screen.form.submit_button'),
                           buttonStyle: StylesApp(context)
                               .btnWidgetSmall
                               .copyWith(
@@ -674,7 +701,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
           child: Column(
             children: [
               HeadScreenNotAvatar(
-                title: "Pedidos de Oración\n ${widget.args['label']}",
+                title:
+                    "${_translationProvider.tr('request_prayer_screen.title')}\n ${widget.args['label']}",
                 onRoute: () {
                   Navigator.pop(context);
                 },
@@ -689,7 +717,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: CustomDropdownWithValidation<PrayerSubTypeModel>(
-                    hintText: "Tipo de Pedido",
+                    hintText: _translationProvider
+                        .tr('request_prayer_screen.form.request_type.label'),
                     items: options,
                     onChanged: (ModelData? newValue) {
                       setState(() {
@@ -698,7 +727,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                     },
                     validator: (value) {
                       if (value == null) {
-                        return "Por favor selecciona un Tipo de Pedido";
+                        return _translationProvider.tr(
+                            'request_preyer_screen.form.request_type.validation');
                       }
                       return null;
                     },
@@ -718,7 +748,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                     errorStyle: StylesApp(context)
                         .textStyleBody12
                         .copyWith(fontSize: 12, color: StyleColor.redLight),
-                    hintText: "Nombre de por quien Orar",
+                    hintText: _translationProvider
+                        .tr('request_preyer_screen.form.recipient_name.label'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
@@ -727,7 +758,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                   controller: _recipientName,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "debe Colocar Por quien es la Oración";
+                      return _translationProvider.tr(
+                          'request_preyer_screen.form.recipient_name.validation');
                     }
                     return null;
                   },
@@ -780,7 +812,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
               // ),
               // SizedBox(height: 10),
               ButtonThemeWidget(
-                text: "Enviar",
+                text: _translationProvider
+                    .tr('request_prayer_screen.form.mobile_submit'),
                 buttonStyle: StylesApp(context).btnWidgetSmall,
                 width: 239.0,
                 height: 41.0,
@@ -836,7 +869,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
     if (!_validateField()) {
       if (mounted) {
         await showCustomDialog(context,
-            message: "Faltan campos Obligatorios",
+            message: _translationProvider.tr('request_prayer_screen.errors'),
             dialogType: DialogType.error);
       }
       return;
@@ -849,7 +882,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
         audio: null,
         description: _descriptionController.text,
         prayerFor: _recipientName.text,
-        prayerSubTypeId: subtypeSelected.value,
+        prayerSubTypeId: subtypeSelected!.value,
         userId: userData!.userId,
       );
 
@@ -894,7 +927,9 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
   }
 
   // Modal de éxito (compartido)
-  Future<dynamic> openModalSendSuccessfully(BuildContext context) {
+  Future<dynamic> openModalSendSuccessfully(
+    BuildContext context,
+  ) {
     return showDialog(
       barrierDismissible: false,
       context: context,
@@ -923,13 +958,15 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         children: [
                           Text(
                             textAlign: TextAlign.center,
-                            "Petición Enviada con Éxito ",
+                            _translationProvider.tr(
+                                'request_prayer_screen.success_modal.title'),
                             style: StylesApp(context).textStyleTitleOrange,
                           ),
                           SizedBox(height: 21.0),
                           Text(
                             textAlign: TextAlign.center,
-                            "Tu petición de oración ha sido enviada a la comunidad de oración, quienes van a orar por tu petición.",
+                            _translationProvider.tr(
+                                'request_prayer_screen.success_modal.message_1'),
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: Colors.black,
                                 ),
@@ -937,7 +974,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                           SizedBox(height: 21.0),
                           Text(
                             textAlign: TextAlign.center,
-                            "Por favor te pedimos que creas en el poder de Dios, si le buscamos el es bueno misericordioso para perdonarnos y darnos una respuesta que sea para bendición de nuestras vidas.",
+                            _translationProvider.tr(
+                                'request_prayer_screen.success_modal.message_2'),
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: Colors.black,
                                 ),
@@ -945,7 +983,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                           SizedBox(height: 21.0),
                           Text(
                             textAlign: TextAlign.center,
-                            'Juan 3:16 "De tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna"',
+                            _translationProvider.tr(
+                                'request_prayer_screen.success_modal.verse'),
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: Colors.black,
                                 ),
@@ -955,7 +994,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                     ),
                     Center(
                       child: ButtonThemeWidget(
-                        text: "Aceptar",
+                        text: _translationProvider.tr(
+                            'request_prayer_screen.success_modal.accept_button'),
                         buttonStyle: StylesApp(context).btnWidgetSmall,
                         width: 239.0,
                         height: 41.0,

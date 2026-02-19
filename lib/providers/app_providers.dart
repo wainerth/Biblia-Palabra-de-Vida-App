@@ -8,3 +8,5 @@ export 'package:biblia_palabra_de_vida_app/providers/theme_provider.dart';
 export 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 export 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
 export 'package:biblia_palabra_de_vida_app/providers/exchange_rate_provider.dart';
+export 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
+export 'package:biblia_palabra_de_vida_app/providers/bible_translation_provider.dart';

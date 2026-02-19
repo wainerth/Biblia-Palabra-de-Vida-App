@@ -52,7 +52,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
 
     _editingData = List.from(widget.data);
     for (var item in _editingData) {
-      if (item.label == 'Tel.') {
+      if (item.clave == 'phoneNumber') {
         initialPhoneCode = item.originalData?.code;
         _controllers.add(TextEditingController(
             text: item.value.isNotEmpty ? item.value.split(' ')[1] : ''));
@@ -83,6 +83,8 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return Dialog(
       alignment: Alignment.bottomCenter,
       shape: RoundedRectangleBorder(
@@ -103,14 +105,16 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
             decoration: BoxDecoration(
               color: StyleColor.white,
             ),
-            child: _isInitialized ? _buildContent() : _buildLoadingState(),
+            child: _isInitialized
+                ? _buildContent(translationProvider)
+                : _buildLoadingState(translationProvider),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(AppTranslationProvider translationProvider) {
     return Container(
       color: StyleColor.turquoise,
       width: double.infinity,
@@ -123,7 +127,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           ),
           SizedBox(height: 20),
           Text(
-            "Cargando datos...",
+            translationProvider.tr('edit_profile_dialog.loading'),
             style: StylesApp(context)
                 .textStyleBody14
                 .copyWith(color: Colors.white),
@@ -136,13 +140,12 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
   Widget _buildField(
       ModelData item,
       int index,
-      List<ModelData> dropDownList,
-      List<ModelData> listPrefixCode,
       List<ModelData> optionsSex,
       List<ModelData> optionsChurches,
       List<Church> listChurches,
-      List<Country> listCatalogue) {
-    if (item.label == 'Tel.') {
+      AppTranslationProvider translationProvider
+      ) {
+    if (item.clave == 'phoneNumber') {
       return SizedBox(
         child: Stack(
           children: [
@@ -151,7 +154,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
               initialPhoneCode: initialPhoneCode,
               validator: (PhoneNumber? phone) {
                 if (phone == null || phone.number.isEmpty) {
-                  return 'El número de teléfono es obligatorio';
+                  return  translationProvider.tr('edit_profile_dialog.phone_required');
                 }
                 return PhoneValidatorService.validatePhoneNumber(phone);
               },
@@ -177,7 +180,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
             Positioned(
               right: -10,
               child: Tooltip(
-                message: 'El número de operador no debe iniciar con 0',
+                message: translationProvider.tr('edit_profile_dialog.fields.phone_info_message'),
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   iconSize: 20,
@@ -186,16 +189,16 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Información'),
+                        title: Text(translationProvider.tr('edit_profile_dialog.fields.phone_info')),
                         content: Text(
                             style: StylesApp(context)
                                 .textStyleBody14
                                 .copyWith(color: StyleColor.black),
-                            'El número de operador no debe iniciar con 0'),
+                            translationProvider.tr('edit_profile_dialog.fields.phone_info_message'),),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('OK'),
+                            child: Text(translationProvider.tr('edit_profile_dialog.dialog.ok'),),
                           ),
                         ],
                       ),
@@ -207,14 +210,14 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           ],
         ),
       );
-    } else if (item.label == 'Sexo') {
+    } else if (item.clave == 'gender') {
       return Container(
         constraints: BoxConstraints(
           minWidth: 160.0,
           maxWidth: StylesApp(context).sizeTextFormField.width,
         ),
         child: CustomDropdownBottomWidget(
-          hintText: "Seleccione Sexo",
+          hintText: translationProvider.tr('edit_profile_dialog.hints.select_gender'),
           items: optionsSex,
           onChanged: (ModelData? newValue) {
             setState(() {
@@ -232,7 +235,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
               : null,
         ),
       );
-    } else if (item.label == 'Fecha nac') {
+    } else if (item.clave == 'birthdate') {
       return DatePickerFormField(
         initialDate: item.value.isNotEmpty
             ? DateFormat("dd/MM/yyyy").parse(item.value)
@@ -247,9 +250,9 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           );
         },
       );
-    } else if (item.label == 'Bautizo') {
+    } else if (item.clave == 'isBaptized') {
       return RadioButtonWidget<bool>(
-          label: "Bautizado:",
+          label: translationProvider.tr('edit_profile_dialog.fields.baptized'),
           value: item.value == 'Bautizado',
           onChanged: (newValue) {
             setState(() {
@@ -262,17 +265,17 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
             });
           },
           options: [
-            RadioButtonOption(value: true, label: "Si"),
-            RadioButtonOption(value: false, label: "No")
+            RadioButtonOption(value: true, label:translationProvider.tr('edit_profile_dialog.radio_options.yes')),
+            RadioButtonOption(value: false, label: translationProvider.tr('edit_profile_dialog.radio_options.no'))
           ]);
-    } else if (item.label == 'País') {
+    } else if (item.clave == 'country') {
       return Container(
         constraints: BoxConstraints(
           minWidth: 160.0,
           maxWidth: StylesApp(context).sizeTextFormField.width,
         ),
         child: OptimizedSearchableDropdown(
-          hintText: "Seleccione un país",
+          hintText: translationProvider.tr('edit_profile_dialog.hints.select_country'),
           defaultValueId: _selectedCountryId,
           selectedItem: null,
           onChanged: (ModelData? newValue) async {
@@ -323,7 +326,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           ),
         ),
       );
-    } else if (item.label == 'Estado') {
+    } else if (item.clave == 'state') {
       return Container(
         constraints: BoxConstraints(
           minWidth: 160.0,
@@ -332,7 +335,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         child: Stack(
           children: [
             CustomDropdownBottomWidget(
-              hintText: "Seleccione un Estado",
+              hintText:  translationProvider.tr('edit_profile_dialog.hints.select_state'),
               items: _statesList,
               onChanged: (ModelData? newValue) async {
                 if (newValue != null) {
@@ -383,7 +386,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           ],
         ),
       );
-    } else if (item.label == 'Ciudad') {
+    } else if (item.clave == 'city') {
       return Container(
         constraints: BoxConstraints(
           minWidth: 160.0,
@@ -392,7 +395,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         child: Stack(
           children: [
             CustomDropdownBottomWidget(
-              hintText: "Seleccione una Ciudad",
+              hintText: translationProvider.tr('edit_profile_dialog.hints.select_city'),
               items: _citiesList,
               onChanged: (ModelData? newValue) {
                 if (newValue != null) {
@@ -433,7 +436,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           ],
         ),
       );
-    } else if (item.label == 'Iglesia') {
+    } else if (item.clave == 'church') {
       return Container(
         constraints: BoxConstraints(
           minWidth: 160.0,
@@ -441,7 +444,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         ),
         child: CustomDropdownBottomWidget(
           items: optionsChurches,
-          hintText: "Seleccione una Iglesia",
+          hintText: translationProvider.tr('edit_profile_dialog.hints.select_church'),
           onChanged: (ModelData? newValue) {
             setState(() {
               _editingData[index] = ModelData(
@@ -460,7 +463,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
       );
     } else {
       return TextFormField(
-        readOnly: item.label == 'Email',
+        readOnly: item.clave == 'email',
         controller: _controllers[index],
         style: StylesApp(context)
             .textStyleBody14
@@ -490,7 +493,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     try {
       // 1. Buscar país si existe en los datos
       final countryItem = _editingData.firstWhere(
-        (item) => item.label == 'País',
+        (item) => item.clave == 'country',
         orElse: () => ModelData(label: '', value: '', clave: ''),
       );
 
@@ -507,7 +510,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
 
         // Guardar datos de estado si existen
         final stateItem = _editingData.firstWhere(
-          (item) => item.label == 'Estado',
+          (item) => item.clave == 'state',
           orElse: () => ModelData(label: '', value: '', clave: ''),
         );
 
@@ -525,7 +528,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
 
         // Guardar datos de ciudad si existen
         final cityItem = _editingData.firstWhere(
-          (item) => item.label == 'Ciudad',
+          (item) => item.clave == 'city',
           orElse: () => ModelData(label: '', value: '', clave: ''),
         );
 
@@ -591,7 +594,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           if (stateToSelect != null) {
             // Encontrar el índice del estado en _editingData
             final stateIndex =
-                _editingData.indexWhere((item) => item.label == 'Estado');
+                _editingData.indexWhere((item) => item.clave == 'state');
             if (stateIndex != -1) {
               // Actualizar _editingData con el estado seleccionado
               setState(() {
@@ -654,7 +657,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
           if (cityToSelect != null) {
             // Encontrar el índice de la ciudad en _editingData
             final cityIndex =
-                _editingData.indexWhere((item) => item.label == 'Ciudad');
+                _editingData.indexWhere((item) => item.clave == 'city');
             if (cityIndex != -1) {
               setState(() {
                 _editingData[cityIndex] = ModelData<CityModel>(
@@ -735,114 +738,97 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
     }
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(AppTranslationProvider translationProvider) {
     // Mostrar loading si aún se está cargando la ubicación
     if (_isLoadingLocation) {
-      return _buildLoadingState();
+      return _buildLoadingState(translationProvider);
     }
 
     final catalogueProvider =
         Provider.of<CatalogueProvider>(context, listen: false);
 
-    final List<ModelData> dropDownList = catalogueProvider.allCountries
-        .map((country) => ModelData(value: country.id, label: country.name))
-        .cast<ModelData>()
-        .toList();
-    final List<ModelData> prefixCode = catalogueProvider.allAreasCode
-        .map((areaCode) => ModelData(value: areaCode.id, label: areaCode.code))
-        .cast<ModelData>()
-        .toList();
 
     final List<ModelData> listChurches = catalogueProvider.allChurches
         .map((church) => ModelData(value: church.id, label: church.name))
         .cast<ModelData>()
         .toList();
     List<ModelData> optionsSex = [
-      ModelData(value: 'm', label: 'Masculino'),
-      ModelData(value: 'f', label: 'Femenino')
+      ModelData(value: 'm', label: translationProvider.tr('profile.gender_options.male')),
+      ModelData(value: 'f', label: translationProvider.tr('profile.gender_options.male'))
     ];
 
-    return Stack(
-      children: [
-        Container(
-          color: StyleColor.turquoise,
-          width: double.infinity,
-          height: MediaQuery.sizeOf(context).height * 0.6,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                HeadScreenNotAvatar(
-                  title: "Edición de Datos",
-                  onRoute: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                SizedBox(height: 30),
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 15),
-                    padding: EdgeInsets.all(15),
-                    color: Colors.white,
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: ListView.builder(
-                              itemCount: _editingData.length,
-                              itemBuilder: (context, index) {
-                                final item = _editingData[index];
-                                return Column(
-                                  children: [
-                                    _buildField(
-                                      item,
-                                      index,
-                                      dropDownList,
-                                      prefixCode,
-                                      optionsSex,
-                                      listChurches,
-                                      catalogueProvider.allChurches,
-                                      catalogueProvider.allCountries,
-                                    ),
-                                    SizedBox(height: 12.0)
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            flex: 0,
-                            child: ButtonThemeWidget(
-                              buttonStyle: StylesApp(context).btnWidgetSmall,
-                              text: 'Guardar',
-                              width: 150.0,
-                              height: 40.0,
-                              onPressed: () {
-                                _saveData();
-                              },
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 40),
-              ],
+    return Container(
+      color: StyleColor.turquoise,
+      width: double.infinity,
+      height: MediaQuery.sizeOf(context).height * 0.6,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            HeadScreenNotAvatar(
+              title: translationProvider.tr('edit_profile_dialog.title'),
+              onRoute: () {
+                Navigator.pop(context);
+              },
             ),
-          ),
+            SizedBox(height: 30),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 15),
+              padding: EdgeInsets.all(15),
+              color: Colors.white,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Lista de campos
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: _editingData.length,
+                      itemBuilder: (context, index) {
+                        final item = _editingData[index];
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.0),
+                          child: _buildField(
+                            item,
+                            index,
+                            optionsSex,
+                            listChurches,
+                            catalogueProvider.allChurches,
+                            translationProvider
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 20),
+                    // Botón Guardar
+                    ButtonThemeWidget(
+                      buttonStyle: StylesApp(context).btnWidgetSmall,
+                      text: translationProvider.tr('edit_profile_dialog.save'),
+                      width: 150.0,
+                      height: 40.0,
+                      onPressed: () {
+                        _saveData(translationProvider);
+                      },
+                    ),
+                    SizedBox(height: 10),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 40),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  void _saveData() {
+  void _saveData(AppTranslationProvider translationProvider) {
     if (_formKey.currentState!.validate()) {
       widget.onSave(_editingData);
     } else {
-      showSnackBar('Por favor, corrija los errores en el formulario',
+      showSnackBar( translationProvider.tr('edit_profile_dialog.form_errors') ,
           type: SnackBarType.error);
     }
   }

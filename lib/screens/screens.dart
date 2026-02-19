@@ -22,7 +22,6 @@ export 'package:biblia_palabra_de_vida_app/screens/features/preach/preach_screen
 export 'package:biblia_palabra_de_vida_app/screens/authentication/login/login_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/authentication/signup/register_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/authentication/recovery/recover_pass_screen.dart';
-export 'package:biblia_palabra_de_vida_app/screens/authentication/recovery/change_pass_screen.dart';
 
 //Onboarding
 export 'package:biblia_palabra_de_vida_app/screens/onboarding/welcome_screen.dart';

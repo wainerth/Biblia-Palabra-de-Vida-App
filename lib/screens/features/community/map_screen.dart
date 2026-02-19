@@ -1,6 +1,7 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
-// import 'package:flutter/material.dart';
+
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
@@ -9,7 +10,6 @@ import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-// import 'package:audioplayers/audioplayers.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -139,6 +139,8 @@ class _MapScreenState extends State<MapScreen>
   }
 
   Future<void> _generateData(BuildContext context) async {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     LoadingService().showLoading(context);
     setState(() {
       isLoading = true;
@@ -190,7 +192,7 @@ class _MapScreenState extends State<MapScreen>
                 if (!levels.any((level) => level.levelNumber == i)) {
                   levels.add(Level(
                     id: 'pending_$i',
-                    name: 'Próximamente',
+                    name: translationProvider.tr('map_screen.coming_soon'),
                     isUnderConstruction: true,
                     unLockLevel: false,
                     color: 'A9B8BE',
@@ -209,7 +211,7 @@ class _MapScreenState extends State<MapScreen>
           });
         }
       } catch (e) {
-        errorMessage = "An error occurred: $e";
+        errorMessage = "Un error ha ocurrido: $e";
         return;
       } finally {
         final int unlockedIndex = levels
@@ -279,18 +281,22 @@ class _MapScreenState extends State<MapScreen>
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {},
       child: Scaffold(
-        body: isTablet ? _buildTabletLayout() : _buildMobileLayout(),
+        body: ResponsiveLayout(
+            mobile: _buildMobileLayout(translationProvider),
+            tablet: _buildTabletLayout(translationProvider)),
         bottomNavigationBar: isTablet ? null : _buildBottomNavigationBar(),
       ),
     );
   }
 
   // ========== DISEÑO PARA TABLET ==========
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(AppTranslationProvider translationProvider) {
     return SafeArea(
       child: Column(
         children: [
@@ -310,7 +316,7 @@ class _MapScreenState extends State<MapScreen>
                   // Columna izquierda - Información y controles (30%)
                   Expanded(
                     flex: 3,
-                    child: _buildTabletInfoColumn(),
+                    child: _buildTabletInfoColumn(translationProvider),
                   ),
 
                   SizedBox(width: 24.0),
@@ -326,7 +332,7 @@ class _MapScreenState extends State<MapScreen>
                                 onRetry: () async => _generateData(context),
                                 onBack: () => Navigator.pop(context),
                               )
-                            : _buildTabletMapColumn(),
+                            : _buildTabletMapColumn(translationProvider),
                   ),
                 ],
               ),
@@ -338,7 +344,7 @@ class _MapScreenState extends State<MapScreen>
   }
 
   // Columna de información para tablet
-  Widget _buildTabletInfoColumn() {
+  Widget _buildTabletInfoColumn(AppTranslationProvider translationProvider) {
     return Container(
       decoration: BoxDecoration(
         color: StyleColor.white,
@@ -403,7 +409,7 @@ class _MapScreenState extends State<MapScreen>
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          'Etapa ${stage!.sectionNumber}',
+                          '${translationProvider.tr('map_screen.stage')} ${stage!.sectionNumber}',
                           style: StylesApp(context).textStyleBody14.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -441,7 +447,8 @@ class _MapScreenState extends State<MapScreen>
                                   child: CustomModalWidget(
                                     title: stage!.sectionName,
                                     content: stage!.introduction,
-                                    buttonText: 'Aceptar',
+                                    buttonText: translationProvider
+                                        .tr('map_screen.accept'),
                                     id: stage!.sectionNumber.toString(),
                                     itemCount: stage!.levelCount,
                                     itemsCompleted: stage!.levelCompletedCount,
@@ -481,7 +488,8 @@ class _MapScreenState extends State<MapScreen>
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Efectos de sonido',
+                              translationProvider
+                                  .tr('map_screen.sound_effects'),
                               style:
                                   StylesApp(context).textStyleBody16.copyWith(
                                         fontSize: 16,
@@ -519,7 +527,7 @@ class _MapScreenState extends State<MapScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Progreso del Nivel',
+                            translationProvider.tr('map_screen.level_progress'),
                             style: StylesApp(context).textStyleBody18.copyWith(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -533,7 +541,8 @@ class _MapScreenState extends State<MapScreen>
                                 Expanded(
                                   child: _buildProgressInfo(
                                     icon: Icons.check_circle,
-                                    label: 'Completados',
+                                    label: translationProvider
+                                        .tr('map_screen.completed'),
                                     value: '${getCompletedLevelsCount()}',
                                     color: StyleColor.turquoise,
                                   ),
@@ -542,7 +551,8 @@ class _MapScreenState extends State<MapScreen>
                                 Expanded(
                                   child: _buildProgressInfo(
                                     icon: Icons.layers,
-                                    label: 'Totales',
+                                    label: translationProvider
+                                        .tr('map_screen.total'),
                                     value: '${getTotalLevelsCount()}',
                                     color: StyleColor.yellowLight,
                                   ),
@@ -580,7 +590,7 @@ class _MapScreenState extends State<MapScreen>
                       onPressed: onScrollPosition,
                       icon: Icon(Icons.explore),
                       label: Text(
-                        'Encontrar nivel activo',
+                        translationProvider.tr('map_screen.find_active_level'),
                         style: StylesApp(context).textStyleBody16.copyWith(
                               fontSize: 16,
                               color: StyleColor.white,
@@ -609,7 +619,7 @@ class _MapScreenState extends State<MapScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Navegación',
+                            translationProvider.tr('map_screen.navigation'),
                             style: StylesApp(context).textStyleBody18.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -623,7 +633,8 @@ class _MapScreenState extends State<MapScreen>
                             children: [
                               _buildNavChip(
                                 icon: Icons.book,
-                                label: 'Detalles del curso',
+                                label: translationProvider
+                                    .tr('map_screen.course_details'),
                                 onTap: course != null
                                     ? () {
                                         Navigator.popAndPushNamed(
@@ -636,7 +647,8 @@ class _MapScreenState extends State<MapScreen>
                               ),
                               _buildNavChip(
                                 icon: Icons.arrow_back,
-                                label: 'Volver a etapas',
+                                label: translationProvider
+                                    .tr('map_screen.back_to_stages'),
                                 onTap: () {
                                   Navigator.popAndPushNamed(
                                       context, '/layoutPage1');
@@ -658,7 +670,7 @@ class _MapScreenState extends State<MapScreen>
   }
 
   // Columna del mapa para tablet
-  Widget _buildTabletMapColumn() {
+  Widget _buildTabletMapColumn(AppTranslationProvider translationProvider) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.0),
@@ -688,7 +700,7 @@ class _MapScreenState extends State<MapScreen>
                   controller: scrollController,
                   itemCount: gruposDeNiveles.length,
                   itemBuilder: (context, index) {
-                    return _buildTabletMapSection(index);
+                    return _buildTabletMapSection(index, translationProvider);
                   },
                 ),
               ),
@@ -711,7 +723,8 @@ class _MapScreenState extends State<MapScreen>
   }
 
   // Sección del mapa para tablet
-  Widget _buildTabletMapSection(int index) {
+  Widget _buildTabletMapSection(
+      int index, AppTranslationProvider translationProvider) {
     List<Level> grupo = gruposDeNiveles[index];
     String image = index == 0
         ? imagePathsTablet[0]
@@ -804,7 +817,7 @@ class _MapScreenState extends State<MapScreen>
                   (index % 2 == 0 ? coordATop[i] : coordBTop[i]),
               left: MediaQuery.of(context).size.width *
                   (index % 2 == 0 ? coordALeft[i] : coordBLeft[i]),
-              child: _buildTabletLevelItem(grupo[i]),
+              child: _buildTabletLevelItem(grupo[i], translationProvider),
             ),
           },
         ],
@@ -813,7 +826,8 @@ class _MapScreenState extends State<MapScreen>
   }
 
   // Item de nivel para tablet
-  Widget _buildTabletLevelItem(Level level) {
+  Widget _buildTabletLevelItem(
+      Level level, AppTranslationProvider translationProvider) {
     final double containerSize =
         isTablet ? 80.0 : StylesApp(context).sizeContainer.width;
     final double subContainerSize =
@@ -827,7 +841,7 @@ class _MapScreenState extends State<MapScreen>
               if (level.isUnderConstruction == true) {
                 await showCustomDialog(context,
                     message:
-                        "Este Nivel Esta en Construcción,\n al Estar disponible Te llagara un Notificación",
+                        translationProvider.tr('map_screen.under_construction'),
                     dialogType: DialogType.info);
                 return;
               } else {
@@ -917,13 +931,15 @@ class _MapScreenState extends State<MapScreen>
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: Colors.yellow.withValues(
-                                            alpha: 0.5 * (1 - _animation.value)),
+                                            alpha:
+                                                0.5 * (1 - _animation.value)),
                                       ),
                                     );
                                   },
                                 ),
                               },
-                              _buildItemLevel(context, level, subContainerSize),
+                              _buildItemLevel(context, level, subContainerSize,
+                                  translationProvider),
                             ],
                           ),
                         ),
@@ -933,7 +949,8 @@ class _MapScreenState extends State<MapScreen>
                           child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color(0xFFA9B8BE).withValues(alpha: 0.9),
+                              color: const Color(0xFFA9B8BE)
+                                  .withValues(alpha: 0.9),
                             ),
                           ),
                         ),
@@ -984,7 +1001,7 @@ class _MapScreenState extends State<MapScreen>
   }
 
   // ========== DISEÑO PARA MÓVIL (EXISTENTE) ==========
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (notification is ScrollUpdateNotification) {
@@ -1022,7 +1039,7 @@ class _MapScreenState extends State<MapScreen>
                       onBack: () => Navigator.pop(context),
                     )
                   } else ...{
-                    _buildMobileContent(),
+                    _buildMobileContent(translationProvider),
                   }
                 }
               ],
@@ -1034,7 +1051,7 @@ class _MapScreenState extends State<MapScreen>
   }
 
   // Contenido móvil (existente)
-  Widget _buildMobileContent() {
+  Widget _buildMobileContent(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Stack(children: [
@@ -1057,7 +1074,7 @@ class _MapScreenState extends State<MapScreen>
                   return CustomModalWidget(
                     title: stage!.sectionName,
                     content: stage!.introduction,
-                    buttonText: 'Aceptar',
+                    buttonText: translationProvider.tr('map_screen.accept'),
                     id: stage!.sectionNumber.toString(),
                     itemCount: stage!.levelCount,
                     itemsCompleted: stage!.levelCompletedCount,
@@ -1089,18 +1106,18 @@ class _MapScreenState extends State<MapScreen>
         ]),
         SizedBox(
           height: MediaQuery.sizeOf(context).height,
-          child: _buildMobileMap(),
+          child: _buildMobileMap(translationProvider),
         ),
       ],
     );
   }
 
   // Mapa móvil (existente)
-  Widget _buildMobileMap() {
+  Widget _buildMobileMap(AppTranslationProvider translationProvider) {
     // Coordenadas existentes...
-    List<double> coordATop = [0.0, 0.10, 0.31, 0.54, 0.76];
+    List<double> coordATop = [0.0, 0.25, 0.45, 0.65, 0.90];
     List<double> coordALeft = [0.20, 0.49, 0.65, 0.65, 0.64];
-    List<double> coordBTop = [0.0, 0.13, 0.31, 0.54, 0.76];
+    List<double> coordBTop = [0.0, 0.25, 0.45, 0.65, 0.85];
     List<double> coordBLeft = [0.40, 0.17, 0.01, 0.03, 0.05];
     List<double> coordATopBarco = [
       0.25,
@@ -1109,16 +1126,16 @@ class _MapScreenState extends State<MapScreen>
       0.48,
       0.65,
       0.75,
-      0.75,
+      0.79,
       0.85
     ];
     List<double> coordALeftBarco = [
-      0.20,
+      0.28,
       0.10,
       -0.05,
       0.35,
       0.17,
-      0.35,
+      0.25,
       0.10,
       0.25
     ];
@@ -1208,8 +1225,8 @@ class _MapScreenState extends State<MapScreen>
                               stopAudio();
                               if (grupo[i].isUnderConstruction == true) {
                                 await showCustomDialog(context,
-                                    message:
-                                        "Este Nivel Esta en Construcción,\n al Estar disponible Te llagara un Notificación",
+                                    message: translationProvider
+                                        .tr('map_screen.under_construction'),
                                     dialogType: DialogType.info);
                                 return;
                               } else {
@@ -1315,10 +1332,11 @@ class _MapScreenState extends State<MapScreen>
                                                       decoration: BoxDecoration(
                                                         shape: BoxShape.circle,
                                                         color: Colors.yellow
-                                                            .withValues(alpha: 0.5 *
-                                                                (1 -
-                                                                    _animation
-                                                                        .value)),
+                                                            .withValues(
+                                                                alpha: 0.5 *
+                                                                    (1 -
+                                                                        _animation
+                                                                            .value)),
                                                       ),
                                                     );
                                                   },
@@ -1329,7 +1347,8 @@ class _MapScreenState extends State<MapScreen>
                                                   grupo[i],
                                                   StylesApp(context)
                                                       .sizeContainerSub
-                                                      .width),
+                                                      .width,
+                                                  translationProvider),
                                             ],
                                           ),
                                         ),
@@ -1470,7 +1489,8 @@ class _MapScreenState extends State<MapScreen>
         decoration: BoxDecoration(
           color: StyleColor.turquoise.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: StyleColor.turquoise.withValues(alpha: 0.3)),
+          border:
+              Border.all(color: StyleColor.turquoise.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1490,7 +1510,8 @@ class _MapScreenState extends State<MapScreen>
     );
   }
 
-  Widget _buildItemLevel(BuildContext context, Level level, double size) {
+  Widget _buildItemLevel(BuildContext context, Level level, double size,
+      AppTranslationProvider translationProvider) {
     if (level.img.urlImg.isNotEmpty) {
       return Container(
         clipBehavior: Clip.antiAlias,
@@ -1546,7 +1567,7 @@ class _MapScreenState extends State<MapScreen>
                   ),
                 ),
                 Text(
-                  "paso",
+                  translationProvider.tr('map_screen.step'),
                   style: TextStyle(
                     fontSize: size * 0.15,
                     color: Colors.white,

@@ -1,6 +1,9 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/responsive_layout.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class QuestionCard extends StatelessWidget {
   final String question;
@@ -9,7 +12,7 @@ class QuestionCard extends StatelessWidget {
   final int failedAttempts;
   final double fontSize;
   final bool isTablet;
-  
+
   // Nuevas propiedades para TTS
   final bool isTtsEnabled;
   final VoidCallback? onSpeakQuestion;
@@ -31,20 +34,22 @@ class QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isTablet) {
-      return _buildTabletCard(context);
-    }
-    return _buildMobileCard(context);
+    final translationProvider = context.read<AppTranslationProvider>();
+
+    return ResponsiveLayout(
+      mobile: _buildMobileCard(context, translationProvider),
+      tablet: _buildTabletCard(context, translationProvider),
+    );
   }
 
-  Widget _buildMobileCard(BuildContext context) {
+  Widget _buildMobileCard(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
         GestureDetector(
-          onTap: isTtsEnabled && onSpeakQuestion != null
-              ? onSpeakQuestion
-              : null,
+          onTap:
+              isTtsEnabled && onSpeakQuestion != null ? onSpeakQuestion : null,
           child: Container(
             constraints: BoxConstraints(minHeight: 68.0),
             margin: EdgeInsets.symmetric(horizontal: 6.0),
@@ -102,7 +107,10 @@ class QuestionCard extends StatelessWidget {
                         ),
                         onPressed: onSpeakQuestion,
                         padding: EdgeInsets.zero,
-                        tooltip: isSpeaking ? "Detener" : "Escuchar pregunta",
+                        tooltip: isSpeaking
+                            ? translationProvider.tr('question_card.tts.stop')
+                            : translationProvider
+                                .tr('question_card.tts.listen_question'),
                       ),
                     ),
                   ),
@@ -113,13 +121,14 @@ class QuestionCard extends StatelessWidget {
         Positioned(
           top: -20,
           right: 10,
-          child: _buildAttemptsCounter(context),
+          child: _buildAttemptsCounter(context, translationProvider),
         ),
       ],
     );
   }
 
-  Widget _buildTabletCard(BuildContext context) {
+  Widget _buildTabletCard(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Container(
       padding: EdgeInsets.all(16),
       width: double.infinity,
@@ -142,7 +151,7 @@ class QuestionCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  "Pregunta $numberQuestion de $totalQuestions",
+                  "${translationProvider.tr('question_card.question_prefix')} $numberQuestion ${translationProvider.tr('question_card.of')} $totalQuestions",
                   style: StylesApp(context).textStyleBody12.copyWith(
                         color: Colors.black,
                         fontSize: 14,
@@ -177,11 +186,14 @@ class QuestionCard extends StatelessWidget {
                           ),
                           onPressed: onSpeakQuestion,
                           padding: EdgeInsets.zero,
-                          tooltip: isSpeaking ? "Detener" : "Escuchar pregunta",
+                          tooltip: isSpeaking
+                              ? translationProvider.tr('question_card.tts.stop')
+                              : translationProvider
+                                  .tr('question_card.tts.listen_question'),
                         ),
                       ),
                     ),
-                  _buildAttemptsCounter(context),
+                  _buildAttemptsCounter(context, translationProvider),
                 ],
               ),
             ],
@@ -233,7 +245,7 @@ class QuestionCard extends StatelessWidget {
                   ),
                   SizedBox(width: 4.0),
                   Text(
-                    "Toca la pregunta para escucharla",
+                    translationProvider.tr('question_card.tts.tap_to_listen'),
                     style: StylesApp(context).textStyleBody10.copyWith(
                           color: Colors.black.withValues(alpha: 0.5),
                           fontStyle: FontStyle.italic,
@@ -247,11 +259,11 @@ class QuestionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAttemptsCounter(BuildContext context) {
+  Widget _buildAttemptsCounter(BuildContext context, AppTranslationProvider translationProvider) {
     return Row(
       children: [
         Text(
-          "Oportunidades: ",
+          translationProvider.tr('question_card.opportunities'),
           style: StylesApp(context).textStyleBody12.copyWith(
                 color: StyleColor.grayDark,
                 fontSize: 12,

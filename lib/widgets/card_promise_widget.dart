@@ -135,20 +135,6 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
       ),
       child: Stack(
         children: [
-          Positioned(
-            top: 10,
-            right: 10,
-            child: IconButton(
-              onPressed: () async {
-                await SharePlus.instance.share(ShareParams(
-                  text:
-                      "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}\n${widget.redeemedPromise!.verse!.text}.",
-                  subject: "Promesa",
-                ));
-              },
-              icon: Icon(Icons.share, color: Colors.white),
-            ),
-          ),
           SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -192,6 +178,21 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
               ),
             ),
           ),
+          Positioned(
+            top: 10,
+            right: 10,
+            child: IconButton(
+              onPressed: () async {
+                await SharePlus.instance.share(ShareParams(
+                  text:
+                      "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}\n${widget.redeemedPromise!.verse!.text}.",
+                  subject: "Promesa",
+                ));
+              },
+              icon: Icon(Icons.share, color: Colors.white),
+            ),
+          ),
+          
         ],
       ),
     );

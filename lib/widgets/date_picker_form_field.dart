@@ -1,6 +1,9 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class DatePickerFormField extends StatefulWidget {
   final void Function(String)? onChanged;
@@ -33,13 +36,13 @@ class _DatePickerFormFieldState extends State<DatePickerFormField> {
   Future<void> _selectDate(BuildContext context) async {
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
     final DateTime now = DateTime.now();
-
+    final translationProvider = context.read<AppTranslationProvider>();
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? now,
       firstDate: DateTime(1951),
       lastDate: now,
-      locale: const Locale('es', 'ES'),
+      locale: Locale(translationProvider.currentLanguage),
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData.light().copyWith(
@@ -67,6 +70,7 @@ class _DatePickerFormFieldState extends State<DatePickerFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
     return TextFormField(
       controller: _dateController,
       style: StylesApp(context).textStyleBody12.copyWith(color: Colors.black),
@@ -74,13 +78,13 @@ class _DatePickerFormFieldState extends State<DatePickerFormField> {
       onTap: () => _selectDate(context),
       onChanged: widget.onChanged,
       decoration: StylesApp(context).inputDecorationOutlineStyle.copyWith(
-            hintText: "Fecha de nacimiento",
+            hintText: translationProvider.tr('birth_date'),
             suffixIcon: const Icon(Icons.calendar_today),
             // border: const OutlineInputBorder(),
           ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return "La Fecha de nacimiento es obligatoria";
+          return translationProvider.tr('birth_date');
         }
         return null;
       },

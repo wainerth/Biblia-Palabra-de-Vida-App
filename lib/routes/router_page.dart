@@ -9,7 +9,6 @@ final Map<String, WidgetBuilder> routes = {
   '/loginPage': (BuildContext context) => const LoginScreen(),
   '/registerPage': (BuildContext context) => const RegisterScreen(),
   '/forgotPasswordPage': (BuildContext context) => const RecoverPassScreen(),
-  '/changePasswordPage': (BuildContext context) => const ChangePassScreen(),
   '/layoutPage': (BuildContext context) => AuthGuard(child: PageScreen()),
   '/layoutPage1': (BuildContext context) => const LayoutScreen(),
   '/layoutLibrary': (BuildContext context) =>

@@ -25,8 +25,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _selectImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1000, // Opcional: reducir tamaño
+      maxHeight: 1000, // Opcional: reducir tamaño
+      imageQuality: 80, // Opcional: comprimir
+    );
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
       final fileSizeInBytes = imageFile.lengthSync();
@@ -95,11 +99,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
     List<ModelData> optionsSex = [
-      ModelData(value: 'M', label: 'Masculino'),
-      ModelData(value: 'F', label: 'Femenino')
+      ModelData(
+          value: 'M',
+          label: translationProvider.tr('profile.gender_options.male')),
+      ModelData(
+          value: 'F',
+          label: translationProvider.tr('profile.gender_options.female'))
     ];
 
     final String userGender = (dataUser!.gender != null &&
@@ -108,50 +117,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : '';
     List<ModelData> progressData = [
       ModelData(
-        label: "Registro",
+        label: translationProvider.tr('profile.progress_metrics.registration'),
         value: dataUser!.createdAt.isNotEmpty
             ? getFormattedDate(int.parse(dataUser!.createdAt))
             : "",
       ),
       ModelData(
-          label: "Racha",
-          value: "${dataUser!.streakDaysCount} días",
+          label: translationProvider.tr('profile.progress_metrics.streak'),
+          value: translationProvider
+              .tr('profile.progress_metrics.streak_days')
+              .replaceFirst('%s', dataUser!.streakDaysCount.toString()),
           clave: "streakDaysCount"),
       ModelData(
-          label: "Energía",
-          value: "${dataUser!.energyPoints}",
+          label: translationProvider.tr('profile.progress_metrics.energy'),
+          value: translationProvider
+              .tr('profile.progress_metrics.energy_points')
+              .replaceFirst('%s', dataUser!.energyPoints.toString()),
           clave: "expTotalUser"),
       ModelData(
-          label: "Cursos Completados", value: "${dataUser!.completedCourse}"),
+          label: translationProvider
+              .tr('profile.progress_metrics.completed_courses'),
+          value: "${dataUser!.completedCourse}"),
     ];
     List<ModelData> personalData = [
       ModelData(
-          label: "Nombre",
+          label: translationProvider.tr('profile.fields.name'),
           value: dataUser!.name,
           showLabel: false,
           clave: "name"),
       ModelData(
-          label: "Apellido",
+          label: translationProvider.tr('profile.fields.lastname'),
           value: "${dataUser?.lastname}",
           showLabel: false,
           clave: "lastname"),
       ModelData(
-        label: "Sexo",
+        label: translationProvider.tr('profile.fields.gender'),
         value: userGender,
         clave: "gender",
       ),
       ModelData(
-        label: "Fecha nac",
+        label: translationProvider.tr('profile.fields.birthdate'),
         value: "${dataUser!.birthdate}",
         clave: "birthdate",
       ),
+      ModelData(
+          label: translationProvider.tr('profile.fields.baptized'),
+          value: getIsBaptized(
+            dataUser!.isBaptized ?? false,
+          ),
+          showLabel: false,
+          clave: "isBaptized"),
     ];
     List<ModelData> contactDetails = [
       ModelData(
-        label: "Email",
-        value: dataUser!.email!,
-        showLabel: false,
-      ),
+          label: translationProvider.tr('profile.fields.email'),
+          value: dataUser!.email!,
+          showLabel: false,
+          clave: 'email'),
       ModelData(
         label: "Tel.",
         value:
@@ -162,24 +184,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ];
     List<ModelData> locationData = [
       ModelData(
-          label: "País",
+          label: translationProvider.tr('profile.fields.country'),
           value: dataUser!.country?.name ?? '',
           clave: "country",
           originalData: dataUser!.country),
       ModelData(
-        label: "Estado",
+        label: translationProvider.tr('profile.fields.state'),
         value: dataUser!.state?.name ?? '',
         clave: "state",
         originalData: dataUser!.state,
       ),
       ModelData(
-        label: "Ciudad",
+        label: translationProvider.tr('profile.fields.city'),
         value: dataUser!.city?.name ?? '',
         clave: "city",
         originalData: dataUser!.city,
       ),
       ModelData(
-        label: "Iglesia",
+        label: translationProvider.tr('profile.fields.church'),
         clave: 'church',
         value: getChurchActive(dataUser!.userChurch) != null
             ? getChurchActive(dataUser!.userChurch)!.churchName!
@@ -197,22 +219,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             builder: (context, constraints) {
               // Si el ancho es mayor a 600px (tablet), usar diseño de dos columnas
               if (constraints.maxWidth > 600) {
-                return _buildTabletLayout(
-                  context,
-                  progressData,
-                  personalData,
-                  contactDetails,
-                  locationData,
-                );
+                return _buildTabletLayout(context, progressData, personalData,
+                    contactDetails, locationData, translationProvider);
               } else {
                 // Para móvil, mantener el diseño actual
-                return _buildMobileLayout(
-                  context,
-                  progressData,
-                  personalData,
-                  contactDetails,
-                  locationData,
-                );
+                return _buildMobileLayout(context, progressData, personalData,
+                    contactDetails, locationData, translationProvider);
               }
             },
           ),
@@ -223,12 +235,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Diseño para móvil (igual al actual)
   Widget _buildMobileLayout(
-    BuildContext context,
-    List<ModelData> progressData,
-    List<ModelData> personalData,
-    List<ModelData> contactDetails,
-    List<ModelData> locationData,
-  ) {
+      BuildContext context,
+      List<ModelData> progressData,
+      List<ModelData> personalData,
+      List<ModelData> contactDetails,
+      List<ModelData> locationData,
+      AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -281,7 +293,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () {
               Navigator.popAndPushNamed(context, '/layoutPage');
             },
-            text: "Volver",
+            text: translationProvider.tr('profile.back'),
             buttonStyle: StylesApp(context).btnWidgetSmall,
             textStyle: StylesApp(context).textStyleBody7,
             width: 239.0,
@@ -294,12 +306,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Diseño para tablet (dos columnas)
   Widget _buildTabletLayout(
-    BuildContext context,
-    List<ModelData> progressData,
-    List<ModelData> personalData,
-    List<ModelData> contactDetails,
-    List<ModelData> locationData,
-  ) {
+      BuildContext context,
+      List<ModelData> progressData,
+      List<ModelData> personalData,
+      List<ModelData> contactDetails,
+      List<ModelData> locationData,
+      AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -342,7 +354,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: () {
                         Navigator.popAndPushNamed(context, '/layoutPage');
                       },
-                      text: "Volver",
+                      text: translationProvider.tr('profile.back'),
                       buttonStyle: StylesApp(context).btnWidgetSmall,
                       textStyle: StylesApp(context).textStyleBody7,
                       width: double.infinity,
@@ -375,13 +387,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Cards en una cuadrícula de 2 columnas
-                    _buildCardsGrid(
-                      context,
-                      progressData,
-                      personalData,
-                      contactDetails,
-                      locationData,
-                    ),
+                    _buildCardsGrid(context, progressData, personalData,
+                        contactDetails, locationData, translationProvider),
                   ],
                 ),
               ),
@@ -394,12 +401,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Widget para mostrar las cards en cuadrícula (tablet)
   Widget _buildCardsGrid(
-    BuildContext context,
-    List<ModelData> progressData,
-    List<ModelData> personalData,
-    List<ModelData> contactDetails,
-    List<ModelData> locationData,
-  ) {
+      BuildContext context,
+      List<ModelData> progressData,
+      List<ModelData> personalData,
+      List<ModelData> contactDetails,
+      List<ModelData> locationData,
+      AppTranslationProvider translationProvider) {
     return GridView.count(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
@@ -412,7 +419,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildTabletCard(
           context,
           icon: "assets/Flag.png",
-          title: "Progreso",
+          title: translationProvider.tr('profile.sections.progress'),
           data: progressData,
           iconLeft: Icons.trending_up,
           highlightLabel: true,
@@ -424,7 +431,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildTabletCard(
           context,
           icon: "assets/User.png",
-          title: "Datos Personales",
+          title: translationProvider.tr('profile.sections.personal_data'),
           data: personalData,
           iconLeft: Icons.edit,
           color: Color(0XFF12CBC4),
@@ -434,7 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildTabletCard(
           context,
           icon: "assets/Link.png",
-          title: "Contacto",
+          title: translationProvider.tr('profile.sections.contact'),
           data: contactDetails,
           iconLeft: Icons.edit,
           color: Color(0XFF12CBC4),
@@ -444,7 +451,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildTabletCard(
           context,
           icon: "assets/Map_pin.png",
-          title: "Ubicación",
+          title: translationProvider.tr('profile.sections.location'),
           data: locationData,
           iconLeft: Icons.edit,
           color: Color(0XFF12CBC4),
@@ -467,7 +474,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String areaCode = '';
     String phone = '';
     final encontrado = data.firstWhere(
-      (item) => item.label == 'Tel.',
+      (item) => item.clave == 'phoneNumber',
       orElse: () => ModelData(label: '', value: ''),
     );
     parsePhoneNumberSimple(context, encontrado.value).then((result) {
@@ -551,7 +558,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               TextSpan(
                                 text: item.value.isNotEmpty
-                                    ? item.label == 'Tel.'
+                                    ? item.clave == 'phoneNumber'
                                         ? '$areaCode $phone'
                                         : item.value
                                     : '',
@@ -743,137 +750,180 @@ class CardColumnWidget extends StatefulWidget {
 }
 
 class _CardColumnWidgetState extends State<CardColumnWidget> {
+  String areaCode = '';
+  String phone = '';
+
   @override
-  Widget build(BuildContext context) {
-    // Encuentra el item cuyo label sea 'Tel.'
-    String areaCode = '';
-    String phone = '';
+  void initState() {
+    super.initState();
+    _parsePhoneNumber();
+  }
+
+  void _parsePhoneNumber() async {
     final encontrado = widget.data.firstWhere(
-      (item) => item.label == 'Tel.',
+      (item) => item.clave == 'phoneNumber',
       orElse: () => ModelData(label: '', value: ''),
     );
-    parsePhoneNumberSimple(context, encontrado.value).then((result) {
-      areaCode = result.$1; // Para records: $1 es el primer elemento
-      phone = result.$2; // $2 es el segundo elemento
-      if (mounted) {
-        // Si necesitas actualizar la UI después
-        setState(() {});
-      }
-    });
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 18.0, top: 10, bottom: 16),
-          child: Stack(
-            children: [
-              Row(
-                spacing: 10.0,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
+
+    final result = await parsePhoneNumberSimple(context, encontrado.value);
+    if (mounted) {
+      setState(() {
+        areaCode = result.$1;
+        phone = result.$2;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+        minHeight: 60, // Altura mínima para evitar el error
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 18.0, top: 10, bottom: 16),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  constraints: BoxConstraints(
+                    minHeight: 40.sp, // Altura mínima para el contenido
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset(
-                        widget.iconRight,
+                      // Columna del icono
+                      Container(
                         width: 40.sp,
-                        color: Colors.white,
-                      )
+                        height: 40.sp,
+                        alignment: Alignment.topCenter,
+                        child: Image.asset(
+                          widget.iconRight,
+                          width: 40.sp,
+                          color: Colors.white,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+
+                      SizedBox(width: 10.0),
+
+                      // Columna del contenido
+                      Expanded(
+                        child: Container(
+                          constraints: BoxConstraints(
+                            minHeight: 40.sp,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              for (var i = 0; i < widget.data.length; i++) ...[
+                                if (widget.data[i].showLabel ||
+                                    widget.data[i].value.isNotEmpty)
+                                  Container(
+                                    margin: EdgeInsets.only(bottom: 4.0),
+                                    child: Text.rich(
+                                      style: StylesApp(context)
+                                          .textStyleBodyWhite4,
+                                      TextSpan(
+                                        children: [
+                                          if (widget.data[i].label.isNotEmpty)
+                                            if (widget.data[i].showLabel)
+                                              TextSpan(
+                                                text:
+                                                    "${widget.data[i].label}: ",
+                                              ),
+                                          TextSpan(
+                                            text:
+                                                widget.data[i].value.isNotEmpty
+                                                    ? widget.data[i].clave ==
+                                                            'phoneNumber'
+                                                        ? '$areaCode $phone'
+                                                        : widget.data[i].value
+                                                    : '',
+                                            style: StylesApp(context)
+                                                .textStyleBodyWhite4
+                                                .copyWith(
+                                                  color: (widget
+                                                              .highlightLabel &&
+                                                          (i == 1 || i == 2))
+                                                      ? Colors.orange
+                                                      : Colors.white,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ]
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (var i = 0; i < widget.data.length; i++) ...[
-                          if (widget.data[i].showLabel ||
-                              widget.data[i].value.isNotEmpty)
-                            Text.rich(
-                              style: StylesApp(context).textStyleBodyWhite4,
-                              TextSpan(
-                                children: [
-                                  if (widget.data[i].label.isNotEmpty)
-                                    if (widget.data[i].showLabel)
-                                      TextSpan(
-                                          text: "${widget.data[i].label}: "),
-                                  TextSpan(
-                                    text: widget.data[i].value.isNotEmpty
-                                        ? widget.data[i].label == 'Tel.'
-                                            ? '$areaCode $phone'
-                                            : widget.data[i].value
-                                        : '',
-                                    style: StylesApp(context)
-                                        .textStyleBodyWhite4
-                                        .copyWith(
-                                          color: (widget.highlightLabel &&
-                                                  (i == 1 || i == 2))
-                                              ? Colors.orange
-                                              : Colors.white,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ]
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              Positioned(
-                top: 0,
-                right: 2,
-                child: Container(
-                  width: 40.sp,
-                  height: 40.sp,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(40.sp),
-                    color: Colors.orange,
-                  ),
-                  child: IconButton(
-                    padding: EdgeInsets.all(0),
-                    constraints: BoxConstraints(maxWidth: 40.sp),
-                    iconSize: 30.sp,
-                    onPressed: () {
-                      if (widget.route != null) {
-                        Navigator.popAndPushNamed(context, widget.route!);
-                      } else {
-                        // Abrir el diálogo de edición Tablet
-                        _openDialogEdit(widget.data);
-                      }
-                    },
-                    icon: Icon(
-                      widget.iconLeft,
-                      color: Colors.white,
-                    ),
-                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        if (widget.divider)
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 5.0),
-            height: 2.0,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.white, // Co
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black
-                      .withValues(alpha: 0.25), // Color de la sombra
-                  spreadRadius: 2, // Extensión de la sombra
-                  blurRadius: 5, // Difuminado de la sombra
-                  offset: Offset(0, 3), // Desplazamiento de la sombra
+
+                // Botón de edición (Positioned)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 40.sp,
+                    height: 40.sp,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(40.sp),
+                      color: Colors.orange,
+                    ),
+                    child: IconButton(
+                      padding: EdgeInsets.all(0),
+                      constraints: BoxConstraints.tightFor(
+                        width: 40.sp,
+                        height: 40.sp,
+                      ),
+                      iconSize: 24.sp,
+                      onPressed: () {
+                        if (widget.route != null) {
+                          Navigator.popAndPushNamed(context, widget.route!);
+                        } else {
+                          _openDialogEdit(widget.data);
+                        }
+                      },
+                      icon: Icon(
+                        widget.iconLeft,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-      ],
+          if (widget.divider)
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 5.0),
+              height: 2.0,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 

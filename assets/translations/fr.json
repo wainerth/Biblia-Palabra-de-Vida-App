@@ -1,0 +1,1015 @@
+{
+    "common": {
+        "back": "Retour",
+        "continue": "Continuer",
+        "accept": "Accepter",
+        "cancel": "Annuler",
+        "exit": "Quitter",
+        "view": "Voir",
+        "close": "Fermer",
+        "go_to_adventure": "Aller à l'aventure",
+        "stage": "Étape"
+    },
+    "navigation": {
+        "home": "Accueil",
+        "bible": "Bible",
+        "prayer": "Prière",
+        "settings": "Paramètres",
+        "offerings": "Offrandes",
+        "adventures": "Aventures",
+        "ranking": "Classement",
+        "doubts": "Doutes",
+        "map": "Carte",
+        "promises": "Promesses",
+        "online_challenge": "Défi en ligne",
+        "news": "Nouveauté"
+    },
+    "home_screen": {
+        "view_intro": "Voir l'intro",
+        "register_free_account": "ENREGISTREZ UN\n COMPTE GRATUIT",
+        "create_account": "Créer un compte",
+        "login": "Se connecter"
+    },
+    "register_screen": {
+        "title": "La Bible\n  Parole De\n Vie!",
+        "subtitle": "Inscription",
+        "continue": "Continuer",
+        "register": "S'inscrire",
+        "go_to_login": "Aller à la connexion",
+        "or": "ou",
+        "already_have_account": "Vous avez déjà un compte? ",
+        "login_here": "Connectez-vous",
+        "user_info_title": "Informations Utilisateur",
+        "personal_info_title": "Informations Personnelles",
+        "user_info_description": "Complétez vos informations de base pour créer votre compte",
+        "personal_info_description": "Complétez vos informations personnelles pour continuer",
+        "step_1": "1",
+        "step_2": "2",
+        "secure_data": "Données sécurisées et protégées",
+        "fast_registration": "Inscription rapide et facile",
+        "join_community": "Rejoignez notre communauté",
+        "dialogs": {
+            "complete_fields": "Veuillez remplir tous les champs obligatoires",
+            "resending_code": "Renvoyer le code",
+            "pin_verification": "Vérification du PIN"
+        }
+    },
+    "user_info_step": {
+        "document_number": "Numéro de document",
+        "document_number_example": "Ex: 12345678",
+        "document_number_hint": "Numéro de document",
+        "email": "Email*",
+        "email_hint": "exemple@email.com",
+        "email_error_required": "L'email est obligatoire",
+        "email_error_invalid": "Entrez une adresse email valide",
+        "username": "Nom d'utilisateur",
+        "username_hint": "Nom d'utilisateur",
+        "username_error_required": "Le nom d'utilisateur est obligatoire",
+        "username_error_spaces": "Le nom d'utilisateur ne peut pas contenir d'espaces",
+        "password": "Mot de passe*",
+        "password_hint": "Minimum 6 caractères",
+        "password_error_required": "Le mot de passe est obligatoire",
+        "password_error_length": "Le mot de passe doit contenir au moins 6 caractères",
+        "confirm_password": "Confirmer le mot de passe*",
+        "confirm_password_hint": "Confirmer le mot de passe",
+        "repeat_password_hint": "Répéter le mot de passe",
+        "password_mismatch": "Les mots de passe ne correspondent pas",
+        "required_field": "Champ obligatoire",
+        "invalid_email": "Email invalide",
+        "minimum_characters": "Minimum 6 caractères",
+        "required_fields_info": "Tous les champs marqués avec * sont obligatoires. Assurez-vous de vous souvenir de votre mot de passe.",
+        "document_id_title": "Document d'identité",
+        "document_id_description": "Entrez votre document d'identité officiel: Exemples selon votre pays:",
+        "alias_title": "Alias (surnom)",
+        "alias_description": "Ce champ est un alias ou surnom qui sera utilisé dans la Bible. Ce n'est pas votre vrai nom, il est optionnel et sert uniquement à vous afficher dans l'application.",
+        "understood": "Compris",
+        "examples_by_country": "Exemples selon votre pays:",
+        "argentina": "• Argentine: DNI",
+        "uruguay": "• Uruguay: Carte d'identité",
+        "chile": "• Chili: RUN ou RUT",
+        "colombia": "• Colombie: Carte d'identité",
+        "mexico": "• Mexique: INE ou CURP",
+        "spain": "• Espagne: DNI ou NIE",
+        "usa": "• États-Unis: SSN",
+        "brazil": "• Brésil: RG ou CPF",
+        "numbers_only": "Chiffres uniquement, sans points ni tirets."
+    },
+    "personal_info_step": {
+        "first_name": "Prénom",
+        "first_name_hint": "Prénom",
+        "first_name_error": "Le prénom est obligatoire",
+        "first_name_example": "Ex: Jean",
+        "last_name": "Nom",
+        "last_name_hint": "Nom",
+        "last_name_error": "Le nom est obligatoire",
+        "last_name_example": "Ex: Dupont",
+        "gender": "Genre*",
+        "gender_error": "Veuillez sélectionner votre genre",
+        "male": "Masculin",
+        "female": "Féminin",
+        "birth_date": "Date de naissance*",
+        "birth_date_error": "La date de naissance est obligatoire",
+        "baptized": "Êtes-vous baptisé?",
+        "yes": "Oui",
+        "no": "Non",
+        "country": "Pays*",
+        "country_hint": "Sélectionnez un pays",
+        "country_search_hint": "Recherchez et sélectionnez votre pays",
+        "country_error": "Veuillez sélectionner un pays",
+        "phone": "Téléphone*",
+        "hint_text": "Numéro de téléphone",
+        "invalid_number_message": "Numéro de Téléphone Invalide!",
+        "phone_error_invalid": "Veuillez entrer un numéro de téléphone valide",
+        "required_fields_info": "Les champs marqués avec * sont obligatoires. Assurez-vous que toutes les informations sont correctes.",
+        "phone_format_title": "Format du numéro de téléphone",
+        "phone_format_description": "Entrez votre numéro de téléphone portable:",
+        "correct_examples": "📱 Exemples corrects:",
+        "uruguay_example": "• +598 99123456 (Uruguay)",
+        "argentina_example": "• +54 91112345678 (Argentine)",
+        "chile_example": "• +56 998765432 (Chili)",
+        "colombia_example": "• +57 3001234567 (Colombie)",
+        "phone_warning": "Le numéro d'opérateur NE DOIT PAS commencer par 0 (ex: 099... → 99...) N'incluez pas d'espaces, de tirets ou d'autres caractères spéciaux.",
+        "understood": "Compris",
+        "required_field": "Champ obligatoire",
+        "select_gender": "Sélectionnez votre genre",
+        "search_country": "Rechercher un pays",
+        "phone_error_required": "Le numéro de téléphone est obligatoire"
+    },
+    "login": {
+        "title": "¡La Bible\n  Parole De\n Vie!",
+        "subtitle": "Connexion",
+        "username": "Utilisateur ou Email",
+        "username_required": "L'utilisateur ou l'email est requis",
+        "username_no_spaces": "L'utilisateur ou l'email ne peut pas contenir d'espaces",
+        "password": "Mot de passe",
+        "password_required": "Le mot de passe est requis",
+        "password_min_length": "Le mot de passe doit contenir au moins 6 caractères",
+        "login_button": "Se connecter",
+        "google_login": "Se connecter avec",
+        "forgot_password": "Mot de passe oublié",
+        "register": "S'inscrire",
+        "divider_or": "ou",
+        "welcome": "Bon retour",
+        "welcome_message": "Connectez-vous à votre compte pour continuer votre étude biblique"
+    },
+    "dialogs": {
+        "verify_email": "Veuillez d'abord vérifier votre email",
+        "verification_code_sent": "Code de vérification envoyé",
+        "verification_failed": "Échec de la vérification",
+        "resend_code": "Renvoyer le code",
+        "google_login_error": "Erreur lors de la connexion avec Google",
+        "error_details": "Détails de l'erreur"
+    },
+    "buttons": {
+        "ok": "Accepter",
+        "cancel": "Annuler",
+        "verify": "Vérifier",
+        "resend": "Renvoyer"
+    },
+    "messages": {
+        "loading": "Chargement...",
+        "success": "Succès",
+        "error": "Erreur"
+    },
+    "recover_password": {
+        "title": "¡La Bible\n  Parole De\n Vie!",
+        "subtitle": "Récupérer le\n mot de passe",
+        "step1_title": "Entrez votre email pour rechercher votre compte",
+        "step2_title": "Entrez le code de récupération envoyé à votre email",
+        "email": "Email",
+        "email_required": "L'email est obligatoire",
+        "email_invalid": "Veuillez entrer une adresse email valide",
+        "recovery_code": "Code de récupération",
+        "recovery_code_required": "Le code de récupération est obligatoire",
+        "new_password": "Nouveau mot de passe",
+        "new_password_required": "Le nouveau mot de passe est requis",
+        "password_min_length": "Le mot de passe doit contenir au moins 6 caractères",
+        "confirm_password": "Confirmer le mot de passe",
+        "confirm_password_mismatch": "Les mots de passe ne correspondent pas",
+        "continue_button": "Continuer",
+        "reset_button": "Réinitialiser",
+        "back_to_login": "Retour à la connexion",
+        "resend_code": "Renvoyer le code",
+        "code_sent_message": "Code de récupération envoyé à votre email",
+        "success_message": "Mot de passe réinitialisé avec succès",
+        "error_message": "Erreur lors de la réinitialisation du mot de passe",
+        "dialogs": {
+            "forgot_password_success": "Code de récupération envoyé avec succès",
+            "forgot_password_error": "Erreur lors de l'envoi du code de récupération",
+            "reset_password_success": "Mot de passe réinitialisé avec succès",
+            "reset_password_error": "Erreur lors de la réinitialisation du mot de passe",
+            "invalid_code": "Code de récupération invalide",
+            "code_expired": "Code de récupération expiré"
+        },
+        "buttons": {
+            "cancel": "Annuler",
+            "try_again": "Réessayer",
+            "resend": "Renvoyer le code",
+            "back": "Retour"
+        },
+        "validation": {
+            "password_requirements": "Exigences du mot de passe:",
+            "min_length": "Au moins 6 caractères",
+            "special_char": "Au moins un caractère spécial",
+            "number": "Au moins un chiffre",
+            "uppercase": "Au moins une lettre majuscule",
+            "lowercase": "Au moins une lettre minuscule"
+        },
+        "steps": {
+            "step_1": "Entrer l'email",
+            "step_2": "Entrer le code et le nouveau mot de passe",
+            "step_3": "Réinitialisation terminée"
+        }
+    },
+    "pagination": {
+        "items_per_page": "Éléments par page",
+        "page": "Page",
+        "pages": "Pages",
+        "of": "de",
+        "previous": "Précédent",
+        "next": "Suivant",
+        "showing": "Affichage",
+        "to": "à",
+        "of_total": "de"
+    },
+    "header_adventure": {
+        "experience": "Exp",
+        "streak": "Série",
+        "days": "%s jours"
+    },
+    "adventure_screen": {
+        "title": "Aventures",
+        "subtitle": "Cours Disponibles",
+        "details_button": "Voir Détails",
+        "map_button": "Aller à la Carte",
+        "loading_courses": "Chargement des cours...",
+        "no_courses": "Aucun cours disponible",
+        "course_unavailable": "Ce cours n'est pas disponible !",
+        "course_completed": "Cours déjà terminé",
+        "completed_message": "Vous avez terminé ce cours avec succès",
+        "back_to_course": "Retour au Cours",
+        "close": "Fermer",
+        "go_to_course": "Aller au Cours",
+        "progress_error": "Erreur de chargement du progrès",
+        "retry": "Réessayer",
+        "go_back": "Retour",
+        "affiliation_needed": "Affiliation Requise",
+        "affiliate_to_church": "Affilier à une Église ?",
+        "affiliate_message": "Vous devez être affilié à une église pour accéder aux cours",
+        "return_to_workspace": "Retour à l'Espace de Travail",
+        "go_to_profile": "Aller au Profil",
+        "error_fallback": "Un error ha ocurrido"
+    },
+    "detail_course": {
+        "title": "Suivez le chemin de la sagesse",
+        "stage": "Étape",
+        "of": "/",
+        "status": {
+            "completed": "Terminé",
+            "in_progress": "En Cours",
+            "pending": "En Attente"
+        },
+        "go": "Aller",
+        "course_unavailable": "Ce cours n'est pas disponible !",
+        "course_completed": "Cours déjà terminé",
+        "see_more_courses": "Voir plus de cours",
+        "go_to_course": "Aller au Cours",
+        "accept": "Accepter",
+        "view_course_details": "Voir les détails du cours",
+        "go_to_course_map": "Aller à la carte du cours",
+        "course_sections": "Sections",
+        "completed_percentage": "% Terminé",
+        "course_stages": "Étapes du cours",
+        "stages_count": "étapes",
+        "no_stages": "Aucune étape disponible",
+        "progress": "Progression",
+        "coming_soon": "Bientôt disponible",
+        "next_stage": "Étape",
+        "upcoming_stage": " - Bientôt disponible",
+        "errors": {
+            "navigation_context": "Contexte de navigation invalide.",
+            "course_id_not_provided": "ID de cours non fourni.",
+            "user_not_authenticated": "Utilisateur non authentifié.",
+            "an_error_occurred": "Une erreur est survenue"
+        }
+    },
+    "intro_adventure": {
+        "suggestions_title": "Suggestions pour votre aventure",
+        "suggestions_subtitle": "Profitez au maximum de cette expérience",
+        "tip_1": {
+            "title": "Conseil utile",
+            "description": "Consacrez au moins 10 minutes par jour pour de meilleurs résultats"
+        },
+        "tip_2": {
+            "title": "Gagnez des récompenses",
+            "description": "Terminez les étapes pour débloquer des Prix et des succès"
+        },
+        "tip_3": {
+            "title": "Suivez votre progression",
+            "description": "Vérifiez votre Progression dans le calendrier de Série"
+        },
+        "tip_4": {
+            "title": "Partagez avec des amis",
+            "description": "Restez dans le classement de votre groupe"
+        },
+        "additional_tip": "Chaque étape vous rapproche de la compréhension de la sagesse divine",
+        "step_1_title_mobile": "Suivez\n le\n chemin\n de la\n sagesse",
+        "step_2_title": "Sélectionnez le sujet que vous souhaitez apprendre",
+        "step_2_title_mobile": "Sélectionnez\n le sujet\n que vous\n souhaitez\n apprendre",
+        "step_3_title": "Commencez l'aventure, complétez et avancez dans les étapes pour en savoir plus sur Dieu",
+        "step_3_title_mobile": "Commencez\n l'aventure,\n complétez\n et avancez\n dans les\n étapes\n pour en\n savoir plus\n sur Dieu",
+        "step_4_title": "Suivez les étapes, lisez ou écoutez le contenu et répondez aux questions pour ajouter des points d'expérience",
+        "step_4_title_mobile": "Suivez les\n étapes lisez ou\n écoutez\n le contenu et\n répondez aux\n questions\n pour ajouter\n des points\n d'expérience",
+        "step": "Étape",
+        "of": "de",
+        "skip": "Ignorer",
+        "next": "SUIVANT",
+        "start_adventure": "COMMENCER L'AVENTURE",
+        "skip_intro": "Ignorer l'Intro",
+        "start_adventure_mobile": "Commencer l'Aventure"
+    },
+    "map_screen": {
+        "stage": "Étape",
+        "accept": "Accepter",
+        "sound_effects": "Effets sonores",
+        "level_progress": "Progrès du Niveau",
+        "completed": "Terminés",
+        "total": "Totaux",
+        "find_active_level": "Trouver le niveau actif",
+        "navigation": "Navigation",
+        "course_details": "Détails du cours",
+        "back_to_stages": "Retour aux étapes",
+        "under_construction": "Ce Niveau est en Construction,\n quand il sera disponible vous recevrez une Notification",
+        "step": "étape",
+        "coming_soon": "Bientôt disponible"
+    },
+    "history_screen": {
+        "title": "Découvrez ",
+        "level_name": "Étape ",
+        "voice_control": "Contrôle vocal",
+        "speed": "Vitesse",
+        "percentage": "%",
+        "beginning": "Début",
+        "end": "Fin",
+        "progress": "Progression",
+        "congratulations": "Félicitations !",
+        "completed_story": "Vous avez atteint la fin de l'histoire",
+        "continue_learning": "Continuez ! Chaque histoire vous rapproche de la connaissance.",
+        "has_completed_story": "Vous avez terminé cette histoire",
+        "restart_story": "Redémarrer l'histoire",
+        "continue_with_questions": "Continuer avec les Questions",
+        "return_to_start": "Retourner au début de l'histoire",
+        "continue_questions": "Continuer avec les Questions",
+        "find_active_level": "Trouver le niveau actif",
+        "audio_story": "Audio de l'histoire",
+        "no_stories": "Aucune histoire disponible",
+        "story_copied": "Histoire copiée dans le presse-papiers",
+        "tts_error": "Erreur TTS",
+        "close": "Fermer",
+        "select_version": "Sélectionnez la Version",
+        "bible_version": "Version de la Bible",
+        "slow": "Lent",
+        "normal": "Normal",
+        "fast": "Rapide",
+        "level_progress": "Progression du Niveau",
+        "sound_control": "Contrôle vocal",
+        "error_arguments": "Aucun argument fourni",
+        "error_parameters": "Paramètres requis manquants",
+        "user_no_authenticate": "Utilisateur non authentifié",
+        "an_error_occurred": "Une erreur est survenue"
+    },
+    "question_screen": {
+        "question_header": {
+            "know_the": "Découvrez le",
+            "step": "Étape"
+        },
+        "answer_actions": {
+            "very_good": "Très bien !",
+            "oh_sorry": "Oh, désolé !",
+            "next": "Suivant"
+        },
+        "tts_feedback": {
+            "correct_answer": "Bonne réponse !",
+            "incorrect_answer": "Mauvaise réponse"
+        },
+        "tts": {
+            "question_prefix": "Question",
+            "of": "sur",
+            "options": "Options :",
+            "option": "Option"
+        },
+        "tts_controls": {
+            "activate_reading": "Activer la lecture",
+            "deactivate_reading": "Désactiver la lecture",
+            "stop_reading": "Arrêter la lecture",
+            "read_question": "Lire la question",
+            "read_options": "Lire les options"
+        },
+        "speed_control": {
+            "speed": "Vitesse"
+        },
+        "level_info": {
+            "step": "Étape",
+            "current_level": "Niveau actuel"
+        },
+        "activity_completed": {
+            "almost_there": "Presque réussi !",
+            "step_completed": "Vous avez terminé l'Étape",
+            "try_again": "Réessayez l'Étape",
+            "to_advance": "pour progresser",
+            "energy_earned": "Vous avez gagné %s LMs d'énergie",
+            "continue": "Continuer"
+        },
+        "stage_completed": {
+            "stage_completed": "Étape %s terminée",
+            "stage_completed_success": "a été terminée avec succès",
+            "effort_worth": "Votre effort en valait la peine ! Vous avez terminé l'Étape",
+            "share_achievement": "Partager le succès"
+        },
+        "prize_won": {
+            "congratulations_course": "Félicitations\n pour avoir terminé\n ce cours !",
+            "prize_earned": "Vous avez gagné un(e) {{typeStone}} pour\n votre collection",
+            "can_exchange": "Vous pouvez l'échanger contre\n %s lms d'énergie quand vous voulez",
+            "continue": "Continuer"
+        },
+        "achievement_unlocked": {
+            "title_obtained": "Vous avez obtenu\n le titre de\n %s !",
+            "download_certificate": "Télécharger le certificat",
+            "share_achievement": "Partager le succès",
+            "share_text": "Étape {sectionNumber} - {sectionName} terminée !",
+            "share_subject": "Félicitez {username} !",
+            "continue": "Continuer"
+        },
+        "certificate": {
+            "downloaded_success": "Certificat téléchargé avec succès dans :",
+            "share_achievement": "Partager le succès",
+            "open_directory": "Ouvrir le dossier",
+            "download_error": "Impossible de télécharger le certificat.",
+            "folder_error": "Impossible d'ouvrir le dossier de téléchargements.",
+            "download_error_generic": "Erreur lors du téléchargement du certificat :"
+        },
+        "share_messages": {
+            "stage_share": "Étape terminée",
+            "congratulate_user": "Félicitez",
+            "title_share": "J'ai obtenu le titre de"
+        },
+        "error_generic": "Une erreur s'est produite :"
+    },
+    "question_card": {
+        "question_prefix": "Question",
+        "of": "sur",
+        "opportunities": "Tentatives :",
+        "tts": {
+            "stop": "Arrêter",
+            "listen_question": "Écouter la question",
+            "tap_to_listen": "Appuyez sur la question pour écouter"
+        }
+    },
+    "streak_celebration": {
+        "title": "Félicitations ! 🎉",
+        "days_streak": "jours de série",
+        "current_streak": "Série actuelle",
+        "record": "Record",
+        "days": "jours",
+        "weekdays": {
+            "monday": "L",
+            "tuesday": "M",
+            "wednesday": "M",
+            "thursday": "J",
+            "friday": "V",
+            "saturday": "S",
+            "sunday": "D"
+        }
+    },
+    "prayer_screen": {
+        "title": "Demandes de Prière",
+        "view_responses": "Voir les réponses à vos demandes de prière",
+        "make_request": "Faire une demande de prière",
+        "select_category": "Sélectionnez une catégorie",
+        "choose_from_list": "Choisissez dans la liste à droite",
+        "how_it_works": "Comment ça fonctionne ?",
+        "step_1": "1. Sélectionnez une catégorie dans la liste",
+        "step_2": "2. Complétez votre demande de prière",
+        "step_3": "3. Notre équipe intercédera pour vous",
+        "step_4": "4. Vous recevrez des notifications de réponses",
+        "categories_title": "Catégories de Prière",
+        "loading_categories": "Chargement des catégories...",
+        "confidentiality_note": "💬 Chaque demande est traitée avec une confidentialité et un respect absolus. Votre vie privée est notre priorité.",
+        "take_prayers": "Prendre des demandes de prière",
+        "prayer_group": {
+            "title": "Groupe de Prière",
+            "join": "Rejoindre le groupe",
+            "leave": "Quitter le groupe"
+        }
+    },
+    "list_request_screen": {
+        "title": {
+            "responses_of": "Réponses de",
+            "prayer_requests": "Demandes de Prière"
+        },
+        "search": {
+            "placeholder": "Rechercher dans mes demandes...",
+            "hint": "Rechercher..."
+        },
+        "stats": {
+            "total_requests": "Total Demandes",
+            "current_page": "Page Actuelle",
+            "per_page": "Par Page"
+        },
+        "detail_panel": {
+            "title": "Détails de la Demande",
+            "date": "Date:",
+            "requested_by": "Demandé par:",
+            "categories_title": "Catégories",
+            "main_category": "Catégorie Principale",
+            "subcategory": "Sous-catégorie",
+            "prayer_request": "Demande de Prière",
+            "responses_received": "Réponses Reçues",
+            "response_from_team": "Réponse de l'équipe de prière",
+            "view_full": "Voir Complet",
+            "delete": "Supprimer"
+        },
+        "empty_detail": {
+            "title": "Sélectionnez une demande",
+            "subtitle": "Cliquez sur une demande de la liste\npour voir ses détails ici"
+        },
+        "empty_state": {
+            "title": "Vous n'avez encore fait aucune\nDemande de Prière",
+            "subtitle": "Lorsque vous ferez des demandes,\nelles apparaîtront ici"
+        },
+        "list_item": {
+            "by": "Par:",
+            "with_response": "Avec réponse",
+            "view_details": "Voir détails",
+            "delete": "Supprimer"
+        },
+        "mobile": {
+            "date": "Date heure:",
+            "by": "Par:",
+            "prayer_for": "Prière pour:"
+        },
+        "delete_dialog": {
+            "title": "Confirmation",
+            "message": "Êtes-vous sûr de vouloir supprimer cette demande?",
+            "confirm": "Oui",
+            "cancel": "Non"
+        },
+        "messages": {
+            "deleted_success": "Demande supprimée avec succès",
+            "try_again_later": "Réessayez plus tard.",
+            "load_previous_page_error": "Erreur lors du chargement de la page précédente:"
+        }
+    },
+    "request_prayer_screen": {
+        "title": "Demandes de Prière",
+        "category": "Catégorie :",
+        "instructions": {
+            "title": "Instructions",
+            "step_1": "Sélectionnez le type spécifique de demande",
+            "step_2": "Entrez le nom de la personne pour qui prier",
+            "step_3": "Décrivez votre demande en détail",
+            "step_4": "Appuyez sur Envoyer pour partager votre demande"
+        },
+        "daily_verse": {
+            "title": "Verset du jour",
+            "copied_message": "Proverbe copié dans le presse-papiers",
+            "share_subject": "Proverbe du jour"
+        },
+        "form": {
+            "title": "Compléter la Demande",
+            "subtitle": "Complétez les champs suivants pour envoyer votre demande",
+            "request_type": {
+                "label": "Type de Demande",
+                "hint": "Sélectionnez une option",
+                "validation": "Veuillez sélectionner un Type de Demande"
+            },
+            "recipient_name": {
+                "label": "Nom de la personne pour qui prier",
+                "hint": "Exemple : Jean Dupont",
+                "validation": "Vous devez indiquer pour qui est la prière"
+            },
+            "description": {
+                "label": "Décrivez votre demande de prière",
+                "hint": "Décrivez votre demande de prière..."
+            },
+            "audio": {
+                "label": "Enregistrement Audio (Optionnel)",
+                "ready_message": "Enregistrement audio prêt à envoyer"
+            },
+            "submit_button": "Envoyer la Demande",
+            "mobile_submit": "Envoyer"
+        },
+        "success_modal": {
+            "title": "Demande Envoyée avec Succès",
+            "message_1": "Votre demande de prière a été envoyée à la communauté de prière, qui priera pour votre demande.",
+            "message_2": "S'il vous plaît, croyez en la puissance de Dieu ; si nous Le cherchons, Il est bon et miséricordieux pour nous pardonner et nous donner une réponse qui bénira nos vies.",
+            "verse": "Jean 3:16 « Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu'il ait la vie éternelle »",
+            "accept_button": "Accepter"
+        },
+        "errors": {
+            "missing_fields": "Des champs obligatoires sont manquants",
+            "select_option": "Veuillez sélectionner une option"
+        }
+    },
+    "take_prayer_screen": {
+        "title": {
+            "take": "Prendre des",
+            "prayer": "Demandes de Prière"
+        },
+        "search": {
+            "placeholder": "Rechercher des demandes...",
+            "hint": "Rechercher..."
+        },
+        "stats": {
+            "total_requests": "Total Demandes",
+            "pending": "En Attente",
+            "per_page": "Par Page"
+        },
+        "detail_panel": {
+            "title": "Détails de la Demande",
+            "date": "Date:",
+            "requested_by": "Demandé par:",
+            "prayer_for": "Prière pour:",
+            "categories_title": "Catégories",
+            "main_category": "Catégorie Principale",
+            "subcategory": "Sous-catégorie",
+            "prayer_request": "Demande de Prière",
+            "audio_title": "Audio de la Demande",
+            "audio_available": "Audio disponible",
+            "assist_button": "Assister à cette Demande"
+        },
+        "list_item": {
+            "date": "Date:",
+            "by": "Par:",
+            "prayer_for": "Pour:",
+            "pending": "En Attente",
+            "assist_button": "Assister à cette Demande",
+            "assist_button_mobile": "Assister Demande"
+        },
+        "empty_detail": {
+            "title": "Sélectionnez une demande",
+            "subtitle": "Cliquez sur une demande de la liste\npour voir ses détails ici"
+        },
+        "empty_state": {
+            "title": "Excellent travail!",
+            "subtitle": "Aucune demande en attente.\n\nVous avez traité toutes les demandes disponibles\nou il n'y a pas de nouvelles demandes pour le moment.",
+            "refresh_button": "Actualiser"
+        },
+        "mobile": {
+            "title": "Réponses aux\nDemandes de Prière",
+            "date": "Date heure:",
+            "by": "Par:",
+            "prayer_for": "Prière pour:"
+        },
+        "messages": {
+            "load_previous_page_error": "Erreur lors du chargement de la page précédente:",
+            "error_filter": "erreur de filtrage"
+        }
+    },
+    "workspace": {
+        "title": "Accueil",
+        "notifications": "Notifications",
+        "see_all": "Voir Toutes...",
+        "no_unread_notifications": "Vous n'avez pas de notifications non lues.",
+        "no_read_notifications": "Vous n'avez pas de notifications lues.",
+        "unread": "Non lues",
+        "read": "Lues",
+        "cards": {
+            "community": "Communauté",
+            "adventure": "Aventure",
+            "bible": "La Bible",
+            "library": "Bibliothèque"
+        },
+        "sections": {
+            "christian_library": "Bibliothèque Chrétienne",
+            "stories_to_reflect": "Histoires pour réfléchir",
+            "games": "Jeux",
+            "preachings": "Prédications",
+            "promises": "Promesses"
+        },
+        "user_profile": {
+            "welcome_herd": "Le troupeau vous attend!",
+            "streak_days": "Série: %s Jours",
+            "energy_points": "%s Lms.",
+            "profile": "Profil"
+        },
+        "daily_proverb": {
+            "title": "Proverbe du jour",
+            "copy_success": "Proverbe copié dans le presse-papiers",
+            "share_subject": "Proverbe du jour",
+            "loading": "Chargement du proverbe..."
+        },
+        "errors": {
+            "load_notifications": "Erreur de chargement des notifications",
+            "load_proverb": "Erreur de chargement du proverbe",
+            "load_reflection": "Erreur de chargement de la réflexion",
+            "load_progress": "Erreur de chargement du progrès"
+        },
+        "dialogs": {
+            "course_completed": "Le cours a déjà été terminé",
+            "see_more_courses": "Voir plus de cours",
+            "go_to_course": "Aller au cours",
+            "course": "cours"
+        },
+        "buttons": {
+            "copy": "Copier",
+            "share": "Partager",
+            "retry": "Réessayer",
+            "profile": "Profil",
+            "add": "Ajouter"
+        },
+        "modal": {
+            "notification_details": "Détails de la notification",
+            "time_format": "jj/mm/aaaa HH:mm"
+        }
+    },
+    "modal_tales": {
+        "title": "Contes",
+        "search_placeholder": "Rechercher un conte",
+        "search": "Rechercher",
+        "no_results": "Aucun conte trouvé",
+        "loading": "Chargement des contes...",
+        "load_error": "Erreur de chargement des contes",
+        "prev_page": "Page précédente",
+        "next_page": "Page suivante",
+        "current_page": "Page %s sur %s"
+    },
+    "audio_player": {
+        "loading": "Chargement...",
+        "duration_format": "%s / %s",
+        "play": "Jouer",
+        "pause": "Pause",
+        "volume_on": "Volume activé",
+        "volume_off": "Volume désactivé",
+        "more_options": "Plus d'options",
+        "volume": "Volume",
+        "download": "Télécharger",
+        "share": "Partager",
+        "share_text": "Écoutez cet audio!",
+        "share_subject": "Parole de Vie",
+        "download_success": "✅ Audio téléchargé avec succès",
+        "download_error": "❌ Erreur de téléchargement: %s",
+        "download_complete": "Téléchargement terminé",
+        "download_in_progress": "📥 Téléchargement: %s%",
+        "download_started": "✅ Téléchargement démarré. Fichier enregistré dans: %s",
+        "download_failed": "Échec du démarrage du téléchargement.",
+        "share_success": "Audio partagé avec succès",
+        "share_error": "Erreur lors du partage de l'audio",
+        "save_to_gallery": "Enregistrer dans la galerie",
+        "save_success": "✅ Audio enregistré dans Téléchargements/Bible",
+        "save_permission_warning": "Permission de stockage nécessaire pour enregistrer dans la galerie",
+        "save_error": "Erreur d'enregistrement: %s",
+        "play_local": "Écouter maintenant",
+        "file_not_found": "Fichier introuvable",
+        "play_error": "Erreur de lecture du fichier local: %s",
+        "permission_write_error": "Impossible d'écrire dans le répertoire",
+        "storage_permission": "Permission de stockage",
+        "storage_permission_required": "Nécessite une permission de stockage",
+        "menu": {
+            "download": "Télécharger",
+            "share": "Partager",
+            "volume": "Volume",
+            "play": "Jouer",
+            "save_external": "Enregistrer externe"
+        },
+        "notifications": {
+            "downloading": "Téléchargement audio...",
+            "complete": "Téléchargement terminé",
+            "saving": "Enregistrement dans la galerie..."
+        },
+        "file_names": {
+            "default": "audio",
+            "safe_format": "Nettoyage du nom de fichier"
+        }
+    },
+    "profile": {
+        "title": "Profil",
+        "back": "Retour",
+        "edit": "Modifier",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "sections": {
+            "progress": "Progrès",
+            "personal_data": "Données Personnelles",
+            "contact": "Contact",
+            "location": "Localisation"
+        },
+        "fields": {
+            "name": "Nom",
+            "lastname": "Nom de famille",
+            "gender": "Sexe",
+            "birthdate": "Date de naissance",
+            "email": "Email",
+            "phone": "Téléphone",
+            "country": "Pays",
+            "state": "État",
+            "city": "Ville",
+            "church": "Église",
+            "baptized": "Baptisé",
+            "registration": "Inscription",
+            "streak": "Série",
+            "energy": "Énergie",
+            "completed_courses": "Cours Terminés",
+            "points": "points",
+            "days": "jours"
+        },
+        "gender_options": {
+            "male": "Masculin",
+            "female": "Féminin"
+        },
+        "progress_metrics": {
+            "registration": "Inscription",
+            "streak": "Série",
+            "energy": "Énergie",
+            "completed_courses": "Cours Terminés",
+            "streak_days": "%s jours",
+            "energy_points": "%s Lms"
+        }
+    },
+    "edit_profile_dialog": {
+        "title": "Édition des Données",
+        "loading": "Chargement des données...",
+        "save": "Enregistrer",
+        "form_errors": "Veuillez corriger les erreurs dans le formulaire",
+        "phone_required": "Le numéro de téléphone est obligatoire",
+        "hints": {
+            "select_gender": "Sélectionnez le Sexe",
+            "select_country": "Sélectionnez un pays",
+            "select_state": "Sélectionnez un État",
+            "select_city": "Sélectionnez une Ville",
+            "select_church": "Sélectionnez une Église"
+        },
+        "fields": {
+            "baptized": "Baptisé:",
+            "phone_info": "Information",
+            "phone_info_message": "Le numéro d'opérateur ne doit pas commencer par 0"
+        },
+        "radio_options": {
+            "yes": "Oui",
+            "no": "Non"
+        },
+        "dialog": {
+            "ok": "OK"
+        }
+    },
+    "progress_detail_screen": {
+        "registration": "Enregistrement:",
+        "streak": "Série:",
+        "energy": "Énergie:",
+        "streak_days": "%s jours",
+        "energy_points": "%s Lms",
+        "awards_collection": "Collection de Prix",
+        "view_collection": "Voir Collection",
+        "view": "Voir",
+        "continue": "Continuer",
+        "continue_adventure": "Continuer l'Aventure",
+        "achieved_titles": "Titres Obtenus",
+        "is_precious_stone": "{{value}} est une pierre précieuse utilisée dans le pectoral sacerdotal",
+        "monthly_progress": "Progrès Mensuel",
+        "exit": "Sortir",
+        "go_to_course": "Aller au Cours",
+        "close": "Fermer",
+        "certificate_downloaded": "Certificat téléchargé avec succès dans:",
+        "ok": "Ok",
+        "no_titles_yet": "Vous n'avez pas encore obtenu de titres",
+        "priestly_breastplate": "Pierres Précieuses utilisées dans le pectoral sacerdotal",
+        "page": "Page",
+        "of": "de",
+        "award_redeemed": "Ce Prix a déjà été échangé",
+        "redeem_gem": "Vous pouvez échanger cette gemme contre {{value}}Lsm d'énergie",
+        "redeem": "Échanger",
+        "accept": "Accepter",
+        "title_obtained": "Vous avez obtenu\n le titre de\n {{title}}!",
+        "title_message_shared": "J'ai obtenu le titre de {{title}} !",
+        "subject_shared": "Félicitez %s ! ",
+        "download_certificate": "Télécharger certificat",
+        "share_achievement": "Partager réussite",
+        "open_directory": "Ouvrir le répertoire",
+        "download_error": "Impossible de télécharger le certificat.",
+        "folder_open_error": "Impossible d'ouvrir le dossier des téléchargements.",
+        "download_certificate_error": "Erreur lors du téléchargement du certificat :"
+    },
+    "current_month_calendar": {
+        "constancy": "Constance",
+        "months": [
+            "Janvier",
+            "Février",
+            "Mars",
+            "Avril",
+            "Mai",
+            "Juin",
+            "Juillet",
+            "Août",
+            "Septembre",
+            "Octobre",
+            "Novembre",
+            "Décembre"
+        ]
+    },
+    "settings": {
+        "settings": "Paramètres",
+        "app_settings": "Paramètres de l'application",
+        "configuration_options": "Options de configuration",
+        "app_preferences": "Préférences de l'application",
+        "information": "Information",
+        "about": "À propos",
+        "learn_more_app": "En savoir plus sur l'application",
+        "help_support": "Aide et Support",
+        "faq": "Questions fréquemment posées",
+        "faq_contact": "FAQ et Contact",
+        "account": "Compte",
+        "logout": "Déconnexion",
+        "logout_current_account": "Quitter votre compte actuel",
+        "language": "Langue",
+        "spanish": "Espagnol",
+        "bible_word_of_life": "Bible Parole de Vie",
+        "version_2_0_0": "Version 2.0.0",
+        "all_rights_reserved": "© 2024 Tous droits réservés",
+        "personalize_experience": "Personnalisez votre expérience d'étude biblique",
+        "logout_confirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
+        "logout_warning": "Votre session actuelle sera fermée et vous devrez vous reconnecter",
+        "cancel": "Annuler",
+        "logout_button": "Déconnexion"
+    },
+    "progress": {
+        "registration": "Inscription",
+        "streak": "Série",
+        "energy": "Énergie",
+        "completed_courses": "Cours Terminés",
+        "days": "jours",
+        "monthly_progress": "Progrès Mensuel",
+        "rewards_collection": "Collection de Récompenses",
+        "view_collection": "Voir la Collection",
+        "titles_achieved": "Titres Obtenus",
+        "continue_adventure": "Continuer l'Aventure",
+        "no_titles_yet": "Vous n'avez pas encore obtenu de titres",
+        "precious_stones": "Pierres précieuses utilisées dans le pectoral sacerdotal",
+        "is_precious_stone": "est une pierre précieuse utilisée dans le pectoral sacerdotal",
+        "reward_redeemed": "Cette Récompense a déjà été échangée",
+        "can_redeem_gem": "Vous pouvez échanger cette gemme contre",
+        "lsm_energy": "Lsm d'énergie",
+        "redeem": "Échanger",
+        "title_earned": "Vous avez obtenu le titre de",
+        "congratulations_to": "Félicitations à",
+        "certificate_downloaded": "Certificat téléchargé avec succès dans :",
+        "open_directory": "Ouvrir le répertoire",
+        "download_error": "Impossible de télécharger le certificat.",
+        "folder_open_error": "Impossible d'ouvrir le dossier de téléchargements.",
+        "download_certificate_error": "Erreur lors du téléchargement du certificat :",
+        "points": "points"
+    },
+    "languages": {
+        "select_language": "Sélectionner la langue",
+        "translation_activated": "Traduction activée",
+        "translation_deactivated": "Traduction désactivée",
+        "available_languages": "Langues disponibles :"
+    },
+    "about": {
+        "title": "Bible Parole de Vie",
+        "loading": "Chargement...",
+        "loading_version": "Chargement de la version...",
+        "app_description": "Cette application a été créée pour vous aider à étudier et partager la Parole de Dieu de manière interactive et ludique.\n\nDéveloppée par l'équipe de Bible Parole de Vie.",
+        "contact": "Contact :",
+        "copyright": "© 2025 Bible Parole de Vie",
+        "all_rights_reserved": "Tous droits réservés",
+        "about_app": "À propos de l'Application",
+        "welcome": "Bienvenue sur Bible Parole de Vie",
+        "detailed_description": "Cette application a été créée dans le but de vous aider à étudier, comprendre et partager la Parole de Dieu de manière interactive, accessible et enrichissante.",
+        "features_title": "Principales fonctionnalités :",
+        "feature_multiple_versions": "📖 Multiples versions de la Bible",
+        "feature_advanced_search": "🔍 Recherche avancée de versets",
+        "feature_bookmarks": "⭐ Signets et favoris",
+        "feature_themes": "🎨 Personnalisation des thèmes",
+        "feature_audio": "🔊 Lecture audio",
+        "feature_notes": "📝 Notes et surlignages",
+        "development_team": "Équipe de Développement",
+        "team_description": "Développée par une équipe passionnée par la Parole de Dieu et engagée à créer des outils numériques qui facilitent l'étude biblique.",
+        "contact_section": "📧 Contact",
+        "contact_instruction": "Avez-vous des questions, suggestions ou commentaires ? Nous aimerions avoir de vos nouvelles !",
+        "version_label": "Version :",
+        "email_subject": "Demande - Bible Parole de Vie",
+        "email_body": "Bonjour, j'ai une question concernant l'application :",
+        "email_error": "Impossible d'ouvrir l'application de messagerie"
+    },
+    "doubts": {
+        "title": "Questions Fréquemment Posées",
+        "have_doubts": "Avez-vous des doutes ?",
+        "description": "Voici quelques-unes des questions les plus fréquemment posées sur l'application et son utilisation.",
+        "not_found_answer": "Vous n'avez pas trouvé votre réponse ? Écrivez-nous à",
+        "or_write_to": "Ou écrivez-nous à :",
+        "contact_us": "Contactez-nous",
+        "copyright": "© 2025 Bible Parole de Vie",
+        "frequent_questions": "Questions Fréquentes",
+        "question_1": "Comment puis-je rechercher un verset ?",
+        "answer_1": "Sur l'écran principal, allez dans l'option Bible et dans les icônes du haut où se trouve la loupe...\n Vous trouverez des options qui vous permettent de naviguer entre les versions, les livres, les chapitres et les versets, ainsi que d'accéder à la section des enseignements et des personnages...",
+        "question_2": "Puis-je lire la Bible hors ligne ?",
+        "answer_2": "Non, vous devez être connecté à Internet pour accéder aux fonctionnalités de la Bible",
+        "question_3": "Comment puis-je changer le thème de l'application ?",
+        "answer_3": "Vous ne pouvez changer le thème de couleurs que dans la section Bible. \n Allez dans la Bible, utilisez l'icône de personnalisation et sélectionnez le thème que vous préférez : clair, sombre ou personnalisé. \n De plus, vous pouvez changer le type de police, ajuster la taille de la police, ces\n données restent enregistrées dans le store de l'application",
+        "question_4": "Où puis-je envoyer des suggestions ou signaler des erreurs ?",
+        "answer_4": "Par courriel que vous trouvez dans les paramètres \"à propos de l'application\", vous pouvez nous envoyer vos suggestions ou signaler tout problème.",
+        "email_subject": "Demande - Bible Parole de Vie",
+        "email_body": "Bonjour, j'ai une question concernant l'application :",
+        "email_error": "Impossible d'ouvrir l'application de messagerie"
+    }
+}

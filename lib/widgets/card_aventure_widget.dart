@@ -1,23 +1,27 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class CardAventureWidget extends StatelessWidget {
   final CourseModel course;
   final bool loadingAction;
   final void Function() onTap;
   final void Function() goToMap;
-  const CardAventureWidget({
-    super.key,
-    required this.course, required this.onTap, required this.goToMap,
-    this.loadingAction = false
-  });
+  const CardAventureWidget(
+      {super.key,
+      required this.course,
+      required this.onTap,
+      required this.goToMap,
+      this.loadingAction = false});
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
     const maxScore = 150;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 9.0, vertical: 6.0),
@@ -44,12 +48,14 @@ class CardAventureWidget extends StatelessWidget {
                         Stack(
                           children: [
                             Center(
-                                child: StarStatusWidget(
+                              child: StarStatusWidget(
                                 containerWidth: 79,
-                                levelScore: obtainedStar(maxScore, course.sectionCompletedCount, course.sectionCount) ,
+                                levelScore: obtainedStar(
+                                    maxScore,
+                                    course.sectionCompletedCount,
+                                    course.sectionCount),
                               ),
                             ),
-                            
                             Column(
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -64,7 +70,9 @@ class CardAventureWidget extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(100.0),
                                     image: DecorationImage(
-                                      image: NetworkImage (GraphQLConfig.urlServidor + course.img.urlImg),
+                                      image: NetworkImage(
+                                          GraphQLConfig.urlServidor +
+                                              course.img.urlImg),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -129,7 +137,7 @@ class CardAventureWidget extends StatelessWidget {
                       .chipLevels
                       .copyWith(color: Colors.white),
                   buttonStyle: StylesApp(context).btnWidgetSmall,
-                  text: "Ir a aventura",
+                  text: translationProvider.tr('common.go_to_adventure'),
                   width: 150.0,
                   height: 27,
                 ),
@@ -140,5 +148,4 @@ class CardAventureWidget extends StatelessWidget {
       ),
     );
   }
-
 }

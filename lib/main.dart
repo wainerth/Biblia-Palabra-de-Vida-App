@@ -22,7 +22,9 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  final translationProvider = AppTranslationProvider();
+  await translationProvider.initialize();
   await PreferencesManager().init();
 
   final socketProvider = SocketClientProvider();
@@ -47,7 +49,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => translationProvider),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => BibleTranslationProvider()),
         ChangeNotifierProvider(create: (_) => socketProvider),
         ChangeNotifierProvider(create: (_) => ExchangeRateProvider()),
         ChangeNotifierProvider<CatalogueProvider>(

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/services/country_search_service.dart';
 import 'package:biblia_palabra_de_vida_app/services/phone_validator_service.dart';
@@ -104,14 +105,16 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return ResponsiveLayout(
-      mobile: _buildMobileLayout(),
-      tablet: _buildTabletLayout(),
+      mobile: _buildMobileLayout(translationProvider),
+      tablet: _buildTabletLayout(translationProvider),
     );
   }
 
   // Layout para móvil (manteniendo el diseño actual)
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     final double formWidth = StylesApp(context).sizeTextFormField.width;
 
     return SingleChildScrollView(
@@ -124,13 +127,16 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               controller: widget.nameController,
               decoration: StylesApp(context)
                   .inputDecorationOutlineStyle
-                  .copyWith(hintText: "Nombre"),
+                  .copyWith(
+                      hintText: translationProvider
+                          .tr('personal_info_step.first_name_hint')),
               style: StylesApp(context)
                   .textStyleBody12
                   .copyWith(color: StyleColor.black),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "El Nombre es obligatorio";
+                  return translationProvider
+                      .tr('personal_info_step.first_name_error');
                 }
                 return null;
               },
@@ -145,13 +151,16 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               controller: widget.lastNameController,
               decoration: StylesApp(context)
                   .inputDecorationOutlineStyle
-                  .copyWith(hintText: "Apellido"),
+                  .copyWith(
+                      hintText: translationProvider
+                          .tr('personal_info_step.last_name_hint')),
               style: StylesApp(context)
                   .textStyleBody12
                   .copyWith(color: StyleColor.black),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "El Apellido es obligatorio";
+                  return translationProvider
+                      .tr('personal_info_step.last_name_error');
                 }
                 return null;
               },
@@ -163,7 +172,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           SizedBox(
             width: formWidth,
             child: ValidatedRadioGroup<String>(
-              label: "Género:",
+              label: translationProvider.tr('personal_info_step.gender'),
               initialValue: widget.gender,
               onChanged: (newValue) {
                 setState(() {
@@ -172,14 +181,19 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "Por favor selecciona tu género";
+                  return translationProvider
+                      .tr('personal_info_step.gender_error');
                 }
                 return null;
               },
               onSaved: (newValue) {},
               options: [
-                RadioButtonOption(value: "m", label: "Masculino"),
-                RadioButtonOption(value: "f", label: "Femenino"),
+                RadioButtonOption(
+                    value: "m",
+                    label: translationProvider.tr('personal_info_step.male')),
+                RadioButtonOption(
+                    value: "f",
+                    label: translationProvider.tr('personal_info_step.female')),
               ],
             ),
           ),
@@ -210,12 +224,16 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8)),
             child: RadioButtonWidget<bool>(
-                label: "Bautizado:",
+                label: translationProvider.tr('personal_info_step.baptized'),
                 value: widget.isBaptized,
                 onChanged: (newValue) => widget.onChangeBaptized!(newValue!),
                 options: [
-                  RadioButtonOption(value: true, label: "Si"),
-                  RadioButtonOption(value: false, label: "No")
+                  RadioButtonOption(
+                      value: true,
+                      label: translationProvider.tr('personal_info_step.yes')),
+                  RadioButtonOption(
+                      value: false,
+                      label: translationProvider.tr('personal_info_step.no'))
                 ]),
           ),
           SizedBox(height: 23.0),
@@ -224,7 +242,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
           SizedBox(
             width: _formWidth,
             child: OptimizedSearchableDropdownFormField(
-              hintText: "Seleccione un país",
+              hintText:
+                  translationProvider.tr('personal_info_step.country_hint'),
               onChanged: widget.onCountrySelected,
               searchFunction: _searchCountries,
               fetchItemById: (id) => _countrySearchService.getCountryById(id),
@@ -239,7 +258,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               height: StylesApp(context).sizeTextFormField.height + 4,
               validator: (value) {
                 if (value == null) {
-                  return "Por favor selecciona un país";
+                  return translationProvider
+                      .tr('personal_info_step.country_error');
                 }
                 return null;
               },
@@ -254,9 +274,13 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               children: [
                 IntlPhoneFieldWithValidation(
                   controller: widget.phoneNumberController,
+                  hintText: translationProvider.tr('phone_field.hint_text'),
+                  invalidNumberMessage: translationProvider
+                      .tr('phone_field.invalid_number_message'),
                   validator: (PhoneNumber? phone) {
                     if (phone == null || phone.number.isEmpty) {
-                      return 'El número de teléfono es obligatorio';
+                      return translationProvider
+                          .tr('personal_info_step.phone_error_required');
                     }
                     return PhoneValidatorService.validatePhoneNumber(phone);
                   },
@@ -299,13 +323,14 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                 Positioned(
                   right: -10,
                   child: Tooltip(
-                    message: 'El número de operador no debe iniciar con 0',
+                    message: translationProvider
+                        .tr('personal_info_step.phone_warning'),
                     child: IconButton(
                       padding: EdgeInsets.zero,
                       iconSize: 20,
                       icon: const Icon(Icons.info_outline),
                       onPressed: () {
-                        _showDialogInfoFormatNUmberTel();
+                        _showDialogInfoFormatNUmberTel(translationProvider);
                       },
                     ),
                   ),
@@ -321,7 +346,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
 
   // Layout para tablet con 2 columnas
   // Layout para tablet con 2 columnas - VERSIÓN CORREGIDA
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20),
@@ -344,7 +369,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Nombre*",
+                            "${translationProvider.tr('personal_info_step.first_name')}*",
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.black,
                                   fontWeight: FontWeight.w600,
@@ -359,7 +384,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                               decoration: StylesApp(context)
                                   .inputDecorationOutlineStyle
                                   .copyWith(
-                                    hintText: "Ej: Juan",
+                                    hintText: translationProvider.tr(
+                                        'personal_info_step.first_name_example'),
                                   ),
                               style:
                                   StylesApp(context).textStyleBody12.copyWith(
@@ -368,7 +394,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                                       ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return "Campo obligatorio";
+                                  return translationProvider
+                                      .tr('personal_info_step.required_field');
                                 }
                                 return null;
                               },
@@ -387,7 +414,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Apellido*",
+                            "${translationProvider.tr('personal_info_step.last_name')} *",
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.black,
                                   fontWeight: FontWeight.w600,
@@ -402,7 +429,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                               decoration: StylesApp(context)
                                   .inputDecorationOutlineStyle
                                   .copyWith(
-                                    hintText: "Ej: Pérez",
+                                    hintText: translationProvider.tr(
+                                        'personal_info_step.last_name_example'),
                                   ),
                               style:
                                   StylesApp(context).textStyleBody12.copyWith(
@@ -411,7 +439,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                                       ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return "Campo obligatorio";
+                                  return translationProvider
+                                      .tr('personal_info_step.required_field');
                                 }
                                 return null;
                               },
@@ -437,7 +466,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Género*",
+                            "${translationProvider.tr('personal_info_step.gender')}",
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.black,
                                   fontWeight: FontWeight.w600,
@@ -462,16 +491,21 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                               },
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return "Selecciona tu género";
+                                  return translationProvider
+                                      .tr('personal_info_step.select_gender');
                                 }
                                 return null;
                               },
                               onSaved: (newValue) {},
                               options: [
                                 RadioButtonOption(
-                                    value: "m", label: "Masculino"),
+                                    value: "m",
+                                    label: translationProvider
+                                        .tr('personal_info_step.male')),
                                 RadioButtonOption(
-                                    value: "f", label: "Femenino"),
+                                    value: "f",
+                                    label: translationProvider
+                                        .tr('personal_info_step.female')),
                               ],
                             ),
                           ),
@@ -488,7 +522,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "¿Estás bautizado?",
+                            translationProvider
+                                .tr('personal_info_step.baptized'),
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.black,
                                   fontWeight: FontWeight.w600,
@@ -511,8 +546,14 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                               onChanged: (newValue) =>
                                   widget.onChangeBaptized!(newValue!),
                               options: [
-                                RadioButtonOption(value: true, label: "Sí"),
-                                RadioButtonOption(value: false, label: "No")
+                                RadioButtonOption(
+                                    value: true,
+                                    label: translationProvider
+                                        .tr('personal_info_step.yes')),
+                                RadioButtonOption(
+                                    value: false,
+                                    label: translationProvider
+                                        .tr('personal_info_step.no'))
                               ],
                             ),
                           ),
@@ -536,7 +577,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Fecha de nacimiento*",
+                            translationProvider
+                                .tr('personal_info_step.birth_date'),
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.black,
                                   fontWeight: FontWeight.w600,
@@ -568,7 +610,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "País*",
+                            translationProvider
+                                .tr('personal_info_step.country'),
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.black,
                                   fontWeight: FontWeight.w600,
@@ -577,7 +620,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                           ),
                           SizedBox(height: 8),
                           OptimizedSearchableDropdownFormField(
-                            hintText: "Busca y selecciona tu país",
+                            hintText: translationProvider
+                                .tr('personal_info_step.country_search_hint'),
                             onChanged: widget.onCountrySelected,
                             searchFunction: _searchCountries,
                             fetchItemById: (id) =>
@@ -593,7 +637,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                             // height: _fieldHeight,
                             validator: (value) {
                               if (value == null) {
-                                return "Por favor selecciona un país";
+                                return translationProvider
+                                    .tr('personal_info_step.country_error');
                               }
                               return null;
                             },
@@ -613,7 +658,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                   Row(
                     children: [
                       Text(
-                        "Teléfono*",
+                        translationProvider.tr('personal_info_step.phone'),
                         style: StylesApp(context).textStyleBody12.copyWith(
                               color: StyleColor.black,
                               fontWeight: FontWeight.w600,
@@ -623,7 +668,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                       SizedBox(width: 8),
                       GestureDetector(
                         onTap: () {
-                          _showDialogInfoFormatNUmberTel();
+                          _showDialogInfoFormatNUmberTel(translationProvider);
                         },
                         child: Icon(
                           Icons.help_outline,
@@ -643,7 +688,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                       controller: widget.phoneNumberController,
                       validator: (PhoneNumber? phone) {
                         if (phone == null || phone.number.isEmpty) {
-                          return 'El número de teléfono es obligatorio';
+                          return translationProvider
+                              .tr('personal_info_step.phone_error_required');
                         }
                         return PhoneValidatorService.validatePhoneNumber(phone);
                       },
@@ -710,7 +756,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        "Los campos marcados con * son obligatorios. Asegúrate de que toda la información sea correcta.",
+                        translationProvider
+                            .tr('personal_info_step.required_fields_info'),
                         style: StylesApp(context).textStyleBody12.copyWith(
                               color: Colors.grey[700],
                               fontSize: 13,
@@ -728,7 +775,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
     );
   }
 
-  Future<dynamic> _showDialogInfoFormatNUmberTel() {
+  Future<dynamic> _showDialogInfoFormatNUmberTel(
+      AppTranslationProvider translationProvider) {
     return showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -746,7 +794,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Formato del número de teléfono',
+                        translationProvider
+                            .tr('personal_info_step.phone_format_title'),
                         style: StylesApp(context).textStyleBody16.copyWith(
                               color: StyleColor.grayDark,
                               fontWeight: FontWeight.bold,
@@ -758,7 +807,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'Ingresa tu número de teléfono móvil:',
+                  translationProvider
+                      .tr('personal_info_step.phone_format_description'),
                   style: StylesApp(context).textStyleBody16.copyWith(
                         color: StyleColor.grayDark,
                         fontSize: 14,
@@ -775,7 +825,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '📱 Ejemplos correctos:',
+                        translationProvider
+                            .tr('personal_info_step.correct_examples'),
                         style: StylesApp(context).textStyleBody16.copyWith(
                             color: StyleColor.grayDark,
                             fontWeight: FontWeight.w500,
@@ -783,25 +834,29 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        '• +598 99123456 (Uruguay)',
+                        translationProvider
+                            .tr('personal_info_step.uruguay_example'),
                         style: StylesApp(context)
                             .textStyleBody16
                             .copyWith(color: StyleColor.grayDark, fontSize: 14),
                       ),
                       Text(
-                        '• +54 91112345678 (Argentina)',
+                        translationProvider
+                            .tr('personal_info_step.argentina_example'),
                         style: StylesApp(context)
                             .textStyleBody16
                             .copyWith(color: StyleColor.grayDark, fontSize: 14),
                       ),
                       Text(
-                        '• +56 998765432 (Chile)',
+                        translationProvider
+                            .tr('personal_info_step.chile_example'),
                         style: StylesApp(context)
                             .textStyleBody16
                             .copyWith(color: StyleColor.grayDark, fontSize: 14),
                       ),
                       Text(
-                        '• +57 3001234567 (Colombia)',
+                        translationProvider
+                            .tr('personal_info_step.colombia_example'),
                         style: StylesApp(context)
                             .textStyleBody16
                             .copyWith(color: StyleColor.grayDark, fontSize: 14),
@@ -822,8 +877,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'El número de operador NO debe iniciar con 0 (ej: 099... → 99...)'
-                          'No incluyas espacios, guiones u otros caracteres especiales.',
+                          translationProvider
+                              .tr('personal_info_step.phone_warning'),
                           style: StylesApp(context).textStyleBody16.copyWith(
                                 color: StyleColor.grayDark,
                                 fontSize: 13,
@@ -840,7 +895,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                     style: StylesApp(context).btnWidgetSmall,
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
-                      'Entendido',
+                      translationProvider.tr('personal_info_step.understood'),
                       style: StylesApp(context).textStyleBody14,
                     ),
                   ),

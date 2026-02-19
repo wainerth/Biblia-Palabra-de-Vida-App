@@ -3,17 +3,20 @@ import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 class AppConstants {
   static final List<Map<String, dynamic>> homeCards = [
     {
-      'label': 'Aventura',
+      'label': 'workspace.cards.adventure',
+      'key':'Aventura',
       'img': 'assets/aventure.gif',
       'route': '/introAventurePage',
     },
     {
-      'label': 'La Biblia',
+      'label': 'workspace.cards.bible',
+      'key':'Biblia',
       'img': 'assets/biblia.png',
       'route': '/bibliaPage',
     },
     {
-      'label': 'Comunidad',
+      'label': 'workspace.cards.community',
+      'key':'Comunidad',
       'img': 'assets/comunidad.png',
       'route': '/communityPage',
     },

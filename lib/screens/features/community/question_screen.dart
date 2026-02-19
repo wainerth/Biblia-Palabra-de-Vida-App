@@ -29,7 +29,7 @@ class QuestionScreen extends StatefulWidget {
 
 class _QuestionScreenState extends State<QuestionScreen> {
   final options = AppConstants.listOption;
-
+  final _translation = AppTranslationProvider();
   LoginUser? userData;
   late Map<String, dynamic> config;
   CourseDetail? course;
@@ -167,7 +167,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
   Future<void> _speakQuestion() async {
     if (!isTtsEnabled || currentQuestion.question.isEmpty) return;
 
-    String textToSpeak = "Pregunta $numberQuestion de ${questions.length}. "
+    String textToSpeak =
+        "${_translation.tr("question_screen.tts.question_prefix")} $numberQuestion ${_translation.tr("question_screen.tts.of")} ${questions.length}. "
         "${currentQuestion.question}";
 
     await flutterTts.speak(textToSpeak);
@@ -178,10 +179,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
     if (!isTtsEnabled || currentAnswers.isEmpty) return;
 
     StringBuffer optionsText = StringBuffer();
-    optionsText.write("Opciones: ");
+    optionsText.write(_translation.tr("question_screen.tts.options"));
 
     for (int i = 0; i < currentAnswers.length; i++) {
-      optionsText.write("Opción ${String.fromCharCode(65 + i)}: ");
+      optionsText.write(
+          "${_translation.tr("question_screen.tts.option")} ${String.fromCharCode(65 + i)}: ");
       optionsText.write(currentAnswers[i].answer);
       if (i < currentAnswers.length - 1) {
         optionsText.write(". ");
@@ -195,7 +197,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
   Future<void> _speakAnswer(int index) async {
     if (!isTtsEnabled || index >= currentAnswers.length) return;
 
-    String textToSpeak = "Opción ${String.fromCharCode(65 + index)}: "
+    String textToSpeak =
+        "${_translation.tr("question_screen.tts.option")} ${String.fromCharCode(65 + index)}: "
         "${currentAnswers[index].answer}";
 
     await flutterTts.speak(textToSpeak);
@@ -285,7 +288,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         }
         _initializeQuestions(questionResponse.data);
       } catch (e) {
-        errorMessage = "An error occurred: $e";
+        errorMessage = "${_translation.tr("question_screen.error_generic")} $e";
       } finally {
         LoadingService().hideLoading();
         setState(() {
@@ -353,10 +356,17 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   void _showAnswerSnackbar(BuildContext context) {
+    if (!mounted) return;
+
+    final translationProvider = context.read<AppTranslationProvider>();
+
     // Leer feedback de respuesta
     if (isTtsEnabled) {
-      String feedback =
-          _isCorrect ? "¡Respuesta correcta!" : "Respuesta incorrecta";
+      String feedback = _isCorrect
+          ? translationProvider
+              .tr('question_screen.tts_feedback.correct_answer')
+          : translationProvider
+              .tr('question_screen.tts_feedback.incorrect_answer');
       flutterTts.speak(feedback);
     }
 
@@ -371,7 +381,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 Icon(_isCorrect ? Icons.check_circle : Icons.error,
                     color: Colors.white),
                 SizedBox(width: 8),
-                Text(_isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!'),
+                Text(_isCorrect
+                    ? translationProvider
+                        .tr('question_screen.answer_actions.very_good')
+                    : translationProvider
+                        .tr('question_screen.answer_actions.oh_sorry')),
               ],
             ),
             TextButton(
@@ -385,7 +399,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   });
                 }
               },
-              child: Text('Siguiente', style: TextStyle(color: Colors.white)),
+              child: Text(
+                  translationProvider.tr('question_screen.answer_actions.next'),
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -647,6 +663,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     userData = Provider.of<UserProvider>(context, listen: false).currentUser;
     config = Provider.of<CatalogueProvider>(context, listen: false).allConfig;
     MAX_SCORE = config["highScore"];
@@ -660,13 +678,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
       },
       child: Scaffold(
         body: SafeArea(
-          child: _buildMainContent(),
+          child: _buildMainContent(translationProvider),
         ),
       ),
     );
   }
 
-  Widget _buildMainContent() {
+  Widget _buildMainContent(AppTranslationProvider translationProvider) {
     if (isLoading) return Container();
     if (errorMessage != null) {
       return BuildErrorWidget(
@@ -678,18 +696,18 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     // Usar ResponsiveLayout para manejar móvil/tablet
     return ResponsiveLayout(
-      mobile: _buildMobileLayout(),
-      tablet: _buildTabletLayout(),
+      mobile: _buildMobileLayout(translationProvider),
+      tablet: _buildTabletLayout(translationProvider),
     );
   }
 
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         _buildCommonHeader(),
         if (_shouldShowQuestionContent()) ...[
           SizedBox(height: 19),
-          _buildTtsControls(),
+          _buildTtsControls(translationProvider),
           QuestionCard(
             question: currentQuestion.question,
             numberQuestion: numberQuestion,
@@ -702,14 +720,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
           SizedBox(height: 38),
           Expanded(child: _buildQuestionBody()),
         ] else if (activityIsCompleted) ...[
-          Expanded(child: _buildResultScreen(context)),
+          Expanded(child: _buildResultScreen(context, translationProvider)),
         ],
       ],
     );
   }
 
 // Widget para controles TTS
-  Widget _buildTtsControls() {
+  Widget _buildTtsControls(AppTranslationProvider translationProvider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -722,7 +740,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
               color: isTtsEnabled ? Colors.blue : Colors.grey,
             ),
             onPressed: _toggleTts,
-            tooltip: isTtsEnabled ? "Desactivar lectura" : "Activar lectura",
+            tooltip: isTtsEnabled
+                ? translationProvider
+                    .tr('question_screen.tts_controls.deactivate_reading')
+                : translationProvider
+                    .tr('question_screen.tts_controls.activate_reading'),
           ),
 
           // Controles de TTS solo si está activado
@@ -734,14 +756,19 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 color: Colors.blue,
               ),
               onPressed: isTtsSpeaking ? _stopTts : _speakQuestion,
-              tooltip: isTtsSpeaking ? "Detener lectura" : "Leer pregunta",
+              tooltip: isTtsSpeaking
+                  ? translationProvider
+                      .tr('question_screen.tts_controls.stop_reading')
+                  : translationProvider
+                      .tr('question_screen.tts_controls.reading_question'),
             ),
 
             // Botón para leer opciones
             IconButton(
               icon: Icon(Icons.list, color: Colors.blue),
               onPressed: _speakOptions,
-              tooltip: "Leer opciones",
+              tooltip: translationProvider
+                  .tr('question_screen.tts_controls.read_options'),
             ),
           ],
 
@@ -755,7 +782,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 Icon(Icons.speed, size: 16, color: Colors.grey),
                 SizedBox(width: 4),
                 Text(
-                  "Velocidad",
+                  translationProvider.tr('question_screen.speed_control.speed'),
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 SizedBox(width: 8),
@@ -776,7 +803,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         _buildCommonHeader(),
@@ -800,7 +827,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildTtsControls(),
+                          _buildTtsControls(translationProvider),
                           QuestionCard(
                             question: currentQuestion.question,
                             numberQuestion: numberQuestion,
@@ -820,7 +847,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                             isTablet: true,
                           ),
                           Spacer(),
-                          _buildLevelInfo(),
+                          _buildLevelInfo(translationProvider),
                         ],
                       ),
                     ),
@@ -838,7 +865,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         border: Border.all(color: Colors.grey[200]!),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha: 0.1),
                             blurRadius: 10,
                             offset: Offset(0, 4),
                           ),
@@ -852,7 +879,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
           ),
         ] else if (activityIsCompleted) ...[
-          Expanded(child: _buildResultScreen(context)),
+          Expanded(child: _buildResultScreen(context, translationProvider)),
         ],
       ],
     );
@@ -901,12 +928,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  Widget _buildResultScreen(BuildContext context) {
-    if (showStepCompleted) return _buildActivityCompleted();
+  Widget _buildResultScreen(
+      BuildContext context, AppTranslationProvider translationProvider) {
+    if (showStepCompleted) return _buildActivityCompleted(translationProvider);
     if (showRewardObtained) return _buildRewardScreen();
-    if (showLastStageCompleted) return _buildLastStage(context);
-    if (showPrizeWon) return _buildPrizeWon(context);
-    if (showTitleObtained) return _buildAchievementUnlocked(context);
+    if (showLastStageCompleted)
+      return _buildLastStage(context, translationProvider);
+    if (showPrizeWon) return _buildPrizeWon(context, translationProvider);
+    if (showTitleObtained)
+      return _buildAchievementUnlocked(context, translationProvider);
     return Container();
   }
 
@@ -950,11 +980,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // Método reutilizable para construir contenido del resultado
-  Widget _buildResultContent() {
+  Widget _buildResultContent(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Text(
-          '${levelProgress!.score > 0 ? levelProgress!.message.resultTitle : "Ya casi lo\n logras!"}',
+          '${levelProgress!.score > 0 ? levelProgress!.message.resultTitle : translationProvider.tr('question_screen.activity_completed.almost_there')}',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white,
@@ -965,8 +995,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
         SizedBox(height: isTablet(context) ? 16 : 8),
         Text(
           levelProgress!.score > 0
-              ? 'Culminaste el Paso ${levelProgress!.level.levelNumber}'
-              : "Intenta nuevamente el\n Paso ${levelProgress!.level.levelNumber} para avanzar",
+              ? '${translationProvider.tr('question_screen.activity_completed.step_completed')} ${levelProgress!.level.levelNumber}'
+              : "${translationProvider.tr('question_screen.activity_completed.try_again')} ${levelProgress!.level.levelNumber} ${translationProvider.tr('question_screen.activity_completed.to_advance')}",
           textAlign: TextAlign.center,
           style: StylesApp(context).textStyleBody16.copyWith(
                 color: Colors.white,
@@ -976,7 +1006,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
         if (levelProgress!.score > 0 && !showReview) ...[
           SizedBox(height: isTablet(context) ? 20 : 8),
           Text(
-            'Haz ganado\n ${levelProgress!.energy} LMs de energía',
+            translationProvider
+                .tr('question_screen.activity_completed.energy_earned')
+                .replaceFirst("%s", levelProgress!.energy.toString()),
             textAlign: TextAlign.center,
             style: StylesApp(context).textStyleBody16.copyWith(
                   color: Colors.white,
@@ -989,7 +1021,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // Método reutilizable para construir acciones del resultado
-  Widget _buildResultActions() {
+  Widget _buildResultActions(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         if (levelProgress!.score > 0 && !showReview) ...[
@@ -1009,7 +1041,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
           SizedBox(height: 20),
         ],
         ButtonThemeWidget(
-          text: "Continuar",
+          text: translationProvider
+              .tr('question_screen.activity_completed.continue'),
           width: isTablet(context) ? 200 : 132,
           height: isTablet(context) ? 48 : 32,
           buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
@@ -1052,20 +1085,22 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // Helper para info de nivel en tablet
-  Widget _buildLevelInfo() {
+  Widget _buildLevelInfo(AppTranslationProvider translationProvider) {
     if (level == null) return Container();
 
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.teal.withOpacity(0.1),
+        color: Colors.teal.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.teal.withOpacity(0.3)),
+        border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Nivel actual",
+          Text(
+              translationProvider
+                  .tr('question_screen.level_info.current_level'),
               style: StylesApp(context)
                   .textStyleBody12
                   .copyWith(fontSize: 12, color: Colors.grey[600])),
@@ -1075,7 +1110,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   fontWeight: FontWeight.bold,
                   color: Colors.teal)),
           SizedBox(height: 4),
-          Text("Paso $numberQuestion",
+          Text(
+              "${translationProvider.tr('question_screen.level_info.step')} $numberQuestion",
               style: StylesApp(context)
                   .textStyleBody14
                   .copyWith(fontSize: 14, color: Colors.grey[700])),
@@ -1104,19 +1140,21 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // esta parte es para mostrar nivel Completado
-  Widget _buildActivityCompleted() {
+  Widget _buildActivityCompleted(AppTranslationProvider translationProvider) {
     // Usar el mismo componente para móvil y tablet con diseño responsivo interno
     return SingleChildScrollView(
       padding: EdgeInsets.all(isTablet(context) ? 24 : 20),
       child: Center(
         child: Container(
+          clipBehavior: Clip.none,
           constraints: BoxConstraints(
               maxWidth: isTablet(context) ? 800 : double.infinity),
           child: Column(
             children: [
               // Contenido adaptable según tamaño
               Container(
-                padding: EdgeInsets.all(isTablet(context) ? 32 : 20),
+                clipBehavior: Clip.none,
+                padding: EdgeInsets.all(isTablet(context) ? 32 : 70),
                 decoration: BoxDecoration(
                   borderRadius:
                       BorderRadius.circular(isTablet(context) ? 16 : 8),
@@ -1125,10 +1163,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     fit: BoxFit.cover,
                   ),
                 ),
-                child: _buildResultContent(),
+                child: _buildResultContent(translationProvider),
               ),
               SizedBox(height: isTablet(context) ? 32 : 20),
-              _buildResultActions(),
+              _buildResultActions(translationProvider),
             ],
           ),
         ),
@@ -1137,7 +1175,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // sección de Sección o etapa completada
-  _buildLastStage(BuildContext context) {
+  _buildLastStage(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20),
@@ -1157,7 +1196,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 Text(
                   textAlign: TextAlign.center,
-                  "Etapa $sectionId Completada",
+                  translationProvider
+                      .tr('question_screen.stage_completed.stage_completed')
+                      .replaceFirst("%s", sectionId.toString()),
                   style: StylesApp(context)
                       .textStyleCongratulation
                       .copyWith(color: Colors.white),
@@ -1167,7 +1208,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 Text(
                   textAlign: TextAlign.center,
-                  'El esfuerzo valió la pena  completaste la Etapa $sectionId \n “${stage?.sectionName}” \n fue completada con éxito"',
+                  '${translationProvider.tr('question_screen.stage_completed.effort_worth')} $sectionId \n “${stage?.sectionName}” \n ${translationProvider.tr('question_screen.stage_completed.stage_completed_success')}"',
                   style: StylesApp(context).textStyleBody20,
                 ),
                 SizedBox(
@@ -1197,17 +1238,24 @@ class _QuestionScreenState extends State<QuestionScreen> {
               height: 32,
               colorIcon: Colors.white,
               buttonStyle: StylesApp(context).btnPrimary,
-              text: "Compartir logro",
+              text: translationProvider
+                  .tr('question_screen.achievement_unlocked.share_achievement'),
               onPressed: () async {
                 await SharePlus.instance.share(ShareParams(
-                  text:
-                      "¡Etapa $stage.sectionNumber-${stage?.sectionName} completada",
-                  subject: "¡Felicita a ${userData!.username}! ",
+                  text: translationProvider.trParams(
+                      'question_screen.achievement_unlocked.share_subject', {
+                    "sectionNumber": stage!.sectionNumber.toString(),
+                    "sectionName": stage!.sectionName ?? ""
+                  }),
+                  subject: translationProvider.trParams(
+                      'question_screen.achievement_unlocked.share_subject',
+                      {"username": userData!.username!}),
                 ));
               }),
           SizedBox(height: 43),
           ButtonThemeWidget(
-            text: "Continuar",
+            text: translationProvider
+                .tr('question_screen.achievement_unlocked.continue'),
             width: 208,
             height: 32,
             buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -1231,7 +1279,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // premio Obtenido
-  _buildPrizeWon(BuildContext context) {
+  _buildPrizeWon(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,
@@ -1252,7 +1301,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   ),
                   Text(
                     textAlign: TextAlign.center,
-                    "¡Felicidades\n por completar\n este curso!",
+                    translationProvider.tr('question_screen.prize_won'),
                     style: StylesApp(context)
                         .textStyleCongratulation
                         .copyWith(color: Colors.white),
@@ -1264,7 +1313,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       textAlign: TextAlign.center,
-                      'Haz ganado un ${prize!.typeStone} para\n tu colección',
+                      translationProvider.trParams(
+                          'question_screen.prize_won.prize_earned',
+                          {"typeStone": prize!.typeStone}),
                       style: StylesApp(context).textStyleBody20,
                     ),
                   ),
@@ -1320,7 +1371,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
             Text(
               textAlign: TextAlign.center,
-              "Cuando lo requieras puede canjearlo\n por ${prize?.exchangeValue.toInt()}lms de energía",
+              translationProvider
+                  .tr('question_screen.prize_won.congratulation_course')
+                  .replaceFirst("%s", prize!.exchangeValue.toString()),
               style: StylesApp(context)
                   .textStyleBody14
                   .copyWith(color: Colors.black),
@@ -1355,7 +1408,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   width: 29,
                 ),
                 ButtonThemeWidget(
-                  text: "Continuar",
+                  text: translationProvider
+                      .tr('question_screen.prize_won.continue'),
                   width: 132,
                   height: 32,
                   buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -1385,7 +1439,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // esta parte es para mostrar titulo obtenido
-  _buildAchievementUnlocked(BuildContext context) {
+  _buildAchievementUnlocked(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,
@@ -1406,7 +1461,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   ),
                   Text(
                     textAlign: TextAlign.center,
-                    "Haz obtenido\n el titulo de\n ${title?.title}!",
+                    translationProvider
+                        .tr('question_screen.achievement_unlocked.title_obtained')
+                        .replaceFirst("%s", title!.title),
                     style: StylesApp(context)
                         .textStyleCongratulation
                         .copyWith(color: Colors.white),
@@ -1450,7 +1507,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
               width: 245,
               height: 32,
               buttonStyle: StylesApp(context).btnPrimary,
-              text: "Descargar certificado",
+              text: translationProvider.tr(
+                  'question_screen.achievement_unlocked.download_certificate'),
               onPressed: () async {
                 try {
                   final responseDownloadCertificate =
@@ -1481,21 +1539,22 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         await showCustomDialogWithAction(
                           context,
                           message:
-                              "Certificado descargado exitosamente en: $filePath",
+                              "${translationProvider.tr('question_screen.certificate.download_success')} $filePath",
                           dialogType: DialogTypeAction.info,
-                          buttonOk: "Ok",
+                          buttonOk: translationProvider.tr('buttons.ok'),
                           actionCallbackOk: () {
                             Navigator.pop(context);
                           },
-                          textButton: "Abrir directorio",
+                          textButton: translationProvider
+                              .tr('question_screen.certificate.open_directory'),
                           actionCallback: () async {
                             try {
                               await launchUrl(Uri.file(directory.path));
                             } catch (e) {
                               await showCustomDialog(
                                 context,
-                                message:
-                                    "No se pudo abrir la carpeta de descargas.",
+                                message: translationProvider.tr(
+                                    'question_screen.certificate.folder_error'),
                                 dialogType: DialogType.error,
                               );
                             }
@@ -1504,14 +1563,16 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       } else {
                         await showCustomDialog(
                           context,
-                          message: "No se pudo descargar el certificado.",
+                          message: translationProvider
+                              .tr('question_screen.certificate.download_error'),
                           dialogType: DialogType.error,
                         );
                       }
                     } catch (e) {
                       await showCustomDialog(
                         context,
-                        message: "Error al descargar el certificado: $e",
+                        message:
+                            "${translationProvider.tr('question_screen.certificate.download_error_generic')} $e",
                         dialogType: DialogType.error,
                       );
                     }
@@ -1536,11 +1597,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
               height: 32,
               colorIcon: Colors.white,
               buttonStyle: StylesApp(context).btnPrimary,
-              text: "Compartir logro",
+              text: translationProvider
+                  .tr('question_screen.certificate.share_tile'),
               onPressed: () async {
                 await SharePlus.instance.share(ShareParams(
-                  text: "¡He obtenido el titulo de ${title?.title}!",
-                  subject: "¡Felicita a ${userData!.username}! ",
+                  text:
+                      "${translationProvider.tr('question_screen.share_message.title_share')} ${title?.title}!",
+                  subject:
+                      "${translationProvider.tr('question_screen.share_message.congratulate_user')} ${userData!.username}! ",
                 ));
               },
             ),
@@ -1574,7 +1638,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 Center(
                   child: ButtonThemeWidget(
-                    text: "Continuar",
+                    text: translationProvider.tr('button.continue'),
                     width: 132,
                     height: 32,
                     buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -1610,7 +1674,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     // Verificar si deberíamos mostrar la celebración
     final shouldShow = await StreakService.shouldShowCelebration();
 
-    if (shouldShow) {
+    if (!shouldShow) {
       // Obtener datos del calendario
       final ResponseData response =
           await streaksCalendar(userData!.userId, DateTime.now().month);

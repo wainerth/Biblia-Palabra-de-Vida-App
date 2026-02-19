@@ -1,5 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class QuestionHeader extends StatelessWidget {
   final CourseDetail? course;
@@ -8,7 +10,7 @@ class QuestionHeader extends StatelessWidget {
   final int numberQuestion;
   final bool showStageInfo;
   final VoidCallback onBack;
-  
+
   const QuestionHeader({
     super.key,
     required this.course,
@@ -18,15 +20,17 @@ class QuestionHeader extends StatelessWidget {
     this.showStageInfo = true,
     required this.onBack,
   });
-  
+
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
     return Column(
       children: [
         HeaderNotDetailsStageWidget(
           showStage: showStageInfo,
           showAction: showStageInfo,
-          title: "Conoce el ${course?.titleCourse ?? ''}",
+          title:
+              "${translationProvider.tr('question_screen.question_header.know_the')} ${course?.titleCourse ?? ''}",
           stage: stage?.sectionNumber.toString() ?? '',
           subtitle: stage?.sectionName ?? '',
           details: stage,
@@ -42,7 +46,7 @@ class QuestionHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(8.0),
             ),
             child: Text(
-              "${level?.name ?? ''} - Paso $numberQuestion",
+              "${level?.name ?? ''} - ${translationProvider.tr('question_screen.question_header.step')} $numberQuestion",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
