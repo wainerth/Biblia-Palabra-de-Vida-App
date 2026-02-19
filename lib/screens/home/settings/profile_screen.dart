@@ -25,7 +25,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _selectImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1000, // Opcional: reducir tamaño
+      maxHeight: 1000, // Opcional: reducir tamaño
+      imageQuality: 80, // Opcional: comprimir
+    );
 
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
