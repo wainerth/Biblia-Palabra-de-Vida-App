@@ -50,6 +50,7 @@ class BibleScreen extends StatefulWidget {
 // ============================================================================
 
 class _BibleScreenState extends State<BibleScreen> {
+  final _translationProvider = AppTranslationProvider();
   // ==========================================================================
   // 1. CONTROLADORES Y KEYS
   // ==========================================================================
@@ -244,7 +245,10 @@ class _BibleScreenState extends State<BibleScreen> {
         isPlaying = false;
         currentPlayingVerseIndex = null;
       });
-      showSnackBar("Error en TTS: $msg", type: SnackBarType.error);
+      showSnackBar(
+          _translationProvider.trParams(
+              "bible_screen.error.tts_error", {"error": msg.toString()}),
+          type: SnackBarType.error);
     });
   }
 
@@ -258,15 +262,6 @@ class _BibleScreenState extends State<BibleScreen> {
   void _setupScrollListener() {
     scrollController.addListener(() {
       _handleScroll();
-      // if (scrollController.position.isScrollingNotifier.value) {
-      //   if (!_isManualScroll) return;
-      //   if (scrollToVerse != null && scrollToVerse! > 0) {
-      //     setState(() {
-      //       scrollToVerse = null;
-      //       _isManualScroll = false;
-      //     });
-      //   }
-      // }
     });
   }
   // ==========================================================================
@@ -279,7 +274,7 @@ class _BibleScreenState extends State<BibleScreen> {
       if (mounted && _screenState == BibleScreenState.loading) {
         setState(() {
           _screenState = BibleScreenState.error;
-          errorMessage = 'Tiempo de carga excedido';
+          errorMessage = _translationProvider.tr("bible_screen.error.timeout");
         });
         LoadingService().hideLoading();
       }
@@ -549,7 +544,8 @@ class _BibleScreenState extends State<BibleScreen> {
       setState(() {
         _screenState = BibleScreenState.error;
         _showSkeleton = false;
-        errorMessage = 'Error al cargar: ${error.toString()}';
+        errorMessage = _translationProvider.trParams(
+            "bible_screen.error.loading", {"error": error.toString()});
       });
     }
     LoadingService().hideLoading();
@@ -560,9 +556,10 @@ class _BibleScreenState extends State<BibleScreen> {
   // ==========================================================================
 
   String _getSpeedLabel(double speed) {
-    if (speed <= 0.4) return 'Lento';
-    if (speed <= 0.6) return 'Normal';
-    return 'Rápido';
+    if (speed <= 0.4) return _translationProvider.tr("bible_screen.speed.slow");
+    if (speed <= 0.6)
+      return _translationProvider.tr("bible_screen.speed.normal");
+    return _translationProvider.tr("bible_screen.speed.fast");
   }
 
   Future<void> _readVerse(VerseModel verse) async {
@@ -598,7 +595,10 @@ class _BibleScreenState extends State<BibleScreen> {
           isPlaying = false;
           currentPlayingVerseIndex = null;
         });
-        showSnackBar("Error al leer: $msg", type: SnackBarType.error);
+        showSnackBar(
+            _translationProvider.trParams(
+                "bible_screen.error.tts_error", {"error": msg.toString()}),
+            type: SnackBarType.error);
       });
 
       flutterTts.setCancelHandler(() {
@@ -617,7 +617,9 @@ class _BibleScreenState extends State<BibleScreen> {
         isPlaying = false;
         currentPlayingVerseIndex = null;
       });
-      showSnackBar("Error al leer versículo: ${e.toString()}",
+      showSnackBar(
+          _translationProvider.trParams(
+              "bible_screen.error.verse_reading", {"error": e.toString()}),
           type: SnackBarType.error);
     }
   }
@@ -709,7 +711,7 @@ class _BibleScreenState extends State<BibleScreen> {
             CircularProgressIndicator(),
             SizedBox(height: 16),
             Text(
-              'Cargando Biblia...',
+              _translationProvider.tr("bible_screen.loading"),
               style: TextStyle(color: currentTheme.textColor),
             ),
           ],
@@ -827,7 +829,8 @@ class _BibleScreenState extends State<BibleScreen> {
             Icon(Icons.error_outline, size: 64, color: Colors.red),
             SizedBox(height: 16),
             Text(
-              errorMessage ?? 'Error desconocido',
+              errorMessage ??
+                  _translationProvider.tr("bible_screen.error.unknown"),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: currentTheme.textColor,
@@ -842,7 +845,8 @@ class _BibleScreenState extends State<BibleScreen> {
                 });
                 _initializeScreen();
               },
-              child: Text('Reintentar'),
+              child:
+                  Text(_translationProvider.tr("bible_screen.buttons.retry")),
             ),
             SizedBox(height: 16),
             TextButton(
@@ -853,7 +857,8 @@ class _BibleScreenState extends State<BibleScreen> {
                   arguments: {'selectedIndex': 0},
                 );
               },
-              child: Text('Volver al inicio'),
+              child: Text(
+                  _translationProvider.tr("bible_screen.buttons.back_to_home")),
             ),
           ],
         ),
@@ -997,7 +1002,7 @@ class _BibleScreenState extends State<BibleScreen> {
                 ),
                 Center(
                   child: Text(
-                    'Navegación',
+                    _translationProvider.tr("bible_screen.navigation.title"),
                     style: StylesApp(context).textStyleBody18.copyWith(
                           color: currentTheme.buttonTextColor,
                           fontWeight: FontWeight.bold,
@@ -1223,7 +1228,10 @@ class _BibleScreenState extends State<BibleScreen> {
                           ],
                         ),
                         Text(
-                          'Velocidad: ${(_speechRate * 100).round()}%',
+                          _translationProvider.trParams(
+                              "bible_screen.speed.label", {
+                            "percentage": (_speechRate * 100).round().toString()
+                          }),
                           style: TextStyle(
                             color: currentTheme.textColor,
                             fontSize: 10,
@@ -1300,7 +1308,8 @@ class _BibleScreenState extends State<BibleScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Navegación',
+                        _translationProvider
+                            .tr("bible_screen.navigation.title"),
                         style: StylesApp(context).textStyleBody18.copyWith(
                               color: currentTheme.buttonTextColor,
                               fontWeight: FontWeight.bold,
@@ -1379,7 +1388,7 @@ class _BibleScreenState extends State<BibleScreen> {
           ),
           SizedBox(width: 8),
           Text(
-            'Desliza desde la derecha para navegar',
+            _translationProvider.tr("bible_screen.navigation.drawer_indicator"),
             style: TextStyle(
               color: currentTheme.buttonColor,
               fontSize: 12,
@@ -1498,7 +1507,7 @@ class _BibleScreenState extends State<BibleScreen> {
       style: TextStyle(
         fontSize: fontSizeNumber,
         fontFamily: fontFamilySet.label,
-         fontFamilyFallback: ['Arial', 'sans-serif'], 
+        fontFamilyFallback: ['Arial', 'sans-serif'],
       ),
     );
   }
@@ -1584,7 +1593,8 @@ class _BibleScreenState extends State<BibleScreen> {
     } catch (e) {
       setState(() {
         _screenState = BibleScreenState.error;
-        errorMessage = 'Error al cargar: ${e.toString()}';
+        errorMessage = _translationProvider
+            .trParams("bible_screen.error.chapter", {"error": e.toString()});
       });
     }
   }
@@ -1610,7 +1620,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
             // Título del mensaje
             Text(
-              'No se encontraron versículos',
+              _translationProvider.tr("bible_screen.no_verses.title"),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: currentTheme.textColor,
@@ -1624,8 +1634,11 @@ class _BibleScreenState extends State<BibleScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
-                'El capítulo ${currentChapter?.chapter ?? 'actual'} del libro '
-                '${currentBook?.modernName ?? 'seleccionado'} no contiene versículos disponibles.',
+                _translationProvider.trParams(
+                    "bible_screen.no_verses.description", {
+                  "chapter": currentChapter!.chapter.toString(),
+                  "book": currentBook!.modernName
+                }),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: currentTheme.textColor.withValues(alpha: 0.7),
@@ -1660,7 +1673,7 @@ class _BibleScreenState extends State<BibleScreen> {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Información del capítulo',
+                          _translationProvider.tr("bible_screen.no_verses.chapter_info"),
                           style: TextStyle(
                             color: currentTheme.buttonColor,
                             fontSize: 14,
@@ -1672,11 +1685,11 @@ class _BibleScreenState extends State<BibleScreen> {
                   ),
                   SizedBox(height: 8),
                   _buildInfoRow(
-                      'Libro:', currentBook?.modernName ?? 'No disponible'),
+                      _translationProvider.tr("bible_screen.no_verses.book"), currentBook?.modernName ?? _translationProvider.tr("bible_screen.no_verses.not_available")),
                   _buildInfoRow(
-                      'Capítulo:', '${currentChapter?.chapter ?? 'N/A'}'),
+                      _translationProvider.tr("bible_screen.no_verses.chapter"), '${currentChapter?.chapter ?? 'N/A'}'),
                   _buildInfoRow(
-                      'Versión:', currentVersion?.version ?? 'No disponible'),
+                      _translationProvider.tr("bible_screen.no_verses.version"), currentVersion?.version ?? _translationProvider.tr("bible_screen.no_verses.not_available")),
                 ],
               ),
             ),
@@ -1692,7 +1705,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     _retryLoadChapter();
                   },
                   icon: Icon(Icons.refresh, size: 20),
-                  label: Text('Reintentar'),
+                  label: Text(_translationProvider.tr("bible_screen.no_verses.retry")),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: currentTheme.buttonTextColor,
                     backgroundColor: currentTheme.buttonColor,
@@ -1707,7 +1720,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     _goToNextChapter('${(currentChapter?.chapter ?? 0) + 1}');
                   },
                   icon: Icon(Icons.skip_next, size: 20),
-                  label: Text('Siguiente capítulo'),
+                  label: Text(_translationProvider.tr("bible_screen.no_verses.next_chapter")),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: currentTheme.buttonColor,
                     side: BorderSide(color: currentTheme.buttonColor),
@@ -1929,7 +1942,7 @@ class _BibleScreenState extends State<BibleScreen> {
             _buildToolbarButton(
               icon: Icons.content_copy,
               iconColor: currentTheme.buttonColor,
-              label: 'Copiar',
+              label: _translationProvider.tr("bible_screen.toolbar.copy"),
               onTap: _copySelectedVerses,
             ),
             Divider(height: 1, color: Colors.grey[300]),
@@ -1937,7 +1950,7 @@ class _BibleScreenState extends State<BibleScreen> {
             _buildToolbarButton(
               icon: Icons.share,
               iconColor: currentTheme.buttonColor,
-              label: 'Compartir',
+              label: _translationProvider.tr("bible_screen.toolbar.share"),
               onTap: _shareSelectedVerses,
             ),
             Divider(height: 1, color: Colors.grey[300]),
@@ -1946,7 +1959,7 @@ class _BibleScreenState extends State<BibleScreen> {
               _buildToolbarButton(
                 icon: Icons.highlight,
                 iconColor: currentTheme.buttonColor,
-                label: 'Resaltar',
+                label: _translationProvider.tr("bible_screen.toolbar.highlight"),
                 onTap: _showHighlightColorPicker,
               ),
 
@@ -1956,7 +1969,7 @@ class _BibleScreenState extends State<BibleScreen> {
             _buildToolbarButton(
               icon: Icons.clear_all,
               iconColor: currentTheme.buttonColor,
-              label: 'Limpiar',
+              label: _translationProvider.tr("bible_screen.toolbar.clear"),
               onTap: _clearSelection,
             ),
           ],
@@ -2014,7 +2027,7 @@ class _BibleScreenState extends State<BibleScreen> {
           ListTile(
             leading: Icon(isFavorite ? Icons.star_outline : Icons.star),
             title: Text(
-                isFavorite ? 'Remover de favoritos' : 'Agregar a favoritos'),
+                isFavorite ? _translationProvider.tr("bible_screen.verse_popup.remove_favorite") : _translationProvider.tr("bible_screen.verse_popup.add_to_favorites")),
             onTap: () {
               _toggleFavorite(verse);
               Navigator.pop(context);

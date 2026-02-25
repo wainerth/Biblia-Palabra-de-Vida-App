@@ -274,9 +274,9 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               children: [
                 IntlPhoneFieldWithValidation(
                   controller: widget.phoneNumberController,
-                  hintText: translationProvider.tr('phone_field.hint_text'),
+                  hintText: translationProvider.tr('personal_info_step.phone_hint'),
                   invalidNumberMessage: translationProvider
-                      .tr('phone_field.invalid_number_message'),
+                      .tr('personal_info_step.phone_error_invalid'),
                   validator: (PhoneNumber? phone) {
                     if (phone == null || phone.number.isEmpty) {
                       return translationProvider

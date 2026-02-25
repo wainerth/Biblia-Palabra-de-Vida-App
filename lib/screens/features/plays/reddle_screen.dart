@@ -86,7 +86,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
         if (mounted) {
           await showCustomDialogWithAction(context,
               message:
-                  _translationProvider.tr("quiz_screen.errors.no_characters"),
+                  _translationProvider.tr("reddle_screen.errors.no_characters"),
               dialogType: DialogTypeAction.info,
               buttonOk: "Ok", actionCallbackOk: () {
             Navigator.pop(context);
@@ -178,7 +178,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
         ),
         backgroundColor: StyleColor.turquoise,
         title: Text(
-          _translationProvider.tr("quiz_screen.title"),
+          _translationProvider.tr("reddle_screen.title"),
           style: StylesApp(context)
               .textStyleBody16
               .copyWith(color: StyleColor.white),
@@ -204,7 +204,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
           children: [
             SizedBox(height: isTablet ? 20.0 : 0),
             Text(
-              _translationProvider.tr("quiz_screen.difficulty_selection.title"),
+              _translationProvider
+                  .tr("reddle_screen.difficulty_selection.title"),
               style: isTablet
                   ? StylesApp(context).textStyleBody24.copyWith(
                         color: StyleColor.black,
@@ -218,17 +219,17 @@ class _ReddleScreenState extends State<ReddleScreen> {
             SizedBox(height: isTablet ? 40.0 : 20.0),
             _buildDifficultyButton(
                 _translationProvider
-                    .tr("quiz_screen.difficulty_selection.easy"),
+                    .tr("reddle_screen.difficulty_selection.easy"),
                 Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
             _buildDifficultyButton(
                 _translationProvider
-                    .tr("quiz_screen.difficulty_selection.medium"),
+                    .tr("reddle_screen.difficulty_selection.medium"),
                 Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
             _buildDifficultyButton(
                 _translationProvider
-                    .tr("quiz_screen.difficulty_selection.hard"),
+                    .tr("reddle_screen.difficulty_selection.hard"),
                 Icons.face_2_rounded),
             SizedBox(height: isTablet ? 40.0 : 15),
           ],
@@ -301,7 +302,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
   }
 
   Widget _buildPlayScene() {
-    return isTablet ? _buildSceneTablet() : _buildSceneMobile();
+    return ResponsiveLayout(
+        mobile: _buildSceneMobile(), tablet: _buildSceneTablet());
   }
 
   _buildSceneTablet() {
@@ -325,7 +327,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                   children: [
                     Text(
                       _translationProvider
-                          .tr("quiz_screen.game_play.header.title"),
+                          .tr("reddle_screen.game_play.header.title"),
                       style: StylesApp(context).textStyleBody20.copyWith(
                             color: StyleColor.black,
                             fontWeight: FontWeight.bold,
@@ -333,7 +335,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                     ),
                     Text(
                       _translationProvider.trParams(
-                          "quiz_screen.game_play.header.difficulty",
+                          "reddle_screen.game_play.header.difficulty",
                           {"difficulty": difficulty}),
                       style: StylesApp(context)
                           .textStyleBody14
@@ -346,7 +348,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                   children: [
                     Text(
                       _translationProvider
-                          .tr("quiz_screen.game_play.header.opportunities"),
+                          .tr("reddle_screen.game_play.header.opportunities"),
                       style: StylesApp(context)
                           .textStyleBody14
                           .copyWith(color: StyleColor.grayDark),
@@ -421,7 +423,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                               children: [
                                 Text(
                                   _translationProvider.tr(
-                                      "quiz_screen.game_play.header.progress"),
+                                      "reddle_screen.game_play.header.progress"),
                                   style: StylesApp(context)
                                       .textStyleBody15
                                       .copyWith(
@@ -480,7 +482,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                           // Título y pregunta
                           Text(
                             _translationProvider
-                                .tr("quiz_screen.game_play.question"),
+                                .tr("reddle_screen.game_play.question"),
                             style: StylesApp(context).textStyleBody20.copyWith(
                                   color: StyleColor.black,
                                   fontWeight: FontWeight.bold,
@@ -502,7 +504,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                                 .inputDecorationOutlineStyle
                                 .copyWith(
                                   hintText: _translationProvider
-                                      .tr("quiz_screen.game_play.input_hint"),
+                                      .tr("reddle_screen.game_play.input_hint"),
                                   filled: true,
                                   fillColor: Colors.white,
                                   contentPadding: EdgeInsets.all(16.0),
@@ -517,7 +519,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                           // Botón de verificar
                           ButtonThemeWidget(
                             text: _translationProvider
-                                .tr("quiz_screen.game_play.verify_button"),
+                                .tr("reddle_screen.game_play.verify_button"),
                             width: double.infinity,
                             height: 50,
                             buttonStyle:
@@ -573,9 +575,9 @@ class _ReddleScreenState extends State<ReddleScreen> {
                                     child: Text(
                                       respuestaCorrecta
                                           ? _translationProvider.tr(
-                                              "quiz_screen.game_play.feedback.correct")
+                                              "reddle_screen.game_play.feedback.correct")
                                           : _translationProvider.trParams(
-                                              "quiz_screen.game_play.feedback.incorrect",
+                                              "reddle_screen.game_play.feedback.incorrect",
                                               {
                                                   "name": personajeActual!
                                                       .character.name
@@ -640,8 +642,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
                                 ),
                                 SizedBox(width: 12),
                                 Text(
-                                  _translationProvider
-                                      .tr("quiz_screen.game_play.clues_title"),
+                                  _translationProvider.tr(
+                                      "reddle_screen.game_play.clues_title"),
                                   style: StylesApp(context)
                                       .textStyleBody28
                                       .copyWith(
@@ -675,7 +677,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                               children: [
                                 Text(
                                   _translationProvider.tr(
-                                      "quiz_screen.game_play.instructions.title"),
+                                      "reddle_screen.game_play.instructions.title"),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -685,7 +687,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                                 ),
                                 SizedBox(height: 8),
                                 Text(
-                                  "${_translationProvider.tr("quiz_screen.game_play.instructions.step1")}\n${_translationProvider.tr("quiz_screen.game_play.instructions.step2")}\n${_translationProvider.tr("quiz_screen.game_play.instructions.step3")}\n${_translationProvider.tr("quiz_screen.game_play.instructions.step4")}",
+                                  "${_translationProvider.tr("reddle_screen.game_play.instructions.step1")}\n${_translationProvider.tr("reddle_screen.game_play.instructions.step2")}\n${_translationProvider.tr("reddle_screen.game_play.instructions.step3")}\n${_translationProvider.tr("reddle_screen.game_play.instructions.step4")}",
                                   style: StylesApp(context)
                                       .textStyleBody14
                                       .copyWith(
@@ -725,7 +727,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
           child: Row(
             children: [
               Text(
-                "${_translationProvider.tr("quiz_screen.game_play.header.opportunities")}: ",
+                "${_translationProvider.tr("reddle_screen.game_play.header.opportunities")}: ",
                 style: StylesApp(context)
                     .textStyleBody10
                     .copyWith(color: StyleColor.grayMedium),
@@ -759,7 +761,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
               child: Text(
                 textAlign: TextAlign.center,
                 _translationProvider
-                    .tr("quiz_screen.game_play.header.mobile_title"),
+                    .tr("reddle_screen.game_play.mobile_title"),
                 style: StylesApp(context)
                     .textStyleBody20
                     .copyWith(color: StyleColor.black),
@@ -796,7 +798,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
             SizedBox(height: 15),
             // Pregunta
             Text(
-              _translationProvider.tr("quiz_screen.game_play.question"),
+              _translationProvider.tr("reddle_screen.game_play.question"),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             if (personajes.isNotEmpty)
@@ -816,11 +818,11 @@ class _ReddleScreenState extends State<ReddleScreen> {
                     .inputDecorationOutlineStyle
                     .copyWith(
                         hintText: _translationProvider
-                            .tr("quiz_screen.game_play.input_hint")),
+                            .tr("reddle_screen.game_play.input_hint")),
               ),
             ),
             Text(
-              _translationProvider.tr("quiz_screen.game_play.clues_mobile"),
+              _translationProvider.tr("reddle_screen.game_play.clues_mobile"),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             // Feedback
@@ -828,9 +830,9 @@ class _ReddleScreenState extends State<ReddleScreen> {
               Text(
                 respuestaCorrecta
                     ? _translationProvider
-                        .tr("quiz_screen.game_play.feedback.correct")
+                        .tr("reddle_screen.game_play.feedback.correct")
                     : _translationProvider.trParams(
-                        "quiz_screen.game_play.feedback.incorrect",
+                        "reddle_screen.game_play.feedback.incorrect",
                         {"name": personajeActual!.character.name}),
                 style: TextStyle(
                   fontSize: 18,
@@ -871,7 +873,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
           padding: EdgeInsets.all(24.0),
           child: Center(
             child: Text(
-              _translationProvider.tr("quiz_screen.game_play.loading_clues"),
+              _translationProvider.tr("reddle_screen.game_play.loading_clues"),
               style: StylesApp(context).textStyleBody16,
             ),
           ),
@@ -972,7 +974,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text(_translationProvider
-            .tr("quiz_screen.failed_attempts_dialog.title")),
+            .tr("reddle_screen.failed_attempts_dialog.title")),
         content: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: isTablet ? 500 : double.infinity,
@@ -980,7 +982,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                 isTablet ? 450 : MediaQuery.of(context).size.height * 0.5,
           ),
           child: Text(_translationProvider
-              .tr("quiz_screen.failed_attempts_dialog.message")),
+              .tr("reddle_screen.failed_attempts_dialog.message")),
         ),
         actions: [
           TextButton(
@@ -996,7 +998,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
               });
             },
             child: Text(_translationProvider
-                .tr("quiz_screen.failed_attempts_dialog.play_again")),
+                .tr("reddle_screen.failed_attempts_dialog.play_again")),
           ),
         ],
       ),
@@ -1024,13 +1026,13 @@ class _ReddleScreenState extends State<ReddleScreen> {
           await showCustomDialogWithAction(context,
               message: responseSaveResult.error!,
               dialogType: DialogTypeAction.error,
-              buttonOk:
-                  _translationProvider.tr("quiz_screen.load_error_dialog.back"),
+              buttonOk: _translationProvider
+                  .tr("reddle_screen.load_error_dialog.back"),
               actionCallbackOk: () {
                 Navigator.pop(context);
               },
               textButton: _translationProvider
-                  .tr("quiz_screen.load_load_error_dialog.retry"),
+                  .tr("reddle_screen.load_load_error_dialog.retry"),
               actionCallback: () {
                 _showDialogFinallyPlay();
               });
@@ -1046,13 +1048,13 @@ class _ReddleScreenState extends State<ReddleScreen> {
           await showCustomDialogWithAction(context,
               message: responseSaveResult.error!,
               dialogType: DialogTypeAction.error,
-              buttonOk:
-                  _translationProvider.tr("quiz_screen.load_error_dialog.back"),
+              buttonOk: _translationProvider
+                  .tr("reddle_screen.load_error_dialog.back"),
               actionCallbackOk: () {
                 Navigator.pop(context);
               },
               textButton: _translationProvider
-                  .tr("quiz_screen.load_error_dialog.retry"),
+                  .tr("reddle_screen.load_error_dialog.retry"),
               actionCallback: () {
                 _showDialogFinallyPlay();
               });
@@ -1082,13 +1084,13 @@ class _ReddleScreenState extends State<ReddleScreen> {
                         .copyWith(color: StyleColor.black),
                   ),
                   Text(
-                      "${_translationProvider.trParams("quiz_screen.result_dialog.category", {
+                      "${_translationProvider.trParams("reddle_screen.result_dialog.category", {
                         "category": infoResult.message.category!,
-                      })} ${_translationProvider.trParams("quiz_screen.result_dialog.difficulty", {
+                      })} ${_translationProvider.trParams("reddle_screen.result_dialog.difficulty", {
                         "difficulty": infoResult.message.difficulty!,
                       })}"),
                   Text(_translationProvider
-                      .trParams("quiz_screen.result_dialog.score", {
+                      .trParams("reddle_screen.result_dialog.score", {
                     "score": infoResult.score.toString(),
                   }))
                 ],
@@ -1097,7 +1099,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
             actions: [
               ButtonThemeWidget(
                 text: _translationProvider
-                    .tr("quiz_screen.result_dialog.play_again"),
+                    .tr("reddle_screen.result_dialog.play_again"),
                 buttonStyle: StylesApp(context).btnWidgetSmall,
                 onPressed: () {
                   Navigator.pop(context);
@@ -1122,12 +1124,12 @@ class _ReddleScreenState extends State<ReddleScreen> {
             message: e.toString(),
             dialogType: DialogTypeAction.error,
             buttonOk:
-                _translationProvider.tr("quiz_screen.load_error_dialog.back"),
+                _translationProvider.tr("reddle_screen.load_error_dialog.back"),
             actionCallbackOk: () {
               Navigator.pop(context);
             },
-            textButton:
-                _translationProvider.tr("quiz_screen.load_error_dialog.retry"),
+            textButton: _translationProvider
+                .tr("reddle_screen.load_error_dialog.retry"),
             actionCallback: () {
               _showDialogFinallyPlay();
             });
@@ -1147,15 +1149,15 @@ class _ReddleScreenState extends State<ReddleScreen> {
   }
 
   Color _getDifficultyColor(String level) {
-    if (_translationProvider.tr('quiz_screen.difficulty_selection.easy') ==
+    if (_translationProvider.tr('reddle_screen.difficulty_selection.easy') ==
         level) {
       return StyleColor.greenDark;
     } else if (_translationProvider
-            .tr('quiz_screen.difficulty_selection.medium') ==
+            .tr('reddle_screen.difficulty_selection.medium') ==
         level) {
       return StyleColor.orange;
     } else if (_translationProvider
-            .tr('quiz_screen.difficulty_selection.hard') ==
+            .tr('reddle_screen.difficulty_selection.hard') ==
         level) {
       return StyleColor.redDark;
     } else {
@@ -1164,15 +1166,15 @@ class _ReddleScreenState extends State<ReddleScreen> {
   }
 
   String _getDifficultyCharacter(String level) {
-    if (_translationProvider.tr('quiz_screen.difficulty_selection.easy') ==
+    if (_translationProvider.tr('reddle_screen.difficulty_selection.easy') ==
         level) {
       return 'F';
     } else if (_translationProvider
-            .tr('quiz_screen.difficulty_selection.medium') ==
+            .tr('reddle_screen.difficulty_selection.medium') ==
         level) {
       return 'I';
     } else if (_translationProvider
-            .tr('quiz_screen.difficulty_selection.hard') ==
+            .tr('reddle_screen.difficulty_selection.hard') ==
         level) {
       return 'D';
     } else {

@@ -290,7 +290,7 @@ class _MapScreenState extends State<MapScreen>
         body: ResponsiveLayout(
             mobile: _buildMobileLayout(translationProvider),
             tablet: _buildTabletLayout(translationProvider)),
-        bottomNavigationBar: isTablet ? null : _buildBottomNavigationBar(),
+        bottomNavigationBar: isTablet ? null : SafeArea(child: _buildBottomNavigationBar()),
       ),
     );
   }
@@ -1405,7 +1405,7 @@ class _MapScreenState extends State<MapScreen>
       builder: (context, isVisible, child) {
         return AnimatedContainer(
           duration: Duration(milliseconds: 300),
-          height: isVisible ? kBottomNavigationBarHeight + 25 : 0,
+          height: isVisible ? kBottomNavigationBarHeight : 0,
           curve: Curves.easeInOut,
           child: Wrap(children: [
             CustomBottomNavigationBarWidget(

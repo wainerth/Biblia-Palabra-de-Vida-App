@@ -42,10 +42,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                         path: 'settings.language',
                         trailingText: translationProvider.currentLanguageName,
-                        onTap: ()=> _showLanguageDialog(context),
-                        // GraphQLConfig.development
-                        //     ? () => _showLanguageDialog(context)
-                        //     : () {},
+                        onTap: GraphQLConfig.development
+                            ? () => _showLanguageDialog(context)
+                            : () {},
                       ),
                       _buildSettingsItem(
                         context,
@@ -283,9 +282,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               icon: Icons.language,
                               path: 'settings.language',
                               subtitle: translationProvider.currentLanguageName,
-                              onTap: () {
-                                _showLanguageDialog(context);
-                              },
+                              onTap:  GraphQLConfig.development
+                            ? () => _showLanguageDialog(context)
+                            : () {},
                             ),
 
                             SizedBox(height: 30),
@@ -505,91 +504,99 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showModalBottomSheet(
       isDismissible: false,
       context: context,
+      isScrollControlled: true, // Importante para controlar el tamaño
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(25),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: StyleColor.redLight.withValues(alpha: 0.1),
-                ),
-                child: Icon(
-                  Icons.warning_amber,
-                  color: StyleColor.redLight,
-                  size: 36,
-                ),
-              ),
-              SizedBox(height: 20),
-              TranslatedText(
-                path: 'settings.logout_confirmation',
-                style: StylesApp(context).textStyleBody18.copyWith(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 10),
-              TranslatedText(
-                path: 'settings.logout_warning',
-                style: StylesApp(context).textStyleBody14.copyWith(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 25),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: TranslatedButton(
-                      path: 'settings.cancel',
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: StylesApp(context).btnWidgetSmall.copyWith(
-                            backgroundColor: WidgetStateProperty.all(
-                              Colors.grey[300],
-                            ),
-                            foregroundColor: WidgetStateProperty.all(
-                              Colors.black87,
-                            ),
-                          ),
-                    ),
+        return SafeArea(
+          // 👈 Envolver con SafeArea
+          child: Container(
+            padding: EdgeInsets.all(25),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // ... tu contenido existente
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: StyleColor.redLight.withValues(alpha: 0.1),
                   ),
-                  SizedBox(width: 15),
-                  Expanded(
-                    child: TranslatedButton(
-                      path: 'settings.logout_button',
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        LoadingService().showLoading(context);
-                        final authentication =
-                            Provider.of<AuthenticationProvider>(context,
-                                listen: false);
-                        await authentication.logoutUser(context);
-                        LoadingService().hideLoading();
-                      },
-                      style: StylesApp(context).btnWidgetSmall.copyWith(
-                            backgroundColor: WidgetStateProperty.all(
-                              StyleColor.redLight,
-                            ),
-                            foregroundColor: WidgetStateProperty.all(
-                              Colors.white,
-                            ),
-                          ),
-                    ),
+                  child: Icon(
+                    Icons.warning_amber,
+                    color: StyleColor.redLight,
+                    size: 36,
                   ),
-                ],
-              ),
-            ],
+                ),
+                SizedBox(height: 20),
+                TranslatedText(
+                  path: 'settings.logout_confirmation',
+                  style: StylesApp(context).textStyleBody18.copyWith(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                TranslatedText(
+                  path: 'settings.logout_warning',
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: TranslatedButton(
+                        path: 'settings.cancel',
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: StylesApp(context).btnWidgetSmall.copyWith(
+                              backgroundColor: WidgetStateProperty.all(
+                                Colors.grey[300],
+                              ),
+                              foregroundColor: WidgetStateProperty.all(
+                                Colors.black87,
+                              ),
+                            ),
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: TranslatedButton(
+                        path: 'settings.logout_button',
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          LoadingService().showLoading(context);
+                          final authentication =
+                              Provider.of<AuthenticationProvider>(context,
+                                  listen: false);
+                          await authentication.logoutUser(context);
+                          LoadingService().hideLoading();
+                        },
+                        style: StylesApp(context).btnWidgetSmall.copyWith(
+                              backgroundColor: WidgetStateProperty.all(
+                                StyleColor.redLight,
+                              ),
+                              foregroundColor: WidgetStateProperty.all(
+                                Colors.white,
+                              ),
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -639,8 +646,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return isTablet(context)
-        ? _buildTabletLayout(context)
-        : _buildMobileLayout(context);
+    return ResponsiveLayout(
+        mobile: _buildMobileLayout(context),
+        tablet: _buildTabletLayout(context));
   }
 }

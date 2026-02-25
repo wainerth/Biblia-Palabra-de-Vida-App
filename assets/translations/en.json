@@ -54,6 +54,30 @@
             "pin_verification": "PIN Verification"
         }
     },
+    "verify_pin_dialog": {
+        "title": "Security Verification",
+        "message": "We have sent a 6-digit code to:",
+        "paste_hint": "You can paste the complete code from the email",
+        "paste_button": "PASTE",
+        "paste_success": "Code pasted successfully",
+        "paste_error": "Error pasting code",
+        "paste_empty": "No text in clipboard",
+        "resend_button": "Resend code",
+        "resend_success": "Code resent to {{email}}",
+        "resend_timer": "You can resend in: {{time}}",
+        "help_link": "Didn't receive the code?",
+        "verify_button": "VERIFY CODE",
+        "error_incorrect": "Incorrect code. Please try again.",
+        "paste_code_error": "Error pasting code",
+        "help_dialog": {
+            "title": "Help",
+            "subtitle": "If you didn't receive the code:",
+            "step1": "1. Check your spam or junk folder",
+            "step2": "2. Verify that the email address is correct",
+            "step3": "3. Wait a few minutes and click \"Resend code\"",
+            "close": "Close"
+        }
+    },
     "user_info_step": {
         "document_number": "Document number",
         "document_number_example": "Ex: 12345678",
@@ -926,6 +950,125 @@
             "difficulty": "Difficulty: {{difficulty}}",
             "score": "Score obtained: {{score}}",
             "play_again": "Play again"
+        }
+    },
+    "notification_screen": {
+        "title": "Notifications",
+        "tablet": {
+            "stats": {
+                "total": "Total",
+                "unread": "Unread",
+                "read": "Read"
+            },
+            "empty_detail": {
+                "title": "Select a notification",
+                "subtitle": "Click on a notification from the list\nto view its details here"
+            },
+            "detail_panel": {
+                "title": "Notification Details",
+                "message": "Message",
+                "action": "Action",
+                "go_to_action": "Go to action",
+                "mark_as_read": "Mark as read",
+                "close": "Close"
+            },
+            "mark_all_read": "Mark all as read"
+        },
+        "mobile": {
+            "mark_all_read": "Read All",
+            "empty": "You have no notifications.",
+            "empty_detail": "When you receive notifications,\nthey will appear here"
+        },
+        "date_groups": {
+            "today": "Today",
+            "yesterday": "Yesterday"
+        },
+        "messages": {
+            "loading": "Loading notifications...",
+            "error": "Error loading notifications: {{error}}",
+            "mark_read_error": "Error marking as read: {{error}}",
+            "mark_all_read_error": "Error marking all as read"
+        },
+        "stats": {
+            "total": "Total",
+            "unread": "Unread",
+            "read": "Read"
+        },
+        "count": {
+            "notifications": "{{count}} notifications"
+        }
+    },
+    "bible_screen": {
+        "title": "Bible",
+        "loading": "Loading Bible...",
+        "error": {
+            "timeout": "Loading timeout exceeded",
+            "unknown": "Unknown error",
+            "loading": "Error loading: {{error}}",
+            "chapter": "Error loading chapter {{error}}",
+            "navigation": "Error changing chapter: {{error}}"
+        },
+        "navigation": {
+            "title": "Navigation",
+            "drawer_indicator": "Swipe from the right to navigate"
+        },
+        "speed_labels": {
+            "slow": "Slow",
+            "normal": "Normal",
+            "fast": "Fast",
+            "speed": "Speed: {{percentage}}%"
+        },
+        "toolbar": {
+            "copy": "Copy",
+            "share": "Share",
+            "highlight": "Highlight",
+            "clear": "Clear"
+        },
+        "verse_popup": {
+            "remove_favorite": "Remove from favorites",
+            "add_favorite": "Add to favorites",
+            "stop_reading": "Stop reading",
+            "read_verse": "Read verse"
+        },
+        "favorites": {
+            "title": "Favorites",
+            "no_favorites": "No favorite verses"
+        },
+        "highlight_dialog": {
+            "title": "Highlight",
+            "message": "What do you want to do with this highlight?",
+            "delete": "Delete",
+            "cancel": "Cancel"
+        },
+        "chapter": {
+            "copy_success": "Chapter {{chapter}} of the book {{book}} has been successfully copied to clipboard",
+            "share_subject": "Word of Life - {{chapter}} {{book}}"
+        },
+        "verse_selection": {
+            "copy_success": "Verses copied",
+            "no_selection": "No verses selected to copy",
+            "share_subject": "Verse from {{book}}"
+        },
+        "no_verses": {
+            "title": "No verses found",
+            "description": "Chapter {{chapter}} of the book {{book}} does not contain available verses.",
+            "chapter_info": "Chapter Information",
+            "book": "Book:",
+            "chapter": "Chapter:",
+            "version": "Version:",
+            "retry": "Retry",
+            "next_chapter": "Next chapter"
+        },
+        "buttons": {
+            "retry": "Retry",
+            "back_to_home": "Back to home",
+            "re_intentar": "Retry",
+            "back": "Back"
+        },
+        "speed": {
+            "slow": "Slow",
+            "normal": "Normal",
+            "fast": "Fast"
         }
     },
     "workspace": {

@@ -54,6 +54,30 @@
             "pin_verification": "Verificação de PIN"
         }
     },
+    "verify_pin_dialog": {
+        "title": "Verificação de Segurança",
+        "message": "Enviamos um código de 6 dígitos para:",
+        "paste_hint": "Você pode colar o código completo do e-mail",
+        "paste_button": "COLAR",
+        "paste_success": "Código colado com sucesso",
+        "paste_error": "Erro ao colar o código",
+        "paste_empty": "Não há texto na área de transferência",
+        "resend_button": "Reenviar código",
+        "resend_success": "Código reenviado para {{email}}",
+        "resend_timer": "Você pode reenviar em: {{tempo}}",
+        "help_link": "Não recebeu o código?",
+        "verify_button": "VERIFICAR CÓDIGO",
+        "error_incorrect": "Código incorreto. Tente novamente.",
+        "paste_code_error": "Erro ao colar o código",
+        "help_dialog": {
+            "title": "Ajuda",
+            "subtitle": "Se você não recebeu o código:",
+            "step1": "1. Verifique sua pasta de spam ou lixo eletrônico",
+            "step2": "2. Verifique se o e-mail está correto",
+            "step3": "3. Aguarde alguns minutos e clique em \"Reenviar código\"",
+            "close": "Fechar"
+        }
+    },
     "user_info_step": {
         "document_number": "Número do documento",
         "document_number_example": "Ex: 12345678",
@@ -926,6 +950,125 @@
             "difficulty": "Dificuldade: {{dificuldade}}",
             "score": "Pontuação obtida: {{pontuação}}",
             "play_again": "Jogar novamente"
+        }
+    },
+    "notification_screen": {
+        "title": "Notificações",
+        "tablet": {
+            "stats": {
+                "total": "Total",
+                "unread": "Não lidas",
+                "read": "Lidas"
+            },
+            "empty_detail": {
+                "title": "Selecione uma notificação",
+                "subtitle": "Clique em uma notificação da lista\npara ver seus detalhes aqui"
+            },
+            "detail_panel": {
+                "title": "Detalhes da Notificação",
+                "message": "Mensagem",
+                "action": "Ação",
+                "go_to_action": "Ir para a ação",
+                "mark_as_read": "Marcar como lida",
+                "close": "Fechar"
+            },
+            "mark_all_read": "Marcar todas como lidas"
+        },
+        "mobile": {
+            "mark_all_read": "Ler Todas",
+            "empty": "Você não tem notificações.",
+            "empty_detail": "Quando você receber notificações,\nelas aparecerão aqui"
+        },
+        "date_groups": {
+            "today": "Hoje",
+            "yesterday": "Ontem"
+        },
+        "messages": {
+            "loading": "Carregando notificações...",
+            "error": "Erro ao carregar notificações: {{erro}}",
+            "mark_read_error": "Erro ao marcar como lida: {{erro}}",
+            "mark_all_read_error": "Erro ao marcar todas como lidas"
+        },
+        "stats": {
+            "total": "Total",
+            "unread": "Não lidas",
+            "read": "Lidas"
+        },
+        "count": {
+            "notifications": "{{contagem}} notificações"
+        }
+    },
+    "bible_screen": {
+        "title": "Bíblia",
+        "loading": "Carregando Bíblia...",
+        "error": {
+            "timeout": "Tempo de carga excedido",
+            "unknown": "Erro desconhecido",
+            "loading": "Erro ao carregar: {{erro}}",
+            "chapter": "Erro ao carregar o capítulo {{erro}}",
+            "navigation": "Erro ao mudar de capítulo: {{erro}}"
+        },
+        "navigation": {
+            "title": "Navegação",
+            "drawer_indicator": "Deslize da direita para navegar"
+        },
+        "speed_labels": {
+            "slow": "Lento",
+            "normal": "Normal",
+            "fast": "Rápido",
+            "speed": "Velocidade: {{porcentagem}}%"
+        },
+        "toolbar": {
+            "copy": "Copiar",
+            "share": "Compartilhar",
+            "highlight": "Destacar",
+            "clear": "Limpar"
+        },
+        "verse_popup": {
+            "remove_favorite": "Remover dos favoritos",
+            "add_favorite": "Adicionar aos favoritos",
+            "stop_reading": "Parar leitura",
+            "read_verse": "Ler versículo"
+        },
+        "favorites": {
+            "title": "Favoritos",
+            "no_favorites": "Nenhum versículo favorito"
+        },
+        "highlight_dialog": {
+            "title": "Destaque",
+            "message": "O que você deseja fazer com este destaque?",
+            "delete": "Excluir",
+            "cancel": "Cancelar"
+        },
+        "chapter": {
+            "copy_success": "O capítulo {{capítulo}} do livro {{livro}} foi copiado com sucesso para a área de transferência",
+            "share_subject": "Palavra de Vida - {{capítulo}} {{livro}}"
+        },
+        "verse_selection": {
+            "copy_success": "Versículos copiados",
+            "no_selection": "Nenhum versículo selecionado para copiar",
+            "share_subject": "Versículo de {{livro}}"
+        },
+        "no_verses": {
+            "title": "Nenhum versículo encontrado",
+            "description": "O capítulo {{capítulo}} do livro {{livro}} não contém versículos disponíveis.",
+            "chapter_info": "Informações do capítulo",
+            "book": "Livro:",
+            "chapter": "Capítulo:",
+            "version": "Versão:",
+            "retry": "Tentar novamente",
+            "next_chapter": "Próximo capítulo"
+        },
+        "buttons": {
+            "retry": "Tentar novamente",
+            "back_to_home": "Voltar ao início",
+            "re_intentar": "Tentar novamente",
+            "back": "Voltar"
+        },
+        "speed": {
+            "slow": "Lento",
+            "normal": "Normal",
+            "fast": "Rápido"
         }
     },
     "workspace": {

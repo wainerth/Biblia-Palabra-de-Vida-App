@@ -2,8 +2,7 @@ import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/socket_client_provider.dart';
-import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -24,6 +23,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
   String error = '';
   bool loading = false;
   NotificationModel? selectedNotification;
+
+  // variable que contiene las traducciones
+  final _translationProvider = AppTranslationProvider();
 
   @override
   void initState() {
@@ -76,7 +78,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
         await showCustomDialog(
           context,
           dialogType: DialogType.error,
-          message: 'Error al marcar como leída: ${e.toString()}',
+          message: _translationProvider
+              .trParams("notification_screen.messages.error", {
+            "error": e.toString(),
+          }),
         );
       }
     } finally {
@@ -202,7 +207,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          error = "Error al cargar notificaciones: ${e.toString()}";
+          error = _translationProvider.trParams(
+              "notification_screen.messages.error",
+              {"error": e.toString()});
           loading = false;
         });
       }
@@ -304,7 +311,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Notificaciones",
+            _translationProvider.tr("notification_screen.title"),
             style: StylesApp(context).textStyleTitleOrange.copyWith(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
@@ -314,7 +321,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
           SizedBox(height: 4),
           if (notifications.isNotEmpty)
             Text(
-              "${notifications.length} notificaciones",
+              _translationProvider
+                  .trParams("notification_screen.count.notifications", {
+                "count": notifications.length.toString(),
+              }),
               style: StylesApp(context).textStyleBody14.copyWith(
                     color: Colors.white.withValues(alpha: 0.9),
                   ),
@@ -332,7 +342,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: Row(
                 children: [
                   Text(
-                    "Marcar todas como leídas",
+                    _translationProvider.tr(
+                        "notification_screen.tablet.detail_panel.mark_all_read"),
                     style: StylesApp(context).textStyleBody14.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -369,7 +380,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         icon: Icon(Icons.arrow_back, size: 30),
       ),
       title: Text(
-        "Notificaciones",
+        _translationProvider.tr("notification_screen.title"),
         style: StylesApp(context)
             .textStyleBody20
             .copyWith(color: StyleColor.white, fontSize: 20.0),
@@ -417,21 +428,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         children: [
                           _buildStatCard(
                             context,
-                            'Total',
+                            _translationProvider
+                                .tr("notification_screen.tablet.stats.total"),
                             '${notifications.length}',
                             Icons.notifications,
                             StyleColor.orange,
                           ),
                           _buildStatCard(
                             context,
-                            'No leídas',
+                            _translationProvider
+                                .tr("notification_screen.tablet.stats.unread"),
                             '${notifications.where((n) => !n.isRead).length}',
                             Icons.notifications_active,
                             StyleColor.blue,
                           ),
                           _buildStatCard(
                             context,
-                            'Leídas',
+                            _translationProvider
+                                .tr("notification_screen.tablet.stats.read"),
                             '${notifications.where((n) => n.isRead).length}',
                             Icons.notifications_none,
                             StyleColor.greenMedium,
@@ -469,7 +483,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                           ),
                                           SizedBox(height: 20),
                                           Text(
-                                            "No tienes notificaciones",
+                                            _translationProvider.tr(
+                                                "notification_screen.mobile.empty"),
                                             style: StylesApp(context)
                                                 .textStyleBody16
                                                 .copyWith(
@@ -478,7 +493,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                           ),
                                           SizedBox(height: 10),
                                           Text(
-                                            "Cuando recibas notificaciones,\naparecerán aquí",
+                                            _translationProvider.tr(
+                                                "notification_screen.mobile.empty_detail"),
                                             textAlign: TextAlign.center,
                                             style: StylesApp(context)
                                                 .textStyleBody14
@@ -750,7 +766,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Detalles de la Notificación",
+                _translationProvider
+                    .tr("notification_screen.tablet.detail_panel.title"),
                 style: StylesApp(context).textStyleBody24.copyWith(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -847,7 +864,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
                 // Mensaje completo
                 Text(
-                  "Mensaje",
+                  _translationProvider
+                      .tr("notification_screen.tablet.detail_panel.message"),
                   style: StylesApp(context).textStyleBody16.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -876,7 +894,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 // Acción (si existe)
                 if (notification.actionLabel.isNotEmpty) ...[
                   Text(
-                    "Acción",
+                    _translationProvider
+                        .tr("notification_screen.tablet.detail_panel.action"),
                     style: StylesApp(context).textStyleBody16.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -928,7 +947,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  "Ir a la acción",
+                                  _translationProvider.tr(
+                                      "notification_screen.tablet.detail_panel.go_to_action"),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -975,7 +995,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           color: StyleColor.greenMedium, size: 20),
                       SizedBox(width: 8),
                       Text(
-                        "Marcar como leída",
+                        _translationProvider
+                            .tr("notification_screen.tablet.detail_panel.mark_all_read"),
                         style: StylesApp(context).textStyleBody16.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -1004,7 +1025,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     Icon(Icons.close, color: Colors.grey, size: 20),
                     SizedBox(width: 8),
                     Text(
-                      "Cerrar",
+                      _translationProvider
+                          .tr("notification_screen.tablet.detail_panel.close"),
                       style: StylesApp(context).textStyleBody16.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -1034,7 +1056,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
           SizedBox(height: 20),
           Text(
-            'Selecciona una notificación',
+            _translationProvider
+                .tr("notification_screen.tablet.empty_detail.title"),
             style: StylesApp(context).textStyleBody20.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -1043,7 +1066,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
           SizedBox(height: 10),
           Text(
-            'Haz clic en una notificación de la lista\npara ver sus detalles aquí',
+            _translationProvider
+                .tr("notification_screen.tablet.empty_detail.subtitle"),
             textAlign: TextAlign.center,
             style: StylesApp(context).textStyleBody15.copyWith(
                   fontSize: 15,
@@ -1093,13 +1117,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   // Icono según la fecha
   IconData _getDateIcon(String dateKey) {
-    switch (dateKey) {
-      case 'Hoy':
-        return Icons.today;
-      case 'Ayer':
-        return Icons.history;
-      default:
-        return Icons.calendar_month;
+    if (_translationProvider.tr("notification_screen.date_groups.today") ==
+        dateKey) {
+      return Icons.today;
+    } else if (_translationProvider
+            .tr("notification_screen.date_groups.yesterday") ==
+        dateKey) {
+      return Icons.history;
+    } else {
+      return Icons.calendar_month;
     }
   }
 
@@ -1122,7 +1148,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: Row(
                 spacing: 4.0,
                 children: [
-                  Text("Leer Todas"),
+                  Text(_translationProvider.tr("notification_screen.mobile.mark_all_read")),
                   Icon(
                     Icons.checklist_outlined,
                     color: StyleColor.turquoise,
@@ -1160,7 +1186,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         : notifications.isEmpty
                             ? Center(
                                 child: Text(
-                                  "No tienes notificaciones.",
+                                  _translationProvider.tr("notification_screen.mobile.empty"),
                                   style: StylesApp(context)
                                       .textStyleBody7
                                       .copyWith(color: StyleColor.black),
@@ -1399,9 +1425,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final notificationDate = DateTime(date.year, date.month, date.day);
 
     if (notificationDate == today) {
-      return 'Hoy';
+      return _translationProvider.tr("notification_screen.date_groups.today");
     } else if (notificationDate == yesterday) {
-      return 'Ayer';
+      return _translationProvider.tr("notification_screen.date_groups.yesterday");
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
@@ -1412,10 +1438,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final keys = groupedNotifications.keys.toList();
 
     keys.sort((a, b) {
-      if (a == 'Hoy') return -1;
-      if (b == 'Hoy') return 1;
-      if (a == 'Ayer') return -1;
-      if (b == 'Ayer') return 1;
+      if (a == _translationProvider.tr("notification_screen.date_groups.today")) return -1;
+      if (b == _translationProvider.tr("notification_screen.date_groups.today")) return 1;
+      if (a == _translationProvider.tr("notification_screen.date_groups.yesterday")) return -1;
+      if (b == _translationProvider.tr("notification_screen.date_groups.yesterday")) return 1;
 
       final dateA = _parseDateKey(a);
       final dateB = _parseDateKey(b);
@@ -1427,8 +1453,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   DateTime _parseDateKey(String key) {
-    if (key == 'Hoy') return DateTime.now();
-    if (key == 'Ayer') return DateTime.now().subtract(Duration(days: 1));
+    if (key == _translationProvider.tr("notification_screen.date_groups.today")) return DateTime.now();
+    if (key == _translationProvider.tr("notification_screen.date_groups.yesterday")) return DateTime.now().subtract(Duration(days: 1));
 
     final parts = key.split('/');
     return DateTime(
