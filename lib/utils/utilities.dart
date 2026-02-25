@@ -4,6 +4,7 @@ import 'dart:io' show SocketException;
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/services/country_search_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/simple_timezone.dart';
@@ -12,8 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
 
 export 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 export 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
@@ -24,6 +23,8 @@ enum SnackBarType {
   warning,
   info,
 }
+
+final _translationProvider = AppTranslationProvider();
 
 Map<String, dynamic> removeTypename(values) {
   if (values is Map<String, dynamic>) {
@@ -62,7 +63,9 @@ var maskFormatterEmail = MaskTextInputFormatter(
 );
 
 getIsBaptized(value) {
-  return value ? "Bautizado" : "No Bautizado";
+  return value
+      ? _translationProvider.tr("utils.baptized.yes")
+      : _translationProvider.tr("utils.baptized.no");
 }
 
 getGender() {}
@@ -277,8 +280,11 @@ Future<void> copyToClipboard(BuildContext context, dynamic data) async {
   await showCustomDialog(
     showDetails: false,
     context,
-    message:
-        "El capítulo ${data.chapter.chapter} del libro ${data.book.modernName}\nse ha copiado con éxito al portapapeles",
+    message: _translationProvider.trParams("utils.copy.verse_success", {
+      "chapter": data.chapter.chapter.toString(),
+      "verse": data.verse.verse.toString(),
+      "book": data.book.modernName
+    }),
     dialogType: DialogType.info,
   );
 }
@@ -289,8 +295,12 @@ Future<void> shareVerse(BuildContext context, dynamic data) async {
       "${data.book.modernName}\n${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
   await SharePlus.instance.share(ShareParams(
     text: shareText,
-    subject:
-        "Palabra de Vida - ${data.chapter.chapter} ${data.book.modernName}\nVer en: $baseUrl",
+    subject: "${_translationProvider.trParams("utils.share.subject", {
+          "chapter": data.chapter.chapter.toString(),
+          "book": data.book.modernName
+        })}\n ${_translationProvider.trParams("utils.share.see_in", {
+          "baseUrl": baseUrl
+        })}",
   ));
 }
 
@@ -328,19 +338,23 @@ ResponseData handleGenericError(dynamic e, String operationName) {
   if (e is TimeoutException) {
     return ResponseData(
       data: null,
-      userFriendlyError: "$operationName solicitud agotada",
-      error: "$operationName Request timed out",
+      userFriendlyError: _translationProvider
+          .trParams("utils.errors.timeout", {"operation": operationName}),
+      error: _translationProvider
+          .trParams("utils.errors.timeout", {"operation": operationName}),
     );
   } else if (e is SocketException) {
     return ResponseData(
       data: null,
-      userFriendlyError: "$operationName Sin conexión a Internet",
+      userFriendlyError: _translationProvider
+          .trParams("utils.errors.no_internet", {"operation": operationName}),
       error: "$operationName: ${e.toString()}",
     );
   } else if (e is FormatException) {
     return ResponseData(
       data: null,
-      userFriendlyError: "$operationName Formato de datos no válido",
+      userFriendlyError: _translationProvider.trParams(
+          "utils.errors.invalid_format", {"operation": operationName}),
       error: "$operationName:  ${e.toString()}",
     );
   } else if (e is PlatformException) {
@@ -350,20 +364,23 @@ ResponseData handleGenericError(dynamic e, String operationName) {
         e.message?.contains('NETWORK_ERROR') == true) {
       return ResponseData(
         data: null,
-        userFriendlyError: "$operationName Error de conexión a Internet",
+        userFriendlyError: _translationProvider.trParams(
+            "utils.errors.network_error", {"operation": operationName}),
         error: "$operationName: Network error (Google Sign-In)",
       );
     }
     // Otros errores de PlatformException
     return ResponseData(
       data: null,
-      userFriendlyError: "$operationName Error en el servicio",
+      userFriendlyError: _translationProvider
+          .trParams("utils.errors.service_error", {"operation": operationName}),
       error: "$operationName: ${e.code} - ${e.message}",
     );
   } else {
     return ResponseData(
         data: null,
-        userFriendlyError: "$operationName Error inesperado",
+        userFriendlyError: _translationProvider
+            .trParams("utils.errors.unexpected", {"operation": operationName}),
         error: "$operationName: ${e.toString()}");
   }
 }

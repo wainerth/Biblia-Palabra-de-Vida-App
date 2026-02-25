@@ -1,6 +1,8 @@
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/services/audio_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -16,14 +18,10 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
+  final _translationProvider = AppTranslationProvider();
   LoginUser? userData;
   late AudioService _audioService;
-  final options = [
-    {"option": "A", "color": "A8A1E7"},
-    {"option": "B", "color": "C3F0F9"},
-    {"option": "C", "color": "E1D8D8"},
-    {"option": "D", "color": "A8B9F1"}
-  ];
+  final options = AppConstants.listOption;
   bool showError = false;
   List<Question> questions = [];
   List currentAnswers = [];
@@ -90,7 +88,7 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
         backgroundColor: StyleColor.turquoise,
         title: Text(
-          'Prueba de Conocimientos',
+          _translationProvider.tr('quiz_screen.title'),
           style: StylesApp(context)
               .textStyleBody16
               .copyWith(color: StyleColor.white),
@@ -116,7 +114,7 @@ class _QuizScreenState extends State<QuizScreen> {
           children: [
             SizedBox(height: isTablet ? 20.0 : 0),
             Text(
-              "Selecciona la dificultad",
+              _translationProvider.tr('quiz_screen.difficulty_selection.title'),
               style: isTablet
                   ? StylesApp(context).textStyleBody24.copyWith(
                         color: StyleColor.black,
@@ -128,11 +126,20 @@ class _QuizScreenState extends State<QuizScreen> {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: isTablet ? 40.0 : 20.0),
-            _buildDifficultyButton("Fácil", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr('quiz_screen.difficulty_selection.easy'),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
-            _buildDifficultyButton("Medio", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr('quiz_screen.difficulty_selection.medium'),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
-            _buildDifficultyButton("Difícil", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr('quiz_screen.difficulty_selection.hard'),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 40.0 : 15),
           ],
         ),
@@ -214,7 +221,7 @@ class _QuizScreenState extends State<QuizScreen> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text(
-              "Oportunidades: ",
+              _translationProvider.tr("quiz_screen.game_play.opportunities"),
               style: StylesApp(context)
                   .textStyleBody10
                   .copyWith(color: StyleColor.grayMedium),
@@ -355,11 +362,11 @@ class _QuizScreenState extends State<QuizScreen> {
             padding: EdgeInsets.all(20.0),
             margin: EdgeInsets.only(bottom: 20.0),
             decoration: BoxDecoration(
-              color: StyleColor.cosmicBlue.withOpacity(0.1),
+              color: StyleColor.cosmicBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: Offset(0, 4),
                 ),
@@ -373,13 +380,13 @@ class _QuizScreenState extends State<QuizScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Progreso",
+                      _translationProvider.tr("quiz_screen.game_play.progress"),
                       style: StylesApp(context)
                           .textStyleBody14
                           .copyWith(color: StyleColor.grayDark),
                     ),
                     SizedBox(height: 4),
-                    Container(
+                    SizedBox(
                       width: 200,
                       child: LinearProgressIndicator(
                         borderRadius: BorderRadius.circular(8.0),
@@ -407,7 +414,8 @@ class _QuizScreenState extends State<QuizScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      "Oportunidades",
+                      _translationProvider
+                          .tr("quiz_screen.game_play.opportunities"),
                       style: StylesApp(context)
                           .textStyleBody14
                           .copyWith(color: StyleColor.grayDark),
@@ -459,7 +467,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       borderRadius: BorderRadius.circular(16.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.25),
+                          color: Colors.black.withValues(alpha: 0.25),
                           offset: Offset(0.0, 6.0),
                           blurRadius: 12.0,
                         ),
@@ -494,13 +502,15 @@ class _QuizScreenState extends State<QuizScreen> {
                               vertical: 8.0,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                             child: Text(
                               currentQuestion.isOrdering
-                                  ? "Pregunta de Ordenamiento"
-                                  : "Pregunta de Selección",
+                                  ? _translationProvider.tr(
+                                      "quiz_screen.game_play.ordering_question")
+                                  : _translationProvider.tr(
+                                      "quiz_screen.game_play.selection_question"),
                               style:
                                   StylesApp(context).textStyleBody14.copyWith(
                                         color: Colors.white,
@@ -523,7 +533,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       borderRadius: BorderRadius.circular(16.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 12,
                           offset: Offset(0, 6),
                         ),
@@ -538,8 +548,8 @@ class _QuizScreenState extends State<QuizScreen> {
                           margin: EdgeInsets.only(bottom: 20.0),
                           decoration: BoxDecoration(
                             color: currentQuestion.isOrdering
-                                ? StyleColor.turquoise.withOpacity(0.1)
-                                : StyleColor.orange.withOpacity(0.1),
+                                ? StyleColor.turquoise.withValues(alpha: 0.1)
+                                : StyleColor.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12.0),
                             border: Border.all(
                               color: currentQuestion.isOrdering
@@ -563,8 +573,10 @@ class _QuizScreenState extends State<QuizScreen> {
                               SizedBox(width: 12),
                               Text(
                                 currentQuestion.isOrdering
-                                    ? "Ordena las opciones correctamente"
-                                    : "Selecciona la respuesta correcta",
+                                    ? _translationProvider.tr(
+                                        "quiz_screen.game_play.ordering_instruction")
+                                    : _translationProvider.tr(
+                                        "quiz_screen.game_play.selection_instruction"),
                                 style:
                                     StylesApp(context).textStyleBody16.copyWith(
                                           color: Colors.black,
@@ -710,7 +722,11 @@ class _QuizScreenState extends State<QuizScreen> {
                   ),
                   SizedBox(width: 8),
                   Text(
-                    _isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!',
+                    _isCorrect
+                        ? _translationProvider
+                            .tr("quiz_screen.snackbar.correct")
+                        : _translationProvider
+                            .tr("quiz_screen.snackbar.incorrect"),
                     style: StylesApp(context).textStyleBody12,
                   ),
                 ],
@@ -722,7 +738,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   await funcAnswerValidate();
                 },
                 child: Text(
-                  'Siguiente',
+                  _translationProvider.tr("quiz_screen.game_play.next"),
                   style: StylesApp(context)
                       .textStyleBody12
                       .copyWith(color: Colors.white),
@@ -795,9 +811,11 @@ class _QuizScreenState extends State<QuizScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('¡Oportunidades Agotadas!'),
-        content: const Text(
-            'Haz Fallado Los Intentos Permitidos. ¿Quieres intentarlo de nuevo?'),
+        title: Text(_translationProvider
+            .tr("quiz_screen.failed_attempts_dialog.title")),
+        content: Text(
+          _translationProvider.tr("quiz_screen.failed_attempts_dialog.message"),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -818,7 +836,8 @@ class _QuizScreenState extends State<QuizScreen> {
               currentAnswers = [];
               currentIndex = 0;
             },
-            child: const Text('Jugar de nuevo'),
+            child: Text(_translationProvider
+                .tr("quiz_screen.failed_attempts_dialog.play_again")),
           ),
         ],
       ),
@@ -843,11 +862,13 @@ class _QuizScreenState extends State<QuizScreen> {
         await showCustomDialogWithAction(context,
             message: responseSaveResult.error!,
             dialogType: DialogTypeAction.error,
-            buttonOk: "Volver",
+            buttonOk:
+                _translationProvider.tr("quiz_screen.load_error_dialog.back"),
             actionCallbackOk: () {
               Navigator.pop(context);
             },
-            textButton: "Reintentar",
+            textButton:
+                _translationProvider.tr("quiz_screen.load_error_dialog.retry"),
             actionCallback: () {
               _showDialogFinallyPlay();
             });
@@ -861,11 +882,13 @@ class _QuizScreenState extends State<QuizScreen> {
         await showCustomDialogWithAction(context,
             message: responseSaveResult.error!,
             dialogType: DialogTypeAction.error,
-            buttonOk: "Volver",
+            buttonOk:
+                _translationProvider.tr("quiz_screen.load_error_dialog.back"),
             actionCallbackOk: () {
               Navigator.pop(context);
             },
-            textButton: "Reintentar",
+            textButton:
+                _translationProvider.tr("quiz_screen.load_error_dialog.retry"),
             actionCallback: () {
               _showDialogFinallyPlay();
             });
@@ -888,13 +911,21 @@ class _QuizScreenState extends State<QuizScreen> {
                     .copyWith(color: StyleColor.black),
               ),
               Text(
-                  "Categoría:  ${infoResult.message.category} Dificultad: ${infoResult.message.difficulty}"),
-              Text("Puntaje obtenido:  ${infoResult.score}")
+                "${_translationProvider.trParams("quiz_screen.result_dialog.category", {
+                      "category": infoResult.message.category!,
+                    })} ${_translationProvider.trParams("quiz_screen.result_dialog.difficulty", {
+                      "difficulty": infoResult.message.difficulty!,
+                    })}",
+              ),
+              Text(_translationProvider
+                  .trParams("quiz_screen.result_dialog.score", {
+                "category": infoResult.score.toString(),
+              }))
             ],
           ),
           actions: [
             ButtonThemeWidget(
-              text: "Jugar de nuevo",
+              text: _translationProvider.tr("quiz_screen.result_dialog.play_again"),
               buttonStyle: StylesApp(context).btnWidgetSmall,
               onPressed: () {
                 Navigator.pop(context);
@@ -913,11 +944,11 @@ class _QuizScreenState extends State<QuizScreen> {
       await showCustomDialogWithAction(context,
           message: e.toString(),
           dialogType: DialogTypeAction.error,
-          buttonOk: "Volver",
+          buttonOk: _translationProvider.tr("quiz_screen.error_dialog.back"),
           actionCallbackOk: () {
             Navigator.pop(context);
           },
-          textButton: "Reintentar",
+          textButton: _translationProvider.tr("quiz_screen.error_dialog.retry"),
           actionCallback: () {
             _showDialogFinallyPlay();
           });
@@ -927,28 +958,26 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Color _getDifficultyColor(String level) {
-    switch (level) {
-      case "Fácil":
-        return StyleColor.greenDark;
-      case "Medio":
-        return StyleColor.orange;
-      case "Difícil":
-        return StyleColor.redDark;
-      default:
-        return StyleColor.black;
+    if(_translationProvider.tr('quiz_screen.difficulty_selection.easy') == level){
+      return StyleColor.greenDark;
+    } else if(_translationProvider.tr('quiz_screen.difficulty_selection.medium') == level){
+      return StyleColor.orange;
+    } else if(_translationProvider.tr('quiz_screen.difficulty_selection.hard') == level){
+      return StyleColor.redDark;
+    } else {
+      return StyleColor.greenDark;
     }
   }
 
   String _getDifficultyCharacter(String level) {
-    switch (level) {
-      case "Fácil":
-        return 'F';
-      case "Medio":
-        return 'I';
-      case "Difícil":
-        return 'D';
-      default:
-        return 'F';
+    if(_translationProvider.tr('quiz_screen.difficulty_selection.easy') == level){
+      return 'F';
+    } else if(_translationProvider.tr('quiz_screen.difficulty_selection.medium') == level){
+      return 'I';
+    } else if(_translationProvider.tr('quiz_screen.difficulty_selection.hard') == level){
+      return 'D';
+    } else {
+      return 'F';
     }
   }
 }

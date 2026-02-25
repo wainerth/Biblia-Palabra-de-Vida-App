@@ -24,6 +24,8 @@ class ReddleScreen extends StatefulWidget {
 }
 
 class _ReddleScreenState extends State<ReddleScreen> {
+  // variable que contiene las traducciones de esta pantalla
+  final _translationProvider = AppTranslationProvider();
   String difficulty = '';
   // Datos del juego
   List<GuessCharacter> personajes = [];
@@ -83,7 +85,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
         LoadingService().hideLoading();
         if (mounted) {
           await showCustomDialogWithAction(context,
-              message: "No hay personajes disponibles para esta dificultad",
+              message:
+                  _translationProvider.tr("quiz_screen.errors.no_characters"),
               dialogType: DialogTypeAction.info,
               buttonOk: "Ok", actionCallbackOk: () {
             Navigator.pop(context);
@@ -96,15 +99,14 @@ class _ReddleScreenState extends State<ReddleScreen> {
       }
     } catch (e) {
       LoadingService().hideLoading();
-        if (mounted) {
-
-      await showCustomDialogWithAction(context,
-          message: e.toString(),
-          dialogType: DialogTypeAction.error,
-          buttonOk: "Ok", actionCallbackOk: () {
-        Navigator.pop(context);
-      });
-        }
+      if (mounted) {
+        await showCustomDialogWithAction(context,
+            message: e.toString(),
+            dialogType: DialogTypeAction.error,
+            buttonOk: "Ok", actionCallbackOk: () {
+          Navigator.pop(context);
+        });
+      }
       setState(() {
         difficulty = '';
       });
@@ -176,7 +178,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
         ),
         backgroundColor: StyleColor.turquoise,
         title: Text(
-          'Adivinanza',
+          _translationProvider.tr("quiz_screen.title"),
           style: StylesApp(context)
               .textStyleBody16
               .copyWith(color: StyleColor.white),
@@ -202,7 +204,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
           children: [
             SizedBox(height: isTablet ? 20.0 : 0),
             Text(
-              "Selecciona la dificultad",
+              _translationProvider.tr("quiz_screen.difficulty_selection.title"),
               style: isTablet
                   ? StylesApp(context).textStyleBody24.copyWith(
                         color: StyleColor.black,
@@ -214,11 +216,20 @@ class _ReddleScreenState extends State<ReddleScreen> {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: isTablet ? 40.0 : 20.0),
-            _buildDifficultyButton("Fácil", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr("quiz_screen.difficulty_selection.easy"),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
-            _buildDifficultyButton("Medio", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr("quiz_screen.difficulty_selection.medium"),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
-            _buildDifficultyButton("Difícil", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr("quiz_screen.difficulty_selection.hard"),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 40.0 : 15),
           ],
         ),
@@ -313,14 +324,17 @@ class _ReddleScreenState extends State<ReddleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Adivinanza Bíblica",
+                      _translationProvider
+                          .tr("quiz_screen.game_play.header.title"),
                       style: StylesApp(context).textStyleBody20.copyWith(
                             color: StyleColor.black,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
                     Text(
-                      "Dificultad: $difficulty",
+                      _translationProvider.trParams(
+                          "quiz_screen.game_play.header.difficulty",
+                          {"difficulty": difficulty}),
                       style: StylesApp(context)
                           .textStyleBody14
                           .copyWith(color: StyleColor.grayDark),
@@ -331,7 +345,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      "Oportunidades",
+                      _translationProvider
+                          .tr("quiz_screen.game_play.header.opportunities"),
                       style: StylesApp(context)
                           .textStyleBody14
                           .copyWith(color: StyleColor.grayDark),
@@ -397,14 +412,16 @@ class _ReddleScreenState extends State<ReddleScreen> {
                             padding: EdgeInsets.all(12.0),
                             margin: EdgeInsets.only(bottom: 16.0),
                             decoration: BoxDecoration(
-                              color: StyleColor.turquoise.withValues(alpha: 0.1),
+                              color:
+                                  StyleColor.turquoise.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "Progreso: ",
+                                  _translationProvider.tr(
+                                      "quiz_screen.game_play.header.progress"),
                                   style: StylesApp(context)
                                       .textStyleBody15
                                       .copyWith(
@@ -462,7 +479,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
 
                           // Título y pregunta
                           Text(
-                            '¿Quién es este personaje?',
+                            _translationProvider
+                                .tr("quiz_screen.game_play.question"),
                             style: StylesApp(context).textStyleBody20.copyWith(
                                   color: StyleColor.black,
                                   fontWeight: FontWeight.bold,
@@ -483,7 +501,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
                             decoration: StylesApp(context)
                                 .inputDecorationOutlineStyle
                                 .copyWith(
-                                  hintText: "Ingrese el nombre del personaje",
+                                  hintText: _translationProvider
+                                      .tr("quiz_screen.game_play.input_hint"),
                                   filled: true,
                                   fillColor: Colors.white,
                                   contentPadding: EdgeInsets.all(16.0),
@@ -497,18 +516,19 @@ class _ReddleScreenState extends State<ReddleScreen> {
 
                           // Botón de verificar
                           ButtonThemeWidget(
-                            text: "Verificar Respuesta",
+                            text: _translationProvider
+                                .tr("quiz_screen.game_play.verify_button"),
                             width: double.infinity,
                             height: 50,
-                            buttonStyle: StylesApp(context)
-                                .btnWidgetSmall
-                                .copyWith(
-                                  backgroundColor: WidgetStatePropertyAll(
-                                    nameCharacter.text.isEmpty
-                                        ? StyleColor.grayMedium.withValues(alpha: 0.5)
-                                        : StyleColor.turquoise,
-                                  ),
-                                ),
+                            buttonStyle:
+                                StylesApp(context).btnWidgetSmall.copyWith(
+                                      backgroundColor: WidgetStatePropertyAll(
+                                        nameCharacter.text.isEmpty
+                                            ? StyleColor.grayMedium
+                                                .withValues(alpha: 0.5)
+                                            : StyleColor.turquoise,
+                                      ),
+                                    ),
                             disabled: nameCharacter.text.isEmpty,
                             onPressed: nameCharacter.text.isEmpty
                                 ? null
@@ -525,7 +545,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
                               padding: EdgeInsets.all(16.0),
                               decoration: BoxDecoration(
                                 color: respuestaCorrecta
-                                    ? StyleColor.greenDark.withValues(alpha: 0.1)
+                                    ? StyleColor.greenDark
+                                        .withValues(alpha: 0.1)
                                     : StyleColor.redDark.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12.0),
                                 border: Border.all(
@@ -551,8 +572,14 @@ class _ReddleScreenState extends State<ReddleScreen> {
                                   Flexible(
                                     child: Text(
                                       respuestaCorrecta
-                                          ? '¡Correcto!'
-                                          : 'Incorrecto, era ${personajeActual?.character.name}',
+                                          ? _translationProvider.tr(
+                                              "quiz_screen.game_play.feedback.correct")
+                                          : _translationProvider.trParams(
+                                              "quiz_screen.game_play.feedback.incorrect",
+                                              {
+                                                  "name": personajeActual!
+                                                      .character.name
+                                                }),
                                       style: StylesApp(context)
                                           .textStyleBody16
                                           .copyWith(
@@ -613,7 +640,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
                                 ),
                                 SizedBox(width: 12),
                                 Text(
-                                  "Pistas del Personaje",
+                                  _translationProvider
+                                      .tr("quiz_screen.game_play.clues_title"),
                                   style: StylesApp(context)
                                       .textStyleBody28
                                       .copyWith(
@@ -638,14 +666,16 @@ class _ReddleScreenState extends State<ReddleScreen> {
                           Container(
                             padding: EdgeInsets.all(16.0),
                             decoration: BoxDecoration(
-                              color: StyleColor.blueLight.withValues(alpha: 0.1),
+                              color:
+                                  StyleColor.blueLight.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Instrucciones:",
+                                  _translationProvider.tr(
+                                      "quiz_screen.game_play.instructions.title"),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -655,10 +685,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                                 ),
                                 SizedBox(height: 8),
                                 Text(
-                                  "1. Observa las pistas cuidadosamente\n"
-                                  "2. Escribe el nombre del personaje\n"
-                                  "3. Tienes 3 oportunidades\n"
-                                  "4. ¡Diviértete aprendiendo!",
+                                  "${_translationProvider.tr("quiz_screen.game_play.instructions.step1")}\n${_translationProvider.tr("quiz_screen.game_play.instructions.step2")}\n${_translationProvider.tr("quiz_screen.game_play.instructions.step3")}\n${_translationProvider.tr("quiz_screen.game_play.instructions.step4")}",
                                   style: StylesApp(context)
                                       .textStyleBody14
                                       .copyWith(
@@ -698,7 +725,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
           child: Row(
             children: [
               Text(
-                "Oportunidades: ",
+                "${_translationProvider.tr("quiz_screen.game_play.header.opportunities")}: ",
                 style: StylesApp(context)
                     .textStyleBody10
                     .copyWith(color: StyleColor.grayMedium),
@@ -731,7 +758,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
             Center(
               child: Text(
                 textAlign: TextAlign.center,
-                "¡Adivina el Personaje Bíblico!",
+                _translationProvider
+                    .tr("quiz_screen.game_play.header.mobile_title"),
                 style: StylesApp(context)
                     .textStyleBody20
                     .copyWith(color: StyleColor.black),
@@ -768,7 +796,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
             SizedBox(height: 15),
             // Pregunta
             Text(
-              '¿Quién es este personaje?',
+              _translationProvider.tr("quiz_screen.game_play.question"),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             if (personajes.isNotEmpty)
@@ -786,19 +814,24 @@ class _ReddleScreenState extends State<ReddleScreen> {
                 },
                 decoration: StylesApp(context)
                     .inputDecorationOutlineStyle
-                    .copyWith(hintText: "Ingrese Nombre del Personaje"),
+                    .copyWith(
+                        hintText: _translationProvider
+                            .tr("quiz_screen.game_play.input_hint")),
               ),
             ),
             Text(
-              'Pistas....',
+              _translationProvider.tr("quiz_screen.game_play.clues_mobile"),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             // Feedback
             if (respuestaSeleccionada != null && mostrarImagen)
               Text(
                 respuestaCorrecta
-                    ? '¡Correcto!'
-                    : 'Incorrecto, era ${personajeActual?.character.name}',
+                    ? _translationProvider
+                        .tr("quiz_screen.game_play.feedback.correct")
+                    : _translationProvider.trParams(
+                        "quiz_screen.game_play.feedback.incorrect",
+                        {"name": personajeActual!.character.name}),
                 style: TextStyle(
                   fontSize: 18,
                   color: _getColorText(),
@@ -838,7 +871,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
           padding: EdgeInsets.all(24.0),
           child: Center(
             child: Text(
-              "Cargando pistas...",
+              _translationProvider.tr("quiz_screen.game_play.loading_clues"),
               style: StylesApp(context).textStyleBody16,
             ),
           ),
@@ -938,15 +971,16 @@ class _ReddleScreenState extends State<ReddleScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('¡Oportunidades Agotadas!'),
+        title: Text(_translationProvider
+            .tr("quiz_screen.failed_attempts_dialog.title")),
         content: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: isTablet ? 500 : double.infinity,
             maxHeight:
                 isTablet ? 450 : MediaQuery.of(context).size.height * 0.5,
           ),
-          child: const Text(
-              'Haz Fallado Los Intentos Permitidos. ¿Quieres intentarlo de nuevo?'),
+          child: Text(_translationProvider
+              .tr("quiz_screen.failed_attempts_dialog.message")),
         ),
         actions: [
           TextButton(
@@ -961,7 +995,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
                 respuestaSeleccionada = '';
               });
             },
-            child: const Text('Jugar de nuevo'),
+            child: Text(_translationProvider
+                .tr("quiz_screen.failed_attempts_dialog.play_again")),
           ),
         ],
       ),
@@ -989,11 +1024,13 @@ class _ReddleScreenState extends State<ReddleScreen> {
           await showCustomDialogWithAction(context,
               message: responseSaveResult.error!,
               dialogType: DialogTypeAction.error,
-              buttonOk: "Volver",
+              buttonOk:
+                  _translationProvider.tr("quiz_screen.load_error_dialog.back"),
               actionCallbackOk: () {
                 Navigator.pop(context);
               },
-              textButton: "Reintentar",
+              textButton: _translationProvider
+                  .tr("quiz_screen.load_load_error_dialog.retry"),
               actionCallback: () {
                 _showDialogFinallyPlay();
               });
@@ -1009,11 +1046,13 @@ class _ReddleScreenState extends State<ReddleScreen> {
           await showCustomDialogWithAction(context,
               message: responseSaveResult.error!,
               dialogType: DialogTypeAction.error,
-              buttonOk: "Volver",
+              buttonOk:
+                  _translationProvider.tr("quiz_screen.load_error_dialog.back"),
               actionCallbackOk: () {
                 Navigator.pop(context);
               },
-              textButton: "Reintentar",
+              textButton: _translationProvider
+                  .tr("quiz_screen.load_error_dialog.retry"),
               actionCallback: () {
                 _showDialogFinallyPlay();
               });
@@ -1043,14 +1082,22 @@ class _ReddleScreenState extends State<ReddleScreen> {
                         .copyWith(color: StyleColor.black),
                   ),
                   Text(
-                      "Categoría:  ${infoResult.message.category} Dificultad: ${infoResult.message.difficulty}"),
-                  Text("Puntaje obtenido:  ${infoResult.score}")
+                      "${_translationProvider.trParams("quiz_screen.result_dialog.category", {
+                        "category": infoResult.message.category!,
+                      })} ${_translationProvider.trParams("quiz_screen.result_dialog.difficulty", {
+                        "difficulty": infoResult.message.difficulty!,
+                      })}"),
+                  Text(_translationProvider
+                      .trParams("quiz_screen.result_dialog.score", {
+                    "score": infoResult.score.toString(),
+                  }))
                 ],
               ),
             ),
             actions: [
               ButtonThemeWidget(
-                text: "Jugar de nuevo",
+                text: _translationProvider
+                    .tr("quiz_screen.result_dialog.play_again"),
                 buttonStyle: StylesApp(context).btnWidgetSmall,
                 onPressed: () {
                   Navigator.pop(context);
@@ -1074,11 +1121,13 @@ class _ReddleScreenState extends State<ReddleScreen> {
         await showCustomDialogWithAction(context,
             message: e.toString(),
             dialogType: DialogTypeAction.error,
-            buttonOk: "Volver",
+            buttonOk:
+                _translationProvider.tr("quiz_screen.load_error_dialog.back"),
             actionCallbackOk: () {
               Navigator.pop(context);
             },
-            textButton: "Reintentar",
+            textButton:
+                _translationProvider.tr("quiz_screen.load_error_dialog.retry"),
             actionCallback: () {
               _showDialogFinallyPlay();
             });
@@ -1098,28 +1147,36 @@ class _ReddleScreenState extends State<ReddleScreen> {
   }
 
   Color _getDifficultyColor(String level) {
-    switch (level) {
-      case "Fácil":
-        return StyleColor.greenDark;
-      case "Medio":
-        return StyleColor.orange;
-      case "Difícil":
-        return StyleColor.redDark;
-      default:
-        return StyleColor.black;
+    if (_translationProvider.tr('quiz_screen.difficulty_selection.easy') ==
+        level) {
+      return StyleColor.greenDark;
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.medium') ==
+        level) {
+      return StyleColor.orange;
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.hard') ==
+        level) {
+      return StyleColor.redDark;
+    } else {
+      return StyleColor.black;
     }
   }
 
   String _getDifficultyCharacter(String level) {
-    switch (level) {
-      case "Fácil":
-        return 'F';
-      case "Medio":
-        return 'I';
-      case "Difícil":
-        return 'D';
-      default:
-        return 'F';
+    if (_translationProvider.tr('quiz_screen.difficulty_selection.easy') ==
+        level) {
+      return 'F';
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.medium') ==
+        level) {
+      return 'I';
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.hard') ==
+        level) {
+      return 'D';
+    } else {
+      return 'F';
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -28,7 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             children: [
               HeadScreenNotAvatar(
-                title:'settings.settings',
+                title: 'settings.settings',
                 onRoute: () {
                   Navigator.pushNamed(context, "/layoutPage");
                 },
@@ -41,9 +42,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                         path: 'settings.language',
                         trailingText: translationProvider.currentLanguageName,
-                        onTap: () {
-                          _showLanguageDialog(context);
-                        },
+                        onTap: ()=> _showLanguageDialog(context),
+                        // GraphQLConfig.development
+                        //     ? () => _showLanguageDialog(context)
+                        //     : () {},
                       ),
                       _buildSettingsItem(
                         context,

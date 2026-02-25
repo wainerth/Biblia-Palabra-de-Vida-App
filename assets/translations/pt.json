@@ -666,6 +666,268 @@
             "error_filter": "erro ao filtrar"
         }
     },
+    "preach_screen": {
+        "title": "Pregações",
+        "tabs": {
+            "message": "Mensagem",
+            "preacher": "Pregador",
+            "favorites": "Favoritas"
+        },
+        "search": {
+            "placeholder_message": "Buscar por mensagem...",
+            "placeholder_preacher": "Buscar por pregador...",
+            "placeholder_favorites": "Buscar nos favoritos...",
+            "hint": "Buscar"
+        },
+        "categories_title": "Categorias",
+        "empty_favorites": "Você não tem pregações favoritas",
+        "messages": {
+            "error_occurred": "Ocorreu um erro:",
+            "loading": "Carregando pregações..."
+        },
+        "card": {
+            "references": "ref."
+        },
+        "month_names": {
+            "1": "Janeiro",
+            "2": "Fevereiro",
+            "3": "Março",
+            "4": "Abril",
+            "5": "Maio",
+            "6": "Junho",
+            "7": "Julho",
+            "8": "Agosto",
+            "9": "Setembro",
+            "10": "Outubro",
+            "11": "Novembro",
+            "12": "Dezembro"
+        }
+    },
+    "video_player_screen": {
+        "title": "Pregações",
+        "tablet_title": "Reprodutor de Pregação",
+        "references": "Referências",
+        "playing": "Reproduzindo",
+        "tablet": {
+            "references_header": "Referências Bíblicas",
+            "preaching_info": "Informações da Pregação",
+            "title": "Título:",
+            "preacher": "Pregador:",
+            "date": "Data:"
+        },
+        "reference_modal": {
+            "copy": "Copiar",
+            "share": "Compartilhar",
+            "close": "Fechar",
+            "read_more": "Ler Mais",
+            "chapter_verse": "{{capítulo}}:{{versículo}}"
+        },
+        "messages": {
+            "copied": "Texto copiado para a área de transferência",
+            "share_subject": "Versículo de {{livro}}"
+        }
+    },
+    "utils": {
+        "baptized": {
+            "yes": "Batizado",
+            "no": "Não Batizado"
+        },
+        "copy": {
+            "chapter_success": "O capítulo {{capítulo}} do livro {{livro}}\nfoi copiado com sucesso para a área de transferência",
+            "verse_success": "O versículo {{capítulo}}:{{versículo}} do livro {{livro}}\nfoi copiado com sucesso para a área de transferência"
+        },
+        "share": {
+            "subject": "Palavra de Vida - {{capítulo}} {{livro}}",
+            "see_in": "Ver em: {{baseUrl}}"
+        },
+        "errors": {
+            "timeout": "{{operação}} solicitação expirada",
+            "no_internet": "{{operação}} Sem conexão com a Internet",
+            "invalid_format": "{{operação}} Formato de dados inválido",
+            "network_error": "{{operação}} Erro de conexão com a Internet",
+            "service_error": "{{operação}} Erro de serviço",
+            "unexpected": "{{operação}} Erro inesperado"
+        }
+    },
+    "promises_screen": {
+        "title": "Promessas",
+        "stats": {
+            "energy": "{{energia}}",
+            "streak": "Sequência:",
+            "days": "dias",
+            "remaining": "{{restantes}} de {{total}} para abrir"
+        },
+        "promise_card": {
+            "open": "Abra sua promessa!",
+            "default_description": "Descubra sua promessa"
+        },
+        "messages": {
+            "empty": "Nenhuma promessa disponível",
+            "update": "As promessas serão atualizadas a cada 24 horas",
+            "loading": "Carregando promessas...",
+            "error": "Ocorreu um erro: {{erro}}"
+        }
+    },
+    "promises_texts": {
+        "0": "Que segredo este versículo esconde que pode mudar sua vida?",
+        "1": "Descubra a força que transforma vidas e embarque em uma jornada espiritual",
+        "2": "Permita que a sabedoria o inspire a viver uma vida autêntica e compassiva",
+        "3": "Embarque em uma jornada que o levará a descobrir as profundezas da sua alma",
+        "4": "Você encontrará a força interior necessária para encontrar consolo em sua vida",
+        "5": "Cada verso é uma semente que pode florescer em seu coração",
+        "6": "Conecte-se com a fonte de toda sabedoria e encontre a paz que tanto anseia",
+        "7": "Descubra o tesouro escondido em cada palavra",
+        "8": "Permita que a sabedoria dos antigos mestres o guie",
+        "9": "Abra sua mente e seu coração às infinitas possibilidades que a palavra oferece",
+        "10": "Descubra a beleza da simplicidade e a profundidade da fé",
+        "11": "As palavras têm o poder de curar, inspirar e transformar",
+        "12": "Permita que essas verdades eternas transformem enormemente seu coração",
+        "13": "Cada verso é um presente que o convida a crescer como pessoa",
+        "14": "Conecte-se com a fonte de toda sabedoria e encontre a paz que tanto anseia",
+        "15": "Cada palavra é uma peça que o ajudará a compreender seu lugar no mundo."
+    },
+    "play_screen": {
+        "title": "Jogos",
+        "games": {
+            "memory": {
+                "title": "Memória",
+                "description": "Quão boa é sua memória visual? Neste jogo, você terá que encontrar pares de imagens que têm várias representações relacionadas à Bíblia. Aguçe sua visão e sua memória!"
+            },
+            "riddle": {
+                "title": "Adivinha",
+                "description": "Você é um detetive da Bíblia? Use sua inteligência e conhecimento bíblico para decifrar as pistas e descobrir quem é o personagem escondido. Prepare-se para um desafio muito emocionante!"
+            },
+            "quiz": {
+                "title": "Quiz",
+                "description": "Você é um especialista na Bíblia? Neste jogo, você pode provar isso respondendo a perguntas de diferentes categorias e níveis de dificuldade. Aceite o desafio e aprenda mais sobre a Palavra de Deus!"
+            }
+        },
+        "button": "Vamos!"
+    },
+    "memory_screen": {
+        "title": "Memória",
+        "difficulty_selection": {
+            "title": "Selecione a dificuldade",
+            "easy": "Fácil",
+            "medium": "Médio",
+            "hard": "Difícil"
+        },
+        "game_play": {
+            "title": "Memória Bíblica",
+            "subtitle": "Encontre os pares para ganhar!",
+            "difficulty_label": "Dificuldade",
+            "time_label": "Tempo",
+            "time_remaining": "Tempo restante",
+            "stats": {
+                "found": "Cartas encontradas:",
+                "total": "Total de pares:"
+            },
+            "instructions": "Clique nas cartas para encontrar os pares",
+            "change_difficulty": "Mudar dificuldade"
+        },
+        "time_up_dialog": {
+            "title": "Tempo esgotado!",
+            "message": "O tempo acabou. Quer tentar novamente?",
+            "play_again": "Jogar novamente"
+        },
+        "result_dialog": {
+            "difficulty": "Dificuldade: {{dificuldade}}",
+            "score": "Pontuação obtida: {{pontuação}}",
+            "play_again": "Jogar novamente"
+        },
+        "load_error_dialog": {
+            "retry": "Tentar novamente",
+            "back": "Voltar"
+        }
+    },
+    "quiz_screen": {
+        "title": "Teste de Conhecimentos",
+        "difficulty_selection": {
+            "title": "Selecione a dificuldade",
+            "easy": "Fácil",
+            "medium": "Médio",
+            "hard": "Difícil"
+        },
+        "game_play": {
+            "opportunities": "Oportunidades",
+            "progress": "Progresso",
+            "ordering_question": "Pergunta de Ordenação",
+            "selection_question": "Pergunta de Seleção",
+            "ordering_instruction": "Organize as opções corretamente",
+            "selection_instruction": "Selecione a resposta correta",
+            "next": "Próximo",
+            "correct": "Muito bem!",
+            "incorrect": "Oh, desculpe!"
+        },
+        "snackbar": {
+            "correct": "Muito bem!",
+            "incorrect": "Oh, desculpe!"
+        },
+        "failed_attempts_dialog": {
+            "title": "Oportunidades Esgotadas!",
+            "message": "Você falhou as tentativas permitidas. Quer tentar novamente?",
+            "play_again": "Jogar novamente"
+        },
+        "result_dialog": {
+            "category": "Categoria: {{category}}",
+            "difficulty": "Dificuldade: {{dificuldade}}",
+            "score": "Pontuação obtida: {{pontuação}}",
+            "play_again": "Jogar novamente"
+        },
+        "load_error_dialog": {
+            "retry": "Tentar novamente",
+            "back": "Voltar"
+        }
+    },
+    "reddle_screen": {
+        "title": "Adivinha",
+        "difficulty_selection": {
+            "title": "Selecione a dificuldade",
+            "easy": "Fácil",
+            "medium": "Médio",
+            "hard": "Difícil"
+        },
+        "game_play": {
+            "header": {
+                "title": "Adivinha Bíblica",
+                "difficulty": "Dificuldade: {{dificuldade}}",
+                "opportunities": "Oportunidades",
+                "progress": "Progresso:"
+            },
+            "question": "Quem é este personagem?",
+            "input_hint": "Digite o nome do personagem",
+            "verify_button": "Verificar Resposta",
+            "feedback": {
+                "correct": "Correto!",
+                "incorrect": "Incorreto, era {{name}}"
+            },
+            "clues_title": "Pistas do Personagem",
+            "instructions": {
+                "title": "Instruções:",
+                "step1": "1. Observe as pistas cuidadosamente",
+                "step2": "2. Escreva o nome do personagem",
+                "step3": "3. Você tem 3 oportunidades",
+                "step4": "4. Divirta-se aprendendo!"
+            },
+            "loading_clues": "Carregando pistas...",
+            "mobile_title": "Adivinhe o Personagem Bíblico!",
+            "clues_mobile": "Pistas...."
+        },
+        "errors": {
+            "no_characters": "Não há personagens disponíveis para esta dificuldade"
+        },
+        "failed_attempts_dialog": {
+            "title": "Oportunidades Esgotadas!",
+            "message": "Você falhou as tentativas permitidas. Quer tentar novamente?",
+            "play_again": "Jogar novamente"
+        },
+        "result_dialog": {
+            "category": "Categoria: {{category}}",
+            "difficulty": "Dificuldade: {{dificuldade}}",
+            "score": "Pontuação obtida: {{pontuação}}",
+            "play_again": "Jogar novamente"
+        }
+    },
     "workspace": {
         "title": "Início",
         "notifications": "Notificações",

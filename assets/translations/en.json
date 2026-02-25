@@ -666,6 +666,268 @@
             "error_filter": "error filtering"
         }
     },
+    "preach_screen": {
+        "title": "Preachings",
+        "tabs": {
+            "message": "Message",
+            "preacher": "Preacher",
+            "favorites": "Favorites"
+        },
+        "search": {
+            "placeholder_message": "Search by message...",
+            "placeholder_preacher": "Search by preacher...",
+            "placeholder_favorites": "Search in favorites...",
+            "hint": "Search"
+        },
+        "categories_title": "Categories",
+        "empty_favorites": "You have no favorite preachings",
+        "messages": {
+            "error_occurred": "An error occurred:",
+            "loading": "Loading preachings..."
+        },
+        "card": {
+            "references": "ref."
+        },
+        "month_names": {
+            "1": "January",
+            "2": "February",
+            "3": "March",
+            "4": "April",
+            "5": "May",
+            "6": "June",
+            "7": "July",
+            "8": "August",
+            "9": "September",
+            "10": "October",
+            "11": "November",
+            "12": "December"
+        }
+    },
+    "video_player_screen": {
+        "title": "Preachings",
+        "tablet_title": "Preaching Player",
+        "references": "References",
+        "playing": "Playing",
+        "tablet": {
+            "references_header": "Bible References",
+            "preaching_info": "Preaching Information",
+            "title": "Title:",
+            "preacher": "Preacher:",
+            "date": "Date:"
+        },
+        "reference_modal": {
+            "copy": "Copy",
+            "share": "Share",
+            "close": "Close",
+            "read_more": "Read More",
+            "chapter_verse": "{{chapter}}:{{verse}}"
+        },
+        "messages": {
+            "copied": "Text copied to clipboard",
+            "share_subject": "Verse from {{book}}"
+        }
+    },
+    "utils": {
+        "baptized": {
+            "yes": "Baptized",
+            "no": "Not Baptized"
+        },
+        "copy": {
+            "chapter_success": "Chapter {{chapter}} of the book {{book}}\nhas been successfully copied to clipboard",
+            "verse_success": "Verse {{chapter}}:{{verse}} of the book {{book}}\nhas been successfully copied to clipboard"
+        },
+        "share": {
+            "subject": "Word of Life - {{chapter}} {{book}}",
+            "see_in": "View at: {{baseUrl}}"
+        },
+        "errors": {
+            "timeout": "{{operation}} request timed out",
+            "no_internet": "{{operation}} No internet connection",
+            "invalid_format": "{{operation}} Invalid data format",
+            "network_error": "{{operation}} Internet connection error",
+            "service_error": "{{operation}} Service error",
+            "unexpected": "{{operation}} Unexpected error"
+        }
+    },
+    "promises_screen": {
+        "title": "Promises",
+        "stats": {
+            "energy": "{{energy}}",
+            "streak": "Streak:",
+            "days": "days",
+            "remaining": "{{remaining}} of {{total}} to open"
+        },
+        "promise_card": {
+            "open": "Open your promise!",
+            "default_description": "Discover your promise"
+        },
+        "messages": {
+            "empty": "No promises available",
+            "update": "Promises will be updated every 24 hours",
+            "loading": "Loading promises...",
+            "error": "An error occurred: {{error}}"
+        }
+    },
+    "promises_texts": {
+        "0": "What secret does this verse hold that could change your life?",
+        "1": "Discover the strength that transforms lives and embark on a spiritual journey",
+        "2": "Allow wisdom to inspire you to live an authentic and compassionate life",
+        "3": "Embark on a journey that will lead you to discover the depths of your soul",
+        "4": "You will find the inner strength needed to find comfort in your life",
+        "5": "Each verse is a seed that can bloom in your heart",
+        "6": "Connect with the source of all wisdom and find the peace you long for",
+        "7": "Discover the hidden treasure found in every word",
+        "8": "Allow the wisdom of ancient masters to guide you",
+        "9": "Open your mind and heart to the infinite possibilities that the word offers you",
+        "10": "Discover the beauty of simplicity and the depth of faith",
+        "11": "Words have the power to heal, inspire and transform",
+        "12": "Allow these eternal truths to greatly transform your heart",
+        "13": "Each verse is a gift that invites you to grow as a person",
+        "14": "Connect with the source of all wisdom and find the peace you long for",
+        "15": "Each word is a piece that will help you understand your place in the world."
+    },
+    "play_screen": {
+        "title": "Games",
+        "games": {
+            "memory": {
+                "title": "Memory",
+                "description": "How good is your visual memory? In this game you will have to find pairs of images that have various representations related to the Bible. Sharpen your sight and your memory!"
+            },
+            "riddle": {
+                "title": "Riddle",
+                "description": "Are you a Bible detective? Use your wit and biblical knowledge to decipher the clues and discover who the hidden character is. Get ready for a very exciting challenge!"
+            },
+            "quiz": {
+                "title": "Quiz",
+                "description": "Are you an expert in the Bible? In this game you can prove it by answering questions from different categories and difficulty levels. Accept the challenge and learn more about the Word of God!"
+            }
+        },
+        "button": "Let's go!"
+    },
+    "memory_screen": {
+        "title": "Memory",
+        "difficulty_selection": {
+            "title": "Select difficulty",
+            "easy": "Easy",
+            "medium": "Medium",
+            "hard": "Hard"
+        },
+        "game_play": {
+            "title": "Bible Memory",
+            "subtitle": "Find the pairs to win!",
+            "difficulty_label": "Difficulty",
+            "time_label": "Time",
+            "time_remaining": "Time remaining",
+            "stats": {
+                "found": "Cards found:",
+                "total": "Total pairs:"
+            },
+            "instructions": "Click on the cards to find the pairs",
+            "change_difficulty": "Change difficulty"
+        },
+        "time_up_dialog": {
+            "title": "Time's up!",
+            "message": "Time is over. Do you want to try again?",
+            "play_again": "Play again"
+        },
+        "result_dialog": {
+            "difficulty": "Difficulty: {{difficulty}}",
+            "score": "Score obtained: {{score}}",
+            "play_again": "Play again"
+        },
+        "load_error_dialog": {
+            "retry": "Retry",
+            "back": "Back"
+        }
+    },
+    "quiz_screen": {
+        "title": "Knowledge Test",
+        "difficulty_selection": {
+            "title": "Select difficulty",
+            "easy": "Easy",
+            "medium": "Medium",
+            "hard": "Hard"
+        },
+        "game_play": {
+            "opportunities": "Opportunities",
+            "progress": "Progress",
+            "ordering_question": "Ordering Question",
+            "selection_question": "Selection Question",
+            "ordering_instruction": "Arrange the options correctly",
+            "selection_instruction": "Select the correct answer",
+            "next": "Next",
+            "correct": "Very good!",
+            "incorrect": "Oh, sorry!"
+        },
+        "snackbar": {
+            "correct": "Very good!",
+            "incorrect": "Oh, sorry!"
+        },
+        "failed_attempts_dialog": {
+            "title": "Opportunities Exhausted!",
+            "message": "You have failed the allowed attempts. Do you want to try again?",
+            "play_again": "Play again"
+        },
+        "result_dialog": {
+            "category": "Category: {{category}}",
+            "difficulty": "Difficulty: {{difficulty}}",
+            "score": "Score obtained: {{score}}",
+            "play_again": "Play again"
+        },
+        "load_error_dialog": {
+            "retry": "Retry",
+            "back": "Back"
+        }
+    },
+    "reddle_screen": {
+        "title": "Riddle",
+        "difficulty_selection": {
+            "title": "Select difficulty",
+            "easy": "Easy",
+            "medium": "Medium",
+            "hard": "Hard"
+        },
+        "game_play": {
+            "header": {
+                "title": "Bible Riddle",
+                "difficulty": "Difficulty: {{difficulty}}",
+                "opportunities": "Opportunities",
+                "progress": "Progress:"
+            },
+            "question": "Who is this character?",
+            "input_hint": "Enter the character's name",
+            "verify_button": "Verify Answer",
+            "feedback": {
+                "correct": "Correct!",
+                "incorrect": "Incorrect, it was {{name}}"
+            },
+            "clues_title": "Character Clues",
+            "instructions": {
+                "title": "Instructions:",
+                "step1": "1. Look at the clues carefully",
+                "step2": "2. Write the character's name",
+                "step3": "3. You have 3 opportunities",
+                "step4": "4. Have fun learning!"
+            },
+            "loading_clues": "Loading clues...",
+            "mobile_title": "Guess the Bible Character!",
+            "clues_mobile": "Clues...."
+        },
+        "errors": {
+            "no_characters": "No characters available for this difficulty"
+        },
+        "failed_attempts_dialog": {
+            "title": "Opportunities Exhausted!",
+            "message": "You have failed the allowed attempts. Do you want to try again?",
+            "play_again": "Play again"
+        },
+        "result_dialog": {
+            "category": "Category: {{category}}",
+            "difficulty": "Difficulty: {{difficulty}}",
+            "score": "Score obtained: {{score}}",
+            "play_again": "Play again"
+        }
+    },
     "workspace": {
         "title": "Home",
         "notifications": "Notifications",

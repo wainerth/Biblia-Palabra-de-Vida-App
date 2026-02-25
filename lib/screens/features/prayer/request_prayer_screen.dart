@@ -303,7 +303,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                       SizedBox(width: 10),
                                       Text(
                                         _translationProvider.tr(
-                                            'request_preyer_screen.daily_verse.title'),
+                                            'request_prayer_screen.daily_verse.title'),
                                         style: StylesApp(context)
                                             .textStyleBody18
                                             .copyWith(
@@ -339,7 +339,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                                   .showCopiedMessage(
                                                 context,
                                                 _translationProvider.tr(
-                                                    'request_preyer_screen.daily_verse.copied_message'),
+                                                    'request_prayer_screen.daily_verse.copied_message'),
                                               );
                                             },
                                           ),
@@ -361,7 +361,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                               text:
                                                   "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible",
                                               subject: _translationProvider.tr(
-                                                  'request_preyer_screen.daily_verse.share_subject'),
+                                                  'request_prayer_screen.daily_verse.share_subject'),
                                             ));
                                           },
                                         ),
@@ -423,7 +423,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                     children: [
                       Text(
                         _translationProvider
-                            .tr('request_preyer_screen.form.title'),
+                            .tr('request_prayer_screen.form.title'),
                         style: StylesApp(context).textStyleBody24.copyWith(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
@@ -433,7 +433,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                       SizedBox(height: 10),
                       Text(
                         _translationProvider
-                            .tr('request_preyer_screen.form.subtitle'),
+                            .tr('request_prayer_screen.form.subtitle'),
                         style: StylesApp(context).textStyleBody15.copyWith(
                               fontSize: 15,
                               color: Colors.grey[600],
@@ -447,7 +447,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         children: [
                           Text(
                             _translationProvider.tr(
-                                'request_preyer_screen.form.request_type.label'),
+                                'request_prayer_screen.form.request_type.label'),
                             style: StylesApp(context).textStyleBody16.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -464,7 +464,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                             child: CustomDropdownWithValidation<
                                 PrayerSubTypeModel>(
                               hintText: _translationProvider.tr(
-                                  'request_preyer_screen.form.request_type.hint'),
+                                  'request_prayer_screen.form.request_type.hint'),
                               items: options,
                               border: true,
                               onChanged: (ModelData? newValue) {
@@ -475,7 +475,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                               validator: (value) {
                                 if (value == null) {
                                   return _translationProvider.tr(
-                                      'request_preyer_screen.form.request_type.validation');
+                                      'request_prayer_screen.form.request_type.validation');
                                 }
                                 return null;
                               },
@@ -491,7 +491,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         children: [
                           Text(
                             _translationProvider.tr(
-                                'request_preyer_screen.form.recipient_name.label'),
+                                'request_prayer_screen.form.recipient_name.label'),
                             style: StylesApp(context).textStyleBody16.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -515,7 +515,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                   .copyWith(
                                       fontSize: 12, color: StyleColor.redLight),
                               hintText: _translationProvider.tr(
-                                  'request_preyer_screen.form.recipient_name.hint'),
+                                  'request_prayer_screen.form.recipient_name.hint'),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.0),
                                 borderSide: BorderSide.none,
@@ -527,7 +527,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return _translationProvider.tr(
-                                    'request_preyer_screen.form.recipient_name.validation');
+                                    'request_prayer_screen.form.recipient_name.validation');
                               }
                               return null;
                             },
@@ -542,7 +542,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         children: [
                           Text(
                             _translationProvider.tr(
-                                'request_preyer_screen.form.description.label'),
+                                'request_prayer_screen.form.description.label'),
                             style: StylesApp(context).textStyleBody16.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -577,7 +577,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                                       ),
                                   decoration: InputDecoration(
                                     hintText: _translationProvider.tr(
-                                        'request_preyer_screen.form.description.hint'),
+                                        'request_prayer_screen.form.description.hint'),
                                     hintStyle: StylesApp(context)
                                         .textStyleBody14
                                         .copyWith(color: Colors.grey[500]),
@@ -660,7 +660,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                       Center(
                         child: ButtonThemeWidget(
                           text: _translationProvider
-                              .tr('request_preyer_screen.form.submit_button'),
+                              .tr('request_prayer_screen.form.submit_button'),
                           buttonStyle: StylesApp(context)
                               .btnWidgetSmall
                               .copyWith(
@@ -728,7 +728,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                     validator: (value) {
                       if (value == null) {
                         return _translationProvider.tr(
-                            'request_preyer_screen.form.request_type.validation');
+                            'request_prayer_screen.form.request_type.validation');
                       }
                       return null;
                     },
@@ -749,7 +749,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                         .textStyleBody12
                         .copyWith(fontSize: 12, color: StyleColor.redLight),
                     hintText: _translationProvider
-                        .tr('request_preyer_screen.form.recipient_name.label'),
+                        .tr('request_prayer_screen.form.recipient_name.label'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
@@ -759,7 +759,7 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return _translationProvider.tr(
-                          'request_preyer_screen.form.recipient_name.validation');
+                          'request_prayer_screen.form.recipient_name.validation');
                     }
                     return null;
                   },

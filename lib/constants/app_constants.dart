@@ -44,21 +44,21 @@ class AppConstants {
     {"title": 'Personajes', "placeholder": 'Buscar personajes'},
   ];
   static final List<Map<String, dynamic>> tabsPreach = [
-    {
-      "title": 'Mensaje',
-      "placeholder": 'Mensaje a buscar',
-      "icon": Icons.message,
-    },
-    {
-      "title": 'Predicador',
-      "placeholder": 'Nombre del predicador a buscar',
-      "icon": Icons.person,
-    },
-    {
-      "title": 'Favoritas',
-      "placeholder": 'Favorito a buscar',
-      "icon": Icons.favorite,
-    }
+     {
+    "title": 'preach_screen.tabs.message',  // 👈 Usa la clave, no el texto fijo
+    "placeholder": 'preach_screen.search.placeholder_message',
+    "icon": Icons.message,
+  },
+  {
+    "title": 'preach_screen.tabs.preacher',
+    "placeholder": 'preach_screen.search.placeholder_preacher',
+    "icon": Icons.person,
+  },
+  {
+    "title": 'preach_screen.tabs.favorites',
+    "placeholder": 'preach_screen.search.placeholder_favorites',
+    "icon": Icons.favorite,
+  }
   ];
 
   static final List<String> spanishKeywords = [
@@ -109,24 +109,6 @@ class AppConstants {
     'bible'
   ];
 
-  static final List<String> textPromise = [
-    "¿Qué secreto esconde este versículo que puede cambiar tu vida?",
-    "Descubre la fuerza que transforma vidas y embárcate en un viaje espiritual",
-    "Permite que la sabiduría te inspire a vivir una vida auténtica y compasiva",
-    "Embárcate en un viaje que te llevará a descubrir las profundidades de tu alma",
-    "Encontrarás la fuerza interior necesaria para hallar consuelo en tu vida",
-    "Cada verso es una semilla que puede florecer en tu corazón",
-    "Conecta con la fuente de toda sabiduría y encuentra la paz que tanto anhelas",
-    "Descubre el tesoro oculto que se encuentra en cada palabra",
-    "Permite que la sabiduría de los antiguos maestros te guíe",
-    "Abre tu mente y tu corazón a las infinitas posibilidades que la palabra te ofrece",
-    "Descubre la belleza de la simplicidad y la profundidad de la fe",
-    "Las palabras tienen el poder de sanar, inspirar y transformar",
-    "Permite que estas verdades eternas transforme enormemente tu corazón",
-    "Cada verso es un regalo que te invita a crecer como persona",
-    "Conecta con la fuente de toda sabiduría y encuentra la paz que tanto anhelas",
-    "Cada palabra es una pieza que te ayudará a comprender tu lugar en el mundo."
-  ];
 
   static final List<String> imagesPromise = [
     "assets/promesa-1.png",

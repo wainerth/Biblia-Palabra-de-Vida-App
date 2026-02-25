@@ -666,6 +666,268 @@
             "error_filter": "erreur de filtrage"
         }
     },
+    "preach_screen": {
+        "title": "Prédications",
+        "tabs": {
+            "message": "Message",
+            "preacher": "Prédicateur",
+            "favorites": "Favoris"
+        },
+        "search": {
+            "placeholder_message": "Rechercher par message...",
+            "placeholder_preacher": "Rechercher par prédicateur...",
+            "placeholder_favorites": "Rechercher dans les favoris...",
+            "hint": "Rechercher"
+        },
+        "categories_title": "Catégories",
+        "empty_favorites": "Vous n'avez pas de prédications favorites",
+        "messages": {
+            "error_occurred": "Une erreur est survenue :",
+            "loading": "Chargement des prédications..."
+        },
+        "card": {
+            "references": "réf."
+        },
+        "month_names": {
+            "1": "Janvier",
+            "2": "Février",
+            "3": "Mars",
+            "4": "Avril",
+            "5": "Mai",
+            "6": "Juin",
+            "7": "Juillet",
+            "8": "Août",
+            "9": "Septembre",
+            "10": "Octobre",
+            "11": "Novembre",
+            "12": "Décembre"
+        }
+    },
+    "video_player_screen": {
+        "title": "Prédications",
+        "tablet_title": "Lecteur de Prédication",
+        "references": "Références",
+        "playing": "Lecture en cours",
+        "tablet": {
+            "references_header": "Références Bibliques",
+            "preaching_info": "Informations sur la Prédication",
+            "title": "Titre :",
+            "preacher": "Prédicateur :",
+            "date": "Date :"
+        },
+        "reference_modal": {
+            "copy": "Copier",
+            "share": "Partager",
+            "close": "Fermer",
+            "read_more": "Lire Plus",
+            "chapter_verse": "{{chapitre}}:{{verset}}"
+        },
+        "messages": {
+            "copied": "Texte copié dans le presse-papiers",
+            "share_subject": "Verset de {{livre}}"
+        }
+    },
+    "utils": {
+        "baptized": {
+            "yes": "Baptisé",
+            "no": "Non Baptisé"
+        },
+        "copy": {
+            "chapter_success": "Le chapitre {{chapitre}} du livre {{livre}}\na été copié avec succès dans le presse-papiers",
+            "verse_success": "Le verset {{chapitre}}:{{verset}} du livre {{livre}}\na été copié avec succès dans le presse-papiers"
+        },
+        "share": {
+            "subject": "Parole de Vie - {{chapitre}} {{livre}}",
+            "see_in": "Voir sur : {{baseUrl}}"
+        },
+        "errors": {
+            "timeout": "{{opération}} délai d'attente dépassé",
+            "no_internet": "{{opération}} Pas de connexion Internet",
+            "invalid_format": "{{opération}} Format de données invalide",
+            "network_error": "{{opération}} Erreur de connexion Internet",
+            "service_error": "{{opération}} Erreur de service",
+            "unexpected": "{{opération}} Erreur inattendue"
+        }
+    },
+    "promises_screen": {
+        "title": "Promesses",
+        "stats": {
+            "energy": "{{énergie}}",
+            "streak": "Série :",
+            "days": "jours",
+            "remaining": "{{restantes}} sur {{total}} à ouvrir"
+        },
+        "promise_card": {
+            "open": "Ouvre ta promesse !",
+            "default_description": "Découvre ta promesse"
+        },
+        "messages": {
+            "empty": "Aucune promesse disponible",
+            "update": "Les promesses seront mises à jour toutes les 24 heures",
+            "loading": "Chargement des promesses...",
+            "error": "Une erreur est survenue : {{erreur}}"
+        }
+    },
+    "promises_texts": {
+        "0": "Quel secret ce verset cache-t-il qui pourrait changer ta vie ?",
+        "1": "Découvre la force qui transforme des vies et embarque pour un voyage spirituel",
+        "2": "Laisse la sagesse t'inspirer à vivre une vie authentique et compatissante",
+        "3": "Embarque pour un voyage qui te mènera à découvrir les profondeurs de ton âme",
+        "4": "Tu trouveras la force intérieure nécessaire pour trouver du réconfort dans ta vie",
+        "5": "Chaque verset est une graine qui peut fleurir dans ton cœur",
+        "6": "Connecte-toi à la source de toute sagesse et trouve la paix que tu désires tant",
+        "7": "Découvre le trésor caché dans chaque parole",
+        "8": "Laisse la sagesse des anciens maîtres te guider",
+        "9": "Ouvre ton esprit et ton cœur aux possibilités infinies que la parole t'offre",
+        "10": "Découvre la beauté de la simplicité et la profondeur de la foi",
+        "11": "Les mots ont le pouvoir de guérir, d'inspirer et de transformer",
+        "12": "Laisse ces vérités éternelles transformer profondément ton cœur",
+        "13": "Chaque verset est un cadeau qui t'invite à grandir en tant que personne",
+        "14": "Connecte-toi à la source de toute sagesse et trouve la paix que tu désires tant",
+        "15": "Chaque mot est une pièce qui t'aidera à comprendre ta place dans le monde."
+    },
+    "play_screen": {
+        "title": "Jeux",
+        "games": {
+            "memory": {
+                "title": "Mémoire",
+                "description": "Quelle est la qualité de votre mémoire visuelle ? Dans ce jeu, vous devrez trouver des paires d'images ayant diverses représentations liées à la Bible. Aiguisez votre vue et votre mémoire !"
+            },
+            "riddle": {
+                "title": "Devinette",
+                "description": "Êtes-vous un détective de la Bible ? Utilisez votre ingéniosité et vos connaissances bibliques pour déchiffrer les indices et découvrir qui est le personnage caché. Préparez-vous pour un défi très excitant !"
+            },
+            "quiz": {
+                "title": "Quiz",
+                "description": "Êtes-vous un expert de la Bible ? Dans ce jeu, vous pouvez le prouver en répondant à des questions de différentes catégories et niveaux de difficulté. Relevez le défi et apprenez-en plus sur la Parole de Dieu !"
+            }
+        },
+        "button": "Allons-y !"
+    },
+    "memory_screen": {
+        "title": "Mémoire",
+        "difficulty_selection": {
+            "title": "Choisissez la difficulté",
+            "easy": "Facile",
+            "medium": "Moyen",
+            "hard": "Difficile"
+        },
+        "game_play": {
+            "title": "Mémoire Biblique",
+            "subtitle": "Trouvez les paires pour gagner !",
+            "difficulty_label": "Difficulté",
+            "time_label": "Temps",
+            "time_remaining": "Temps restant",
+            "stats": {
+                "found": "Cartes trouvées :",
+                "total": "Total de paires :"
+            },
+            "instructions": "Cliquez sur les cartes pour trouver les paires",
+            "change_difficulty": "Changer la difficulté"
+        },
+        "time_up_dialog": {
+            "title": "Temps écoulé !",
+            "message": "Le temps est écoulé. Voulez-vous réessayer ?",
+            "play_again": "Rejouer"
+        },
+        "result_dialog": {
+            "difficulty": "Difficulté : {{difficulty}}",
+            "score": "Score obtenu : {{score}}",
+            "play_again": "Rejouer"
+        },
+        "load_error_dialog": {
+            "retry": "Réessayer",
+            "back": "Retour"
+        }
+    },
+    "quiz_screen": {
+        "title": "Test de Connaissances",
+        "difficulty_selection": {
+            "title": "Choisissez la difficulté",
+            "easy": "Facile",
+            "medium": "Moyen",
+            "hard": "Difficile"
+        },
+        "game_play": {
+            "opportunities": "Opportunités",
+            "progress": "Progrès",
+            "ordering_question": "Question d'Ordre",
+            "selection_question": "Question à Choix",
+            "ordering_instruction": "Ordonnez correctement les options",
+            "selection_instruction": "Sélectionnez la bonne réponse",
+            "next": "Suivant",
+            "correct": "Très bien !",
+            "incorrect": "Oh, désolé !"
+        },
+        "snackbar": {
+            "correct": "Très bien !",
+            "incorrect": "Oh, désolé !"
+        },
+        "failed_attempts_dialog": {
+            "title": "Opportunités Épuisées !",
+            "message": "Vous avez échoué les tentatives autorisées. Voulez-vous réessayer ?",
+            "play_again": "Rejouer"
+        },
+        "result_dialog": {
+            "category": "Catégorie : {{category}}",
+            "difficulty": "Difficulté : {{difficulty}}",
+            "score": "Score obtenu : {{score}}",
+            "play_again": "Rejouer"
+        },
+        "load_error_dialog": {
+            "retry": "Réessayer",
+            "back": "Retour"
+        }
+    },
+    "reddle_screen": {
+        "title": "Devinette",
+        "difficulty_selection": {
+            "title": "Choisissez la difficulté",
+            "easy": "Facile",
+            "medium": "Moyen",
+            "hard": "Difficile"
+        },
+        "game_play": {
+            "header": {
+                "title": "Devinette Biblique",
+                "difficulty": "Difficulté : {{difficulty}}",
+                "opportunities": "Opportunités",
+                "progress": "Progrès :"
+            },
+            "question": "Qui est ce personnage ?",
+            "input_hint": "Entrez le nom du personnage",
+            "verify_button": "Vérifier la réponse",
+            "feedback": {
+                "correct": "Correct !",
+                "incorrect": "Incorrect, c'était {{name}}"
+            },
+            "clues_title": "Indices du Personnage",
+            "instructions": {
+                "title": "Instructions :",
+                "step1": "1. Observez attentivement les indices",
+                "step2": "2. Écrivez le nom du personnage",
+                "step3": "3. Vous avez 3 opportunités",
+                "step4": "4. Amusez-vous en apprenant !"
+            },
+            "loading_clues": "Chargement des indices...",
+            "mobile_title": "Devinez le personnage biblique !",
+            "clues_mobile": "Indices...."
+        },
+        "errors": {
+            "no_characters": "Aucun personnage disponible pour cette difficulté"
+        },
+        "failed_attempts_dialog": {
+            "title": "Opportunités Épuisées !",
+            "message": "Vous avez échoué les tentatives autorisées. Voulez-vous réessayer ?",
+            "play_again": "Rejouer"
+        },
+        "result_dialog": {
+            "category": "Catégorie : {{category}}",
+            "difficulty": "Difficulté : {{difficulty}}",
+            "score": "Score obtenu : {{score}}",
+            "play_again": "Rejouer"
+        }
+    },
     "workspace": {
         "title": "Accueil",
         "notifications": "Notifications",

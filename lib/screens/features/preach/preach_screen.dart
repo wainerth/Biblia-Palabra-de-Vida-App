@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
@@ -28,7 +30,7 @@ class _PreachScreenState extends State<PreachScreen> {
   Map<String, List<Preach>> groupedPreaches = {};
   final List<Preach> favorites = [];
   List tabs = AppConstants.tabsPreach;
-
+  final _translationProvider = AppTranslationProvider();
   // Función para determinar si es tablet
   bool get isTablet {
     final width = MediaQuery.of(context).size.width;
@@ -36,6 +38,10 @@ class _PreachScreenState extends State<PreachScreen> {
   }
 
   List<Preach> preaches = [];
+  List<Preach> _searchResults = [];
+  bool _isSearchActive = false;
+  TextEditingController _searchController = TextEditingController();
+
   groupByMonthYear() {
     for (var preach in preaches) {
       List<String> dateParts = preach.createdAt!.split('/');
@@ -49,45 +55,60 @@ class _PreachScreenState extends State<PreachScreen> {
   }
 
   _getMonthName(month) {
-    return {
-      1: 'Enero',
-      2: 'Febrero',
-      3: 'Marzo',
-      4: 'Abril',
-      5: 'Mayo',
-      6: 'Junio',
-      7: 'Julio',
-      8: 'Agosto',
-      9: 'Septiembre',
-      10: 'Octubre',
-      11: 'Noviembre',
-      12: 'Diciembre',
-    }[month];
+    return _translationProvider.tr('preach_screen.month_names.$month');
   }
 
-  _getSuggestions(value, String filter) {
-    switch (filter) {
-      case "Mensaje":
-        return preaches
-            .where((element) =>
-                element.title!.toLowerCase().contains(value.toLowerCase()))
-            .map((e) => e.title);
-      case "Predicador":
-        return preaches
-            .where((element) =>
-                element.preachers!.toLowerCase().contains(value.toLowerCase()))
-            .map((e) => e.preachers);
-      case "Favoritas":
-        return favorites
-            .where((element) =>
-                element.preachers!
-                    .toLowerCase()
-                    .contains(value.toLowerCase()) ||
-                element.title!.toLowerCase().contains(value.toLowerCase()))
-            .map((e) => e.preachers!.toLowerCase().contains(value.toLowerCase())
-                ? e.preachers
-                : e.title);
+  FutureOr<Iterable<String>> _getSuggestions(String value, String filter) {
+    if (value.isEmpty) return [];
+
+    final searchTerm = value.toLowerCase().trim();
+
+    if (_translationProvider.tr("preach_screen.tabs.message") == filter) {
+      List<String> result = preaches
+          .where((element) =>
+              element.title?.toLowerCase().contains(searchTerm) ?? false)
+          .map((e) => e.title)
+          .cast<String>()
+          .toList();
+
+      return preaches
+          .where((element) =>
+              element.title?.toLowerCase().contains(searchTerm) ?? false)
+          .map((e) => e.title)
+          .cast<String>()
+          .toList();
+    } else if (_translationProvider.tr("preach_screen.tabs.preacher") ==
+        filter) {
+      return preaches
+          .where((element) =>
+              element.preachers?.toLowerCase().contains(searchTerm) ?? false)
+          .map((e) => e.preachers)
+          .where((preacher) => preacher != null && preacher.isNotEmpty)
+          .cast<String>()
+          .toList();
+    } else if (_translationProvider.tr("preach_screen.tabs.favorites") ==
+        filter) {
+      return favorites
+          .where((element) {
+            final matchesPreacher =
+                element.preachers?.toLowerCase().contains(searchTerm) ?? false;
+            final matchesTitle =
+                element.title?.toLowerCase().contains(searchTerm) ?? false;
+            return matchesPreacher || matchesTitle;
+          })
+          .map((e) {
+            if (e.preachers?.toLowerCase().contains(searchTerm) ?? false) {
+              return e.preachers;
+            } else {
+              return e.title;
+            }
+          })
+          .where((result) => result != null && result.isNotEmpty)
+          .cast<String>()
+          .toList();
     }
+
+    return [];
   }
 
   @override
@@ -125,7 +146,8 @@ class _PreachScreenState extends State<PreachScreen> {
         groupByMonthYear();
       }
     } catch (e) {
-      errorMessage = "An error occurred: $e";
+      errorMessage =
+          "${_translationProvider.tr("preach_screen.messages.error_occurred")} $e";
     } finally {
       LoadingService().hideLoading();
       setState(() {
@@ -167,7 +189,8 @@ class _PreachScreenState extends State<PreachScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return isTablet ? _buildTabletLayout() : _buildMobileLayout();
+    return ResponsiveLayout(
+        mobile: _buildMobileLayout(), tablet: _buildTabletLayout());
   }
 
   _buildMobileLayout() {
@@ -181,7 +204,7 @@ class _PreachScreenState extends State<PreachScreen> {
                 backColor: StyleColor.turquoise,
                 buttonColor: StyleColor.orange,
                 textButtonColor: Colors.white,
-                title: 'Predicas',
+                title: _translationProvider.tr('preach_screen.title'),
                 styleText: StylesApp(context).textStyleBody7,
                 onRoute: () {
                   Navigator.pop(context);
@@ -238,7 +261,8 @@ class _PreachScreenState extends State<PreachScreen> {
                           ),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Center(child: Text(tab["title"])),
+                        child: Center(
+                            child: Text(_translationProvider.tr(tab["title"]))),
                       ),
                     );
                   }).toList(),
@@ -250,42 +274,50 @@ class _PreachScreenState extends State<PreachScreen> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 padding: const EdgeInsets.all(0.0),
                 child: Autocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
+                  optionsBuilder: (TextEditingValue textEditingValue) async {
                     if (textEditingValue.text.isEmpty) {
                       return const Iterable<String>.empty();
                     }
-                    return _getSuggestions(
-                        textEditingValue.text, tabs[_selectedIndex]["title"]);
+                    return _getSuggestions(textEditingValue.text,
+                        _translationProvider.tr(tabs[_selectedIndex]["title"]));
                   },
                   onSelected: (String selection) {
-                    if (kDebugMode) {
-                      print('You just selected $selection');
-                    }
-                    setState(() {
-                      preaches = groupedPreaches.values
-                          .expand((list) => list)
-                          .where((preach) {
-                        return preach.title == selection ||
-                            preach.preachers == selection;
-                      }).toList();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              VideoPlayerScreen(data: preaches[0]),
-                        ),
-                      );
+                    final searchResults = groupedPreaches.values
+                        .expand((list) => list)
+                        .where((preach) {
+                      return preach.title == selection ||
+                          preach.preachers == selection;
+                    }).toList();
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            VideoPlayerScreen(data: searchResults[0]),
+                      ),
+                    ).then((_) {
+                      // 👇 Cuando regrese de la pantalla, limpiar el campo de búsqueda
+                      _searchController.clear();
+
+                      // Opcional: quitar el foco del teclado
+                      FocusScope.of(context).unfocus();
+
+                      // Forzar rebuild para que el Autocomplete sepa que está vacío
+                      setState(() {});
                     });
                   },
                   fieldViewBuilder: (BuildContext context,
                       TextEditingController textEditingController,
                       FocusNode focusNode,
                       VoidCallback onFieldSubmitted) {
+                    _searchController =
+                        textEditingController; // Guardar el controlador para limpiar después
                     return TextField(
                       controller: textEditingController,
                       focusNode: focusNode,
                       decoration: InputDecoration(
-                        hintText: tabs[_selectedIndex]["placeholder"],
+                        hintText: _translationProvider
+                            .tr(tabs[_selectedIndex]["placeholder"]),
                         suffixIcon: Icon(Icons.search),
                         contentPadding: EdgeInsets.symmetric(horizontal: 8),
                         border: OutlineInputBorder(
@@ -310,9 +342,12 @@ class _PreachScreenState extends State<PreachScreen> {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        _buildContentForTab("Mensaje"),
-                        _buildContentForTab("Predicador"),
-                        _buildContentForTab("Favoritas"),
+                        _buildContentForTab(_translationProvider
+                            .tr("preach_screen.tabs.message")),
+                        _buildContentForTab(_translationProvider
+                            .tr("preach_screen.tabs.preacher")),
+                        _buildContentForTab(_translationProvider
+                            .tr("preach_screen.tabs.favorites")),
                       ],
                     ),
                   ),
@@ -334,7 +369,7 @@ class _PreachScreenState extends State<PreachScreen> {
               backColor: StyleColor.turquoise,
               buttonColor: StyleColor.orange,
               textButtonColor: Colors.white,
-              title: 'Predicas',
+              title: _translationProvider.tr('preach_screen.title'),
               styleText:
                   StylesApp(context).textStyleBody7.copyWith(fontSize: 24),
               onRoute: () {
@@ -368,7 +403,7 @@ class _PreachScreenState extends State<PreachScreen> {
                         children: [
                           SizedBox(height: 20),
                           Text(
-                            'Categorías',
+                            _translationProvider.tr('preach_screen.categories_title'),
                             style: StylesApp(context).textStyleBody18.copyWith(
                                   color: StyleColor.turquoise,
                                   fontWeight: FontWeight.bold,
@@ -416,7 +451,8 @@ class _PreachScreenState extends State<PreachScreen> {
                                         SizedBox(width: 12),
                                         Expanded(
                                           child: Text(
-                                            tab["title"],
+                                            _translationProvider
+                                                .tr(tab["title"]),
                                             style: StylesApp(context)
                                                 .textStyleBody14
                                                 .copyWith(
@@ -473,7 +509,8 @@ class _PreachScreenState extends State<PreachScreen> {
                                     ),
                                     SizedBox(width: 12),
                                     Text(
-                                      tabs[_selectedIndex]["title"],
+                                      _translationProvider
+                                          .tr(tabs[_selectedIndex]["title"]),
                                       style: StylesApp(context)
                                           .textStyleBody18
                                           .copyWith(
@@ -492,27 +529,32 @@ class _PreachScreenState extends State<PreachScreen> {
                                     }
                                     return _getSuggestions(
                                         textEditingValue.text,
-                                        tabs[_selectedIndex]["title"]);
+                                        _translationProvider
+                                            .tr(tabs[_selectedIndex]["title"]));
                                   },
                                   onSelected: (String selection) {
-                                    if (kDebugMode) {
-                                      print('You just selected $selection');
-                                    }
-                                    setState(() {
-                                      preaches = groupedPreaches.values
-                                          .expand((list) => list)
-                                          .where((preach) {
-                                        return preach.title == selection ||
-                                            preach.preachers == selection;
-                                      }).toList();
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              VideoPlayerScreen(
-                                                  data: preaches[0]),
-                                        ),
-                                      );
+                                    final searchResults = groupedPreaches.values
+                                        .expand((list) => list)
+                                        .where((preach) {
+                                      return preach.title == selection ||
+                                          preach.preachers == selection;
+                                    }).toList();
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => VideoPlayerScreen(
+                                            data: searchResults[0]),
+                                      ),
+                                    ).then((_) {
+                                      // 👇 Cuando regrese de la pantalla, limpiar el campo de búsqueda
+                                      _searchController.clear();
+
+                                      // Opcional: quitar el foco del teclado
+                                      FocusScope.of(context).unfocus();
+
+                                      // Forzar rebuild para que el Autocomplete sepa que está vacío
+                                      setState(() {});
                                     });
                                   },
                                   fieldViewBuilder: (BuildContext context,
@@ -520,12 +562,16 @@ class _PreachScreenState extends State<PreachScreen> {
                                           textEditingController,
                                       FocusNode focusNode,
                                       VoidCallback onFieldSubmitted) {
+
+                                        _searchController = textEditingController;
+                                         // Guardar el controlador para limpiar después
                                     return TextField(
                                       controller: textEditingController,
                                       focusNode: focusNode,
                                       decoration: InputDecoration(
-                                        hintText: tabs[_selectedIndex]
-                                            ["placeholder"],
+                                        hintText: _translationProvider.tr(
+                                            tabs[_selectedIndex]
+                                                ["placeholder"]),
                                         hintStyle: StylesApp(context)
                                             .textStyleBody12
                                             .copyWith(
@@ -604,9 +650,10 @@ class _PreachScreenState extends State<PreachScreen> {
       );
     }
 
-    final currentTab = tabs[_selectedIndex]["title"];
+    final currentTab = _translationProvider.tr(tabs[_selectedIndex]["title"]);
 
-    if (currentTab == "Favoritas" && favorites.isEmpty) {
+    if (currentTab == _translationProvider.tr("preach_screen.tabs.favorites") &&
+        favorites.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -618,7 +665,7 @@ class _PreachScreenState extends State<PreachScreen> {
             ),
             SizedBox(height: 16),
             Text(
-              "No tienes predicaciones favoritas",
+              _translationProvider.tr("preach_screen.empty_favorites"),
               style: StylesApp(context).textStyleBody18.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -634,7 +681,8 @@ class _PreachScreenState extends State<PreachScreen> {
       itemBuilder: (context, index) {
         List<String> dates = groupedPreaches.keys.toList();
         final items = groupedPreaches[dates[index]]!.where((preach) {
-          if (currentTab == "Favoritas") {
+          if (currentTab ==
+              _translationProvider.tr("preach_screen.tabs.favorites")) {
             return favorites.any((element) => element.id == preach.id);
           }
           return true;
@@ -713,7 +761,8 @@ class _PreachScreenState extends State<PreachScreen> {
       itemBuilder: (context, index) {
         List<String> dates = groupedPreaches.keys.toList();
         final items = groupedPreaches[dates[index]]!.where((preach) {
-          if (tabTitle == "Favoritas") {
+          if (tabTitle ==
+              _translationProvider.tr("preach_screen.tabs.favorites")) {
             return favorites.any((element) => element.id == preach.id);
           }
           return true;
@@ -785,6 +834,7 @@ class MessageCardTablet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _translationProvider = AppTranslationProvider();
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -937,7 +987,7 @@ class MessageCardTablet extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              "${preach.references!.length} ref.",
+                              "${preach.references!.length} ${_translationProvider.tr("preach_screen.card.references")}",
                               style:
                                   StylesApp(context).textStyleBody10.copyWith(
                                         color: StyleColor.turquoise,
@@ -956,4 +1006,3 @@ class MessageCardTablet extends StatelessWidget {
     );
   }
 }
-
