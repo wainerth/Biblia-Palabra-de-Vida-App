@@ -1238,7 +1238,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 ButtonThemeWidget(
                                   textCenter: true,
                                   text: translationProvider.tr(
-                                      'history_screen.continue_with_questions'),
+                                      'history_screen.continue_questions'),
                                   buttonStyle:
                                       StylesApp(context).btnWidgetSmall,
                                   height: null,

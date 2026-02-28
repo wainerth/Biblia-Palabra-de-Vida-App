@@ -8,17 +8,17 @@ import 'package:intl_phone_field/phone_number.dart';
 import 'package:intl_phone_field/countries.dart';
 
 class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
-  IntlPhoneFieldWithValidation(
-      {super.key,
-      required TextEditingController controller,
-      String? initialPhoneCode,
-      String? initialCountryCode,
-      super.validator,
-      ValueChanged<PhoneNumber>? onChanged,
-      bool disableLengthCheck = true,
-      hintText,
-      invalidNumberMessage})
-      : super(
+  IntlPhoneFieldWithValidation({
+    super.key,
+    required TextEditingController controller,
+    String? initialPhoneCode,
+    String? initialCountryCode,
+    super.validator,
+    ValueChanged<PhoneNumber>? onChanged,
+    bool disableLengthCheck = true,
+    String? hintText,
+    String? invalidNumberMessage,
+  }) : super(
           builder: (FormFieldState<PhoneNumber> field) {
             String determineInitialCountryCode() {
               if (initialCountryCode != null &&
@@ -47,6 +47,26 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
               return 'US';
             }
 
+            // Si el controlador tiene texto, actualizar el campo
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (controller.text.isNotEmpty && field.value == null) {
+                final countryCode = determineInitialCountryCode();
+                final country = countries.firstWhere(
+                  (c) => c.code == countryCode,
+                  orElse: () => countries.firstWhere((c) => c.code == 'US'),
+                );
+
+                final phoneNumber = PhoneNumber(
+                  countryISOCode: country.code,
+                  countryCode: country.dialCode,
+                  number: controller.text.replaceAll(RegExp(r'[^\d]+'), ''),
+                );
+
+                // ✅ Esto ahora es seguro porque ya pasó el build
+                field.didChange(phoneNumber);
+              }
+            });
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -66,31 +86,39 @@ class IntlPhoneFieldWithValidation extends FormField<PhoneNumber> {
                   dropdownTextStyle: StylesApp(field.context)
                       .textStyleBody14
                       .copyWith(color: StyleColor.black),
-                  // 🔹 CONFIGURACIÓN CLAVE PARA PAÍSES CON CÓDIGOS CORTOS
-                  disableLengthCheck:
-                      disableLengthCheck, // 🔹 DESACTIVA VALIDACIÓN POR DEFECTO
+                  disableLengthCheck: disableLengthCheck,
                   keyboardType: TextInputType.phone,
-                  inputFormatters: [], // 🔹 PERMITE MÁS FLEXIBILIDAD
-
+                  inputFormatters: [],
                   decoration: StylesApp(field.context)
                       .inputDecorationOutlineStyle
                       .copyWith(
                         hintText: hintText,
-                        errorText: field.hasError ? field.errorText : null,
+                        errorMaxLines: 2,
+                        error: field.hasError
+                            ? Text(
+                                field.errorText ?? '',
+                                style: StylesApp(field.context)
+                                    .textStyleBody12
+                                    .copyWith(color: Colors.red),
+                              )
+                            : null,
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
-                            color: field.hasError ? Colors.red : Colors.black,
+                            color: field.hasError ? Colors.red : Colors.grey,
                           ),
                         ),
                       ),
                   languageCode: "es",
                   invalidNumberMessage: invalidNumberMessage,
                   onChanged: (phone) {
+                    // 🔹 ACTUALIZAR EL ESTADO DEL FORMULARIO
                     field.didChange(phone);
+                    field.validate(); // Forzar validación
                     onChanged?.call(phone);
                   },
                   onCountryChanged: (country) {
                     controller.text = '';
+                    field.didChange(null); // Limpiar valor al cambiar país
                   },
                 ),
               ],

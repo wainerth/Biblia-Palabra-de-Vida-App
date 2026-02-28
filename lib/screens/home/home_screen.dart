@@ -1,5 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
+import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -145,6 +147,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: StylesApp(context).btnHeight.width,
                 height: StylesApp(context).btnHeight.height,
               ),
+              const SizedBox(height: 28),
+              ButtonThemeWidget(
+                textWithImage: true,
+                image: "assets/google-icon.png",
+                text: translationProvider.tr('home_screen.sign_up_google'),
+                textStyle: StylesApp(context).buttonTextStyle,
+                buttonStyle: StylesApp(context).btnTransparentSmall,
+                onPressed: () async {
+                  final authProvider = context.read<AuthenticationProvider>();
+                  LoadingService().showLoading(context);
+                  final user = await authProvider.loginWithGoogle(context);
+
+                  if (user.error != null) {
+                    LoadingService().hideLoading();
+                    await showCustomDialog(context,
+                        message: user.userFriendlyError ?? '',
+                        messageDetail: user.error ??
+                            translationProvider
+                                .tr('home_screen.sign_up_google'),
+                        showDetails: true,
+                        dialogType: DialogType.error);
+                  } else {
+                    LoadingService().hideLoading();
+                    if (!mounted) return;
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/layoutPage', (route) => false);
+                  }
+                },
+                width: isTablet(context)
+                    ? StylesApp(context).formWidth
+                    : StylesApp(context).btnHeight.width,
+                height: StylesApp(context).btnHeight.height,
+              ),
             ],
           ),
         ),
@@ -234,6 +269,40 @@ class _HomeScreenState extends State<HomeScreen> {
                         buttonStyle: StylesApp(context).btnSecondary,
                         onPressed: () {
                           Navigator.pushNamed(context, '/loginPage');
+                        },
+                        width: StylesApp(context).btnHeight.width * 0.45,
+                        height: StylesApp(context).btnHeight.height,
+                      ),
+                      const SizedBox(height: 28),
+                      ButtonThemeWidget(
+                        textWithImage: true,
+                        image: "assets/google-icon.png",
+                        text: translationProvider
+                            .tr('home_screen.sign_up_google'),
+                        textStyle: StylesApp(context).buttonTextStyle,
+                        buttonStyle: StylesApp(context).btnTransparentSmall,
+                        onPressed: () async {
+                          final authProvider =
+                              context.read<AuthenticationProvider>();
+                          LoadingService().showLoading(context);
+                          final user =
+                              await authProvider.loginWithGoogle(context);
+
+                          if (user.error != null) {
+                            LoadingService().hideLoading();
+                            await showCustomDialog(context,
+                                message: user.userFriendlyError ?? '',
+                                messageDetail: user.error ??
+                                    translationProvider
+                                        .tr('home_screen.sign_up_google'),
+                                showDetails: true,
+                                dialogType: DialogType.error);
+                          } else {
+                            LoadingService().hideLoading();
+                            if (!mounted) return;
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, '/layoutPage', (route) => false);
+                          }
                         },
                         width: StylesApp(context).btnHeight.width * 0.45,
                         height: StylesApp(context).btnHeight.height,

@@ -92,14 +92,20 @@ class _QuestionScreenState extends State<QuestionScreen> {
   int currentIndex = 0;
   int failedAttempts = 0;
 
+  int? _selectedAnswerIndex; // Índice de la respuesta seleccionada
+  int? _correctAnswerIndex;
+
   double score = 0;
 //draggable variables
   bool orderedCompleted = false;
   List<Answer> orderedAnswers = [];
 
   // Constantes
+  // ignore: non_constant_identifier_names
   int MAX_SCORE = 0;
+  // ignore: non_constant_identifier_names
   int MEDIUM_SCORE = 0;
+  // ignore: non_constant_identifier_names
   int LOW_SCORE = 0;
 
   // Añade estas variables para TTS
@@ -109,6 +115,52 @@ class _QuestionScreenState extends State<QuestionScreen> {
   double ttsVolume = 1.0;
   double ttsRate = 0.5;
   double ttsPitch = 1.0;
+
+  final Question orderingQuestionCreacion = Question(
+    id: "ordering_creacion_001",
+    question: "Ordena los días de la creación en la secuencia correcta",
+    difficulty: "Fácil",
+    status: 1,
+    isOrdering: true,
+    answers: [
+      Answer(
+        questionId: "2",
+        status: 1,
+        id: "ans_c01",
+        answer: "Día 1: Separación de la luz y las tinieblas",
+        isCorrect: true,
+        option: "A",
+        correctOrder: 1,
+      ),
+      Answer(
+        questionId: "2",
+        status: 1,
+        id: "ans_c02",
+        answer: "Día 2: Separación de las aguas y creación del firmamento",
+        isCorrect: true,
+        option: "B",
+        correctOrder: 2,
+      ),
+      Answer(
+        questionId: "2",
+        status: 1,
+        id: "ans_c03",
+        answer: "Día 3: Creación de la tierra seca, plantas y árboles",
+        isCorrect: true,
+        option: "C",
+        correctOrder: 3,
+      ),
+      Answer(
+        questionId: "2",
+        status: 1,
+        id: "ans_c04",
+        answer: "Día 4: Creación del sol, la luna y las estrellas",
+        isCorrect: true,
+        option: "D",
+        correctOrder: 4,
+      ),
+    ],
+  );
 
   @override
   void initState() {
@@ -131,7 +183,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     // Verificar preferencias de usuario para TTS
     bool? savedTtsEnabled = await PreferencesManager().getTtsEnabled();
     setState(() {
-      // isTtsEnabled = savedTtsEnabled ?? false;
+      isTtsEnabled = savedTtsEnabled ?? true;
     });
 
     // Configurar TTS
@@ -175,22 +227,72 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // Leer opciones de respuesta
-  Future<void> _speakOptions() async {
-    if (!isTtsEnabled || currentAnswers.isEmpty) return;
+  // Future<void> _speakOptions() async {
+  //   if (!isTtsEnabled || currentAnswers.isEmpty) return;
 
-    StringBuffer optionsText = StringBuffer();
-    optionsText.write(_translation.tr("question_screen.tts.options"));
+  //   StringBuffer optionsText = StringBuffer();
+  //   optionsText.write(_translation.tr("question_screen.tts.options"));
 
-    for (int i = 0; i < currentAnswers.length; i++) {
-      optionsText.write(
-          "${_translation.tr("question_screen.tts.option")} ${String.fromCharCode(65 + i)}: ");
-      optionsText.write(currentAnswers[i].answer);
-      if (i < currentAnswers.length - 1) {
-        optionsText.write(". ");
-      }
+  //   for (int i = 0; i < currentAnswers.length; i++) {
+  //     optionsText.write(
+  //         "${_translation.tr("question_screen.tts.option")} ${String.fromCharCode(65 + i)}: ");
+  //     optionsText.write(currentAnswers[i].answer);
+  //     if (i < currentAnswers.length - 1) {
+  //       optionsText.write(". ");
+  //     }
+  //   }
+
+  //   await flutterTts.speak(optionsText.toString());
+  // }
+
+// Leer el resultado del ordenamiento
+  Future<void> _speakOrderingResult(bool isCorrect) async {
+    if (!isTtsEnabled) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
     }
 
-    await flutterTts.speak(optionsText.toString());
+    StringBuffer resultText = StringBuffer();
+
+    if (isCorrect) {
+      // Mensaje para respuesta correcta
+      resultText.write("¡Excelente! El orden es correcto. ");
+
+      // Leer el orden actual
+      resultText.write("El orden que has establecido es: ");
+      for (int i = 0; i < orderedAnswers.length; i++) {
+        resultText.write("${i + 1}. ${orderedAnswers[i].answer}. ");
+      }
+
+      resultText
+          .write("¡Felicidades! Has completado correctamente el ordenamiento.");
+    } else {
+      // Mensaje para respuesta incorrecta
+      resultText.write("Lo siento, el orden no es correcto. ");
+
+      // Leer el orden actual
+      if (orderedAnswers.isNotEmpty) {
+        resultText.write("Tu orden actual es: ");
+        for (int i = 0; i < orderedAnswers.length; i++) {
+          resultText.write("${i + 1}. ${orderedAnswers[i].answer}. ");
+        }
+      }
+
+      // Leer el orden correcto
+      List<Answer> sortedAnswers = List.from(orderedAnswers);
+      sortedAnswers.sort((a, b) => a.correctOrder!.compareTo(b.correctOrder!));
+
+      resultText.write("El orden correcto debería ser: ");
+      for (int i = 0; i < sortedAnswers.length; i++) {
+        resultText.write("${i + 1}. ${sortedAnswers[i].answer}. ");
+      }
+
+      resultText.write("Intenta de nuevo. ¡Tú puedes hacerlo!");
+    }
+
+    await flutterTts.speak(resultText.toString());
   }
 
   // Leer respuesta específica
@@ -305,6 +407,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
           .cast<Question>()
           .toList();
 
+      // Insertar al principio el item orderingQuestionCreacion
+      // questions = [orderingQuestionCreacion, ...questions];
+
       for (int i = 0; i < questions.length; i++) {
         for (int j = 0; j < questions[i].answers.length; j++) {
           questions[i].answers[j].option = options[j]["option"];
@@ -320,17 +425,31 @@ class _QuestionScreenState extends State<QuestionScreen> {
   /// Función que se encarga de marcar respuesta seleccionada
   ///
   void _answerSelected(BuildContext context, int index) {
-    // Primero leer la opción seleccionada
+    // Determinar si es correcta
+    _isCorrect =
+        (currentAnswers.isNotEmpty) ? currentAnswers[index].isCorrect : false;
+
+    // Encontrar el índice de la respuesta correcta
+    int correctIndex = -1;
+    for (int i = 0; i < currentAnswers.length; i++) {
+      if (currentAnswers[i].isCorrect) {
+        correctIndex = i;
+        break;
+      }
+    }
+
+    // Leer el resultado de la respuesta (CORREGIDO: pasar isCorrect)
     if (isTtsEnabled) {
-      _speakAnswer(index);
+      _speakAnswerResult(index, _isCorrect);
     }
 
     setState(() {
       _isAnswerSelected = true;
       _suggestionSelected = false;
+      _selectedAnswerIndex = index; // Guardar índice seleccionado
+      _correctAnswerIndex = correctIndex;
     });
-    _isCorrect =
-        (currentAnswers.isNotEmpty) ? currentAnswers[index].isCorrect : false;
+
     if (userData != null) {
       responses.add(UserResponses(
         answerId: currentAnswers[index].id,
@@ -349,10 +468,194 @@ class _QuestionScreenState extends State<QuestionScreen> {
         _suggestionSelected = true;
       });
     }
+
     setState(() {
       _selectionCompleted = true;
     });
+
     _showAnswerSnackbar(context);
+  }
+
+  Future<void> _speakAnswerResult(int index, bool isCorrect) async {
+    if (!isTtsEnabled) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    StringBuffer resultText = StringBuffer();
+    String selectedOption = String.fromCharCode(65 + index);
+    String selectedAnswer = currentAnswers[index].answer;
+
+    // Encontrar la respuesta correcta
+    Answer? correctAnswerObj;
+    for (var answer in currentAnswers) {
+      if (answer.isCorrect) {
+        correctAnswerObj = answer;
+        break;
+      }
+    }
+
+    if (isCorrect) {
+      resultText.write("¡Excelente! ");
+      resultText.write("La opción $selectedOption es correcta. ");
+      resultText.write("$selectedAnswer. ");
+      resultText.write("¡Muy bien! Has acertado. ");
+    } else {
+      resultText.write("Lo siento, esa no es la respuesta correcta. ");
+
+      if (correctAnswerObj != null) {
+        int correctIndex = currentAnswers.indexOf(correctAnswerObj);
+        String correctOption = String.fromCharCode(65 + correctIndex);
+        resultText.write("La opción correcta es la $correctOption: "
+            "${correctAnswerObj.answer}. ");
+      }
+      resultText.write("¡No te desanimes, sigue intentándolo!");
+    }
+
+    // Usar la función mejorada para leer
+    await _speakWithTTS(resultText.toString());
+  }
+
+  String _formatTextForTTS(String text) {
+    if (text.isEmpty) return text;
+
+    String processedText = text;
+
+    // 1. Eliminar emojis (usando tu regex)
+    processedText = processedText.replaceAll(
+      RegExp(
+        r'[\u{1F600}-\u{1F64F}' // Emoticons
+        r'\u{1F300}-\u{1F5FF}' // Símbolos y pictogramas
+        r'\u{1F680}-\u{1F6FF}' // Transporte y símbolos
+        r'\u{1F1E0}-\u{1F1FF}' // Banderas (iOS)
+        r'\u{1F018}-\u{1F270}' // Varios símbolos
+        r'[\u{1F000}-\u{1F9FF}' // Emojis principales y suplementarios
+        r'\u{2600}-\u{26FF}' // Símbolos misceláneos
+        r'\u{2700}-\u{27BF}' // Dingbats
+        r'\u{2300}-\u{23FF}' // Símbolos técnicos (incluye ⭐)
+        r'\u{2B50}-\u{2BFF}' // Símbolos y flechas (incluye ⭐)
+        r'\u{FE00}-\u{FE0F}' // Variantes de emojis
+        r'\u{1F900}-\u{1F9FF}' // Emojis suplementarios
+        r'\u{1FA70}-\u{1FAFF}' // Símbolos extendidos
+        r']',
+        unicode: true,
+      ),
+      '',
+    );
+
+    // 2. Procesar referencias bíblicas (formato "Libro Capítulo:Versículo" o "Libro Capítulo:Versículo-Versículo")
+    // Patrón para capturar: "Juan 2:4" o "Juan 4:4-5"
+    processedText = processedText.replaceAllMapped(
+      RegExp(
+        r'\b([A-Za-záéíóúñÑ]+)\s+(\d+):(\d+)(?:-(\d+))?\b',
+        caseSensitive: false,
+      ),
+      (match) {
+        String book = match.group(1)!;
+        String chapter = match.group(2)!;
+        String verse = match.group(3)!;
+        String? endVerse = match.group(4);
+
+        // Capitalizar primera letra del libro
+        book = book[0].toUpperCase() + book.substring(1).toLowerCase();
+
+        if (endVerse != null) {
+          return '$book capítulo $chapter versículo $verse al $endVerse';
+        } else {
+          return '$book capítulo $chapter versículo $verse';
+        }
+      },
+    );
+
+    // 3. Limpiar espacios múltiples
+    processedText = processedText.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    return processedText;
+  }
+
+  String _detectLanguage(String text) {
+    // Eliminar emojis y números para mejor detección
+    String cleanText = text.replaceAll(RegExp(r'[0-9\s]'), '');
+    cleanText = cleanText.replaceAll(
+      RegExp(
+        r'[\u{1F600}-\u{1F64F}' // Emoticons
+        r'\u{1F300}-\u{1F5FF}' // Símbolos y pictogramas
+        r'\u{1F680}-\u{1F6FF}' // Transporte y símbolos
+        r'\u{1F1E0}-\u{1F1FF}' // Banderas
+        r'\u{2600}-\u{26FF}' // Símbolos misceláneos
+        r'\u{2700}-\u{27BF}' // Dingbats
+        r'\u{2300}-\u{23FF}' // Símbolos técnicos
+        r'\u{2B50}-\u{2BFF}' // Símbolos y flechas
+        r']',
+        unicode: true,
+      ),
+      '',
+    );
+
+    if (cleanText.isEmpty) return 'es-ES'; // Default si no hay texto
+
+    // Detectar por rango Unicode (ejemplo para hebreo)
+    final hebrewRegex = RegExp(r'[\u0590-\u05FF]');
+    if (hebrewRegex.hasMatch(cleanText)) {
+      return 'he-IL';
+    }
+
+    // Detectar por palabras clave
+    final spanishWords = ['el', 'la', 'los', 'las', 'y', 'con', 'para', 'por'];
+    final englishWords = ['the', 'and', 'with', 'for', 'this', 'that', 'from'];
+
+    int spanishScore = 0;
+    int englishScore = 0;
+
+    for (var word in spanishWords) {
+      if (cleanText.toLowerCase().contains(word)) spanishScore++;
+    }
+
+    for (var word in englishWords) {
+      if (cleanText.toLowerCase().contains(word)) englishScore++;
+    }
+
+    // Detectar tildes españolas
+    final tildesRegex = RegExp(r'[áéíóúüñ]');
+    spanishScore += tildesRegex.allMatches(cleanText.toLowerCase()).length;
+
+    if (spanishScore > englishScore) {
+      return 'es-ES';
+    } else if (englishScore > spanishScore) {
+      return 'en-US';
+    }
+
+    return 'es-ES'; // Default
+  }
+
+  Future<void> _speakWithTTS(String text) async {
+    if (!isTtsEnabled || text.isEmpty) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    // 1. Limpiar y formatear el texto
+    String formattedText = _formatTextForTTS(text);
+
+    // 2. Detectar idioma
+    String language = _detectLanguage(text);
+
+    // 3. Configurar idioma en TTS
+    await flutterTts.setLanguage(language);
+
+    // 4. Ajustar velocidad según idioma (opcional)
+    if (language == 'he-IL') {
+      await flutterTts.setSpeechRate(0.3); // Hebreo más lento
+    } else {
+      await flutterTts.setSpeechRate(ttsRate);
+    }
+
+    // 5. Leer el texto formateado
+    await flutterTts.speak(formattedText);
   }
 
   void _showAnswerSnackbar(BuildContext context) {
@@ -390,12 +693,19 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
             TextButton(
               onPressed: () async {
+                // DETENER TTS ANTES DE CONTINUAR
+                if (isTtsEnabled && isTtsSpeaking) {
+                  await _stopTts();
+                }
+
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 await funcAnswerValidate();
                 if (mounted) {
                   setState(() {
                     _isAnswerSelected = false;
                     _suggestionSelected = false;
+                    _selectedAnswerIndex = null; // Limpiar selección
+                    _correctAnswerIndex = null; // Limpiar correcta
                   });
                 }
               },
@@ -410,16 +720,69 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
+  // Leer instrucciones del ordenamiento
+  Future<void> _speakOrderingInstructions() async {
+    if (!isTtsEnabled) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    String instructions =
+        "Para esta pregunta, debes ordenar los eventos en la secuencia correcta. "
+        "Mantén presionada cada opción y arrástrala al espacio vacío correspondiente. "
+        "Una vez que hayas colocado todas las opciones, presiona el botón Verificar Orden. "
+        "Puedes escuchar cada opción presionando el ícono de altavoz o manteniendo presionada la opción.";
+
+    await flutterTts.speak(instructions);
+  }
+
+// En tu _QuestionScreenState, agrega esta función:
+
+// Leer el orden actual
+  Future<void> _speakCurrentOrder() async {
+    if (!isTtsEnabled || orderedAnswers.isEmpty) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    StringBuffer orderText = StringBuffer();
+
+    if (orderedAnswers.isEmpty) {
+      orderText.write("Aún no has colocado ninguna opción.");
+    } else {
+      orderText.write("El orden actual es: ");
+      for (int i = 0; i < orderedAnswers.length; i++) {
+        orderText.write("${i + 1}. ${orderedAnswers[i].answer}. ");
+      }
+    }
+
+    await flutterTts.speak(orderText.toString());
+  }
+
   ///
   /// Función que se encarga de verificar el orden de las respuestas
   ///
   void verifyOrdered(BuildContext context, int index) {
+    // DETENER TTS ANTES DE NADA
+    if (isTtsEnabled && isTtsSpeaking) {
+      _stopTts();
+    }
+
     bool isCorrectOrder = true;
     for (int i = 0; i < orderedAnswers.length; i++) {
       if (orderedAnswers[i].correctOrder != i + 1) {
         isCorrectOrder = false;
         break;
       }
+    }
+
+    // LEER EL RESULTADO
+    if (isTtsEnabled) {
+      _speakOrderingResult(isCorrectOrder);
     }
 
     if (isCorrectOrder) {
@@ -441,6 +804,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
   /// Función que se encarga de validar las respuestas enviadas
   ///
   funcAnswerValidate() async {
+    if (isTtsEnabled && isTtsSpeaking) {
+      _stopTts();
+    }
+
     // si no es la ultima pregunta
     if (currentIndex < questions.length - 1) {
       setState(() {
@@ -702,27 +1069,29 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
-    return Column(
-      children: [
-        _buildCommonHeader(),
-        if (_shouldShowQuestionContent()) ...[
-          SizedBox(height: 19),
-          _buildTtsControls(translationProvider),
-          QuestionCard(
-            question: currentQuestion.question,
-            numberQuestion: numberQuestion,
-            totalQuestions: questions.length,
-            failedAttempts: failedAttempts,
-            fontSize: fontSizeText,
-            isTablet: false,
-            onSpeakQuestion: isTtsEnabled ? _speakQuestion : null,
-          ),
-          SizedBox(height: 38),
-          Expanded(child: _buildQuestionBody()),
-        ] else if (activityIsCompleted) ...[
-          Expanded(child: _buildResultScreen(context, translationProvider)),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildCommonHeader(),
+          if (_shouldShowQuestionContent()) ...[
+            SizedBox(height: 19),
+            _buildTtsControls(translationProvider),
+            QuestionCard(
+              question: currentQuestion.question,
+              numberQuestion: numberQuestion,
+              totalQuestions: questions.length,
+              failedAttempts: failedAttempts,
+              fontSize: fontSizeText,
+              isTablet: false,
+              onSpeakQuestion: isTtsEnabled ? _speakQuestion : null,
+            ),
+            SizedBox(height: 38),
+            _buildQuestionBody(),
+          ] else if (activityIsCompleted) ...[
+            _buildResultScreen(context, translationProvider),
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -755,7 +1124,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 isTtsSpeaking ? Icons.stop : Icons.play_arrow,
                 color: Colors.blue,
               ),
-              onPressed: isTtsSpeaking ? _stopTts : _speakQuestion,
+              onPressed: isTtsSpeaking ? _stopTts : _speakFullQuestion,
               tooltip: isTtsSpeaking
                   ? translationProvider
                       .tr('question_screen.tts_controls.stop_reading')
@@ -763,13 +1132,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       .tr('question_screen.tts_controls.reading_question'),
             ),
 
-            // Botón para leer opciones
-            IconButton(
-              icon: Icon(Icons.list, color: Colors.blue),
-              onPressed: _speakOptions,
-              tooltip: translationProvider
-                  .tr('question_screen.tts_controls.read_options'),
-            ),
+            // // Botón para leer opciones
+            // IconButton(
+            //   icon: Icon(Icons.list, color: Colors.blue),
+            //   onPressed: _speakOptions,
+            //   tooltip: translationProvider
+            //       .tr('question_screen.tts_controls.read_options'),
+            // ),
           ],
 
           // Espaciador
@@ -777,27 +1146,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
           // Opcional: ajustar velocidad
           if (isTtsEnabled && isTablet(context))
-            Row(
-              children: [
-                Icon(Icons.speed, size: 16, color: Colors.grey),
-                SizedBox(width: 4),
-                Text(
-                  translationProvider.tr('question_screen.speed_control.speed'),
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                SizedBox(width: 8),
-                Slider(
-                  value: ttsRate,
-                  min: 0.0,
-                  max: 1.0,
-                  divisions: 10,
-                  onChanged: (value) async {
-                    setState(() => ttsRate = value);
-                    await flutterTts.setSpeechRate(value);
-                  },
-                ),
-              ],
-            ),
+            _buildSpeedControl(translationProvider),
         ],
       ),
     );
@@ -912,6 +1261,18 @@ class _QuestionScreenState extends State<QuestionScreen> {
         answerSelected: verifyOrdered,
         showError: showError,
         onContinue: funcAnswerValidate,
+        isTtsEnabled: isTtsEnabled,
+        onSpeakOption: isTtsEnabled
+            ? (index) {
+                if (index < currentAnswers.length) {
+                  _speakAnswer(index);
+                }
+              }
+            : null,
+        onSpeakInstructions: isTtsEnabled ? _speakOrderingInstructions : null,
+        onSpeakCurrentOrder: isTtsEnabled && orderedAnswers.isNotEmpty
+            ? _speakCurrentOrder
+            : null,
       );
     }
 
@@ -925,6 +1286,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
       answerSelected: _answerSelected,
       callBackContinue: () {},
       isAnswerSelected: _isAnswerSelected,
+      selectedAnswerIndex: _selectedAnswerIndex, // NUEVO
+      correctAnswerIndex: _correctAnswerIndex,
     );
   }
 
@@ -1244,8 +1607,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 await SharePlus.instance.share(ShareParams(
                   text: translationProvider.trParams(
                       'question_screen.achievement_unlocked.share_subject', {
-                    "sectionNumber": stage!.sectionNumber.toString(),
-                    "sectionName": stage!.sectionName ?? ""
+                    "sectionNumber": stage?.sectionNumber.toString() ?? "",
+                    "sectionName": stage?.sectionName ?? ""
                   }),
                   subject: translationProvider.trParams(
                       'question_screen.achievement_unlocked.share_subject',
@@ -1656,6 +2019,38 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
+// Leer pregunta y opciones como un solo bloque
+  Future<void> _speakFullQuestion() async {
+    if (!isTtsEnabled) return;
+
+    // Construir el texto completo
+    StringBuffer fullText = StringBuffer();
+
+    // 1. Número de pregunta
+    fullText.write("${_translation.tr("question_screen.tts.question_prefix")} "
+        "$numberQuestion ${_translation.tr("question_screen.tts.of")} ${questions.length}. ");
+
+    // 2. La pregunta
+    fullText.write("${currentQuestion.question}. ");
+
+    // 3. Las opciones
+    fullText.write(_translation.tr("question_screen.tts.options"));
+
+    for (int i = 0; i < currentAnswers.length; i++) {
+      fullText.write("${_translation.tr("question_screen.tts.option")} "
+          "${String.fromCharCode(65 + i)}: ${currentAnswers[i].answer}. ");
+    }
+
+    // Detener cualquier reproducción anterior
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    // Leer el texto completo
+    await flutterTts.speak(fullText.toString());
+  }
+
   double _calculateProgressValue() {
     // Validar que haya historias
     if (questions.isEmpty) return 1.0;
@@ -1695,5 +2090,33 @@ class _QuestionScreenState extends State<QuestionScreen> {
         });
       }
     }
+  }
+
+  // Control de velocidad separado para mejor organización
+  Widget _buildSpeedControl(AppTranslationProvider translationProvider) {
+    return Row(
+      children: [
+        Icon(Icons.speed, size: 16, color: Colors.grey),
+        SizedBox(width: 4),
+        Text(
+          translationProvider.tr('question_screen.speed_control.speed'),
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        SizedBox(width: 8),
+        SizedBox(
+          width: 100,
+          child: Slider(
+            value: ttsRate,
+            min: 0.0,
+            max: 1.0,
+            divisions: 10,
+            onChanged: (value) async {
+              setState(() => ttsRate = value);
+              await flutterTts.setSpeechRate(value);
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

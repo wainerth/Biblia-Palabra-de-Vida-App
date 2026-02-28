@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -17,6 +18,7 @@ class ThemeEditorScreen extends StatefulWidget {
 }
 
 class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
+  final translationProvider = AppTranslationProvider();
   TextEditingController _nameController = TextEditingController();
   late Color _backgroundColor;
   late Color _textColor;
@@ -38,7 +40,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
       _buttonTextColor = widget.existingTheme!.buttonTextColor;
       _verseHighlightColor = widget.existingTheme!.verseHighlightColor;
     } else {
-      _nameController = TextEditingController(text: "Tema Personalizado");
+      _nameController = TextEditingController(
+          text: translationProvider.tr("theme_editor_screen.title.text_input"));
       _backgroundColor = Colors.white;
       _textColor = Colors.black;
       _appBarColor = Colors.blue;
@@ -87,7 +90,9 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
         ),
         backgroundColor: currentTheme.appBarColor,
         title: Text(
-          widget.existingTheme != null ? 'Editar Tema' : 'Nuevo Tema',
+          widget.existingTheme != null
+              ? translationProvider.tr("theme_editor_screen.title.edit")
+              : translationProvider.tr("theme_editor_screen.title.new"),
           style: StylesApp(context)
               .textStyleBody16
               .copyWith(color: currentTheme.textColor),
@@ -109,71 +114,79 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
         ],
       ),
       backgroundColor: currentTheme.backgroundColor,
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nameController,
-              style: StylesApp(context)
-                  .textStyleBody12
-                  .copyWith(color: currentTheme.textColor),
-              decoration: InputDecoration(
-                labelText: 'Nombre del tema',
-                labelStyle: StylesApp(context)
-                    .textStyleBody14
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextField(
+                controller: _nameController,
+                style: StylesApp(context)
+                    .textStyleBody12
                     .copyWith(color: currentTheme.textColor),
-                border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: translationProvider
+                      .tr("theme_editor_screen.fields.theme_name"),
+                  labelStyle: StylesApp(context)
+                      .textStyleBody14
+                      .copyWith(color: currentTheme.textColor),
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            // Selectores de color
-            _buildColorPicker(
-              'Color de AppBar',
-              _appBarColor,
-              (color) => setState(() => _appBarColor = color),
-            ),
-            _buildColorPicker('Color de fondo', _backgroundColor, (color) {
-              setState(() {
-                _backgroundColor = color;
-              });
-            }),
-            _buildColorPicker(
-              'Color de texto',
-              _textColor,
-              (color) => setState(() => _textColor = color),
-            ),
-            _buildColorPicker(
-              'Color de botones',
-              _buttonColor,
-              (color) => setState(() => _buttonColor = color),
-            ),
-            _buildColorPicker(
-              'Color de texto en botones',
-              _buttonTextColor,
-              (color) => setState(() => _buttonTextColor = color),
-            ),
-            _buildColorPicker(
-              'Color de resaltado',
-              _verseHighlightColor,
-              (color) => setState(() => _verseHighlightColor = color),
-            ),
-            SizedBox(height: 30),
-            _buildPreview(),
-            SizedBox(height: 30),
-            ButtonThemeWidget(
-              text: widget.existingTheme != null
-                  ? "MODIFICAR TEMA"
-                  : "GUARDAR TEMA",
-              buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                  backgroundColor: WidgetStatePropertyAll(
-                    currentTheme.buttonColor,
-                  ),
-                  foregroundColor:
-                      WidgetStatePropertyAll(currentTheme.buttonTextColor)),
-              onPressed: () => _saveTheme(context),
-            ),
-          ],
+              SizedBox(height: 20),
+              // Selectores de color
+              _buildColorPicker(
+                translationProvider.tr("theme_editor_screen.fields.color_appbar"),
+                _appBarColor,
+                (color) => setState(() => _appBarColor = color),
+              ),
+              _buildColorPicker(
+                  translationProvider
+                      .tr("theme_editor_screen.fields.color_background"),
+                  _backgroundColor, (color) {
+                setState(() {
+                  _backgroundColor = color;
+                });
+              }),
+              _buildColorPicker(
+                translationProvider.tr("theme_editor_screen.fields.color_text"),
+                _textColor,
+                (color) => setState(() => _textColor = color),
+              ),
+              _buildColorPicker(
+                translationProvider.tr("theme_editor_screen.fields.color_button"),
+                _buttonColor,
+                (color) => setState(() => _buttonColor = color),
+              ),
+              _buildColorPicker(
+                translationProvider
+                    .tr("theme_editor_screen.fields.color_button_text"),
+                _buttonTextColor,
+                (color) => setState(() => _buttonTextColor = color),
+              ),
+              _buildColorPicker(
+                translationProvider
+                    .tr("theme_editor_screen.fields.color_highlight"),
+                _verseHighlightColor,
+                (color) => setState(() => _verseHighlightColor = color),
+              ),
+              SizedBox(height: 30),
+              _buildPreview(),
+              SizedBox(height: 30),
+              ButtonThemeWidget(
+                text: widget.existingTheme != null
+                    ? translationProvider.tr("theme_editor_screen.buttons.update")
+                    : translationProvider.tr("theme_editor_screen.buttons.save"),
+                buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                    backgroundColor: WidgetStatePropertyAll(
+                      currentTheme.buttonColor,
+                    ),
+                    foregroundColor:
+                        WidgetStatePropertyAll(currentTheme.buttonTextColor)),
+                onPressed: () => _saveTheme(context),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -201,7 +214,9 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
         ),
         backgroundColor: currentTheme.appBarColor,
         title: Text(
-          widget.existingTheme != null ? 'Editor de Tema' : 'Crear Nuevo Tema',
+          widget.existingTheme != null
+              ? translationProvider.tr("theme_editor_screen.title.editor")
+              : translationProvider.tr("theme_editor_screen.title.create"),
           style: StylesApp(context).textStyleBody18.copyWith(
               color: currentTheme.textColor, fontWeight: FontWeight.bold),
         ),
@@ -211,7 +226,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               icon: Icon(Icons.delete_outline, size: 28),
               color: Colors.red,
               onPressed: () => _deleteTheme(context),
-              tooltip: 'Eliminar tema',
+              // tooltip: 'Eliminar tema',
             ),
           SizedBox(width: 16),
         ],
@@ -230,7 +245,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Nombre del tema
-                    _buildTabletSectionTitle('Nombre del Tema'),
+                    _buildTabletSectionTitle(translationProvider
+                        .tr("theme_editor_screen.fields.theme_name")),
                     SizedBox(height: 12),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -248,7 +264,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                             .copyWith(color: currentTheme.textColor),
                         decoration: InputDecoration(
                           border: InputBorder.none,
-                          hintText: 'Ingresa un nombre para el tema',
+                          hintText: translationProvider
+                              .tr("theme_editor_screen.fields.theme_name_hint"),
                           hintStyle: StylesApp(context)
                               .textStyleBody14
                               .copyWith(
@@ -260,7 +277,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     SizedBox(height: 32),
 
                     // Selectores de color en grid para tablet
-                    _buildTabletSectionTitle('Personalización de Colores'),
+                    _buildTabletSectionTitle(translationProvider
+                        .tr("theme_editor_screen.sections.colors")),
                     SizedBox(height: 20),
 
                     GridView.count(
@@ -272,32 +290,38 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       childAspectRatio: 3.5,
                       children: [
                         _buildTabletColorPickerItem(
-                          'AppBar',
+                          translationProvider
+                              .tr("theme_editor_screen.preview.appbar"),
                           _appBarColor,
                           (color) => setState(() => _appBarColor = color),
                         ),
                         _buildTabletColorPickerItem(
-                          'Fondo',
+                          translationProvider
+                              .tr("theme_editor_screen.preview.background"),
                           _backgroundColor,
                           (color) => setState(() => _backgroundColor = color),
                         ),
                         _buildTabletColorPickerItem(
-                          'Texto',
+                          translationProvider
+                              .tr("theme_editor_screen.preview.text"),
                           _textColor,
                           (color) => setState(() => _textColor = color),
                         ),
                         _buildTabletColorPickerItem(
-                          'Botones',
+                          translationProvider
+                              .tr("theme_editor_screen.preview.buttons"),
                           _buttonColor,
                           (color) => setState(() => _buttonColor = color),
                         ),
                         _buildTabletColorPickerItem(
-                          'Texto Botones',
+                          translationProvider
+                              .tr("theme_editor_screen.preview.button_text"),
                           _buttonTextColor,
                           (color) => setState(() => _buttonTextColor = color),
                         ),
                         _buildTabletColorPickerItem(
-                          'Resaltado',
+                          translationProvider
+                              .tr("theme_editor_screen.preview.highlight"),
                           _verseHighlightColor,
                           (color) =>
                               setState(() => _verseHighlightColor = color),
@@ -313,8 +337,10 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                         width: 300,
                         child: ButtonThemeWidget(
                           text: widget.existingTheme != null
-                              ? "ACTUALIZAR TEMA"
-                              : "CREAR TEMA",
+                              ? translationProvider
+                                  .tr("theme_editor_screen.buttons.update")
+                              : translationProvider
+                                  .tr("theme_editor_screen.buttons.create"),
                           buttonStyle:
                               StylesApp(context).btnWidgetSmall.copyWith(
                                     backgroundColor: WidgetStatePropertyAll(
@@ -339,7 +365,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               flex: 2,
               child: Column(
                 children: [
-                  _buildTabletSectionTitle('Vista Previa'),
+                  _buildTabletSectionTitle(translationProvider
+                      .tr("theme_editor_screen.sections.preview")),
                   SizedBox(height: 20),
                   Expanded(
                     child: _buildTabletPreview(),
@@ -367,7 +394,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                                 size: 20),
                             SizedBox(width: 10),
                             Text(
-                              'Consejo',
+                              translationProvider
+                                  .tr("theme_editor_screen.sections.tip"),
                               style:
                                   StylesApp(context).textStyleBody14.copyWith(
                                         color: currentTheme.textColor,
@@ -378,7 +406,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                         ),
                         SizedBox(height: 12),
                         Text(
-                          'Los temas personalizados se aplicarán solo a la biblia y podrás cambiarlos en cualquier momento.',
+                          translationProvider
+                              .tr("theme_editor_screen.messages.tip_message"),
                           style: StylesApp(context).textStyleBody12.copyWith(
                                 color: currentTheme.textColor
                                     .withValues(alpha: 0.7),
@@ -490,7 +519,9 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Seleccionar color para $label',
+                      translationProvider.trParams(
+                          "theme_editor_screen.color_picker.title",
+                          {"label": label}),
                       style: StylesApp(context).textStyleBody16.copyWith(
                             color: currentTheme.textColor,
                             fontWeight: FontWeight.bold,
@@ -507,7 +538,6 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   child: ColorPicker(
-                  
                     pickerColor: currentColor,
                     onColorChanged: (color) {
                       tempColor = color;
@@ -518,7 +548,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     displayThumbColor: true,
                     portraitOnly: true,
                     hexInputBar: true,
-                     pickerAreaBorderRadius: BorderRadius.circular(10),
+                    pickerAreaBorderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
@@ -529,7 +559,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
-                      'Cancelar',
+                      translationProvider.tr("theme_editor_screen.color_picker.cancel"),
                       style: StylesApp(context).textStyleBody14.copyWith(
                             color:
                                 currentTheme.textColor.withValues(alpha: 0.7),
@@ -552,7 +582,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       Navigator.of(context).pop();
                     },
                     child: Text(
-                      'Aplicar',
+                      translationProvider.tr("theme_editor_screen.color_picker.apply"),
                       style: StylesApp(context).textStyleBody14,
                     ),
                   ),
@@ -597,7 +627,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
             ),
             child: Center(
               child: Text(
-                'AppBar',
+                translationProvider.tr("theme_editor_screen.preview.appbar"),
                 style: TextStyle(
                   color: _buttonTextColor,
                   fontWeight: FontWeight.bold,
@@ -607,7 +637,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
             ),
           ),
           SizedBox(height: 24),
-      
+
           // Contenido de ejemplo
           Expanded(
             child: SingleChildScrollView(
@@ -615,20 +645,20 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Texto de ejemplo',
+                    translationProvider.tr("theme_editor_screen.preview.sample_text"),
                     style: StylesApp(context).textStyleBody18.copyWith(
-                      color: _textColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
+                          color: _textColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Este es un texto de muestra para mostrar cómo se verá el tema en la aplicación.',
-                    style:  StylesApp(context).textStyleBody14.copyWith(
-                      color: _textColor.withValues(alpha: 0.8),
-                      fontSize: 14,
-                    ),
+                    translationProvider.tr("theme_editor_screen.preview.sample_description"),
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                          color: _textColor.withValues(alpha: 0.8),
+                          fontSize: 14,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 32),
@@ -640,12 +670,12 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      'Versículo resaltado',
-                      style:  StylesApp(context).textStyleBody14.copyWith(
-                        color: _textColor,
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                      ),
+                      translationProvider.tr("theme_editor_screen.preview.highlighted_verse"),
+                      style: StylesApp(context).textStyleBody14.copyWith(
+                            color: _textColor,
+                            fontSize: 14,
+                            fontStyle: FontStyle.italic,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -654,7 +684,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
             ),
           ),
           SizedBox(height: 24),
-      
+
           // Botones de ejemplo
           Row(
             children: [
@@ -667,11 +697,11 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      'Botón Primario',
-                      style:  StylesApp(context).textStyleBody18.copyWith(
-                        color: _buttonTextColor,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      translationProvider.tr("theme_editor_screen.preview.primary_button"),
+                      style: StylesApp(context).textStyleBody18.copyWith(
+                            color: _buttonTextColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                 ),
@@ -692,7 +722,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
             ],
           ),
           SizedBox(height: 20),
-      
+
           // Nombre del tema
           Container(
             padding: EdgeInsets.symmetric(vertical: 12),
@@ -704,12 +734,12 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               child: Text(
                 _nameController.text.isNotEmpty
                     ? _nameController.text
-                    : 'Nombre del Tema',
-                style:  StylesApp(context).textStyleBody14.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: _textColor.withValues(alpha: 0.9),
-                ),
+                    : translationProvider.tr("theme_editor_screen.fields.theme_name"),
+                style: StylesApp(context).textStyleBody14.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: _textColor.withValues(alpha: 0.9),
+                    ),
               ),
             ),
           ),
@@ -740,7 +770,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                 builder: (context) => AlertDialog(
                   backgroundColor: currentTheme.backgroundColor,
                   title: Text(
-                    'Seleccionar color',
+                    translationProvider.tr(
+                        "theme_editor_screen.color_picker.title_color"),
                     style: StylesApp(context)
                         .textStyleBody10
                         .copyWith(color: currentTheme.textColor),
@@ -760,7 +791,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                   actions: [
                     TextButton(
                       child: Text(
-                        'Cancelar',
+                        translationProvider.tr("theme_editor_screen.color_picker.cancel"),
                         style: StylesApp(context)
                             .textStyleBody10
                             .copyWith(color: currentTheme.textColor),
@@ -769,7 +800,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     ),
                     TextButton(
                       child: Text(
-                        'Seleccionar',
+                        translationProvider.tr("theme_editor_screen.color_picker.select"),
                         style: StylesApp(context)
                             .textStyleBody10
                             .copyWith(color: currentTheme.textColor),
@@ -840,7 +871,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                 backgroundColor: WidgetStatePropertyAll(_buttonColor),
                 foregroundColor: WidgetStatePropertyAll(_buttonTextColor)),
             onPressed: () {},
-            text: 'Botón',
+            text: translationProvider.tr("theme_editor_screen.preview.buttons"),
           ),
           SizedBox(height: 16),
           Container(
@@ -867,7 +898,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
 
   Future<void> _saveTheme(BuildContext context) async {
     if (_nameController.text.isEmpty) {
-      showSnackBar("Por favor ingresa un nombre para el tema",
+      showSnackBar(translationProvider.tr("theme_editor_screen.messages.name_required"),
           type: SnackBarType.info);
       return;
     }
@@ -900,15 +931,15 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Eliminar tema'),
-        content: Text('¿Estás seguro de que quieres eliminar este tema?'),
+        title: Text(translationProvider.tr("theme_editor_screen.delete_dialog.title")),
+        content: Text(translationProvider.tr("theme_editor_screen.delete_dialog.message")),
         actions: [
           TextButton(
-            child: Text('Cancelar'),
+            child: Text(translationProvider.tr("theme_editor_screen.delete_dialog.cancel")),
             onPressed: () => Navigator.of(context).pop(false),
           ),
           TextButton(
-            child: Text('Eliminar'),
+            child: Text(translationProvider.tr("theme_editor_screen.delete_dialog.delete")),
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],

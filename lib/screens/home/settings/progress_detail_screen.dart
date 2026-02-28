@@ -22,6 +22,8 @@ class ProgressDetailScreen extends StatefulWidget {
 }
 
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
+  final translationProvider = AppTranslationProvider();
+
   List<UserTitle>? titles = [];
   ResponseProgress? progressUser;
   late Map<String, dynamic> config;
@@ -55,8 +57,6 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   Widget build(BuildContext context) {
     config = Provider.of<CatalogueProvider>(context, listen: false).allConfig;
 
-    final translationProvider = context.read<AppTranslationProvider>();
-
     maxScore = config["highScore"];
     mediumScore = config["mediumScore"];
     lowScore = config["lowScore"];
@@ -67,15 +67,17 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     return Scaffold(
       body: SafeArea(
         child: ResponsiveLayout(
-          mobile: _buildMobileLayout(context, userData!, translationProvider),
-          tablet: _buildTabletLayout(context, userData, translationProvider),
+          mobile: _buildMobileLayout(context, userData!),
+          tablet: _buildTabletLayout(context, userData),
         ),
       ),
     );
   }
 
-  Widget _buildMobileLayout(BuildContext context, LoginUser userData,
-      AppTranslationProvider translationProvider) {
+  Widget _buildMobileLayout(
+    BuildContext context,
+    LoginUser userData,
+  ) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,18 +199,20 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                     int.parse(userData.createdAt))
                 : DateTime.now(),
           ),
-          _buildAchievements(context, translationProvider),
+          _buildAchievements(context),
           SizedBox(
             height: 8.0,
           ),
-          _buildCollections(context, translationProvider)
+          _buildCollections(context)
         ],
       ),
     );
   }
 
-  Widget _buildTabletLayout(BuildContext context, LoginUser userData,
-      AppTranslationProvider translationProvider) {
+  Widget _buildTabletLayout(
+    BuildContext context,
+    LoginUser userData,
+  ) {
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.all(16.0),
@@ -242,7 +246,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                             ),
                             ButtonThemeWidget(
                               onPressed: () {
-                                _dialogAwards(context, translationProvider);
+                                _dialogAwards(context);
                               },
                               text: translationProvider
                                   .tr('progress_detail_screen.view_collection'),
@@ -384,8 +388,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                           child: Column(
                             children: [
                               // Logros/títulos (versión expandida)
-                              _buildAchievementsTablet(
-                                  context, translationProvider),
+                              _buildAchievementsTablet(context),
                             ],
                           ),
                         ),
@@ -500,8 +503,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   }
 
   // Versión tablet de los logros
-  Widget _buildAchievementsTablet(
-      BuildContext context, AppTranslationProvider translationProvider) {
+  Widget _buildAchievementsTablet(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -571,8 +573,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       final userProvider =
                           Provider.of<UserProvider>(context, listen: false);
                       final LoginUser? userData = userProvider.currentUser;
-                      return _buildTitleItemTablet(context, titles![index],
-                          userData!, translationProvider);
+                      return _buildTitleItemTablet(
+                          context, titles![index], userData!);
                     },
                   ),
           ),
@@ -582,11 +584,11 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   }
 
 // Item de título para tablet
-  Widget _buildTitleItemTablet(BuildContext context, UserTitle title,
-      LoginUser userData, AppTranslationProvider translationProvider) {
+  Widget _buildTitleItemTablet(
+      BuildContext context, UserTitle title, LoginUser userData) {
     return GestureDetector(
       onTap: () {
-        _showTitleDetailModal(context, title, userData, translationProvider);
+        _showTitleDetailModal(context, title, userData);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -635,8 +637,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     );
   }
 
-  Column _buildCollections(
-      BuildContext context, AppTranslationProvider translationProvider) {
+  Column _buildCollections(BuildContext context) {
     return Column(
       children: [
         Center(
@@ -652,7 +653,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               ),
               ButtonThemeWidget(
                 onPressed: () {
-                  _dialogAwards(context, translationProvider);
+                  _dialogAwards(context);
                 },
                 text: translationProvider.tr('progress_detail_screen.view'),
                 width: 73.0,
@@ -715,8 +716,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     );
   }
 
-  Future<dynamic> _dialogAwards(
-      BuildContext context, AppTranslationProvider translationProvider) async {
+  Future<dynamic> _dialogAwards(BuildContext context) async {
     // Detectar si estamos en tablet
     final bool _isTablet = isTablet(context);
 
@@ -1133,8 +1133,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     );
   }
 
-  Widget _buildAchievements(
-      BuildContext context, AppTranslationProvider translationProvider) {
+  Widget _buildAchievements(BuildContext context) {
     ScrollController scrollController = ScrollController();
 
     // Detectar si estamos en tablet
@@ -1198,8 +1197,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                           listen: false,
                         );
                         LoginUser? userData = userProvider.currentUser;
-                        _showTitleDetailModal(context, titles![index],
-                            userData!, translationProvider);
+                        _showTitleDetailModal(
+                            context, titles![index], userData!);
                       },
                       child: Container(
                         constraints: BoxConstraints(
@@ -1489,21 +1488,20 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   }
 
 // Método para mostrar el modal del título
-  void _showTitleDetailModal(BuildContext context, UserTitle title,
-      LoginUser userData, AppTranslationProvider translationProvider) {
+  void _showTitleDetailModal(
+      BuildContext context, UserTitle title, LoginUser userData) {
     showModalBottomSheet(
       context: context,
       isScrollControlled:
           true, // Permite que el modal ocupe casi toda la pantalla
       backgroundColor: Colors.transparent, // Fondo transparente para el modal
-      builder: (context) => _buildTitleDetailContent(
-          context, title, userData, translationProvider),
+      builder: (context) => _buildTitleDetailContent(context, title, userData),
     );
   }
 
 // Widget con el contenido del modal
-  Widget _buildTitleDetailContent(BuildContext context, UserTitle title,
-      LoginUser userData, AppTranslationProvider translationProvider) {
+  Widget _buildTitleDetailContent(
+      BuildContext context, UserTitle title, LoginUser userData) {
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,

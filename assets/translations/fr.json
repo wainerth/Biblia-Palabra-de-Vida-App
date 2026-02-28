@@ -8,7 +8,8 @@
         "view": "Voir",
         "close": "Fermer",
         "go_to_adventure": "Aller à l'aventure",
-        "stage": "Étape"
+        "stage": "Étape",
+        "read_more": "Lire Plus"
     },
     "navigation": {
         "home": "Accueil",
@@ -28,7 +29,8 @@
         "view_intro": "Voir l'intro",
         "register_free_account": "ENREGISTREZ UN\n COMPTE GRATUIT",
         "create_account": "Créer un compte",
-        "login": "Se connecter"
+        "login": "Se connecter",
+        "sign_up_google": "S'inscrire avec Google"
     },
     "register_screen": {
         "title": "La Bible\n  Parole De\n Vie!",
@@ -1071,6 +1073,166 @@
             "fast": "Rapide"
         }
     },
+    "search_bible_screen": {
+        "title": "Rechercher dans la Bible",
+        "tabs": {
+            "book": "Livre",
+            "text": "Texte",
+            "theme": "Thème",
+            "character": "Personnages",
+            "placeholder_book": "Rechercher par livre",
+            "placeholder_text": "Rechercher par texte",
+            "placeholder_theme": "Rechercher par thème",
+            "placeholder_character": "Rechercher des personnages"
+        },
+        "messages": {
+            "data_unavailable": "Données non disponibles",
+            "initializing": "Initialisation..."
+        }
+    },
+    "search_by_book": {
+        "dropdowns": {
+            "version": "Sélectionnez la version",
+            "book": "Sélectionnez le Livre",
+            "book_short": "Sélectionnez le livre"
+        },
+        "sections": {
+            "chapters": "Chapitres",
+            "verses": "Versets",
+            "total_chapters": "Total : {{count}}",
+            "chapter": "Ch. {{number}}",
+            "select_book": "Sélectionnez un livre",
+            "select_chapter": "Sélectionnez un chapitre"
+        },
+        "range": {
+            "title": "Plage de versets",
+            "select_range": "Sélectionner une plage"
+        },
+        "button": "Accepter",
+        "messages": {
+            "fields_required": "Vous devez sélectionner tous les champs",
+            "error_loading_data": "Erreur lors du chargement des données : {{error}}",
+            "error_changing_version": "Erreur lors du changement de version : {{error}}",
+            "no_books_available": "Aucun livre disponible pour cette version",
+            "no_chapters_available": "Aucun chapitre disponible pour ce livre"
+        }
+    },
+    "search_by_text": {
+        "dropdowns": {
+            "version": "Sélectionnez la version",
+            "version_short": "Version biblique"
+        },
+        "search": {
+            "label_text": "Rechercher par texte",
+            "placeholder": "Rechercher un mot ou une phrase...",
+            "placeholder_tablet": "Tapez ici le mot ou la phrase à rechercher...",
+            "searching": "Recherche en cours...",
+            "results_count": "{{count}} résultats pour '{{query}}'",
+            "page_info": "Page {{current}} sur {{total}}"
+        },
+        "results": {
+            "empty": {
+                "title": "Aucun résultat",
+                "message_select_version": "Sélectionnez une version biblique pour commencer votre recherche",
+                "message_search": "Tapez un mot ou une phrase dans le champ de recherche pour trouver des versets associés"
+            }
+        },
+        "actions": {
+            "view": "Voir",
+            "copy": "Copier",
+            "favorite": "Favori",
+            "view_chapter": "Voir le Chapitre",
+            "copy_verse": "Copier le Verset",
+            "add_favorite": "Ajouter aux Favoris",
+            "added_favorite": "Verset ajouté aux Favoris"
+        },
+        "modal": {
+            "copy_success": "Le chapitre {{chapitre}} du livre {{livre}}\na été copié avec succès dans le presse-papiers"
+        },
+        "messages": {
+            "error_loading": "Erreur lors du chargement des données : {{error}}",
+            "error_filter": "erreur de filtrage"
+        }
+    },
+    "search_by_theme": {
+        "search": {
+            "label_text": "Recherche de Thèmes Bibliques",
+            "placeholder": "Rechercher un thème...",
+            "placeholder_tablet": "Tapez ici le thème biblique...",
+            "searching": "Recherche de thèmes...",
+            "results_count": "{{count}} thèmes trouvés",
+            "page_info": "Page {{current}} sur {{total}}"
+        },
+        "results": {
+            "empty": {
+                "title": "Aucun thème trouvé",
+                "message_start": "Commencez à chercher des thèmes bibliques en tapant dans le champ de recherche",
+                "message_not_found": "Aucun résultat trouvé pour '{{query}}'"
+            }
+        },
+        "card": {
+            "tag": "Thème",
+            "category": "Étude biblique",
+            "view_button": "Voir l'étude complète"
+        },
+        "messages": {
+            "error_loading": "Erreur lors du chargement des données : {{error}}",
+            "error_filter": "erreur de filtrage",
+            "cancel": "Annuler",
+            "retry": "Réessayer"
+        }
+    },
+    "dialog_internal_teaching": {
+        "title": "Enseignement Biblique",
+        "title_mobile": "Enseignement",
+        "description_title": "Description de l'Enseignement",
+        "references_title": "Références Bibliques",
+        "references_count": "{{count}} versets",
+        "loading_references": "Chargement des références...",
+        "no_references": "Aucune référence biblique pour cet enseignement",
+        "go_to_verse": "Aller au verset",
+        "copy_verse": "Copier le verset",
+        "share": "Partager",
+        "button_references": "Références Bibliques",
+        "dialog_reference": {
+            "title": "Références"
+        }
+    },
+    "search_by_character": {
+        "search": {
+            "label_text": "Recherche de Personnages Bibliques",
+            "placeholder": "Rechercher un personnage...",
+            "placeholder_tablet": "Tapez ici le nom du personnage...",
+            "searching": "Recherche de personnages...",
+            "results_count": "{{count}} personnages trouvés",
+            "page_info": "Page {{current}} sur {{total}}"
+        },
+        "results": {
+            "empty": {
+                "title": "Aucun personnage trouvé",
+                "message_start": "Commencez à chercher des personnages bibliques en tapant dans le champ de recherche",
+                "message_not_found": "Aucun résultat trouvé pour '{{query}}'",
+                "no_results": "Aucun résultat..."
+            }
+        },
+        "card": {
+            "related_count": "A {{count}} liés",
+            "view_button": "Voir détails",
+            "color_label": "Couleur d'identification",
+            "new_testament": "Personnage du Nouveau Testament"
+        },
+        "dialog": {
+            "related_characters": "Personnages Liés",
+            "character_details": "Détails du Personnage",
+            "description": "Description"
+        },
+        "messages": {
+            "error_loading": "Erreur lors du chargement des données : {{error}}",
+            "error_filter": "erreur de filtrage",
+            "back": "Retour",
+            "retry": "Réessayer"
+        }
+    },
     "workspace": {
         "title": "Accueil",
         "notifications": "Notifications",
@@ -1198,6 +1360,10 @@
             "personal_data": "Données Personnelles",
             "contact": "Contact",
             "location": "Localisation"
+        },
+        "dialog": {
+            "title": "Image trop grande",
+            "message": "L'image sélectionnée dépasse la taille maximale de 5 Mo."
         },
         "fields": {
             "name": "Nom",
@@ -1416,5 +1582,92 @@
         "email_subject": "Demande - Bible Parole de Vie",
         "email_body": "Bonjour, j'ai une question concernant l'application :",
         "email_error": "Impossible d'ouvrir l'application de messagerie"
+    },
+    "theme_editor_screen": {
+        "title": {
+            "text_input": "Thème Personnalisé",
+            "edit": "Modifier le Thème",
+            "new": "Nouveau Thème",
+            "editor": "Éditeur de Thème",
+            "create": "Créer un Nouveau Thème"
+        },
+        "fields": {
+            "theme_name": "Nom du thème",
+            "theme_name_hint": "Entrez un nom pour le thème",
+            "color_appbar": "Couleur de la Barre",
+            "color_background": "Couleur de fond",
+            "color_text": "Couleur du texte",
+            "color_button": "Couleur des boutons",
+            "color_button_text": "Couleur du texte des boutons",
+            "color_highlight": "Couleur de surbrillance"
+        },
+        "sections": {
+            "theme_name": "Nom du Thème",
+            "colors": "Personnalisation des Couleurs",
+            "preview": "Aperçu",
+            "tip": "Conseil"
+        },
+        "preview": {
+            "sample_text": "Texte exemple",
+            "sample_description": "Ceci est un exemple de texte pour montrer à quoi ressemblera le thème dans l'application.",
+            "highlighted_verse": "Verset surligné",
+            "primary_button": "Bouton Principal",
+            "appbar": "Barre",
+            "background": "Fond",
+            "text": "Texte",
+            "buttons": "Boutons",
+            "button_text": "Texte des boutons",
+            "highlight": "Surlignage"
+        },
+        "color_picker": {
+            "title": "Choisir la couleur pour {{label}}",
+            "title_color": "Choisir la couleur",
+            "cancel": "Annuler",
+            "apply": "Appliquer",
+            "select": "Sélectionner"
+        },
+        "buttons": {
+            "save": "ENREGISTRER LE THÈME",
+            "update": "MODIFIER LE THÈME",
+            "create": "CRÉER LE THÈME",
+            "update_alt": "METTRE À JOUR",
+            "delete_tooltip": "Supprimer le thème"
+        },
+        "delete_dialog": {
+            "title": "Supprimer le thème",
+            "message": "Êtes-vous sûr de vouloir supprimer ce thème ?",
+            "cancel": "Annuler",
+            "delete": "Supprimer"
+        },
+        "messages": {
+            "name_required": "Veuillez entrer un nom pour le thème",
+            "tip_message": "Les thèmes personnalisés ne s'appliqueront qu'à la bible et vous pourrez les changer à tout moment."
+        }
+    },
+    "audio_screen": {
+        "title": "Audio",
+        "app_name": "AMISTAD",
+        "app_subtitle": "Radio en ligne",
+        "app_tagline": "La fréquence qui accompagne",
+        "app_description": "Une radio avec des valeurs qui vous accompagne tous les jours",
+        "opening_message": "Vous êtes sur le point d'ouvrir :",
+        "confirm_dialog": {
+            "title": "Confirmer",
+            "message": "Voulez-vous ouvrir l'application {{appName}} ?",
+            "cancel": "Annuler",
+            "open": "Ouvrir"
+        },
+        "external_app_dialog": {
+            "title": "Ouvrir une application externe",
+            "message": "Vous serez redirigé vers 'Amistad Online'",
+            "cancel": "Annuler",
+            "accept": "Accepter"
+        },
+        "error_dialog": {
+            "message": "Impossible d'ouvrir l'application {{appName}}. Voulez-vous télécharger l'App ?",
+            "continue": "Continuer",
+            "cancel": "Annuler"
+        },
+        "button": "Écouter la radio"
     }
 }

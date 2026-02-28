@@ -22,6 +22,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String avatarImg = 'assets/avatar.png';
   LoginUser? dataUser;
+  final translationProvider = AppTranslationProvider();
 
   Future<void> _selectImage() async {
     final picker = ImagePicker();
@@ -80,12 +81,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Imagen muy grande'),
-                content: Text(
-                    'La imagen seleccionada excede el tamaño máximo de 5MB.'),
+                title: Text(translationProvider.tr("profile.dialog.title"),),
+                content: Text(translationProvider.tr("profile.dialog.message")),
                 actions: [
                   TextButton(
-                    child: Text('Aceptar'),
+                    child: Text(translationProvider.tr("common.accept")),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -99,7 +99,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final translationProvider = context.read<AppTranslationProvider>();
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
     List<ModelData> optionsSex = [

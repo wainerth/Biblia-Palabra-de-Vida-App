@@ -40,6 +40,9 @@ class SearchByBookWidget extends StatefulWidget {
 }
 
 class _SearchByBookWidgetState extends State<SearchByBookWidget> {
+
+  final translationProvider = AppTranslationProvider();
+  
   late BibleTheme currentTheme;
 
   // variables para almacenar listas globales
@@ -164,7 +167,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       } catch (e) {
         if (!mounted) return;
         await showCustomDialog(context,
-            message: 'Error al cargar los datos: $e',
+            message: translationProvider.trParams('search_by_book.messages.error_loading_data', {'error': e.toString()}),
             dialogType: DialogType.error);
       }
     });
@@ -197,7 +200,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ButtonThemeWidget(
-                text: "Aceptar",
+                text: translationProvider.tr('search_by_book.button'),
                 width: isTablet ? 200 : null,
                 height: isTablet ? 50 : null,
                 buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -232,7 +235,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           ),
           padding: EdgeInsets.symmetric(horizontal: 12),
           child: CustomDropdownBottomWidget(
-            hintText: "Seleccione la versión",
+            hintText: translationProvider.tr('search_by_book.dropdowns.version'),
             items: bibleVersions,
             border: false,
             currentTheme: currentTheme,
@@ -262,7 +265,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
             maxWidth: maxDropdownWidth,
           ),
           child: CustomDropdownBottomWidget(
-            hintText: "Seleccione el Libro",
+            hintText: translationProvider.tr('search_by_book.dropdowns.book'),
             items: books,
             border: false,
             currentTheme: currentTheme,
@@ -347,7 +350,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 ),
                                 SizedBox(width: 8),
                                 Text(
-                                  "Capítulos",
+                                  translationProvider.tr('search_by_book.sections.chapters'),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -358,7 +361,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 ),
                                 Spacer(),
                                 Text(
-                                  "Total: ${chapters.length}",
+                                  translationProvider.trParams('search_by_book.sections.total_chapters', {'count': chapters.length.toString()}),
                                   style: StylesApp(context)
                                       .textStyleBody12
                                       .copyWith(
@@ -377,7 +380,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 : chapters.isEmpty
                                     ? Center(
                                         child: Text(
-                                          "Seleccione un libro",
+                                          translationProvider.tr('search_by_book.sections.select_book'),
                                           style: StylesApp(context)
                                               .textStyleBody14
                                               .copyWith(
@@ -439,7 +442,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 ),
                                 SizedBox(width: 8),
                                 Text(
-                                  "Versículos",
+                                  translationProvider.tr('search_by_book.sections.verses'),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -451,7 +454,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 Spacer(),
                                 if (chapterSelected != null)
                                   Text(
-                                    "Cap. ${chapterSelected!.chapter}",
+                                    translationProvider.trParams('search_by_book.sections.chapter', {'number': chapterSelected!.chapter.toString()}),
                                     style: StylesApp(context)
                                         .textStyleBody12
                                         .copyWith(
@@ -481,7 +484,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                             ),
                                             SizedBox(height: 8),
                                             Text(
-                                              "Seleccione un capítulo",
+                                              translationProvider.tr('search_by_book.sections.select_chapter'),
                                               style: StylesApp(context)
                                                   .textStyleBody14
                                                   .copyWith(
@@ -546,7 +549,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       ),
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: CustomDropdownBottomWidget(
-        hintText: "Seleccione la versión",
+        hintText: translationProvider.tr('search_by_book.dropdowns.version'),
         items: bibleVersions,
         border: false,
         currentTheme: currentTheme,
@@ -570,7 +573,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       ),
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: CustomDropdownBottomWidget(
-        hintText: "Seleccione el libro",
+        hintText: translationProvider.tr('search_by_book.dropdowns.book'),
         items: books,
         onChanged: _onBookChanged,
         border: false,
@@ -672,7 +675,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
             child: Row(
               children: [
                 Text(
-                  "Capítulos",
+                  translationProvider.tr('search_by_book.sections.chapters'),
                   style: StylesApp(context).textStyleBody16.copyWith(
                         color: currentTheme.textColor,
                         fontSize: 16,
@@ -737,7 +740,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
             child: Row(
               children: [
                 Text(
-                  "Versículos",
+                  translationProvider.tr('search_by_book.sections.verses'),
                   style: StylesApp(context).textStyleBody16.copyWith(
                         color: currentTheme.textColor,
                         fontSize: 16,
@@ -804,7 +807,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           Expanded(
             child: ListTile(
               title: Text(
-                'Rango de versículos',
+                translationProvider.tr('search_by_book.range.title'),
                 style: StylesApp(context).textStyleBody12.copyWith(
                       color: currentTheme.textColor,
                       fontSize: 12,
@@ -846,7 +849,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           ),
           SizedBox(width: 8),
           Text(
-            'Seleccionar rango',
+            translationProvider.tr('search_by_book.range.select_range'),
             style: StylesApp(context).textStyleBody14.copyWith(
                   color: currentTheme.textColor,
                   fontWeight: FontWeight.w500,
@@ -885,7 +888,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       await loadBookByVersion(version.value);
 
       if (books.isEmpty) {
-        throw Exception('No hay libros disponibles para esta versión');
+        throw Exception(translationProvider.tr('search_by_book.messages.no_books_available'));
       }
 
       // guardamos libros
@@ -905,7 +908,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       await getChapterByBook(bookSelected!.value);
 
       if (chapters.isEmpty) {
-        throw Exception('No hay capítulos disponibles para este libro');
+        throw Exception(translationProvider.tr('search_by_book.messages.no_chapters_available'));
       }
       // buscamos chapter si ya hay uno previo usar ese si no el primero
       ChapterModel? newChapterSelected;
@@ -962,7 +965,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         });
 
         await showCustomDialog(context,
-            message: 'Error al cambiar versión: ${e.toString()}',
+            message: translationProvider.trParams('search_by_book.messages.error_changing_version', {'error': e.toString()}),
             dialogType: DialogType.error);
       }
     }
@@ -1042,7 +1045,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         chapterSelected == null ||
         _selectedItems.isEmpty) {
       showCustomDialog(context,
-          message: "Debe seleccionar todos los campos",
+          message: translationProvider.tr('search_by_book.messages.fields_required'),
           dialogType: DialogType.error);
       return;
     }

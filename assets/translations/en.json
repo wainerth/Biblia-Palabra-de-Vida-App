@@ -8,7 +8,8 @@
         "view": "View",
         "close": "Close",
         "go_to_adventure": "Go to adventure",
-        "stage": "Stage"
+        "stage": "Stage",
+        "read_more": "Read More"
     },
     "navigation": {
         "home": "Home",
@@ -28,7 +29,8 @@
         "view_intro": "View intro",
         "register_free_account": "REGISTER A\n FREE ACCOUNT",
         "create_account": "Create an account",
-        "login": "Log In"
+        "login": "Log In",
+        "sign_up_google": "Sign up with Google"
     },
     "register_screen": {
         "title": "The Bible\n  Word Of\n Life!",
@@ -1071,6 +1073,166 @@
             "fast": "Fast"
         }
     },
+    "search_bible_screen": {
+        "title": "Search the Bible",
+        "tabs": {
+            "book": "Book",
+            "text": "Text",
+            "theme": "Theme",
+            "character": "Characters",
+            "placeholder_book": "Search by book",
+            "placeholder_text": "Search by text",
+            "placeholder_theme": "Search by theme",
+            "placeholder_character": "Search characters"
+        },
+        "messages": {
+            "data_unavailable": "Data not available",
+            "initializing": "Initializing..."
+        }
+    },
+    "search_by_book": {
+        "dropdowns": {
+            "version": "Select version",
+            "book": "Select Book",
+            "book_short": "Select book"
+        },
+        "sections": {
+            "chapters": "Chapters",
+            "verses": "Verses",
+            "total_chapters": "Total: {{count}}",
+            "chapter": "Ch. {{number}}",
+            "select_book": "Select a book",
+            "select_chapter": "Select a chapter"
+        },
+        "range": {
+            "title": "Verse range",
+            "select_range": "Select range"
+        },
+        "button": "Accept",
+        "messages": {
+            "fields_required": "You must select all fields",
+            "error_loading_data": "Error loading data: {{error}}",
+            "error_changing_version": "Error changing version: {{error}}",
+            "no_books_available": "No books available for this version",
+            "no_chapters_available": "No chapters available for this book"
+        }
+    },
+    "search_by_text": {
+        "dropdowns": {
+            "version": "Select version",
+            "version_short": "Bible version"
+        },
+        "search": {
+            "label_text": "Search by text",
+            "placeholder": "Search word or phrase...",
+            "placeholder_tablet": "Type the word or phrase to search here...",
+            "searching": "Searching...",
+            "results_count": "{{count}} results for '{{query}}'",
+            "page_info": "Page {{current}} of {{total}}"
+        },
+        "results": {
+            "empty": {
+                "title": "No results",
+                "message_select_version": "Select a Bible version to start your search",
+                "message_search": "Type a word or phrase in the search field to find related verses"
+            }
+        },
+        "actions": {
+            "view": "View",
+            "copy": "Copy",
+            "favorite": "Favorite",
+            "view_chapter": "View Chapter",
+            "copy_verse": "Copy Verse",
+            "add_favorite": "Add to Favorites",
+            "added_favorite": "Verse added to Favorites"
+        },
+        "modal": {
+            "copy_success": "Chapter {{chapter}} of the book {{book}}\nhas been successfully copied to clipboard"
+        },
+        "messages": {
+            "error_loading": "Error loading data: {{error}}",
+            "error_filter": "error filtering"
+        }
+    },
+    "search_by_theme": {
+        "search": {
+            "label_text": "Bible Topics Search",
+            "placeholder": "Search Topic...",
+            "placeholder_tablet": "Type the Bible topic here...",
+            "searching": "Searching topics...",
+            "results_count": "{{count}} topics found",
+            "page_info": "Page {{current}} of {{total}}"
+        },
+        "results": {
+            "empty": {
+                "title": "No topics found",
+                "message_start": "Start searching Bible topics by typing in the search field",
+                "message_not_found": "No results found for '{{query}}'"
+            }
+        },
+        "card": {
+            "tag": "Topic",
+            "category": "Bible study",
+            "view_button": "View full study"
+        },
+        "messages": {
+            "error_loading": "Error loading data: {{error}}",
+            "error_filter": "error filtering",
+            "cancel": "Cancel",
+            "retry": "Retry"
+        }
+    },
+    "dialog_internal_teaching": {
+        "title": "Bible Teaching",
+        "title_mobile": "Teaching",
+        "description_title": "Teaching Description",
+        "references_title": "Bible References",
+        "references_count": "{{count}} verses",
+        "loading_references": "Loading references...",
+        "no_references": "There are no Bible references for this teaching",
+        "go_to_verse": "Go to verse",
+        "copy_verse": "Copy verse",
+        "share": "Share",
+        "button_references": "Bible References",
+        "dialog_reference": {
+            "title": "References"
+        }
+    },
+    "search_by_character": {
+        "search": {
+            "label_text": "Bible Characters Search",
+            "placeholder": "Search Character...",
+            "placeholder_tablet": "Type the character's name here...",
+            "searching": "Searching characters...",
+            "results_count": "{{count}} characters found",
+            "page_info": "Page {{current}} of {{total}}"
+        },
+        "results": {
+            "empty": {
+                "title": "No characters found",
+                "message_start": "Start searching Bible characters by typing in the search field",
+                "message_not_found": "No results found for '{{query}}'",
+                "no_results": "No results..."
+            }
+        },
+        "card": {
+            "related_count": "Has {{count}} related",
+            "view_button": "View details",
+            "color_label": "Identifier color",
+            "new_testament": "New Testament character"
+        },
+        "dialog": {
+            "related_characters": "Related Characters",
+            "character_details": "Character Details",
+            "description": "Description"
+        },
+        "messages": {
+            "error_loading": "Error loading data: {{error}}",
+            "error_filter": "error filtering",
+            "back": "Back",
+            "retry": "Retry"
+        }
+    },
     "workspace": {
         "title": "Home",
         "notifications": "Notifications",
@@ -1198,6 +1360,10 @@
             "personal_data": "Personal Data",
             "contact": "Contact",
             "location": "Location"
+        },
+        "dialog": {
+            "title": "Image too large",
+            "message": "The selected image exceeds the maximum size of 5MB."
         },
         "fields": {
             "name": "Name",
@@ -1417,5 +1583,92 @@
         "email_subject": "Inquiry - Bible Word of Life",
         "email_body": "Hello, I have a question about the application:",
         "email_error": "Could not open email application"
+    },
+    "theme_editor_screen": {
+        "title": {
+            "text_input": "Custom Theme",
+            "edit": "Edit Theme",
+            "new": "New Theme",
+            "editor": "Theme Editor",
+            "create": "Create New Theme"
+        },
+        "fields": {
+            "theme_name": "Theme name",
+            "theme_name_hint": "Enter a name for the theme",
+            "color_appbar": "AppBar Color",
+            "color_background": "Background Color",
+            "color_text": "Text Color",
+            "color_button": "Button Color",
+            "color_button_text": "Button Text Color",
+            "color_highlight": "Highlight Color"
+        },
+        "sections": {
+            "theme_name": "Theme Name",
+            "colors": "Color Customization",
+            "preview": "Preview",
+            "tip": "Tip"
+        },
+        "preview": {
+            "sample_text": "Sample text",
+            "sample_description": "This is a sample text to show how the theme will look in the app.",
+            "highlighted_verse": "Highlighted verse",
+            "primary_button": "Primary Button",
+            "appbar": "AppBar",
+            "background": "Background",
+            "text": "Text",
+            "buttons": "Buttons",
+            "button_text": "Button text",
+            "highlight": "Highlight"
+        },
+        "color_picker": {
+            "title": "Select color for {{label}}",
+            "title_color": "Select color",
+            "cancel": "Cancel",
+            "apply": "Apply",
+            "select": "Select"
+        },
+        "buttons": {
+            "save": "SAVE THEME",
+            "update": "UPDATE THEME",
+            "create": "CREATE THEME",
+            "update_alt": "UPDATE THEME",
+            "delete_tooltip": "Delete theme"
+        },
+        "delete_dialog": {
+            "title": "Delete theme",
+            "message": "Are you sure you want to delete this theme?",
+            "cancel": "Cancel",
+            "delete": "Delete"
+        },
+        "messages": {
+            "name_required": "Please enter a name for the theme",
+            "tip_message": "Custom themes will only be applied to the bible and you can change them at any time."
+        }
+    },
+    "audio_screen": {
+        "title": "Audio",
+        "app_name": "AMISTAD",
+        "app_subtitle": "Online Radio",
+        "app_tagline": "The frequency that accompanies you",
+        "app_description": "A radio with values that accompanies you every day",
+        "opening_message": "You are about to open:",
+        "confirm_dialog": {
+            "title": "Confirm",
+            "message": "Do you want to open the {{appName}} application?",
+            "cancel": "Cancel",
+            "open": "Open"
+        },
+        "external_app_dialog": {
+            "title": "Open external application",
+            "message": "You will be redirected to 'Amistad Online'",
+            "cancel": "Cancel",
+            "accept": "Accept"
+        },
+        "error_dialog": {
+            "message": "Could not open the {{appName}} application. Do you want to download the App?",
+            "continue": "Continue",
+            "cancel": "Cancel"
+        },
+        "button": "Listen to Radio"
     }
 }

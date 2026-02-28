@@ -117,12 +117,16 @@ class _ReddleScreenState extends State<ReddleScreen> {
   }
 
   void _verificarRespuesta(String respuesta) {
-    // _focusNode.dispose();
+    String respuestaLimpia = respuesta.trim().toLowerCase();
+    String nombreCorrectoLimpio = personajeActual!.character.name.toLowerCase();
+
+    // Eliminar tildes y caracteres especiales
+    String respuestaNormalizada = _removeDiacritics(respuestaLimpia);
+    String nombreNormalizado = _removeDiacritics(nombreCorrectoLimpio);
 
     setState(() {
       respuestaSeleccionada = respuesta;
-      respuestaCorrecta = respuesta.toLowerCase() ==
-          personajeActual?.character.name.toLowerCase();
+      respuestaCorrecta =  respuestaNormalizada == nombreNormalizado;
       mostrarImagen = true;
       if (!respuestaCorrecta) {
         failedAttempts -= 1;
@@ -148,6 +152,26 @@ class _ReddleScreenState extends State<ReddleScreen> {
     setState(() {
       nameCharacter.text = '';
     });
+  }
+
+  String _removeDiacritics(String str) {
+    const diacritics = {
+      'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+      'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
+      'ä': 'a', 'ë': 'e', 'ï': 'i', 'ö': 'o', 'ü': 'u',
+      'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
+      'ã': 'a', 'õ': 'o', 'ñ': 'n',
+      'ç': 'c',
+      // Versiones mayúsculas
+      'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+      'À': 'A', 'È': 'E', 'Ì': 'I', 'Ò': 'O', 'Ù': 'U',
+      'Ä': 'A', 'Ë': 'E', 'Ï': 'I', 'Ö': 'O', 'Ü': 'U',
+      'Â': 'A', 'Ê': 'E', 'Î': 'I', 'Ô': 'O', 'Û': 'U',
+      'Ã': 'A', 'Õ': 'O', 'Ñ': 'N',
+      'Ç': 'C',
+    };
+
+    return str.split('').map((char) => diacritics[char] ?? char).join('');
   }
 
   @override
@@ -760,8 +784,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
             Center(
               child: Text(
                 textAlign: TextAlign.center,
-                _translationProvider
-                    .tr("reddle_screen.game_play.mobile_title"),
+                _translationProvider.tr("reddle_screen.game_play.mobile_title"),
                 style: StylesApp(context)
                     .textStyleBody20
                     .copyWith(color: StyleColor.black),

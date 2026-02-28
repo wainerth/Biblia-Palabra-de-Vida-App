@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -25,6 +26,8 @@ class DialogInternalTeaching extends StatefulWidget {
 }
 
 class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
+  final translationProvider = AppTranslationProvider();
+
   List<ReferenceBiblicalModel> references = [];
   bool loadingReferences = false;
 
@@ -93,7 +96,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Enseñanza Bíblica',
+                          translationProvider
+                              .tr("dialog_internal_teaching.title"),
                           style: StylesApp(context).textStyleBody18.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -213,7 +217,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                               ),
                               SizedBox(width: 12),
                               Text(
-                                'Descripción de la Enseñanza',
+                                translationProvider.tr(
+                                    "dialog_internal_teaching.description_title"),
                                 style:
                                     StylesApp(context).textStyleBody16.copyWith(
                                           color: widget.currentTheme.textColor,
@@ -268,7 +273,8 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                                   ),
                                   SizedBox(width: 12),
                                   Text(
-                                    'Referencias Bíblicas',
+                                    translationProvider.tr(
+                                        "dialog_internal_teaching.references_title"),
                                     style: StylesApp(context)
                                         .textStyleBody16
                                         .copyWith(
@@ -288,7 +294,11 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  '${references.length} versículos',
+                                  translationProvider.trParams(
+                                      "dialog_internal_teaching.references_count",
+                                      {
+                                        'count': references.length.toString(),
+                                      }),
                                   style: TextStyle(
                                     color: widget.currentTheme.buttonColor,
                                     fontSize: 14,
@@ -311,7 +321,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                                   ),
                                   SizedBox(height: 12),
                                   Text(
-                                    'Cargando referencias...',
+                                    translationProvider.tr("dialog_internal_teaching.loading_references"),
                                     style: TextStyle(
                                       color: widget.currentTheme.textColor
                                           .withValues(alpha: 0.7),
@@ -338,7 +348,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                                   ),
                                   SizedBox(height: 12),
                                   Text(
-                                    'No hay referencias bíblicas para esta enseñanza',
+                                    translationProvider.tr("dialog_internal_teaching.no_references"),
                                     style: TextStyle(
                                       color: widget.currentTheme.textColor
                                           .withValues(alpha: 0.6),
@@ -495,7 +505,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                         }
                       },
                       child: Text(
-                        'Ir al versículo',
+                        translationProvider.tr("dialog_internal_teaching.go_to_verse")  ,
                         style: TextStyle(
                           color: widget.currentTheme.buttonColor,
                           fontSize: 11,
@@ -536,7 +546,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
             backColor: StyleColor.turquoise,
             buttonColor: StyleColor.orange,
             textButtonColor: Colors.white,
-            title: 'Enseñanza',
+            title: translationProvider.tr("dialog_internal_teaching.title_mobile"),
             styleText: StylesApp(context).textStyleBody7,
             onRoute: () {
               Navigator.pop(context);
@@ -594,7 +604,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
           SizedBox(
             width: isTablet(context) ? 300 : double.infinity,
             child: ButtonThemeWidget(
-              text: "Referencias Bíblicas",
+              text: translationProvider.tr("dialog_internal_teaching.button_references"),
               disabled: references.isEmpty,
               buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(),
               onPressed: references.isEmpty
@@ -671,7 +681,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
               ),
               SizedBox(width: 10),
               Text(
-                'Copiar versículo',
+                translationProvider.tr("dialog_internal_teaching.copy_verse"),
                 style: TextStyle(
                   color: widget.currentTheme.textColor,
                   fontSize: 13,
@@ -692,7 +702,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
               ),
               SizedBox(width: 10),
               Text(
-                'Compartir',
+                translationProvider.tr("dialog_internal_teaching.share"),
                 style: TextStyle(
                   color: widget.currentTheme.textColor,
                   fontSize: 13,

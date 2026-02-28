@@ -38,10 +38,11 @@ class AppConstants {
   ];
 
   static final List<Map<String, String>> tabsSearchBible = [
-    {"title": 'Libro', "placeholder": 'Buscar por libro'},
-    {"title": 'Texto', "placeholder": 'Buscar por texto'},
-    {"title": 'Tema', "placeholder": 'Buscar por tema'},
-    {"title": 'Personajes', "placeholder": 'Buscar personajes'},
+  {"title": 'search_bible_screen.tabs.book', "placeholder": 'search_bible_screen.search.placeholder_book'},
+  {"title": 'search_bible_screen.tabs.text', "placeholder": 'search_bible_screen.search.placeholder_text'},
+  {"title": 'search_bible_screen.tabs.theme', "placeholder": 'search_bible_screen.search.placeholder_theme'},
+  {"title": 'search_bible_screen.tabs.character', "placeholder": 'search_bible_screen.search.placeholder_character'},
+
   ];
   static final List<Map<String, dynamic>> tabsPreach = [
      {

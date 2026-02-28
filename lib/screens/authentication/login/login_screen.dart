@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     if (user.error != null) {
                       if (user.error.contains(
-                          translationProvider.tr('dialogs.verify_email'))) {
+                          "Por favor verifica tu correo electrónico primero")) {
                         final Map<String, dynamic> jsonError =
                             json.decode(user.error.replaceAll("'", '"'));
                         final timeZone = await getDeviceTimeZone();
