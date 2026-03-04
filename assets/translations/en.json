@@ -1,4 +1,5 @@
 {
+    "bible": "The Bible",
     "common": {
         "back": "Back",
         "continue": "Continue",
@@ -1573,13 +1574,13 @@
         "copyright": "© 2025 Bible Word of Life",
         "frequent_questions": "Frequent Questions",
         "question_1": "How can I search for a verse?",
-        "answer_1": "On the main screen, go to the Bible option and in the top icons where the magnifying glass is...\n You will find options that allow you to navigate through versions, books, chapters and verses, plus access to the teachings and characters section...",
+        "answer_1": "To search for a verse:\n1. Go to the Bible section from the main screen.\n2. Tap the magnifying glass icon at the top.\nFrom there you can search by keyword or browse between versions, books, chapters, and verses.\nYou can also access the teachings and biblical characters sections available in the app.",
         "question_2": "Can I read the Bible offline?",
-        "answer_2": "No, you need to be connected to the internet to access the Bible functionalities",
+        "answer_2": "No. To access the content and all the app's features, you need an internet connection.",
         "question_3": "How can I change the app theme?",
-        "answer_3": "You can only change the color theme in the Bible section. \n Go to the Bible, use the personalization icon and select the theme you prefer: light, dark or customized. \n Additionally, you can change the font type, adjust the font size, these\n data remains saved within the application store",
-        "question_4": "Where can I send suggestions or report errors?",
-        "answer_4": "Through the email you find in settings \"about the app\", you can send us your suggestions or report any issues.",
+        "answer_3": "You can customize the theme from the *Bible* section.\n1. Go to the *Bible* section.\n2. Tap the *customization* icon.\n3. Choose your preferred theme: *light, dark, or custom*.\n\nYou can also change the font type and adjust the font size.\nThese changes are automatically saved in the application.",
+        "question_4": "Where can I send suggestions or report bugs?",
+        "answer_4": "You can send us your suggestions or report any issues via the email available at:\n\n*Settings → About the app*\n\nWe will be happy to receive your feedback to keep improving.",
         "email_subject": "Inquiry - Bible Word of Life",
         "email_body": "Hello, I have a question about the application:",
         "email_error": "Could not open email application"
@@ -1645,8 +1646,36 @@
             "tip_message": "Custom themes will only be applied to the bible and you can change them at any time."
         }
     },
-    "audio_screen": {
-        "title": "Audio",
+    "ranking": {
+        "no_league": {
+            "title": "You don't have an active league",
+            "subtitle": "Play Adventures to get a league"
+        },
+        "time_remaining": "Time Remaining:",
+        "loading": "Loading...",
+        "format": "{{days}} days {{hours}}:{{minutes}}:{{seconds}}",
+        "zones": {
+            "promotion": "Promotion Zone",
+            "relegation": "Relegation Zone"
+        },
+        "errors": {
+            "no_leagues": "No leagues found"
+        },
+        "points": "exp"
+    },
+    "soon": {
+        "title": "Coming Soon",
+        "subtitle": "We're working on something amazing for you.",
+        "back_button": "Back"
+    },
+    "promise_card": {
+        "redeemed": {
+            "earned_message": "You've earned a mini star!\n {{points}} Lms of energy",
+            "share_subject": "Promise"
+        }
+    },
+    "radio_screen": {
+        "title": "Radio",
         "app_name": "AMISTAD",
         "app_subtitle": "Online Radio",
         "app_tagline": "The frequency that accompanies you",

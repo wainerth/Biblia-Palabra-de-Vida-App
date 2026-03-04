@@ -186,7 +186,10 @@ class DoubtScreen extends StatelessWidget {
                 style: StylesApp(context).textStyleBody14.copyWith(
                       color: Colors.white70,
                       fontFamily: 'Montserrat',
+                      textBaseline: TextBaseline.alphabetic,
                       decoration: TextDecoration.underline,
+                      decorationColor: StyleColor.white,
+                      decorationStyle: TextDecorationStyle.solid,
                     ),
               ),
             ),
@@ -286,16 +289,17 @@ class DoubtScreen extends StatelessWidget {
                         scheme: 'mailto',
                         path: GraphQLConfig.emailContact,
                         queryParameters: {
-                          'subject': translationProvider.tr('doubts.email_subject'),
-                          'body':
-                              translationProvider.tr('doubts.email_body'),
+                          'subject':
+                              translationProvider.tr('doubts.email_subject'),
+                          'body': translationProvider.tr('doubts.email_body'),
                         },
                       );
 
                       if (await canLaunchUrl(emailLaunchUri)) {
                         await launchUrl(emailLaunchUri);
                       } else {
-                        showSnackBar(translationProvider.tr('doubts.email_error'),
+                        showSnackBar(
+                            translationProvider.tr('doubts.email_error'),
                             type: SnackBarType.error);
                       }
                     },
@@ -380,27 +384,22 @@ class DoubtScreen extends StatelessWidget {
                         _buildQuestionCard(
                           context,
                           question: translationProvider.tr('doubts.question_1'),
-                          answer:
-                              translationProvider.tr('doubts.answer_1'),
+                          answer: translationProvider.tr('doubts.answer_1'),
                         ),
                         _buildQuestionCard(
                           context,
                           question: translationProvider.tr('doubts.question_2'),
-                          answer:
-                              translationProvider.tr('doubts.answer_2'),
+                          answer: translationProvider.tr('doubts.answer_2'),
                         ),
                         _buildQuestionCard(
                           context,
                           question: translationProvider.tr('doubts.question_3'),
-                          answer:
-                              translationProvider.tr('doubts.answer_3'),
+                          answer: translationProvider.tr('doubts.answer_3'),
                         ),
                         _buildQuestionCard(
                           context,
-                          question:
-                              translationProvider.tr('doubts.question_4'),
-                          answer:
-                              translationProvider.tr('doubts.answer_4'),
+                          question: translationProvider.tr('doubts.question_4'),
+                          answer: translationProvider.tr('doubts.answer_4'),
                         ),
                       ],
                     ),
@@ -540,18 +539,80 @@ class DoubtScreen extends StatelessWidget {
             padding: forTablet
                 ? const EdgeInsets.all(20.0)
                 : const EdgeInsets.only(bottom: 12.0, left: 8, right: 8),
-            child: Text(
-              answer,
-              style: StylesApp(context).textStyleBody14.copyWith(
-                    color: Colors.white70,
-                    fontFamily: 'Montserrat',
-                    fontSize: forTablet ? 16 : 14,
-                    height: 1.5,
-                  ),
+            child: _buildFormattedText(
+              context,
+              text: answer,
+              forTablet: forTablet,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFormattedText(BuildContext context,
+      {required String text, required bool forTablet}) {
+    final RegExp regex = RegExp(r'\*(.*?)\*');
+    final List<TextSpan> spans = [];
+    int currentIndex = 0;
+
+    final baseStyle = StylesApp(context).textStyleBody14.copyWith(
+          color: Colors.white70,
+          fontFamily: 'Montserrat',
+          fontSize: forTablet ? 16 : 14,
+          height: 1.5,
+        );
+
+    final boldStyle = baseStyle.copyWith(
+      fontWeight: FontWeight.bold,
+      color: Colors.white, // Opcional: un poco más brillante para la negrita
+    );
+
+    // Encontrar todas las coincidencias
+    final matches = regex.allMatches(text);
+
+    for (final match in matches) {
+      // Texto normal antes de la negrita
+      if (match.start > currentIndex) {
+        spans.add(
+          TextSpan(
+            text: text.substring(currentIndex, match.start),
+            style: baseStyle,
+          ),
+        );
+      }
+
+      // Texto en negrita (sin los asteriscos)
+      spans.add(
+        TextSpan(
+          text: match.group(1),
+          style: boldStyle,
+        ),
+      );
+
+      currentIndex = match.end;
+    }
+
+    // Texto normal después de la última negrita
+    if (currentIndex < text.length) {
+      spans.add(
+        TextSpan(
+          text: text.substring(currentIndex),
+          style: baseStyle,
+        ),
+      );
+    }
+
+    // Si no hay asteriscos, mostrar texto normal
+    if (spans.isEmpty) {
+      return Text(
+        text,
+        style: baseStyle,
+      );
+    }
+
+    return RichText(
+      text: TextSpan(children: spans),
     );
   }
 }

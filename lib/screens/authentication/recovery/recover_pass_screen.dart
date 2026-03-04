@@ -272,6 +272,7 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                         LoadingService().hideLoading();
                                         await showCustomDialog(
                                           context,
+                                          showDetails: true,
                                           message: response.userFriendlyError!,
                                           messageDetail: response.error!,
                                           dialogType: DialogType.error,
@@ -299,6 +300,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                         LoadingService().hideLoading();
                                         await showCustomDialog(
                                           context,
+                                          showDetails: true,
+
                                           message: response.userFriendlyError!,
                                           messageDetail: response.error!,
                                           dialogType: DialogType.error,

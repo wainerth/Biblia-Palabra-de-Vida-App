@@ -17,6 +17,7 @@ import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/loading_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/text_with_gradient.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
+import 'package:biblia_palabra_de_vida_app/services/audio_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -26,6 +27,7 @@ void main() async {
   final translationProvider = AppTranslationProvider();
   await translationProvider.initialize();
   await PreferencesManager().init();
+  final audioService = AudioService();
 
   final socketProvider = SocketClientProvider();
   await socketProvider.initializeNotificationSystem();
@@ -51,7 +53,6 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => translationProvider),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => BibleTranslationProvider()),
         ChangeNotifierProvider(create: (_) => socketProvider),
         ChangeNotifierProvider(create: (_) => ExchangeRateProvider()),
         ChangeNotifierProvider<CatalogueProvider>(
@@ -66,7 +67,7 @@ void main() async {
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {
-          return const MyApp();
+          return MyApp(audioService: audioService);
         },
       ),
     ),
@@ -74,7 +75,10 @@ void main() async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final AudioService audioService;
+
+  const MyApp({super.key, required this.audioService});
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -106,7 +110,6 @@ class _MyAppState extends State<MyApp> {
         await catalogueProvider.initialize();
       } catch (e) {
         debugPrint('⚠️ Error inicializando catálogo: $e');
-        // Permitir que la app continúe incluso si el catálogo falla
       }
     }
   }
@@ -189,7 +192,6 @@ class _MyAppState extends State<MyApp> {
       if (isTablet) {
         SystemChrome.setPreferredOrientations([
           DeviceOrientation.landscapeLeft,
-          // DeviceOrientation.portraitDown,
         ]);
       } else {
         SystemChrome.setPreferredOrientations([
@@ -197,7 +199,6 @@ class _MyAppState extends State<MyApp> {
         ]);
       }
     } catch (e) {
-      // If MediaQuery is not available yet or any other error, ignore silently
       debugPrint('Could not apply orientation policy: $e');
     }
   }
@@ -213,7 +214,7 @@ class _MyAppState extends State<MyApp> {
     if (_hasSeenIntro!) {
       return Consumer<AuthenticationProvider>(
         builder: (context, authProvider, child) {
-          // si aún no hemos empezado lña verificación, la iniciamos
+          // si aún no hemos empezado la verificación, la iniciamos
           if (!_isAuthCheckComplete && !authProvider.isLoading) {
             _startAuthCheck(context);
           }
@@ -287,7 +288,9 @@ class _LoadMaskedWidgetState extends State<LoadMaskedWidget> {
           children: [
             Image.asset("assets/bibleLogo.png"),
             TextWithGradient(
-                text: "La Biblia", font: StylesApp(context).textStyleBody1)
+              text: "La Biblia",
+              font: StylesApp(context).textStyleBody1,
+            )
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 {
+    "bible": "A Bíblia",
     "common": {
         "back": "Voltar",
         "continue": "Continuar",
@@ -1571,14 +1572,14 @@
         "contact_us": "Contate-nos",
         "copyright": "© 2025 Bíblia Palavra de Vida",
         "frequent_questions": "Perguntas Frequentes",
-        "question_1": "Como posso procurar um versículo?",
-        "answer_1": "Na tela principal, vá para a opção Bíblia e nos ícones superiores onde está a lupa...\n Você encontrará opções que permitem navegar entre versões, livros, capítulos e versículos, além de acessar a seção de ensinos e personagens...",
-        "question_2": "Posso ler a Bíblia offline?",
-        "answer_2": "Não, você precisa estar conectado à internet para acessar as funcionalidades da Bíblia",
-        "question_3": "Como posso mudar o tema do aplicativo?",
-        "answer_3": "Você só pode mudar o tema de cores na seção da Bíblia. \n Vá para a Bíblia, use o ícone de personalização e selecione o tema que preferir: claro, escuro ou personalizado. \n Além disso, você pode mudar o tipo de fonte, ajustar o tamanho da fonte, estes\n dados permanecem salvos dentro da loja do aplicativo",
+        "question_1": "Como posso pesquisar um versículo?",
+        "answer_1": "Para pesquisar um versículo:\n1. Acesse a seção Bíblia na tela principal.\n2. Toque no ícone da lupa, localizado na parte superior.\nA partir daí você pode pesquisar por palavra-chave ou navegar entre versões, livros, capítulos e versículos.\nVocê também pode acessar as seções de ensinamentos e personagens bíblicos disponíveis no aplicativo.",
+        "question_2": "Posso ler a Bíblia sem conexão?",
+        "answer_2": "Não. Para acessar o conteúdo e todas as funcionalidades do aplicativo, é necessário ter conexão com a internet.",
+        "question_3": "Como posso alterar o tema do aplicativo?",
+        "answer_3": "Você pode personalizar o tema na seção *Bíblia*.\n1. Acesse a seção *Bíblia*.\n2. Toque no ícone de *personalização*.\n3. Selecione o tema que preferir: *claro, escuro ou personalizado*.\n\nAlém disso, você pode alterar o tipo de letra e ajustar o tamanho da fonte.\nEssas alterações são salvas automaticamente no aplicativo.",
         "question_4": "Onde posso enviar sugestões ou relatar erros?",
-        "answer_4": "Através do e-mail que você encontra nas configurações \"sobre o aplicativo\", pode nos enviar suas sugestões ou relatar qualquer problema.",
+        "answer_4": "Você pode enviar suas sugestões ou relatar qualquer problema através do e-mail disponível em:\n\n*Configurações → Sobre o aplicativo*\n\nFicaremos felizes em receber seus comentários para continuar melhorando.",
         "email_subject": "Consulta - Bíblia Palavra de Vida",
         "email_body": "Olá, tenho uma pergunta sobre o aplicativo:",
         "email_error": "Não foi possível abrir o aplicativo de e-mail"
@@ -1644,7 +1645,35 @@
             "tip_message": "Os temas personalizados serão aplicados apenas à bíblia e você poderá alterá-los a qualquer momento."
         }
     },
-    "audio_screen": {
+    "ranking": {
+        "no_league": {
+            "title": "Você não tem uma liga ativa",
+            "subtitle": "Jogue Aventuras para conseguir uma liga"
+        },
+        "time_remaining": "Tempo Restante:",
+        "loading": "Carregando...",
+        "format": "{{days}}d {{hours}}:{{minutes}}:{{seconds}}",
+        "zones": {
+            "promotion": "Zona de Promoção",
+            "relegation": "Zona de Rebaixamento"
+        },
+        "errors": {
+            "no_leagues": "Nenhuma liga encontrada"
+        },
+        "points": "exp"
+    },
+    "soon": {
+        "title": "Em Breve",
+        "subtitle": "Estamos trabalhando em algo incrível para você.",
+        "back_button": "Voltar"
+    },
+    "promise_card": {
+        "redeemed": {
+            "earned_message": "Você ganhou uma mini estrela!\n {{points}} Lms de energia",
+            "share_subject": "Promessa"
+        }
+    },
+    "radio_screen": {
         "title": "Áudio",
         "app_name": "AMISTAD",
         "app_subtitle": "Rádio Online",

@@ -52,7 +52,7 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
                     text: translationProvider
                         .tr("header_adventure.days")
                         .replaceAll(
-                            "%s", userData!.streakDaysCount.toString())),
+                            "%s", userData != null ? userData.streakDaysCount.toString() : '')),
               ],
             ),
           ),

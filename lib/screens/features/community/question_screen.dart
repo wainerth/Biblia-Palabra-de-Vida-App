@@ -92,7 +92,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   int currentIndex = 0;
   int failedAttempts = 0;
 
-  int? _selectedAnswerIndex; // Índice de la respuesta seleccionada
+  int? _selectedAnswerIndex;
   int? _correctAnswerIndex;
 
   double score = 0;
@@ -225,25 +225,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     await flutterTts.speak(textToSpeak);
   }
-
-  // Leer opciones de respuesta
-  // Future<void> _speakOptions() async {
-  //   if (!isTtsEnabled || currentAnswers.isEmpty) return;
-
-  //   StringBuffer optionsText = StringBuffer();
-  //   optionsText.write(_translation.tr("question_screen.tts.options"));
-
-  //   for (int i = 0; i < currentAnswers.length; i++) {
-  //     optionsText.write(
-  //         "${_translation.tr("question_screen.tts.option")} ${String.fromCharCode(65 + i)}: ");
-  //     optionsText.write(currentAnswers[i].answer);
-  //     if (i < currentAnswers.length - 1) {
-  //       optionsText.write(". ");
-  //     }
-  //   }
-
-  //   await flutterTts.speak(optionsText.toString());
-  // }
 
 // Leer el resultado del ordenamiento
   Future<void> _speakOrderingResult(bool isCorrect) async {
@@ -446,7 +427,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     setState(() {
       _isAnswerSelected = true;
       _suggestionSelected = false;
-      _selectedAnswerIndex = index; // Guardar índice seleccionado
+      _selectedAnswerIndex = index; 
       _correctAnswerIndex = correctIndex;
     });
 
@@ -663,15 +644,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     final translationProvider = context.read<AppTranslationProvider>();
 
-    // Leer feedback de respuesta
-    if (isTtsEnabled) {
-      String feedback = _isCorrect
-          ? translationProvider
-              .tr('question_screen.tts_feedback.correct_answer')
-          : translationProvider
-              .tr('question_screen.tts_feedback.incorrect_answer');
-      flutterTts.speak(feedback);
-    }
+    // // Leer feedback de respuesta
+    // if (isTtsEnabled) {
+    //   String feedback = _isCorrect
+    //       ? translationProvider
+    //           .tr('question_screen.tts_feedback.correct_answer')
+    //       : translationProvider
+    //           .tr('question_screen.tts_feedback.incorrect_answer');
+    //   flutterTts.speak(feedback);
+    // }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -738,9 +719,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
     await flutterTts.speak(instructions);
   }
 
-// En tu _QuestionScreenState, agrega esta función:
-
-// Leer el orden actual
+  ///
+  /// Leer el orden actual
+  ///
   Future<void> _speakCurrentOrder() async {
     if (!isTtsEnabled || orderedAnswers.isEmpty) return;
 
@@ -896,7 +877,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
         int experience = 0;
         int energy = 0;
         // si no ha obtenido todos los puntos
-        // print("es nuevo record : ${levelProgress!.newRecord}");
         if (levelProgress!.newRecord) {
           experience = levelProgress!.score > levelProgress!.scoreLastAttempt
               ? levelProgress!.score - levelProgress!.scoreLastAttempt
@@ -1131,14 +1111,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   : translationProvider
                       .tr('question_screen.tts_controls.reading_question'),
             ),
-
-            // // Botón para leer opciones
-            // IconButton(
-            //   icon: Icon(Icons.list, color: Colors.blue),
-            //   onPressed: _speakOptions,
-            //   tooltip: translationProvider
-            //       .tr('question_screen.tts_controls.read_options'),
-            // ),
           ],
 
           // Espaciador
@@ -1295,11 +1267,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
       BuildContext context, AppTranslationProvider translationProvider) {
     if (showStepCompleted) return _buildActivityCompleted(translationProvider);
     if (showRewardObtained) return _buildRewardScreen();
-    if (showLastStageCompleted)
+    if (showLastStageCompleted) {
       return _buildLastStage(context, translationProvider);
+    }
     if (showPrizeWon) return _buildPrizeWon(context, translationProvider);
-    if (showTitleObtained)
+    if (showTitleObtained) {
       return _buildAchievementUnlocked(context, translationProvider);
+    }
     return Container();
   }
 
@@ -1336,8 +1310,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     final score = levelProgress!.score;
     if (score > MEDIUM_SCORE) return "assets/boxStartFull.png";
-    if (score > LOW_SCORE && score <= MEDIUM_SCORE)
+    if (score > LOW_SCORE && score <= MEDIUM_SCORE) {
       return "assets/boxStartMedium.png";
+    }
     if (score > 0 && score <= LOW_SCORE) return "assets/boxStartLow.png";
     return "assets/boxStartFailed.png";
   }
@@ -1383,7 +1358,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  // Método reutilizable para construir acciones del resultado
+  // Método para construir acciones del resultado
   Widget _buildResultActions(AppTranslationProvider translationProvider) {
     return Column(
       children: [
@@ -1422,7 +1397,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   void _handleContinue() async {
-    // Lógica reutilizable para continuar
     if (!sendScore!.hasBeenPlayedSection &&
         sendScore!.rewardObtained &&
         reward != null &&
@@ -1438,7 +1412,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  // Helper para verificar si mostrar contenido de pregunta
+  // verifica si mostrar contenido de pregunta
   bool _shouldShowQuestionContent() {
     return !activityIsCompleted &&
         !showTitleObtained &&
@@ -1447,7 +1421,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         !showLastStageCompleted;
   }
 
-  // Helper para info de nivel en tablet
+  // info de nivel en tablet
   Widget _buildLevelInfo(AppTranslationProvider translationProvider) {
     if (level == null) return Container();
 
@@ -1494,7 +1468,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     double maxPossibleHeight = score / 1000 * 112;
 
     if (score >= MAX_SCORE) {
-      return 112; // Alto fijo cuando los puntos son mayores o iguales a 1000
+      return 112;
     } else {
       double width = ((maxPossibleHeight * 100)) / 112;
 
@@ -1502,16 +1476,16 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  // esta parte es para mostrar nivel Completado
+  // mostrar nivel Completado
   Widget _buildActivityCompleted(AppTranslationProvider translationProvider) {
-    // Usar el mismo componente para móvil y tablet con diseño responsivo interno
     return SingleChildScrollView(
       padding: EdgeInsets.all(isTablet(context) ? 24 : 20),
       child: Center(
         child: Container(
           clipBehavior: Clip.none,
           constraints: BoxConstraints(
-              maxWidth: isTablet(context) ? 800 : double.infinity),
+            maxWidth: isTablet(context) ? 800 : double.infinity,
+          ),
           child: Column(
             children: [
               // Contenido adaptable según tamaño
@@ -1548,10 +1522,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/boxOrange.png'),
-                    fit: BoxFit.fill,
-                    alignment: Alignment.topCenter)),
+              image: DecorationImage(
+                  image: AssetImage('assets/boxOrange.png'),
+                  fit: BoxFit.fill,
+                  alignment: Alignment.topCenter),
+            ),
             child: Column(
               children: [
                 SizedBox(
@@ -1801,7 +1776,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  // esta parte es para mostrar titulo obtenido
+  // mostrar titulo obtenido
   _buildAchievementUnlocked(
       BuildContext context, AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
@@ -2027,18 +2002,20 @@ class _QuestionScreenState extends State<QuestionScreen> {
     StringBuffer fullText = StringBuffer();
 
     // 1. Número de pregunta
-    fullText.write("${_translation.tr("question_screen.tts.question_prefix")} "
+    await _speakWithTTS(
+        "${_translation.tr("question_screen.tts.question_prefix")} "
         "$numberQuestion ${_translation.tr("question_screen.tts.of")} ${questions.length}. ");
 
     // 2. La pregunta
-    fullText.write("${currentQuestion.question}. ");
+    await _speakWithTTS(currentQuestion.question.toString());
 
     // 3. Las opciones
-    fullText.write(_translation.tr("question_screen.tts.options"));
+    await _speakWithTTS(_translation.tr("question_screen.tts.options"));
 
     for (int i = 0; i < currentAnswers.length; i++) {
-      fullText.write("${_translation.tr("question_screen.tts.option")} "
-          "${String.fromCharCode(65 + i)}: ${currentAnswers[i].answer}. ");
+      await _speakWithTTS("${_translation.tr("question_screen.tts.option")} "
+          "${String.fromCharCode(65 + i)}: ");
+      await _speakWithTTS(currentAnswers[i].answer);
     }
 
     // Detener cualquier reproducción anterior

@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -25,6 +26,8 @@ class CardPromiseWidget extends StatefulWidget {
 }
 
 class _CardPromiseWidgetState extends State<CardPromiseWidget> {
+  final translationProvider = AppTranslationProvider();
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -168,7 +171,10 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
                       width: 50, height: 50),
                   SizedBox(height: 10),
                   Text(
-                    "Haz ganado una mini estrella\n ${widget.redeemedPromise!.energyPoint} Lms de energía",
+                    translationProvider.trParams(
+                        "promise_card.redeemed.earned_message", {
+                      "points": widget.redeemedPromise!.energyPoint.toString()
+                    }),
                     textAlign: TextAlign.center,
                     style: StylesApp(context)
                         .textStyleBody12
@@ -186,13 +192,12 @@ class _CardPromiseWidgetState extends State<CardPromiseWidget> {
                 await SharePlus.instance.share(ShareParams(
                   text:
                       "${widget.redeemedPromise!.book!.modernName} ${widget.redeemedPromise!.chapter!.chapter}:${widget.redeemedPromise!.verse!.verse}\n${widget.redeemedPromise!.verse!.text}.",
-                  subject: "Promesa",
+                  subject: translationProvider.tr("promise_card-redeemed.share_subject"),
                 ));
               },
               icon: Icon(Icons.share, color: Colors.white),
             ),
           ),
-          
         ],
       ),
     );

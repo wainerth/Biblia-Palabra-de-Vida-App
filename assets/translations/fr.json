@@ -1,4 +1,5 @@
 {
+    "bible": "La Bible",
     "common": {
         "back": "Retour",
         "continue": "Continuer",
@@ -1572,13 +1573,13 @@
         "copyright": "© 2025 Bible Parole de Vie",
         "frequent_questions": "Questions Fréquentes",
         "question_1": "Comment puis-je rechercher un verset ?",
-        "answer_1": "Sur l'écran principal, allez dans l'option Bible et dans les icônes du haut où se trouve la loupe...\n Vous trouverez des options qui vous permettent de naviguer entre les versions, les livres, les chapitres et les versets, ainsi que d'accéder à la section des enseignements et des personnages...",
+        "answer_1": "Pour rechercher un verset :\n1. Accédez à la section Bible depuis l'écran principal.\n2. Appuyez sur l'icône de la loupe en haut.\nVous pouvez ensuite rechercher par mot-clé ou naviguer entre les versions, livres, chapitres et versets.\nVous pouvez également accéder aux sections enseignements et personnages bibliques disponibles dans l'application.",
         "question_2": "Puis-je lire la Bible hors ligne ?",
-        "answer_2": "Non, vous devez être connecté à Internet pour accéder aux fonctionnalités de la Bible",
+        "answer_2": "Non. Pour accéder au contenu et à toutes les fonctionnalités de l'application, une connexion Internet est nécessaire.",
         "question_3": "Comment puis-je changer le thème de l'application ?",
-        "answer_3": "Vous ne pouvez changer le thème de couleurs que dans la section Bible. \n Allez dans la Bible, utilisez l'icône de personnalisation et sélectionnez le thème que vous préférez : clair, sombre ou personnalisé. \n De plus, vous pouvez changer le type de police, ajuster la taille de la police, ces\n données restent enregistrées dans le store de l'application",
+        "answer_3": "Vous pouvez personnaliser le thème depuis la section *Bible*.\n1. Accédez à la section *Bible*.\n2. Appuyez sur l'icône de *personnalisation*.\n3. Choisissez le thème que vous préférez : *clair, sombre ou personnalisé*.\n\nVous pouvez également changer le type de police et ajuster la taille de la police.\nCes modifications sont automatiquement enregistrées dans l'application.",
         "question_4": "Où puis-je envoyer des suggestions ou signaler des erreurs ?",
-        "answer_4": "Par courriel que vous trouvez dans les paramètres \"à propos de l'application\", vous pouvez nous envoyer vos suggestions ou signaler tout problème.",
+        "answer_4": "Vous pouvez nous envoyer vos suggestions ou signaler tout problème via l'adresse e-mail disponible dans :\n\n*Paramètres → À propos de l'application*\n\nNous serons ravis de recevoir vos commentaires pour continuer à nous améliorer.",
         "email_subject": "Demande - Bible Parole de Vie",
         "email_body": "Bonjour, j'ai une question concernant l'application :",
         "email_error": "Impossible d'ouvrir l'application de messagerie"
@@ -1644,7 +1645,35 @@
             "tip_message": "Les thèmes personnalisés ne s'appliqueront qu'à la bible et vous pourrez les changer à tout moment."
         }
     },
-    "audio_screen": {
+    "ranking": {
+        "no_league": {
+            "title": "Vous n'avez pas de ligue active",
+            "subtitle": "Jouez aux Aventures pour obtenir une ligue"
+        },
+        "time_remaining": "Temps Restant:",
+        "loading": "Chargement...",
+        "format": "{{days}}j {{hours}}:{{minutes}}:{{seconds}}",
+        "zones": {
+            "promotion": "Zone de Promotion",
+            "relegation": "Zone de Relégation"
+        },
+        "errors": {
+            "no_leagues": "Aucune ligue trouvée"
+        },
+        "points": "exp"
+    },
+    "soon": {
+        "title": "Prochainement",
+        "subtitle": "Nous travaillons sur quelque chose d'incroyable pour vous.",
+        "back_button": "Retour"
+    },
+    "promise_card": {
+        "redeemed": {
+            "earned_message": "Vous avez gagné une mini étoile !\n {{points}} Lms d'énergie",
+            "share_subject": "Promesse"
+        }
+    },
+    "radio_screen": {
         "title": "Audio",
         "app_name": "AMISTAD",
         "app_subtitle": "Radio en ligne",

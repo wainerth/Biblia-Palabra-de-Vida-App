@@ -42,9 +42,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                         path: 'settings.language',
                         trailingText: translationProvider.currentLanguageName,
-                        onTap: GraphQLConfig.development
-                            ? () => _showLanguageDialog(context)
-                            : () {},
+                        onTap:() => _showLanguageDialog(context),
+                        //  GraphQLConfig.development
+                        //     ? () => _showLanguageDialog(context)
+                        //     : () {},
                       ),
                       _buildSettingsItem(
                         context,
@@ -604,9 +605,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showLanguageDialog(BuildContext context) {
-    final translationProvider =
-        Provider.of<AppTranslationProvider>(context, listen: false);
-
     showDialog(
       context: context,
       builder: (context) {

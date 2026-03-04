@@ -80,8 +80,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     );
   }
 
-  // Handle other routes here
-
   return MaterialPageRoute(
     builder: (context) => UnknownScreen(), // A fallback page for unknown routes
   );

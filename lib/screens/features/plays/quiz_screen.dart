@@ -46,6 +46,8 @@ class _QuizScreenState extends State<QuizScreen> {
   bool _isAnswerSelected = false;
   bool _suggestionSelected = false;
   bool _isCorrect = false;
+  int? _selectedAnswerIndex;
+  int? _correctAnswerIndex;
 
   bool get isTablet {
     final width = MediaQuery.of(context).size.width;
@@ -308,6 +310,8 @@ class _QuizScreenState extends State<QuizScreen> {
                           // await funcAnswerValidate();
                         },
                         isAnswerSelected: _isAnswerSelected,
+                        selectedAnswerIndex: _selectedAnswerIndex,
+                        correctAnswerIndex: _correctAnswerIndex,
                       ),
                     ),
                 },
@@ -614,6 +618,8 @@ class _QuizScreenState extends State<QuizScreen> {
                                       // await funcAnswerValidate();
                                     },
                                     isAnswerSelected: _isAnswerSelected,
+                                    selectedAnswerIndex: _selectedAnswerIndex,
+                                    correctAnswerIndex: _correctAnswerIndex,
                                     // isTablet: isTablet,
                                   ),
                           ),
@@ -671,7 +677,7 @@ class _QuizScreenState extends State<QuizScreen> {
     } else {
       // si falle 3 o mas veces muestro modal de inténtalo de nuevo
       if (failedAttempts == 0) {
-        await _audioService.playFailedAttempts();
+        _audioService.playFailedAttempts();
         _showDialogFailedAttempts();
       } else {
         _audioService.playWinSound();
@@ -685,71 +691,91 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _answerSelected(BuildContext context, int index) async {
-    setState(() {
-      _isAnswerSelected = true;
-      _suggestionSelected = false;
-    });
-    _isCorrect =
-        (currentAnswers.isNotEmpty) ? currentAnswers[index].isCorrect : false;
+    // Mostrar loading
+    LoadingService().showLoading(context);
 
+    // Actualizar estado de manera más eficiente
+    _isAnswerSelected = true;
+    _suggestionSelected = false;
+    _selectedAnswerIndex = index;
+
+    // Determinar si es correcta
+    _isCorrect = currentAnswers[index].isCorrect;
+
+    // Encontrar índice de respuesta correcta (solo si es necesario)
+    int correctIndex = -1;
     if (!_isCorrect) {
-      await _audioService.playWrongAnswer();
-      setState(() {
-        _suggestionSelected = true;
-        failedAttempts -= 1;
-      });
-    } else {
-      setState(() {
-        _suggestionSelected = true;
-      });
-      await _audioService.playCorrectAnswer();
+      correctIndex = currentAnswers.indexWhere((answer) => answer.isCorrect);
     }
-    setState(() {
-      _selectionCompleted = true;
-    });
+
+    // Reproducir audio según resultado
+    if (_isCorrect) {
+      _audioService.playCorrectAnswer();
+    } else {
+      _audioService.playWrongAnswer();
+      failedAttempts -= 1;
+      _suggestionSelected = true;
+    }
+
+    // Actualizar estado final
+    _correctAnswerIndex = correctIndex;
+    _selectionCompleted = true;
+
+    // Forzar reconstrucción una sola vez
+    setState(() {});
+
+    // Ocultar loading
+    LoadingService().hideLoading();
+
+    // Mostrar SnackBar (sin 24 horas de duración)
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: Duration(hours: 24),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      _showResultSnackBar(context, index);
+    }
+  }
+
+  void _showResultSnackBar(BuildContext context, int index) {
+    final snackBar = SnackBar(
+      duration: const Duration(hours: 24), // Reducido a 3 segundos
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Icon(
-                    _isCorrect ? Icons.check_circle : Icons.error,
-                    color: Colors.white,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    _isCorrect
-                        ? _translationProvider
-                            .tr("quiz_screen.snackbar.correct")
-                        : _translationProvider
-                            .tr("quiz_screen.snackbar.incorrect"),
-                    style: StylesApp(context).textStyleBody12,
-                  ),
-                ],
+              Icon(
+                _isCorrect ? Icons.check_circle : Icons.error,
+                color: Colors.white,
               ),
-              // botón de siguiente
-              TextButton(
-                onPressed: () async {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  await funcAnswerValidate();
-                },
-                child: Text(
-                  _translationProvider.tr("quiz_screen.game_play.next"),
-                  style: StylesApp(context)
-                      .textStyleBody12
-                      .copyWith(color: Colors.white),
-                ),
+              const SizedBox(width: 8),
+              Text(
+                _isCorrect
+                    ? _translationProvider.tr("quiz_screen.snackbar.correct")
+                    : _translationProvider.tr("quiz_screen.snackbar.incorrect"),
+                style: StylesApp(context).textStyleBody12,
               ),
             ],
           ),
-          backgroundColor: _isCorrect ? Colors.green : Colors.red,
-        ),
-      );
-    }
+          TextButton(
+            onPressed: () async {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              await funcAnswerValidate();
+              setState(() {
+                _selectedAnswerIndex = null;
+                _correctAnswerIndex = null;
+              });
+            },
+            child: Text(
+              _translationProvider.tr("quiz_screen.game_play.next"),
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: _isCorrect ? Colors.green : Colors.red,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Future<void> loadQuestions() async {
@@ -913,19 +939,20 @@ class _QuizScreenState extends State<QuizScreen> {
               Text(
                 "${_translationProvider.trParams("quiz_screen.result_dialog.category", {
                       "category": infoResult.message.category!,
-                    })} ${_translationProvider.trParams("quiz_screen.result_dialog.difficulty", {
+                    })}\n ${_translationProvider.trParams("quiz_screen.result_dialog.difficulty", {
                       "difficulty": infoResult.message.difficulty!,
-                    })}",
+                    })}\n",
               ),
               Text(_translationProvider
                   .trParams("quiz_screen.result_dialog.score", {
-                "category": infoResult.score.toString(),
+                "score": infoResult.score.toString(),
               }))
             ],
           ),
           actions: [
             ButtonThemeWidget(
-              text: _translationProvider.tr("quiz_screen.result_dialog.play_again"),
+              text: _translationProvider
+                  .tr("quiz_screen.result_dialog.play_again"),
               buttonStyle: StylesApp(context).btnWidgetSmall,
               onPressed: () {
                 Navigator.pop(context);
@@ -958,11 +985,16 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Color _getDifficultyColor(String level) {
-    if(_translationProvider.tr('quiz_screen.difficulty_selection.easy') == level){
+    if (_translationProvider.tr('quiz_screen.difficulty_selection.easy') ==
+        level) {
       return StyleColor.greenDark;
-    } else if(_translationProvider.tr('quiz_screen.difficulty_selection.medium') == level){
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.medium') ==
+        level) {
       return StyleColor.orange;
-    } else if(_translationProvider.tr('quiz_screen.difficulty_selection.hard') == level){
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.hard') ==
+        level) {
       return StyleColor.redDark;
     } else {
       return StyleColor.greenDark;
@@ -970,11 +1002,16 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   String _getDifficultyCharacter(String level) {
-    if(_translationProvider.tr('quiz_screen.difficulty_selection.easy') == level){
+    if (_translationProvider.tr('quiz_screen.difficulty_selection.easy') ==
+        level) {
       return 'F';
-    } else if(_translationProvider.tr('quiz_screen.difficulty_selection.medium') == level){
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.medium') ==
+        level) {
       return 'I';
-    } else if(_translationProvider.tr('quiz_screen.difficulty_selection.hard') == level){
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.hard') ==
+        level) {
       return 'D';
     } else {
       return 'F';

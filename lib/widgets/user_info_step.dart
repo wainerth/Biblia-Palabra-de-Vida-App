@@ -143,7 +143,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
           // NOMBRE DE USUARIO
           SizedBox(
             width: _formWidth,
-            height: StylesApp(context).sizeTextFormField.height,
+             height: StylesApp(context).sizeTextFormField.height + 20,
             child: TextFormField(
               controller: widget.userNameController,
               decoration: StylesApp(context)
@@ -157,6 +157,15 @@ class _UserInfoStepState extends State<UserInfoStep> {
                           color: Colors.grey, size: 22),
                     ),
                   ),
+              validator: (value) {
+                if (value == null || value.isNotEmpty) {
+                  if (value!.contains(' ')) {
+                    return translationProvider
+                        .tr("user_info_step.username_error_spaces");
+                  }
+                }
+                return null;
+              },
               style: StylesApp(context)
                   .textStyleBody12
                   .copyWith(color: StyleColor.black),
@@ -330,7 +339,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                         ),
                         SizedBox(height: 8),
                         SizedBox(
-                          height: StylesApp(context).sizeTextFormField.height,
+                          height: StylesApp(context).sizeTextFormField.height + 10,
                           child: TextFormField(
                             controller: widget.userNameController,
                             decoration: StylesApp(context)
@@ -345,6 +354,15 @@ class _UserInfoStepState extends State<UserInfoStep> {
                                         color: Colors.grey, size: 22),
                                   ),
                                 ),
+                            validator: (value) {
+                              if (value == null || value.isNotEmpty) {
+                                if (value!.contains(' ')) {
+                                  return translationProvider.tr(
+                                      "user_info_step.username_error_spaces");
+                                }
+                              }
+                              return null;
+                            },
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.black,
                                   fontSize: 16,

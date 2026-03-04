@@ -10,7 +10,6 @@ import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -38,8 +37,6 @@ class _PreachScreenState extends State<PreachScreen> {
   }
 
   List<Preach> preaches = [];
-  List<Preach> _searchResults = [];
-  bool _isSearchActive = false;
   TextEditingController _searchController = TextEditingController();
 
   groupByMonthYear() {
@@ -64,13 +61,6 @@ class _PreachScreenState extends State<PreachScreen> {
     final searchTerm = value.toLowerCase().trim();
 
     if (_translationProvider.tr("preach_screen.tabs.message") == filter) {
-      List<String> result = preaches
-          .where((element) =>
-              element.title?.toLowerCase().contains(searchTerm) ?? false)
-          .map((e) => e.title)
-          .cast<String>()
-          .toList();
-
       return preaches
           .where((element) =>
               element.title?.toLowerCase().contains(searchTerm) ?? false)
@@ -403,7 +393,8 @@ class _PreachScreenState extends State<PreachScreen> {
                         children: [
                           SizedBox(height: 20),
                           Text(
-                            _translationProvider.tr('preach_screen.categories_title'),
+                            _translationProvider
+                                .tr('preach_screen.categories_title'),
                             style: StylesApp(context).textStyleBody18.copyWith(
                                   color: StyleColor.turquoise,
                                   fontWeight: FontWeight.bold,
@@ -562,9 +553,8 @@ class _PreachScreenState extends State<PreachScreen> {
                                           textEditingController,
                                       FocusNode focusNode,
                                       VoidCallback onFieldSubmitted) {
-
-                                        _searchController = textEditingController;
-                                         // Guardar el controlador para limpiar después
+                                    _searchController = textEditingController;
+                                    // Guardar el controlador para limpiar después
                                     return TextField(
                                       controller: textEditingController,
                                       focusNode: focusNode,

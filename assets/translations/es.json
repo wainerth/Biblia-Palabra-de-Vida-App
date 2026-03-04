@@ -1,4 +1,5 @@
 {
+    "bible": "La Biblia",
     "common": {
         "back": "Volver",
         "continue": "Continuar",
@@ -1575,20 +1576,20 @@
     "doubts": {
         "title": "Dudas Frecuentes",
         "have_doubts": "¿Tienes dudas?",
-        "description": "Aquí ALgunas de las preguntas más frecuentes sobre la app y su uso.",
+        "description": "Aquí Algunas de las preguntas más frecuentes sobre la app y su uso.",
         "not_found_answer": "¿No encontraste tu respuesta? Escríbenos a",
         "or_write_to": "O escríbenos a:",
         "contact_us": "Contáctanos",
         "copyright": "© 2025 Biblia Palabra de Vida",
         "frequent_questions": "Preguntas Frecuentes",
         "question_1": "¿Cómo puedo buscar un versículo?",
-        "answer_1": "En la pantalla principal, Ingresas a la opción de la Biblia y el los iconos de la parte superior donde esta la lupa ...\n Encontraras las opciones que te permiten moverte sobre los Versiones, libros capítulos y versículos, ademas de acceder, a la sección de enseñanzas, y personajes...",
+        "answer_1": "Para buscar un versículo:\n 1. Ingresa a la sección Biblia desde la pantalla principal.\n2. Toca el ícono de la lupa, ubicado en la parte superior.\nDesde allí podrás buscar por palabra clave o navegar entre versiones, libros, capítulos y versículos.\nTambién podrás acceder a las secciones de enseñanzas y personajes bíblicos disponibles en la app.",
         "question_2": "¿Puedo leer la Biblia sin conexión?",
-        "answer_2": "No,necesitas estar conectado a internet, para poder acceder a las funcionalidades de la Biblia",
+        "answer_2": "No. Para acceder al contenido y a todas las funcionalidades de la app, es necesario contar con conexión a internet.",
         "question_3": "¿Cómo puedo cambiar el tema de la app?",
-        "answer_3": "Solo puedes cambiar el tema de colores en la sección de la Biblia. \n Ve a la biblia usas el icono de personalización  y selecciona el tema que prefieras: claro, oscuro o personalizado. \n Ademas puedes cambiar el tipo de fuente, ajustar el tamaño de la fuente, estos\n datos permanecen guardados dentro del store de la aplicación",
+        "answer_3": "Puedes personalizar el tema desde la sección *Biblia*.\n1. Ingresa a la sección *Biblia*.\n2. Toca el ícono de *personalización*.\n3. Selecciona el tema que prefieras: *claro, oscuro o personalizado*.\n\nAdemás, puedes cambiar el tipo de letra y ajustar el tamaño de la fuente.\nEstos cambios se guardan automáticamente en la aplicación.",
         "question_4": "¿Dónde puedo enviar sugerencias o reportar errores?",
-        "answer_4": "a traves del correo Electrónico, que encuentras en configuración \"acerca de la app\", puedes enviarnos tus sugerencias o reportar cualquier inconveniente.",
+        "answer_4": "Puedes enviarnos tus sugerencias o reportar cualquier inconveniente a través del correo electrónico disponible en:\n\n*Configuración → Acerca de la app*\n\nEstaremos encantados de recibir tus comentarios para seguir mejorando.",
         "email_subject": "Consulta - Biblia Palabra de Vida",
         "email_body": "Hola, tengo una consulta sobre la aplicación:",
         "email_error": "No se pudo abrir la aplicación de correo"
@@ -1654,32 +1655,58 @@
             "tip_message": "Los temas personalizados se aplicarán solo a la biblia y podrás cambiarlos en cualquier momento."
         }
     },
-    
-  "radio_screen": {
-    "title": "Radio",
-    "app_name": "AMISTAD",
-    "app_subtitle": "Online Radio",
-    "app_tagline": "La frecuencia que acompaña",
-    "app_description": "Una radio con valores que te acompaña todos los días",
-    "opening_message": "Estás a punto de abrir:",
-    "confirm_dialog": {
-      "title": "Confirmar",
-      "message": "¿Deseas abrir la aplicación {{appName}}?",
-      "cancel": "Cancelar",
-      "open": "Abrir"
+    "ranking": {
+        "no_league": {
+            "title": "No tienes una liga activa",
+            "subtitle": "Juega Aventuras para conseguir una liga"
+        },
+        "time_remaining": "Tiempo Restante:",
+        "loading": "Cargando...",
+        "format": "{{days}} días {{hours}}:{{minutes}}:{{seconds}}",
+        "zones": {
+            "promotion": "Zona de Ascenso",
+            "relegation": "Zona de Descenso"
+        },
+        "errors": {
+            "no_leagues": "No se encontraron ligas"
+        },
+        "points": "exp"
     },
-    "external_app_dialog": {
-      "title": "Abrir aplicación externa",
-      "message": "Serás redirigido a 'Amistad Online'",
-      "cancel": "Cancelar",
-      "accept": "Aceptar"
+    "soon": {
+        "title": "Próximamente",
+        "subtitle": "Estamos trabajando en algo increíble para ti.",
+        "back_button": "Volver"
     },
-    "error_dialog": {
-      "message": "No se pudo abrir la aplicación {{appName}}. ¿Deseas descargar la App?",
-      "continue": "Continuar",
-      "cancel": "Cancelar"
+    "promise_card": {
+        "redeemed": {
+            "earned_message": "¡Haz ganado una mini estrella!\n {{points}} Lms de energía",
+            "share_subject": "Promesa"
+        }
     },
-    "button": "Escuchar Radio"
-  }
-
+    "radio_screen": {
+        "title": "Radio",
+        "app_name": "AMISTAD",
+        "app_subtitle": "Online Radio",
+        "app_tagline": "La frecuencia que acompaña",
+        "app_description": "Una radio con valores que te acompaña todos los días",
+        "opening_message": "Estás a punto de abrir:",
+        "confirm_dialog": {
+            "title": "Confirmar",
+            "message": "¿Deseas abrir la aplicación {{appName}}?",
+            "cancel": "Cancelar",
+            "open": "Abrir"
+        },
+        "external_app_dialog": {
+            "title": "Abrir aplicación externa",
+            "message": "Serás redirigido a 'Amistad Online'",
+            "cancel": "Cancelar",
+            "accept": "Aceptar"
+        },
+        "error_dialog": {
+            "message": "No se pudo abrir la aplicación {{appName}}. ¿Deseas descargar la App?",
+            "continue": "Continuar",
+            "cancel": "Cancelar"
+        },
+        "button": "Escuchar Radio"
+    }
 }
