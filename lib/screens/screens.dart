@@ -1,6 +1,9 @@
 //Authentication
 
 
+
+
+
 export 'package:biblia_palabra_de_vida_app/screens/features/notification/notification_screen.dart';
 
 export 'package:biblia_palabra_de_vida_app/screens/soon/soon_screen.dart';
@@ -79,4 +82,13 @@ export 'package:biblia_palabra_de_vida_app/screens/features/theme_editor/theme_e
 
 //404
 export 'package:biblia_palabra_de_vida_app/screens/404/unknown_screen.dart';
+
+// splash
+export 'package:biblia_palabra_de_vida_app/screens/splash/splash_screen.dart';
+
+// maintenance
+export 'package:biblia_palabra_de_vida_app/screens/maintenance/maintenance_screen.dart';
+
+// forceUpdate
+export 'package:biblia_palabra_de_vida_app/screens/forceUpdate/force_update_screen.dart';
 

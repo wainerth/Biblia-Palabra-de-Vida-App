@@ -4,6 +4,9 @@ import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 final Map<String, WidgetBuilder> routes = {
+  '/loading': (context) => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
   '/introPage': (BuildContext context) => const WelcomeScreen(),
   '/homePage': (BuildContext context) => const HomeScreen(),
   '/loginPage': (BuildContext context) => const LoginScreen(),
