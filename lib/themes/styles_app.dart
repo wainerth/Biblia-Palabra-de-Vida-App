@@ -247,7 +247,7 @@ class StylesApp {
     } else if (screenWidth <= SizeScreensApp().tablet) {
       return 20;
     } else if (screenWidth <= SizeScreensApp().xlg) {
-      return 12;
+      return 20;
     } else {
       return 16;
     }

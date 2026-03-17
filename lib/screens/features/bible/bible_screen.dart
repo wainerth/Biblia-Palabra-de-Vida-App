@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:biblia_palabra_de_vida_app/class/bible_version_selector.dart';
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
@@ -49,6 +50,7 @@ class BibleScreen extends StatefulWidget {
 // ============================================================================
 
 class _BibleScreenState extends State<BibleScreen> {
+  final _translationProvider = AppTranslationProvider();
   // ==========================================================================
   // 1. CONTROLADORES Y KEYS
   // ==========================================================================
@@ -243,7 +245,10 @@ class _BibleScreenState extends State<BibleScreen> {
         isPlaying = false;
         currentPlayingVerseIndex = null;
       });
-      showSnackBar("Error en TTS: $msg", type: SnackBarType.error);
+      showSnackBar(
+          _translationProvider.trParams(
+              "bible_screen.error.tts_error", {"error": msg.toString()}),
+          type: SnackBarType.error);
     });
   }
 
@@ -257,15 +262,6 @@ class _BibleScreenState extends State<BibleScreen> {
   void _setupScrollListener() {
     scrollController.addListener(() {
       _handleScroll();
-      // if (scrollController.position.isScrollingNotifier.value) {
-      //   if (!_isManualScroll) return;
-      //   if (scrollToVerse != null && scrollToVerse! > 0) {
-      //     setState(() {
-      //       scrollToVerse = null;
-      //       _isManualScroll = false;
-      //     });
-      //   }
-      // }
     });
   }
   // ==========================================================================
@@ -278,7 +274,7 @@ class _BibleScreenState extends State<BibleScreen> {
       if (mounted && _screenState == BibleScreenState.loading) {
         setState(() {
           _screenState = BibleScreenState.error;
-          errorMessage = 'Tiempo de carga excedido';
+          errorMessage = _translationProvider.tr("bible_screen.error.timeout");
         });
         LoadingService().hideLoading();
       }
@@ -548,7 +544,8 @@ class _BibleScreenState extends State<BibleScreen> {
       setState(() {
         _screenState = BibleScreenState.error;
         _showSkeleton = false;
-        errorMessage = 'Error al cargar: ${error.toString()}';
+        errorMessage = _translationProvider.trParams(
+            "bible_screen.error.loading", {"error": error.toString()});
       });
     }
     LoadingService().hideLoading();
@@ -559,24 +556,78 @@ class _BibleScreenState extends State<BibleScreen> {
   // ==========================================================================
 
   String _getSpeedLabel(double speed) {
-    if (speed <= 0.4) return 'Lento';
-    if (speed <= 0.6) return 'Normal';
-    return 'Rápido';
+    if (speed <= 0.4) return _translationProvider.tr("bible_screen.speed.slow");
+    if (speed <= 0.6)
+      return _translationProvider.tr("bible_screen.speed.normal");
+    return _translationProvider.tr("bible_screen.speed.fast");
   }
 
   Future<void> _readVerse(VerseModel verse) async {
     try {
-      if (isPlaying) await flutterTts.stop();
+      // Detener si hay algo reproduciéndose
+      if (isPlaying) {
+        await flutterTts.stop();
+      }
 
-      setState(() => currentPlayingVerseIndex = verses.indexOf(verse));
+      // Configurar el versículo actual
+      final verseIndex = verses.indexOf(verse);
+      setState(() {
+        currentPlayingVerseIndex = verseIndex;
+        isPlaying = true; // 👈 Importante: marcar como reproduciendo
+      });
+
+      // Detectar idioma y configurar TTS
+      final detectedLanguage = _detectLanguage(verse.text);
+      await _configureTTSForLanguage(detectedLanguage);
+
+      // Configurar handlers ANTES de speak
+      flutterTts.setCompletionHandler(() {
+        debugPrint('✅ TTS completado para versículo ${verse.verse}');
+        setState(() {
+          isPlaying = false;
+          currentPlayingVerseIndex = null;
+        });
+      });
+
+      flutterTts.setErrorHandler((msg) {
+        debugPrint('❌ Error en TTS: $msg');
+        setState(() {
+          isPlaying = false;
+          currentPlayingVerseIndex = null;
+        });
+        showSnackBar(
+            _translationProvider.trParams(
+                "bible_screen.error.tts_error", {"error": msg.toString()}),
+            type: SnackBarType.error);
+      });
+
+      flutterTts.setCancelHandler(() {
+        debugPrint('⏹️ TTS cancelado');
+        setState(() {
+          isPlaying = false;
+          currentPlayingVerseIndex = null;
+        });
+      });
+
+      // Iniciar la reproducción
       await flutterTts.speak("Versículo ${verse.verse}. ${verse.text}");
     } catch (e) {
-      showSnackBar("Error al leer versículo: ${e.toString()}",
+      debugPrint('❌ Error en _readVerse: $e');
+      setState(() {
+        isPlaying = false;
+        currentPlayingVerseIndex = null;
+      });
+      showSnackBar(
+          _translationProvider.trParams(
+              "bible_screen.error.verse_reading", {"error": e.toString()}),
           type: SnackBarType.error);
-    } finally {
-      setState(() => isPlaying = false);
-      await flutterTts.stop();
     }
+  }
+
+// Detectar CUALQUIER idioma que se escribe de derecha a izquierda
+  bool _isRTL(String text) {
+    // Rango Unicode que cubre TODOS los idiomas RTL (hebreo, árabe, siríaco, etc.)
+    return RegExp(r'[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]').hasMatch(text);
   }
 
   Future<void> _togglePlayPause() async {
@@ -660,7 +711,7 @@ class _BibleScreenState extends State<BibleScreen> {
             CircularProgressIndicator(),
             SizedBox(height: 16),
             Text(
-              'Cargando Biblia...',
+              _translationProvider.tr("bible_screen.loading"),
               style: TextStyle(color: currentTheme.textColor),
             ),
           ],
@@ -778,7 +829,8 @@ class _BibleScreenState extends State<BibleScreen> {
             Icon(Icons.error_outline, size: 64, color: Colors.red),
             SizedBox(height: 16),
             Text(
-              errorMessage ?? 'Error desconocido',
+              errorMessage ??
+                  _translationProvider.tr("bible_screen.error.unknown"),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: currentTheme.textColor,
@@ -793,7 +845,8 @@ class _BibleScreenState extends State<BibleScreen> {
                 });
                 _initializeScreen();
               },
-              child: Text('Reintentar'),
+              child:
+                  Text(_translationProvider.tr("bible_screen.buttons.retry")),
             ),
             SizedBox(height: 16),
             TextButton(
@@ -804,7 +857,8 @@ class _BibleScreenState extends State<BibleScreen> {
                   arguments: {'selectedIndex': 0},
                 );
               },
-              child: Text('Volver al inicio'),
+              child: Text(
+                  _translationProvider.tr("bible_screen.buttons.back_to_home")),
             ),
           ],
         ),
@@ -948,7 +1002,7 @@ class _BibleScreenState extends State<BibleScreen> {
                 ),
                 Center(
                   child: Text(
-                    'Navegación',
+                    _translationProvider.tr("bible_screen.navigation.title"),
                     style: StylesApp(context).textStyleBody18.copyWith(
                           color: currentTheme.buttonTextColor,
                           fontWeight: FontWeight.bold,
@@ -1174,7 +1228,10 @@ class _BibleScreenState extends State<BibleScreen> {
                           ],
                         ),
                         Text(
-                          'Velocidad: ${(_speechRate * 100).round()}%',
+                          _translationProvider.trParams(
+                              "bible_screen.speed.label", {
+                            "percentage": (_speechRate * 100).round().toString()
+                          }),
                           style: TextStyle(
                             color: currentTheme.textColor,
                             fontSize: 10,
@@ -1251,7 +1308,8 @@ class _BibleScreenState extends State<BibleScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Navegación',
+                        _translationProvider
+                            .tr("bible_screen.navigation.title"),
                         style: StylesApp(context).textStyleBody18.copyWith(
                               color: currentTheme.buttonTextColor,
                               fontWeight: FontWeight.bold,
@@ -1330,7 +1388,7 @@ class _BibleScreenState extends State<BibleScreen> {
           ),
           SizedBox(width: 8),
           Text(
-            'Desliza desde la derecha para navegar',
+            _translationProvider.tr("bible_screen.navigation.drawer_indicator"),
             style: TextStyle(
               color: currentTheme.buttonColor,
               fontSize: 12,
@@ -1355,9 +1413,11 @@ class _BibleScreenState extends State<BibleScreen> {
       return _buildNoVersesMessage();
     }
     verses.map((v) => "${v.verse} ${v.text}").join(' ');
-
+    final bool isRTL = verses.isNotEmpty ? _isRTL(verses.first.text) : false;
     return SelectableText.rich(
       enableInteractiveSelection: false,
+      textAlign: isRTL ? TextAlign.right : TextAlign.left,
+      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
       TextSpan(
         children: verses.asMap().entries.expand((entry) {
           final index = entry.key;
@@ -1447,6 +1507,7 @@ class _BibleScreenState extends State<BibleScreen> {
       style: TextStyle(
         fontSize: fontSizeNumber,
         fontFamily: fontFamilySet.label,
+        fontFamilyFallback: ['Arial', 'sans-serif'],
       ),
     );
   }
@@ -1532,7 +1593,8 @@ class _BibleScreenState extends State<BibleScreen> {
     } catch (e) {
       setState(() {
         _screenState = BibleScreenState.error;
-        errorMessage = 'Error al cargar: ${e.toString()}';
+        errorMessage = _translationProvider
+            .trParams("bible_screen.error.chapter", {"error": e.toString()});
       });
     }
   }
@@ -1558,7 +1620,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
             // Título del mensaje
             Text(
-              'No se encontraron versículos',
+              _translationProvider.tr("bible_screen.no_verses.title"),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: currentTheme.textColor,
@@ -1572,8 +1634,11 @@ class _BibleScreenState extends State<BibleScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
-                'El capítulo ${currentChapter?.chapter ?? 'actual'} del libro '
-                '${currentBook?.modernName ?? 'seleccionado'} no contiene versículos disponibles.',
+                _translationProvider.trParams(
+                    "bible_screen.no_verses.description", {
+                  "chapter": currentChapter!.chapter.toString(),
+                  "book": currentBook!.modernName
+                }),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: currentTheme.textColor.withValues(alpha: 0.7),
@@ -1608,7 +1673,7 @@ class _BibleScreenState extends State<BibleScreen> {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Información del capítulo',
+                          _translationProvider.tr("bible_screen.no_verses.chapter_info"),
                           style: TextStyle(
                             color: currentTheme.buttonColor,
                             fontSize: 14,
@@ -1620,11 +1685,11 @@ class _BibleScreenState extends State<BibleScreen> {
                   ),
                   SizedBox(height: 8),
                   _buildInfoRow(
-                      'Libro:', currentBook?.modernName ?? 'No disponible'),
+                      _translationProvider.tr("bible_screen.no_verses.book"), currentBook?.modernName ?? _translationProvider.tr("bible_screen.no_verses.not_available")),
                   _buildInfoRow(
-                      'Capítulo:', '${currentChapter?.chapter ?? 'N/A'}'),
+                      _translationProvider.tr("bible_screen.no_verses.chapter"), '${currentChapter?.chapter ?? 'N/A'}'),
                   _buildInfoRow(
-                      'Versión:', currentVersion?.version ?? 'No disponible'),
+                      _translationProvider.tr("bible_screen.no_verses.version"), currentVersion?.version ?? _translationProvider.tr("bible_screen.no_verses.not_available")),
                 ],
               ),
             ),
@@ -1640,7 +1705,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     _retryLoadChapter();
                   },
                   icon: Icon(Icons.refresh, size: 20),
-                  label: Text('Reintentar'),
+                  label: Text(_translationProvider.tr("bible_screen.no_verses.retry")),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: currentTheme.buttonTextColor,
                     backgroundColor: currentTheme.buttonColor,
@@ -1655,7 +1720,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     _goToNextChapter('${(currentChapter?.chapter ?? 0) + 1}');
                   },
                   icon: Icon(Icons.skip_next, size: 20),
-                  label: Text('Siguiente capítulo'),
+                  label: Text(_translationProvider.tr("bible_screen.no_verses.next_chapter")),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: currentTheme.buttonColor,
                     side: BorderSide(color: currentTheme.buttonColor),
@@ -1877,7 +1942,7 @@ class _BibleScreenState extends State<BibleScreen> {
             _buildToolbarButton(
               icon: Icons.content_copy,
               iconColor: currentTheme.buttonColor,
-              label: 'Copiar',
+              label: _translationProvider.tr("bible_screen.toolbar.copy"),
               onTap: _copySelectedVerses,
             ),
             Divider(height: 1, color: Colors.grey[300]),
@@ -1885,7 +1950,7 @@ class _BibleScreenState extends State<BibleScreen> {
             _buildToolbarButton(
               icon: Icons.share,
               iconColor: currentTheme.buttonColor,
-              label: 'Compartir',
+              label: _translationProvider.tr("bible_screen.toolbar.share"),
               onTap: _shareSelectedVerses,
             ),
             Divider(height: 1, color: Colors.grey[300]),
@@ -1894,7 +1959,7 @@ class _BibleScreenState extends State<BibleScreen> {
               _buildToolbarButton(
                 icon: Icons.highlight,
                 iconColor: currentTheme.buttonColor,
-                label: 'Resaltar',
+                label: _translationProvider.tr("bible_screen.toolbar.highlight"),
                 onTap: _showHighlightColorPicker,
               ),
 
@@ -1904,7 +1969,7 @@ class _BibleScreenState extends State<BibleScreen> {
             _buildToolbarButton(
               icon: Icons.clear_all,
               iconColor: currentTheme.buttonColor,
-              label: 'Limpiar',
+              label: _translationProvider.tr("bible_screen.toolbar.clear"),
               onTap: _clearSelection,
             ),
           ],
@@ -1962,7 +2027,7 @@ class _BibleScreenState extends State<BibleScreen> {
           ListTile(
             leading: Icon(isFavorite ? Icons.star_outline : Icons.star),
             title: Text(
-                isFavorite ? 'Remover de favoritos' : 'Agregar a favoritos'),
+                isFavorite ? _translationProvider.tr("bible_screen.verse_popup.remove_favorite") : _translationProvider.tr("bible_screen.verse_popup.add_favorite")),
             onTap: () {
               _toggleFavorite(verse);
               Navigator.pop(context);
@@ -2447,13 +2512,13 @@ class _BibleScreenState extends State<BibleScreen> {
       LoadingService().hideLoading();
       if (mounted) {
         showGeneralDialog(
-
           context: context,
           barrierDismissible: false,
           transitionDuration: Duration(milliseconds: 500),
           pageBuilder: (_, __, ___) {
             return Dialog(
               backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.zero,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: isTablet(context) ? 600 : double.infinity,
@@ -2734,6 +2799,86 @@ class _BibleScreenState extends State<BibleScreen> {
     });
   }
 
+  String _detectLanguage(String text) {
+    // 1. Primero verificar hebreo (más específico)
+    final hebrewRegex = RegExp(r'[\u0590-\u05FF\uFB1D-\uFB4F]');
+    final hebrewCount = hebrewRegex.allMatches(text).length;
+
+    if (hebrewCount > 0) {
+      print("✅ Detectado HEBREO por caracteres hebreos: $hebrewCount");
+      return "hebrew";
+    }
+
+    // 2. Palabras clave ESPECÍFICAS en español (prioridad alta)
+    final spanishKeywords = AppConstants.spanishKeywords;
+
+    // 3. Palabras clave en inglés
+    final englishKeywords = AppConstants.englishKeywords;
+
+    // 4. Contar ocurrencias
+    int spanishScore = 0;
+    int englishScore = 0;
+
+    final textLower = text.toLowerCase();
+
+    for (final keyword in spanishKeywords) {
+      // Buscar palabra completa (con límites de palabra)
+      final pattern = RegExp(r'\b' + RegExp.escape(keyword) + r'\b');
+      spanishScore += pattern.allMatches(textLower).length;
+    }
+
+    for (final keyword in englishKeywords) {
+      final pattern = RegExp(r'\b' + RegExp.escape(keyword) + r'\b');
+      englishScore += pattern.allMatches(textLower).length;
+    }
+
+    // 5. Verificar tildes españolas (caracteres especiales)
+    final spanishTildesRegex = RegExp(r'[áéíóúÁÉÍÓÚñÑ]');
+    final spanishTildesCount = spanishTildesRegex.allMatches(text).length;
+    spanishScore += spanishTildesCount * 3; // Peso extra por tildes
+
+    if (kDebugMode) {
+      print("""
+  🔍 Análisis de idioma:
+  - Puntos español: $spanishScore (keywords: ${spanishScore - spanishTildesCount}, tildes: $spanishTildesCount)
+  - Puntos inglés: $englishScore
+  """);
+    }
+
+    // 6. Decidir idioma (umbral mínimo)
+    if (spanishScore > englishScore && spanishScore >= 2) {
+      if (kDebugMode) {
+        print("✅ Idioma detectado: ESPAÑOL");
+      }
+      return "spanish";
+    } else if (englishScore > spanishScore && englishScore >= 2) {
+      if (kDebugMode) {
+        print("✅ Idioma detectado: INGLÉS");
+      }
+      return "english";
+    }
+
+    // 7. Si está muy parejo o no hay keywords, usar REGLAS POR DEFECTO
+    final totalLetters =
+        text.replaceAll(RegExp(r'[^a-zA-ZáéíóúÁÉÍÓÚñÑ]'), '').length;
+    if (totalLetters > 0) {
+      // Porcentaje de tildes
+      final tildesPercentage = spanishTildesCount / totalLetters;
+
+      if (tildesPercentage > 0.02) {
+        // 2% de tildes → español
+        if (kDebugMode) {
+          print("✅ Español detectado por tildes ($tildesPercentage%)");
+        }
+        return "spanish";
+      }
+    }
+
+    // 8. DEFAULT: Español para textos bíblicos (tu caso)
+    print("⚠️ Idioma no claro, usando ESPAÑOL por defecto");
+    return "spanish";
+  }
+
   void _scrollToVerseFallback(int startIndex) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_selectableTextKey.currentContext != null &&
@@ -2780,13 +2925,11 @@ class _BibleScreenState extends State<BibleScreen> {
             message: responseVideo.error!,
             dialogType: DialogTypeAction.error,
             buttonOk: "Re intentar",
-            textButton: "Volver",
-            actionCallbackOk: () {
-               _retryLoadChapter();
-            },
-            actionCallback: () {
-               _retryLoadChapter();
-            });
+            textButton: "Volver", actionCallbackOk: () {
+          _retryLoadChapter();
+        }, actionCallback: () {
+          _retryLoadChapter();
+        });
       }
       return;
     }
@@ -2814,45 +2957,13 @@ class _BibleScreenState extends State<BibleScreen> {
 
         setState(() => currentPlayingVerseIndex = i);
 
-        if (_selectableTextKey.currentContext != null &&
-            scrollController.hasClients) {
-          try {
-            final renderBox =
-                _selectableTextKey.currentContext!.findRenderObject();
-            if (renderBox is RenderBox) {
-              final text = verses
-                  .sublist(0, i)
-                  .map((v) => "${v.verse} ${v.text}")
-                  .join(' ');
-              final tp = TextPainter(
-                text: TextSpan(
-                  text: text,
-                  style: StylesApp(context).textStyleBody14.copyWith(
-                        fontFamily: fontFamilySet.label,
-                        fontSize: fontSizeVerse,
-                      ),
-                ),
-                textDirection: TextDirection.ltr,
-                maxLines: null,
-              );
-              tp.layout(maxWidth: renderBox.size.width);
-              final offsetY = tp.height - 15;
-              await scrollController.animateTo(
-                offsetY,
-                duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            }
-          } catch (_) {
-            final itemHeight = 40.0;
-            await scrollController.animateTo(
-              i * itemHeight,
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          }
-        }
+        // 👇 Usar el método existente para scroll
+        _scrollToKeyVerse(i);
+        // 2. DETECTAR IDIOMA automáticamente
+        final detectedLanguage = _detectLanguage(verses[i].text);
 
+        // 3. CONFIGURAR TTS para ese idioma
+        await _configureTTSForLanguage(detectedLanguage);
         await flutterTts.speak("${verses[i].text}.");
         await _waitForTtsCompletion();
         if (!isPlaying) break;
@@ -2865,6 +2976,69 @@ class _BibleScreenState extends State<BibleScreen> {
         isPlaying = false;
         currentPlayingVerseIndex = null;
       });
+    }
+  }
+
+  /// Configurar FlutterTTS según idioma detectado
+  Future<void> _configureTTSForLanguage(String language) async {
+    try {
+      switch (language.toLowerCase()) {
+        case "hebrew":
+        case "he":
+        case "iw":
+          // Intentar diferentes códigos de hebreo
+          final hebrewCodes = ["he-IL", "he", "iw-IL", "iw"];
+          bool configured = false;
+
+          for (final code in hebrewCodes) {
+            if (await flutterTts.isLanguageAvailable(code)) {
+              await flutterTts.setLanguage(code);
+              await flutterTts.setSpeechRate(0.3); // Más lento para hebreo
+              if (kDebugMode) {
+                print("✅ TTS configurado para HEBREO con código: $code");
+              }
+              configured = true;
+              break;
+            }
+          }
+
+          if (!configured) {
+            if (kDebugMode) {
+              print("⚠️ Voz hebrea no disponible, usando español");
+            }
+            await flutterTts.setLanguage("es-ES");
+          }
+          break;
+
+        case "spanish":
+        case "es":
+          await flutterTts.setLanguage("es-ES");
+          await flutterTts.setSpeechRate(_speechRate);
+          if (kDebugMode) {
+            print("✅ TTS configurado para ESPAÑOL");
+          }
+          break;
+
+        case "english":
+        case "en":
+          await flutterTts.setLanguage("en-US");
+          await flutterTts.setSpeechRate(_speechRate);
+          if (kDebugMode) {
+            print("✅ TTS configurado para INGLÉS");
+          }
+          break;
+
+        default:
+          await flutterTts.setLanguage("es-ES");
+          if (kDebugMode) {
+            print("✅ TTS configurado para ESPAÑOL (por defecto)");
+          }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("❌ Error configurando TTS: $e");
+      }
+      await flutterTts.setLanguage("es-ES"); // Fallback
     }
   }
 

@@ -1,7 +1,9 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class IntroAventureScreen extends StatefulWidget {
@@ -18,7 +20,8 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool _isTablet = isTablet(context);
+    // final bool _isTablet = isTablet(context);
+    final translationProvider = context.read<AppTranslationProvider>();
 
     return Scaffold(
       body: SafeArea(
@@ -26,9 +29,9 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
           children: [
             HeaderWidget(),
             Expanded(
-              child: _isTablet
-                  ? _buildTabletIntroSlide(context)
-                  : _buildMobileIntroSlide(context),
+              child: ResponsiveLayout(
+                  mobile: _buildMobileIntroSlide(context, translationProvider),
+                  tablet: _buildTabletIntroSlide(context, translationProvider)),
             ),
           ],
         ),
@@ -37,49 +40,201 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   }
 
   // VERSIÓN TABLET con 2 columnas
-  Widget _buildTabletIntroSlide(BuildContext context) {
+  Widget _buildTabletIntroSlide(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Row(
       children: [
         // COLUMNA IZQUIERDA: Imagen y texto
         Expanded(
           flex: 3,
-          child: _buildTabletRightColumn(context),
+          child: _buildTabletLeftColumn(context, translationProvider),
         ),
         // COLUMNA DERECHA: Sugerencias
         Expanded(
           flex: 2,
-          child: _buildTabletLeftColumn(context),
+          child: _buildTabletRightColumn(context, translationProvider),
         ),
       ],
     );
   }
 
   // Columna izquierda (contenido principal)
-  Widget _buildTabletLeftColumn(BuildContext context) {
+  Widget _buildTabletLeftColumn(
+      BuildContext context, AppTranslationProvider translationProvider) {
+    return Stack(
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: PageView(
+            controller: _controller,
+            onPageChanged: (index) {
+              setState(() {
+                _isLastPage = index == 3;
+              });
+            },
+            children: [
+              _buildTabletPage(context, "assets/IntroTablet.png", "",
+                  translationProvider.tr('intro_adventure.step_1_title'),translationProvider),
+              _buildTabletPage(context, "assets/IntroTablet.png", "1",
+                  translationProvider.tr('intro_adventure.step_2_title'),translationProvider),
+              _buildTabletPage(context, "assets/IntroTablet.png", "2",
+                  translationProvider.tr('intro_adventure.step_3_title'),translationProvider),
+              _buildTabletPage(context, "assets/IntroTablet.png", "3",
+                  translationProvider.tr('intro_adventure.step_4_title'),translationProvider),
+            ],
+          ),
+        ),
+
+        // Controles inferiores
+        Positioned(
+          bottom: 40,
+          left: 0,
+          right: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Column(
+              children: [
+                // Indicador de páginas
+                SmoothPageIndicator(
+                  controller: _controller,
+                  count: 4,
+                  effect: const WormEffect(
+                    activeDotColor: StyleColor.blueHigh,
+                    dotColor: Colors.grey,
+                    dotHeight: 10,
+                    dotWidth: 10,
+                    spacing: 8,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Botones de navegación
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Botón omitir
+                    if (!_isLastPage)
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/layoutPage1');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          backgroundColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                                color:
+                                    StyleColor.blueHigh.withValues(alpha: 0.8)),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          translationProvider.tr('intro_adventure.skip'),
+                          style: StylesApp(context)
+                              .textStyleBody12
+                              .copyWith(color: StyleColor.blueHigh),
+                        ),
+                      )
+                    else
+                      const SizedBox(width: 100),
+
+                    // Botón siguiente/iniciar
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_isLastPage) {
+                          Navigator.pushNamed(context, '/layoutPage1');
+                        } else {
+                          _controller.nextPage(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.ease,
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 14),
+                        backgroundColor: _isLastPage
+                            ? StyleColor.blueHigh
+                            : Colors.white.withValues(alpha: 0.9),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 3,
+                      ),
+                      child: _isLastPage
+                          ? Text(
+                              translationProvider
+                                  .tr('intro_adventure.start_adventure').toUpperCase(),
+                              style:
+                                  StylesApp(context).textStyleBody12.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                            )
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  translationProvider
+                                      .tr('intro_adventure.next'),
+                                  style: StylesApp(context)
+                                      .textStyleBody12
+                                      .copyWith(
+                                        color: StyleColor.blueHigh,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Icon(
+                                  Icons.arrow_forward,
+                                  color: StyleColor.blueHigh,
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Columna derecha (sugerencias)
+  Widget _buildTabletRightColumn(
+      BuildContext context, AppTranslationProvider translationProvider) {
     final suggestions = [
       {
         'icon': Icons.lightbulb_outline,
-        'title': 'Consejo útil',
+        'title': translationProvider.tr('intro_adventure.tip_1.title'),
         'description':
-            'Dedica al menos 10 minutos diarios para obtener mejores resultados',
+            translationProvider.tr('intro_adventure.tip_1.description'),
         'color': Colors.amber,
       },
       {
         'icon': Icons.star_border,
-        'title': 'Gana recompensas',
-        'description': 'Completa etapas para desbloquear Premios y logros',
+        'title': translationProvider.tr('intro_adventure.tip_2.title'),
+        'description':
+            translationProvider.tr('intro_adventure.tip_2.description'),
         'color': Colors.blue,
       },
       {
         'icon': Icons.track_changes,
-        'title': 'Sigue tu progreso',
-        'description': 'Revisa tu Progreso en el calendario de Racha',
+        'title': translationProvider.tr('intro_adventure.tip_3.title'),
+        'description':
+            translationProvider.tr('intro_adventure.tip_3.description'),
         'color': Colors.green,
       },
       {
         'icon': Icons.group,
-        'title': 'Comparte con amigos',
-        'description': 'Mantente en el ranking de tu grupo',
+        'title': translationProvider.tr('intro_adventure.tip_4.title'),
+        'description':
+            translationProvider.tr('intro_adventure.tip_4.description'),
         'color': Colors.purple,
       },
     ];
@@ -101,7 +256,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
         children: [
           // Título de la sección
           Text(
-            'Sugerencias para tu aventura',
+            translationProvider.tr('intro_adventure.suggestions_title'),
             style: StylesApp(context).textStyleBody20.copyWith(
                   color: StyleColor.blueHigh,
                   fontWeight: FontWeight.bold,
@@ -109,7 +264,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Aprovecha al máximo esta experiencia',
+            translationProvider.tr('intro_adventure.suggestions_subtitle'),
             style: StylesApp(context).textStyleBody14.copyWith(
                   color: Colors.grey[700],
                 ),
@@ -164,7 +319,8 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Text(
-                            'Cada etapa te acerca más a comprender la sabiduría divina',
+                            translationProvider
+                                .tr('intro_adventure.additional_tip'),
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.blueHigh,
                                   fontStyle: FontStyle.italic,
@@ -180,150 +336,6 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  // Columna derecha (sugerencias)
-  Widget _buildTabletRightColumn(BuildContext context) {
-    return Stack(
-      children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: PageView(
-            controller: _controller,
-            onPageChanged: (index) {
-              setState(() {
-                _isLastPage = index == 3;
-              });
-            },
-            children: [
-              _buildTabletPage(context, "assets/IntroTablet.png", "",
-                  "Sigue\n la ruta \nde la sabiduría"),
-              _buildTabletPage(context, "assets/IntroTablet.png", "1",
-                  "Selecciona \nel tema que \nquieres aprender"),
-              _buildTabletPage(context, "assets/IntroTablet.png", "2",
-                  "Inicia la aventura, completa y avanza en las etapas para conocer más de Dios"),
-              _buildTabletPage(context, "assets/IntroTablet.png", "3",
-                  "Sigue los pasos, lee o escucha el contenido y responde las preguntas para sumar puntos de experiencia"),
-            ],
-          ),
-        ),
-
-        // Controles inferiores
-        Positioned(
-          bottom: 40,
-          left: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Column(
-              children: [
-                // Indicador de páginas
-                SmoothPageIndicator(
-                  controller: _controller,
-                  count: 4,
-                  effect: const WormEffect(
-                    activeDotColor: StyleColor.blueHigh,
-                    dotColor: Colors.grey,
-                    dotHeight: 10,
-                    dotWidth: 10,
-                    spacing: 8,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Botones de navegación
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Botón omitir
-                    if (!_isLastPage)
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/layoutPage1');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          backgroundColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(
-                                color:
-                                    StyleColor.blueHigh.withValues(alpha: 0.8)),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          'Omitir',
-                          style: StylesApp(context)
-                              .textStyleBody12
-                              .copyWith(color: StyleColor.blueHigh),
-                        ),
-                      )
-                    else
-                      const SizedBox(width: 100),
-
-                    // Botón siguiente/iniciar
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_isLastPage) {
-                          Navigator.pushNamed(context, '/layoutPage1');
-                        } else {
-                          _controller.nextPage(
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.ease,
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 14),
-                        backgroundColor: _isLastPage
-                            ? StyleColor.blueHigh
-                            : Colors.white.withValues(alpha: 0.9),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 3,
-                      ),
-                      child: _isLastPage
-                          ? Text(
-                              "INICIAR AVENTURA",
-                              style:
-                                  StylesApp(context).textStyleBody12.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                            )
-                          : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "SIGUIENTE",
-                                  style: StylesApp(context)
-                                      .textStyleBody12
-                                      .copyWith(
-                                        color: StyleColor.blueHigh,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.arrow_forward,
-                                  color: StyleColor.blueHigh,
-                                  size: 20,
-                                ),
-                              ],
-                            ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -396,8 +408,8 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   }
 
   // Página para Tablet
-  Widget _buildTabletPage(
-      BuildContext context, String imageUrl, String number, String text) {
+  Widget _buildTabletPage(BuildContext context, String imageUrl, String number,
+      String text, AppTranslationProvider translationProvider) {
     return Container(
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
@@ -440,6 +452,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
                 ),
                 child: Text(
                   text,
+                  maxLines: 3,
                   style: StylesApp(context).textStyleTitle.copyWith(
                         color: StyleColor.orange,
                         fontWeight: FontWeight.bold,
@@ -454,7 +467,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 30),
                 child: Text(
-                  'Paso ${int.parse(number) + 1} de 4',
+                  '${translationProvider.tr('intro_adventure.step')} ${int.parse(number) + 1} ${ translationProvider.tr('intro_adventure.of')} 4',
                   style: StylesApp(context).textStyleBody12.copyWith(
                         color: Colors.white.withValues(alpha: 0.8),
                       ),
@@ -467,7 +480,8 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   }
 
   // VERSIÓN MÓVIL (original)
-  Widget _buildMobileIntroSlide(BuildContext context) {
+  Widget _buildMobileIntroSlide(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Stack(
       children: [
         SizedBox(
@@ -490,13 +504,14 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
             },
             children: [
               _buildMobilePage(context, "assets/layerIntro.png", "",
-                  "Sigue\n la\n ruta\n de la\n sabiduría"),
+              translationProvider.tr('intro_adventure.step_1_title_mobile')
+                  ),
               _buildMobilePage(context, "assets/layerIntro.png", "1",
-                  "Selecciona\n el tema\n que\n quiere\n aprender"),
+                  translationProvider.tr('intro_adventure.step_2_title_mobile')),
               _buildMobilePage(context, "assets/layerIntro.png", "2",
-                  "Inicia la\n aventura,\n completa\n y avanza en\n las etapas\n para conocer\n más de\n Dios"),
+                  translationProvider.tr('intro_adventure.step_3_title_mobile')),
               _buildMobilePage(context, "assets/finalIntro.png", "3",
-                  "Sigue los\n pasos lee o\n escucha el\n contenido y\n responde las\n preguntas\n para sumar\n puntos de\n experiencia"),
+                  translationProvider.tr('intro_adventure.step_4_title_mobile')),
             ],
           ),
         ),
@@ -504,7 +519,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
           Positioned(
             top: 10,
             right: 16,
-            child: _buildSkipButton(context),
+            child: _buildSkipButton(context, translationProvider),
           ),
         Positioned(
           bottom: 16,
@@ -524,7 +539,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
         Positioned(
           bottom: 16,
           right: 16,
-          child: _buildNextButton(context),
+          child: _buildNextButton(context, translationProvider),
         ),
       ],
     );
@@ -587,7 +602,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   }
 
   // Botón omitir para Móvil (original)
-  Widget _buildSkipButton(BuildContext context) {
+  Widget _buildSkipButton(BuildContext context, AppTranslationProvider translationProvider) {
     return ElevatedButton(
       onPressed: () {
         setState(() {
@@ -604,7 +619,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
         ),
       ),
       child: Text(
-        'Omitir el Intro',
+        translationProvider.tr('intro_adventure.skip_intro'),
         style: TextStyle(
           color: Colors.white,
           fontSize: 16.sp,
@@ -614,7 +629,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
   }
 
   // Botón siguiente para Móvil (original)
-  Widget _buildNextButton(BuildContext context) {
+  Widget _buildNextButton(BuildContext context, AppTranslationProvider translationProvider) {
     return ElevatedButton(
       onPressed: () {
         if (_isLastPage) {
@@ -645,7 +660,7 @@ class _IntroAventureScreenState extends State<IntroAventureScreen> {
       ),
       child: _isLastPage
           ? Text(
-              "Iniciar Aventura",
+             translationProvider.tr('intro_adventure.start_adventure_mobile'),
               style: StylesApp(context).textStyleBody7,
             )
           : Icon(

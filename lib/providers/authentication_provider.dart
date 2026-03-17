@@ -401,12 +401,12 @@ class AuthenticationProvider extends ChangeNotifier {
       final ResponseData response = await verifyPinPassword(email, code);
       error = response.error;
       if (error != null) {
-        return ResponseData(data: null, error: error);
+        return ResponseData(data: null,userFriendlyError: response.userFriendlyError, error: error);
       }
       final ResponseData recovery = await resetPassword(email, password);
       error = recovery.error;
       if (error != null) {
-        return ResponseData(data: null, error: error);
+        return ResponseData(data: null,userFriendlyError: response.userFriendlyError, error: error);
       }
       return ResponseData(data: response.data, error: error);
     } catch (e) {

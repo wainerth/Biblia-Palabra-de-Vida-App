@@ -1,5 +1,7 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class HeaderNotDetailsStageWidget extends StatefulWidget {
   final String title;
@@ -29,6 +31,9 @@ class _HeaderNotDetailsStageWidgetState
     extends State<HeaderNotDetailsStageWidget> {
   @override
   Widget build(BuildContext context) {
+
+final translationProvider = context.read<AppTranslationProvider>();
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -91,7 +96,7 @@ class _HeaderNotDetailsStageWidgetState
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Text(
-                            'Etapa ${widget.stage}',
+                            '${translationProvider.tr("common.stage")} ${widget.stage}',
                             style: StylesApp(context).textStyleBody4.copyWith(
                                   color: Colors.white,
                                 ),
@@ -109,7 +114,7 @@ class _HeaderNotDetailsStageWidgetState
                                     return CustomModalWidget(
                                       title: widget.details!.sectionName,
                                       content: widget.details.introduction,
-                                      buttonText: 'Aceptar',
+                                      buttonText: translationProvider.tr('common.accept'),
                                       id: widget.details.sectionNumber.toString() ,
                                       itemCount: widget.details.levelCount,
                                       itemsCompleted:

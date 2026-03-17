@@ -9,6 +9,8 @@ class SelectionQuestionWidget extends StatefulWidget {
   final bool suggestionSelected;
   final bool selectionCompleted;
   final bool isAnswerSelected;
+  final int? selectedAnswerIndex;
+  final int? correctAnswerIndex; 
   final bool isCorrect;
   final double fontSize;
   final bool isTablet;
@@ -32,9 +34,11 @@ class SelectionQuestionWidget extends StatefulWidget {
     required this.isCorrect,
     required this.callBackContinue,
     required this.isAnswerSelected,
+    this.selectedAnswerIndex,    
+    this.correctAnswerIndex,      
     this.fontSize = 14.0,
     this.isTablet = false,
-    // Nuevos parámetros TTS
+    // parámetros TTS
     this.isTtsEnabled = false,
     this.onSpeakOption,
     this.onSpeakQuestion,
@@ -57,8 +61,11 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
   @override
   Widget build(BuildContext context) {
     try {
-      return widget.isTablet
-          ? Container(
+      return 
+      widget.isTablet
+          ? 
+          
+           Container(
               padding: widget.isTablet ? EdgeInsets.all(16.0) : EdgeInsets.zero,
               child: Column(
                 children: [
@@ -104,6 +111,7 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
               ),
             )
           : ListView.builder(
+            shrinkWrap: true,
               itemCount: widget.currentQuestion.answers.length,
               itemBuilder: (context, int index) {
                 return _buildOptionItem(context, index);
@@ -121,6 +129,46 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
   Widget _buildOptionItem(BuildContext context, int index) {
     currentAnswers = widget.currentQuestion.answers;
     final answer = currentAnswers[index];
+
+    final bool isSelected = widget.selectedAnswerIndex == index;
+    final bool isCorrectAnswer = widget.correctAnswerIndex == index;
+    
+    Color backgroundColor = StyleColor.turquoise;
+    Color borderColor = Colors.transparent;
+    double borderWidth = 0;
+    BoxShadow? shadow;
+    
+    // Determinar colores según el estado
+    if (widget.selectionCompleted) {
+      if (isCorrectAnswer) {
+        backgroundColor = Colors.green.withOpacity(0.2); // RESALTADO VERDE
+        borderColor = Colors.green;
+        borderWidth = 2.0;
+        shadow = BoxShadow(
+          color: Colors.green.withOpacity(0.3),
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        );
+      } else if (isSelected && !widget.isCorrect) {
+        backgroundColor = Colors.red.withOpacity(0.2); // RESALTADO ROJO
+        borderColor = Colors.red;
+        borderWidth = 2.0;
+      } else if (isSelected && widget.isCorrect) {
+        // Si la seleccionada es correcta, mostrar en verde también
+        backgroundColor = Colors.green.withOpacity(0.2);
+        borderColor = Colors.green;
+        borderWidth = 2.0;
+        shadow = BoxShadow(
+          color: Colors.green.withOpacity(0.3),
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        );
+      }
+    } else if (isSelected) {
+      backgroundColor = Colors.blue.withOpacity(0.2); // SELECCIÓN TEMPORAL
+      borderColor = Colors.blue;
+      borderWidth = 2.0;
+    }
 
     return GestureDetector(
       onTap: widget.isAnswerSelected
@@ -143,16 +191,16 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
       child: Container(
         margin: widget.isTablet
             ? EdgeInsets.zero
-            : EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            : EdgeInsets.symmetric(vertical: 8.0, ),
         constraints: BoxConstraints(minHeight: 48.0),
         decoration: BoxDecoration(
-          color: widget.suggestionSelected && answer.isCorrect
-              ? Colors.green
-              : widget.isAnswerSelected
-                  ? StyleColor.turquoise.withValues(alpha: 0.30)
-                  : StyleColor.turquoise,
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(8.0),
-          boxShadow: [
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+          ),
+          boxShadow: shadow != null ? [shadow] : [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.25),
               offset: Offset(0.0, 4.0),
@@ -170,16 +218,6 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
             children: [
               Row(
                 children: [
-                  // Botón de altavoz para TTS
-                  if (widget.isTtsEnabled && widget.onSpeakOption != null)
-                    IconButton(
-                      icon: Icon(Icons.volume_up, size: 16),
-                      onPressed: () => widget.onSpeakOption!(index),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      tooltip: "Escuchar opción",
-                    ),
-                  SizedBox(width: 4),
                   Container(
                     width: 32.0,
                     height: 32.0,
@@ -215,6 +253,13 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
                   ),
                 ),
               ),
+              // Agregar íconos indicadores cuando la selección está completada
+              if (widget.selectionCompleted) ...[
+                if (isCorrectAnswer)
+                  Icon(Icons.check_circle, color: Colors.green, size: 20),
+                if (isSelected && !widget.isCorrect)
+                  Icon(Icons.cancel, color: Colors.red, size: 20),
+              ],
             ],
           ),
         ),

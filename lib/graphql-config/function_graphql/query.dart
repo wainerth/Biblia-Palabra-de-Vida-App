@@ -553,7 +553,7 @@ Future loadCoursesByUserAndChurch(
     }
 
     return ResponseData(
-      data: data['getAllCourses']['data'],
+      data: data['getAllCourses'],
       error: null,
     );
   } catch (e) {

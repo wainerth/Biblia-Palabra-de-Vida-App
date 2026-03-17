@@ -247,6 +247,7 @@ class CatalogueProvider extends ChangeNotifier {
       try {
         final client = createClient();
         final options = QueryOptions(
+          // operationName: "testConnection",
           document: gql(r'query { __typename }'),
         );
         await client.query(options);

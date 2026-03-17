@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -20,6 +21,8 @@ class CustomVerseDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+   final translationProvider = AppTranslationProvider();
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(12.0),
@@ -110,7 +113,7 @@ class CustomVerseDialog extends StatelessWidget {
                         width: 120,
                         icon: Icons.read_more_outlined,
                         showIcon: true,
-                        text: "Leer Más",
+                        text: translationProvider.tr("common.read_more"),
                         buttonStyle: StylesApp(context).btnWidgetSmall,
                         onPressed: () {
                           final dataToSend = InputDataSearchModel(

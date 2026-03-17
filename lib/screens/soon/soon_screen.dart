@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
@@ -6,6 +7,9 @@ class SoonScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
+    final translationProvider = AppTranslationProvider();
+
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -68,7 +72,7 @@ class SoonScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
                     Text(
-                      "Próximamente",
+                      translationProvider.tr("soon.title"),
                       style: TextStyle(
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
@@ -84,7 +88,7 @@ class SoonScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      "Estamos trabajando en algo increíble para ti.",
+                      translationProvider.tr("soon.subtitle"),
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.white,

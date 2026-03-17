@@ -1,5 +1,6 @@
 // screens/search_bible_route_screen.dart
 import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,8 @@ class SearchBibleScreen extends StatefulWidget {
 }
 
 class _SearchBibleScreenState extends State<SearchBibleScreen> {
+  final translationProvider = AppTranslationProvider();
+
   late BibleTheme currentTheme;
   LoginUser? userData;
   bool isInitialized = false;
@@ -95,7 +98,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Buscar en la Biblia',
+          translationProvider.tr('search_bible_screen.title'),
           style: StylesApp(context).textStyleBody18.copyWith(
                 color: currentTheme.buttonTextColor,
                 fontWeight: FontWeight.bold,
@@ -153,7 +156,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              tab["title"],
+                              translationProvider.tr(tab["title"]),
                               style:
                                   StylesApp(context).textStyleBody14.copyWith(
                                         color: Colors.white,
@@ -249,7 +252,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Center(
                       child: Text(
-                        tab["title"],
+                       translationProvider.tr(tab["title"]),
                         maxLines: 1,
                       ),
                     ),
@@ -274,7 +277,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
         widget.chapter == null) {
       return Center(
         child: Text(
-          'Datos no disponibles',
+          translationProvider.tr('search_bible_screen.messages.data_unavailable'),
           style: TextStyle(color: currentTheme.textColor),
         ),
       );
@@ -308,7 +311,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
     if (widget.version == null ||
         widget.book == null ||
         widget.chapter == null) {
-      return List.filled(4, Center(child: Text('Datos no disponibles')));
+      return List.filled(4, Center(child: Text(translationProvider.tr('search_bible_screen.messages.data_unavailable'))));
     }
 
     return [

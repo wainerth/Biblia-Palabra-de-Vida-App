@@ -11,6 +11,7 @@ class CustomDropdownWithValidation<T> extends FormField<ModelData> {
     super.validator,
     super.initialValue,
     bool border = true,
+    BoxDecoration? boxDecorationProperties
   }) : super(
           builder: (FormFieldState<ModelData> field) {
             return Column(
@@ -20,6 +21,7 @@ class CustomDropdownWithValidation<T> extends FormField<ModelData> {
                   border: border,
                   hintText: hintText,
                   items: items,
+                  boxDecoration: boxDecorationProperties ,
                   onChanged: (ModelData? newValue) {
                     field.didChange(newValue);
                     onChanged(newValue);

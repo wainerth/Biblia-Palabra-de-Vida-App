@@ -1,6 +1,7 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -59,6 +60,7 @@ class _AventureScreenState extends State<AventureScreen> {
   }
 
   Future<void> _generateData(BuildContext context, int page, int limit) async {
+    final translationProvider = context.read<AppTranslationProvider>();
     LoadingService().showLoading(context);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     dataUser = userProvider.currentUser;
@@ -79,12 +81,13 @@ class _AventureScreenState extends State<AventureScreen> {
           await showCustomDialogWithAction(context,
               message: result.error!,
               dialogType: DialogTypeAction.info,
-              buttonOk: 'Volver',
+              buttonOk: translationProvider.tr('adventure_screen.go_back'),
               actionCallbackOk: () {
                 Navigator.popAndPushNamed(context, '/workspacePage');
               },
               showAction: true,
-              textButton: 'Afiliar a una Iglesia?',
+              textButton: translationProvider
+                  .tr('adventure_screen.affiliate_to_church'),
               actionCallback: () {
                 Navigator.popAndPushNamed(context, '/profilePage');
               });
@@ -94,14 +97,15 @@ class _AventureScreenState extends State<AventureScreen> {
         }
       } else {
         setState(() {
-          courses = result.data
+          courses = result.data['data']
               .map((course) => CourseModel.fromJson(removeTypename(course)))
               .cast<CourseModel>()
               .toList();
+          pagination = PaginationInfo.fromJson(result.data['meta']);
         });
       }
     } catch (e) {
-      errorMessage = "An error occurred: $e";
+      errorMessage = "Un  error  ha ocurrido: $e";
     } finally {
       LoadingService().hideLoading();
       setState(() {
@@ -112,6 +116,8 @@ class _AventureScreenState extends State<AventureScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     final userProvider = Provider.of<UserProvider>(context);
     dataUser = userProvider.currentUser;
     progressUser = userProvider.progressUser;
@@ -137,8 +143,10 @@ class _AventureScreenState extends State<AventureScreen> {
                           ),
                         )
                       : isTablet
-                          ? _buildTabletLayout() // Diseño para tablet
-                          : _buildMobileLayout(), // Diseño para móvil (existente)
+                          ? _buildTabletLayout(
+                              translationProvider) // Diseño para tablet
+                          : _buildMobileLayout(
+                              translationProvider), // Diseño para móvil (existente)
             ),
             Padding(
               padding: EdgeInsets.only(
@@ -174,7 +182,7 @@ class _AventureScreenState extends State<AventureScreen> {
   }
 
   // ========== DISEÑO PARA TABLET (2 COLUMNAS) ==========
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(AppTranslationProvider translationProvider) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: GridView.builder(
@@ -188,13 +196,14 @@ class _AventureScreenState extends State<AventureScreen> {
         itemCount: courses.length,
         itemBuilder: (context, index) {
           if (loadAventure.length <= index) loadAventure.add(false);
-          return _buildTabletCard(index);
+          return _buildTabletCard(index, translationProvider);
         },
       ),
     );
   }
 
-  Widget _buildTabletCard(int index) {
+  Widget _buildTabletCard(
+      int index, AppTranslationProvider translationProvider) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -213,7 +222,7 @@ class _AventureScreenState extends State<AventureScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Imagen con altura fija
-                Container(
+                SizedBox(
                   height: 160, // Altura fija para la imagen
                   width: double.infinity,
                   child: ClipRRect(
@@ -305,14 +314,14 @@ class _AventureScreenState extends State<AventureScreen> {
                         SizedBox(height: 16),
 
                         // Botones - altura fija
-                        Container(
+                        SizedBox(
                           height: 50, // Altura fija para botones
                           child: Row(
                             children: [
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: () async {
-                                    _handleCardTap(index);
+                                    _handleCardTap(index, translationProvider);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: currentTheme.buttonColor,
@@ -323,7 +332,8 @@ class _AventureScreenState extends State<AventureScreen> {
                                     ),
                                   ),
                                   child: Text(
-                                    'Ver Detalles',
+                                    translationProvider
+                                        .tr('adventure_screen.details_button'),
                                     style: TextStyle(
                                       fontSize: 14.0,
                                       fontWeight: FontWeight.w500,
@@ -336,7 +346,7 @@ class _AventureScreenState extends State<AventureScreen> {
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () async {
-                                    _handleGoToMap(index);
+                                    _handleGoToMap(index, translationProvider);
                                   },
                                   style: OutlinedButton.styleFrom(
                                     padding:
@@ -348,7 +358,8 @@ class _AventureScreenState extends State<AventureScreen> {
                                         color: currentTheme.buttonColor),
                                   ),
                                   child: Text(
-                                    'Ir al Mapa',
+                                    translationProvider
+                                        .tr('adventure_screen.map_button'),
                                     style: TextStyle(
                                       fontSize: 14.0,
                                       fontWeight: FontWeight.w500,
@@ -372,7 +383,7 @@ class _AventureScreenState extends State<AventureScreen> {
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(16.0),
                   ),
                   child: Center(
@@ -394,7 +405,7 @@ class _AventureScreenState extends State<AventureScreen> {
   }
 
   // ========== DISEÑO PARA MÓVIL (EXISTENTE) ==========
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     return ListView.builder(
       padding: EdgeInsets.only(bottom: 24.0),
       itemCount: courses.length,
@@ -407,10 +418,10 @@ class _AventureScreenState extends State<AventureScreen> {
                 course: courses[index],
                 loadingAction: loadAventure[index],
                 onTap: () async {
-                  _handleCardTap(index);
+                  _handleCardTap(index, translationProvider);
                 },
                 goToMap: () async {
-                  _handleGoToMap(index);
+                  _handleGoToMap(index, translationProvider);
                 },
               ),
               if (loadAventure[index])
@@ -447,7 +458,8 @@ class _AventureScreenState extends State<AventureScreen> {
   }
 
   // Agrega estas funciones dentro de la clase _AventureScreenState:
-  Future<void> _handleCardTap(int index) async {
+  Future<void> _handleCardTap(
+      int index, AppTranslationProvider translationProvider) async {
     setState(() => loadAventure[index] = true);
     Stage? stage = await loadStage(dataUser?.userId, courses[index].id);
     if (!mounted) return;
@@ -459,13 +471,15 @@ class _AventureScreenState extends State<AventureScreen> {
       if (mounted) setState(() => loadAventure[index] = false);
       if (!mounted) return;
       await showCustomDialog(context,
-          message: "¡Este curso no esta Disponible!",
+          message:
+              translationProvider.tr('adventure_screen.course_unavailable'),
           showDetails: false,
           dialogType: DialogType.info);
     }
   }
 
-  Future<void> _handleGoToMap(int index) async {
+  Future<void> _handleGoToMap(
+      int index, AppTranslationProvider translationProvider) async {
     if (mounted) setState(() => loadAventure[index] = true);
 
     Stage? stage = await loadStage(dataUser?.userId, courses[index].id);
@@ -498,41 +512,45 @@ class _AventureScreenState extends State<AventureScreen> {
             context,
             message: progressUser!.message,
             dialogType: DialogTypeAction.info,
-            buttonOk: "Cerrar",
-            textButton: "ir Al curso",
+            buttonOk: translationProvider.tr('adventure_screen.close'),
+            textButton: translationProvider.tr('adventure_screen.go_to_course'),
             showAction: true,
             actionCallbackOk: () {
               if (mounted) setState(() => loadAventure[index] = false);
               if (mounted) Navigator.pop(context);
             },
             actionCallback: () {
-              if (mounted)
+              if (mounted) {
                 Navigator.pushNamed(context, '/mapPage', arguments: {
                   'courseId': progressUser?.data?.courseId,
                   'sectionId': progressUser?.data?.sectionId ?? stage.id
                 });
+              }
             },
           );
           return;
         } else {
-          if (mounted)
+          if (mounted) {
             Navigator.pushNamed(context, '/mapPage', arguments: {
               'courseId': courses[index].id,
               'sectionId': progressUser?.data?.sectionId ?? stage.id
             });
+          }
         }
       } else {
-        if (mounted)
+        if (mounted) {
           Navigator.pushNamed(context, '/mapPage', arguments: {
             'courseId': courses[index].id,
             'sectionId': stage.id
           });
+        }
       }
     } else {
       if (mounted) setState(() => loadAventure[index] = false);
       if (!mounted) return;
       await showCustomDialog(context,
-          message: "¡Este curso no esta Disponible!",
+          message:
+              translationProvider.tr('adventure_screen.course_unavailable'),
           dialogType: DialogType.info);
     }
 

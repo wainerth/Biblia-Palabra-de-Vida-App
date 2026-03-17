@@ -1,11 +1,13 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class ModalTalesWidget extends StatefulWidget {
   final List<ButtonData> data;
@@ -74,6 +76,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
     return Dialog(
       insetPadding: isTablet
           ? EdgeInsets.symmetric(
@@ -88,7 +91,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
             Expanded(
               flex: 0,
               child: SimpleHeaderWidget(
-                title: 'Cuentos',
+                title: translationProvider.tr('modal_tales.title'),
                 onRoute: () {
                   Navigator.pop(context);
                 },
@@ -137,7 +140,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                         ),
                     focusNode: focusNode,
                     decoration: InputDecoration(
-                      hintText: 'Buscar cuento',
+                      hintText:translationProvider.tr('modal_tales.search_placeholder'),
                       suffixIcon: Icon(
                         Icons.search,
                         size: isTablet
@@ -239,6 +242,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                             size: isTablet ? 20.sp : 20.sp,
                           ),
                           color: Colors.white,
+                           tooltip: translationProvider.tr('modal_tales.prev_page'),
                         ),
                       ),
                     ),
@@ -275,6 +279,7 @@ class _ModalTalesWidgetState extends State<ModalTalesWidget> {
                             size: isTablet ? 18.sp : 20.sp,
                           ),
                           color: Colors.white,
+                          tooltip: translationProvider.tr('modal_tales.next_page'),
                         ),
                       ),
                     ),

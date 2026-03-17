@@ -43,9 +43,6 @@ class CountrySearchService {
         hasMore: hasMore,
       );
     } catch (e) {
-      if (kDebugMode) {
-        print('Error buscando países: $e');
-      }
       throw Exception('Error buscando países: $e');
     }
   }

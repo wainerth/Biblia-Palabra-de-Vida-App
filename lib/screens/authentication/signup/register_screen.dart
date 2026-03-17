@@ -1,12 +1,12 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -113,19 +113,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     final bool isTablet = _isTablet(context);
 
     return Scaffold(
       body: SafeArea(
         child: isTablet
-            ? _buildTabletLayout(context)
-            : _buildMobileLayout(context),
+            ? _buildTabletLayout(context, translationProvider)
+            : _buildMobileLayout(context, translationProvider),
       ),
     );
   }
 
   // Layout para móvil (manteniendo el diseño actual)
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Container(
       height: MediaQuery.sizeOf(context).height,
       width: MediaQuery.sizeOf(context).width,
@@ -144,8 +147,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   HeadWidget(
                     showLeftStar: _currentStep == 0,
                     showRightStar: _currentStep != 0,
-                    title: "¡La Biblia\n  Palabra De\n Vida!",
-                    subtitle: "Registro",
+                    title: translationProvider.tr('register_screen.title'),
+                    subtitle:
+                        translationProvider.tr('register_screen.subtitle'),
                   ),
                   if (_currentStep == 1) ...{
                     Align(
@@ -275,9 +279,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ButtonThemeWidget(
                             textStyle: StylesApp(context).buttonTextStyle,
                             onPressed: () async {
-                              initRegister();
+                              initRegister(translationProvider);
                             },
-                            text: _currentStep == 0 ? "Continuar" : "Registrar",
+                            text: _currentStep == 0
+                                ? translationProvider
+                                    .tr('register_screen.continue')
+                                : translationProvider
+                                    .tr('register_screen.register'),
                             buttonStyle: StylesApp(context).btnSecondarySmall,
                             width: isTablet(context)
                                 ? StylesApp(context).formWidth
@@ -312,7 +320,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               Navigator.pushNamed(context, '/loginPage');
                             },
                             child: Text(
-                              'Ir a iniciar session',
+                              translationProvider
+                                  .tr('register_screen.go_to_login'),
                               textAlign: TextAlign.center,
                               style: StylesApp(context).textStyleBody4,
                             ),
@@ -332,7 +341,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'o',
+                            "O",
                             style: StylesApp(context).textStyleBody4,
                           ),
                         ),
@@ -355,7 +364,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Layout para tablet con 2 columnas
-  Widget _buildTabletLayout(BuildContext context) {
+  Widget _buildTabletLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Container(
         height: MediaQuery.sizeOf(context).height,
@@ -386,13 +396,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       HeadWidget(
                         showLeftStar: _currentStep == 0,
                         showRightStar: _currentStep != 0,
-                        title: "¡La Biblia\n  Palabra De\n Vida!",
-                        subtitle: "Registro",
+                        title: translationProvider.tr('register_screen.title'),
+                        subtitle:
+                            translationProvider.tr('register_screen.subtitle'),
                       ),
                       SizedBox(height: 30),
 
                       // Indicador de pasos
-                      _buildStepIndicator(),
+                      _buildStepIndicator(translationProvider),
                       SizedBox(height: 40),
 
                       // Información adicional
@@ -404,17 +415,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             children: [
                               _buildInfoItem(
                                 icon: Icons.security,
-                                text: "Datos seguros y protegidos",
+                                text: translationProvider
+                                    .tr('register_screen.secure_data'),
                               ),
                               SizedBox(height: 20),
                               _buildInfoItem(
                                 icon: Icons.speed,
-                                text: "Registro rápido y sencillo",
+                                text: translationProvider
+                                    .tr('register_screen.fast_registration'),
                               ),
                               SizedBox(height: 20),
                               _buildInfoItem(
                                 icon: Icons.people,
-                                text: "Únete a nuestra comunidad",
+                                text: translationProvider
+                                    .tr('register_screen.join_community'),
                               ),
                             ],
                           ),
@@ -432,7 +446,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: Text.rich(
                               TextSpan(children: [
                                 TextSpan(
-                                  text: '¿Ya tienes cuenta? ',
+                                  text: translationProvider.tr(
+                                      'register_screen.already_have_account'),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -442,7 +457,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       ),
                                 ),
                                 TextSpan(
-                                  text: 'Inicia sesión',
+                                  text: translationProvider
+                                      .tr('register_screen.login_here'),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -529,8 +545,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           // Título del paso actual
                           Text(
                             _currentStep == 0
-                                ? "Información de Usuario"
-                                : "Información Personal",
+                                ? translationProvider
+                                    .tr('register_screen.user_info_title')
+                                : translationProvider
+                                    .tr('register_screen.personal_info_title'),
                             style: StylesApp(context).textStyleBody20.copyWith(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
@@ -542,8 +560,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           // Descripción del paso
                           Text(
                             _currentStep == 0
-                                ? "Completa tus datos básicos para crear tu cuenta"
-                                : "Completa tu información personal para continuar",
+                                ? translationProvider
+                                    .tr('register_screen.user_info_description')
+                                : translationProvider.tr(
+                                    'register_screen.personal_info_description'),
                             style: StylesApp(context).textStyleBody14.copyWith(
                                   fontSize: 16,
                                   color: Colors.grey[600],
@@ -560,9 +580,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: Column(
                               children: [
                                 if (_currentStep == 0) ...[
-                                  _buildTabletUserInfoStep(),
+                                  _buildTabletUserInfoStep(translationProvider),
                                 ] else if (_currentStep == 1) ...[
-                                  _buildTabletPersonalInfoStep(),
+                                  _buildTabletPersonalInfoStep(
+                                      translationProvider),
                                 ],
                                 SizedBox(height: 12),
 
@@ -571,7 +592,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   width: 400,
                                   child: ElevatedButton(
                                     onPressed: () async {
-                                      initRegister();
+                                      initRegister(translationProvider);
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: StyleColor.orange,
@@ -587,8 +608,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ),
                                     child: Text(
                                       _currentStep == 0
-                                          ? "Continuar →"
-                                          : "Registrarse",
+                                          ? "${translationProvider.tr('register_screen.continue')} →"
+                                          : translationProvider
+                                              .tr('register_screen.register'),
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w600,
@@ -616,7 +638,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Widget para el indicador de pasos en tablet
-  Widget _buildStepIndicator() {
+  Widget _buildStepIndicator(AppTranslationProvider translationProvider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -636,7 +658,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           child: Center(
             child: Text(
-              "1",
+              translationProvider.tr('register_screen.step_1'),
               style: StylesApp(context).textStyleBody16.copyWith(
                     color:
                         _currentStep >= 0 ? StyleColor.white : Colors.grey[400],
@@ -668,7 +690,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           child: Center(
             child: Text(
-              "2",
+              translationProvider.tr('register_screen.step_2'),
               style: TextStyle(
                 color: _currentStep >= 1 ? StyleColor.white : Colors.grey[400],
                 fontWeight: FontWeight.bold,
@@ -706,7 +728,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Paso de información de usuario optimizado para tablet
-  Widget _buildTabletUserInfoStep() {
+  Widget _buildTabletUserInfoStep(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Row(
@@ -741,7 +763,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Paso de información personal optimizado para tablet
-  Widget _buildTabletPersonalInfoStep() {
+  Widget _buildTabletPersonalInfoStep(
+      AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Row(
@@ -806,7 +829,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void initRegister() async {
+  void initRegister(AppTranslationProvider translationProvider) async {
     if (_currentStep == 0) {
       _nextStep();
     } else {
@@ -818,7 +841,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final bool isValid = _formKey.currentState?.validate() ?? false;
         if (!isValid) {
-          showSnackBar('Por favor completa todos los campos requeridos',
+          showSnackBar(
+              translationProvider.tr('register_screen.dialogs.complete_fields'),
               type: SnackBarType.info);
           return;
         }

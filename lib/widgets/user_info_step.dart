@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class UserInfoStep extends StatefulWidget {
   final TextEditingController userIdController;
@@ -58,11 +60,15 @@ class _UserInfoStepState extends State<UserInfoStep> {
 
   @override
   Widget build(BuildContext context) {
-    return _isTablet ? _buildTabletLayout() : _buildMobileLayout();
+    final translationProvider = context.read<AppTranslationProvider>();
+
+    return _isTablet
+        ? _buildTabletLayout(translationProvider)
+        : _buildMobileLayout(translationProvider);
   }
 
   // Layout para móvil (manteniendo el diseño actual)
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -78,14 +84,16 @@ class _UserInfoStepState extends State<UserInfoStep> {
               ],
               decoration:
                   StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                        hintText: "Número de documento",
+                        hintText: translationProvider
+                            .tr('user_info_step.document_number_hint'),
                         suffixIcon: IconButton(
                             icon: Icon(
                               Icons.info_outline,
                               color: Colors.grey,
                               size: 22,
                             ),
-                            onPressed: () => _showInfoDialogDocument()),
+                            onPressed: () =>
+                                _showInfoDialogDocument(translationProvider)),
                       ),
               style: StylesApp(context)
                   .textStyleBody12
@@ -103,25 +111,28 @@ class _UserInfoStepState extends State<UserInfoStep> {
           // CORREO ELECTRÓNICO
           SizedBox(
             width: _formWidth,
-            height: StylesApp(context).sizeTextFormField.height,
+            height: StylesApp(context).sizeTextFormField.height + 20,
             child: TextFormField(
               controller: widget.emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration:
-                  StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                        hintText: "Correo electrónico",
-                      ),
+              decoration: StylesApp(context)
+                  .inputDecorationOutlineStyle
+                  .copyWith(
+                    hintText: translationProvider.tr('user_info_step.email'),
+                  ),
               style: StylesApp(context)
                   .textStyleBody12
                   .copyWith(color: StyleColor.black),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "El correo es obligatorio";
+                  return translationProvider
+                      .tr('user_info_step.email_error_required');
                 }
                 final RegExp emailRegExp = RegExp(
                     r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+(.[a-zA-Z]+)?$");
                 if (!emailRegExp.hasMatch(value)) {
-                  return 'Ingrese un correo electrónico válido';
+                  return translationProvider
+                      .tr('user_info_step.email_error_invalid');
                 }
                 return null;
               },
@@ -132,30 +143,32 @@ class _UserInfoStepState extends State<UserInfoStep> {
           // NOMBRE DE USUARIO
           SizedBox(
             width: _formWidth,
-            height: StylesApp(context).sizeTextFormField.height,
+             height: StylesApp(context).sizeTextFormField.height + 20,
             child: TextFormField(
               controller: widget.userNameController,
-              decoration:
-                  StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                        hintText: "Nombre de Usuario",
-                        suffixIcon: IconButton(
-                          onPressed: () => _showInfoDialogUserName(),
-                          icon: Icon(Icons.info_outline,
-                              color: Colors.grey, size: 22),
-                        ),
-                      ),
+              decoration: StylesApp(context)
+                  .inputDecorationOutlineStyle
+                  .copyWith(
+                    hintText: translationProvider.tr('user_info_step.username'),
+                    suffixIcon: IconButton(
+                      onPressed: () =>
+                          _showInfoDialogUserName(translationProvider),
+                      icon: Icon(Icons.info_outline,
+                          color: Colors.grey, size: 22),
+                    ),
+                  ),
+              validator: (value) {
+                if (value == null || value.isNotEmpty) {
+                  if (value!.contains(' ')) {
+                    return translationProvider
+                        .tr("user_info_step.username_error_spaces");
+                  }
+                }
+                return null;
+              },
               style: StylesApp(context)
                   .textStyleBody12
                   .copyWith(color: StyleColor.black),
-              // validator: (value) {
-              //   if (value == null || value.isEmpty) {
-              //     return "El Nombre de Usuario es obligatorio";
-              //   }
-              //   if (value.contains(' ')) {
-              //     return "El Nombre de Usuario no puede contener espacios";
-              //   }
-              //   return null;
-              // },
             ),
           ),
           SizedBox(height: 23.0),
@@ -163,7 +176,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
           // CONTRASEÑA
           SizedBox(
             width: _formWidth,
-            height: StylesApp(context).sizeTextFormField.height,
+            height: StylesApp(context).sizeTextFormField.height + 20,
             child: TextFormField(
               controller: widget.passwordController,
               obscureText: widget.obscureTextPass,
@@ -171,7 +184,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
               decoration: StylesApp(context)
                   .inputDecorationOutlineStyle
                   .copyWith(
-                    hintText: "Contraseña",
+                    hintText: translationProvider.tr('user_info_step.password'),
                     suffixIcon: IconButton(
                       iconSize: 20,
                       padding: EdgeInsets.zero,
@@ -190,10 +203,12 @@ class _UserInfoStepState extends State<UserInfoStep> {
                   .copyWith(color: StyleColor.black),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "La contraseña es obligatoria";
+                  return translationProvider
+                      .tr('user_info_step.password_error_required');
                 }
                 if (value.length < 6) {
-                  return "la contraseña debe contener al menos 6 caracteres";
+                  return translationProvider
+                      .tr('user_info_step.password_error_length');
                 }
                 return null;
               },
@@ -204,14 +219,15 @@ class _UserInfoStepState extends State<UserInfoStep> {
           // CONFIRMAR CONTRASEÑA
           SizedBox(
             width: _formWidth,
-            height: StylesApp(context).sizeTextFormField.height,
+            height: StylesApp(context).sizeTextFormField.height + 20,
             child: TextFormField(
               controller: widget.confirmPasswordController,
               obscureText: widget.obscureTextRepeat,
               textAlignVertical: TextAlignVertical.center,
               decoration:
                   StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                        hintText: "Confirmar Contraseña",
+                        hintText: translationProvider
+                            .tr('user_info_step.confirm_password'),
                         suffixIcon: IconButton(
                           alignment: Alignment.center,
                           iconSize: 20,
@@ -231,7 +247,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                   .copyWith(color: StyleColor.black),
               validator: (value) {
                 if (value != widget.passwordController.text) {
-                  return "Las contraseñas no coinciden";
+                  return translationProvider
+                      .tr('user_info_step.password_mismatch');
                 }
                 return null;
               },
@@ -244,7 +261,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
   }
 
   // Layout para tablet con 2 columnas
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20),
@@ -262,7 +279,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Número de documento",
+                          translationProvider
+                              .tr('user_info_step.document_number'),
                           style: StylesApp(context).textStyleBody12.copyWith(
                                 color: StyleColor.black,
                                 fontWeight: FontWeight.w600,
@@ -281,7 +299,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                             decoration: StylesApp(context)
                                 .inputDecorationOutlineStyle
                                 .copyWith(
-                                  hintText: "Ej: 12345678",
+                                  hintText: translationProvider.tr(
+                                      'user_info_step.document_number_example'),
                                   // errorStyle: TextStyle(fontSize: 12),
                                   suffixIcon: IconButton(
                                       icon: Icon(
@@ -289,8 +308,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                                         color: Colors.grey,
                                         size: 22,
                                       ),
-                                      onPressed: () =>
-                                          _showInfoDialogDocument()),
+                                      onPressed: () => _showInfoDialogDocument(
+                                          translationProvider)),
                                 ),
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.black,
@@ -311,7 +330,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Nombre de usuario",
+                          translationProvider.tr('user_info_step.username'),
                           style: StylesApp(context).textStyleBody12.copyWith(
                                 color: StyleColor.black,
                                 fontWeight: FontWeight.w600,
@@ -320,7 +339,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                         ),
                         SizedBox(height: 8),
                         SizedBox(
-                          height: StylesApp(context).sizeTextFormField.height,
+                          height: StylesApp(context).sizeTextFormField.height + 10,
                           child: TextFormField(
                             controller: widget.userNameController,
                             decoration: StylesApp(context)
@@ -329,11 +348,21 @@ class _UserInfoStepState extends State<UserInfoStep> {
                                   hintText: "Ej: usuario123",
                                   // errorStyle: TextStyle(fontSize: 12),
                                   suffixIcon: IconButton(
-                                    onPressed: () => _showInfoDialogUserName(),
+                                    onPressed: () => _showInfoDialogUserName(
+                                        translationProvider),
                                     icon: Icon(Icons.info_outline,
                                         color: Colors.grey, size: 22),
                                   ),
                                 ),
+                            validator: (value) {
+                              if (value == null || value.isNotEmpty) {
+                                if (value!.contains(' ')) {
+                                  return translationProvider.tr(
+                                      "user_info_step.username_error_spaces");
+                                }
+                              }
+                              return null;
+                            },
                             style: StylesApp(context).textStyleBody12.copyWith(
                                   color: StyleColor.black,
                                   fontSize: 16,
@@ -353,7 +382,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Correo electrónico*",
+                  translationProvider.tr('user_info_step.email'),
                   style: StylesApp(context).textStyleBody12.copyWith(
                         color: StyleColor.black,
                         fontWeight: FontWeight.w600,
@@ -368,7 +397,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                     keyboardType: TextInputType.emailAddress,
                     decoration:
                         StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                              hintText: "ejemplo@correo.com",
+                              hintText: translationProvider
+                                  .tr('user_info_step.email_hint'),
                               // errorStyle: TextStyle(fontSize: 12),
                             ),
                     style: StylesApp(context).textStyleBody12.copyWith(
@@ -377,12 +407,14 @@ class _UserInfoStepState extends State<UserInfoStep> {
                         ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Campo obligatorio";
+                        return translationProvider
+                            .tr('user_info_step.required_field');
                       }
                       final RegExp emailRegExp = RegExp(
                           r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+(.[a-zA-Z]+)?$");
                       if (!emailRegExp.hasMatch(value)) {
-                        return 'Email inválido';
+                        return translationProvider
+                            .tr('user_info_step.invalid_email');
                       }
                       return null;
                     },
@@ -404,7 +436,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Contraseña*",
+                          translationProvider.tr('user_info_step.password'),
                           style: StylesApp(context).textStyleBody12.copyWith(
                                 color: StyleColor.black,
                                 fontWeight: FontWeight.w600,
@@ -421,7 +453,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                             decoration: StylesApp(context)
                                 .inputDecorationOutlineStyle
                                 .copyWith(
-                                  hintText: "Mínimo 6 caracteres",
+                                  hintText: translationProvider
+                                      .tr('user_info_step.password_hint'),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       widget.obscureTextPass
@@ -442,10 +475,12 @@ class _UserInfoStepState extends State<UserInfoStep> {
                                 ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return "Campo obligatorio";
+                                return translationProvider
+                                    .tr('user_info_step.required_field');
                               }
                               if (value.length < 6) {
-                                return "Mínimo 6 caracteres";
+                                return translationProvider
+                                    .tr('user_info_step.minimum_characters');
                               }
                               return null;
                             },
@@ -464,7 +499,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Confirmar contraseña*",
+                          translationProvider
+                              .tr('user_info_step.confirm_password_hint'),
                           style: StylesApp(context).textStyleBody12.copyWith(
                                 color: StyleColor.black,
                                 fontWeight: FontWeight.w600,
@@ -481,7 +517,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                             decoration: StylesApp(context)
                                 .inputDecorationOutlineStyle
                                 .copyWith(
-                                  hintText: "Repite la contraseña",
+                                  hintText: translationProvider.tr(
+                                      'user_info_step.repeat_password_hint'),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       widget.obscureTextRepeat
@@ -502,7 +539,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                                 ),
                             validator: (value) {
                               if (value != widget.passwordController.text) {
-                                return "Las contraseñas no coinciden";
+                                return translationProvider
+                                    .tr('user_info_step.password_mismatch');
                               }
                               return null;
                             },
@@ -537,7 +575,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      "Todos los campos marcados con * son obligatorios. Asegúrate de recordar tu contraseña.",
+                      translationProvider
+                          .tr('user_info_step.required_fields_info'),
                       style: StylesApp(context).textStyleBody12.copyWith(
                             color: Colors.grey[700],
                             fontSize: 13,
@@ -554,7 +593,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
     );
   }
 
-  Future<dynamic> _showInfoDialogUserName() {
+  Future<dynamic> _showInfoDialogUserName(
+      AppTranslationProvider translationProvider) {
     return showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -568,7 +608,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Alias (seudónimo)',
+                  translationProvider.tr('user_info_step.alias_title'),
                   style: StylesApp(context).textStyleBody12.copyWith(
                         color: StyleColor.black,
                         fontWeight: FontWeight.w600,
@@ -577,8 +617,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'Este campo es un alias o diminutivo que se usará en la Biblia. '
-                  'No es tu nombre real, es opcional y sirve solo para mostrarte en la app.',
+                  translationProvider.tr('user_info_step.alias_description'),
                   style: StylesApp(context).textStyleBody12.copyWith(
                         color: StyleColor.black,
                         fontSize: 14,
@@ -591,7 +630,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                     style: StylesApp(context).btnWidgetSmall,
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
-                      'Entendido',
+                      translationProvider.tr('user_info_step.understood'),
                       style: StylesApp(context).textStyleBody14,
                     ),
                   ),
@@ -604,7 +643,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
     );
   }
 
-  Future<dynamic> _showInfoDialogDocument() {
+  Future<dynamic> _showInfoDialogDocument(
+      AppTranslationProvider translationProvider) {
     return showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -618,7 +658,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Documento de identidad',
+                  translationProvider.tr('user_info_step.document_id_title'),
                   style: StylesApp(context).textStyleBody12.copyWith(
                         color: StyleColor.black,
                         fontWeight: FontWeight.w600,
@@ -631,23 +671,32 @@ class _UserInfoStepState extends State<UserInfoStep> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ingresa tu documento de identidad oficial: Ejemplos según tu país:',
+                      translationProvider
+                          .tr('user_info_step.document_id_description'),
                       style: StylesApp(context).textStyleBody12.copyWith(
                           color: StyleColor.grayDark,
                           fontWeight: FontWeight.w500),
                     ),
                     SizedBox(height: 12),
-                    _buildInfoItem('• Argentina: DNI'),
-                    _buildInfoItem('• Uruguay: Cédula'),
-                    _buildInfoItem('• Chile: RUN o RUT'),
-                    _buildInfoItem('• Colombia: Cédula'),
-                    _buildInfoItem('• México: INE o CURP'),
-                    _buildInfoItem('• España: DNI o NIE'),
-                    _buildInfoItem('• Estados Unidos: SSN'),
-                    _buildInfoItem('• Brasil: RG o CPF'),
+                    _buildInfoItem(
+                        translationProvider.tr('user_info_step.argentina')),
+                    _buildInfoItem(
+                        translationProvider.tr('user_info_step.uruguay')),
+                    _buildInfoItem(
+                        translationProvider.tr('user_info_step.chile')),
+                    _buildInfoItem(
+                        translationProvider.tr('user_info_step.colombia')),
+                    _buildInfoItem(
+                        translationProvider.tr('user_info_step.mexico')),
+                    _buildInfoItem(
+                        translationProvider.tr('user_info_step.spain')),
+                    _buildInfoItem(
+                        translationProvider.tr('user_info_step.usa')),
+                    _buildInfoItem(
+                        translationProvider.tr('user_info_step.brazil')),
                     SizedBox(height: 12),
                     Text(
-                      'Solo números, sin puntos ni guiones.',
+                      translationProvider.tr('user_info_step.numbers_only'),
                       style: TextStyle(
                         fontStyle: FontStyle.italic,
                         fontSize: 13,
@@ -662,7 +711,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                     style: StylesApp(context).btnWidgetSmall,
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
-                      'Entendido',
+                      translationProvider.tr('user_info_step.understood'),
                       style: StylesApp(context).textStyleBody14,
                     ),
                   ),

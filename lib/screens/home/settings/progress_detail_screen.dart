@@ -22,6 +22,8 @@ class ProgressDetailScreen extends StatefulWidget {
 }
 
 class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
+  final translationProvider = AppTranslationProvider();
+
   List<UserTitle>? titles = [];
   ResponseProgress? progressUser;
   late Map<String, dynamic> config;
@@ -54,6 +56,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
   @override
   Widget build(BuildContext context) {
     config = Provider.of<CatalogueProvider>(context, listen: false).allConfig;
+
     maxScore = config["highScore"];
     mediumScore = config["mediumScore"];
     lowScore = config["lowScore"];
@@ -71,7 +74,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     );
   }
 
-  Widget _buildMobileLayout(BuildContext context, LoginUser userData) {
+  Widget _buildMobileLayout(
+    BuildContext context,
+    LoginUser userData,
+  ) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +117,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                             TextSpan(
                               style: StylesApp(context).textStyleBody6,
                               children: [
-                                TextSpan(text: "Registro: "),
+                                TextSpan(
+                                  text:
+                                      "${translationProvider.tr('progress_detail_screen.registration')} ",
+                                ),
                                 TextSpan(
                                     text: userData.createdAt.isNotEmpty
                                         ? getFormattedDate(
@@ -124,9 +133,17 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                             TextSpan(
                               style: StylesApp(context).textStyleBody6,
                               children: [
-                                TextSpan(text: "Racha: "),
                                 TextSpan(
-                                    text: "${userData.streakDaysCount} días"),
+                                    text:
+                                        "${translationProvider.tr('progress_detail_screen.streak')} "),
+                                TextSpan(
+                                    text: translationProvider
+                                        .tr(
+                                            'progress_detail_screen.streak_days')
+                                        .replaceFirst(
+                                            '%s',
+                                            userData.streakDaysCount
+                                                .toString())),
                               ],
                             ),
                           ),
@@ -134,8 +151,15 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                             TextSpan(
                               style: StylesApp(context).textStyleBody6,
                               children: [
-                                TextSpan(text: "Energía: "),
-                                TextSpan(text: "${userData.energyPoints}"),
+                                TextSpan(
+                                    text:
+                                        "${translationProvider.tr('progress_detail_screen.energy')} "),
+                                TextSpan(
+                                    text: translationProvider
+                                        .tr(
+                                            'progress_detail_screen.energy_points')
+                                        .replaceFirst('%s',
+                                            userData.energyPoints.toString())),
                               ],
                             ),
                           ),
@@ -185,7 +209,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
     );
   }
 
-  Widget _buildTabletLayout(BuildContext context, LoginUser userData) {
+  Widget _buildTabletLayout(
+    BuildContext context,
+    LoginUser userData,
+  ) {
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.all(16.0),
@@ -211,7 +238,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Colección de Premios",
+                              translationProvider.tr(
+                                  'progress_detail_screen.awards_collection'),
                               style: StylesApp(context)
                                   .textStyCalendar
                                   .copyWith(fontSize: 20),
@@ -220,7 +248,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                               onPressed: () {
                                 _dialogAwards(context);
                               },
-                              text: "Ver Colección",
+                              text: translationProvider
+                                  .tr('progress_detail_screen.view_collection'),
                               width: 150.0,
                               height: 40.0,
                               buttonStyle:
@@ -262,7 +291,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                                 .textStyleBody4
                                                 .copyWith(fontSize: 18),
                                             children: [
-                                              TextSpan(text: "Registro: "),
+                                              TextSpan(
+                                                  text: translationProvider.tr(
+                                                      'progress_detail_screen.registration')),
                                               TextSpan(
                                                   text: userData
                                                           .createdAt.isNotEmpty
@@ -280,10 +311,18 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                                 .textStyleBody4
                                                 .copyWith(fontSize: 18),
                                             children: [
-                                              TextSpan(text: "Racha: "),
                                               TextSpan(
                                                   text:
-                                                      "${userData.streakDaysCount} días"),
+                                                      "${translationProvider.tr('progress_detail_screen.streak')} "),
+                                              TextSpan(
+                                                  text: translationProvider
+                                                      .tr(
+                                                          'progress_detail_screen.streak')
+                                                      .replaceFirst(
+                                                          "%s",
+                                                          userData
+                                                              .streakDaysCount
+                                                              .toString())),
                                             ],
                                           ),
                                         ),
@@ -294,10 +333,17 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                                 .textStyleBody4
                                                 .copyWith(fontSize: 18),
                                             children: [
-                                              TextSpan(text: "Energía: "),
                                               TextSpan(
                                                   text:
-                                                      "${userData.energyPoints}"),
+                                                      "${translationProvider.tr('progress_detail_screen.energy')} "),
+                                              TextSpan(
+                                                  text: translationProvider
+                                                      .tr(
+                                                          'progress_detail_screen.energy_points')
+                                                      .replaceFirst(
+                                                          "%s",
+                                                          userData.energyPoints
+                                                              .toString())),
                                             ],
                                           ),
                                         ),
@@ -368,24 +414,12 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                           child: Column(
                             children: [
                               Text(
-                                "Progreso Mensual",
+                                translationProvider.tr(
+                                    'progress_detail_screen.monthly_progress'),
                                 style: StylesApp(context)
                                     .textStyCalendar
                                     .copyWith(fontSize: 20),
                               ),
-                              // Calendario
-                              // FractionallySizedBox(
-                              //   widthFactor: 0.7, // 90% del ancho disponible
-                              //   heightFactor:
-                              //       0.8, // 80% de la altura disponible
-                              //   child: CurrentMonthCalendarWidget(
-                              //     registrationDate:
-                              //         userData.createdAt.isNotEmpty
-                              //             ? DateTime.fromMillisecondsSinceEpoch(
-                              //                 int.parse(userData.createdAt))
-                              //             : DateTime.now(),
-                              //   ),
-                              // ),
                               ConstrainedBox(
                                 constraints: BoxConstraints(
                                   maxWidth: 400, // Ancho máximo para tablet
@@ -414,7 +448,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               child: SizedBox(
                 width: 300,
                 child: ButtonThemeWidget(
-                  text: "Continuar Aventura",
+                  text: translationProvider
+                      .tr('progress_detail_screen.continue_adventure'),
                   height: 50.0,
                   buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                         textStyle: WidgetStatePropertyAll(TextStyle(
@@ -429,8 +464,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                           context,
                           message: progressUser!.message,
                           dialogType: DialogTypeAction.info,
-                          buttonOk: "Cerrar",
-                          textButton: "ir Al curso",
+                          buttonOk: translationProvider
+                              .tr('progress_detail_screen.close'),
+                          textButton: translationProvider
+                              .tr('progress_detail_screen.go_to_course'),
                           showAction: true,
                           actionCallbackOk: () {
                             Navigator.pop(context);
@@ -480,13 +517,16 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Títulos Alcanzados",
+                translationProvider
+                    .tr('progress_detail_screen.achieved_titles'),
                 style:
                     StylesApp(context).textStyCalendar.copyWith(fontSize: 20),
               ),
               if (titles != null && titles!.isNotEmpty)
                 Text(
-                  "${titles!.length} títulos",
+                  translationProvider
+                      .tr('progress_detail_screen.total_titles')
+                      .replaceFirst("%s", titles!.length.toString()),
                   style:
                       StylesApp(context).textStyleBody6.copyWith(fontSize: 16),
                 ),
@@ -510,10 +550,11 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        "Aún no has obtenido títulos",
-                        style: StylesApp(context).textStyleBody6.copyWith(
-                          color: StyleColor.grayDark
-                        ),
+                        translationProvider
+                            .tr('progress_detail_screen.no_titles_yet'),
+                        style: StylesApp(context)
+                            .textStyleBody6
+                            .copyWith(color: StyleColor.grayDark),
                       ),
                     ),
                   )
@@ -606,14 +647,15 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Text(
-                "Colección de Premios",
+                translationProvider
+                    .tr('progress_detail_screen.awards_collection'),
                 style: StylesApp(context).textStyCalendar,
               ),
               ButtonThemeWidget(
                 onPressed: () {
                   _dialogAwards(context);
                 },
-                text: "Ver",
+                text: translationProvider.tr('progress_detail_screen.view'),
                 width: 73.0,
                 height: 31.0,
                 buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -626,7 +668,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
         ),
         Center(
           child: ButtonThemeWidget(
-            text: "Continuar",
+            text: translationProvider.tr('progress_detail_screen.continue'),
             width: 239.0,
             height: 41.0,
             buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -639,8 +681,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                     context,
                     message: progressUser!.message,
                     dialogType: DialogTypeAction.info,
-                    buttonOk: "Cerrar",
-                    textButton: "ir Al curso",
+                    buttonOk:
+                        translationProvider.tr('progress_detail_screen.close'),
+                    textButton: translationProvider
+                        .tr('progress_detail_screen.go_to_course'),
                     showAction: true,
                     actionCallbackOk: () {
                       Navigator.pop(context);
@@ -779,7 +823,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                       child: Text(
-                        "Piedras Preciosas usadas en el pectoral sacerdotal",
+                        translationProvider
+                            .tr('progress_detail_screen.priestly_breastplate'),
                         textAlign: TextAlign.center,
                         style: StylesApp(context).textStyleBody14.copyWith(
                               fontWeight: FontWeight.bold,
@@ -1107,7 +1152,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                 : EdgeInsets.zero,
             child: Text(
               textAlign: TextAlign.left,
-              "Títulos Alcanzados",
+              translationProvider.tr('progress_detail_screen.achieved_titles'),
               style: _isTablet
                   ? StylesApp(context).textStyCalendar.copyWith(fontSize: 20)
                   : StylesApp(context).textStyCalendar,
@@ -1234,6 +1279,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
       barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
+        final translationProvider = context.read<AppTranslationProvider>();
         return Dialog(
           insetPadding:
               EdgeInsets.only(left: 12.0, right: 12.0, top: 0.0, bottom: 0),
@@ -1241,7 +1287,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: SingleChildScrollView(
-            child: Container(
+            child: SizedBox(
               width: isTablet(context)
                   ? MediaQuery.sizeOf(context).width * 0.65
                   : MediaQuery.sizeOf(context).width,
@@ -1256,7 +1302,10 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                         color: Colors.orange,
                         borderRadius: BorderRadius.circular(8.0)),
                     child: Text(
-                      "${item.typeStone} es una Piedra preciosa usada en el pectoral sacerdotal",
+                      translationProvider
+                          .tr('progress_detail_screen.is_precious_stone')
+                          .replaceFirst('{{value}}', item.typeStone.toString()),
+                      // "${} es una Piedra preciosa usada en el pectoral sacerdotal",
                       style: StylesApp(context).textStyleBody14,
                     ),
                   ),
@@ -1321,8 +1370,12 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                         child: Text(
                           textAlign: TextAlign.center,
                           item.redeemed
-                              ? "Este Premio ya fue canjeado"
-                              : "Puedes canjear esta gema por ${item.exchangeValue.toInt()}Lsm de energía",
+                              ? translationProvider
+                                  .tr('progress_detail_screen.award_redeemed')
+                              : translationProvider
+                                  .tr('progress_detail_screen.redeem_gem')
+                                  .replaceFirst('{{value}}',
+                                      item.exchangeValue.toString()),
                           style: StylesApp(context)
                               .textStyleBody14
                               .copyWith(color: Colors.black),
@@ -1338,7 +1391,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                               ? null
                               : () async {
                                   final userProvider =
-                                      Provider.of<UserProvider>(context);
+                                      context.read<UserProvider>();
                                   final LoginUser? userData =
                                       userProvider.currentUser;
                                   LoadingService().showLoading(context);
@@ -1363,7 +1416,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                   LoadingService().hideLoading();
                                   Navigator.pop(context);
                                 },
-                          text: "Canjear",
+                          text: translationProvider
+                              .tr('progress_detail_screen.redeem'),
                           width: 132.0,
                           height: 32.0,
                           buttonStyle:
@@ -1387,7 +1441,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        text: "Aceptar",
+                        text: translationProvider
+                            .tr('progress_detail_screen.accept'),
                         width: 129.0,
                         height: 35.0,
                         buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -1470,7 +1525,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                 children: [
                   SizedBox(height: 27),
                   Text(
-                    "Haz obtenido\n el titulo de\n ${title.title}!",
+                    translationProvider
+                        .tr('progress_detail_screen.title_obtained')
+                        .replaceFirst("{{title}}", title.title),
                     textAlign: TextAlign.center,
                     style: StylesApp(context)
                         .textStyleCongratulation
@@ -1508,7 +1565,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               width: 245,
               height: 32,
               buttonStyle: StylesApp(context).btnPrimary,
-              text: "Descargar certificado",
+              text: translationProvider
+                  .tr('progress_detail_screen.download_certificate'),
               onPressed: () async {
                 try {
                   final responseDownloadCertificate =
@@ -1540,21 +1598,23 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                         await showCustomDialogWithAction(
                           context,
                           message:
-                              "Certificado descargado exitosamente en: $filePath",
+                              "${translationProvider.tr('progress_detail_screen.certificate_downloaded')} $filePath",
                           dialogType: DialogTypeAction.info,
-                          buttonOk: "Ok",
+                          buttonOk: translationProvider
+                              .tr('progress_detail_screen.ok'),
                           actionCallbackOk: () {
                             Navigator.pop(context);
                           },
-                          textButton: "Abrir directorio",
+                          textButton: translationProvider
+                              .tr('progress_detail_screen.open_directory'),
                           actionCallback: () async {
                             try {
                               await launchUrl(Uri.file(directory.path));
                             } catch (e) {
                               await showCustomDialog(
                                 context,
-                                message:
-                                    "No se pudo abrir la carpeta de descargas.",
+                                message: translationProvider.tr(
+                                    'progress_detail_screen.folder_open_error'),
                                 dialogType: DialogType.error,
                               );
                             }
@@ -1563,14 +1623,16 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       } else {
                         await showCustomDialog(
                           context,
-                          message: "No se pudo descargar el certificado.",
+                          message: translationProvider
+                              .tr('progress_detail_screen.download_error'),
                           dialogType: DialogType.error,
                         );
                       }
                     } catch (e) {
                       await showCustomDialog(
                         context,
-                        message: "Error al descargar el certificado: $e",
+                        message:
+                            "${translationProvider.tr('progress_detail_screen.download_certificate_error')}  $e",
                         dialogType: DialogType.error,
                       );
                     }
@@ -1593,12 +1655,15 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               height: 32,
               colorIcon: Colors.white,
               buttonStyle: StylesApp(context).btnPrimary,
-              text: "Compartir logro",
+              text: translationProvider
+                  .tr('progress_detail_screen.share_achievement'),
               onPressed: () async {
                 await SharePlus.instance.share(ShareParams(
                   text:
-                      "¡He obtenido el titulo de ${title.title}! \n ${GraphQLConfig.urlServidor}OfficialBible",
-                  subject: "¡Felicita a ${userData.username}! ",
+                      "${translationProvider.tr('progress_detail_screen.title_message_shared').replaceFirst("{{title}}", title.title)} \n ${GraphQLConfig.urlServidor}OfficialBible",
+                  subject: translationProvider
+                      .tr('progress_detail_screen.subject_shared')
+                      .replaceFirst("%s", title.title),
                 ));
               },
             ),
@@ -1614,7 +1679,9 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                       fit: BoxFit.contain,
                     ),
                     Text(
-                      "${userData.energyPoints} lms",
+                      translationProvider
+                          .tr('progress_detail_screen.energy_points')
+                          .replaceFirst("%s", userData.energyPoints.toString()),
                       style: StylesApp(context)
                           .textStyleBody12
                           .copyWith(color: StyleColor.orange),
@@ -1622,7 +1689,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                   ],
                 ),
                 ButtonThemeWidget(
-                  text: "Aceptar",
+                  text: translationProvider.tr('progress_detail_screen.accept'),
                   width: 132,
                   height: 32,
                   buttonStyle: StylesApp(context).btnWidgetSmall,

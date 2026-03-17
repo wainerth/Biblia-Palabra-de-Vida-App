@@ -23,6 +23,8 @@ class SearchByThemeWidget extends StatefulWidget {
 }
 
 class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
+  final translationProvider = AppTranslationProvider();
+
   LoginUser? userData;
 
   late BibleTheme currentTheme;
@@ -110,12 +112,12 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
         await showCustomDialogWithAction(context,
             message: responseTeaching.error!,
             dialogType: DialogTypeAction.error,
-            buttonOk: 'Cancelar',
+            buttonOk: translationProvider.tr("common.cancel"),
             actionCallbackOk: () {
               Navigator.pop(currentContext);
             },
             showAction: true,
-            textButton: 'Reintentar',
+            textButton: translationProvider.tr("common.retry"),
             actionCallback: () async {
               Navigator.pop(currentContext);
               _loadData(1, itemPerPageValue, _searchText);
@@ -142,12 +144,12 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
       await showCustomDialogWithAction(context,
           message: e.toString(),
           dialogType: DialogTypeAction.error,
-          buttonOk: 'Cancelar',
+          buttonOk: translationProvider.tr("common.cancel"),
           actionCallbackOk: () {
             Navigator.pop(currentContext);
           },
           showAction: true,
-          textButton: 'Reintentar',
+          textButton: translationProvider.tr("common.retry"),
           actionCallback: () async {
             Navigator.pop(currentContext);
             _loadData(1, itemPerPageValue, _searchText);
@@ -159,13 +161,10 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
   Widget build(BuildContext context) {
     final themeProvider = context.read<BibleThemeProvider>();
     currentTheme = themeProvider.themeData;
-
-    // Layout condicional según dispositivo
-    if (isTablet) {
-      return _buildTabletLayout();
-    } else {
-      return _buildMobileLayout();
-    }
+    return ResponsiveLayout(
+      mobile: _buildMobileLayout(),
+      tablet: _buildTabletLayout(),
+    );
   }
 
   // ============ LAYOUT PARA TABLET ============
@@ -200,7 +199,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
           height: 25.0,
         ),
         Padding(
-           padding: EdgeInsets.symmetric(
+          padding: EdgeInsets.symmetric(
             horizontal: 12.0,
           ),
           child: Container(
@@ -225,10 +224,10 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
             ),
             child: TextFormField(
               controller: searchTextController,
-               style: StylesApp(context).textStyleSmallBlack.copyWith(
-                color: currentTheme.textColor,
-                            fontSize: 16,
-                          ),
+              style: StylesApp(context).textStyleSmallBlack.copyWith(
+                    color: currentTheme.textColor,
+                    fontSize: 16,
+                  ),
               decoration: InputDecoration(
                 fillColor: currentTheme.backgroundColor,
                 filled: true,
@@ -236,45 +235,48 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                       color: currentTheme.textColor.withValues(alpha: 0.6),
                       fontSize: 15,
                     ),
-                hintText: 'Buscar Tema...',
+                hintText: translationProvider
+                    .tr("search_by_theme.search.placeholder"),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none, // Sin borde visible
                 ),
                 enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: currentTheme.textColor.withValues(
-                              alpha: 0.6), // Borde cuando está habilitado
-                          width: 1.0,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: currentTheme
-                              .textColor, // Borde cuando está enfocado
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.red, // Borde de error
-                          width: 1.0,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: currentTheme.textColor.withValues(
-                              alpha: 0.3), // Borde cuando está deshabilitado
-                          width: 1.0,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                  borderSide: BorderSide(
+                    color: currentTheme.textColor
+                        .withValues(alpha: 0.6), // Borde cuando está habilitado
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: currentTheme.textColor, // Borde cuando está enfocado
+                    width: 2.0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.red, // Borde de error
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: currentTheme.textColor.withValues(
+                        alpha: 0.3), // Borde cuando está deshabilitado
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 suffixIcon: _searchText.isNotEmpty
                     ? IconButton(
-                        icon: Icon(Icons.clear, color: currentTheme.buttonColor,),
+                        icon: Icon(
+                          Icons.clear,
+                          color: currentTheme.buttonColor,
+                        ),
                         onPressed: () {
                           setState(() {
                             cleanSearch();
@@ -368,7 +370,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
               ),
               SizedBox(width: 12),
               Text(
-                "Búsqueda de Temas Bíblicos",
+                translationProvider.tr("search_by_theme.search.label_text"),
                 style: StylesApp(context).textStyleBody18.copyWith(
                       color: currentTheme.textColor,
                       fontSize: 22,
@@ -402,11 +404,12 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                   child: TextFormField(
                     controller: searchTextController,
                     style: StylesApp(context).textStyleSmallBlack.copyWith(
-                      color: currentTheme.textColor,
+                          color: currentTheme.textColor,
                           fontSize: 16,
                         ),
                     decoration: InputDecoration(
-                      hintText: 'Escribe aquí el tema bíblico...',
+                      hintText: translationProvider
+                          .tr("search_by_theme.search.placeholder_tablet"),
                       hintStyle: StylesApp(context).textStyleBody15.copyWith(
                             color:
                                 currentTheme.textColor.withValues(alpha: 0.6),
@@ -489,7 +492,9 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          "${pagination.totalItems} temas encontrados",
+                          translationProvider.trParams(
+                              "search_by_theme.search.result_count",
+                              {"count": pagination.totalItems.toString()}),
                           style: StylesApp(context).textStyleBody12.copyWith(
                                 color: currentTheme.textColor,
                                 fontWeight: FontWeight.w500,
@@ -509,7 +514,11 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                       ),
                     ),
                     child: Text(
-                      "Página ${pagination.currentPage} de ${pagination.totalPages}",
+                      translationProvider
+                          .trParams("search_by_theme.search.page_info", {
+                        "current": pagination.currentPage.toString(),
+                        "total": pagination.totalPages.toString()
+                      }),
                       style: StylesApp(context).textStyleBody12.copyWith(
                             color:
                                 currentTheme.textColor.withValues(alpha: 0.7),
@@ -536,7 +545,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
             ),
             SizedBox(height: 16),
             Text(
-              "Buscando temas...",
+              translationProvider.tr("search_by_theme.search.searching"),
               style: StylesApp(context).textStyleBody14.copyWith(
                     color: currentTheme.textColor.withValues(alpha: 0.7),
                   ),
@@ -605,7 +614,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      "Tema",
+                      translationProvider.tr("search_by_theme.card.tag"),
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -677,7 +686,8 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                         SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            "Estudio bíblico",
+                            translationProvider
+                                .tr("search_by_theme.card.category"),
                             style: TextStyle(
                               fontSize: 13,
                               color:
@@ -714,7 +724,8 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Ver estudio completo',
+                        translationProvider
+                            .tr("search_by_theme.card.view_button"),
                         style: TextStyle(
                           color: currentTheme.buttonColor,
                           fontWeight: FontWeight.w600,
@@ -753,7 +764,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
             ),
             SizedBox(height: 20),
             Text(
-              "No se encontraron temas",
+              translationProvider.tr("search_by_theme.results.empty.title"),
               style: StylesApp(context).textStyleBody18.copyWith(
                     color: currentTheme.textColor,
                     fontSize: isTablet ? 22 : 18,
@@ -762,8 +773,11 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
             SizedBox(height: 12),
             Text(
               _searchText.isEmpty
-                  ? "Comienza a buscar temas bíblicos escribiendo en el campo de búsqueda"
-                  : "No se encontraron resultados para '$_searchText'",
+                  ? translationProvider
+                      .tr("search_by_theme.results.empty.message_start")
+                  : translationProvider.trParams(
+                      "search_by_theme.results.empty.message_not_found",
+                      {"query": _searchText}),
               textAlign: TextAlign.center,
               style: StylesApp(context).textStyleBody14.copyWith(
                     color: currentTheme.textColor.withValues(alpha: 0.6),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -34,6 +35,7 @@ class _VerifyPinDialogState extends State<VerifyPinDialog> {
   bool _canResend = false;
 
   final GlobalKey _pasteButtonKey = GlobalKey();
+  final _translationProvider = AppTranslationProvider();
 
   @override
   void initState() {
@@ -113,20 +115,20 @@ class _VerifyPinDialogState extends State<VerifyPinDialog> {
 
       if (pastedText.isNotEmpty) {
         if (pastedText.length > 6) {
-          showSnackBar('Error al pegar el código', type: SnackBarType.error);
+          showSnackBar(_translationProvider.tr("verify_pin_dialog.paste_code_error"), type: SnackBarType.error);
         } else {
           _handlePaste(pastedText);
 
           // Mostrar mensaje de éxito
-          showSnackBar('Código pegado correctamente',
+          showSnackBar(_translationProvider.tr("verify_pin_dialog.paste_success"),
               type: SnackBarType.success);
         }
       } else {
-        showSnackBar('No hay texto en el portapapeles',
+        showSnackBar(_translationProvider.tr("verify_pin_dialog.paste_empty"),
             type: SnackBarType.info);
       }
     } catch (e) {
-      showSnackBar('Error al pegar el código', type: SnackBarType.error);
+      showSnackBar(_translationProvider.tr("verify_pin_dialog.paste_error"), type: SnackBarType.error);
     }
   }
 
@@ -164,7 +166,7 @@ class _VerifyPinDialogState extends State<VerifyPinDialog> {
 
   void _resendCode() {
     widget.onResendCode();
-    showSnackBar('Código reenviado a ${widget.email}',
+    showSnackBar(_translationProvider.trParams("verify_pin_dialog.resend_success", {"email": widget.email}),
         type: SnackBarType.success);
     setState(() {
       _secondsRemaining = 300; // 5 minutos
@@ -293,7 +295,9 @@ class _VerifyPinDialogState extends State<VerifyPinDialog> {
     return Padding(
       padding: EdgeInsets.only(top: 8),
       child: Text(
-        'Puedes reenviar en: ${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+        _translationProvider.trParams("verify_pin_dialog.resend_timer", {
+          "time": "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}",
+        }),
         style: StylesApp(context).textStyleBody14.copyWith(
               color: _canResend ? StyleColor.greenDark : StyleColor.redLight,
               fontWeight: FontWeight.w500,
@@ -306,212 +310,211 @@ class _VerifyPinDialogState extends State<VerifyPinDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: StyleColor.white,
+      insetPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
-        padding: EdgeInsets.all(24),
-        constraints: BoxConstraints(maxWidth: 500),
+        padding: EdgeInsets.all(14),
+        constraints: BoxConstraints(maxWidth: 700),
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Icono
-                Icon(
-                  Icons.verified_user_outlined,
-                  size: 64,
-                  color: StyleColor.greenDark,
-                ),
-                SizedBox(height: 16),
-
-                // Título
-                Text(
-                  'Verificación de Seguridad',
-                  style: StylesApp(context).textStyleBody20.copyWith(
-                        color: StyleColor.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                SizedBox(height: 12),
-
-                // Mensaje
-                Text(
-                  'Hemos enviado un código de 6 dígitos a:',
-                  textAlign: TextAlign.center,
-                  style: StylesApp(context).textStyleBody16.copyWith(
-                        color: StyleColor.grayDark,
-                      ),
-                ),
-                SizedBox(height: 4),
-
-                // Email
-                Text(
-                  widget.email,
-                  textAlign: TextAlign.center,
-                  style: StylesApp(context).textStyleBody16.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: StyleColor.blueHigh,
-                      ),
-                ),
-                SizedBox(height: 24),
-
-                // Fila con campos del PIN y botón de pegar
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Campos del PIN
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children:
-                          List.generate(6, (index) => _buildInputCode(index)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icono
+              Icon(
+                Icons.verified_user_outlined,
+                size: 64,
+                color: StyleColor.greenDark,
+              ),
+              SizedBox(height: 16),
+          
+              // Título
+              Text(
+                _translationProvider.tr("verify_pin_dialog.title"),
+                style: StylesApp(context).textStyleBody20.copyWith(
+                      color: StyleColor.black,
+                      fontWeight: FontWeight.bold,
                     ),
-
-                    // Botón de pegar
-                    _buildPasteButton(),
+              ),
+              SizedBox(height: 12),
+          
+              // Mensaje
+              Text(
+                _translationProvider.tr("verify_pin_dialog.message"),
+                textAlign: TextAlign.center,
+                style: StylesApp(context).textStyleBody16.copyWith(
+                      color: StyleColor.grayDark,
+                    ),
+              ),
+              SizedBox(height: 4),
+          
+              // Email
+              Text(
+                widget.email,
+                textAlign: TextAlign.center,
+                style: StylesApp(context).textStyleBody16.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: StyleColor.blueHigh,
+                    ),
+              ),
+              SizedBox(height: 24),
+          
+              // Fila con campos del PIN y botón de pegar
+              Wrap(
+                alignment: WrapAlignment.center,
+                // mainAxisAlignment: MainAxisAlignment.center,
+                // crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Campos del PIN
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children:
+                        List.generate(6, (index) => _buildInputCode(index)),
+                  ),
+          
+                  // Botón de pegar
+                  _buildPasteButton(),
+                ],
+              ),
+              SizedBox(height: 8),
+          
+              // Mensaje de ayuda para pegar
+              Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: Text(
+                  _translationProvider.tr("verify_pin_dialog.paste_hint"),
+                  style: StylesApp(context).textStyleBody12.copyWith(
+                        color: StyleColor.grayMedium,
+                        fontStyle: FontStyle.italic,
+                      ),
+                ),
+              ),
+          
+              // Mensaje de error
+              if (_isError)
+                Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text(
+                    _translationProvider.tr("verify_pin_dialog.error_incorrect"),
+                    style: StylesApp(context).textStyleBody14.copyWith(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ),
+          
+              SizedBox(height: 24),
+          
+              // Botón de verificación
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed:
+                      _pin.length == 6 && !_isLoading ? _verifyPin : null,
+                  style: StylesApp(context).btnSecondary.copyWith(
+                        padding: WidgetStatePropertyAll(
+                            EdgeInsets.symmetric(vertical: 16)),
+                        shape: WidgetStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        backgroundColor:
+                            WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return StyleColor.grayDark;
+                          }
+                          return StyleColor.orange;
+                        }),
+                        foregroundColor:
+                            WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return StyleColor.grayMedium;
+                          }
+                          return Colors.white;
+                        }),
+                        overlayColor:
+                            WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return Colors.transparent;
+                          }
+                          return Colors.white.withOpacity(0.1);
+                        }),
+                        elevation: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return 0;
+                          }
+                          return 2;
+                        }),
+                        maximumSize:
+                            WidgetStatePropertyAll(Size(200.0, 60.0)),
+                        minimumSize: WidgetStatePropertyAll(Size(0, 0)),
+                      ),
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          _translationProvider.tr("verify_pin_dialog.verify_button"),
+                          style: StylesApp(context)
+                              .textStyleBody16
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                ),
+              ),
+              SizedBox(height: 16),
+          
+              // Enlace para reenviar código
+              TextButton(
+                onPressed: _canResend && !_isLoading ? _resendCode : null,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.refresh,
+                      size: 18,
+                      color: _canResend ? StyleColor.blueDark : Colors.grey,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      _translationProvider.tr("verify_pin_dialog.resend_button"),
+                      style: StylesApp(context).textStyleBody16.copyWith(
+                            color: _canResend
+                                ? StyleColor.blueDark
+                                : Colors.grey,
+                          ),
+                    ),
                   ],
                 ),
-                SizedBox(height: 8),
-
-                // Mensaje de ayuda para pegar
-                Padding(
-                  padding: EdgeInsets.only(top: 4),
-                  child: Text(
-                    'Puedes pegar el código completo del correo',
-                    style: StylesApp(context).textStyleBody12.copyWith(
-                          color: StyleColor.grayMedium,
-                          fontStyle: FontStyle.italic,
-                        ),
-                  ),
-                ),
-
-                // Mensaje de error
-                if (_isError)
-                  Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Text(
-                      'Código incorrecto. Intente nuevamente.',
-                      style: StylesApp(context).textStyleBody14.copyWith(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ),
-
-                SizedBox(height: 24),
-
-                // Botón de verificación
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed:
-                        _pin.length == 6 && !_isLoading ? _verifyPin : null,
-                    style: StylesApp(context).btnSecondary.copyWith(
-                          padding: WidgetStatePropertyAll(
-                              EdgeInsets.symmetric(vertical: 16)),
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          backgroundColor:
-                              WidgetStateProperty.resolveWith((states) {
-                            if (states.contains(WidgetState.disabled)) {
-                              return StyleColor.grayDark;
-                            }
-                            return StyleColor.orange;
-                          }),
-                          foregroundColor:
-                              WidgetStateProperty.resolveWith((states) {
-                            if (states.contains(WidgetState.disabled)) {
-                              return StyleColor.grayMedium;
-                            }
-                            return Colors.white;
-                          }),
-                          overlayColor:
-                              WidgetStateProperty.resolveWith((states) {
-                            if (states.contains(WidgetState.disabled)) {
-                              return Colors.transparent;
-                            }
-                            return Colors.white.withOpacity(0.1);
-                          }),
-                          elevation: WidgetStateProperty.resolveWith((states) {
-                            if (states.contains(WidgetState.disabled)) {
-                              return 0;
-                            }
-                            return 2;
-                          }),
-                          maximumSize:
-                              WidgetStatePropertyAll(Size(200.0, 60.0)),
-                          minimumSize: WidgetStatePropertyAll(Size(0, 0)),
-                        ),
-                    child: _isLoading
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          )
-                        : Text(
-                            'VERIFICAR CÓDIGO',
-                            style: StylesApp(context)
-                                .textStyleBody16
-                                .copyWith(fontWeight: FontWeight.bold),
-                          ),
-                  ),
-                ),
-                SizedBox(height: 16),
-
-                // Enlace para reenviar código
-                TextButton(
-                  onPressed: _canResend && !_isLoading ? _resendCode : null,
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.refresh,
-                        size: 18,
-                        color: _canResend ? StyleColor.blueDark : Colors.grey,
+              ),
+          
+          // Contador
+              _buildTimerWidget(),
+          
+              // Enlace de ayuda
+              TextButton(
+                onPressed: () {
+                  // Mostrar ayuda
+                  _showHelpDialog();
+                },
+                child: Text(
+                  _translationProvider.tr("verify_pin_dialog.help_link"),
+                  style: StylesApp(context).textStyleBody14.copyWith(
+                        color: StyleColor.blueDark,
+                        decoration: TextDecoration.underline,
                       ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Reenviar código',
-                        style: StylesApp(context).textStyleBody16.copyWith(
-                              color: _canResend
-                                  ? StyleColor.blueDark
-                                  : Colors.grey,
-                            ),
-                      ),
-                    ],
-                  ),
                 ),
-
-// Contador
-                _buildTimerWidget(),
-
-                // Enlace de ayuda
-                TextButton(
-                  onPressed: () {
-                    // Mostrar ayuda
-                    _showHelpDialog();
-                  },
-                  child: Text(
-                    '¿No recibiste el código?',
-                    style: StylesApp(context).textStyleBody14.copyWith(
-                          color: StyleColor.blueDark,
-                          decoration: TextDecoration.underline,
-                        ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -523,7 +526,7 @@ class _VerifyPinDialogState extends State<VerifyPinDialog> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Ayuda',
+          _translationProvider.tr("verify_pin_dialog.help_dialog.title"),
           style: StylesApp(context).textStyleBody18.copyWith(
             color: StyleColor.black,
                 fontWeight: FontWeight.bold,
@@ -534,26 +537,26 @@ class _VerifyPinDialogState extends State<VerifyPinDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Si no recibiste el código:',
+              _translationProvider.tr("verify_pin_dialog.help_dialog.subtitle"),
               style: StylesApp(context).textStyleBody16.copyWith(
                 color: StyleColor.black
               ),
             ),
             SizedBox(height: 8),
             Text(
-              '1. Revisa tu carpeta de spam o correo no deseado',
+              _translationProvider.tr("verify_pin_dialog.help_dialog.step1"),
               style: StylesApp(context).textStyleBody14.copyWith(
                 color: StyleColor.black
               ),
             ),
             Text(
-              '2. Verifica que el correo electrónico sea correcto',
+              _translationProvider.tr("verify_pin_dialog.help_dialog.step2"),
               style: StylesApp(context).textStyleBody14.copyWith(
                 color: StyleColor.black
               ),
             ),
             Text(
-              '3. Espera unos minutos y haz clic en "Reenviar código"',
+              _translationProvider.tr("verify_pin_dialog.help_dialog.step3"),
               style: StylesApp(context).textStyleBody14.copyWith(
                 color: StyleColor.black
               ),
@@ -563,7 +566,7 @@ class _VerifyPinDialogState extends State<VerifyPinDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cerrar'),
+            child: Text(_translationProvider.tr("verify_pin_dialog.help_dialog.close")),
           ),
         ],
       ),

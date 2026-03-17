@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -7,14 +8,16 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 // import 'package:installed_apps/installed_apps.dart';
 
-class AudioScreen extends StatefulWidget {
-  const AudioScreen({super.key});
+class RadioScreen extends StatefulWidget {
+  const RadioScreen({super.key});
 
   @override
-  State<AudioScreen> createState() => _AudioScreenState();
+  State<RadioScreen> createState() => _RadioScreenState();
 }
 
-class _AudioScreenState extends State<AudioScreen> {
+class _RadioScreenState extends State<RadioScreen> {
+  final translationProvider = AppTranslationProvider();
+
   static const platform =
       MethodChannel('com.renuevo.palabradevidabiblia/appchecker');
   final String appName = "amistad Online"; // Ajusta esto
@@ -23,12 +26,14 @@ class _AudioScreenState extends State<AudioScreen> {
   String playStoreWebUrl = "";
   final String appCustomUrl =
       "amistad.online2://"; // Esquema personalizado - ¡DEBES VERIFICARLO!
-  final String appDescription =
-      "Una radio con valores que te acompaña todos los días";
+  String appDescription = "";
   bool showScreen = false;
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appDescription = translationProvider.tr("radio_screen.app_description");
+    });
   }
 
   static Future<bool> isAppInstalled(String packageName) async {
@@ -55,14 +60,18 @@ class _AudioScreenState extends State<AudioScreen> {
         final confirmed = await showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: Text("Abrir aplicación externa"),
-            content: Text("Serás redirigido a 'Amistad Online'"),
+            title: Text(translationProvider
+                .tr("radio_screen.external_app_dialog.title")),
+            content: Text(translationProvider
+                .tr("radio_screen.external_app_dialog.message")),
             actions: [
               TextButton(
-                  child: Text("cancel"),
+                  child: Text(translationProvider
+                      .tr("radio_screen.external_app_dialog.cancel")),
                   onPressed: () => Navigator.pop(ctx, false)),
               TextButton(
-                  child: Text("Aceptar"),
+                  child: Text(translationProvider
+                      .tr("radio_screen.external_app_dialog.accept")),
                   onPressed: () => Navigator.pop(ctx, true)),
             ],
           ),
@@ -76,17 +85,18 @@ class _AudioScreenState extends State<AudioScreen> {
       } else {
         await showCustomDialogWithAction(
           context,
-          message:
-              "No se pudo abrir la aplicación $appName. ¿Deseas descargar la App?",
+          message: translationProvider.tr("radio_screen.error_dialog.message"),
           dialogType: DialogTypeAction.error,
-          buttonOk: "Continuar",
+          buttonOk:
+              translationProvider.tr("radio_screen.error_dialog.continue"),
           showAction: true,
           actionCallbackOk: () async {
             Navigator.pop(context);
             await launchUrl(Uri.parse(playStoreWebUrl),
                 mode: LaunchMode.externalApplication);
           },
-          textButton: "Cancelar",
+          textButton:
+              translationProvider.tr("radio_screen.error_dialog.cancel"),
           actionCallback: () {
             Navigator.pop(context);
             setState(() {
@@ -99,21 +109,23 @@ class _AudioScreenState extends State<AudioScreen> {
       await showCustomDialogWithAction(
         context,
         message:
-            "No se pudo abrir la aplicación $appName. ¿Deseas descargar la App?",
+            translationProvider.trParams("radio_screen.error_dialog.message", {
+          "appName": appName,
+        }),
         dialogType: DialogTypeAction.error,
-        buttonOk: "Continuar",
+        buttonOk: translationProvider.tr("radio_screen.error_dialog.continue"),
         showAction: true,
         actionCallbackOk: () {
           Navigator.pop(context);
           final Uri playStoreUri = Uri.parse(playStoreWebUrl);
           launchUrl(playStoreUri, mode: LaunchMode.externalApplication);
         },
-        textButton: "Cancelar",
+        textButton: translationProvider.tr("radio_screen.error_dialog.cancel"),
         actionCallback: () async {
           Navigator.pop(context);
-            setState(() {
-              showScreen = true;
-            });
+          setState(() {
+            showScreen = true;
+          });
         },
       );
     }
@@ -145,7 +157,7 @@ class _AudioScreenState extends State<AudioScreen> {
         ),
         backgroundColor: StyleColor.turquoise,
         title: Text(
-          'Audio',
+          translationProvider.tr("radio_screen.title"),
           style: StylesApp(context)
               .textStyleBody16
               .copyWith(color: StyleColor.white),
@@ -159,20 +171,20 @@ class _AudioScreenState extends State<AudioScreen> {
             Icon(Icons.radio, size: 80, color: Colors.blue),
             SizedBox(height: 30),
             Text(
-              "AMISTAD",
+              translationProvider.tr("radio_screen.app_name"),
               style: StylesApp(context).textStyleBody28.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.blue,
                   ),
             ),
             Text(
-              "Online Radio",
+              translationProvider.tr("radio_screen.app_subtitle"),
               style: StylesApp(context).textStyleBody20.copyWith(
                     color: Colors.grey[600],
                   ),
             ),
             Text(
-              "La frecuencia que acompaña",
+              translationProvider.tr("radio_screen.app_tagline"),
               style: StylesApp(context).textStyleBody16.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -185,7 +197,7 @@ class _AudioScreenState extends State<AudioScreen> {
                 child: Column(
                   children: [
                     Text(
-                      "Estás a punto de abrir:",
+                      translationProvider.tr("radio_screen.opening_message"),
                       style: StylesApp(context).textStyleBody16.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -224,16 +236,16 @@ class _AudioScreenState extends State<AudioScreen> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text("Confirmar"),
+                      title: Text(translationProvider.tr("radio_screen.confirm_dialog.title")),
                       content:
-                          Text("¿Deseas abrir la aplicación $appPackageName?"),
+                          Text(translationProvider.tr("radio_screen.confirm_dialog.message")),
                       actions: [
                         TextButton(
-                          child: Text("Cancelar"),
+                          child: Text(translationProvider.tr("radio_screen.confirm_dialog.cancel")),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                         TextButton(
-                          child: Text("Abrir"),
+                          child: Text(translationProvider.tr("radio_screen.confirm_dialog.open")),
                           onPressed: () {
                             Navigator.of(context).pop();
                             _launchApp();
@@ -245,7 +257,7 @@ class _AudioScreenState extends State<AudioScreen> {
                 );
               },
               child: Text(
-                "Escuchar Radio",
+                translationProvider.tr("radio_screen.button"),
                 style: StylesApp(context)
                     .textStyleBody18
                     .copyWith(color: StyleColor.white),

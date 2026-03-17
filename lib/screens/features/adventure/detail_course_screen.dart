@@ -2,7 +2,6 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
-import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -24,7 +23,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   String? errorMessage;
   ResponseProgress? progressUser;
   int _selectedIndex = 1;
-
+  late AppTranslationProvider _translationProvider;
   // determinar s ies table
   @override
   void initState() {
@@ -34,14 +33,17 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
     });
   }
 
-  Future<void> _loadStageSections(_) async {
+  Future<void> _loadStageSections(context) async {
+    final translationProvider = _translationProvider;
+
     setState(() => errorMessage = null);
 
     if (!mounted) return;
     final route = ModalRoute.of(context);
     if (route == null || route.settings.arguments == null) {
       setState(() {
-        errorMessage = "Contexto de navegación inválido.";
+        errorMessage =
+            translationProvider.tr('details_course.errors.navigation_context');
         isLoading = false;
       });
       return;
@@ -57,7 +59,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
 
       if (courseParam == null || !courseParam.containsKey("courseId")) {
         setState(() {
-          errorMessage = "ID de curso no proporcionado.";
+          errorMessage = translationProvider
+              .tr('details_course.errors.course_id_not_provided');
           isLoading = false;
         });
         return;
@@ -67,7 +70,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
 
       if (userData == null) {
         setState(() {
-          errorMessage = "Usuario no autenticado.";
+          errorMessage = translationProvider
+              .tr('details_course.errors.user_not_authenticated');
           isLoading = false;
         });
         return;
@@ -105,7 +109,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
         });
       }
     } catch (e) {
-      errorMessage = "An error occurred: $e";
+      errorMessage =
+          "${translationProvider.tr('details_course.errors.an_error_occurred')}: $e";
       return;
     } finally {
       // 5. Asegurar que hideLoading se llame incluso si mounted es false
@@ -144,9 +149,14 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _translationProvider = context.read<AppTranslationProvider>();
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return Scaffold(
       body: SafeArea(
-        child: isTablet(context) ? _buildTabletLayout() : _buildMobileLayout(),
+        child: isTablet(context)
+            ? _buildTabletLayout(translationProvider)
+            : _buildMobileLayout(translationProvider),
       ),
       bottomNavigationBar: CustomBottomNavigationBarWidget(
         type: BottomNavigationBarType.fixed,
@@ -163,7 +173,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
     );
   }
 
-  _buildBodyContent(course) {
+  _buildBodyContent(course, AppTranslationProvider translationProvider) {
     return Expanded(
       child: Column(
         children: [
@@ -194,8 +204,10 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                         context,
                         message: progressUser!.message,
                         dialogType: DialogTypeAction.info,
-                        buttonOk: "Ver más cursos",
-                        textButton: "ir Al curso",
+                        buttonOk: translationProvider
+                            .tr('detail_course.see_more_courses'),
+                        textButton: translationProvider
+                            .tr('detail_course.go_to_course'),
                         showAction: true,
                         actionCallbackOk: () {
                           Navigator.pushNamed(context, '/layoutPage',
@@ -225,7 +237,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                       });
                     } else {
                       await showCustomDialog(context,
-                          message: "¡Este curso no esta Disponible!",
+                          message: translationProvider
+                              .tr('detail_course.course_unavailable'),
                           dialogType: DialogType.info);
                     }
                     setState(() {
@@ -241,7 +254,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                       return CustomModalWidget(
                         title: course.titleCourse,
                         content: course.introduction,
-                        buttonText: 'Aceptar',
+                        buttonText:
+                            translationProvider.tr('detail_course.accept'),
                         id: course.id,
                         showSubtitle: false,
                         itemCount: 0,
@@ -293,13 +307,14 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
           SizedBox(
             height: 12.0,
           ),
-          _listOfStages(context)
+          _listOfStages(context, translationProvider)
         ],
       ),
     );
   }
 
-  _listOfStages(BuildContext context) {
+  _listOfStages(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Expanded(
       child: ListView.builder(
         padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
@@ -343,7 +358,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                         minHeight: 28.0, minWidth: 101.0),
                                     child: Center(
                                       child: Text(
-                                        "Etapa ${stage.sectionNumber}", //index + 1
+                                        "${translationProvider.tr('detail_course.stage')} ${stage.sectionNumber}", //index + 1
                                         style: StylesApp(context)
                                             .textStyleBody12
                                             .copyWith(color: Colors.black),
@@ -400,8 +415,10 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                       ButtonThemeWidget(
                                         height: 27.0,
                                         width: 150.0,
-                                        onPressed: (getStatus(stage) ==
-                                                "Pendiente")
+                                        onPressed: (getStatus(stage,
+                                                    translationProvider) ==
+                                                translationProvider.tr(
+                                                    'detail_course.status.pending'))
                                             ? null
                                             : () {
                                                 Navigator.pushNamed(
@@ -424,17 +441,23 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                                 return Colors
                                                     .grey; // Color when the button is disabled
                                               }
-                                              return (getStatus(stage) ==
-                                                      "Completado")
+                                              return (getStatus(stage,
+                                                          translationProvider) ==
+                                                      translationProvider.tr(
+                                                          'detail_course.status.completed'))
                                                   ? Color(0XFFC7AA34)
                                                   : Color(
                                                       0XFF12CBC4); // Use the component's default.
                                             },
                                           ),
                                         ),
-                                        text: getStatus(stage),
+                                        text: getStatus(
+                                            stage, translationProvider),
                                       ),
-                                      if (getStatus(stage) != "Pendiente") ...{
+                                      if (getStatus(
+                                              stage, translationProvider) !=
+                                          translationProvider.tr(
+                                              'detail_course.status.pending')) ...{
                                         SizedBox(width: 8.0),
                                         ButtonThemeWidget(
                                           onPressed: () {
@@ -449,7 +472,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                               .textStyleBody14,
                                           width: 50.sp,
                                           height: 27.0,
-                                          text: "Ir",
+                                          text: translationProvider
+                                              .tr('detail_course.go'),
                                           buttonStyle:
                                               StylesApp(context).btnWidgetSmall,
                                         )
@@ -479,7 +503,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                   return CustomModalWidget(
                                     title: stage.sectionName,
                                     content: stage.introduction,
-                                    buttonText: 'Aceptar',
+                                    buttonText: translationProvider
+                                        .tr('detail_course.accept'),
                                     id: "${stage.sectionNumber} ",
                                     itemCount: stage.levelCount,
                                     itemsCompleted: stage.levelCompletedCount,
@@ -490,7 +515,9 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                           ),
                         ),
                       ),
-                      if (getStatus(stage) == "En Proceso")
+                      if (getStatus(stage, translationProvider) ==
+                          translationProvider
+                              .tr('detail_course.status.in_progress'))
                         Positioned(
                             bottom: 0,
                             right: 0,
@@ -539,7 +566,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                       SizedBox(width: 12.0),
                       Expanded(
                         child: Text(
-                          "Etapa ${index + 1} - Próximamente",
+                          "${translationProvider.tr('detail_course.stage')} ${index + 1} - ${translationProvider.tr('detail_course.coming_soon')}",
                           style: StylesApp(context).textStyleBody14.copyWith(
                               color: Colors.black87,
                               fontWeight: FontWeight.w600),
@@ -561,32 +588,37 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
     );
   }
 
-  String getStatus(level) {
+  String getStatus(level, AppTranslationProvider translationProvider) {
     if (level.levelCompletedCount > 0) {
       if (level.levelCompletedCount.toString() == level.levelCount.toString()) {
-        return "Completado";
+        return translationProvider.tr('detail_course.status.completed');
       } else {
-        return "En Proceso";
+        return translationProvider.tr('detail_course.status.in_progress');
       }
     } else {
-      return level.unLockSection ? "En proceso" : "Pendiente";
+      return level.unLockSection
+          ? translationProvider.tr('detail_course.status.in_progress')
+          : translationProvider.tr('detail_course.status.pending');
     }
   }
 
-  IconData getEstadoIcon(String estado) {
-    switch (estado) {
-      case 'Completado':
-        return Icons.chat_bubble_outline;
-      case 'En Proceso':
-        return Icons.whatshot;
-      case 'Pendiente':
-        return Icons.square;
-      default:
-        return Icons.error;
+  IconData getEstadoIcon(String estado, AppTranslationProvider trProvider) {
+    final completed = trProvider.tr('detail_course.status.completed');
+    final inProgress = trProvider.tr('detail_course.status.in_progress');
+    final pending = trProvider.tr('detail_course.status.pending');
+
+    if (estado == completed) {
+      return Icons.chat_bubble_outline;
+    } else if (estado == inProgress) {
+      return Icons.whatshot;
+    } else if (estado == pending) {
+      return Icons.square;
+    } else {
+      return Icons.error;
     }
   }
 
-  _buildTabletLayout() {
+  _buildTabletLayout(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         HeadScoreWidget(
@@ -597,7 +629,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
         SizedBox(height: 16.0),
         // titulo
         Text(
-          "Sigue la ruta de la sabiduría",
+          translationProvider.tr('detail_course.title'),
           style: StylesApp(context)
               .textStyleBody14
               .copyWith(color: StyleColor.vibrantPurple),
@@ -621,29 +653,33 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
           )
         else
           Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    child: _buildTabletCourseCard(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                spacing: 10.0,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      child: _buildTabletCourseCard(translationProvider),
+                    ),
                   ),
-                ),
-                Expanded(
-                  flex: 7,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        right: BorderSide(
-                          color: Colors.black,
-                          width: 2.0,
+                  Expanded(
+                    flex: 7,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: BorderSide(
+                            color: Colors.black,
+                            width: 2.0,
+                          ),
                         ),
                       ),
+                      child: _buildTabletStagesList(translationProvider),
                     ),
-                    child: _buildTabletStagesList(),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           )
       ],
@@ -651,14 +687,14 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   }
 
   // Card del curso para tablet
-  Widget _buildTabletCourseCard() {
+  Widget _buildTabletCourseCard(AppTranslationProvider translationProvider) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),
@@ -674,7 +710,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               image: course?.imgCourseUrl.isNotEmpty == true
                   ? DecorationImage(
-                      image: NetworkImage("${GraphQLConfig.urlServidor}${course!.imgCourseUrl}"),
+                      image: NetworkImage(
+                          "${GraphQLConfig.urlServidor}${course!.imgCourseUrl}"),
                       fit: BoxFit.cover,
                     )
                   : null,
@@ -701,7 +738,6 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  
                   // Información del curso
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -732,13 +768,13 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                           _buildInfoChip(
                             icon: Icons.layers,
                             text:
-                                '${course?.sectionCompletedCount ?? 0}/${course?.sectionCount ?? 0} Secciones',
+                                '${course?.sectionCompletedCount ?? 0}/${course?.sectionCount ?? 0} ${translationProvider.tr('detail_course.course_sections')}',
                           ),
                           SizedBox(width: 12),
                           _buildInfoChip(
                             icon: Icons.check_circle,
                             text:
-                                '${((course?.sectionCompletedCount ?? 0) / (course?.sectionCount ?? 1) * 100).toInt()}% Completado',
+                                '${((course?.sectionCompletedCount ?? 0) / (course?.sectionCount ?? 1) * 100).toInt()} ${translationProvider.tr('detail_course.completed_percentage')}',
                           ),
                         ],
                       ),
@@ -766,7 +802,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                   child: CustomModalWidget(
                                     title: course?.titleCourse ?? '',
                                     content: course?.introduction ?? '',
-                                    buttonText: 'Aceptar',
+                                    buttonText: translationProvider
+                                        .tr('detail_course.accept'),
                                     id: course?.id ?? '',
                                     showSubtitle: false,
                                     itemCount: 0,
@@ -785,7 +822,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                           ),
                         ),
                         child: Text(
-                          'Ver detalles del curso',
+                          translationProvider
+                              .tr('detail_course.view_course_details'),
                           style: StylesApp(context).textStyleBody14.copyWith(
                                 color: Colors.white,
                               ),
@@ -815,7 +853,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                 ),
                               )
                             : Text(
-                                'Ir al mapa del curso',
+                                translationProvider
+                                    .tr('detail_course.go_to_course_map'),
                                 style:
                                     StylesApp(context).textStyleBody12.copyWith(
                                           color: StyleColor.turquoise,
@@ -833,7 +872,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
     );
   }
 
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
         return SingleChildScrollView(
@@ -850,7 +889,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                   },
                 ),
                 Text(
-                  "Sigue la ruta de la sabiduría",
+                  translationProvider.tr('detail_course.title'),
                   style: StylesApp(context)
                       .textStyleBody20
                       .copyWith(color: StyleColor.vibrantPurple),
@@ -865,7 +904,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                 await _loadStageSections(context),
                             onBack: () => Navigator.pop(context),
                           ))
-                        : _buildBodyContent(course)
+                        : _buildBodyContent(course, translationProvider)
               ],
             ),
           ),
@@ -921,8 +960,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
           context,
           message: progressUser!.message,
           dialogType: DialogTypeAction.info,
-          buttonOk: "Ver más cursos",
-          textButton: "ir Al curso",
+          buttonOk: _translationProvider.tr('detail_course.see_more_course'),
+          textButton: _translationProvider.tr('detail_course.go_to_course'),
           showAction: true,
           actionCallbackOk: () {
             Navigator.pushNamed(context, '/layoutPage',
@@ -948,14 +987,14 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
             arguments: {'courseId': course!.id, 'sectionId': stages.first.id});
       } else {
         await showCustomDialog(context,
-            message: "¡Este curso no esta Disponible!",
+            message: _translationProvider.tr('detail_course.course_unavailable'),
             dialogType: DialogType.info);
       }
     }
   }
 
   // Lista de etapas para tablet
-  Widget _buildTabletStagesList() {
+  Widget _buildTabletStagesList(AppTranslationProvider translationProvider) {
     return Container(
       decoration: BoxDecoration(
         color: StyleColor.white,
@@ -982,14 +1021,14 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Etapas del curso',
+                  translationProvider.tr('detail_course.course_stages'),
                   style: StylesApp(context).textStyleBody20.copyWith(
                         fontSize: 22,
                         color: Colors.white,
                       ),
                 ),
                 Text(
-                  '${stages.length} etapas',
+                  '${stages.length} ${translationProvider.tr('detail_course.stages_count')}',
                   style: StylesApp(context).textStyleBody12,
                 ),
               ],
@@ -1001,7 +1040,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
             child: stages.isEmpty
                 ? Center(
                     child: Text(
-                      'No hay etapas disponibles',
+                      translationProvider.tr('detail_course.no_stages'),
                       style: StylesApp(context).textStyleBody14.copyWith(
                             fontSize: 18,
                             color: StyleColor.grayMedium,
@@ -1013,7 +1052,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                     itemCount: stages.length,
                     itemBuilder: (context, index) {
                       final stage = stages[index];
-                      return _buildTabletStageItem(stage, index);
+                      return _buildTabletStageItem(
+                          stage, index, translationProvider);
                     },
                   ),
           ),
@@ -1023,7 +1063,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
   }
 
   // Item de etapa para tablet
-  Widget _buildTabletStageItem(Stage stage, int index) {
+  Widget _buildTabletStageItem(
+      Stage stage, int index, AppTranslationProvider translationProvider) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       padding: EdgeInsets.only(left: 16.0),
@@ -1056,7 +1097,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Etapa',
+                    translationProvider.tr('detail_course.stage'),
                     style: StylesApp(context).textStyleBody10.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -1115,7 +1156,8 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                   child: CustomModalWidget(
                                     title: stage.sectionName,
                                     content: stage.introduction,
-                                    buttonText: 'Aceptar',
+                                    buttonText: translationProvider
+                                        .tr('detail_course.accept'),
                                     id: "${stage.sectionNumber} ",
                                     itemCount: stage.levelCount,
                                     itemsCompleted: stage.levelCompletedCount,
@@ -1139,7 +1181,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Progreso',
+                            translationProvider.tr('detail_course.progress'),
                             style: StylesApp(context).textStyleBody14.copyWith(
                                   fontSize: 14,
                                 ),
@@ -1185,7 +1227,9 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                       Expanded(
                         child: ButtonThemeWidget(
                           height: StylesApp(context).btnHeight.height,
-                          onPressed: (getStatus(stage) == "Pendiente")
+                          onPressed: (getStatus(stage, translationProvider) ==
+                                  translationProvider
+                                      .tr("detail_course.status.pending"))
                               ? null
                               : () {
                                   Navigator.pushNamed(context, '/mapPage',
@@ -1205,20 +1249,25 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                 WidgetStateProperty.resolveWith<Color?>(
                               (Set<WidgetState> states) {
                                 if (states.contains(WidgetState.disabled)) {
-                                  return Colors.grey[400]; // Color when the button is disabled
+                                  return Colors.grey[
+                                      400]; // Color when the button is disabled
                                 }
-                                return (getStatus(stage) == "Completado")
+                                return (getStatus(stage, translationProvider) ==
+                                        translationProvider.tr(
+                                            "detail_course.status.completed"))
                                     ? Color(0XFFC7AA34)
                                     : StyleColor
                                         .turquoise; // Use the component's default.
                               },
                             ),
                           ),
-                          text: getStatus(stage),
+                          text: getStatus(stage, translationProvider),
                         ),
                       ),
                       SizedBox(width: 12),
-                      if (getStatus(stage) != "Pendiente") ...{
+                      if (getStatus(stage, translationProvider) !=
+                          translationProvider
+                              .tr("detail_course.status.pending")) ...{
                         SizedBox(width: 8.0),
                         ButtonThemeWidget(
                           height: StylesApp(context).btnHeight.height,
@@ -1229,43 +1278,16 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
                                   'sectionId': stage.id
                                 });
                           },
-                          textStyle: StylesApp(context).textStyleBody14.copyWith(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          textStyle:
+                              StylesApp(context).textStyleBody14.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                           width: 60,
-                          text: "Ir",
+                          text: translationProvider.tr("detail_course.go"),
                           buttonStyle: StylesApp(context).btnWidgetSmall,
                         )
                       }
-                      // if (status != "Pendiente")
-                      //   SizedBox(
-                      //     width: 60,
-                      //     child: ElevatedButton(
-                      //       onPressed: () {
-                      //         Navigator.pushNamed(context, '/mapPage',
-                      //             arguments: {
-                      //               'courseId': course?.id,
-                      //               'sectionId': stage.id
-                      //             });
-                      //       },
-                      //       style: ElevatedButton.styleFrom(
-                      //         backgroundColor: Colors.white,
-                      //         shape: RoundedRectangleBorder(
-                      //           borderRadius: BorderRadius.circular(8),
-                      //         ),
-                      //         padding: EdgeInsets.symmetric(vertical: 12),
-                      //       ),
-                      //       child: Text(
-                      //         'Ir',
-                      //         style: TextStyle(
-                      //           fontSize: 14,
-                      //           fontWeight: FontWeight.w500,
-                      //           color: Color(0XFF12CBC4),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
                     ],
                   ),
                 ],

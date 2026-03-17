@@ -28,17 +28,18 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
   }
 
-  Widget _buildLoginForm(BuildContext context) {
+  Widget _buildLoginForm(
+      BuildContext context, AppTranslationProvider translationProvider) {
     final authProvider =
         Provider.of<AuthenticationProvider>(context, listen: false);
 
     return Column(
       children: [
-        const HeadWidget(
+        HeadWidget(
           showLeftStar: true,
           showRightStar: true,
-          title: "¡La Biblia\n  Palabra De\n Vida!",
-          subtitle: "Login",
+          title: translationProvider.tr('login.title'),
+          subtitle: translationProvider.tr('login.subtitle'),
         ),
         const SizedBox(height: 40),
         Form(
@@ -47,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.only(left: 21.0, right: 21.0),
             child: Column(
               children: [
-                Container(
+                SizedBox(
                   width: StylesApp(context).formWidth,
                   child: TextFormField(
                     controller: textEmail,
@@ -57,21 +58,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         .copyWith(color: StyleColor.black),
                     decoration:
                         StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                              hintText: "usuario o Correo electrónico",
+                              hintText: translationProvider.tr('login.username'),
                             ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "usuario o Correo electrónico es obligatoria";
+                        return translationProvider.tr('login.username_required');
                       }
                       if (value.contains(' ')) {
-                        return "usuario o Correo electrónico no puede contener espacios";
+                        return translationProvider.tr('login.username_no_spaces');
                       }
                       return null;
                     },
                   ),
                 ),
                 const SizedBox(height: 25),
-                Container(
+                SizedBox(
                   width: StylesApp(context).formWidth,
                   child: TextFormField(
                     controller: textPass,
@@ -83,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         .copyWith(color: StyleColor.black),
                     decoration:
                         StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                              hintText: "Contraseña",
+                              hintText: translationProvider.tr('login.password'),
                               suffixIcon: IconButton(
                                 iconSize: 20,
                                 padding: const EdgeInsets.all(0),
@@ -101,10 +102,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "La contraseña es obligatoria";
+                        return translationProvider.tr('login.password');
                       }
                       if (value.length < 6) {
-                        return "La contraseña debe contener mínimo 6 caracteres";
+                        return translationProvider.tr('login.password_min_length');
                       }
                       return null;
                     },
@@ -112,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 54),
                 ButtonThemeWidget(
-                  text: "Iniciar sesión",
+                  text: translationProvider.tr('login.login_button'),
                   buttonStyle: StylesApp(context).btnSecondarySmall,
                   onPressed: () async {
                     if (!_formKey.currentState!.validate()) {
@@ -176,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ButtonThemeWidget(
                   textWithImage: true,
                   image: "assets/google-icon.png",
-                  text: "Iniciar con",
+                  text: translationProvider.tr('login.google_login'),
                   textStyle: StylesApp(context).buttonTextStyle,
                   buttonStyle: StylesApp(context).btnTransparentSmall,
                   onPressed: () async {
@@ -195,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       await showCustomDialog(context,
                           message: user.userFriendlyError ?? '',
                           messageDetail: user.error ??
-                              'Error al Iniciar Sessión con Google',
+                             translationProvider.tr('dialogs.google_login_error'),
                           showDetails: true,
                           dialogType: DialogType.error);
                     } else {
@@ -219,7 +220,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildFooter(BuildContext context) {
+  Widget _buildFooter(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -238,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pushNamed(context, '/forgotPasswordPage');
                     },
                     child: Text(
-                      'Recuperar contraseña',
+                      translationProvider.tr('login.forgot_password'),
                       textAlign: TextAlign.center,
                       style: StylesApp(context).textStyleBody4,
                     ),
@@ -250,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pushNamed(context, '/registerPage');
                     },
                     child: Text(
-                      'Registrarme',
+                      translationProvider.tr('login.register'),
                       textAlign: TextAlign.center,
                       style: StylesApp(context).textStyleBody4,
                     ),
@@ -289,21 +291,23 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Container(
           decoration: const BoxDecoration(
             color: Color(0Xff12CBC4),
           ),
-          child: _buildLoginForm(context),
+          child: _buildLoginForm(context, translationProvider),
         ),
-        _buildFooter(context),
+        _buildFooter(context, translationProvider),
       ],
     );
   }
 
-  Widget _buildTabletLayout(BuildContext context) {
+  Widget _buildTabletLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Container(
       color: const Color(0Xff12CBC4),
       child: Row(
@@ -314,7 +318,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
               child: SingleChildScrollView(
-                child: _buildLoginForm(context),
+                child: _buildLoginForm(context, translationProvider),
               ),
             ),
           ),
@@ -349,7 +353,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 30),
                         Text(
-                          'Bienvenido de nuevo',
+                          translationProvider.tr('login.welcome'),
                           style: StylesApp(context).textStyleBody1.copyWith(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -359,14 +363,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 15),
                         Text(
-                          'Accede a tu cuenta para continuar tu estudio bíblico',
+                          translationProvider.tr('login.welcome_message'),
                           style: StylesApp(context).textStyleBody4.copyWith(
                                 fontSize: 16,
                               ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 40),
-                        _buildFooter(context),
+                        _buildFooter(context, translationProvider),
                       ],
                     ),
                   ),
@@ -381,18 +385,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool _isTablet = isTablet(context);
+    final translationProvider = context.read<AppTranslationProvider>();
     return Scaffold(
       body: SafeArea(
         child: SizedBox(
-          height: MediaQuery.sizeOf(context).height,
-          width: MediaQuery.sizeOf(context).width,
-          child: _isTablet
-              ? _buildTabletLayout(context)
-              : SingleChildScrollView(
-                  child: _buildMobileLayout(context),
-                ),
-        ),
+            height: MediaQuery.sizeOf(context).height,
+            width: MediaQuery.sizeOf(context).width,
+            child: ResponsiveLayout(
+              mobile: SingleChildScrollView(
+                child: _buildMobileLayout(context, translationProvider),
+              ),
+              tablet: _buildTabletLayout(context, translationProvider),
+            )),
       ),
     );
   }
@@ -417,7 +421,7 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       onResendCode: () async {
         // Lógica para reenviar el código
-        print('Reenviando código a $email');
+        // print('Reenviando código a $email');
         final timeZone = await getDeviceTimeZone();
         final response = await resendVerificationCode(email, timeZone);
 

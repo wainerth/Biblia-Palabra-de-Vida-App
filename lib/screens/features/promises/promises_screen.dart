@@ -5,7 +5,6 @@ import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class PromisesScreen extends StatefulWidget {
@@ -24,11 +23,14 @@ class _PromisesScreenState extends State<PromisesScreen> {
   List<PromiseCardModel> promises = [];
 
   // lista de mensaje de presentación para las promesas
-  final List<String> textPromise = AppConstants.textPromise..shuffle();
+  final List<String> textPromise = [];
   // lista de imágenes para las promesas
   List<String> images = AppConstants.imagesPromise;
   // lista de colores para las card de las promesas canjeadas
   final List<String> colorsCard = AppConstants.colorsCard;
+
+  // variable que carga la traducción para los textos de la pantalla de promesas
+  final _translationProvider = AppTranslationProvider();
 
   @override
   void initState() {
@@ -73,27 +75,39 @@ class _PromisesScreenState extends State<PromisesScreen> {
       redeemedPromise = responsePromises.data
           .map<PromiseModel>((pr) => PromiseModel.fromJson(removeTypename(pr)))
           .toList();
-      redeemedPromise = redeemedPromise.map((promise) {
-        final randomColor = colorsCard[redeemedPromise.indexOf(promise)];
-        return promise.copyWith(
-          color: randomColor.toString(),
-        );
-      }).toList();
+      if (redeemedPromise.isNotEmpty) {
+        redeemedPromise = redeemedPromise.map((promise) {
+          final randomColor = colorsCard[redeemedPromise.indexOf(promise)];
+          return promise.copyWith(
+            color: randomColor.toString(),
+          );
+        }).toList();
 
-      promises = redeemedPromise.map((promise) {
-        return PromiseCardModel(
-          id: promise.id!,
-          title: "¡Abre tu promesa!",
-          description: textPromise.isNotEmpty
-              ? textPromise[
-                  redeemedPromise.indexOf(promise) % textPromise.length]
-              : "Descubre tu promesa",
-          images: images[redeemedPromise.indexOf(promise)],
-          hasViewed: promise.hasViewed!,
-        );
-      }).toList();
+        List<String> translatedPromises = [];
+        for (int i = 0; i < 16; i++) {
+          // 16 es la cantidad de textos
+          translatedPromises.add(_translationProvider.tr('promises_texts.$i'));
+        }
+        // Mezclar los textos
+        translatedPromises.shuffle();
+
+        promises = redeemedPromise.map((promise) {
+          int index = redeemedPromise.indexOf(promise);
+          return PromiseCardModel(
+            id: promise.id!,
+            title: _translationProvider.tr("promises_screen.promise_card.open"),
+            description: translatedPromises.isNotEmpty
+                ? translatedPromises[index % translatedPromises.length]
+                : _translationProvider
+                    .tr('promises_screen.promise_card.default_description'),
+            images: images[redeemedPromise.indexOf(promise)],
+            hasViewed: promise.hasViewed!,
+          );
+        }).toList();
+      }
     } catch (e) {
-      errorMessage = "An error occurred: $e";
+      errorMessage = _translationProvider
+          .trParams("promises_screen.messages.error", {"error": e.toString()});
     } finally {
       LoadingService().hideLoading();
       setState(() {
@@ -144,7 +158,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
       child: Column(
         children: [
           SimpleHeaderWidget(
-            title: 'Promesas',
+            title: _translationProvider.tr("promises_screen.title"),
             onRoute: () {
               Navigator.pop(context);
             },
@@ -183,10 +197,12 @@ class _PromisesScreenState extends State<PromisesScreen> {
                     TextSpan(
                       style: StylesApp(context).textStyleBody14,
                       children: [
-                        TextSpan(text: 'Racha: '),
                         TextSpan(
                             text:
-                                '${userData != null ? userData!.streakDaysCount : '0'} días'),
+                                '${_translationProvider.tr("promises_screen.stats.streak")} '),
+                        TextSpan(
+                            text:
+                                '${userData != null ? userData!.streakDaysCount : '0'} ${_translationProvider.tr("promises_screen.stats.days")}'),
                       ],
                     ),
                   ),
@@ -226,10 +242,6 @@ class _PromisesScreenState extends State<PromisesScreen> {
                                     setState(() {
                                       promises[index] = promises[index]
                                           .copyWith(hasViewed: value);
-                                      if (kDebugMode) {
-                                        print(
-                                            "cambio valor ${promises[index].hasViewed}");
-                                      }
                                       didChangeDependencies();
                                     });
                                   }
@@ -244,7 +256,8 @@ class _PromisesScreenState extends State<PromisesScreen> {
                       Center(
                         child: Text(
                           textAlign: TextAlign.center,
-                          'Las promesas se actualizarán cada 24 horas',
+                          _translationProvider
+                              .tr("promises_screen.messages.update"),
                           style: StylesApp(context)
                               .textStyleBody12
                               .copyWith(color: StyleColor.turquoise),
@@ -301,7 +314,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'Promesas',
+                          _translationProvider.tr("promises_screen.title"),
                           style:
                               StylesApp(context).textStyleTitleOrange.copyWith(
                                     fontSize: 32,
@@ -319,7 +332,14 @@ class _PromisesScreenState extends State<PromisesScreen> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              '${promises.where((p) => !p.hasViewed).length} de ${promises.length} por abrir',
+                              _translationProvider
+                                  .trParams("promises_screen.stats.remaining", {
+                                "remaining": promises
+                                    .where((p) => !p.hasViewed)
+                                    .length
+                                    .toString(),
+                                "total": promises.length.toString()
+                              }),
                               style: StylesApp(context)
                                   .textStyleBody14
                                   .copyWith(color: StyleColor.orange),
@@ -355,7 +375,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
                               .copyWith(color: Colors.white),
                         ),
                         Text(
-                          '${userData?.streakDaysCount ?? '0'} días',
+                          '${userData?.streakDaysCount ?? '0'}  ${_translationProvider.tr("promises_screen.stats.days")}',
                           style: StylesApp(context)
                               .textStyleBody12
                               .copyWith(color: Colors.white),
@@ -391,7 +411,8 @@ class _PromisesScreenState extends State<PromisesScreen> {
                                     size: 60, color: Colors.grey),
                                 SizedBox(height: 20),
                                 Text(
-                                  'No hay promesas disponibles',
+                                  _translationProvider
+                                      .tr("promises_screen.messages.empty"),
                                   style: StylesApp(context)
                                       .textStyleBody14
                                       .copyWith(color: Colors.grey),
@@ -431,7 +452,7 @@ class _PromisesScreenState extends State<PromisesScreen> {
           padding: EdgeInsets.all(16),
           color: StyleColor.turquoise.withValues(alpha: 0.1),
           child: Text(
-            'Las promesas se actualizarán cada 24 horas',
+            _translationProvider.tr("promises_screen.messages.update"),
             style: StylesApp(context)
                 .textStyleBody12
                 .copyWith(color: StyleColor.turquoise),

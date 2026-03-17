@@ -547,16 +547,16 @@ class _OrderingQuestionDraggableStateWidget
                                   ),
                                 ),
                                 // Botón de altavoz pequeño
-                                if (widget.isTtsEnabled &&
-                                    widget.onSpeakOption != null)
-                                  Padding(
-                                    padding: EdgeInsets.only(right: 8.0),
-                                    child: Icon(
-                                      Icons.volume_up,
-                                      size: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                                // if (widget.isTtsEnabled &&
+                                //     widget.onSpeakOption != null)
+                                //   Padding(
+                                //     padding: EdgeInsets.only(right: 8.0),
+                                //     child: Icon(
+                                //       Icons.volume_up,
+                                //       size: 16,
+                                //       color: Colors.white,
+                                //     ),
+                                //   ),
                               ],
                             ),
                           ),
@@ -820,23 +820,23 @@ class _OrderingQuestionDraggableStateWidget
                         Row(
                           children: [
                             // Botón de altavoz para TTS
-                            if (widget.isTtsEnabled &&
-                                widget.onSpeakOption != null)
-                              IconButton(
-                                icon: Icon(Icons.volume_up, size: 14),
-                                onPressed: () {
-                                  // Encontrar el índice de la respuesta original
-                                  int originalIndex = currentAnswers.indexWhere(
-                                      (answer) =>
-                                          answer.id ==
-                                          widget.orderedAnswers[index].id);
-                                  if (originalIndex != -1) {
-                                    widget.onSpeakOption!(originalIndex);
-                                  }
-                                },
-                                padding: EdgeInsets.zero,
-                                constraints: BoxConstraints(),
-                              ),
+                            // if (widget.isTtsEnabled &&
+                            //     widget.onSpeakOption != null)
+                            //   IconButton(
+                            //     icon: Icon(Icons.volume_up, size: 14),
+                            //     onPressed: () {
+                            //       // Encontrar el índice de la respuesta original
+                            //       int originalIndex = currentAnswers.indexWhere(
+                            //           (answer) =>
+                            //               answer.id ==
+                            //               widget.orderedAnswers[index].id);
+                            //       if (originalIndex != -1) {
+                            //         widget.onSpeakOption!(originalIndex);
+                            //       }
+                            //     },
+                            //     padding: EdgeInsets.zero,
+                            //     constraints: BoxConstraints(),
+                            //   ),
                             Expanded(
                               flex: 0,
                               child: Container(
@@ -1028,14 +1028,14 @@ class _OrderingQuestionDraggableStateWidget
                       child: Row(
                         children: [
                           // Botón de altavoz para TTS
-                          if (widget.isTtsEnabled &&
-                              widget.onSpeakOption != null)
-                            IconButton(
-                              icon: Icon(Icons.volume_up, size: 14),
-                              onPressed: () => widget.onSpeakOption!(index),
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                            ),
+                          // if (widget.isTtsEnabled &&
+                          //     widget.onSpeakOption != null)
+                          //   IconButton(
+                          //     icon: Icon(Icons.volume_up, size: 14),
+                          //     onPressed: () => widget.onSpeakOption!(index),
+                          //     padding: EdgeInsets.zero,
+                          //     constraints: BoxConstraints(),
+                          //   ),
                           Expanded(
                             flex: 0,
                             child: Container(

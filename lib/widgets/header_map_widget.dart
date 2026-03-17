@@ -1,6 +1,8 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class HeaderMapWidget extends StatelessWidget {
   final String title;
@@ -23,6 +25,8 @@ class HeaderMapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -79,7 +83,7 @@ class HeaderMapWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Text(
-                      'Etapa $indexStage',
+                      '${translationProvider.tr('common.stage')} $indexStage',
                       style: StylesApp(context).textStyleBody4.copyWith(
                             color: Colors.white,
                           ),
