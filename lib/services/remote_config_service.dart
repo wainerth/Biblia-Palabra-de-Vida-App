@@ -1,6 +1,7 @@
-import 'dart:ui';
-
+import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class RemoteConfigService {
@@ -11,8 +12,14 @@ class RemoteConfigService {
   final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
   bool _isInitialized = false;
   VoidCallback? _onConfigUpdated;
+  VoidCallback? _onNavigateToAppropriateScreen;
 
-  // Valores cacheados para acceso rapido
+  // Control de actualizaciones
+  Timer? _pollingTimer;
+  bool _isDisposed = false;
+  String _lastFetchedValues = '';
+
+  // Valores cacheados
   String get minimumVersion => _remoteConfig.getString('minimum_version');
   bool get isForceUpdate => _remoteConfig.getBool('force_update');
   bool get isMaintenanceMode => _remoteConfig.getBool('maintenance_mode');
@@ -24,20 +31,20 @@ class RemoteConfigService {
   String get storeUrlAndroid => _remoteConfig.getString('store_url_android');
   String get latestVersion => _remoteConfig.getString('latest_version');
 
-  /// Inicializar Remote Config
   Future<void> initialize({VoidCallback? onConfigUpdated}) async {
     if (_isInitialized) return;
 
     try {
       _onConfigUpdated = onConfigUpdated;
+      _isDisposed = false;
 
-      // Configurar tiempo de fetch y caché [citation:5][citation:7]
+      // Configuración estándar
       await _remoteConfig.setConfigSettings(RemoteConfigSettings(
         fetchTimeout: const Duration(seconds: 30),
-        minimumFetchInterval: const Duration(hours: 0),
+        minimumFetchInterval:
+            const Duration(minutes: 1), // 1 minuto para pruebas
       ));
 
-      // Valores por defecto
       await _remoteConfig.setDefaults({
         'minimum_version': '1.0.0',
         'latest_version': '1.0.0',
@@ -50,117 +57,176 @@ class RemoteConfigService {
             'Estamos mejorando la aplicación para ofrecerte una mejor experiencia',
         'store_url_android': 'market://details?id=com.tuapp',
       });
-      // 👇 ACTIVAR REALTIME REMOTE CONFIG
-      _setupRealtimeListener();
 
       // Fetch inicial
       await _remoteConfig.fetchAndActivate();
-
       _printAllParameters();
+      _saveCurrentValues();
+
+      // Estrategia según plataforma
+      if (Platform.isIOS) {
+        // En iOS intentamos tiempo real (funciona bien)
+        _setupRealtimeListener();
+      } else {
+        // En Android usamos polling (más estable)
+        if (kDebugMode) {
+          print(
+              '📱 Android detectado - usando polling en lugar de tiempo real');
+        }
+      }
+
+      // En ambas plataformas, iniciamos polling como respaldo
+      _startPolling();
 
       _isInitialized = true;
-      print('✅ Remote Config inicializado correctamente');
+      if (kDebugMode) {
+        print('✅ Remote Config inicializado correctamente');
+      }
     } catch (e) {
-      print('❌ Error inicializando Remote Config: $e');
-      // La app usará los valores por defecto
+      if (kDebugMode) {
+        print('❌ Error inicializando Remote Config: $e');
+      }
     }
   }
 
-  /// 🔥 NUEVO: Configurar listener en tiempo real
+  /// Listener de tiempo real (solo iOS)
   void _setupRealtimeListener() {
     try {
-      print('📡 [1] Intentando configurar listener en tiempo real...');
+      if (kDebugMode) {
+        print('📡 Configurando listener en tiempo real...');
+      }
 
       _remoteConfig.onConfigUpdated.listen((event) async {
-        print('🎯 [2] ¡EVENTO RECIBIDO! Timestamp: ${DateTime.now()}');
-        print('   Datos del evento: $event');
-
-        // Verificar estado antes de activar
-        // print('   Estado antes de activate: ${_remoteConfig.info}');
-
-        // Activar los nuevos valores
-        await _remoteConfig.activate();
-        print('   ✅ Valores activados');
-
-        // Mostrar los nuevos valores
-        _printAllParameters();
-
-        // Verificar si hay callback
-        if (_onConfigUpdated != null) {
-          print('   📢 Ejecutando callback...');
-          _onConfigUpdated!();
-        } else {
-          print('   ⚠️ _onConfigUpdated es null');
+        if (kDebugMode) {
+          print('🎯 ¡Evento en tiempo real recibido!');
         }
-
-        _handleConfigUpdate();
+        await _remoteConfig.activate();
+        _checkForChanges();
       }, onError: (error) {
-        print('❌ Error en listener: $error');
-      }, onDone: () {
-        print('📡 Listener cerrado');
+        if (kDebugMode) {
+          print('⚠️ Error en tiempo real: $error - usando polling');
+        }
       });
-
-      print('✅ [3] Listener configurado correctamente');
-
-      // Verificar el stream
-      print('   Stream exists: ${_remoteConfig.onConfigUpdated != null}');
-    } catch (e, stack) {
-      print('❌ Error configurando Realtime listener: $e');
-      print('Stack: $stack');
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ No se pudo establecer tiempo real: $e');
+      }
     }
   }
 
-  /// 🔥 NUEVO: Manejar cambios específicos
-  void _handleConfigUpdate() {
-    // Ejemplo: Si cambia maintenance_mode, actuar inmediatamente
-    if (isMaintenanceMode) {}
+  void setNavigationCallback(VoidCallback callback) {
+    _onNavigateToAppropriateScreen = callback;
+  }
 
-    // Ejemplo: Si cambia force_update, verificar si aplica
-    if (isForceUpdate) {
-      print('⚠️ Actualización forzada activada en tiempo real');
-      // Podrías verificar la versión actual y forzar update si es necesario
+  /// Polling periódico (funciona en todas plataformas)
+  void _startPolling() {
+    _pollingTimer?.cancel();
+
+    // Polling cada 30 segundos para pruebas (en producción podrían ser 2-5 minutos)
+    _pollingTimer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+      if (_isDisposed) {
+        timer.cancel();
+        return;
+      }
+
+      try {
+        await _remoteConfig.fetch();
+        final activated = await _remoteConfig.activate();
+
+        if (activated) {
+          if (kDebugMode) {
+            print('🔄 Polling: Nuevos valores detectados!');
+          }
+          _printAllParameters();
+          _checkForChanges();
+        }
+      } catch (e) {
+        // Silenciar errores de polling para no saturar logs
+      }
+    });
+
+    if (kDebugMode) {
+      print('⏱️ Polling iniciado (cada 30 segundos)');
     }
   }
 
-  Stream<bool> get onConfigChanged =>
-      _remoteConfig.onConfigUpdated.map((event) {
-        return true; // Emite true cada vez que hay cambios
-      });
+  /// Verificar si hubo cambios significativos
+  void _checkForChanges() {
+    final currentValues = _getCurrentValuesString();
+
+    if (currentValues != _lastFetchedValues) {
+      if (kDebugMode) {
+        print('📢 Cambios detectados en configuración');
+      }
+      _lastFetchedValues = currentValues;
+
+      if (_onConfigUpdated != null && !_isDisposed) {
+        _onConfigUpdated!();
+      }
+    }
+  }
+
+  String _getCurrentValuesString() {
+    return 'min:$minimumVersion|latest:$latestVersion|force:$isForceUpdate|maintenance:$isMaintenanceMode';
+  }
+
+  void _saveCurrentValues() {
+    _lastFetchedValues = _getCurrentValuesString();
+  }
 
   void _printAllParameters() {
-    print('📊 [DEBUG] VALORES ACTUALES:');
-    print('  minimum_version: ${_remoteConfig.getString('minimum_version')}');
-    print('  latest_version: ${_remoteConfig.getString('latest_version')}');
-    print('  force_update: ${_remoteConfig.getBool('force_update')}');
-    print('  maintenance_mode: ${_remoteConfig.getBool('maintenance_mode')}');
-    print('  update_title: ${_remoteConfig.getString('update_title')}');
-    print('  update_message: ${_remoteConfig.getString('update_message')}');
-  }
-
-  /// Refrescar configuración manualmente
-  Future<void> refreshConfig() async {
-    try {
-      await _remoteConfig.fetchAndActivate();
-      print('🔄 Remote Config refrescado');
-    } catch (e) {
-      print('Error refrescando Remote Config: $e');
+    if (kDebugMode) {
+      print('📊 VALORES ACTUALES:');
+      print('  minimum_version: $minimumVersion');
+      print('  latest_version: $latestVersion');
+      print('  force_update: $isForceUpdate');
+      print('  maintenance_mode: $isMaintenanceMode');
+      print('  update_title: $updateTitle');
+      print('  update_message: $updateMessage');
     }
   }
 
-  /// Obtener versión actual de la app
+  /// Método público para forzar refresh manual
+  Future<void> refreshConfig() async {
+    if (kDebugMode) {
+      print('🔄 Forzando refresh manual...');
+    }
+    try {
+      await _remoteConfig.fetch();
+      final activated = await _remoteConfig.activate();
+      if (activated) {
+        if (kDebugMode) {
+          print('✅ Nuevos valores activados');
+        }
+        _printAllParameters();
+        _checkForChanges();
+      } else {
+        if (kDebugMode) {
+          print('ℹ️ Sin cambios nuevos');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error en refresh manual: $e');
+      }
+    }
+  }
+
   Future<String> getCurrentVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
     return packageInfo.version;
   }
 
-  /// Comparar versiones (retorna: -1 si current < min, 0 si igual, 1 si current > min)
   int compareVersions(String current, String minimum) {
     List<int> currentParts = current.split('.').map(int.parse).toList();
     List<int> minimumParts = minimum.split('.').map(int.parse).toList();
 
-    // Asegurar que ambas listas tengan 3 elementos
-    while (currentParts.length < 3) currentParts.add(0);
-    while (minimumParts.length < 3) minimumParts.add(0);
+    while (currentParts.length < 3) {
+      currentParts.add(0);
+    }
+    while (minimumParts.length < 3) {
+      minimumParts.add(0);
+    }
 
     for (int i = 0; i < 3; i++) {
       if (currentParts[i] < minimumParts[i]) return -1;
@@ -169,22 +235,23 @@ class RemoteConfigService {
     return 0;
   }
 
-  /// Verificar si requiere actualización forzada
   Future<bool> isForceUpdateRequired() async {
     final currentVersion = await getCurrentVersion();
-    final comparison = compareVersions(currentVersion, minimumVersion);
+    final comparison = compareVersions(currentVersion, latestVersion);
     return comparison < 0 && isForceUpdate;
   }
 
-  /// Verificar si hay actualización recomendada
   Future<bool> isSoftUpdateRecommended() async {
     final currentVersion = await getCurrentVersion();
     final forceRequired = await isForceUpdateRequired();
-
-    if (forceRequired)
-      return false; // Si es forzada, no mostrar como "recomendada"
-
+    if (forceRequired) return false;
     final comparison = compareVersions(currentVersion, latestVersion);
-    return comparison < 0; // current < latest
+    return comparison < 0;
+  }
+
+  void dispose() {
+    _isDisposed = true;
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
   }
 }

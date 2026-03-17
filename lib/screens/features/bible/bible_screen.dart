@@ -2027,7 +2027,7 @@ class _BibleScreenState extends State<BibleScreen> {
           ListTile(
             leading: Icon(isFavorite ? Icons.star_outline : Icons.star),
             title: Text(
-                isFavorite ? _translationProvider.tr("bible_screen.verse_popup.remove_favorite") : _translationProvider.tr("bible_screen.verse_popup.add_to_favorites")),
+                isFavorite ? _translationProvider.tr("bible_screen.verse_popup.remove_favorite") : _translationProvider.tr("bible_screen.verse_popup.add_favorite")),
             onTap: () {
               _toggleFavorite(verse);
               Navigator.pop(context);
@@ -2518,6 +2518,7 @@ class _BibleScreenState extends State<BibleScreen> {
           pageBuilder: (_, __, ___) {
             return Dialog(
               backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.zero,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: isTablet(context) ? 600 : double.infinity,

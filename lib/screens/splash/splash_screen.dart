@@ -4,6 +4,7 @@ import 'package:biblia_palabra_de_vida_app/services/remote_config_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/button_theme_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,12 +14,11 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key, required this.onComplete});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   late final RemoteConfigService _configService;
-  bool _isChecking = true;
 
   @override
   void initState() {
@@ -38,7 +38,9 @@ class _SplashScreenState extends State<SplashScreen> {
       // Verificar estado de la app
       await _checkAppStatus();
     } catch (e) {
-      print('Error en inicialización: $e');
+      if (kDebugMode) {
+        print('Error en inicialización: $e');
+      }
       // Si hay error, igual intentamos ir a home
       widget.onComplete();
     }
@@ -58,10 +60,10 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     // 6. Verificar actualización recomendada
-    if (await _configService.isSoftUpdateRecommended()) {
-      _navigateToSoftUpdate();
-      return;
-    }
+    // if (await _configService.isSoftUpdateRecommended()) {
+    //   _navigateToSoftUpdate();
+    //   return;
+    // }
 
     // 7. Todo ok, completar
     widget.onComplete();
@@ -96,9 +98,9 @@ class _SplashScreenState extends State<SplashScreen> {
     widget.onComplete();
 
     // Mostrar diálogo después de navegar
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showSoftUpdateDialog();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _showSoftUpdateDialog();
+    // });
   }
 
   void _showSoftUpdateDialog() {

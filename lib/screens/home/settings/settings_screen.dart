@@ -42,10 +42,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                         path: 'settings.language',
                         trailingText: translationProvider.currentLanguageName,
-                        onTap:() => _showLanguageDialog(context),
-                        //  GraphQLConfig.development
-                        //     ? () => _showLanguageDialog(context)
-                        //     : () {},
+                        onTap: () => GraphQLConfig.development
+                            ? () => _showLanguageDialog(context)
+                            : () {},
                       ),
                       _buildSettingsItem(
                         context,
@@ -283,9 +282,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               icon: Icons.language,
                               path: 'settings.language',
                               subtitle: translationProvider.currentLanguageName,
-                              onTap:  GraphQLConfig.development
-                            ? () => _showLanguageDialog(context)
-                            : () {},
+                              onTap: GraphQLConfig.development
+                                  ? () => _showLanguageDialog(context)
+                                  : () {},
                             ),
 
                             SizedBox(height: 30),
@@ -499,8 +498,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showLogoutConfirmation(BuildContext context) {
-    final translationProvider =
-        Provider.of<AppTranslationProvider>(context, listen: false);
+    Provider.of<AppTranslationProvider>(context, listen: false);
 
     showModalBottomSheet(
       isDismissible: false,

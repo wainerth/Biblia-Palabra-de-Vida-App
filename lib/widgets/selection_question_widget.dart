@@ -61,8 +61,11 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
   @override
   Widget build(BuildContext context) {
     try {
-      return widget.isTablet
-          ? Container(
+      return 
+      widget.isTablet
+          ? 
+          
+           Container(
               padding: widget.isTablet ? EdgeInsets.all(16.0) : EdgeInsets.zero,
               child: Column(
                 children: [
@@ -188,7 +191,7 @@ class _SelectionQuestionWidgetState extends State<SelectionQuestionWidget> {
       child: Container(
         margin: widget.isTablet
             ? EdgeInsets.zero
-            : EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            : EdgeInsets.symmetric(vertical: 8.0, ),
         constraints: BoxConstraints(minHeight: 48.0),
         decoration: BoxDecoration(
           color: backgroundColor,

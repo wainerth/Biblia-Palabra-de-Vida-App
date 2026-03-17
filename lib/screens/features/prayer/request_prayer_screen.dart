@@ -710,59 +710,62 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
               SizedBox(height: 46.0),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 26.0),
-                child: Container(
-                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                  decoration: BoxDecoration(
+                child: CustomDropdownWithValidation<PrayerSubTypeModel>(
+                  boxDecorationProperties: BoxDecoration(
                     color: StyleColor.white,
                     borderRadius: BorderRadius.circular(25.0),
                   ),
-                  child: CustomDropdownWithValidation<PrayerSubTypeModel>(
-                    hintText: _translationProvider
-                        .tr('request_prayer_screen.form.request_type.label'),
-                    items: options,
-                    onChanged: (ModelData? newValue) {
-                      setState(() {
-                        subtypeSelected = newValue!;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return _translationProvider.tr(
-                            'request_prayer_screen.form.request_type.validation');
-                      }
-                      return null;
-                    },
-                    border: true,
-                  ),
+                  hintText: _translationProvider
+                      .tr('request_prayer_screen.form.request_type.label'),
+                  items: options,
+                  onChanged: (ModelData? newValue) {
+                    setState(() {
+                      subtypeSelected = newValue!;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return _translationProvider.tr(
+                          'request_prayer_screen.form.request_type.validation');
+                    }
+                    return null;
+                  },
+                  border: true,
                 ),
               ),
               SizedBox(height: 16.0),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 26.0),
-                child: TextFormField(
-                  style: StylesApp(context).textStyleBody4,
-                  decoration: InputDecoration(
-                    fillColor: Color(0XFFFFFFFF),
-                    filled: true,
-                    hintStyle: StylesApp(context).hintStyle,
-                    errorStyle: StylesApp(context)
-                        .textStyleBody12
-                        .copyWith(fontSize: 12, color: StyleColor.redLight),
-                    hintText: _translationProvider
-                        .tr('request_prayer_screen.form.recipient_name.label'),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide.none,
+                child: Container(
+                  // height: StylesApp(context).sizeTextFormField.height,
+                  child: TextFormField(
+                    style: StylesApp(context).textStyleBody4,
+                    decoration: InputDecoration(
+                      fillColor: Color(0XFFFFFFFF),
+                      filled: true,
+                      hintStyle: StylesApp(context).hintStyle,
+                      errorStyle: StylesApp(context)
+                          .textStyleBody12
+                          .copyWith(fontSize: 12, color: StyleColor.redLight),
+                      hintText: _translationProvider.tr(
+                          'request_prayer_screen.form.recipient_name.label'),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      errorMaxLines: 2,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
+                    controller: _recipientName,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return _translationProvider.tr(
+                            'request_prayer_screen.form.recipient_name.validation');
+                      }
+                      return null;
+                    },
                   ),
-                  controller: _recipientName,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return _translationProvider.tr(
-                          'request_prayer_screen.form.recipient_name.validation');
-                    }
-                    return null;
-                  },
                 ),
               ),
               SizedBox(height: 16.0),
@@ -869,7 +872,8 @@ class _RequestPrayerScreenState extends State<RequestPrayerScreen> {
     if (!_validateField()) {
       if (mounted) {
         await showCustomDialog(context,
-            message: _translationProvider.tr('request_prayer_screen.errors'),
+            message: _translationProvider
+                .tr('request_prayer_screen.errors.missing_fields'),
             dialogType: DialogType.error);
       }
       return;

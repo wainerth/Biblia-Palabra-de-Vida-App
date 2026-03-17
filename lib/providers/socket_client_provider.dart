@@ -14,7 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-
 class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
   IO.Socket? _socket;
   bool _isConnected = false;
@@ -28,6 +27,8 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
   bool get isConnected => _isConnected;
 
   List<NotificationModel> get notifications => _notifications;
+
+  final Map<String, List<Function(dynamic)>> _eventListeners = {};
 
   String? _fcmToken;
   void cleanSocket() {
@@ -47,7 +48,39 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
+  // ========== MÉTODO PARA MARCAR NOTIFICACIONES COMO LEÍDAS ==========
+  void markNotificationAsRead(String notificationId) {
+    try {
+      // 1. Buscar el índice de la notificación por ID
+      final index = _notifications.indexWhere((n) => n.id == notificationId);
 
+      // 2. Si existe, marcarla como leída
+      if (index != -1) {
+        // Crear una copia actualizada (buena práctica para inmutabilidad)
+        final updatedNotification =
+            _notifications[index].copyWith(isRead: true);
+        _notifications[index] = updatedNotification;
+
+        // 3. ¡IMPORTANTE! Notificar a los listeners
+        notifyListeners();
+
+        // 4. Log para debug (opcional)
+        if (kDebugMode) {
+          print('✅ Notificación marcada como leída: $notificationId');
+          print(
+              '📊 Total no leídas: ${_notifications.where((n) => !n.isRead).length}');
+        }
+      } else {
+        if (kDebugMode) {
+          print('⚠️ No se encontró notificación con ID: $notificationId');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error marcando notificación como leída: $e');
+      }
+    }
+  }
 
   // Método para inicializar TODO el sistema de notificaciones
   Future<void> initializeNotificationSystem() async {
@@ -162,8 +195,8 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
         final notification = NotificationModel.fromJson(notificationData);
 
         // Navegación más robusta
-        final routeInfo =
-            getRouterScreen(notification.model.toLowerCase(), notification.variables);
+        final routeInfo = getRouterScreen(
+            notification.model.toLowerCase(), notification.variables);
 
         if (navigatorKey.currentState != null) {
           if (routeInfo.arguments != null) {
@@ -246,8 +279,8 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     final urlSocket = GraphQLConfig.development
         ? GraphQLConfig.urlSocketDev
         : GraphQLConfig.urlSocketProd;
-    String pathSocket =
-        GraphQLConfig.development ? '/socket.io-dev' : '/socket.io';
+    String pathSocket = '/socket.io-dev';
+    // GraphQLConfig.development ? '/socket.io-dev' : '/socket.io';
     final timeZone = await getDeviceTimeZone();
     _initializedSocket = true;
     initializeObserver();
@@ -344,9 +377,83 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     if (kDebugMode) {
       print(eventName);
     }
-    _socket?.on(eventName, callback);
+
+    _eventListeners.putIfAbsent(eventName, () => []).add(callback);
+    if (_socket != null) {
+      // _eventListeners.clear();
+
+      // _socket?.disconnect();
+      // _socket?.dispose();
+      // _isConnected = false;
+      _socket?.off(eventName);
+
+      _socket?.on(eventName, (data) {
+        final listeners = _eventListeners[eventName];
+        if (listeners != null) {
+          // Hacer una copia de la lista para evitar modificaciones durante la iteración
+          final listenersCopy = List<Function(dynamic)>.from(listeners);
+          for (var listener in listenersCopy) {
+            try {
+              listener(data);
+            } catch (e) {
+              if (kDebugMode) {
+                print('❌ Error en listener de $eventName: $e');
+              }
+            }
+          }
+        }
+      });
+    }
     notifyListeners();
   }
+
+  void removeListenerFromEvent(String eventName, Function(dynamic) callback) {
+  if (kDebugMode) {
+    print('🗑️ Removiendo listener de evento: $eventName');
+  }
+  
+  final listeners = _eventListeners[eventName];
+  if (listeners != null) {
+    listeners.remove(callback);
+    
+    if (listeners.isEmpty) {
+      // Si no quedan listeners, remover el evento del socket
+      _eventListeners.remove(eventName);
+      _socket?.off(eventName);
+      if (kDebugMode) {
+        print('📡 Evento $eventName eliminado del socket (sin listeners)');
+      }
+    } else {
+      // Si aún quedan listeners, actualizar el socket
+      _socket?.off(eventName);
+      _socket?.on(eventName, (data) {
+        final currentListeners = _eventListeners[eventName];
+        if (currentListeners != null) {
+          final listenersCopy = List<Function(dynamic)>.from(currentListeners);
+          for (var listener in listenersCopy) {
+            listener(data);
+          }
+        }
+      });
+    }
+  }
+}
+
+void removeAllListenersFromEvent(String eventName) {
+  if (kDebugMode) {
+    print('🗑️ Removiendo TODOS los listeners de evento: $eventName');
+  }
+  
+  _eventListeners.remove(eventName);
+  _socket?.off(eventName);
+}
+  // void listenToEvent(String eventName, Function(dynamic) callback) {
+  //   if (kDebugMode) {
+  //     print(eventName);
+  //   }
+  //   _socket?.on(eventName, callback);
+  //   notifyListeners();
+  // }
 
   // Emitir eventos
   void emitEvent(String eventName, dynamic data) {

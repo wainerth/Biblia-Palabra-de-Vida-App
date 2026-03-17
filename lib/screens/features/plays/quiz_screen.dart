@@ -98,9 +98,10 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
       body: SafeArea(
           child: Container(
-        child:
-            difficulty.isEmpty ? _buildSelectedDifficulty() : _buildPlayScene(),
-      )),
+            child: difficulty.isEmpty
+                ? _buildSelectedDifficulty()
+                : _buildPlayScene(),
+          )),
     );
   }
 
@@ -213,91 +214,92 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Widget _buildPlayScene() {
-    return isTablet ? _buildSceneTablet() : _buildSceneMobile();
+    return ResponsiveLayout(
+        mobile: _buildSceneMobile(), tablet: _buildSceneTablet());
   }
 
   _buildSceneMobile() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text(
-              _translationProvider.tr("quiz_screen.game_play.opportunities"),
-              style: StylesApp(context)
-                  .textStyleBody10
-                  .copyWith(color: StyleColor.grayMedium),
-            ),
-            Image.asset(
-              failedAttempts > 2
-                  ? "assets/fire_rachaActive.png"
-                  : "assets/fire_rachaInactive.png",
-              width: 20,
-            ),
-            Image.asset(
-              failedAttempts > 1
-                  ? "assets/fire_rachaActive.png"
-                  : "assets/fire_rachaInactive.png",
-              width: 20,
-            ),
-            Image.asset(
-              failedAttempts > 0
-                  ? "assets/fire_rachaActive.png"
-                  : "assets/fire_rachaInactive.png",
-              width: 20,
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 45,
-        ),
-        Container(
-          constraints: BoxConstraints(minHeight: 68.0),
-          margin: EdgeInsets.symmetric(horizontal: 6.0),
-          padding: EdgeInsets.symmetric(horizontal: 11.0, vertical: 15.0),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Color(0XFFFFBB00),
-            borderRadius: BorderRadius.circular(8.0),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withValues(alpha: .25),
-                  offset: Offset(0.0, 4.0),
-                  blurStyle: BlurStyle.outer,
-                  blurRadius: 4.0)
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: 40),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                _translationProvider.tr("quiz_screen.game_play.opportunities"),
+                style: StylesApp(context)
+                    .textStyleBody10
+                    .copyWith(color: StyleColor.grayMedium),
+              ),
+              Image.asset(
+                failedAttempts > 2
+                    ? "assets/fire_rachaActive.png"
+                    : "assets/fire_rachaInactive.png",
+                width: 20,
+              ),
+              Image.asset(
+                failedAttempts > 1
+                    ? "assets/fire_rachaActive.png"
+                    : "assets/fire_rachaInactive.png",
+                width: 20,
+              ),
+              Image.asset(
+                failedAttempts > 0
+                    ? "assets/fire_rachaActive.png"
+                    : "assets/fire_rachaInactive.png",
+                width: 20,
+              ),
             ],
           ),
-          child: Text(
-            currentQuestion.question,
-            style: StylesApp(context)
-                .textStyleBody12
-                .copyWith(color: Colors.black),
+          SizedBox(
+            height: 45,
           ),
-        ),
-        SizedBox(
-          height: 38.0,
-        ),
-        if (questions.isNotEmpty)
-          Expanded(
-            flex: !currentQuestion.isOrdering ? 3 : 2,
-            child: Column(
-              children: [
-                if (currentQuestion.isOrdering) ...{
-                  OrderingQuestionDraggableWidget(
-                    orderedCompleted: orderedCompleted,
-                    orderedAnswers: orderedAnswers,
-                    currentQuestion: currentQuestion,
-                    options: options,
-                    answerSelected: (context, index) =>
-                        verifyOrdered(context, index),
-                    showError: showError,
-                    onContinue: funcAnswerValidate,
-                  )
-                } else ...{
-                  if (options.isNotEmpty)
-                    Expanded(
-                      flex: 3,
-                      child: SelectionQuestionWidget(
+          Container(
+            constraints: BoxConstraints(minHeight: 68.0),
+            margin: EdgeInsets.symmetric(horizontal: 6.0),
+            padding: EdgeInsets.symmetric(horizontal: 11.0, vertical: 15.0),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Color(0XFFFFBB00),
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: .25),
+                    offset: Offset(0.0, 4.0),
+                    blurStyle: BlurStyle.outer,
+                    blurRadius: 4.0)
+              ],
+            ),
+            child: Text(
+              currentQuestion.question,
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: Colors.black),
+            ),
+          ),
+          SizedBox(
+            height: 38.0,
+          ),
+          if (questions.isNotEmpty)
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  if (currentQuestion.isOrdering) ...{
+                    OrderingQuestionDraggableWidget(
+                      orderedCompleted: orderedCompleted,
+                      orderedAnswers: orderedAnswers,
+                      currentQuestion: currentQuestion,
+                      options: options,
+                      answerSelected: (context, index) =>
+                          verifyOrdered(context, index),
+                      showError: showError,
+                      onContinue: funcAnswerValidate,
+                    )
+                  } else ...{
+                    if (options.isNotEmpty)
+                      SelectionQuestionWidget(
                         suggestionSelected: _suggestionSelected,
                         selectionCompleted: _selectionCompleted,
                         isCorrect: _isCorrect,
@@ -313,17 +315,14 @@ class _QuizScreenState extends State<QuizScreen> {
                         selectedAnswerIndex: _selectedAnswerIndex,
                         correctAnswerIndex: _correctAnswerIndex,
                       ),
-                    ),
-                },
-                SizedBox(
-                  height: 47.0,
-                ),
-              ],
+                  },
+                  SizedBox(
+                    height: 47.0,
+                  ),
+                ],
+              ),
             ),
-          ),
-        Expanded(
-          flex: !currentQuestion.isOrdering ? 1 : 0,
-          child: Center(
+          Center(
             child: Container(
               constraints: BoxConstraints(maxWidth: 278.0),
               child: Column(
@@ -347,12 +346,12 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
           ),
-        ),
-        if (currentQuestion.isOrdering)
-          SizedBox(
-            height: 20,
-          )
-      ],
+          if (currentQuestion.isOrdering)
+            SizedBox(
+              height: 20,
+            )
+        ],
+      ),
     );
   }
 
@@ -808,6 +807,12 @@ class _QuizScreenState extends State<QuizScreen> {
         for (int i = 0; i < questions.length; i++) {
           for (int j = 0; j < questions[i].answers.length; j++) {
             questions[i].answers[j].option = options[j]["option"];
+            // questions[i] = questions[i].copyWith(
+            //     question:
+            //         "esto es una prueba de una pregun muuuuuyy larga para poder revisa si se puede obtenr un scroll que permita vizualiozar todo el contenido");
+            // questions[i].answers[j] = questions[i].answers[j].copyWith(
+            //     answer:
+            //         "Esta es una respuesta o opción muy larga que se va  a implemenatr para validar que tanto pueden extenderse las cajas y que tanto es el scrooll de la pantalla que va  apermirt para el usuario pueda ver todas las opciones en el dispositivo movíl , ");
           }
         }
         currentQuestion = questions[currentIndex];

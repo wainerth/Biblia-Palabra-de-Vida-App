@@ -71,6 +71,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
         return;
       }
 
+      final socketProvider =
+          Provider.of<SocketClientProvider>(context, listen: false);
+      socketProvider.markNotificationAsRead(notification.id!);
       // ACTUALIZAR ESTADO COMPLETO
       _updateNotificationStatus(notification.id!, true);
     } catch (e) {
@@ -208,8 +211,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       if (mounted) {
         setState(() {
           error = _translationProvider.trParams(
-              "notification_screen.messages.error",
-              {"error": e.toString()});
+              "notification_screen.messages.error", {"error": e.toString()});
           loading = false;
         });
       }
@@ -229,6 +231,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
       if (responseMarkedAllRead.error != null) {
         throw Exception(responseMarkedAllRead.error!);
+      }
+      final socketProvider =
+          Provider.of<SocketClientProvider>(context, listen: false);
+      for (var notification in notifications.where((n) => !n.isRead)) {
+        socketProvider.markNotificationAsRead(notification.id!);
       }
 
       // Actualizar todas las notificaciones localmente
@@ -995,8 +1002,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           color: StyleColor.greenMedium, size: 20),
                       SizedBox(width: 8),
                       Text(
-                        _translationProvider
-                            .tr("notification_screen.tablet.detail_panel.mark_all_read"),
+                        _translationProvider.tr(
+                            "notification_screen.tablet.detail_panel.mark_all_read"),
                         style: StylesApp(context).textStyleBody16.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -1148,7 +1155,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: Row(
                 spacing: 4.0,
                 children: [
-                  Text(_translationProvider.tr("notification_screen.mobile.mark_all_read")),
+                  Text(_translationProvider
+                      .tr("notification_screen.mobile.mark_all_read")),
                   Icon(
                     Icons.checklist_outlined,
                     color: StyleColor.turquoise,
@@ -1186,7 +1194,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         : notifications.isEmpty
                             ? Center(
                                 child: Text(
-                                  _translationProvider.tr("notification_screen.mobile.empty"),
+                                  _translationProvider
+                                      .tr("notification_screen.mobile.empty"),
                                   style: StylesApp(context)
                                       .textStyleBody7
                                       .copyWith(color: StyleColor.black),
@@ -1379,43 +1388,63 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   DateTime _parseNotificationDate(dynamic dateInput) {
-    try {
-      // Si ya es DateTime, devolverlo
-      if (dateInput is DateTime) {
-        return dateInput;
-      }
-
-      // Si es String, intentar parser
-      if (dateInput is String) {
-        // Intentar formato ISO
-        DateTime? parsed = DateTime.tryParse(dateInput);
-        if (parsed != null) return parsed;
-
-        // Intentar formato personalizado dd/MM/yyyy HH:mm
-        final match = RegExp(r'^(\d{2})/(\d{2})/(\d{4}) (\d{2}):(\d{2})')
-            .firstMatch(dateInput);
-        if (match != null) {
-          return DateTime(
-            int.parse(match.group(3)!),
-            int.parse(match.group(2)!),
-            int.parse(match.group(1)!),
-            int.parse(match.group(4)!),
-            int.parse(match.group(5)!),
-          );
-        }
-        throw FormatException('Formato de fecha no reconocido: $dateInput');
-      }
-
-      // Si no es ninguno de los anteriores, usar fecha mínima
-      return DateTime(2000);
-    } catch (e) {
+  try {
+    // Si es nulo o vacío, usar fecha actual
+    if (dateInput == null || (dateInput is String && dateInput.trim().isEmpty)) {
       if (kDebugMode) {
-        print('Error parsing notification date: $dateInput - $e');
+        print('⚠️ Fecha vacía o nula, usando fecha actual');
       }
-      // Usar una fecha del pasado para evitar confusiones
-      return DateTime(2000);
+      return DateTime.now();
     }
+
+    // Si ya es DateTime, devolverlo
+    if (dateInput is DateTime) {
+      return dateInput;
+    }
+
+    // Si es String, intentar parsear
+    if (dateInput is String) {
+      // Limpiar el string (quitar espacios extras)
+      final cleanDate = dateInput.trim();
+      
+      // Intentar formato ISO (yyyy-MM-ddTHH:mm:ss)
+      DateTime? parsed = DateTime.tryParse(cleanDate);
+      if (parsed != null) return parsed;
+
+      // Intentar formato personalizado dd/MM/yyyy HH:mm
+      final match = RegExp(r'^(\d{2})/(\d{2})/(\d{4}) (\d{2}):(\d{2})')
+          .firstMatch(cleanDate);
+      if (match != null) {
+        return DateTime(
+          int.parse(match.group(3)!),
+          int.parse(match.group(2)!),
+          int.parse(match.group(1)!),
+          int.parse(match.group(4)!),
+          int.parse(match.group(5)!),
+        );
+      }
+      
+      // Si llegamos aquí, el formato no es reconocido
+      if (kDebugMode) {
+        print('⚠️ Formato de fecha no reconocido: "$cleanDate", usando fecha actual');
+      }
+      return DateTime.now();
+    }
+
+    // Tipo no soportado, usar fecha actual
+    if (kDebugMode) {
+      print('⚠️ Tipo de fecha no soportado: ${dateInput.runtimeType}, usando fecha actual');
+    }
+    return DateTime.now();
+    
+  } catch (e) {
+    // Error inesperado, usar fecha actual
+    if (kDebugMode) {
+      print('❌ Error parseando fecha: $dateInput - $e');
+    }
+    return DateTime.now();
   }
+}
 
   String _getDateKey(DateTime date) {
     final now = DateTime.now();
@@ -1427,7 +1456,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (notificationDate == today) {
       return _translationProvider.tr("notification_screen.date_groups.today");
     } else if (notificationDate == yesterday) {
-      return _translationProvider.tr("notification_screen.date_groups.yesterday");
+      return _translationProvider
+          .tr("notification_screen.date_groups.yesterday");
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
@@ -1438,10 +1468,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final keys = groupedNotifications.keys.toList();
 
     keys.sort((a, b) {
-      if (a == _translationProvider.tr("notification_screen.date_groups.today")) return -1;
-      if (b == _translationProvider.tr("notification_screen.date_groups.today")) return 1;
-      if (a == _translationProvider.tr("notification_screen.date_groups.yesterday")) return -1;
-      if (b == _translationProvider.tr("notification_screen.date_groups.yesterday")) return 1;
+      if (a == _translationProvider.tr("notification_screen.date_groups.today"))
+        return -1;
+      if (b == _translationProvider.tr("notification_screen.date_groups.today"))
+        return 1;
+      if (a ==
+          _translationProvider.tr("notification_screen.date_groups.yesterday"))
+        return -1;
+      if (b ==
+          _translationProvider.tr("notification_screen.date_groups.yesterday"))
+        return 1;
 
       final dateA = _parseDateKey(a);
       final dateB = _parseDateKey(b);
@@ -1453,8 +1489,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   DateTime _parseDateKey(String key) {
-    if (key == _translationProvider.tr("notification_screen.date_groups.today")) return DateTime.now();
-    if (key == _translationProvider.tr("notification_screen.date_groups.yesterday")) return DateTime.now().subtract(Duration(days: 1));
+    if (key == _translationProvider.tr("notification_screen.date_groups.today"))
+      return DateTime.now();
+    if (key ==
+        _translationProvider.tr("notification_screen.date_groups.yesterday"))
+      return DateTime.now().subtract(Duration(days: 1));
 
     final parts = key.split('/');
     return DateTime(

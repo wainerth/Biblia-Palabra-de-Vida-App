@@ -118,7 +118,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   final Question orderingQuestionCreacion = Question(
     id: "ordering_creacion_001",
-    question: "Ordena los días de la creación en la secuencia correcta",
+    question:
+        "Ordena los días de la creación en la secuencia correcta, Ordena los días de la creación en la secuencia correcta Ordena los días de la creación en la secuencia correctaOrdena los días de la creación en la secuencia correcta Ordena los días de la creación en la secuencia correcta",
     difficulty: "Fácil",
     status: 1,
     isOrdering: true,
@@ -394,6 +395,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
       for (int i = 0; i < questions.length; i++) {
         for (int j = 0; j < questions[i].answers.length; j++) {
           questions[i].answers[j].option = options[j]["option"];
+          // questions[i] = questions[i].copyWith(
+          //   question: "esto es una prueba de una pregun muuuuuyy larga para poder revisa si se puede obtenr un scroll que permita vizualiozar todo el contenido"
+          // );
+          // questions[i].answers[j] = questions[i].answers[j].copyWith(
+          //   answer:  "Esta es una respuesta o opción muy larga que se va  a implemenatr para validar que tanto pueden extenderse las cajas y que tanto es el scrooll de la pantalla que va  apermirt para el usuario pueda ver todas las opciones en el dispositivo movíl , "
+          // );
+          
         }
       }
       currentQuestion = questions[currentIndex];
@@ -427,7 +435,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     setState(() {
       _isAnswerSelected = true;
       _suggestionSelected = false;
-      _selectedAnswerIndex = index; 
+      _selectedAnswerIndex = index;
       _correctAnswerIndex = correctIndex;
     });
 
@@ -1049,30 +1057,74 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildCommonHeader(),
-          if (_shouldShowQuestionContent()) ...[
-            SizedBox(height: 19),
-            _buildTtsControls(translationProvider),
-            QuestionCard(
-              question: currentQuestion.question,
-              numberQuestion: numberQuestion,
-              totalQuestions: questions.length,
-              failedAttempts: failedAttempts,
-              fontSize: fontSizeText,
-              isTablet: false,
-              onSpeakQuestion: isTtsEnabled ? _speakQuestion : null,
-            ),
-            SizedBox(height: 38),
-            _buildQuestionBody(),
-          ] else if (activityIsCompleted) ...[
-            _buildResultScreen(context, translationProvider),
-          ],
-        ],
-      ),
+    return Column(
+      children: [
+        _buildCommonHeader(),
+        Expanded(
+            child: SingleChildScrollView(
+          child: Column(
+            children: [
+              if (_shouldShowQuestionContent()) ...[
+                SizedBox(height: 19),
+                _buildTtsControls(translationProvider),
+                QuestionCard(
+                  question: currentQuestion.question,
+                  numberQuestion: numberQuestion,
+                  totalQuestions: questions.length,
+                  failedAttempts: failedAttempts,
+                  fontSize: fontSizeText,
+                  isTablet: false,
+                  onSpeakQuestion: isTtsEnabled ? _speakQuestion : null,
+                ),
+                SizedBox(height: 38),
+                Container(
+                    margin: EdgeInsets.symmetric(horizontal: 10.0),
+                    // decoration: BoxDecoration(
+                    //   border: Border.all(
+                    //     color: Colors.red
+                    //   )
+                    // ),
+                    child: _buildQuestionBody()),
+              ] else if (activityIsCompleted) ...[
+                _buildResultScreen(context, translationProvider),
+              ],
+            ],
+          ),
+        ))
+      ],
     );
+
+    //  SingleChildScrollView(
+    //   child: Column(
+    //     children: [
+    //       _buildCommonHeader(),
+    //       if (_shouldShowQuestionContent()) ...[
+    //         SizedBox(height: 19),
+    //         _buildTtsControls(translationProvider),
+    //         QuestionCard(
+    //           question: currentQuestion.question,
+    //           numberQuestion: numberQuestion,
+    //           totalQuestions: questions.length,
+    //           failedAttempts: failedAttempts,
+    //           fontSize: fontSizeText,
+    //           isTablet: false,
+    //           onSpeakQuestion: isTtsEnabled ? _speakQuestion : null,
+    //         ),
+    //         SizedBox(height: 38),
+    //         Container(
+    //             margin: EdgeInsets.symmetric(horizontal: 10.0),
+    //             // decoration: BoxDecoration(
+    //             //   border: Border.all(
+    //             //     color: Colors.red
+    //             //   )
+    //             // ),
+    //             child: _buildQuestionBody()),
+    //       ] else if (activityIsCompleted) ...[
+    //         _buildResultScreen(context, translationProvider),
+    //       ],
+    //     ],
+    //   ),
+    // );
   }
 
 // Widget para controles TTS

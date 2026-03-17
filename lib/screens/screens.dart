@@ -1,9 +1,5 @@
 //Authentication
 
-
-
-
-
 export 'package:biblia_palabra_de_vida_app/screens/features/notification/notification_screen.dart';
 
 export 'package:biblia_palabra_de_vida_app/screens/soon/soon_screen.dart';

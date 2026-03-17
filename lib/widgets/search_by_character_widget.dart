@@ -134,10 +134,10 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
         loading = false;
       });
     } catch (e) {
-      setState(() {
-        loading = false;
-      });
       if (mounted) {
+        setState(() {
+          loading = false;
+        });
         await showCustomDialogWithAction(context,
             message: e.toString(),
             dialogType: DialogTypeAction.info,
@@ -195,95 +195,100 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: spacingHeight),
-        Container(
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: currentTheme.buttonColor,
+        Padding(
+          padding: horizontalPadding,
+          child: Container(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: currentTheme.buttonColor,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
-          ),
-          child: FocusScope(
-            node: FocusScopeNode(),
-            child: TextFormField(
-              controller: searchTextController,
-              style: StylesApp(context).textStyleSmallBlack.copyWith(
-                    color: currentTheme.textColor,
-                  ),
-              decoration: InputDecoration(
-                hintText: translationProvider.tr("search_by_character.search.placeholder"),
-                fillColor: currentTheme.backgroundColor,
-                filled: true,
-                hintStyle: StylesApp(context).textStyleBody15.copyWith(
-                      color: currentTheme.textColor.withValues(alpha: 0.6),
+            constraints: BoxConstraints(
+              minWidth: 160.0,
+              maxWidth: StylesApp(context).sizeTextFormField.width,
+            ),
+            child: FocusScope(
+              node: FocusScopeNode(),
+              child: TextFormField(
+                controller: searchTextController,
+                style: StylesApp(context).textStyleSmallBlack.copyWith(
+                      color: currentTheme.textColor,
                     ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                decoration: InputDecoration(
+                  hintText: translationProvider
+                      .tr("search_by_character.search.placeholder"),
+                  fillColor: currentTheme.backgroundColor,
+                  filled: true,
+                  hintStyle: StylesApp(context).textStyleBody15.copyWith(
+                        color: currentTheme.textColor.withValues(alpha: 0.6),
+                      ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
 
-                  borderSide: BorderSide.none, // Sin borde visible
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: currentTheme.textColor
-                        .withValues(alpha: 0.6), // Borde cuando está habilitado
-                    width: 1.0,
+                    borderSide: BorderSide.none, // Sin borde visible
                   ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: currentTheme.textColor, // Borde cuando está enfocado
-                    width: 2.0,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: currentTheme.textColor.withValues(
+                          alpha: 0.6), // Borde cuando está habilitado
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.red, // Borde de error
-                    width: 1.0,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color:
+                          currentTheme.textColor, // Borde cuando está enfocado
+                      width: 2.0,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: currentTheme.textColor.withValues(
-                        alpha: 0.3), // Borde cuando está deshabilitado
-                    width: 1.0,
+                  errorBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.red, // Borde de error
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  disabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: currentTheme.textColor.withValues(
+                          alpha: 0.3), // Borde cuando está deshabilitado
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  suffixIcon: _searchText.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.clear,
+                            color: currentTheme.buttonColor,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              cleanSearch();
+                            });
+                          },
+                        )
+                      : Icon(Icons.search, color: currentTheme.buttonColor),
                 ),
-                suffixIcon: _searchText.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.clear,
-                          color: currentTheme.buttonColor,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            cleanSearch();
-                          });
-                        },
-                      )
-                    : Icon(Icons.search, color: currentTheme.buttonColor),
+                onChanged: (value) {
+                  setState(() {
+                    _searchText = value;
+                  });
+                  _onSearchChanged(value);
+                },
               ),
-              onChanged: (value) {
-                setState(() {
-                  _searchText = value;
-                });
-                _onSearchChanged(value);
-              },
             ),
           ),
         ),
@@ -351,7 +356,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                             fontSize: 16,
                           ),
                       decoration: InputDecoration(
-                        hintText: translationProvider.tr("search_by_character.search.placeholder_tablet"),
+                        hintText: translationProvider.tr(
+                            "search_by_character.search.placeholder_tablet"),
                         hintStyle: TextStyle(
                           color: currentTheme.textColor.withValues(alpha: 0.6),
                           fontSize: 15,
@@ -434,7 +440,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          translationProvider.trParams("search_by_character.search.results_count", {"count": pagination.totalItems.toString()}),
+                          translationProvider.trParams(
+                              "search_by_character.search.results_count",
+                              {"count": pagination.totalItems.toString()}),
                           style: StylesApp(context).textStyleBody12.copyWith(
                                 color: currentTheme.textColor,
                                 fontWeight: FontWeight.w500,
@@ -454,7 +462,11 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                       ),
                     ),
                     child: Text(
-                      translationProvider.trParams("search_by_character.search.page_info", {"current": pagination.currentPage.toString(), "total": pagination.totalPages.toString()}),
+                      translationProvider
+                          .trParams("search_by_character.search.page_info", {
+                        "current": pagination.currentPage.toString(),
+                        "total": pagination.totalPages.toString()
+                      }),
                       style: StylesApp(context).textStyleBody12.copyWith(
                             color:
                                 currentTheme.textColor.withValues(alpha: 0.7),
@@ -526,7 +538,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
             Center(
               child: Text(
                 textAlign: TextAlign.center,
-                translationProvider.tr("search_by_character.results.empty.no_results"),
+                translationProvider
+                    .tr("search_by_character.results.empty.no_results"),
                 style: StylesApp(context).textStyleBody18.copyWith(
                       color: currentTheme.textColor,
                     ),
@@ -688,7 +701,11 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                             ),
                             SizedBox(width: 4),
                             Text(
-                                translationProvider.trParams("search_by_character.card.related_count", {"count": character.relatedCharacters.length.toString()}),
+                              translationProvider.trParams(
+                                  "search_by_character.card.related_count", {
+                                "count": character.relatedCharacters.length
+                                    .toString()
+                              }),
                               style:
                                   StylesApp(context).textStyleBody12.copyWith(
                                         fontSize: 12,
@@ -723,7 +740,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        translationProvider.tr("search_by_character.card.view_button"),
+                        translationProvider
+                            .tr("search_by_character.card.view_button"),
                         style: TextStyle(
                           color: currentTheme.buttonColor,
                           fontWeight: FontWeight.w600,
@@ -771,8 +789,11 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
             SizedBox(height: 12),
             Text(
               _searchText.isEmpty
-                  ? translationProvider.tr("search_by_character.results.empty.message_start")
-                  : translationProvider.trParams("search_by_character.results.empty.message_not_found", {"query": _searchText}),
+                  ? translationProvider
+                      .tr("search_by_character.results.empty.message_start")
+                  : translationProvider.trParams(
+                      "search_by_character.results.empty.message_not_found",
+                      {"query": _searchText}),
               textAlign: TextAlign.center,
               style: StylesApp(context).textStyleBody14.copyWith(
                     color: currentTheme.textColor.withValues(alpha: 0.6),
@@ -872,7 +893,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                     children: [
                       Expanded(
                         child: Text(
-                          translationProvider.tr("search_by_character.dialog.related_characters"),
+                          translationProvider.tr(
+                              "search_by_character.dialog.related_characters"),
                           style: StylesApp(context).textStyleBody18.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -1155,7 +1177,8 @@ class DialogInternalCharacter extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    translationProvider.tr("search_by_character.dialog.character_details"),
+                    translationProvider
+                        .tr("search_by_character.dialog.character_details"),
                     style: StylesApp(context).textStyleBody18.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -1257,7 +1280,8 @@ class DialogInternalCharacter extends StatelessWidget {
                                   ),
                                   SizedBox(width: 8),
                                   Text(
-                                    translationProvider.tr("search_by_character.card.color_label"),
+                                    translationProvider.tr(
+                                        "search_by_character.card.color_label"),
                                     style: TextStyle(
                                       color: currentTheme.textColor
                                           .withValues(alpha: 0.7),
@@ -1299,7 +1323,8 @@ class DialogInternalCharacter extends StatelessWidget {
                               ),
                               SizedBox(width: 8),
                               Text(
-                                translationProvider.tr("search_by_character.dialog.description"),
+                                translationProvider.tr(
+                                    "search_by_character.dialog.description"),
                                 style:
                                     StylesApp(context).textStyleBody16.copyWith(
                                           color: currentTheme.textColor,
@@ -1344,7 +1369,8 @@ class DialogInternalCharacter extends StatelessWidget {
                             ),
                             SizedBox(width: 8),
                             Text(
-                              translationProvider.tr("search_by_character.dialog.new_testament"),
+                              translationProvider.tr(
+                                  "search_by_character.dialog.new_testament"),
                               style: TextStyle(
                                 color: Colors.green[800],
                                 fontWeight: FontWeight.w500,

@@ -75,32 +75,36 @@ class _PromisesScreenState extends State<PromisesScreen> {
       redeemedPromise = responsePromises.data
           .map<PromiseModel>((pr) => PromiseModel.fromJson(removeTypename(pr)))
           .toList();
-      redeemedPromise = redeemedPromise.map((promise) {
-        final randomColor = colorsCard[redeemedPromise.indexOf(promise)];
-        return promise.copyWith(
-          color: randomColor.toString(),
-        );
-      }).toList();
-      List<String> translatedPromises = [];
-      for (int i = 0; i < 16; i++) {
-        // 16 es la cantidad de textos
-        translatedPromises.add(_translationProvider.tr('promises_texts.$i'));
-      }
-      // Mezclar los textos
-      translatedPromises.shuffle();
+      if (redeemedPromise.isNotEmpty) {
+        redeemedPromise = redeemedPromise.map((promise) {
+          final randomColor = colorsCard[redeemedPromise.indexOf(promise)];
+          return promise.copyWith(
+            color: randomColor.toString(),
+          );
+        }).toList();
 
-      promises = redeemedPromise.map((promise) {
-         int index = redeemedPromise.indexOf(promise);
-        return PromiseCardModel(
-          id: promise.id!,
-          title: _translationProvider.tr("promises_screen.promise_card.open"),
-          description:  translatedPromises.isNotEmpty
-            ? translatedPromises[index % translatedPromises.length]
-            : _translationProvider.tr('promises_screen.promise_card.default_description'),
-          images: images[redeemedPromise.indexOf(promise)],
-          hasViewed: promise.hasViewed!,
-        );
-      }).toList();
+        List<String> translatedPromises = [];
+        for (int i = 0; i < 16; i++) {
+          // 16 es la cantidad de textos
+          translatedPromises.add(_translationProvider.tr('promises_texts.$i'));
+        }
+        // Mezclar los textos
+        translatedPromises.shuffle();
+
+        promises = redeemedPromise.map((promise) {
+          int index = redeemedPromise.indexOf(promise);
+          return PromiseCardModel(
+            id: promise.id!,
+            title: _translationProvider.tr("promises_screen.promise_card.open"),
+            description: translatedPromises.isNotEmpty
+                ? translatedPromises[index % translatedPromises.length]
+                : _translationProvider
+                    .tr('promises_screen.promise_card.default_description'),
+            images: images[redeemedPromise.indexOf(promise)],
+            hasViewed: promise.hasViewed!,
+          );
+        }).toList();
+      }
     } catch (e) {
       errorMessage = _translationProvider
           .trParams("promises_screen.messages.error", {"error": e.toString()});

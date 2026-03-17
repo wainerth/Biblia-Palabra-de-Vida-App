@@ -221,62 +221,68 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         SizedBox(height: spacingHeight),
 
         // Selector de versión
-        Container(
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: currentTheme.buttonColor,
+        Padding(
+           padding: horizontalPadding,
+          child: Container(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: currentTheme.buttonColor,
+              ),
             ),
-          ),
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: maxDropdownWidth,
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 12),
-          child: CustomDropdownBottomWidget(
-            hintText: translationProvider.tr('search_by_book.dropdowns.version'),
-            items: bibleVersions,
-            border: false,
-            currentTheme: currentTheme,
-            onChanged: _onVersionChanged,
-            selectedItem: versionSelected!.value.isNotEmpty
-                ? bibleVersions.firstWhereOrNull((element) =>
-                    element.value.toLowerCase() ==
-                    versionSelected?.value.toLowerCase())
-                : null,
+            constraints: BoxConstraints(
+              minWidth: 160.0,
+              maxWidth: maxDropdownWidth,
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: CustomDropdownBottomWidget(
+              hintText: translationProvider.tr('search_by_book.dropdowns.version'),
+              items: bibleVersions,
+              border: false,
+              currentTheme: currentTheme,
+              onChanged: _onVersionChanged,
+              selectedItem: versionSelected!.value.isNotEmpty
+                  ? bibleVersions.firstWhereOrNull((element) =>
+                      element.value.toLowerCase() ==
+                      versionSelected?.value.toLowerCase())
+                  : null,
+            ),
           ),
         ),
 
         SizedBox(height: spacingHeight),
 
         // Selector de libro
-        Container(
-          padding: horizontalPadding,
-           clipBehavior: Clip.antiAliasWithSaveLayer,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: currentTheme.buttonColor,
+        Padding(
+           padding: horizontalPadding,
+          child: Container(
+            padding: horizontalPadding,
+             clipBehavior: Clip.antiAliasWithSaveLayer,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: currentTheme.buttonColor,
+              ),
             ),
-          ),
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: maxDropdownWidth,
-          ),
-          child: CustomDropdownBottomWidget(
-            hintText: translationProvider.tr('search_by_book.dropdowns.book'),
-            items: books,
-            border: false,
-            currentTheme: currentTheme,
-            onChanged: _onBookChanged,
-            selectedItem: bookSelected!.value.isNotEmpty
-                ? books.firstWhereOrNull((element) =>
-                    element.value.toLowerCase() ==
-                    bookSelected?.value.toLowerCase())
-                : books.isNotEmpty
-                    ? books.first
-                    : null,
+            constraints: BoxConstraints(
+              minWidth: 160.0,
+              maxWidth: maxDropdownWidth,
+            ),
+            child: CustomDropdownBottomWidget(
+              hintText: translationProvider.tr('search_by_book.dropdowns.book'),
+              items: books,
+              border: false,
+              currentTheme: currentTheme,
+              onChanged: _onBookChanged,
+              selectedItem: bookSelected!.value.isNotEmpty
+                  ? books.firstWhereOrNull((element) =>
+                      element.value.toLowerCase() ==
+                      bookSelected?.value.toLowerCase())
+                  : books.isNotEmpty
+                      ? books.first
+                      : null,
+            ),
           ),
         ),
 

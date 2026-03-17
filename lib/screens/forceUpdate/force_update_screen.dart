@@ -1,3 +1,5 @@
+import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,23 +39,27 @@ class ForceUpdateScreen extends StatelessWidget {
               SizedBox(height: 24),
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: StylesApp(context).textStyleBody24.copyWith(
+                      color: StyleColor.grayDark,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               SizedBox(height: 16),
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+                style: StylesApp(context)
+                    .textStyleBody16
+                    .copyWith(color: StyleColor.grayMedium, fontSize: 16),
               ),
               SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _openStore,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 50),
-                ),
+                style: StylesApp(context).btnWidgetSmall.copyWith(
+                      minimumSize:
+                          WidgetStatePropertyAll(Size(150, 40)),
+                    ),
                 child: Text('ACTUALIZAR AHORA'),
               ),
             ],

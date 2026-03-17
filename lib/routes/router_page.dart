@@ -1,12 +1,16 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/screens/layoutScreen/layout_library.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
+import 'package:biblia_palabra_de_vida_app/services/navigation_service.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 final Map<String, WidgetBuilder> routes = {
   '/loading': (context) => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
+  '/splashPage': (BuildContext context) => SplashScreen(onComplete: ()=>
+     NavigationService().goToInitialScreen()
+  ),
   '/introPage': (BuildContext context) => const WelcomeScreen(),
   '/homePage': (BuildContext context) => const HomeScreen(),
   '/loginPage': (BuildContext context) => const LoginScreen(),
@@ -72,6 +76,18 @@ final Map<String, WidgetBuilder> routes = {
       description: args['description'],
     );
   },
+  '/maintenance': (context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    return MaintenanceScreen(title: args["title"], message: args["message"]);
+  },
+  '/forceUpdate': (context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    return ForceUpdateScreen(
+      title: args["title"],
+      message: args["message"],
+      storeUrl: args["storeUrl"],
+    );
+  }
 };
 
 Route<dynamic> generateRoute(RouteSettings settings) {
