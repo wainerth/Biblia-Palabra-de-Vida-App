@@ -50,8 +50,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
       verse: Verse(verse: 0, text: ""));
   bool _initCompleted = false;
   int _unreadCount = 0;
-  late SocketClientProvider _notificationProvider;
   dynamic Function(dynamic)? _notificationListener;
+  late final SocketClientProvider _notificationProvider;
 
   @override
   void initState() {
@@ -109,10 +109,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
 
   @override
   void dispose() {
-    if (_notificationListener != null) {
-      final notificationProvider = Provider.of(context, listen: false);
-      notificationProvider.removeListenerFromEvent(
-          "notification", _notificationListener!);
+    if (mounted) {
+      if (_notificationListener != null) {
+        _notificationProvider.removeListenerFromEvent(
+            "notification", _notificationListener!);
+      }
     }
     routeObserver.unsubscribe(this);
     super.dispose();

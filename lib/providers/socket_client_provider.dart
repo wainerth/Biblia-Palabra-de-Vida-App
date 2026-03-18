@@ -279,8 +279,8 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     final urlSocket = GraphQLConfig.development
         ? GraphQLConfig.urlSocketDev
         : GraphQLConfig.urlSocketProd;
-    String pathSocket = '/socket.io-dev';
-    // GraphQLConfig.development ? '/socket.io-dev' : '/socket.io';
+    String pathSocket =
+        GraphQLConfig.development ? '/socket.io-dev' : '/socket.io';
     final timeZone = await getDeviceTimeZone();
     _initializedSocket = true;
     initializeObserver();
@@ -408,45 +408,46 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
   }
 
   void removeListenerFromEvent(String eventName, Function(dynamic) callback) {
-  if (kDebugMode) {
-    print('🗑️ Removiendo listener de evento: $eventName');
-  }
-  
-  final listeners = _eventListeners[eventName];
-  if (listeners != null) {
-    listeners.remove(callback);
-    
-    if (listeners.isEmpty) {
-      // Si no quedan listeners, remover el evento del socket
-      _eventListeners.remove(eventName);
-      _socket?.off(eventName);
-      if (kDebugMode) {
-        print('📡 Evento $eventName eliminado del socket (sin listeners)');
-      }
-    } else {
-      // Si aún quedan listeners, actualizar el socket
-      _socket?.off(eventName);
-      _socket?.on(eventName, (data) {
-        final currentListeners = _eventListeners[eventName];
-        if (currentListeners != null) {
-          final listenersCopy = List<Function(dynamic)>.from(currentListeners);
-          for (var listener in listenersCopy) {
-            listener(data);
-          }
+    if (kDebugMode) {
+      print('🗑️ Removiendo listener de evento: $eventName');
+    }
+
+    final listeners = _eventListeners[eventName];
+    if (listeners != null) {
+      listeners.remove(callback);
+
+      if (listeners.isEmpty) {
+        // Si no quedan listeners, remover el evento del socket
+        _eventListeners.remove(eventName);
+        _socket?.off(eventName);
+        if (kDebugMode) {
+          print('📡 Evento $eventName eliminado del socket (sin listeners)');
         }
-      });
+      } else {
+        // Si aún quedan listeners, actualizar el socket
+        _socket?.off(eventName);
+        _socket?.on(eventName, (data) {
+          final currentListeners = _eventListeners[eventName];
+          if (currentListeners != null) {
+            final listenersCopy =
+                List<Function(dynamic)>.from(currentListeners);
+            for (var listener in listenersCopy) {
+              listener(data);
+            }
+          }
+        });
+      }
     }
   }
-}
 
-void removeAllListenersFromEvent(String eventName) {
-  if (kDebugMode) {
-    print('🗑️ Removiendo TODOS los listeners de evento: $eventName');
+  void removeAllListenersFromEvent(String eventName) {
+    if (kDebugMode) {
+      print('🗑️ Removiendo TODOS los listeners de evento: $eventName');
+    }
+
+    _eventListeners.remove(eventName);
+    _socket?.off(eventName);
   }
-  
-  _eventListeners.remove(eventName);
-  _socket?.off(eventName);
-}
   // void listenToEvent(String eventName, Function(dynamic) callback) {
   //   if (kDebugMode) {
   //     print(eventName);
