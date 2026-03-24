@@ -13,10 +13,10 @@ class GraphQLConfig {
   
   
   static const String baseUrl =
-      'https://labibliapalabradevida.com/services/';
+      'http://10.0.2.2:4020/graphql';
   static const String urlServidor = 'https://labibliapalabradevida.com/';
   static const urlSocketDev = 'wss://labibliapalabradevida.com:2443';
-  static const urlSocketProd = 'wss://labibliapalabradevida.com';
+  static const urlSocketProd = 'wss://labibliapalabradevida.com:2443'; //'wss://labibliapalabradevida.com';
   static const String authToken = '';
   static const bool development = false;
   static const String urlApkRadio = 'https://apk.e-droid.net/apk/app3557953-xlahe3.apk?v=5';
