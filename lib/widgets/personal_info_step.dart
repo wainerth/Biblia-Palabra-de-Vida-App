@@ -247,7 +247,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               onChanged: widget.onCountrySelected,
               searchFunction: _searchCountries,
               fetchItemById: (id) => _countrySearchService.getCountryById(id),
-              defaultValueId: 'VE',
+              defaultValueId: '239',
               showClearButton: true,
               border: true,
               leadingIcon: Icon(

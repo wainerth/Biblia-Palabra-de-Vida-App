@@ -1,10 +1,16 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
-import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
-import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
+import 'package:biblia_palabra_de_vida_app/main.dart';
+import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/models/whats_app_response.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/whatsAppScheduleDialog.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/translated_widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -16,6 +22,15 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool showNotification = false;
+
+  int _refreshKey = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ResponsiveLayout(
+        mobile: _buildMobileLayout(context),
+        tablet: _buildTabletLayout(context));
+  }
 
   Widget _buildMobileLayout(BuildContext context) {
     final translationProvider = context.read<AppTranslationProvider>();
@@ -38,6 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
+                      _buildWhatsAppSettingsItem(context),
                       _buildSettingsItem(
                         context,
                         path: 'settings.language',
@@ -274,7 +290,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Sección: Preferencias de App
+
                             _buildSectionTitle('settings.app_preferences'),
+                            SizedBox(height: 20),
+                            _buildTabletWhatsAppSettingsItem(context),
                             SizedBox(height: 20),
 
                             _buildTabletSettingsItem(
@@ -347,6 +366,85 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // Widget para tablet (similar al mobile pero con estilo tablet)
+  Widget _buildTabletWhatsAppSettingsItem(BuildContext context) {
+    const IconData whatsappIcon = IconData(
+      0xf232, // Código Unicode de WhatsApp (FontAwesome)
+      fontFamily: 'MaterialIcons',
+    );
+
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        final userId = userProvider.currentUser?.userId;
+
+        if (userId == null) {
+          return _buildTabletSettingsItem(
+            context,
+            icon: whatsappIcon,
+            path: 'settings.whatsapp_notifications',
+            subtitle: 'Inicia sesión para configurar',
+            onTap: () {},
+          );
+        }
+
+        return FutureBuilder<UserPreference?>(
+          key: ValueKey(_refreshKey),
+          future: _getUserWhatsAppPreferences(userId.toString()),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return _buildTabletSettingsItem(
+                context,
+                icon: whatsappIcon,
+                path: 'settings.whatsapp_notifications',
+                subtitle: 'Cargando...',
+                onTap: () {},
+              );
+            }
+
+            if (snapshot.hasError || snapshot.data == null) {
+              return _buildTabletSettingsItem(
+                context,
+                icon: whatsappIcon,
+                path: 'settings.whatsapp_notifications',
+                subtitle: 'Error al cargar',
+                onTap: () {},
+              );
+            }
+
+            final preferences = snapshot.data!;
+            final isActive = preferences.is_active_send_whatsapp;
+            final schedules = preferences.user_schedules ?? [];
+            final hasSchedules = schedules.isNotEmpty;
+
+            String subtitle = '';
+            if (isActive && hasSchedules) {
+              final times = schedules.map((s) => s.schedule.time).toList();
+              times.sort();
+              subtitle = 'Horas: ${times.join(', ')}';
+            } else if (isActive && !hasSchedules) {
+              subtitle = 'Selecciona horarios';
+            } else {
+              subtitle = 'Desactivado';
+            }
+
+            return _buildTabletSettingsItem(
+              context,
+              icon: whatsappIcon,
+              path: 'settings.whatsapp_notifications',
+              subtitle: subtitle,
+              onTap: () => _openWhatsAppDialog(
+                context,
+                userId.toString(),
+                isActive,
+                schedules,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildSectionTitle(String path) {
     return Consumer<AppTranslationProvider>(
       builder: (context, provider, child) {
@@ -367,6 +465,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     BuildContext context, {
     required String path,
     String? trailingText,
+    Widget? trailing, // 👈 Agregar para Widget personalizado
+    String? subtitle, // 👈 Agregar para subtítulo
     bool isLogout = false,
     required VoidCallback onTap,
   }) {
@@ -383,14 +483,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           isLogout ? FontWeight.w600 : FontWeight.normal,
                     ),
               ),
-              trailing: trailingText != null
+              subtitle: subtitle != null
                   ? Text(
-                      trailingText,
-                      style: StylesApp(context).textStyleBody12.copyWith(
-                            color: Colors.white.withValues(alpha: 0.8),
+                      subtitle,
+                      style: StylesApp(context).textStyleBody10.copyWith(
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
                     )
                   : null,
+              trailing: trailing ??
+                  (trailingText != null
+                      ? Text(
+                          trailingText,
+                          style: StylesApp(context).textStyleBody12.copyWith(
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                        )
+                      : null),
               onTap: onTap,
             ),
             Divider(
@@ -640,10 +749,176 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ResponsiveLayout(
-        mobile: _buildMobileLayout(context),
-        tablet: _buildTabletLayout(context));
+  // Widget de configuración de WhatsApp (para usar en ambas vistas)
+  Widget _buildWhatsAppSettingsItem(BuildContext context) {
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        final userId = userProvider.currentUser?.userId;
+
+        if (userId == null) {
+          return _buildSettingsItem(
+            context,
+            path: 'settings.whatsapp_notifications',
+            subtitle: 'Inicia sesión para configurar',
+            onTap: () {},
+          );
+        }
+
+        return FutureBuilder<UserPreference?>(
+          key: ValueKey(_refreshKey),
+          future: _getUserWhatsAppPreferences(userId.toString()),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return _buildSettingsItem(
+                context,
+                path: 'settings.whatsapp_notifications',
+                trailing: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                onTap: () {},
+              );
+            }
+
+            if (snapshot.hasError || snapshot.data == null) {
+              return _buildSettingsItem(
+                context,
+                path: 'settings.whatsapp_notifications',
+                subtitle: 'Error al cargar',
+                onTap: () {},
+              );
+            }
+
+            final preferences = snapshot.data!;
+            final isActive = preferences.is_active_send_whatsapp;
+            final schedules = preferences.user_schedules ?? [];
+            final hasSchedules = schedules.isNotEmpty;
+
+            // Formatear horas para mostrar
+            String subtitle = '';
+            if (isActive && hasSchedules) {
+              final times = schedules.map((s) => s.schedule.time).toList();
+              times.sort();
+              subtitle = 'Horas: ${times.join(', ')}';
+            } else if (isActive && !hasSchedules) {
+              subtitle = 'Selecciona horarios';
+            } else {
+              subtitle = 'Desactivado';
+            }
+
+            return _buildSettingsItem(
+              context,
+              path: 'settings.whatsapp_notifications',
+              subtitle: subtitle,
+              trailing: Icon(Icons.chevron_right, color: Colors.white70),
+              onTap: () => _openWhatsAppDialog(
+                context,
+                userId.toString(),
+                isActive,
+                schedules,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+// Abrir el diálogo de WhatsApp
+  Future<void> _openWhatsAppDialog(
+    BuildContext context,
+    String userId,
+    bool currentIsActive,
+    List<UserSchedules> currentSchedules,
+  ) async {
+    // Convertir los horarios actuales a List<ScheduleModel> para el diálogo
+    final currentHours = currentSchedules.map((us) => us.schedule).toList();
+
+    final result = await WhatsAppScheduleDialogExtension.show(
+      context: context,
+      initialEnabled: currentIsActive,
+      initialHours: currentHours,
+      onSave: (enabled, selectedHours) async {
+        // Guardar en el backend
+        await _saveWhatsAppPreferences(
+          context,
+          userId,
+          enabled,
+          selectedHours,
+        );
+
+        if (mounted) {
+          setState(() {
+            _refreshKey++;
+          });
+        }
+      },
+    );
+
+    // Si el usuario guardó, refrescar la pantalla
+    // if (result == true) {
+    //   await Future.delayed(Duration(milliseconds: 1500));
+
+    //   if (mounted) {
+    //     setState(() {
+    //       _refreshKey++;
+    //     });
+    //   }
+    // }
+  }
+
+  // Obtener preferencias del usuario
+  Future<UserPreference?> _getUserWhatsAppPreferences(String userId) async {
+    final response = await getUserWhatsAppPreferences(userId);
+    if (response.error != null || response.data == null) {
+      return null;
+    }
+    return UserPreference.fromJson(response.data);
+  }
+
+  // Helper para SnackBar
+  void _showSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
+    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // Guardar preferencias de WhatsApp
+  Future<void> _saveWhatsAppPreferences(
+    BuildContext context,
+    String userId,
+    bool enabled,
+    List<ScheduleModel> selectedHours,
+  ) async {
+    try {
+      LoadingService().showLoading(context);
+
+      // Extraer los IDs de los horarios seleccionados
+      final scheduleIds = selectedHours.map((h) => h.id.toString()).toList();
+
+      // Llamar a tu mutation
+      await saveWhatsAppConfig(
+        userId,
+        enabled,
+        scheduleIds,
+      );
+
+      LoadingService().hideLoading();
+      _showSnackBar(
+          context,
+          enabled
+              ? 'Notificaciones de WhatsApp activadas'
+              : 'Notificaciones de WhatsApp desactivadas');
+    } catch (e) {
+      LoadingService().hideLoading();
+      _showSnackBar(context, 'Error: ${e.toString()}', isError: true);
+    }
   }
 }

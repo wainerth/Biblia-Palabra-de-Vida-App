@@ -1777,3 +1777,53 @@ Future<ResponseData> resendVerificationCode(
     return handleGenericError(e, "Reenvió de código de verificación");
   }
 }
+
+Future<ResponseData> saveWhatsAppConfig(String userId, bool isActivatedSendWhatsApp,List<String> scheduleHours ) async {
+  final GraphQLClient client = createClient();
+
+  final MutationOptions options = MutationOptions(
+    operationName:"UpdatePreferencesWhatsapp",
+    document: gql(r'''
+       mutation UpdatePreferencesWhatsapp($userId: ID!, $isActiveSendWhatsapp: Boolean!, $scheduleHours: [String!]) {
+          updatePreferencesWhatsapp(user_id: $userId, is_active_send_whatsapp: $isActiveSendWhatsapp, , scheduleHours: $scheduleHours) {
+            userPreferences {
+              is_active_send_whatsapp
+              activated_at_send_whatsapp
+            }
+          }
+        }
+              '''),
+    variables: {
+      'userId': userId,
+      'isActiveSendWhatsapp': isActivatedSendWhatsApp,
+      'scheduleHours':scheduleHours
+    },
+  );
+
+  try {
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['updatePreferencesWhatsapp'] == null) {
+      return ResponseData(
+        data: null,
+        userFriendlyError:
+            'No se pudo enviar actualizar Preferencias del usuario. Inténtalo nuevamente.',
+        error:
+            'Reenvió actualizar Preferencias del usuario  fallida: no se devolvieron datos',
+        errorType: ErrorType.noData,
+      );
+    }
+
+    return ResponseData(
+      data: data['updatePreferencesWhatsapp'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Actualizar preferncias de usuario");
+  }
+}

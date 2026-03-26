@@ -3121,6 +3121,7 @@ Future<ResponseData> getCountries({
   int limit = 20,
 }) async {
   final offset = (page - 1) * limit;
+
   final GraphQLClient client = createClient();
   final options = QueryOptions(
     operationName: "GetAllCountryWithCodeAreas",
@@ -3206,8 +3207,7 @@ Future<ResponseData> getCodeAreas({
     if (data['getAllAreaCodes'] == null) {
       return ResponseData(
           data: null,
-          userFriendlyError:
-              'No se pudieron obtener tLos codigos de area.',
+          userFriendlyError: 'No se pudieron obtener tLos codigos de area.',
           error:
               'Error al obtener todas las ciudades por estado: no se devolvieron datos',
           errorType: ErrorType.noData);
@@ -3219,5 +3219,107 @@ Future<ResponseData> getCodeAreas({
     );
   } catch (e) {
     return handleGenericError(e, "Obtener todas las ciudades por estado");
+  }
+}
+
+Future<ResponseData> getSchedule({int? limit, int? offset}) async {
+  final GraphQLClient client = createClient();
+
+  final options = QueryOptions(
+    operationName: "GetSchedules",
+    document: gql(r'''
+          query GetSchedules($limit: Int, $offset: Int) {
+            getSchedules(limit: $limit, offset: $offset) {
+              data {
+                time
+                id
+              }
+              limit
+              offset
+              total
+            }
+          }
+        '''),
+    variables: <String, dynamic>{"limit": limit, "offset": offset},
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (data['getSchedules']["data"] == null) {
+      return ResponseData(
+          data: null,
+          userFriendlyError: 'No se pudieron obtener Los Horarios.',
+          error: 'Error al obtener todos los horarios: no se devolvieron datos',
+          errorType: ErrorType.noData);
+    }
+
+    return ResponseData(
+      data: data['getSchedules']["data"],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Obtener todos los horarios");
+  }
+}
+
+Future<ResponseData> getUserWhatsAppPreferences(String? userId) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  final options = QueryOptions(
+    operationName: "GetPreferencesWhatsApp",
+    document: gql(r'''
+          query GetPreferencesWhatsApp($userId: ID!) {
+            getPreferencesWhatsApp(userId: $userId) {
+              success
+              message
+              userPreferences {
+                user_id
+                is_active_send_whatsapp
+                user_schedules {
+                  id
+                  schedule {
+                    id
+                    time
+                    is_active
+                    created_at
+                  }
+                }
+              }
+            }
+          }
+        '''),
+    variables: <String, dynamic>{
+      "userId": userId,
+    },
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.query(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = removeTypename(result.data);
+    if (!data['getPreferencesWhatsApp']["success"]) {
+      return ResponseData(
+          data: null,
+          userFriendlyError: 'No se pudieron obtener las configuraciones de whatsApp.',
+          error: 'Error al obtener las configuraciones de whatsApp: no se devolvieron datos',
+          errorType: ErrorType.noData);
+    }
+
+    return ResponseData(
+      data: data['getPreferencesWhatsApp']['userPreferences'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Obtener las configuraciones de whatsApp");
   }
 }

@@ -106,7 +106,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool _orientationApplied = false;
 
   @override
   void initState() {
@@ -177,10 +176,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // if (!_orientationApplied) {
-    //   NavigationService().applyOrientationPolicy();
-    //   _orientationApplied = true;
-    // }
   }
 }
 

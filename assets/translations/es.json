@@ -1511,7 +1511,9 @@
         "logout_confirmation": "¿Estás seguro de cerrar sesión?",
         "logout_warning": "Se cerrará tu sesión actual y deberás iniciar sesión nuevamente",
         "cancel": "Cancelar",
-        "logout_button": "Cerrar Sesión"
+        "logout_button": "Cerrar Sesión",
+        "whatsapp_notifications": "Notificaciones por WhatsApp",
+        "edit_schedule_hours": "Editar horarios de notificación"
     },
     "progress": {
         "registration": "Registro",
