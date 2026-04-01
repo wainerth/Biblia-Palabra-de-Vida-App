@@ -2,10 +2,12 @@ class Country {
   final String id;
   final String name;
   final AreaCode? countryCode;
+  final String? isoCode;
   Country({
     required this.id,
     required this.name,
     required this.countryCode,
+    this.isoCode
   });
 
   factory Country.fromJson(Map<String, dynamic> json) => Country(
@@ -14,12 +16,14 @@ class Country {
         countryCode: json['areaCodeCountry'] != null
             ? AreaCode.fromJson(json['areaCodeCountry'])
             : null,
+            isoCode: json["isoCode"]
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'id': id,
         'name': name,
         'areaCodeCountry': countryCode?.toJson(),
+        "isoCode": isoCode
       };
 }
 

@@ -89,23 +89,25 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: currentTheme.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: currentTheme.appBarColor,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: currentTheme.buttonTextColor),
-          onPressed: () => Navigator.pop(context),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: currentTheme.backgroundColor,
+        appBar: AppBar(
+          backgroundColor: currentTheme.appBarColor,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: currentTheme.buttonTextColor),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            translationProvider.tr('search_bible_screen.title'),
+            style: StylesApp(context).textStyleBody18.copyWith(
+                  color: currentTheme.buttonTextColor,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
         ),
-        title: Text(
-          translationProvider.tr('search_bible_screen.title'),
-          style: StylesApp(context).textStyleBody18.copyWith(
-                color: currentTheme.buttonTextColor,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
+        body: isTablet(context) ? _buildTabletLayout() : _buildMobileLayout(),
       ),
-      body: isTablet(context) ? _buildTabletLayout() : _buildMobileLayout(),
     );
   }
 
@@ -202,6 +204,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
         children: [
           Container(
             width: double.infinity,
+            padding: EdgeInsets.only(top: 8),
             decoration: BoxDecoration(
               color: currentTheme.backgroundColor,
               boxShadow: [

@@ -23,9 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   int _currentStep = 0; // Controla el paso actual
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _autoValidate = false;
-  final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -44,14 +42,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool setIsBaptized = false;
   ModelData? _selectedDataArea;
   ModelData? _selectedData;
-  Country? _selectedCountry;
+  // Country? _selectedCountry;
   AreaCode? _selectedPrefix;
   late List<Country> countries;
   late List<AreaCode> prefixCodes;
   late List<ModelData> dropDownListArea;
-  late List<ModelData> dropDownList;
+  List<ModelData> dropDownList = [];
   bool enabledReceived = false;
   List<ScheduleModel> listHours = [];
+  ModelData? _selectedCountry;
 
   // Método para detectar si es tablet
   bool _isTablet(BuildContext context) {
@@ -208,7 +207,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           if (_currentStep == 0) ...[
                             UserInfoStep(
-                              userIdController: _userIdController,
                               emailController: _emailController,
                               passwordController: _passwordController,
                               confirmPasswordController:
@@ -219,7 +217,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   setState(() => _obscureTextPass = value),
                               onObscureTextRepeatChanged: (value) =>
                                   setState(() => _obscureTextRepeat = value),
-                              userNameController: _userNameController,
+                              dropDownList: dropDownList, // Lista de países
+                              selectedCountry: _selectedCountry,
+                              onCountrySelected: (newValue) {
+                                setState(() {
+                                  _selectedCountry = newValue;
+                                });
+                              },
+                              onAreCodeSelected:(value) =>  _selectedPrefix = value,
+                              prefixNumberController: _prefixNumberController,
+                              phoneNumberController: _phoneNumberController,
                             )
                           ] else if (_currentStep == 1) ...[
                             PersonalInfoStep(
@@ -229,40 +236,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               selectedDate: _selectedDate,
                               onDateSelected: (picked) =>
                                   setState(() => _selectedDate = picked),
-                              dropDownListArea: dropDownListArea,
-                              dropDownList: dropDownList,
-                              selectedDataArea: _selectedDataArea,
-                              selectedData: _selectedData,
-                              selectedCountry: _selectedCountry,
-                              onPrefixSelected: (newValue) {
-                                setState(() {
-                                  _selectedDataArea = newValue;
-
-                                  _selectedPrefix = prefixCodes.firstWhere(
-                                      (country) =>
-                                          country.id == newValue!.value);
-                                  _prefixNumberController.text =
-                                      newValue!.value;
-                                });
-                              },
-                              onCountrySelected: (newValue) {
-                                if (newValue != null) {
-                                  setState(() {
-                                    _selectedData = newValue;
-                                    _selectedCountry =
-                                        _selectedData?.originalData;
-                                    _prefixNumberController.text =
-                                        _selectedCountry!.countryCode!.code;
-                                  });
-                                } else {
-                                  setState(() {
-                                    _selectedData = null;
-                                    _selectedCountry = null;
-                                  });
-                                }
-                              },
-                              prefixNumberController: _prefixNumberController,
-                              phoneNumberController: _phoneNumberController,
                               gender: setGender,
                               onChangeGender: (newValue) {
                                 setState(() {
@@ -745,7 +718,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     UserInfoStep(
-                      userIdController: _userIdController,
                       emailController: _emailController,
                       passwordController: _passwordController,
                       confirmPasswordController: _confirmPasswordController,
@@ -755,7 +727,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           setState(() => _obscureTextPass = value),
                       onObscureTextRepeatChanged: (value) =>
                           setState(() => _obscureTextRepeat = value),
-                      userNameController: _userNameController,
+                      dropDownList: dropDownList, // Lista de países
+                      selectedCountry: _selectedCountry,
+                      onCountrySelected: (newValue) {
+                        setState(() {
+                          _selectedCountry = newValue;
+                        });
+                      },
+                       onAreCodeSelected:(value) =>  _selectedPrefix = value,
+                      prefixNumberController: _prefixNumberController,
+                      phoneNumberController: _phoneNumberController,
                     )
                   ],
                 ),
@@ -782,37 +763,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 selectedDate: _selectedDate,
                 onDateSelected: (picked) =>
                     setState(() => _selectedDate = picked),
-                dropDownListArea: dropDownListArea,
-                dropDownList: dropDownList,
-                selectedDataArea: _selectedDataArea,
-                selectedData: _selectedData,
-                selectedCountry: _selectedCountry,
-                onPrefixSelected: (ModelData? newValue) {
-                  setState(() {
-                    _selectedDataArea = newValue;
-
-                    _selectedPrefix = AreaCode(
-                        id: _selectedDataArea!.value,
-                        code: _selectedDataArea!.label);
-                  });
-                },
-                onCountrySelected: (newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _selectedData = newValue;
-                      _selectedCountry = _selectedData?.originalData;
-                      _prefixNumberController.text =
-                          _selectedCountry!.countryCode!.code;
-                    });
-                  } else {
-                    setState(() {
-                      _selectedData = null;
-                      _selectedCountry = null;
-                    });
-                  }
-                },
-                prefixNumberController: _prefixNumberController,
-                phoneNumberController: _phoneNumberController,
                 gender: setGender,
                 onChangeGender: (newValue) {
                   setState(() {
@@ -839,12 +789,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _nextStep();
     } else {
       // abrir dialogo para preguntar se desea recibir mensajes via whatsapp
-     final dialog =  await _showScheduleDialog();
+      final dialog = await _showScheduleDialog();
       setState(() {
         _autoValidate = true; // Activar validaciones
       });
 
-  // }
+      // }
       // Esperar un frame para que se actualice el estado
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final bool isValid = _formKey.currentState?.validate() ?? false;
@@ -877,6 +827,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     LoadingService().showLoading(context);
     final authenticationProvider =
         Provider.of<AuthenticationProvider>(context, listen: false);
+print(_selectedPrefix);
 
     final dataToRegister = SignupInput(
       name: _nameController.text,
@@ -884,14 +835,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       email: _emailController.text,
       birthdate: _dateController.text,
       codeAreaId: _selectedPrefix?.id,
-      countryId: _selectedCountry?.id,
-      identifier: _userIdController.text,
+      countryId: _selectedCountry?.value,
+      identifier: null,
       password: _passwordController.text,
       phoneNumber:
           _phoneNumberController.text.replaceAll(RegExp(r'[^\d]+'), ''),
       city: null,
       state: null,
-      username: _userNameController.text,
+      username: null,
       isBaptized: setIsBaptized,
       gender: setGender,
     );
@@ -908,7 +859,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           dialogType: DialogType.error);
     } else {
       final data = VerificationResponse.fromJson(response.data);
-      List<String> hours =  listHours.map((toElement) => toElement.id).toList();
+      List<String> hours = listHours.map((toElement) => toElement.id).toList();
       final responseSaveWhatsAppConfig =
           await saveWhatsAppConfig(data.userId, enabledReceived, hours);
       if (responseSaveWhatsAppConfig.error != null) {

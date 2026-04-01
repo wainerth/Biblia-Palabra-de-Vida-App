@@ -419,10 +419,10 @@ class _BibleScreenState extends State<BibleScreen> {
     }
 
     if (loadBook != null && currentVersion != null) {
-      currentBook = currentVersion!.books.firstWhere((b) => b.id == loadBook);
+      currentBook = currentVersion!.books.firstWhere((b) => b.numberBook.toString()  == loadBook);
     } else {
       currentBook = currentVersion!.books.first;
-      await PreferencesManager().setBookSelected(currentBook!.id);
+      await PreferencesManager().setBookSelected(currentBook!.numberBook.toString());
     }
   }
 
@@ -2216,7 +2216,7 @@ class _BibleScreenState extends State<BibleScreen> {
             .firstWhere((b) => b.numberBook == currentBook!.numberBook - 1);
 
         setState(() => currentBook = prevBook);
-        await PreferencesManager().setBookSelected(prevBook.id);
+        await PreferencesManager().setBookSelected(prevBook.numberBook.toString());
         await loadChapters(prevBook, true);
         await PreferencesManager()
             .setChapterSelected(currentChapter!.chapter.toString());
@@ -2272,7 +2272,7 @@ class _BibleScreenState extends State<BibleScreen> {
             .firstWhere((b) => b.numberBook == currentBook!.numberBook + 1);
 
         setState(() => currentBook = nextBook);
-        await PreferencesManager().setBookSelected(nextBook.id);
+        await PreferencesManager().setBookSelected(nextBook.numberBook.toString());
         await PreferencesManager().clearOne('chapterSelected');
         await loadChapters(nextBook, false);
       }
@@ -2426,8 +2426,8 @@ class _BibleScreenState extends State<BibleScreen> {
     if (selectedVersion != null) {
       setState(() => lastVersionsSelected = selectedVersion.value);
 
-      await PreferencesManager().clearOne('bookSelected');
-      await PreferencesManager().clearOne('chapterSelected');
+      // await PreferencesManager().clearOne('bookSelected');
+      // await PreferencesManager().clearOne('chapterSelected');
       await PreferencesManager().setSelectedBibleVersion(lastVersionsSelected!);
 
       setState(() {
@@ -2764,7 +2764,7 @@ class _BibleScreenState extends State<BibleScreen> {
       }
 
       await PreferencesManager().setSelectedBibleVersion(lastVersionsSelected!);
-      await PreferencesManager().setBookSelected(currentBook!.id);
+      await PreferencesManager().setBookSelected(currentBook!.numberBook.toString());
       await PreferencesManager()
           .setChapterSelected(currentChapter!.chapter.toString());
 

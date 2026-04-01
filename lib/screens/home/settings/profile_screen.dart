@@ -208,13 +208,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       )
     ];
 
-    return Scaffold(
-      body: SafeArea(
-        child: Container(
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
           width: double.infinity,
           height: double.infinity,
           decoration: BoxDecoration(color: Color(0XFF12CBC4)),
           child: LayoutBuilder(
+
             builder: (context, constraints) {
               // Si el ancho es mayor a 600px (tablet), usar diseño de dos columnas
               if (constraints.maxWidth > 600) {
@@ -241,6 +242,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       List<ModelData> locationData,
       AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: 20.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
