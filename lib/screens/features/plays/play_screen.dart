@@ -1,30 +1,8 @@
+import 'package:biblia_palabra_de_vida_app/models/play_model.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
-
-class PlayModel {
-  final String title;
-  final String description;
-  final String img;
-  final String url;
-  PlayModel(
-      {required this.title,
-      required this.description,
-      required this.img,
-      required this.url});
-
-  factory PlayModel.fromJson(Map<String, dynamic> json) {
-    return PlayModel(
-        title: json['title'],
-        description: json['description'],
-        img: json['img'],
-        url: json['url']);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {"title": title, "description": description, "img": img, "url": url};
-  }
-}
 
 class PlayScreen extends StatefulWidget {
   const PlayScreen({super.key});
@@ -34,31 +12,48 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _PlayScreenState extends State<PlayScreen> {
-  List<PlayModel> plays = [
-    PlayModel(
-        title: "Memoria",
-        description:
-            "¿Qué tan buena es tu memoria visual? En este juego tendrás que encontrar los pares de imágenes que tiene diversas representaciones relacionadas con la Biblia. ¡Agudiza tu vista y tu memoria!",
-        img: "assets/plays/memory.jpg",
-        url: "/memoryPage"),
-    PlayModel(
-        title: "Adivinanza",
-        description:
-            "¿Acaso eres un detective de la Biblia? Usa tu ingenio y conocimiento bíblico para descifrar las pistas y descubrir quién es el personaje que se esconde. ¡Prepárate para un desafío muy emocionante!",
-        img: "assets/plays/riddle.jpg",
-        url: "/reddlePage"),
-    PlayModel(
-        title: "Quiz",
-        description:
-            "¿Eres un experto en la Biblia? En este juego podrás demostrarlo respondiendo a preguntas de diferentes categorías y niveles de dificultad. ¡Acepta el reto y aprende más sobre la Palabra de Dios!",
-        img: "assets/plays/quiz.jpg",
-        url: "/quizPage"),
-  ];
-
+  final _translationProvider = AppTranslationProvider();
+  List<PlayModel> plays = [];
   // Función para determinar si es tablet
   bool get isTablet {
     final width = MediaQuery.of(context).size.width;
     return width >= 600; // Consideramos tablet a partir de 600px de ancho
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loadPlays();
+  }
+
+  _loadPlays() async {
+    setState(() {
+      plays = [
+        PlayModel(
+          title: _translationProvider.tr('play_screen.games.memory.title'),
+          description:
+              _translationProvider.tr('play_screen.games.memory.description'),
+          img: "assets/plays/memory.jpg",
+          url: "/memoryPage",
+        ),
+        PlayModel(
+          title: _translationProvider.tr('play_screen.games.riddle.title'),
+          description:
+              _translationProvider.tr('play_screen.games.riddle.description'),
+          img: "assets/plays/riddle.jpg",
+          url: "/reddlePage",
+        ),
+        PlayModel(
+          title: _translationProvider.tr('play_screen.games.quiz.title'),
+          description:
+              _translationProvider.tr('play_screen.games.quiz.description'),
+          img: "assets/plays/quiz.jpg",
+          url: "/quizPage",
+        ),
+      ];
+      ;
+    });
   }
 
   @override
@@ -83,7 +78,7 @@ class _PlayScreenState extends State<PlayScreen> {
         ),
         backgroundColor: StyleColor.turquoise,
         title: Text(
-          'Juegos',
+          _translationProvider.tr('play_screen.title'),
           style: StylesApp(context)
               .textStyleBody16
               .copyWith(color: StyleColor.white),
@@ -206,7 +201,7 @@ class _PlayScreenState extends State<PlayScreen> {
 
           // Botón
           ButtonThemeWidget(
-            text: "¡Vamos!",
+            text: _translationProvider.tr('play_screen.button'),
             width: isTablet ? 200 : 150,
             buttonStyle: StylesApp(context).btnWidgetSmall,
             onPressed: () {

@@ -1,5 +1,9 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
+import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,26 +21,19 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // void _initializeCatalogues() async {
-  //   final catalogueProvider =
-  //       Provider.of<CatalogueProvider>(context, listen: false);
-  //   catalogueProvider.initialize();
-  // }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isTablet = screenWidth >= 600; // Umbral para tablets
-
+    final translationProvider = context.read<AppTranslationProvider>();
     return Scaffold(
       body: SizedBox(
         height: MediaQuery.sizeOf(context).height,
         child: Stack(
           children: [
             SingleChildScrollView(
-              child: isTablet
-                  ? Center(child: _buildTabletLayout())
-                  : _buildMobileLayout(),
+              child: ResponsiveLayout(
+                mobile: _buildMobileLayout(translationProvider),
+                tablet: _buildTabletLayout(translationProvider),
+              ),
             ),
             Positioned(
               bottom: 10,
@@ -44,10 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Align(
                 alignment: Alignment.bottomRight,
                 child: TweenAnimationBuilder<double>(
-                  duration:
-                      const Duration(seconds: 1), // Duration of the animation
-                  tween: Tween(begin: 1.0, end: 1.1), // Scale from 1.0 to 1.1
-                  curve: Curves.easeInOut, // Use curve directly here
+                  duration: const Duration(seconds: 1),
+                  tween: Tween(begin: 1.0, end: 1.1),
+                  curve: Curves.easeInOut,
                   builder: (context, scale, child) {
                     return Transform.scale(
                       scale: scale,
@@ -56,18 +52,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.pushNamed(context, '/introPage');
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Colors.transparent, // Transparent background
+                          backgroundColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
                             side: const BorderSide(
                               color: Colors.transparent,
-                              width: 2.0, // Border width
+                              width: 2.0,
                             ),
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                         child: Text(
-                          'Ver intro',
+                          translationProvider.tr('home_screen.view_intro'),
                           style: StylesApp(context).textStyleBody5,
                         ),
                       ),
@@ -86,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Layout para móviles (una columna)
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -121,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 40.0,
         ),
         TextWithGradient(
-          text: "REGISTRA UNA\n CUENTA GRATIS",
+          text: translationProvider.tr("home_screen.register_free_account"),
           font: StylesApp(context).textWithGradient,
         ),
         const SizedBox(
@@ -132,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               ButtonThemeWidget(
-                text: "Crear una cuenta",
+                text: translationProvider.tr('home_screen.create_account'),
                 buttonStyle: StylesApp(context).btnPrimary,
                 onPressed: () {
                   Navigator.pushNamed(context, '/registerPage');
@@ -144,12 +139,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 28,
               ),
               ButtonThemeWidget(
-                text: "Iniciar Sesión",
+                text: translationProvider.tr('home_screen.login'),
                 buttonStyle: StylesApp(context).btnSecondary,
                 onPressed: () {
                   Navigator.pushNamed(context, '/loginPage');
                 },
                 width: StylesApp(context).btnHeight.width,
+                height: StylesApp(context).btnHeight.height,
+              ),
+              const SizedBox(height: 28),
+              ButtonThemeWidget(
+                textWithImage: true,
+                image: "assets/google-icon.png",
+                text: translationProvider.tr('home_screen.sign_up_google'),
+                textStyle: StylesApp(context).buttonTextStyle,
+                buttonStyle: StylesApp(context).btnTransparentSmall,
+                onPressed: () async {
+                  final authProvider = context.read<AuthenticationProvider>();
+                  LoadingService().showLoading(context);
+                  final user = await authProvider.loginWithGoogle(context);
+
+                  if (user.error != null) {
+                    LoadingService().hideLoading();
+                    await showCustomDialog(context,
+                        message: user.userFriendlyError ?? '',
+                        messageDetail: user.error ??
+                            translationProvider
+                                .tr('home_screen.sign_up_google'),
+                        showDetails: true,
+                        dialogType: DialogType.error);
+                  } else {
+                    LoadingService().hideLoading();
+                    if (!mounted) return;
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/layoutPage', (route) => false);
+                  }
+                },
+                width: isTablet(context)
+                    ? StylesApp(context).formWidth
+                    : StylesApp(context).btnHeight.width,
                 height: StylesApp(context).btnHeight.height,
               ),
             ],
@@ -163,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Layout para tablets (dos columnas)
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(AppTranslationProvider translationProvider) {
     return SizedBox(
       height: MediaQuery.sizeOf(context).height,
       child: Padding(
@@ -218,14 +246,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextWithGradient(
-                    text: "REGISTRA UNA\n CUENTA GRATIS",
+                    text: translationProvider
+                        .tr('home_screen.register_free_account'),
                     font: StylesApp(context).textWithGradient,
                   ),
                   const SizedBox(height: 53),
                   Column(
                     children: [
                       ButtonThemeWidget(
-                        text: "Crear una cuenta",
+                        text: translationProvider
+                            .tr('home_screen.create_account'),
                         buttonStyle: StylesApp(context).btnPrimary,
                         onPressed: () {
                           Navigator.pushNamed(context, '/registerPage');
@@ -235,10 +265,44 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 28),
                       ButtonThemeWidget(
-                        text: "Iniciar Sesión",
+                        text: translationProvider.tr('home_screen.login'),
                         buttonStyle: StylesApp(context).btnSecondary,
                         onPressed: () {
                           Navigator.pushNamed(context, '/loginPage');
+                        },
+                        width: StylesApp(context).btnHeight.width * 0.45,
+                        height: StylesApp(context).btnHeight.height,
+                      ),
+                      const SizedBox(height: 28),
+                      ButtonThemeWidget(
+                        textWithImage: true,
+                        image: "assets/google-icon.png",
+                        text: translationProvider
+                            .tr('home_screen.sign_up_google'),
+                        textStyle: StylesApp(context).buttonTextStyle,
+                        buttonStyle: StylesApp(context).btnTransparentSmall,
+                        onPressed: () async {
+                          final authProvider =
+                              context.read<AuthenticationProvider>();
+                          LoadingService().showLoading(context);
+                          final user =
+                              await authProvider.loginWithGoogle(context);
+
+                          if (user.error != null) {
+                            LoadingService().hideLoading();
+                            await showCustomDialog(context,
+                                message: user.userFriendlyError ?? '',
+                                messageDetail: user.error ??
+                                    translationProvider
+                                        .tr('home_screen.sign_up_google'),
+                                showDetails: true,
+                                dialogType: DialogType.error);
+                          } else {
+                            LoadingService().hideLoading();
+                            if (!mounted) return;
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, '/layoutPage', (route) => false);
+                          }
                         },
                         width: StylesApp(context).btnHeight.width * 0.45,
                         height: StylesApp(context).btnHeight.height,

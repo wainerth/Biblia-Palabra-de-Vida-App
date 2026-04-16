@@ -1,9 +1,11 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/services/device_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -31,12 +33,8 @@ class _AboutScreenState extends State<AboutScreen> {
     }
   }
 
-  // Método para verificar si estamos en tablet
-  bool _isTablet(BuildContext context) {
-    return isTablet(context); // Asumo que ya tienes esta función
-  }
-
   Widget _buildMobileLayout() {
+    final translationProvider = context.read<AppTranslationProvider>();
     return Scaffold(
       backgroundColor: const Color(0xFF12CBC4),
       appBar: AppBar(
@@ -85,7 +83,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Biblia Palabra de Vida',
+                    translationProvider.tr('about.title'),
                     style: StylesApp(context).textStyleBody12.copyWith(
                           color: StyleColor.orange,
                           fontSize: 24,
@@ -100,7 +98,7 @@ class _AboutScreenState extends State<AboutScreen> {
             Text(
               _versionApp != null && _versionApp!.isNotEmpty
                   ? _versionApp!['appVersion'].toString()
-                  : 'Cargando...',
+                  : translationProvider.tr('about.loading'),
               style: StylesApp(context).textStyleBody16.copyWith(
                     color: Colors.white,
                     fontSize: 16,
@@ -116,7 +114,7 @@ class _AboutScreenState extends State<AboutScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text(
-                'Esta aplicación fue creada para ayudarte a estudiar y compartir la Palabra de Dios de manera interactiva y divertida.\n\nDesarrollada por el equipo de Biblia Palabra de Vida.',
+                translationProvider.tr('about.app_description'),
                 textAlign: TextAlign.center,
                 style: StylesApp(context).textStyleBody16.copyWith(
                       color: Colors.white,
@@ -138,21 +136,20 @@ class _AboutScreenState extends State<AboutScreen> {
                     scheme: 'mailto',
                     path: GraphQLConfig.emailContact,
                     queryParameters: {
-                      'subject': 'Consulta - Biblia Palabra de Vida',
-                      'body': 'Hola, tengo una consulta sobre la aplicación:',
+                      'subject': translationProvider.tr('about.email_subject'),
+                      'body': translationProvider.tr('about.email_body'),
                     },
                   );
 
                   if (await canLaunchUrl(emailLaunchUri)) {
                     await launchUrl(emailLaunchUri);
                   } else {
-                    showSnackBar("No se pudo abrir la aplicación de correo",
+                    showSnackBar(translationProvider.tr('about.email_error'),
                         type: SnackBarType.error);
-                   
                   }
                 },
                 child: Text(
-                  'Contacto: ${GraphQLConfig.emailContact}',
+                  '${translationProvider.tr('about.contact')} ${GraphQLConfig.emailContact}',
                   style: StylesApp(context).textStyleBody16.copyWith(
                         color: Colors.white,
                         fontSize: 15,
@@ -162,7 +159,7 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
             const Spacer(),
             Text(
-              '© 2025 Biblia Palabra de Vida',
+              translationProvider.tr('about.copyright'),
               style: StylesApp(context).textStyleBody16.copyWith(
                     color: Colors.white70,
                     fontSize: 13,
@@ -176,6 +173,8 @@ class _AboutScreenState extends State<AboutScreen> {
   }
 
   Widget _buildTabletLayout() {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return Scaffold(
       backgroundColor: const Color(0xFF12CBC4),
       appBar: AppBar(
@@ -216,7 +215,7 @@ class _AboutScreenState extends State<AboutScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withValues(alpha: 0.3),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -236,7 +235,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
                     // Título principal
                     Text(
-                      'Biblia\nPalabra de Vida',
+                      translationProvider.tr('about.title'),
                       textAlign: TextAlign.center,
                       style: StylesApp(context).textStyleBody12.copyWith(
                             color: StyleColor.orange,
@@ -253,13 +252,13 @@ class _AboutScreenState extends State<AboutScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         _versionApp != null && _versionApp!.isNotEmpty
-                            ? 'Versión: ${_versionApp!['appVersion'].toString()}'
-                            : 'Cargando versión...',
+                            ? '${translationProvider.tr('about.version_label')} ${_versionApp!['appVersion'].toString()}'
+                            : translationProvider.tr('about.loading_version'),
                         style: StylesApp(context).textStyleBody18.copyWith(
                               color: Colors.white,
                               fontSize: 18,
@@ -274,15 +273,15 @@ class _AboutScreenState extends State<AboutScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.3)),
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3)),
                       ),
                       child: Column(
                         children: [
                           Text(
-                            '© 2025 Biblia Palabra de Vida',
+                            translationProvider.tr('about.copyright'),
                             style: StylesApp(context).textStyleBody16.copyWith(
                                   color: Colors.white70,
                                   fontSize: 15,
@@ -291,7 +290,7 @@ class _AboutScreenState extends State<AboutScreen> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            'Todos los derechos reservados',
+                            translationProvider.tr('about.all_rights_reserved'),
                             style: StylesApp(context).textStyleBody14.copyWith(
                                   color: Colors.white60,
                                   fontSize: 14,
@@ -322,7 +321,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   children: [
                     // Título de la columna
                     Text(
-                      'Acerca de la Aplicación',
+                      translationProvider.tr('about.about_app'),
                       style: StylesApp(context).textStyleBody16.copyWith(
                             color: Color(0xFF12CBC4),
                             fontSize: 28,
@@ -339,7 +338,7 @@ class _AboutScreenState extends State<AboutScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Bienvenido a Biblia Palabra de Vida',
+                              translationProvider.tr('about.welcome'),
                               style:
                                   StylesApp(context).textStyleBody20.copyWith(
                                         color: Color(0xFF333333),
@@ -351,7 +350,7 @@ class _AboutScreenState extends State<AboutScreen> {
                             const SizedBox(height: 20),
 
                             Text(
-                              'Esta aplicación fue creada con el propósito de ayudarte a estudiar, comprender y compartir la Palabra de Dios de manera interactiva, accesible y enriquecedora.',
+                              translationProvider.tr('about.app_description'),
                               style:
                                   StylesApp(context).textStyleBody16.copyWith(
                                         color: Color(0xFF555555),
@@ -364,7 +363,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
                             // Características
                             Text(
-                              'Características principales:',
+                              translationProvider.tr('about.features_title'),
                               style:
                                   StylesApp(context).textStyleBody16.copyWith(
                                         color: Color(0xFF333333),
@@ -375,28 +374,28 @@ class _AboutScreenState extends State<AboutScreen> {
 
                             const SizedBox(height: 15),
 
+                            _buildFeatureItem( translationProvider.tr('about.feature_multiple_versions')),
                             _buildFeatureItem(
-                                '📖 Múltiples versiones bíblicas'),
-                            _buildFeatureItem(
-                                '🔍 Búsqueda avanzada de versículos'),
-                            _buildFeatureItem('⭐ Marcadores y favoritos'),
-                            _buildFeatureItem('🎨 Personalización de temas'),
-                            _buildFeatureItem('🔊 Lectura en voz alta'),
-                            _buildFeatureItem('📝 Notas y resaltados'),
+                                translationProvider.tr('about.feature_advanced_search')),
+                            _buildFeatureItem(translationProvider.tr('about.feature_bookmarks')),
+                            _buildFeatureItem(translationProvider.tr('about.feature_themes')),
+                            _buildFeatureItem(translationProvider.tr('about.feature_audio')),
+                            _buildFeatureItem(translationProvider.tr('about.feature_notes')),
 
                             const SizedBox(height: 30),
 
                             // Divider
                             Container(
                               height: 1,
-                              color: const Color(0xFF12CBC4).withOpacity(0.3),
+                              color: const Color(0xFF12CBC4)
+                                  .withValues(alpha: 0.3),
                             ),
 
                             const SizedBox(height: 30),
 
                             // Equipo de desarrollo
                             Text(
-                              'Equipo de Desarrollo',
+                              translationProvider.tr('about.development_team'),
                               style:
                                   StylesApp(context).textStyleBody16.copyWith(
                                         color: Color(0xFF333333),
@@ -408,7 +407,7 @@ class _AboutScreenState extends State<AboutScreen> {
                             const SizedBox(height: 15),
 
                             Text(
-                              'Desarrollada por un equipo apasionado por la Palabra de Dios y comprometido con crear herramientas digitales que faciliten el estudio bíblico.',
+                              translationProvider.tr('about.team_description') ,
                               style:
                                   StylesApp(context).textStyleBody16.copyWith(
                                         color: Color(0xFF555555),
@@ -423,18 +422,19 @@ class _AboutScreenState extends State<AboutScreen> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF12CBC4).withOpacity(0.1),
+                                color: const Color(0xFF12CBC4)
+                                    .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(
-                                  color:
-                                      const Color(0xFF12CBC4).withOpacity(0.2),
+                                  color: const Color(0xFF12CBC4)
+                                      .withValues(alpha: 0.2),
                                 ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '📧 Contacto',
+                                    translationProvider.tr('about.contact_section'),
                                     style: StylesApp(context)
                                         .textStyleBody16
                                         .copyWith(
@@ -451,17 +451,18 @@ class _AboutScreenState extends State<AboutScreen> {
                                         path: GraphQLConfig.emailContact,
                                         queryParameters: {
                                           'subject':
-                                              'Consulta - Biblia Palabra de Vida',
+                                              translationProvider.tr('about.email_subject'),
                                           'body':
-                                              'Hola, tengo una consulta sobre la aplicación:',
+                                              translationProvider.tr('about.email_body'),
                                         },
                                       );
 
                                       if (await canLaunchUrl(emailLaunchUri)) {
                                         await launchUrl(emailLaunchUri);
                                       } else {
-                                        showSnackBar("No se pudo abrir la aplicación de correo",
-                        type: SnackBarType.error);
+                                        showSnackBar(
+                                            translationProvider.tr('about.email_error'),
+                                            type: SnackBarType.error);
                                       }
                                     },
                                     child: Row(
@@ -490,7 +491,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                   ),
                                   const SizedBox(height: 15),
                                   Text(
-                                    '¿Tienes preguntas, sugerencias o comentarios? ¡Nos encantaría escucharte!',
+                                   translationProvider.tr('about.contact_instruction'),
                                     style: StylesApp(context)
                                         .textStyleBody16
                                         .copyWith(
@@ -544,7 +545,10 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _isTablet(context) ? _buildTabletLayout() : _buildMobileLayout();
+    return ResponsiveLayout(
+      mobile: _buildMobileLayout(),
+      tablet: _buildTabletLayout(),
+    );
   }
 
   Future<Map<String, dynamic>> _loadDeviceInfo() async {

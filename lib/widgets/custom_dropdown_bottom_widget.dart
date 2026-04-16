@@ -11,6 +11,7 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
   final ValueChanged<ModelData?> onChanged;
   final String hintText;
   final bool border;
+  final BoxDecoration? boxDecoration;
   final EdgeInsetsGeometry? contentPadding;
   final Widget? leadingIcon;
   final BibleTheme? currentTheme;
@@ -22,6 +23,7 @@ class CustomDropdownBottomWidget<T> extends StatefulWidget {
       required this.onChanged,
       required this.hintText,
       this.border = true,
+      this.boxDecoration,
       this.contentPadding =
           const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       this.leadingIcon,
@@ -72,15 +74,17 @@ class _CustomDropdownBottomWidgetState<T>
       child: Container(
         height: StylesApp(context).sizeTextFormField.height,
         decoration: widget.border
-            ? BoxDecoration(
-                color: widget.currentTheme != null
-                    ? widget.currentTheme!.backgroundColor
-                    : Colors.white,
-                border: Border.all(color:widget.currentTheme != null
-                    ? widget.currentTheme!.textColor
-                    : Colors.black),
-                borderRadius: BorderRadius.circular(8.0),
-              )
+            ? widget.boxDecoration ??
+                BoxDecoration(
+                  color: widget.currentTheme != null
+                      ? widget.currentTheme!.backgroundColor
+                      : Colors.white,
+                  border: Border.all(
+                      color: widget.currentTheme != null
+                          ? widget.currentTheme!.textColor
+                          : Colors.black),
+                  borderRadius: BorderRadius.circular(8.0),
+                )
             : null,
         child: Padding(
           padding: widget.contentPadding!,

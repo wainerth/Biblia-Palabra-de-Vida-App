@@ -1,3 +1,4 @@
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/screens/library/book_detail_screen.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
@@ -12,7 +13,7 @@ class OnlineChallengeScreen extends StatefulWidget {
 
 class _OnlineChallengeScreenState extends State<OnlineChallengeScreen> {
   int _selectedCategory = 0;
-  final List<String> categories = ['Todos', 'Diarios', 'Semanal', 'Grupales', 'Individuales'];
+  final List<String> categories = AppConstants.categories;
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +55,8 @@ class _OnlineChallengeScreenState extends State<OnlineChallengeScreen> {
                     selected: _selectedCategory == index,
                     selectedColor: StyleColor.turquoise,
                     labelStyle: TextStyle(
-                      color: _selectedCategory == index 
-                          ? StyleColor.white 
+                      color: _selectedCategory == index
+                          ? StyleColor.white
                           : StyleColor.grayDark,
                     ),
                     onSelected: (selected) {
@@ -68,7 +69,7 @@ class _OnlineChallengeScreenState extends State<OnlineChallengeScreen> {
               },
             ),
           ),
-          
+
           Expanded(
             child: ListView(
               padding: EdgeInsets.all(16),
@@ -81,27 +82,30 @@ class _OnlineChallengeScreenState extends State<OnlineChallengeScreen> {
                   color: StyleColor.orange,
                   participants: 254,
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => DailyVerseChallenge()
-                    ));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DailyVerseChallenge()));
                   },
                 ),
-                
+
                 // Reto: Serie de lectura
                 ChallengeCard(
                   title: "Leer los Evangelios en 30 días",
-                  description: "Completa la lectura de Mateo, Marcos, Lucas y Juan",
+                  description:
+                      "Completa la lectura de Mateo, Marcos, Lucas y Juan",
                   icon: Icons.book,
                   color: StyleColor.greenLight,
                   participants: 189,
                   progress: 65,
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => ReadingChallenge()
-                    ));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => readingChallenge()));
                   },
                 ),
-                
+
                 // Reto: Quiz bíblico
                 ChallengeCard(
                   title: "Quiz de Personajes Bíblicos",
@@ -110,12 +114,13 @@ class _OnlineChallengeScreenState extends State<OnlineChallengeScreen> {
                   color: StyleColor.blueMedium,
                   participants: 312,
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => QuizChallenge()
-                    ));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => quizChallenge()));
                   },
                 ),
-                
+
                 // Reto: Grupo de estudio
                 ChallengeCard(
                   title: "Estudio de Romanos en Grupo",
@@ -124,23 +129,26 @@ class _OnlineChallengeScreenState extends State<OnlineChallengeScreen> {
                   color: StyleColor.electricViolet,
                   participants: 45,
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => GroupStudyChallenge()
-                    ));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => groupStudyChallenge()));
                   },
                 ),
-                
+
                 // Reto: Oración comunitaria
                 ChallengeCard(
                   title: "Cadena de Oración 24/7",
-                  description: "Participa en nuestra cadena de oración continua",
+                  description:
+                      "Participa en nuestra cadena de oración continua",
                   icon: Icons.access_time,
                   color: StyleColor.yellowLight,
                   participants: 127,
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => PrayerChainChallenge()
-                    ));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => prayerChainChallenge()));
                   },
                 ),
               ],
@@ -150,14 +158,16 @@ class _OnlineChallengeScreenState extends State<OnlineChallengeScreen> {
       ),
     );
   }
-  
-  ReadingChallenge() {}
-  
-  GroupStudyChallenge() {}
-  
-  PrayerChainChallenge() {}
-  
-  QuizChallenge() {}
+
+  Widget readingChallenge() {
+    return Container();
+  }
+
+  groupStudyChallenge() {}
+
+  prayerChainChallenge() {}
+
+  quizChallenge() {}
 }
 
 class ChallengeCard extends StatelessWidget {
@@ -196,7 +206,7 @@ class ChallengeCard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.2),
+                      color: color.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(icon, color: color),
@@ -209,24 +219,24 @@ class ChallengeCard extends StatelessWidget {
                         Text(
                           title,
                           style: StylesApp(context).textStyleBody16.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: StyleColor.black,
-                          ),
+                                fontWeight: FontWeight.bold,
+                                color: StyleColor.black,
+                              ),
                         ),
                         Text(
                           description,
                           style: StylesApp(context).textStyleBody14.copyWith(
-                            color: StyleColor.grayDark,
-                          ),
+                                color: StyleColor.grayDark,
+                              ),
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              
+
               SizedBox(height: 12),
-              
+
               // Barra de progreso (si aplica)
               if (progress != null) ...[
                 LinearProgressIndicator(
@@ -238,30 +248,31 @@ class ChallengeCard extends StatelessWidget {
                 Text(
                   "$progress% completado",
                   style: StylesApp(context).textStyleBody12.copyWith(
-                    color: StyleColor.grayDark,
-                  ),
+                        color: StyleColor.grayDark,
+                      ),
                 ),
                 SizedBox(height: 8),
               ],
-              
+
               // Participantes
               Row(
                 children: [
-                  Icon(Icons.people_outline, size: 16, color: StyleColor.grayDark),
+                  Icon(Icons.people_outline,
+                      size: 16, color: StyleColor.grayDark),
                   SizedBox(width: 4),
                   Text(
                     "2 participantes",
                     style: StylesApp(context).textStyleBody12.copyWith(
-                      color: StyleColor.grayDark,
-                    ),
+                          color: StyleColor.grayDark,
+                        ),
                   ),
                   Spacer(),
                   Text(
                     "Unirse",
                     style: StylesApp(context).textStyleBody14.copyWith(
-                      color: StyleColor.turquoise,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: StyleColor.turquoise,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ],
               ),
@@ -275,6 +286,8 @@ class ChallengeCard extends StatelessWidget {
 
 // Ejemplo de pantalla de reto específico
 class DailyVerseChallenge extends StatelessWidget {
+  const DailyVerseChallenge({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -289,8 +302,8 @@ class DailyVerseChallenge extends StatelessWidget {
             Text(
               "Juan 3:16",
               style: StylesApp(context).textStyleBody20.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             SizedBox(height: 20),
             Text(

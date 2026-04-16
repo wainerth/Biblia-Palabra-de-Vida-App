@@ -40,6 +40,9 @@ class SearchByBookWidget extends StatefulWidget {
 }
 
 class _SearchByBookWidgetState extends State<SearchByBookWidget> {
+
+  final translationProvider = AppTranslationProvider();
+  
   late BibleTheme currentTheme;
 
   // variables para almacenar listas globales
@@ -164,7 +167,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       } catch (e) {
         if (!mounted) return;
         await showCustomDialog(context,
-            message: 'Error al cargar los datos: $e',
+            message: translationProvider.trParams('search_by_book.messages.error_loading_data', {'error': e.toString()}),
             dialogType: DialogType.error);
       }
     });
@@ -176,33 +179,38 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         Provider.of<BibleThemeProvider>(context, listen: false);
     currentTheme = themeProvider.themeData;
 
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Layout condicional según dispositivo
-          if (!isTablet) _buildMobileLayout() else _buildTabletLayout(),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Layout condicional según dispositivo
 
-          // Botón Aceptar (compartido)
-          SizedBox(height: spacingHeight),
-          Padding(
-            padding: horizontalPadding,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ButtonThemeWidget(
-                  text: "Aceptar",
-                  width: isTablet ? 200 : null,
-                  height: isTablet ? 50 : null,
-                  buttonStyle: StylesApp(context).btnWidgetSmall,
-                  onPressed: _onAcceptPressed,
-                )
-              ],
+        Expanded(
+          child: SingleChildScrollView(
+            child: Container(
+              child: !isTablet ? _buildMobileLayout() : _buildTabletLayout(),
             ),
           ),
-          SizedBox(height: spacingHeight),
-        ],
-      ),
+        ),
+
+        // Botón Aceptar (compartido)
+        SizedBox(height: spacingHeight),
+        Padding(
+          padding: horizontalPadding,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ButtonThemeWidget(
+                text: translationProvider.tr('search_by_book.button'),
+                width: isTablet ? 200 : null,
+                height: isTablet ? 50 : null,
+                buttonStyle: StylesApp(context).btnWidgetSmall,
+                onPressed: _onAcceptPressed,
+              )
+            ],
+          ),
+        ),
+        SizedBox(height: spacingHeight),
+      ],
     );
   }
 
@@ -213,44 +221,68 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         SizedBox(height: spacingHeight),
 
         // Selector de versión
-        Container(
-          padding: horizontalPadding,
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: maxDropdownWidth,
-          ),
-          child: CustomDropdownBottomWidget(
-            hintText: "Seleccione la version",
-            items: bibleVersions,
-            onChanged: _onVersionChanged,
-            selectedItem: versionSelected!.value.isNotEmpty
-                ? bibleVersions.firstWhereOrNull((element) =>
-                    element.value.toLowerCase() ==
-                    versionSelected?.value.toLowerCase())
-                : null,
+        Padding(
+           padding: horizontalPadding,
+          child: Container(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: currentTheme.buttonColor,
+              ),
+            ),
+            constraints: BoxConstraints(
+              minWidth: 160.0,
+              maxWidth: maxDropdownWidth,
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: CustomDropdownBottomWidget(
+              hintText: translationProvider.tr('search_by_book.dropdowns.version'),
+              items: bibleVersions,
+              border: false,
+              currentTheme: currentTheme,
+              onChanged: _onVersionChanged,
+              selectedItem: versionSelected!.value.isNotEmpty
+                  ? bibleVersions.firstWhereOrNull((element) =>
+                      element.value.toLowerCase() ==
+                      versionSelected?.value.toLowerCase())
+                  : null,
+            ),
           ),
         ),
 
         SizedBox(height: spacingHeight),
 
         // Selector de libro
-        Container(
-          padding: horizontalPadding,
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: maxDropdownWidth,
-          ),
-          child: CustomDropdownBottomWidget(
-            hintText: "Seleccione el Libro",
-            items: books,
-            onChanged: _onBookChanged,
-            selectedItem: bookSelected!.value.isNotEmpty
-                ? books.firstWhereOrNull((element) =>
-                    element.value.toLowerCase() ==
-                    bookSelected?.value.toLowerCase())
-                : books.isNotEmpty
-                    ? books.first
-                    : null,
+        Padding(
+           padding: horizontalPadding,
+          child: Container(
+            padding: horizontalPadding,
+             clipBehavior: Clip.antiAliasWithSaveLayer,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: currentTheme.buttonColor,
+              ),
+            ),
+            constraints: BoxConstraints(
+              minWidth: 160.0,
+              maxWidth: maxDropdownWidth,
+            ),
+            child: CustomDropdownBottomWidget(
+              hintText: translationProvider.tr('search_by_book.dropdowns.book'),
+              items: books,
+              border: false,
+              currentTheme: currentTheme,
+              onChanged: _onBookChanged,
+              selectedItem: bookSelected!.value.isNotEmpty
+                  ? books.firstWhereOrNull((element) =>
+                      element.value.toLowerCase() ==
+                      bookSelected?.value.toLowerCase())
+                  : books.isNotEmpty
+                      ? books.first
+                      : null,
+            ),
           ),
         ),
 
@@ -324,7 +356,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 ),
                                 SizedBox(width: 8),
                                 Text(
-                                  "Capítulos",
+                                  translationProvider.tr('search_by_book.sections.chapters'),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -335,7 +367,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 ),
                                 Spacer(),
                                 Text(
-                                  "Total: ${chapters.length}",
+                                  translationProvider.trParams('search_by_book.sections.total_chapters', {'count': chapters.length.toString()}),
                                   style: StylesApp(context)
                                       .textStyleBody12
                                       .copyWith(
@@ -354,7 +386,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 : chapters.isEmpty
                                     ? Center(
                                         child: Text(
-                                          "Seleccione un libro",
+                                          translationProvider.tr('search_by_book.sections.select_book'),
                                           style: StylesApp(context)
                                               .textStyleBody14
                                               .copyWith(
@@ -416,7 +448,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 ),
                                 SizedBox(width: 8),
                                 Text(
-                                  "Versículos",
+                                  translationProvider.tr('search_by_book.sections.verses'),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -428,7 +460,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                 Spacer(),
                                 if (chapterSelected != null)
                                   Text(
-                                    "Cap. ${chapterSelected!.chapter}",
+                                    translationProvider.trParams('search_by_book.sections.chapter', {'number': chapterSelected!.chapter.toString()}),
                                     style: StylesApp(context)
                                         .textStyleBody12
                                         .copyWith(
@@ -458,7 +490,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                                             ),
                                             SizedBox(height: 8),
                                             Text(
-                                              "Seleccione un capítulo",
+                                              translationProvider.tr('search_by_book.sections.select_chapter'),
                                               style: StylesApp(context)
                                                   .textStyleBody14
                                                   .copyWith(
@@ -499,13 +531,11 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           ),
           // Switch de rango (en tablet va en la columna de versículos)
           if (widget.showSelectedRange) ...[
-          SizedBox(height: spacingHeight),
-
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: _buildRangeSwitchTablet(),
-          ),
-
+            SizedBox(height: spacingHeight),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: _buildRangeSwitchTablet(),
+            ),
           ]
         ],
       ),
@@ -516,16 +546,19 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
 
   Widget _buildVersionSelectorTablet() {
     return Container(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        // border: Border.all(
-        //   color: currentTheme.borderColor,
-        // ),
+        border: Border.all(
+          color: currentTheme.buttonColor,
+        ),
       ),
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: CustomDropdownBottomWidget(
-        hintText: "Seleccione la versión",
+        hintText: translationProvider.tr('search_by_book.dropdowns.version'),
         items: bibleVersions,
+        border: false,
+        currentTheme: currentTheme,
         onChanged: _onVersionChanged,
         selectedItem: versionSelected!.value.isNotEmpty
             ? bibleVersions.firstWhereOrNull((element) =>
@@ -540,15 +573,17 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        // border: Border.all(
-        //   color: currentTheme.borderColor,
-        // ),
+        border: Border.all(
+          color: currentTheme.buttonColor,
+        ),
       ),
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: CustomDropdownBottomWidget(
-        hintText: "Seleccione el libro",
+        hintText: translationProvider.tr('search_by_book.dropdowns.book'),
         items: books,
         onChanged: _onBookChanged,
+        border: false,
+        currentTheme: currentTheme,
         selectedItem: bookSelected!.value.isNotEmpty
             ? books.firstWhereOrNull((element) =>
                 element.value.toLowerCase() ==
@@ -646,7 +681,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
             child: Row(
               children: [
                 Text(
-                  "Capítulos",
+                  translationProvider.tr('search_by_book.sections.chapters'),
                   style: StylesApp(context).textStyleBody16.copyWith(
                         color: currentTheme.textColor,
                         fontSize: 16,
@@ -711,7 +746,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
             child: Row(
               children: [
                 Text(
-                  "Versículos",
+                  translationProvider.tr('search_by_book.sections.verses'),
                   style: StylesApp(context).textStyleBody16.copyWith(
                         color: currentTheme.textColor,
                         fontSize: 16,
@@ -754,7 +789,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                 currentTheme: currentTheme,
                 rangeSelect: verseRange,
                 initiallySelected: _selectedItems,
-                onTap: (verse) {
+                onTap: (List<VerseModel> verse) {
                   setState(() {
                     _selectedItems = verse;
                     verseSelected = verse.isNotEmpty ? verse.first : null;
@@ -778,7 +813,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           Expanded(
             child: ListTile(
               title: Text(
-                'Rango de versículos',
+                translationProvider.tr('search_by_book.range.title'),
                 style: StylesApp(context).textStyleBody12.copyWith(
                       color: currentTheme.textColor,
                       fontSize: 12,
@@ -791,13 +826,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
                     WidgetStatePropertyAll(StyleColor.grayMedium),
                 value: verseRange,
                 onChanged: (bool value) {
-                  setState(() {
-                    verseRange = value;
-                    _selectedItems = [];
-                    if (!value && verseSelected != null) {
-                      _selectedItems = [verseSelected!];
-                    }
-                  });
+                  _switchRangeSelected(value);
                 },
               ),
             ),
@@ -826,7 +855,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
           ),
           SizedBox(width: 8),
           Text(
-            'Seleccionar rango',
+            translationProvider.tr('search_by_book.range.select_range'),
             style: StylesApp(context).textStyleBody14.copyWith(
                   color: currentTheme.textColor,
                   fontWeight: FontWeight.w500,
@@ -841,13 +870,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
               trackOutlineColor: WidgetStatePropertyAll(StyleColor.grayMedium),
               value: verseRange,
               onChanged: (bool value) {
-                setState(() {
-                  verseRange = value;
-                  _selectedItems = [];
-                  if (!value && verseSelected != null) {
-                    _selectedItems = [verseSelected!];
-                  }
-                });
+                _switchRangeSelected(value);
               },
             ),
           ),
@@ -862,6 +885,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
     if (version == null) return;
 
     try {
+      // guardamos la version y expando chapters
       setState(() {
         versionSelected = version;
         _chaptersExpanded = true;
@@ -870,9 +894,10 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
       await loadBookByVersion(version.value);
 
       if (books.isEmpty) {
-        throw Exception('No hay libros disponibles para esta versión');
+        throw Exception(translationProvider.tr('search_by_book.messages.no_books_available'));
       }
 
+      // guardamos libros
       ModelData? newBookSelected;
       if (bookSelected != null && bookSelected!.originalData != null) {
         final currentBookNumber = bookSelected!.originalData!.numberBook;
@@ -884,23 +909,23 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
 
       setState(() {
         bookSelected = newBookSelected;
-        _chaptersExpanded = true;
       });
 
       await getChapterByBook(bookSelected!.value);
 
       if (chapters.isEmpty) {
-        throw Exception('No hay capítulos disponibles para este libro');
+        throw Exception(translationProvider.tr('search_by_book.messages.no_chapters_available'));
       }
-
+      // buscamos chapter si ya hay uno previo usar ese si no el primero
       ChapterModel? newChapterSelected;
-      if (chapterSelected != null) {
-        final currentChapterNumber = chapterSelected!.chapter;
-        newChapterSelected = chapters.firstWhereOrNull(
-            (chapter) => chapter.chapter == currentChapterNumber);
-      }
-
-      newChapterSelected ??= chapters.first;
+      // if (chapterSelected != null) {
+      // final currentChapterNumber = chapterSelected!.chapter;
+      newChapterSelected = chapterSelected != null
+          ? chapters.firstWhere(
+              (chapter) => chapter.chapter == chapterSelected?.chapter,
+              orElse: () => chapters.first)
+          : chapters.first;
+      // }
 
       setState(() {
         chapterSelected = newChapterSelected;
@@ -911,8 +936,28 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         await loadVerses(chapterSelected!.id!);
         setState(() {
           _versesExpanded = true;
-          _selectedItems = verses.isNotEmpty ? [verses.first] : [];
-          verseSelected = verses.isNotEmpty ? verses.first : null;
+          if (_selectedItems.isNotEmpty) {
+            final startVerse = _selectedItems
+                .map((v) => v.verse)
+                .reduce((a, b) => a < b ? a : b);
+            final endVerse = _selectedItems
+                .map((v) => v.verse)
+                .reduce((a, b) => a > b ? a : b);
+
+            final rangeVerses = verses
+                .where((v) => v.verse >= startVerse && v.verse <= endVerse)
+                .toList();
+            _selectedItems =
+                rangeVerses.isNotEmpty ? rangeVerses : [verses.first];
+          } else {
+            _selectedItems = verses.isNotEmpty ? [verses.first] : [];
+          }
+          verseSelected = verseSelected != null
+              ? verses.firstWhere((verse) => verse.id == versionSelected?.value,
+                  orElse: () => verses.first)
+              : verses.isNotEmpty
+                  ? verses.first
+                  : null;
         });
       }
     } catch (e) {
@@ -926,7 +971,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         });
 
         await showCustomDialog(context,
-            message: 'Error al cambiar versión: ${e.toString()}',
+            message: translationProvider.trParams('search_by_book.messages.error_changing_version', {'error': e.toString()}),
             dialogType: DialogType.error);
       }
     }
@@ -1006,7 +1051,7 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         chapterSelected == null ||
         _selectedItems.isEmpty) {
       showCustomDialog(context,
-          message: "Debe seleccionar todos los campos",
+          message: translationProvider.tr('search_by_book.messages.fields_required'),
           dialogType: DialogType.error);
       return;
     }
@@ -1110,5 +1155,15 @@ class _SearchByBookWidgetState extends State<SearchByBookWidget> {
         setState(() => loadingVerses = false);
       }
     }
+  }
+
+  void _switchRangeSelected(bool value) {
+    setState(() {
+      verseRange = value;
+      _selectedItems = [];
+      if (!value && verseSelected != null) {
+        _selectedItems = [verseSelected!];
+      }
+    });
   }
 }

@@ -1,6 +1,8 @@
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/reference_card_tablet.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
@@ -13,12 +15,8 @@ class VideoPlayerScreen extends StatefulWidget {
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   final GlobalKey _playerKey = GlobalKey();
+  final _translationProvider = AppTranslationProvider();
 
-  // Función para determinar si es tablet
-  bool get isTablet {
-    final width = MediaQuery.of(context).size.width;
-    return width >= 600;
-  }
 
   @override
   void initState() {
@@ -32,7 +30,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return isTablet ? _buildTabletLayout() : _buildMobileLayout();
+    return ResponsiveLayout(
+      mobile: _buildMobileLayout(),
+      tablet: _buildTabletLayout(),
+    );
   }
 
   _buildMobileLayout() {
@@ -41,7 +42,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         child: CustomScrollView(slivers: [
           SliverToBoxAdapter(
             child: AppBarHeaderWidget(
-              title: "Predicas",
+              title: _translationProvider.tr("video_player_screen.title"),
               styleText: StylesApp(context).textStyleBody7,
               backColor: StyleColor.turquoise,
               textButtonColor: Colors.white,
@@ -138,7 +139,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
-                  "Referencias",
+                  _translationProvider.tr("video_player_screen.references"),
                   style: StylesApp(context)
                       .textStyleBody14
                       .copyWith(color: StyleColor.turquoise),
@@ -198,7 +199,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         child: Column(
           children: [
             AppBarHeaderWidget(
-              title: "Reproductor de Predicación",
+              title:_translationProvider.tr("video_player_screen.tablet_title"),
               styleText:
                   StylesApp(context).textStyleBody7.copyWith(fontSize: 24),
               backColor: StyleColor.turquoise,
@@ -252,7 +253,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   ),
                                   SizedBox(width: 12),
                                   Text(
-                                    "Reproduciendo",
+                                    _translationProvider.tr("video_player_screen.playing"),
                                     style: StylesApp(context)
                                         .textStyleBody18
                                         .copyWith(
@@ -396,7 +397,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   ),
                                   SizedBox(width: 12),
                                   Text(
-                                    "Referencias Bíblicas",
+                                   _translationProvider.tr("video_player_screen.tablet.references_header"),
                                     style: StylesApp(context)
                                         .textStyleBody14
                                         .copyWith(
@@ -467,7 +468,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Información de la Predicación",
+                                    _translationProvider.tr("video_player_screen.tablet.preaching_info"),
                                     style: StylesApp(context)
                                         .textStyleBody14
                                         .copyWith(
@@ -477,7 +478,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   ),
                                   SizedBox(height: 8),
                                   Text(
-                                    "Título: ${widget.data.title!}",
+                                    "${_translationProvider.tr("video_player_screen.tablet.title")} ${widget.data.title!}",
                                     style: StylesApp(context)
                                         .textStyleBody12
                                         .copyWith(
@@ -488,7 +489,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   ),
                                   SizedBox(height: 4),
                                   Text(
-                                    "Predicador: ${widget.data.preachers!}",
+                                    "${_translationProvider.tr("video_player_screen.tablet.preacher")}${widget.data.preachers!}",
                                     style: StylesApp(context)
                                         .textStyleBody12
                                         .copyWith(
@@ -499,7 +500,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   ),
                                   SizedBox(height: 4),
                                   Text(
-                                    "Fecha: ${widget.data.createdAt!}",
+                                    "${_translationProvider.tr("video_player_screen.tablet.date")} ${widget.data.createdAt!}",
                                     style: StylesApp(context)
                                         .textStyleBody12
                                         .copyWith(
@@ -570,7 +571,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             color: Colors.white,
                             size: 24,
                           ),
-                          tooltip: "Copiar",
+                          tooltip: _translationProvider.tr("video_player_screen.reference_modal.copy"),
                         ),
                         IconButton(
                           onPressed: () => shareVerse(context, data),
@@ -579,7 +580,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             color: Colors.white,
                             size: 24,
                           ),
-                          tooltip: "Compartir",
+                          tooltip: _translationProvider.tr("video_player_screen.reference_modal.share"),
                         ),
                       ],
                     ),
@@ -615,7 +616,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         ),
                         child: Text(
                           "${data.chapter!.chapter}:${data.verse!.verse}",
-                          style: isTablet
+                          style: isTablet(context)
                               ? StylesApp(context).textStyleBody20.copyWith(
                                     color: StyleColor.orange,
                                     fontWeight: FontWeight.bold,
@@ -635,7 +636,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         ),
                         child: Text(
                           data.verse!.text,
-                          style: isTablet
+                          style: isTablet(context)
                               ? StylesApp(context).textStyleBody14.copyWith(
                                     color: Colors.black,
                                     height: 1.6,
@@ -652,7 +653,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           ButtonThemeWidget(
-                            text: "Cerrar",
+                            text: _translationProvider.tr("video_player_screen.reference_modal.close"),
                             width: 150,
                             height: 45,
                             buttonStyle: StylesApp(context)
@@ -669,7 +670,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             icon: Icons.menu_book,
                             colorIcon: StyleColor.white,
                             showIcon: true,
-                            text: "Leer Más",
+                            text: _translationProvider.tr("video_player_screen.reference_modal.read_more"),
                             width: 180,
                             height: 45,
                             buttonStyle:
@@ -805,7 +806,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       width: 120,
                       icon: Icons.read_more_outlined,
                       showIcon: true,
-                      text: "Leer Más",
+                      text: _translationProvider.tr("video_player_screen.reference_modal.read_more"),
                       buttonStyle: StylesApp(context).btnWidgetSmall,
                       onPressed: () {
                         // Cerrar el modal primero
@@ -834,111 +835,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// Nuevo widget para tarjetas de referencia en tablet
-class ReferenceCardTablet extends StatelessWidget {
-  final ReferenceModel reference;
-  final VoidCallback onTap;
-
-  const ReferenceCardTablet({
-    super.key,
-    required this.reference,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(
-            color: Colors.grey[200]!,
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Icono de libro
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: StyleColor.turquoise.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8.0),
-                border: Border.all(
-                  color: StyleColor.turquoise,
-                  width: 1.0,
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.book,
-                  color: StyleColor.turquoise,
-                  size: 20,
-                ),
-              ),
-            ),
-
-            SizedBox(width: 16),
-
-            // Información de la referencia
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    reference.book!.modernName,
-                    style: StylesApp(context).textStyleBody14.copyWith(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    "Capítulo ${reference.chapter!.chapter}:${reference.verse!.verse}",
-                    style: StylesApp(context).textStyleBody12.copyWith(
-                          color: StyleColor.orange,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(width: 12),
-
-            // Botón para ver detalles
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: StyleColor.turquoise,
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

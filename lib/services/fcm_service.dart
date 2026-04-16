@@ -27,7 +27,7 @@ class FCMService {
   }
 
   static Future<void> _setupFirebase() async {
-    await Firebase.initializeApp();
+    // await Firebase.initializeApp();
     await _firebaseMessaging.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,

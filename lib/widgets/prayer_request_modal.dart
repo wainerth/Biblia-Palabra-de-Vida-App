@@ -35,12 +35,6 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
   final ScrollController _scrollVerse = ScrollController();
   int intents = 0;
 
-  // Detectar si es tablet
-  bool get isTablet {
-    final width = MediaQuery.of(context).size.width;
-    return width >= 600;
-  }
-
   @override
   void dispose() {
     messageController.dispose();
@@ -52,15 +46,16 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
 
   @override
   Widget build(BuildContext context) {
+    final bool _isTablet = isTablet(context);
     return Dialog(
       backgroundColor: StyleColor.white,
-      insetPadding: isTablet
+      insetPadding: _isTablet
           ? EdgeInsets.symmetric(
               horizontal: 50.0,
               vertical: 30.0,
             )
           : EdgeInsets.zero,
-      shape: isTablet
+      shape: _isTablet
           ? RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.0),
             )
@@ -68,11 +63,12 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: double.infinity,
-          maxHeight: isTablet ? 900 : double.infinity,
+          maxHeight: _isTablet ? 900 : double.infinity,
         ),
-        child: isTablet
-            ? _buildTabletLayout(context)
-            : _buildMobileLayout(context),
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(context),
+          tablet: _buildTabletLayout(context),
+        ),
       ),
     );
   }
@@ -169,11 +165,12 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
                           if (widget.prayerRequest.audioPrayer != null) ...[
                             Text(
                               'Audio de la Petición',
-                              style: StylesApp(context).textStyleBody16.copyWith(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: StyleColor.blueDark,
-                              ),
+                              style:
+                                  StylesApp(context).textStyleBody16.copyWith(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: StyleColor.blueDark,
+                                      ),
                             ),
                             SizedBox(height: 10),
                             AudioPlayerWidget(
@@ -315,14 +312,17 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
                               width: 180,
                               child: ButtonThemeWidget(
                                 text: "Buscar\nVersículo",
-                                buttonStyle:
-                                    StylesApp(context).btnWidgetSmall.copyWith(
-                                          textStyle: WidgetStatePropertyAll(
-                                            StylesApp(context).textStyleBody16.copyWith(
+                                buttonStyle: StylesApp(context)
+                                    .btnWidgetSmall
+                                    .copyWith(
+                                      textStyle: WidgetStatePropertyAll(
+                                        StylesApp(context)
+                                            .textStyleBody16
+                                            .copyWith(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600),
-                                          ),
-                                        ),
+                                      ),
+                                    ),
                                 height: 60,
                                 onPressed: _showVerseSelectionDialog,
                               ),
@@ -420,14 +420,15 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
                             width: 300,
                             height: 60,
                             text: "Enviar Respuesta",
-                            buttonStyle:
-                                StylesApp(context).btnWidgetSmall.copyWith(
-                                      textStyle: WidgetStatePropertyAll(
-                                        StylesApp(context).textStyleBody18.copyWith(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700),
-                                      ),
-                                    ),
+                            buttonStyle: StylesApp(context)
+                                .btnWidgetSmall
+                                .copyWith(
+                                  textStyle: WidgetStatePropertyAll(
+                                    StylesApp(context).textStyleBody18.copyWith(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ),
                             onPressed: () => _handleSubmit(context),
                           ),
                         ),
@@ -468,10 +469,10 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
         Text(
           "Descripción:",
           style: StylesApp(context).textStyleBody14.copyWith(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: StyleColor.blueDark,
-          ),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: StyleColor.blueDark,
+              ),
         ),
         SizedBox(height: 5),
         Container(
@@ -484,10 +485,10 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
           child: Text(
             widget.prayerRequest.prayerDetails,
             style: StylesApp(context).textStyleBody14.copyWith(
-              fontSize: 14,
-              color: Colors.grey[700],
-              height: 1.5,
-            ),
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
           ),
         ),
       ],
@@ -507,18 +508,18 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
               Text(
                 label,
                 style: StylesApp(context).textStyleBody12.copyWith(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
               ),
               SizedBox(height: 2),
               Text(
                 value,
                 style: StylesApp(context).textStyleBody14.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
-                ),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
               ),
             ],
           ),
@@ -950,18 +951,18 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        final bool isTablet = MediaQuery.of(context).size.width >= 600;
-
+        bool _isTablet = isTablet(context);
         return Dialog(
           backgroundColor: StyleColor.white,
-          insetPadding: isTablet
+          insetPadding: _isTablet
               ? EdgeInsets.symmetric(horizontal: 100.0, vertical: 50.0)
               : EdgeInsets.symmetric(horizontal: 5.0),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: isTablet ? 700 : MediaQuery.of(context).size.width - 10,
+              maxWidth:
+                  _isTablet ? 700 : MediaQuery.of(context).size.width - 10,
               maxHeight:
-                  isTablet ? 800 : MediaQuery.of(context).size.height * 0.9,
+                  _isTablet ? 800 : MediaQuery.of(context).size.height * 0.9,
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -1042,8 +1043,9 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
           LoadingService().hideLoading();
           if (mounted) {
             showCustomDialog(context,
-            showDetails: false,
-                message: response.error!, dialogType: DialogType.error);
+                showDetails: false,
+                message: response.error!,
+                dialogType: DialogType.error);
           }
           return;
         }

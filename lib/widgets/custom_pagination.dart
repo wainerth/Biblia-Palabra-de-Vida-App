@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class CustomPagination extends StatelessWidget {
   final PaginationInfo pagination;
@@ -24,6 +26,8 @@ class CustomPagination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     final effectiveTextStyle = textStyle ??
         StylesApp(context).textStyleBody10.copyWith(
               color: currentTheme.textColor,
@@ -53,7 +57,7 @@ class CustomPagination extends StatelessWidget {
                 TextSpan(
                   style: effectiveTextStyle,
                   text:
-                      "${pagination.currentPage} de ${pagination.totalPages} páginas",
+                      "${pagination.currentPage} ${translationProvider.tr('pagination.of')} ${pagination.totalPages} ${translationProvider.tr('pagination.pages')}",
                 ),
               ],
             ),
@@ -68,14 +72,14 @@ class CustomPagination extends StatelessWidget {
             dropdownColor: currentTheme.backgroundColor,
             onChanged: (int? newValue) async {
               if (newValue != null) {
-                await onPageChanged(1, newValue); // Resetear a primera página
+                await onPageChanged(1, newValue); // Reset a primera página
               }
             },
             items: itemsPerPage.map<DropdownMenuItem<int>>((int value) {
               return DropdownMenuItem<int>(
                 value: value,
                 child: Text(
-                  '$value items',
+                  '$value ${translationProvider.tr('pagination.items_per_page')}',
                   style: effectiveTextStyle,
                 ),
               );

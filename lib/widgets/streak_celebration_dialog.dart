@@ -1,9 +1,11 @@
 // streak_celebration_dialog.dart
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/services/audio_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class StreakCelebrationDialog extends StatefulWidget {
   final DateCalendar streakCalendar;
@@ -66,21 +68,22 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
 
   @override
   Widget build(BuildContext context) {
-    bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
-    return Dialog(
+    final transaltionProvider = context.read<AppTranslationProvider>();
 
+    bool _isTablet = isTablet(context);
+    return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth:isTablet ?  400 : double.infinity,
+          maxWidth: _isTablet ? 400 : double.infinity,
         ),
         child: ScaleTransition(
           scale: _scaleAnimation,
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: Stack(children: [
-              _buildContent(),
+              _buildContent(transaltionProvider),
               Positioned(
                 top: 10,
                 right: 0,
@@ -98,7 +101,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(AppTranslationProvider translationProvider) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 24),
       decoration: BoxDecoration(
@@ -120,17 +123,16 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
           SizedBox(height: 16),
 
           // Título de felicitación
-          _buildTitle(),
+          _buildTitle(translationProvider),
           SizedBox(height: 16),
 
           // Calendario de la semana
-          _buildWeekCalendar(),
+          _buildWeekCalendar(translationProvider),
           SizedBox(height: 24),
 
           // Estadísticas de racha
-          _buildStreakStats(),
+          _buildStreakStats(translationProvider),
           SizedBox(height: 24),
-
         ],
       ),
     );
@@ -166,11 +168,11 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Text(
-          '¡Felicidades! 🎉',
+          translationProvider.tr('streak_celebration.title'),
           style: StylesApp(context).textStyleBody24.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF2D3748),
@@ -182,7 +184,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
                   color: StyleColor.orange,
                 )),
         Text(
-          "días de Racha",
+          translationProvider.tr('streak_celebration.days_streak'),
           style: StylesApp(context).textStyleBody16.copyWith(
                 color: Color(0xFF718096),
               ),
@@ -191,7 +193,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
     );
   }
 
-  Widget _buildWeekCalendar() {
+  Widget _buildWeekCalendar(AppTranslationProvider translationProvider) {
     final today = DateTime.now();
     final weekDays = _getCurrentWeek();
     ScrollController scrollController = ScrollController();
@@ -212,13 +214,14 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
             spacing: 4.0,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: weekDays.map((day) {
+              
               final isPlayed = widget.streakCalendar.playDay.any((playDay) =>
                   playDay.year == day.year &&
                   playDay.month == day.month &&
                   playDay.day == day.day);
               final isToday = _isSameDay(day, today);
 
-              return _buildDayCell(day, isPlayed, isToday);
+              return _buildDayCell(day, isPlayed, isToday, translationProvider);
             }).toList(),
           ),
         ),
@@ -226,11 +229,17 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
     );
   }
 
-  Widget _buildDayCell(DateTime day, bool isPlayed, bool isToday) {
+  Widget _buildDayCell(DateTime day, bool isPlayed, bool isToday, AppTranslationProvider translationProvider) {
+    String dayAbbr = translationProvider.tr(
+  'streak_celebration.weekdays.${_getWeekdayKey(day.weekday)}'
+);
+// print(dayAbbr);
     return Column(
       children: [
         Text(
-          _getDayAbbreviation(day.weekday),
+          
+
+          dayAbbr,
           style: StylesApp(context).textStyleBody12.copyWith(
                 fontSize: 12,
                 color: StyleColor.white,
@@ -270,19 +279,19 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
     );
   }
 
-  Widget _buildStreakStats() {
+  Widget _buildStreakStats(AppTranslationProvider translationProvider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildStatItem(
-          'Racha Actual',
-          '${widget.streakCalendar.currentStreak} días',
+          translationProvider.tr('streak_celebration.current_streak'),
+          '${widget.streakCalendar.currentStreak} ${translationProvider.tr('streak_celebration.days')}',
           Icons.local_fire_department,
           StyleColor.orange,
         ),
         _buildStatItem(
-          'Récord',
-          '${widget.streakCalendar.longestStreak} días',
+          translationProvider.tr('streak_celebration.record'),
+          '${widget.streakCalendar.longestStreak} ${translationProvider.tr('streak_celebration.days')}',
           Icons.emoji_events,
           Color(0xFFFFD700),
         ),
@@ -332,5 +341,26 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
   String _getDayAbbreviation(int weekday) {
     final abbreviations = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
     return abbreviations[weekday - 1];
+  }
+
+  String _getWeekdayKey(int weekday) {
+    switch (weekday) {
+      case 1:
+        return 'monday';
+      case 2:
+        return 'tuesday';
+      case 3:
+        return 'wednesday';
+      case 4:
+        return 'thursday';
+      case 5:
+        return 'friday';
+      case 6:
+        return 'saturday';
+      case 7:
+        return 'sunday';
+      default:
+        return 'monday';
+    }
   }
 }

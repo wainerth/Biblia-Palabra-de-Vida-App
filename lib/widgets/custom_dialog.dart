@@ -144,7 +144,7 @@ class _CustomDialogState extends State<CustomDialog> {
                       Clipboard.setData(
                           ClipboardData(text: widget.errorDetail!));
                       showSnackBar('Error copiado al portapapeles',
-                          type: SnackBarType.error);
+                          type: SnackBarType.success);
                      
                     },
                     icon: Icon(Icons.copy, size: 16),

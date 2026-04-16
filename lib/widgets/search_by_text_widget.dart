@@ -27,6 +27,9 @@ class SearchByTextWidget extends StatefulWidget {
 }
 
 class _SearchByTextWidgetState extends State<SearchByTextWidget> {
+
+  final translationProvider = AppTranslationProvider();
+
   late BibleTheme currentTheme;
   TextEditingController searchTextController = TextEditingController();
   List<VersionModel> listBibleVersions = [];
@@ -119,12 +122,8 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: spacingHeight),
-
-        if (!isTablet)
-          _buildMobileSearchHeader()
-        else
-          _buildTabletSearchHeader(),
-
+        ResponsiveLayout(mobile: _buildMobileSearchHeader(), tablet: _buildTabletSearchHeader()),
+       
         SizedBox(height: spacingHeight),
 
         // Resultados de búsqueda
@@ -149,7 +148,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
       child: Column(
         children: [
           CustomDropdownBottomWidget(
-            hintText: "Seleccione la versión",
+            hintText: translationProvider.tr("search_by_text.dropdowns.version"),
             items: bibleVersions,
             currentTheme: currentTheme,
             onChanged: (ModelData? version) async {
@@ -180,88 +179,81 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                           color: currentTheme.textColor,
                           fontSize: isTablet ? 16 : 14,
                         ),
-                    decoration: StylesApp(context)
-                        .inputDecorationOutlineStyle
-                        .copyWith(
-                          fillColor: currentTheme.backgroundColor,
-                          hintText: 'Buscar palabra o frase...',
-                          hintStyle: StylesApp(context)
-                              .textStyleBody12
-                              .copyWith(
-                                color: currentTheme.textColor.withOpacity(0.7),
-                                fontSize: isTablet ? 15 : 14,
-                              ),
-                          // Border configurado con currentTheme
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color:
-                                  currentTheme.buttonColor, // Color del borde
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
+                    decoration: InputDecoration(
+                      fillColor: currentTheme.backgroundColor,
+                      hintText: translationProvider.tr("search_by_text.search.placeholder"),
+                      hintStyle: StylesApp(context).textStyleBody12.copyWith(
+                            color:
+                                currentTheme.textColor.withValues(alpha: 0.7),
+                            fontSize: isTablet ? 15 : 14,
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: currentTheme.textColor.withOpacity(
-                                  0.6), // Borde cuando está habilitado
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: currentTheme
-                                  .textColor, // Borde cuando está enfocado
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.red, // Borde de error
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: currentTheme.textColor.withOpacity(
-                                  0.3), // Borde cuando está deshabilitado
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          suffixIcon: _searchText.isNotEmpty
-                              ? IconButton(
-                                  icon: Icon(
-                                    Icons.clear,
-                                    color: currentTheme
-                                        .buttonColor, // Color del icono
-                                  ),
-                                  onPressed: () {
-                                    _safeClearSearch();
-                                  },
-                                )
-                              : null,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: isTablet ? 20 : 16,
-                            vertical: isTablet ? 18 : 14,
-                          ),
-                          // Icono de búsqueda a la izquierda
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Icon(
-                              Icons.search,
-                              color: currentTheme.buttonColor,
-                              size: isTablet ? 24 : 20,
-                            ),
-                          ),
-                          // Estilo del texto dentro
-                          filled: true,
-                          labelStyle: TextStyle(
-                            color: currentTheme.textColor,
-                          ),
+                      // Border configurado con currentTheme
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none, // Sin borde visible
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: currentTheme.textColor.withValues(
+                              alpha: 0.6), // Borde cuando está habilitado
+                          width: 1.0,
                         ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: currentTheme
+                              .textColor, // Borde cuando está enfocado
+                          width: 2.0,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.red, // Borde de error
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: currentTheme.textColor.withValues(
+                              alpha: 0.3), // Borde cuando está deshabilitado
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      suffixIcon: _searchText.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.clear,
+                                color:
+                                    currentTheme.buttonColor, // Color del icono
+                              ),
+                              onPressed: () {
+                                _safeClearSearch();
+                              },
+                            )
+                          : null,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 20 : 16,
+                        vertical: isTablet ? 18 : 14,
+                      ),
+                      // Icono de búsqueda a la izquierda
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Icon(
+                          Icons.search,
+                          color: currentTheme.buttonColor,
+                          size: isTablet ? 24 : 20,
+                        ),
+                      ),
+                      // Estilo del texto dentro
+                      filled: true,
+                      labelStyle: TextStyle(
+                        color: currentTheme.textColor,
+                      ),
+                    ),
                     onChanged: (value) {
                       if (!mounted) return;
                       _handleSearchChange(value);
@@ -315,7 +307,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
               ),
               SizedBox(width: 12),
               Text(
-                "Búsqueda por Texto",
+                translationProvider.tr("search_by_text.search.label_text") ,
                 style: StylesApp(context).textStyleBody18.copyWith(
                       color: currentTheme.textColor,
                       fontSize: 22,
@@ -331,33 +323,37 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Selector de versión
-              Container(
-                width: 250,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: currentTheme.buttonColor,
+              Expanded(
+                child: Container(
+                  width: 250,
+                  height: 65,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: currentTheme.buttonColor,
+                    ),
                   ),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: CustomDropdownBottomWidget(
-                  border: false,
-                  hintText: "Versión bíblica",
-                  currentTheme: currentTheme,
-                  items: bibleVersions,
-                  onChanged: (ModelData? version) async {
-                    if (kDebugMode) {
-                      print("Versión seleccionada ${version!.value}");
-                    }
-                    setState(() {
-                      versionSelected = version;
-                    });
-                  },
-                  selectedItem: versionSelected!.value.isNotEmpty
-                      ? bibleVersions.firstWhere((element) =>
-                          element.value.toLowerCase() ==
-                          versionSelected?.value.toLowerCase())
-                      : null,
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: CustomDropdownBottomWidget(
+                    contentPadding: EdgeInsets.all(0),
+                    border: false,
+                    hintText: translationProvider.tr("search_by_text.dropdowns.version_short"),
+                    currentTheme: currentTheme,
+                    items: bibleVersions,
+                    onChanged: (ModelData? version) async {
+                      if (kDebugMode) {
+                        print("Versión seleccionada ${version!.value}");
+                      }
+                      setState(() {
+                        versionSelected = version;
+                      });
+                    },
+                    selectedItem: versionSelected!.value.isNotEmpty
+                        ? bibleVersions.firstWhere((element) =>
+                            element.value.toLowerCase() ==
+                            versionSelected?.value.toLowerCase())
+                        : null,
+                  ),
                 ),
               ),
 
@@ -365,7 +361,9 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
 
               // Campo de búsqueda
               Expanded(
+                flex: 2,
                 child: Container(
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
@@ -394,14 +392,23 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                                       fontSize: 16,
                                     ),
                             decoration: InputDecoration(
+                              fillColor: currentTheme.backgroundColor,
+                              filled: true,
                               hintText:
-                                  'Escribe aquí la palabra o frase a buscar...',
+                                  translationProvider.tr("search_by_text.search.placeholder_tablet"),
                               hintStyle: TextStyle(
                                 color: currentTheme.textColor
                                     .withValues(alpha: 0.6),
                                 fontSize: 15,
                               ),
-                              border: InputBorder.none,
+                              border: OutlineInputBorder(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  bottomLeft: Radius.circular(12),
+                                ),
+                                borderSide:
+                                    BorderSide.none, // Sin borde visible
+                              ),
                               contentPadding: EdgeInsets.symmetric(
                                 horizontal: 20,
                                 vertical: 18,
@@ -478,7 +485,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          "${pagination.totalItems} resultados para '$_searchText'",
+                          translationProvider.trParams("search_by_text.search.results_info", {"count": pagination.totalItems.toString(), "query": _searchText}),
                           style: StylesApp(context).textStyleBody12.copyWith(
                                 color: currentTheme.textColor,
                                 fontWeight: FontWeight.w500,
@@ -498,7 +505,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                       ),
                     ),
                     child: Text(
-                      "Página ${pagination.currentPage} de ${pagination.totalPages}",
+                      translationProvider.trParams("search_by_text.search.page_info", {"current": pagination.currentPage.toString(), "total": pagination.totalPages.toString()}),
                       style: StylesApp(context).textStyleBody12.copyWith(
                             color:
                                 currentTheme.textColor.withValues(alpha: 0.7),
@@ -525,7 +532,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
             ),
             SizedBox(height: 16),
             Text(
-              "Buscando...",
+              translationProvider.tr("search_by_text.search.searching"),
               style: StylesApp(context).textStyleBody14.copyWith(
                     color: currentTheme.textColor.withValues(alpha: 0.7),
                   ),
@@ -557,7 +564,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
             ),
             SizedBox(height: 20),
             Text(
-              "No hay resultados",
+              translationProvider.tr("search_by_text.results.empty.title"),
               style: StylesApp(context).textStyleBody18.copyWith(
                     color: currentTheme.textColor,
                     fontSize: isTablet ? 22 : 18,
@@ -570,8 +577,8 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
               ),
               child: Text(
                 versionSelected!.value.isEmpty
-                    ? "Selecciona una versión bíblica para comenzar tu búsqueda"
-                    : "Escribe una palabra o frase en el campo de búsqueda para encontrar versículos relacionados",
+                    ? translationProvider.tr("search_by_text.results.empty.message_select_version")
+                    : translationProvider.tr("search_by_text.results.empty.message_search"),
                 textAlign: TextAlign.center,
                 style: StylesApp(context).textStyleBody14.copyWith(
                       color: currentTheme.textColor.withValues(alpha: 0.6),
@@ -715,17 +722,17 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                 children: [
                   _buildTabletActionButton(
                     icon: Icons.play_arrow,
-                    label: "Ver",
+                    label: translationProvider.tr("search_by_text.actions.view"),
                     onTap: () => _navigateToChapter(data),
                   ),
                   _buildTabletActionButton(
                     icon: Icons.content_copy,
-                    label: "Copiar",
+                    label: translationProvider.tr("search_by_text.actions.copy"),
                     onTap: () => _copyToClipboard(context, data),
                   ),
                   _buildTabletActionButton(
                     icon: Icons.star_border,
-                    label: "Favorito",
+                    label: translationProvider.tr("search_by_text.actions.favorite"),
                     onTap: () => addVerseFavorite(context, data),
                   ),
                 ],
@@ -861,7 +868,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                   size: 28,
                 ),
                 title: Text(
-                  "Ver Capítulo",
+                  translationProvider.tr("search_by_text.actions.view_chapter"),
                   style: StylesApp(context).textStyleBody14.copyWith(
                         color: currentTheme.textColor,
                         fontWeight: FontWeight.w500,
@@ -899,7 +906,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                   size: 28,
                 ),
                 title: Text(
-                  "Copiar Versículo",
+                  translationProvider.tr("search_by_text.actions.copy_verse"),
                   style: StylesApp(context).textStyleBody14.copyWith(
                         color: currentTheme.textColor,
                         fontWeight: FontWeight.w500,
@@ -928,7 +935,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
                   size: 28,
                 ),
                 title: Text(
-                  "Agregar a Favoritos",
+                  translationProvider.tr("search_by_text.actions.add_favorite"),
                   style: StylesApp(context).textStyleBody14.copyWith(
                         color: currentTheme.textColor,
                         fontWeight: FontWeight.w500,
@@ -1042,7 +1049,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
           currentContext,
           showDetails: false,
           message:
-              "El capítulo ${data.chapter.chapter} del libro ${data.book.modernName}\nse ha copiado con éxito al portapapeles",
+          translationProvider.trParams("search_by_text.modal.copy_success", {"chapter": data.chapter.chapter.toString(), "book": data.book.modernName}),
           dialogType: DialogType.info,
         );
       }
@@ -1072,7 +1079,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
 
         if (currentContext.mounted) {
           await showCustomDialog(currentContext,
-              message: "Versículo Agregado a Favoritos",
+              message: translationProvider.tr("search_by_text.actions.added_favorites"),
               dialogType: DialogType.info);
         }
       }

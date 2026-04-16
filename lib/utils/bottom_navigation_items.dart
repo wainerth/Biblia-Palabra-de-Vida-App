@@ -1,13 +1,17 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/bottom_nav_item.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 List<BottomNavigationBarItem> getBottomNavigationBarItems(
     BuildContext context) {
+  final translationProvider = context.read<AppTranslationProvider>();
+
   return [
     BottomNavigationBarItem(
       activeIcon: Column(
@@ -20,7 +24,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -45,7 +49,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -65,7 +69,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             fit: BoxFit.cover,
           ),
           Text(
-            'Biblia',
+            translationProvider.tr('navigation.bible'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -90,7 +94,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             fit: BoxFit.cover,
           ),
           Text(
-            'Biblia',
+            translationProvider.tr('navigation.bible'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -110,7 +114,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             fit: BoxFit.cover,
           ),
           Text(
-            'Oración',
+            translationProvider.tr('navigation.prayer'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -135,7 +139,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             fit: BoxFit.fitHeight,
           ),
           Text(
-            'Oración',
+            translationProvider.tr('navigation.prayer'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -196,7 +200,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
               fit: BoxFit.cover,
             ),
             Text(
-              'Ofrendas',
+              translationProvider.tr('navigation.offerings'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -220,7 +224,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
               fit: BoxFit.cover,
             ),
             Text(
-              'Ofrendas',
+              translationProvider.tr('navigation.offerings'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -238,7 +242,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             color: StyleColor.grayMedium,
           ),
           Text(
-            'Configuración',
+            translationProvider.tr('navigation.settings'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),
@@ -261,7 +265,7 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
             color: StyleColor.grayMedium,
           ),
           Text(
-            'Configuración',
+            translationProvider.tr('navigation.settings'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),
@@ -274,6 +278,8 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
 }
 
 List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
+  final translationProvider = context.read<AppTranslationProvider>();
+
   return [
     BottomNavigationBarItem(
       activeIcon: Column(
@@ -286,7 +292,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -311,7 +317,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -331,7 +337,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Biblia',
+            translationProvider.tr('navigation.bible'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -356,7 +362,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Biblia',
+            translationProvider.tr('navigation.bible'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -376,7 +382,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Oración',
+            translationProvider.tr('navigation.prayer'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -401,7 +407,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             fit: BoxFit.fitHeight,
           ),
           Text(
-            'Oración',
+            translationProvider.tr('navigation.prayer'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -462,7 +468,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
               fit: BoxFit.cover,
             ),
             Text(
-              'Ofrendas',
+              translationProvider.tr('navigation.offerings'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -486,7 +492,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
               fit: BoxFit.cover,
             ),
             Text(
-              'Ofrendas',
+              translationProvider.tr('navigation.offerings'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -504,7 +510,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             color: StyleColor.grayMedium,
           ),
           Text(
-            'Configuración',
+            translationProvider.tr('navigation.settings'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),
@@ -527,7 +533,7 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
             color: StyleColor.grayMedium,
           ),
           Text(
-            'Configuración',
+            translationProvider.tr('navigation.settings'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),
@@ -540,6 +546,8 @@ List<BottomNavigationBarItem> getItemsBarBible(BuildContext context) {
 }
 
 List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
+  final translationProvider = context.read<AppTranslationProvider>();
+
   return [
     BottomNavigationBarItem(
       activeIcon: Column(
@@ -552,7 +560,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -577,7 +585,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -595,7 +603,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             color: StyleColor.black,
           ),
           Text(
-            'Aventuras',
+            translationProvider.tr('navigation.adventures'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -618,7 +626,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             color: StyleColor.black,
           ),
           Text(
-            'Aventuras',
+            translationProvider.tr('navigation.adventures'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -636,7 +644,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             color: StyleColor.greenDark,
           ),
           Text(
-            'Ranking',
+            translationProvider.tr('navigation.ranking'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -659,7 +667,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             color: StyleColor.greenDark,
           ),
           Text(
-            'Ranking',
+            translationProvider.tr('navigation.ranking'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -677,7 +685,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Dudas',
+            translationProvider.tr('navigation.doubts'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -700,7 +708,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Dudas',
+            translationProvider.tr('navigation.doubts'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -719,7 +727,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
               color: StyleColor.redDark,
             ),
             Text(
-              'Reto online',
+              translationProvider.tr('navigation.online_challenge'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -742,7 +750,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
               color: StyleColor.redDark,
             ),
             Text(
-              'Reto online',
+              translationProvider.tr('navigation.online_challenge'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -761,7 +769,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
               color: StyleColor.grayMedium,
             ),
             Text(
-              'Novedad',
+              translationProvider.tr('navigation.news'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.grayMedium,
                   ),
@@ -784,7 +792,7 @@ List<BottomNavigationBarItem> getItemsBarSecond(BuildContext context) {
               color: StyleColor.grayMedium,
             ),
             Text(
-              'Novedad',
+              translationProvider.tr('navigation.news'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.grayMedium,
                   ),
@@ -831,6 +839,8 @@ final List<BottomNavItem> items = [
 ];
 
 List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
+  final translationProvider = context.read<AppTranslationProvider>();
+
   return [
     BottomNavigationBarItem(
       activeIcon: Column(
@@ -843,7 +853,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -868,7 +878,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -886,7 +896,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             color: StyleColor.black,
           ),
           Text(
-            'Aventuras',
+            translationProvider.tr('navigation.adventures'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -909,7 +919,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             color: StyleColor.black,
           ),
           Text(
-            'Aventuras',
+            translationProvider.tr('navigation.adventures'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -927,7 +937,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             color: StyleColor.greenDark,
           ),
           Text(
-            'Mapa',
+            translationProvider.tr('navigation.map'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -950,7 +960,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             color: StyleColor.greenDark,
           ),
           Text(
-            'Mapa',
+            translationProvider.tr('navigation.map'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -968,7 +978,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Ranking',
+            translationProvider.tr('navigation.ranking'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -991,7 +1001,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             color: StyleColor.blueDark,
           ),
           Text(
-            'Ranking',
+            translationProvider.tr('navigation.ranking'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.blueDark,
                 ),
@@ -1009,7 +1019,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             color: StyleColor.redDark,
           ),
           Text(
-            'Dudas',
+            translationProvider.tr('navigation.doubts'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -1032,7 +1042,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
             color: StyleColor.redDark,
           ),
           Text(
-            'Dudas',
+            translationProvider.tr('navigation.doubts'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -1051,7 +1061,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
               color: StyleColor.grayMedium,
             ),
             Text(
-              'Reto online',
+              translationProvider.tr('navigation.online_challenge'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.grayMedium,
                   ),
@@ -1074,7 +1084,7 @@ List<BottomNavigationBarItem> getItemsMap(BuildContext context) {
               color: StyleColor.grayMedium,
             ),
             Text(
-              'Reto online',
+              translationProvider.tr('navigation.online_challenge'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.grayMedium,
                   ),
@@ -1112,6 +1122,8 @@ final List<BottomNavItem> itemsMap = [
 ];
 
 List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
+  final translationProvider = context.read<AppTranslationProvider>();
+
   return [
     BottomNavigationBarItem(
       activeIcon: Column(
@@ -1124,7 +1136,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -1149,7 +1161,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -1169,7 +1181,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Biblia',
+            translationProvider.tr('navigation.bible'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -1194,7 +1206,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Biblia',
+            translationProvider.tr('navigation.bible'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -1212,7 +1224,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             color: StyleColor.greenDark,
           ),
           Text(
-            'Promesas',
+           translationProvider.tr('navigation.promises'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -1235,7 +1247,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
             color: StyleColor.greenDark,
           ),
           Text(
-            'Promesas',
+           translationProvider.tr('navigation.promises'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -1295,7 +1307,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
               color: StyleColor.redDark,
             ),
             Text(
-              'Reto online',
+              translationProvider.tr('navigation.online_challenge'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -1318,7 +1330,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
               color: StyleColor.redDark,
             ),
             Text(
-              'Reto online',
+              translationProvider.tr('navigation.online_challenge'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -1337,7 +1349,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
               color: StyleColor.grayMedium,
             ),
             Text(
-              'Novedad',
+              translationProvider.tr('navigation.news'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.grayMedium,
                   ),
@@ -1360,7 +1372,7 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
               color: StyleColor.grayMedium,
             ),
             Text(
-              'Novedad',
+              translationProvider.tr('navigation.news'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.grayMedium,
                   ),
@@ -1373,6 +1385,8 @@ List<BottomNavigationBarItem> getItemsPromises(BuildContext context) {
 }
 
 List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
+  final translationProvider = context.read<AppTranslationProvider>();
+
   return [
     BottomNavigationBarItem(
       activeIcon: Column(
@@ -1385,7 +1399,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -1410,7 +1424,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -1430,7 +1444,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Biblia',
+            translationProvider.tr('navigation.bible'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -1455,7 +1469,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Biblia',
+            translationProvider.tr('navigation.bible'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -1475,7 +1489,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Oración',
+            translationProvider.tr('navigation.prayer'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -1500,7 +1514,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             fit: BoxFit.fitHeight,
           ),
           Text(
-            'Oración',
+            translationProvider.tr('navigation.prayer'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -1561,7 +1575,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
               fit: BoxFit.cover,
             ),
             Text(
-              'Ofrendas',
+              translationProvider.tr('navigation.offerings'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -1585,7 +1599,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
               fit: BoxFit.cover,
             ),
             Text(
-              'Ofrendas',
+              translationProvider.tr('navigation.offerings'),
               style: StylesApp(context).textStyleBody10.copyWith(
                     color: StyleColor.redDark,
                   ),
@@ -1603,7 +1617,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             color: StyleColor.grayMedium,
           ),
           Text(
-            'Configuración',
+            translationProvider.tr('navigation.settings'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),
@@ -1626,7 +1640,7 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
             color: StyleColor.grayMedium,
           ),
           Text(
-            'Configuración',
+            translationProvider.tr('navigation.settings'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),
@@ -1638,28 +1652,10 @@ List<BottomNavigationBarItem> getItemsPreach(BuildContext context) {
   ];
 }
 
-final List<BottomNavItem> itemsPromises = [
-  BottomNavItem(
-      title: "Inicio", icon: Icons.home_outlined, page: WorkspaceScreen()),
-  BottomNavItem(
-      title: "Biblia", icon: Icons.book_outlined, page: BibleScreen()),
-  BottomNavItem(title: "Promesas", icon: Icons.sync, page: PromisesScreen()),
-  BottomNavItem(
-      title: "Dudas", icon: Icons.question_mark_outlined, page: DoubtScreen()),
-  if (GraphQLConfig.development)
-    BottomNavItem(
-        title: "Reto online",
-        icon: Icons.language,
-        page:
-            GraphQLConfig.development ? OnlineChallengeScreen() : SoonScreen()),
-  if (GraphQLConfig.development)
-    BottomNavItem(
-        title: "Novedad",
-        icon: Icons.notifications_none_rounded,
-        page: GraphQLConfig.development ? NewsScreen() : SoonScreen())
-];
 
 List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
+  final translationProvider = context.read<AppTranslationProvider>();
+
   return [
     BottomNavigationBarItem(
       activeIcon: Column(
@@ -1672,7 +1668,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -1697,7 +1693,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Inicio',
+            translationProvider.tr('navigation.home'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.violetDream,
                 ),
@@ -1718,7 +1714,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Librería',
+            translationProvider.tr('navigation.library'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -1743,7 +1739,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Librería',
+            translationProvider.tr('navigation.library'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.black,
                 ),
@@ -1763,7 +1759,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'AudioLibros',
+            translationProvider.tr('navigation.audiobooks'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -1788,7 +1784,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             fit: BoxFit.fitHeight,
           ),
           Text(
-            'AudioLibros',
+            translationProvider.tr('navigation.audiobooks'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.greenDark,
                 ),
@@ -1807,7 +1803,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Libros',
+            translationProvider.tr('navigation.books'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -1831,7 +1827,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Libros',
+            translationProvider.tr('navigation.books'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.redDark,
                 ),
@@ -1855,7 +1851,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             color: StyleColor.grayMedium,
           ),
           Text(
-            'Mis compras',
+            translationProvider.tr('navigation.my_purchases'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),
@@ -1879,7 +1875,7 @@ List<BottomNavigationBarItem> getItemsLibrary(BuildContext context) {
             fit: BoxFit.cover,
           ),
           Text(
-            'Mis compras',
+            translationProvider.tr('navigation.my_purchases'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: StyleColor.grayMedium,
                 ),

@@ -217,7 +217,7 @@ Future<ResponseData> register(SignupInput dataToRegister) async {
           "phoneNumber": dataToRegister.phoneNumber,
           "countryId": dataToRegister.countryId,
           "cityId": dataToRegister.city,
-          "stateId":dataToRegister.state,
+          "stateId": dataToRegister.state,
           "identifier": dataToRegister.identifier,
           "isBaptized": dataToRegister.isBaptized,
           "timezone": timezone
@@ -247,6 +247,68 @@ Future<ResponseData> register(SignupInput dataToRegister) async {
     );
   } catch (e) {
     return handleGenericError(e, "Registrar Usuario");
+  }
+}
+
+// Mutation Register User
+Future<ResponseData> initializedRegister(SignupInput dataToRegister) async {
+  final GraphQLClient client = createClient();
+  final timezone = await getDeviceTimeZone();
+  operationName = 'InitializeRegisterUser';
+  final MutationOptions mutateGql = MutationOptions(
+      operationName: operationName,
+      document: gql(r'''
+        mutation InitializeRegisterUser($input: initializeRegisterUserInput!) {
+          initializeRegisterUser(input: $input) {
+            success
+            message
+            userId
+          }
+        }
+    '''),
+      variables: <String, dynamic>{
+        "input": {
+          "username": dataToRegister.username,
+          "email": dataToRegister.email,
+          "password": dataToRegister.password,
+          "name": dataToRegister.name,
+          "lastname": dataToRegister.lastname,
+          "birthdate": dataToRegister.birthdate,
+          "gender": dataToRegister.gender!.toUpperCase(),
+          "phoneNumber": dataToRegister.phoneNumber,
+          "countryId": dataToRegister.countryId,
+          "stateId": dataToRegister.state,
+          "cityId": dataToRegister.city,
+          "codeAreaId": dataToRegister.codeAreaId,
+          "identifier": dataToRegister.identifier,
+          "isBaptized": dataToRegister.isBaptized,
+          "timezone": timezone
+        }
+      },
+      fetchPolicy: FetchPolicy.noCache);
+
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['initializeRegisterUser'] == null) {
+      return ResponseData(
+        data: null,
+        userFriendlyError: "No se pudo registrar el usuario.",
+        error: "inicializar Registro de Usuario Sin datos Resultado",
+      );
+    }
+
+    return ResponseData(
+      data: removeTypename(data['initializeRegisterUser']),
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "inicializar Registro de Usuario");
   }
 }
 
@@ -1597,7 +1659,7 @@ Future<ResponseData> confirmPaymentWithBackend({
     }
 
     final data = result.data;
-    if (data == null || data['deleteUserDevice'] == null) {
+    if (data == null || data['confirmStripePayment'] == null) {
       return ResponseData(
         data: null,
         userFriendlyError:
@@ -1614,5 +1676,154 @@ Future<ResponseData> confirmPaymentWithBackend({
     );
   } catch (e) {
     return handleGenericError(e, "Confirmar intención de pago de Stripe");
+  }
+}
+
+Future<ResponseData> verifyPinAndCompleteRegistration(
+    String email, String verificationCode) async {
+  final GraphQLClient client = createClient();
+
+  final MutationOptions options = MutationOptions(
+    operationName: "VerifyPinAndCompleteRegistration",
+    document: gql(r'''
+        mutation VerifyPinAndCompleteRegistration($input: verifyPinAndCompleteRegistrationInput!) {
+        verifyPinAndCompleteRegistration(input: $input) {
+          id
+          email
+          username
+          password
+          imgProfileUser
+          isDeveloperMode
+          userJwtToken {
+          token 
+          }
+        }
+      }
+    '''),
+    variables: {
+      "input": {"email": email, "verificationCode": verificationCode}
+    },
+  );
+
+  try {
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['verifyPinAndCompleteRegistration'] == null) {
+      return ResponseData(
+        data: null,
+        userFriendlyError:
+            'No se pudo enviar de código de verificación. Inténtalo nuevamente.',
+        error:
+            'envió de código de verificación  fallida: no se devolvieron datos',
+        errorType: ErrorType.noData,
+      );
+    }
+
+    return ResponseData(
+      data: data['verifyPinAndCompleteRegistration'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "envió de código de verificación");
+  }
+}
+
+Future<ResponseData> resendVerificationCode(
+    String email, String timeZone) async {
+  final GraphQLClient client = createClient();
+
+  final MutationOptions options = MutationOptions(
+    operationName:"ResendEmailVerificationCode",
+    document: gql(r'''
+        mutation ResendEmailVerificationCode($email: String!, $timezone: String) {
+          resendEmailVerificationCode(email: $email, timezone: $timezone)
+        }
+              '''),
+    variables: {
+      'email': email,
+      'timezone': timeZone,
+    },
+  );
+
+  try {
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['resendEmailVerificationCode'] == null) {
+      return ResponseData(
+        data: null,
+        userFriendlyError:
+            'No se pudo enviar de código de verificación. Inténtalo nuevamente.',
+        error:
+            'Reenvió de código de verificación  fallida: no se devolvieron datos',
+        errorType: ErrorType.noData,
+      );
+    }
+
+    return ResponseData(
+      data: data['resendEmailVerificationCode'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Reenvió de código de verificación");
+  }
+}
+
+Future<ResponseData> saveWhatsAppConfig(String userId, bool isActivatedSendWhatsApp,List<String> scheduleHours ) async {
+  final GraphQLClient client = createClient();
+
+  final MutationOptions options = MutationOptions(
+    operationName:"UpdatePreferencesWhatsapp",
+    document: gql(r'''
+       mutation UpdatePreferencesWhatsapp($userId: ID!, $isActiveSendWhatsapp: Boolean!, $scheduleHours: [String!]) {
+          updatePreferencesWhatsapp(user_id: $userId, is_active_send_whatsapp: $isActiveSendWhatsapp, , scheduleHours: $scheduleHours) {
+            userPreferences {
+              is_active_send_whatsapp
+              activated_at_send_whatsapp
+            }
+          }
+        }
+              '''),
+    variables: {
+      'userId': userId,
+      'isActiveSendWhatsapp': isActivatedSendWhatsApp,
+      'scheduleHours':scheduleHours
+    },
+  );
+
+  try {
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['updatePreferencesWhatsapp'] == null) {
+      return ResponseData(
+        data: null,
+        userFriendlyError:
+            'No se pudo enviar actualizar Preferencias del usuario. Inténtalo nuevamente.',
+        error:
+            'Reenvió actualizar Preferencias del usuario  fallida: no se devolvieron datos',
+        errorType: ErrorType.noData,
+      );
+    }
+
+    return ResponseData(
+      data: data['updatePreferencesWhatsapp'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Actualizar preferncias de usuario");
   }
 }

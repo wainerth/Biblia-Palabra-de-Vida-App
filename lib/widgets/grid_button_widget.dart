@@ -37,7 +37,7 @@ class _GridButtonWidgetState<T extends GridItem>
   // Determinar si es tablet
   bool get isTablet {
     final mediaQuery = MediaQuery.of(context);
-    return mediaQuery.size.shortestSide >= 600;
+    return mediaQuery.size.width >= 600;
   }
 
   // Tamaños responsivos para los botones

@@ -1,6 +1,8 @@
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/services/audio_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -16,14 +18,10 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
+  final _translationProvider = AppTranslationProvider();
   LoginUser? userData;
   late AudioService _audioService;
-  final options = [
-    {"option": "A", "color": "A8A1E7"},
-    {"option": "B", "color": "C3F0F9"},
-    {"option": "C", "color": "E1D8D8"},
-    {"option": "D", "color": "A8B9F1"}
-  ];
+  final options = AppConstants.listOption;
   bool showError = false;
   List<Question> questions = [];
   List currentAnswers = [];
@@ -48,6 +46,8 @@ class _QuizScreenState extends State<QuizScreen> {
   bool _isAnswerSelected = false;
   bool _suggestionSelected = false;
   bool _isCorrect = false;
+  int? _selectedAnswerIndex;
+  int? _correctAnswerIndex;
 
   bool get isTablet {
     final width = MediaQuery.of(context).size.width;
@@ -90,7 +90,7 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
         backgroundColor: StyleColor.turquoise,
         title: Text(
-          'Prueba de Conocimientos',
+          _translationProvider.tr('quiz_screen.title'),
           style: StylesApp(context)
               .textStyleBody16
               .copyWith(color: StyleColor.white),
@@ -98,9 +98,10 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
       body: SafeArea(
           child: Container(
-        child:
-            difficulty.isEmpty ? _buildSelectedDifficulty() : _buildPlayScene(),
-      )),
+            child: difficulty.isEmpty
+                ? _buildSelectedDifficulty()
+                : _buildPlayScene(),
+          )),
     );
   }
 
@@ -116,7 +117,7 @@ class _QuizScreenState extends State<QuizScreen> {
           children: [
             SizedBox(height: isTablet ? 20.0 : 0),
             Text(
-              "Selecciona la dificultad",
+              _translationProvider.tr('quiz_screen.difficulty_selection.title'),
               style: isTablet
                   ? StylesApp(context).textStyleBody24.copyWith(
                         color: StyleColor.black,
@@ -128,11 +129,20 @@ class _QuizScreenState extends State<QuizScreen> {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: isTablet ? 40.0 : 20.0),
-            _buildDifficultyButton("Fácil", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr('quiz_screen.difficulty_selection.easy'),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
-            _buildDifficultyButton("Medio", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr('quiz_screen.difficulty_selection.medium'),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
-            _buildDifficultyButton("Difícil", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr('quiz_screen.difficulty_selection.hard'),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 40.0 : 15),
           ],
         ),
@@ -204,91 +214,92 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Widget _buildPlayScene() {
-    return isTablet ? _buildSceneTablet() : _buildSceneMobile();
+    return ResponsiveLayout(
+        mobile: _buildSceneMobile(), tablet: _buildSceneTablet());
   }
 
   _buildSceneMobile() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text(
-              "Oportunidades: ",
-              style: StylesApp(context)
-                  .textStyleBody10
-                  .copyWith(color: StyleColor.grayMedium),
-            ),
-            Image.asset(
-              failedAttempts > 2
-                  ? "assets/fire_rachaActive.png"
-                  : "assets/fire_rachaInactive.png",
-              width: 20,
-            ),
-            Image.asset(
-              failedAttempts > 1
-                  ? "assets/fire_rachaActive.png"
-                  : "assets/fire_rachaInactive.png",
-              width: 20,
-            ),
-            Image.asset(
-              failedAttempts > 0
-                  ? "assets/fire_rachaActive.png"
-                  : "assets/fire_rachaInactive.png",
-              width: 20,
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 45,
-        ),
-        Container(
-          constraints: BoxConstraints(minHeight: 68.0),
-          margin: EdgeInsets.symmetric(horizontal: 6.0),
-          padding: EdgeInsets.symmetric(horizontal: 11.0, vertical: 15.0),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Color(0XFFFFBB00),
-            borderRadius: BorderRadius.circular(8.0),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withValues(alpha: .25),
-                  offset: Offset(0.0, 4.0),
-                  blurStyle: BlurStyle.outer,
-                  blurRadius: 4.0)
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: 40),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                _translationProvider.tr("quiz_screen.game_play.opportunities"),
+                style: StylesApp(context)
+                    .textStyleBody10
+                    .copyWith(color: StyleColor.grayMedium),
+              ),
+              Image.asset(
+                failedAttempts > 2
+                    ? "assets/fire_rachaActive.png"
+                    : "assets/fire_rachaInactive.png",
+                width: 20,
+              ),
+              Image.asset(
+                failedAttempts > 1
+                    ? "assets/fire_rachaActive.png"
+                    : "assets/fire_rachaInactive.png",
+                width: 20,
+              ),
+              Image.asset(
+                failedAttempts > 0
+                    ? "assets/fire_rachaActive.png"
+                    : "assets/fire_rachaInactive.png",
+                width: 20,
+              ),
             ],
           ),
-          child: Text(
-            currentQuestion.question,
-            style: StylesApp(context)
-                .textStyleBody12
-                .copyWith(color: Colors.black),
+          SizedBox(
+            height: 45,
           ),
-        ),
-        SizedBox(
-          height: 38.0,
-        ),
-        if (questions.isNotEmpty)
-          Expanded(
-            flex: !currentQuestion.isOrdering ? 3 : 2,
-            child: Column(
-              children: [
-                if (currentQuestion.isOrdering) ...{
-                  OrderingQuestionDraggableWidget(
-                    orderedCompleted: orderedCompleted,
-                    orderedAnswers: orderedAnswers,
-                    currentQuestion: currentQuestion,
-                    options: options,
-                    answerSelected: (context, index) =>
-                        verifyOrdered(context, index),
-                    showError: showError,
-                    onContinue: funcAnswerValidate,
-                  )
-                } else ...{
-                  if (options.isNotEmpty)
-                    Expanded(
-                      flex: 3,
-                      child: SelectionQuestionWidget(
+          Container(
+            constraints: BoxConstraints(minHeight: 68.0),
+            margin: EdgeInsets.symmetric(horizontal: 6.0),
+            padding: EdgeInsets.symmetric(horizontal: 11.0, vertical: 15.0),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Color(0XFFFFBB00),
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: .25),
+                    offset: Offset(0.0, 4.0),
+                    blurStyle: BlurStyle.outer,
+                    blurRadius: 4.0)
+              ],
+            ),
+            child: Text(
+              currentQuestion.question,
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: Colors.black),
+            ),
+          ),
+          SizedBox(
+            height: 38.0,
+          ),
+          if (questions.isNotEmpty)
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  if (currentQuestion.isOrdering) ...{
+                    OrderingQuestionDraggableWidget(
+                      orderedCompleted: orderedCompleted,
+                      orderedAnswers: orderedAnswers,
+                      currentQuestion: currentQuestion,
+                      options: options,
+                      answerSelected: (context, index) =>
+                          verifyOrdered(context, index),
+                      showError: showError,
+                      onContinue: funcAnswerValidate,
+                    )
+                  } else ...{
+                    if (options.isNotEmpty)
+                      SelectionQuestionWidget(
                         suggestionSelected: _suggestionSelected,
                         selectionCompleted: _selectionCompleted,
                         isCorrect: _isCorrect,
@@ -301,18 +312,17 @@ class _QuizScreenState extends State<QuizScreen> {
                           // await funcAnswerValidate();
                         },
                         isAnswerSelected: _isAnswerSelected,
+                        selectedAnswerIndex: _selectedAnswerIndex,
+                        correctAnswerIndex: _correctAnswerIndex,
                       ),
-                    ),
-                },
-                SizedBox(
-                  height: 47.0,
-                ),
-              ],
+                  },
+                  SizedBox(
+                    height: 47.0,
+                  ),
+                ],
+              ),
             ),
-          ),
-        Expanded(
-          flex: !currentQuestion.isOrdering ? 1 : 0,
-          child: Center(
+          Center(
             child: Container(
               constraints: BoxConstraints(maxWidth: 278.0),
               child: Column(
@@ -336,12 +346,12 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
           ),
-        ),
-        if (currentQuestion.isOrdering)
-          SizedBox(
-            height: 20,
-          )
-      ],
+          if (currentQuestion.isOrdering)
+            SizedBox(
+              height: 20,
+            )
+        ],
+      ),
     );
   }
 
@@ -355,11 +365,11 @@ class _QuizScreenState extends State<QuizScreen> {
             padding: EdgeInsets.all(20.0),
             margin: EdgeInsets.only(bottom: 20.0),
             decoration: BoxDecoration(
-              color: StyleColor.cosmicBlue.withOpacity(0.1),
+              color: StyleColor.cosmicBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: Offset(0, 4),
                 ),
@@ -373,13 +383,13 @@ class _QuizScreenState extends State<QuizScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Progreso",
+                      _translationProvider.tr("quiz_screen.game_play.progress"),
                       style: StylesApp(context)
                           .textStyleBody14
                           .copyWith(color: StyleColor.grayDark),
                     ),
                     SizedBox(height: 4),
-                    Container(
+                    SizedBox(
                       width: 200,
                       child: LinearProgressIndicator(
                         borderRadius: BorderRadius.circular(8.0),
@@ -407,7 +417,8 @@ class _QuizScreenState extends State<QuizScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      "Oportunidades",
+                      _translationProvider
+                          .tr("quiz_screen.game_play.opportunities"),
                       style: StylesApp(context)
                           .textStyleBody14
                           .copyWith(color: StyleColor.grayDark),
@@ -459,7 +470,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       borderRadius: BorderRadius.circular(16.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.25),
+                          color: Colors.black.withValues(alpha: 0.25),
                           offset: Offset(0.0, 6.0),
                           blurRadius: 12.0,
                         ),
@@ -494,13 +505,15 @@ class _QuizScreenState extends State<QuizScreen> {
                               vertical: 8.0,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                             child: Text(
                               currentQuestion.isOrdering
-                                  ? "Pregunta de Ordenamiento"
-                                  : "Pregunta de Selección",
+                                  ? _translationProvider.tr(
+                                      "quiz_screen.game_play.ordering_question")
+                                  : _translationProvider.tr(
+                                      "quiz_screen.game_play.selection_question"),
                               style:
                                   StylesApp(context).textStyleBody14.copyWith(
                                         color: Colors.white,
@@ -523,7 +536,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       borderRadius: BorderRadius.circular(16.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 12,
                           offset: Offset(0, 6),
                         ),
@@ -538,8 +551,8 @@ class _QuizScreenState extends State<QuizScreen> {
                           margin: EdgeInsets.only(bottom: 20.0),
                           decoration: BoxDecoration(
                             color: currentQuestion.isOrdering
-                                ? StyleColor.turquoise.withOpacity(0.1)
-                                : StyleColor.orange.withOpacity(0.1),
+                                ? StyleColor.turquoise.withValues(alpha: 0.1)
+                                : StyleColor.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12.0),
                             border: Border.all(
                               color: currentQuestion.isOrdering
@@ -563,8 +576,10 @@ class _QuizScreenState extends State<QuizScreen> {
                               SizedBox(width: 12),
                               Text(
                                 currentQuestion.isOrdering
-                                    ? "Ordena las opciones correctamente"
-                                    : "Selecciona la respuesta correcta",
+                                    ? _translationProvider.tr(
+                                        "quiz_screen.game_play.ordering_instruction")
+                                    : _translationProvider.tr(
+                                        "quiz_screen.game_play.selection_instruction"),
                                 style:
                                     StylesApp(context).textStyleBody16.copyWith(
                                           color: Colors.black,
@@ -602,6 +617,8 @@ class _QuizScreenState extends State<QuizScreen> {
                                       // await funcAnswerValidate();
                                     },
                                     isAnswerSelected: _isAnswerSelected,
+                                    selectedAnswerIndex: _selectedAnswerIndex,
+                                    correctAnswerIndex: _correctAnswerIndex,
                                     // isTablet: isTablet,
                                   ),
                           ),
@@ -659,7 +676,7 @@ class _QuizScreenState extends State<QuizScreen> {
     } else {
       // si falle 3 o mas veces muestro modal de inténtalo de nuevo
       if (failedAttempts == 0) {
-        await _audioService.playFailedAttempts();
+        _audioService.playFailedAttempts();
         _showDialogFailedAttempts();
       } else {
         _audioService.playWinSound();
@@ -673,67 +690,91 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _answerSelected(BuildContext context, int index) async {
-    setState(() {
-      _isAnswerSelected = true;
-      _suggestionSelected = false;
-    });
-    _isCorrect =
-        (currentAnswers.isNotEmpty) ? currentAnswers[index].isCorrect : false;
+    // Mostrar loading
+    LoadingService().showLoading(context);
 
+    // Actualizar estado de manera más eficiente
+    _isAnswerSelected = true;
+    _suggestionSelected = false;
+    _selectedAnswerIndex = index;
+
+    // Determinar si es correcta
+    _isCorrect = currentAnswers[index].isCorrect;
+
+    // Encontrar índice de respuesta correcta (solo si es necesario)
+    int correctIndex = -1;
     if (!_isCorrect) {
-      await _audioService.playWrongAnswer();
-      setState(() {
-        _suggestionSelected = true;
-        failedAttempts -= 1;
-      });
-    } else {
-      setState(() {
-        _suggestionSelected = true;
-      });
-      await _audioService.playCorrectAnswer();
+      correctIndex = currentAnswers.indexWhere((answer) => answer.isCorrect);
     }
-    setState(() {
-      _selectionCompleted = true;
-    });
+
+    // Reproducir audio según resultado
+    if (_isCorrect) {
+      _audioService.playCorrectAnswer();
+    } else {
+      _audioService.playWrongAnswer();
+      failedAttempts -= 1;
+      _suggestionSelected = true;
+    }
+
+    // Actualizar estado final
+    _correctAnswerIndex = correctIndex;
+    _selectionCompleted = true;
+
+    // Forzar reconstrucción una sola vez
+    setState(() {});
+
+    // Ocultar loading
+    LoadingService().hideLoading();
+
+    // Mostrar SnackBar (sin 24 horas de duración)
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: Duration(hours: 24),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      _showResultSnackBar(context, index);
+    }
+  }
+
+  void _showResultSnackBar(BuildContext context, int index) {
+    final snackBar = SnackBar(
+      duration: const Duration(hours: 24), // Reducido a 3 segundos
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Icon(
-                    _isCorrect ? Icons.check_circle : Icons.error,
-                    color: Colors.white,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    _isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!',
-                    style: StylesApp(context).textStyleBody12,
-                  ),
-                ],
+              Icon(
+                _isCorrect ? Icons.check_circle : Icons.error,
+                color: Colors.white,
               ),
-              // botón de siguiente
-              TextButton(
-                onPressed: () async {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  await funcAnswerValidate();
-                },
-                child: Text(
-                  'Siguiente',
-                  style: StylesApp(context)
-                      .textStyleBody12
-                      .copyWith(color: Colors.white),
-                ),
+              const SizedBox(width: 8),
+              Text(
+                _isCorrect
+                    ? _translationProvider.tr("quiz_screen.snackbar.correct")
+                    : _translationProvider.tr("quiz_screen.snackbar.incorrect"),
+                style: StylesApp(context).textStyleBody12,
               ),
             ],
           ),
-          backgroundColor: _isCorrect ? Colors.green : Colors.red,
-        ),
-      );
-    }
+          TextButton(
+            onPressed: () async {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              await funcAnswerValidate();
+              setState(() {
+                _selectedAnswerIndex = null;
+                _correctAnswerIndex = null;
+              });
+            },
+            child: Text(
+              _translationProvider.tr("quiz_screen.game_play.next"),
+              style: StylesApp(context)
+                  .textStyleBody12
+                  .copyWith(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: _isCorrect ? Colors.green : Colors.red,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Future<void> loadQuestions() async {
@@ -766,6 +807,12 @@ class _QuizScreenState extends State<QuizScreen> {
         for (int i = 0; i < questions.length; i++) {
           for (int j = 0; j < questions[i].answers.length; j++) {
             questions[i].answers[j].option = options[j]["option"];
+            // questions[i] = questions[i].copyWith(
+            //     question:
+            //         "esto es una prueba de una pregun muuuuuyy larga para poder revisa si se puede obtenr un scroll que permita vizualiozar todo el contenido");
+            // questions[i].answers[j] = questions[i].answers[j].copyWith(
+            //     answer:
+            //         "Esta es una respuesta o opción muy larga que se va  a implemenatr para validar que tanto pueden extenderse las cajas y que tanto es el scrooll de la pantalla que va  apermirt para el usuario pueda ver todas las opciones en el dispositivo movíl , ");
           }
         }
         currentQuestion = questions[currentIndex];
@@ -795,9 +842,11 @@ class _QuizScreenState extends State<QuizScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('¡Oportunidades Agotadas!'),
-        content: const Text(
-            'Haz Fallado Los Intentos Permitidos. ¿Quieres intentarlo de nuevo?'),
+        title: Text(_translationProvider
+            .tr("quiz_screen.failed_attempts_dialog.title")),
+        content: Text(
+          _translationProvider.tr("quiz_screen.failed_attempts_dialog.message"),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -818,7 +867,8 @@ class _QuizScreenState extends State<QuizScreen> {
               currentAnswers = [];
               currentIndex = 0;
             },
-            child: const Text('Jugar de nuevo'),
+            child: Text(_translationProvider
+                .tr("quiz_screen.failed_attempts_dialog.play_again")),
           ),
         ],
       ),
@@ -843,11 +893,13 @@ class _QuizScreenState extends State<QuizScreen> {
         await showCustomDialogWithAction(context,
             message: responseSaveResult.error!,
             dialogType: DialogTypeAction.error,
-            buttonOk: "Volver",
+            buttonOk:
+                _translationProvider.tr("quiz_screen.load_error_dialog.back"),
             actionCallbackOk: () {
               Navigator.pop(context);
             },
-            textButton: "Reintentar",
+            textButton:
+                _translationProvider.tr("quiz_screen.load_error_dialog.retry"),
             actionCallback: () {
               _showDialogFinallyPlay();
             });
@@ -861,11 +913,13 @@ class _QuizScreenState extends State<QuizScreen> {
         await showCustomDialogWithAction(context,
             message: responseSaveResult.error!,
             dialogType: DialogTypeAction.error,
-            buttonOk: "Volver",
+            buttonOk:
+                _translationProvider.tr("quiz_screen.load_error_dialog.back"),
             actionCallbackOk: () {
               Navigator.pop(context);
             },
-            textButton: "Reintentar",
+            textButton:
+                _translationProvider.tr("quiz_screen.load_error_dialog.retry"),
             actionCallback: () {
               _showDialogFinallyPlay();
             });
@@ -888,13 +942,22 @@ class _QuizScreenState extends State<QuizScreen> {
                     .copyWith(color: StyleColor.black),
               ),
               Text(
-                  "Categoría:  ${infoResult.message.category} Dificultad: ${infoResult.message.difficulty}"),
-              Text("Puntaje obtenido:  ${infoResult.score}")
+                "${_translationProvider.trParams("quiz_screen.result_dialog.category", {
+                      "category": infoResult.message.category!,
+                    })}\n ${_translationProvider.trParams("quiz_screen.result_dialog.difficulty", {
+                      "difficulty": infoResult.message.difficulty!,
+                    })}\n",
+              ),
+              Text(_translationProvider
+                  .trParams("quiz_screen.result_dialog.score", {
+                "score": infoResult.score.toString(),
+              }))
             ],
           ),
           actions: [
             ButtonThemeWidget(
-              text: "Jugar de nuevo",
+              text: _translationProvider
+                  .tr("quiz_screen.result_dialog.play_again"),
               buttonStyle: StylesApp(context).btnWidgetSmall,
               onPressed: () {
                 Navigator.pop(context);
@@ -913,11 +976,11 @@ class _QuizScreenState extends State<QuizScreen> {
       await showCustomDialogWithAction(context,
           message: e.toString(),
           dialogType: DialogTypeAction.error,
-          buttonOk: "Volver",
+          buttonOk: _translationProvider.tr("quiz_screen.error_dialog.back"),
           actionCallbackOk: () {
             Navigator.pop(context);
           },
-          textButton: "Reintentar",
+          textButton: _translationProvider.tr("quiz_screen.error_dialog.retry"),
           actionCallback: () {
             _showDialogFinallyPlay();
           });
@@ -927,28 +990,36 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Color _getDifficultyColor(String level) {
-    switch (level) {
-      case "Fácil":
-        return StyleColor.greenDark;
-      case "Medio":
-        return StyleColor.orange;
-      case "Difícil":
-        return StyleColor.redDark;
-      default:
-        return StyleColor.black;
+    if (_translationProvider.tr('quiz_screen.difficulty_selection.easy') ==
+        level) {
+      return StyleColor.greenDark;
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.medium') ==
+        level) {
+      return StyleColor.orange;
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.hard') ==
+        level) {
+      return StyleColor.redDark;
+    } else {
+      return StyleColor.greenDark;
     }
   }
 
   String _getDifficultyCharacter(String level) {
-    switch (level) {
-      case "Fácil":
-        return 'F';
-      case "Medio":
-        return 'I';
-      case "Difícil":
-        return 'D';
-      default:
-        return 'F';
+    if (_translationProvider.tr('quiz_screen.difficulty_selection.easy') ==
+        level) {
+      return 'F';
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.medium') ==
+        level) {
+      return 'I';
+    } else if (_translationProvider
+            .tr('quiz_screen.difficulty_selection.hard') ==
+        level) {
+      return 'D';
+    } else {
+      return 'F';
     }
   }
 }

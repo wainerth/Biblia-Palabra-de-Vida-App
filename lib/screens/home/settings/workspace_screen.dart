@@ -1,6 +1,8 @@
 import 'dart:async';
 
-import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
+import 'package:biblia_palabra_de_vida_app/utils/route_observer.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/notification_list_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -32,7 +34,8 @@ class WorkspaceScreen extends StatefulWidget {
   State<WorkspaceScreen> createState() => _WorkspaceScreenState();
 }
 
-class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
+class _WorkspaceScreenState extends State<WorkspaceScreen>
+    with SafeStateMixin, RouteAware {
   LoginUser? dataUser;
   late final CatalogueProvider catalogueProvider;
   PaginationInfo? paginate;
@@ -46,15 +49,73 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       chapter: Chapter(chapter: 0),
       verse: Verse(verse: 0, text: ""));
   bool _initCompleted = false;
+  int _unreadCount = 0;
+  dynamic Function(dynamic)? _notificationListener;
+  late final SocketClientProvider _notificationProvider;
 
   @override
   void initState() {
     super.initState();
+
+    //Obtener referencia al provider
+    _notificationProvider =
+        Provider.of<SocketClientProvider>(context, listen: false);
+
+    // Agregar listener para cambios
+    _notificationProvider.addListener(_onNotificationsChanged);
+
+    // Calcular contador inicial
+    _updateUnreadCount();
+
     _initializePage();
   }
 
   @override
+  void didPop() {
+    // Este método se llama cuando la pantalla actual vuelve a ser visible
+    super.didPop();
+
+    if (mounted) {
+      _updateUnreadCount();
+      setState(() {});
+      if (kDebugMode) {
+        print('🔄 WorkspaceScreen visible nuevamente - Actualizando contador');
+      }
+    }
+  }
+
+  @override
+  void didPopNext() {
+    // Este método se llama cuando otra pantalla se cierra y esta es la siguiente
+    super.didPopNext();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        await loadAllNotifications();
+        _updateUnreadCount();
+        setState(() {});
+        if (kDebugMode) {
+          print('🔄 WorkspaceScreen volvió al frente - Actualizando contador');
+        }
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Suscribirse al RouteObserver
+    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+  }
+
+  @override
   void dispose() {
+    if (mounted) {
+      if (_notificationListener != null) {
+        _notificationProvider.removeListenerFromEvent(
+            "notification", _notificationListener!);
+      }
+    }
+    routeObserver.unsubscribe(this);
     super.dispose();
   }
 
@@ -79,14 +140,33 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             Provider.of<SocketClientProvider>(context, listen: false);
         await loadAllNotifications();
 
-        notificationProvider.listenToEvent("notification", (notify) {
+        if (_notificationListener != null) {
+          notificationProvider.removeListenerFromEvent(
+              "notification", _notificationListener!);
+        }
+
+        _notificationListener = (dynamic notify) {
           if (kDebugMode) {
-            print(notify);
+            print("📨 Notificación recibida");
           }
           final newNotification = NotificationModel.fromJson(notify);
-          notificationProvider.addNotification(newNotification);
-          notificationProvider.showNotification(newNotification);
-        });
+          // Verificar si ya existe antes de agregar
+          final exists = notificationProvider.notifications
+              .any((n) => n.id == newNotification.id);
+
+          if (!exists) {
+            notificationProvider.addNotification(newNotification);
+            notificationProvider.showNotification(newNotification);
+          } else {
+            if (kDebugMode) {
+              print(
+                  "⏭️ Notificación duplicada ignorada: ${newNotification.id}");
+            }
+          }
+        };
+
+        notificationProvider.listenToEvent(
+            "notification", _notificationListener!);
       }
 
       if (mounted) {
@@ -100,6 +180,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     List<NotificationModel> notifies = [];
     Provider.of<SocketClientProvider>(context, listen: false)
         .cleanNotification();
+    final translationProvider = context.read<AppTranslationProvider>();
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final useData = userProvider.currentUser;
 
@@ -126,7 +208,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
         }
       });
     } catch (e) {
-      String error = "Error al leer las notificaciones:  ${e.toString()}";
+      String error =
+          "${translationProvider.tr('workspace.errors.load_notifications')}:  ${e.toString()}";
       if (mounted) {
         await showCustomDialog(context,
             message: error, dialogType: DialogType.error);
@@ -164,28 +247,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth >= 768;
+    final translationProvider = context.read<AppTranslationProvider>();
     final userProvider = Provider.of<UserProvider>(context);
+    final _isTablet = isTablet(context);
     dataUser = userProvider.currentUser;
 
-    final cardList = [
-      {
-        'label': 'Aventura',
-        'img': 'assets/aventure.gif',
-        'route': '/introAventurePage',
-      },
-      {
-        'label': 'La Biblia',
-        'img': 'assets/biblia.png',
-        'route': '/bibliaPage',
-      },
-      {
-        'label': 'Comunidad',
-        'img': 'assets/comunidad.png',
-        'route': '/communityPage',
-      },
-    ];
+    final cardList = AppConstants.homeCards;
 
     return SafeArea(
       child: SizedBox(
@@ -200,14 +267,14 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 child: Visibility(
                   visible: true,
                   child: Container(
-                    width: isTablet ? 70 : 35,
-                    height: isTablet ? 70 : 35,
+                    width: _isTablet ? 70 : 35,
+                    height: _isTablet ? 70 : 35,
                     decoration: const BoxDecoration(
                       color: Colors.transparent,
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      iconSize: isTablet ? 70 : 35,
+                      iconSize: _isTablet ? 70 : 35,
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
@@ -226,12 +293,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         children: [
                           Icon(
                             Icons.notifications,
-                            size: isTablet ? 60 : 40,
+                            size: _isTablet ? 60 : 40,
                             color: StyleColor.redLight,
                           ),
                           Positioned(
-                            right: isTablet ? 22 : 6,
-                            top: isTablet ? 18 : 12,
+                            right: _isTablet ? 22 : 6,
+                            top: _isTablet ? 18 : 12,
                             child: Container(
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(
@@ -263,16 +330,19 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 children: [
                   const SizedBox(height: 15.0),
                   // Sección de cards superiores - Responsive
-                  isTablet
-                      ? _buildTabletCardSection(context, cardList)
-                      : _buildMobileCardSection(context, cardList),
+                  _isTablet
+                      ? _buildTabletCardSection(
+                          context, cardList, translationProvider)
+                      : _buildMobileCardSection(
+                          context, cardList, translationProvider),
 
                   const SizedBox(height: 12.0),
 
                   // Layout principal responsive
-                  isTablet
-                      ? _buildTabletLayout(context)
-                      : _buildMobileLayout(context),
+                  ResponsiveLayout(
+                    mobile: _buildMobileLayout(context, translationProvider),
+                    tablet: _buildTabletLayout(context, translationProvider),
+                  ),
 
                   SizedBox(height: kBottomNavigationBarHeight - 40),
                 ],
@@ -285,25 +355,29 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   }
 
   // ============ LAYOUT PARA MÓVIL ============
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Column(
       children: [
         dataUser != null
-            ? _buildPositionSection(context, dataUser)
+            ? _buildPositionSection(context, dataUser, translationProvider)
             : Container(),
         const SizedBox(height: 12.0),
-        _buildProverbsSection(context, loadingDaily, errorDaily, dailyWord),
-        _buildStoriesSection(context, reflection),
+        _buildProverbsSection(
+            context, loadingDaily, errorDaily, dailyWord, translationProvider),
+        _buildStoriesSection(context, reflection, translationProvider),
         const SizedBox(height: 12.0),
-        _buildGridViewSection(context),
+        _buildGridViewSection(context, translationProvider),
         const SizedBox(height: 12.0),
-        if (GraphQLConfig.development) _buildLibrarySection(context),
+        if (GraphQLConfig.development)
+          _buildLibrarySection(context, translationProvider),
       ],
     );
   }
 
   // ============ LAYOUT PARA TABLET ============
-  Widget _buildTabletLayout(BuildContext context) {
+  Widget _buildTabletLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
@@ -318,13 +392,15 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 child: Column(
                   children: [
                     dataUser != null
-                        ? _buildPositionSection(context, dataUser)
+                        ? _buildPositionSection(
+                            context, dataUser, translationProvider)
                         : Container(),
                     const SizedBox(height: 16.0),
-                    _buildProverbsSection(
-                        context, loadingDaily, errorDaily, dailyWord),
+                    _buildProverbsSection(context, loadingDaily, errorDaily,
+                        dailyWord, translationProvider),
                     const SizedBox(height: 16.0),
-                    _buildStoriesSection(context, reflection),
+                    _buildStoriesSection(
+                        context, reflection, translationProvider),
                   ],
                 ),
               ),
@@ -334,10 +410,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                 flex: 5,
                 child: Column(
                   children: [
-                    _buildGridViewSection(context),
+                    _buildGridViewSection(context, translationProvider),
                     const SizedBox(height: 16.0),
                     if (GraphQLConfig.development)
-                      _buildLibrarySection(context),
+                      _buildLibrarySection(context, translationProvider),
                   ],
                 ),
               ),
@@ -353,14 +429,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   // Cards superiores para móvil
   Widget _buildMobileCardSection(
-      BuildContext context, List<Map<String, String>> cards) {
+      BuildContext context,
+      List<Map<String, dynamic>> cards,
+      AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: cards
             .where((card) =>
-                !(card['label'] == 'Comunidad' && !GraphQLConfig.development))
-            .map((card) => _buildCard(context, card))
+                (card['key'] != 'Comunidad' && !GraphQLConfig.development))
+            .map((card) => _buildCard(context, card, translationProvider))
             .toList(),
       ),
     );
@@ -368,10 +446,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   // Cards superiores para tablet
   Widget _buildTabletCardSection(
-      BuildContext context, List<Map<String, String>> cards) {
+      BuildContext context,
+      List<Map<String, dynamic>> cards,
+      AppTranslationProvider translationProvider) {
     final filteredCards = cards
         .where((card) =>
-            !(card['label'] == 'Comunidad' && !GraphQLConfig.development))
+            (card['key'] != 'Comunidad' && !GraphQLConfig.development))
         .toList();
 
     return Container(
@@ -379,13 +459,14 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: filteredCards
-            .map((card) => _buildTabletCard(context, card))
+            .map((card) => _buildTabletCard(context, card, translationProvider))
             .toList(),
       ),
     );
   }
 
-  Widget _buildTabletCard(BuildContext context, Map<String, String> card) {
+  Widget _buildTabletCard(BuildContext context, Map<String, dynamic> card,
+      AppTranslationProvider translationProvider) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -406,11 +487,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               ),
               const SizedBox(height: 8.0),
               Text(
-                card['label']!,
+                translationProvider.tr(card['label']!),
                 textAlign: TextAlign.center,
                 style: StylesApp(context).textStyleBody4.copyWith(
                       color: const Color(0xFFFD8C43),
-                      fontSize: 16.sp,
+                      fontSize: 14.sp,
                     ),
               ),
             ],
@@ -420,7 +501,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
-  Widget _buildCard(BuildContext context, Map<String, String> card) {
+  Widget _buildCard(BuildContext context, Map<String, dynamic> card,
+      AppTranslationProvider translationProvider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: GestureDetector(
@@ -443,7 +525,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             ),
             const SizedBox(height: 8.0),
             Text(
-              card['label']!,
+              translationProvider.tr(card['label']!),
               textAlign: TextAlign.center,
               style: StylesApp(context).textStyleBody4.copyWith(
                     color: const Color(0xFFFD8C43),
@@ -456,9 +538,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   }
 
   Future<void> _onCardTap(
-      BuildContext context, Map<String, String> card) async {
+      BuildContext context, Map<String, dynamic> card) async {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     await _loadProgress(context);
-    if (card['label'] == 'Aventura') {
+    if (card['key'] == 'Aventura') {
       if (error) return;
       if (progressUser != null && progressUser!.success == true) {
         if (progressUser!.message.contains('El curso ya fue finalizado')) {
@@ -466,8 +550,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             context,
             message: progressUser!.message,
             dialogType: DialogTypeAction.info,
-            buttonOk: "Ver más cursos",
-            textButton: "ir Al curso",
+            buttonOk:
+                translationProvider.tr('workspace.dialogs.see_more_courses'),
+            textButton:
+                translationProvider.tr('workspace.dialogs.go_to_course'),
             showAction: true,
             actionCallbackOk: () {
               Navigator.pushNamed(context, '/layoutPage1',
@@ -501,7 +587,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     }
   }
 
-  Widget _buildLibrarySection(BuildContext context) {
+  Widget _buildLibrarySection(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/layoutLibrary');
@@ -518,7 +605,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Librería Cristiana",
+              translationProvider.tr('workspace.sections.christian_library'),
               style: StylesApp(context).textStyleBody7,
             ),
             Padding(
@@ -536,7 +623,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
 
   // ============ MANTENER EL RESTO DE LOS MÉTODOS EXISTENTES ============
 
-  _buildStoriesSection(BuildContext context, reflection) {
+  _buildStoriesSection(BuildContext context, reflection,
+      AppTranslationProvider translationProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -544,7 +632,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Cuentos para reflexionar",
+              translationProvider.tr('workspace.sections.stories_to_reflect'),
               style: StylesApp(context)
                   .textStyleBody5
                   .copyWith(color: const Color(0xFFFE8D43)),
@@ -589,7 +677,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               icon: Icon(
                 Icons.add_circle_outline_sharp,
                 color: StyleColor.orange,
-                size: 20.sp,
+                size: 20,
               ),
             )
           ],
@@ -607,7 +695,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
-  _buildGridViewSection(BuildContext context) {
+  _buildGridViewSection(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Wrap(
       spacing: 0.0,
       children: [
@@ -625,8 +714,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                     context,
                     message: progressUser!.message,
                     dialogType: DialogTypeAction.info,
-                    buttonOk: "Ver más cursos",
-                    textButton: "ir Al curso",
+                    buttonOk: translationProvider
+                        .tr('workspace.dialogs.see_more_courses'),
+                    textButton: translationProvider
+                        .tr('workspace.dialogs.go_to_course'),
                     showAction: true,
                     actionCallbackOk: () {
                       Navigator.pushNamed(context, '/layoutPage1',
@@ -659,7 +750,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             },
             child: CardOptionWidget(
                 imageBackground: "assets/ranking.png",
-                labelCard: "Aventura",
+                labelCard: translationProvider.tr('workspace.cards.adventure'),
                 gradientColors: [
                   const Color(0XFFA731EC),
                   const Color(0XFF620188)
@@ -672,7 +763,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             onTap: () => Navigator.pushNamed(context, '/preachPage'),
             child: CardOptionWidget(
                 imageBackground: "assets/predicas.png",
-                labelCard: "Prédicas",
+                labelCard:
+                    translationProvider.tr('workspace.sections.preachings'),
                 gradientColors: [
                   const Color(0XFF1FEFEC),
                   const Color(0XFF0159A7),
@@ -685,7 +777,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             onTap: () => Navigator.pushNamed(context, '/playPage'),
             child: CardOptionWidget(
                 imageBackground: "assets/games.png",
-                labelCard: "Juegos",
+                labelCard: translationProvider.tr('workspace.sections.games'),
                 gradientColors: [
                   const Color(0XFF3531F3),
                   const Color(0XFF040681)
@@ -698,7 +790,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
             onTap: () => Navigator.pushNamed(context, '/promisePage'),
             child: CardOptionWidget(
                 imageBackground: "assets/promesas.png",
-                labelCard: "Promesas",
+                labelCard:
+                    translationProvider.tr('workspace.sections.promises'),
                 gradientColors: [
                   const Color(0XFF58AC5F),
                   const Color(0XFF2F6624),
@@ -745,8 +838,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     }
   }
 
-  _buildProverbsSection(BuildContext context, bool loadingDaily,
-      bool errorDaily, DailyWord dailyWord) {
+  _buildProverbsSection(
+      BuildContext context,
+      bool loadingDaily,
+      bool errorDaily,
+      DailyWord dailyWord,
+      AppTranslationProvider translationProvider) {
     bool loading = false;
     return Container(
       decoration: BoxDecoration(
@@ -851,41 +948,43 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         children: [
                           Center(
                             child: SizedBox(
-                              width: 16.sp,
-                              height: 16.sp,
+                              width: 20,
+                              height: 20,
                               child: IconButton(
                                 padding: EdgeInsets.zero,
                                 icon: Icon(
                                   Icons.copy,
                                   color: Colors.white,
-                                  size: 16.sp,
+                                  size: 20,
                                 ),
                                 onPressed: () {
                                   Clipboard.setData(ClipboardData(
                                       text:
                                           " ${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible"));
                                   showSnackBar(
-                                      "Proverbio copiado al portapapeles",
+                                      translationProvider.tr(
+                                          'workspace.daily_proverb.copy_success'),
                                       type: SnackBarType.success);
                                 },
                               ),
                             ),
                           ),
                           SizedBox(
-                            width: 16.sp,
-                            height: 16.sp,
+                            width: 20,
+                            height: 20,
                             child: IconButton(
                               padding: EdgeInsets.zero,
                               icon: Icon(
                                 Icons.share,
                                 color: Colors.white,
-                                size: 16.sp,
+                                size: 20,
                               ),
                               onPressed: () async {
                                 await SharePlus.instance.share(ShareParams(
                                   text:
                                       "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible",
-                                  subject: "Proverbio del día",
+                                  subject: translationProvider.tr(
+                                      'workspace.daily_proverb.share_subject'),
                                 ));
                               },
                             ),
@@ -934,7 +1033,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
     );
   }
 
-  _buildPositionSection(BuildContext context, userData) {
+  _buildPositionSection(BuildContext context, userData,
+      AppTranslationProvider translationProvider) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF12CBC4),
@@ -985,7 +1085,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                         )
                                       : Image.asset(
                                           'assets/no-image.jpg',
-                                          fit: BoxFit.cover,
+                                          fit: BoxFit.contain,
                                           alignment: Alignment.center,
                                         ),
                                 ),
@@ -1016,7 +1116,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                                 child: Center(
                                   child: Text(
                                     textAlign: TextAlign.center,
-                                    "${userData?.league != null ? userData.league.leagueName : 'El rebaño te espera!'}",
+                                    "${userData?.league != null ? userData.league.leagueName : translationProvider.tr('workspace.user_profile.welcome_herd')}",
                                     style: userData?.league != null
                                         ? StylesApp(context)
                                             .textStyleBody6
@@ -1039,9 +1139,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(
-                              width:
-                                  StylesApp(context).sizeContainerAvatar.width -
-                                      10,
+                              width: isTablet(context) ? 59 : 30,
                               child: Image.asset(
                                 'assets/kawaii_fire.png',
                                 alignment: Alignment.center,
@@ -1079,7 +1177,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         child: Center(
                           child: Text(
                             textAlign: TextAlign.center,
-                            "Const: ${userData.streakDaysCount} Dias",
+                            translationProvider
+                                .tr('workspace.user_profile.streak_days')
+                                .replaceFirst(
+                                    '%s', userData.streakDaysCount.toString()),
                             style: StylesApp(context)
                                 .textStyleBody6
                                 .copyWith(color: Colors.white),
@@ -1090,7 +1191,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                         flex: 1,
                         child: Center(
                           child: Text(
-                            " ${userData.energyPoints} Lms.",
+                            translationProvider
+                                .tr('workspace.user_profile.energy_points')
+                                .replaceFirst(
+                                    '%s', userData.energyPoints.toString()),
                             style: StylesApp(context)
                                 .textStyleBody6
                                 .copyWith(color: Colors.white),
@@ -1103,7 +1207,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
               ),
               Positioned(
                 right: -3,
-                top: -15,
+                top: -10,
                 child: SizedBox(
                   width: 40.0.sp,
                   height: 30.0.sp,
@@ -1112,7 +1216,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
                       Navigator.pushNamed(context, '/profilePage');
                     },
                     icon: const Icon(
-                      Icons.fast_forward_outlined,
+                      Icons.account_circle,
                       color: Colors.white,
                       size: 30.0,
                     ),
@@ -1127,10 +1231,26 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> with SafeStateMixin {
   }
 
   String getUnreadCountNotification() {
-    final notificationProvider = Provider.of<SocketClientProvider>(context);
-    final notifications = notificationProvider.notifications.reversed.toList();
-    final unreadCount = notifications.where((n) => n.isRead == false).length;
-    return unreadCount > 0 ? unreadCount.toString() : '0';
+    return _unreadCount > 0 ? _unreadCount.toString() : '0';
+  }
+
+  void _onNotificationsChanged() {
+    if (mounted) {
+      // Actualizar el contador
+      _updateUnreadCount();
+
+      // Forzar rebuild del widget
+      setState(() {});
+
+      if (kDebugMode) {
+        print('🔄 Notificaciones actualizadas - No leídas: $_unreadCount');
+      }
+    }
+  }
+
+  void _updateUnreadCount() {
+    _unreadCount =
+        _notificationProvider.notifications.where((n) => !n.isRead).length;
   }
 }
 
@@ -1147,328 +1267,5 @@ String formatDateTime(String dateTimeStr) {
         "${dateTime.minute.toString().padLeft(2, '0')}";
   } catch (e) {
     return dateTimeStr;
-  }
-}
-
-class NotificationListWidget extends StatefulWidget {
-  const NotificationListWidget({super.key});
-
-  @override
-  State<NotificationListWidget> createState() => _NotificationListWidgetState();
-}
-
-class _NotificationListWidgetState extends State<NotificationListWidget>
-    with SingleTickerProviderStateMixin {
-  List<NotificationModel> notifications = [];
-  late SocketClientProvider notificationProvider;
-  late TabController _tabController; // ✅ NUEVO: Controlador para los tabs
-
-  @override
-  void initState() {
-    super.initState();
-    notificationProvider =
-        Provider.of<SocketClientProvider>(context, listen: false);
-    notifications = notificationProvider.notifications;
-
-    _tabController = TabController(
-      length: 2,
-      vsync: this,
-      initialIndex: 0, // ← Fuerza el tab inicial
-    );
-    // Listen for changes in notifications
-    notificationProvider.addListener(_onNotificationsChanged);
-  }
-
-  void _onNotificationsChanged() {
-    final newNotifications = [...notificationProvider.notifications];
-    setState(() {
-      notifications = newNotifications;
-    });
-  }
-
-  @override
-  void dispose() {
-    notificationProvider.removeListener(_onNotificationsChanged);
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  List<NotificationModel> get unreadNotifications {
-    return notifications.where((n) => n.isRead == false).toList();
-  }
-
-  List<NotificationModel> get readNotifications {
-    return notifications.where((n) => n.isRead == true).toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      height: MediaQuery.of(context).size.height * 0.7,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Notificaciones",
-                style: StylesApp(context).textStyleBody5.copyWith(
-                    color: StyleColor.black, fontWeight: FontWeight.bold),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // cerramos la modal
-
-                  Navigator.pushNamed(context, '/notificationPage');
-                },
-                child: Text("Ver Todas...",
-                    style: StylesApp(context)
-                        .textStyleBody14
-                        .copyWith(color: StyleColor.turquoise)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                ),
-                color: StyleColor.orange,
-              ),
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelColor: Colors.white,
-              unselectedLabelColor: StyleColor.black,
-              // unselectedLabelStyle: TextStyle(backgroundColor: Colors.blueGrey[200]),
-
-              tabs: [
-                Tab(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("No leídas"),
-                      if (unreadNotifications.isNotEmpty) ...[
-                        SizedBox(width: 4),
-                        Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            unreadNotifications.length.toString(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                Tab(text: "Leídas"),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildNotificationsList(unreadNotifications),
-                _buildNotificationsList(readNotifications),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotificationsList(List<NotificationModel> notificationsToShow) {
-    return notificationsToShow.isEmpty
-        ? Center(
-            child: Text(
-              _tabController.index == 0
-                  ? "No tienes notificaciones no leídas."
-                  : "No tienes notificaciones leídas.",
-              style: StylesApp(context)
-                  .textStyleBody7
-                  .copyWith(color: StyleColor.black),
-            ),
-          )
-        : ListView.separated(
-            itemCount: notificationsToShow.length,
-            separatorBuilder: (_, __) => SizedBox(height: 20.0),
-            itemBuilder: (context, index) {
-              final notification = notificationsToShow[index];
-              return _buildNotificationItem(notification);
-            },
-          );
-  }
-
-  Widget _buildNotificationItem(NotificationModel notification) {
-    return Container(
-      decoration: BoxDecoration(
-        color: notification.isRead ? Colors.white : Colors.blueGrey[100],
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadow: [
-          BoxShadow(
-            color: StyleColor.black.withAlpha(90),
-            offset: Offset(0, 4),
-            spreadRadius: 4.0,
-            blurRadius: 4.0,
-          )
-        ],
-      ),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        leading: Icon(
-          Icons.notifications,
-          color: notification.isRead
-              ? StyleColor.grayMedium
-              : StyleColor.turquoise,
-        ),
-        title: Text(
-          notification.title,
-          style: StylesApp(context).textStyleBody14.copyWith(
-                color: notification.isRead
-                    ? StyleColor.grayMedium
-                    : StyleColor.black,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 8.0, bottom: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  notification.message,
-                  style: StylesApp(context).textStyleBody10.copyWith(
-                        color: notification.isRead
-                            ? StyleColor.grayMedium
-                            : StyleColor.black,
-                        fontWeight: notification.isRead
-                            ? FontWeight.normal
-                            : FontWeight.bold,
-                      ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  formatDateTime(notification.createdAt),
-                  style: StylesApp(context).textStyleBody10.copyWith(
-                      color: notification.isRead
-                          ? StyleColor.grayMedium
-                          : StyleColor.black),
-                ),
-                if (notification.actionLabel.isNotEmpty)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () async {
-                        final responseMarkReadNotification =
-                            await markAsReadOneNotification(notification.id!);
-
-                        if (responseMarkReadNotification.error != null) {
-                          await showCustomDialogWithAction(
-                            context,
-                            dialogType: DialogTypeAction.error,
-                            message: responseMarkReadNotification.error!,
-                            actionCallback: () {
-                              Navigator.pop(context);
-                            },
-                            buttonOk: "Ok",
-                          );
-                          return;
-                        } else {
-                          if (responseMarkReadNotification.data != null) {
-                            if (!responseMarkReadNotification.data['success']) {
-                              await showCustomDialog(
-                                context,
-                                dialogType: DialogType.error,
-                                message: responseMarkReadNotification
-                                    .data['message'],
-                              );
-                              return;
-                            }
-                          }
-                        }
-
-                        if (getRouterScreen(notification.model.toLowerCase(),
-                                    notification.variables)
-                                .arguments !=
-                            null) {
-                          Navigator.pushNamed(
-                              context,
-                              getRouterScreen(notification.model.toLowerCase(),
-                                      notification.variables)
-                                  .routeName,
-                              arguments: getRouterScreen(
-                                      notification.model.toLowerCase(),
-                                      notification.variables)
-                                  .arguments);
-                        } else {
-                          Navigator.pushNamed(
-                              context,
-                              getRouterScreen(
-                                      notification.model.toLowerCase(), null)
-                                  .routeName);
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: StyleColor.blueDark,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(notification.actionLabel),
-                          Icon(Icons.arrow_forward)
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

@@ -6,6 +6,7 @@ import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutat
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/services/audio_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -33,6 +34,8 @@ class _MemoryScreenState extends State<MemoryScreen>
   bool _playWin = false;
   bool _isDisposed = false;
   late AudioService _audioService;
+  // variable que contiene las variables de traducción de la pantalla
+  final _translationProvider = AppTranslationProvider();
 
   // Función para determinar si es tablet
   bool get isTablet {
@@ -95,7 +98,7 @@ class _MemoryScreenState extends State<MemoryScreen>
         ),
         backgroundColor: StyleColor.turquoise,
         title: Text(
-          'Memoria',
+          _translationProvider.tr('memory_screen.title'),
           style: StylesApp(context)
               .textStyleBody16
               .copyWith(color: StyleColor.white),
@@ -143,7 +146,8 @@ class _MemoryScreenState extends State<MemoryScreen>
           children: [
             SizedBox(height: isTablet ? 20.0 : 0),
             Text(
-              "Selecciona la dificultad",
+              _translationProvider
+                  .tr('memory_screen.difficulty_selection.title'),
               style: isTablet
                   ? StylesApp(context).textStyleBody24.copyWith(
                         color: StyleColor.black,
@@ -155,11 +159,20 @@ class _MemoryScreenState extends State<MemoryScreen>
               textAlign: TextAlign.center,
             ),
             SizedBox(height: isTablet ? 40.0 : 20.0),
-            _buildDifficultyButton("Fácil", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr('memory_screen.difficulty_selection.easy'),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
-            _buildDifficultyButton("Medio", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr('memory_screen.difficulty_selection.medium'),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 24.0 : 15),
-            _buildDifficultyButton("Difícil", Icons.face_2_rounded),
+            _buildDifficultyButton(
+                _translationProvider
+                    .tr('memory_screen.difficulty_selection.hard'),
+                Icons.face_2_rounded),
             SizedBox(height: isTablet ? 40.0 : 15),
           ],
         ),
@@ -223,33 +236,32 @@ class _MemoryScreenState extends State<MemoryScreen>
   }
 
   Color _getDifficultyColor(String level) {
-    switch (level) {
-      case "Fácil":
-        return StyleColor.greenDark;
-      case "Medio":
-        return StyleColor.orange;
-      case "Difícil":
-        return StyleColor.redDark;
-      default:
-        return StyleColor.black;
+    if (_translationProvider.tr("memory_screen.difficulty_selection.easy") ==
+        level) {
+      return StyleColor.greenDark;
+    } else if (_translationProvider
+            .tr("memory_screen.difficulty_selection.medium") ==
+        level) {
+      return StyleColor.orange;
+    } else if (_translationProvider
+            .tr("memory_screen.difficulty_selection.hard") ==
+        level) {
+      return StyleColor.redDark;
+    } else {
+      return StyleColor.grayDark;
     }
   }
 
   Future<void> _selectDifficulty(String level) async {
     if (_isDisposed) return;
     await _loadData();
-    if (kDebugMode) {
-      print('DEBUG: Dificultad seleccionada: $level  Iniciando precarga...');
-    }
+
     await _preloadImages();
     setState(() {
       difficulty = level;
       flippedCards = List<bool>.filled(lisMemory.length, false);
       matchedCards = List<bool>.filled(lisMemory.length, false);
     });
-    if (kDebugMode) {
-      print('DEBUG: Precarga de imágenes completada para dificultad $level.');
-    }
   }
 
   Widget _buildPlayScene() {
@@ -311,11 +323,12 @@ class _MemoryScreenState extends State<MemoryScreen>
       context,
       message: message,
       dialogType: DialogTypeAction.error,
-      buttonOk: "Volver",
+      buttonOk: _translationProvider.tr("memory_screen.load_error_dialog.back"),
       actionCallbackOk: () {
         if (!_isDisposed) Navigator.pop(context);
       },
-      textButton: "Reintentar",
+      textButton:
+          _translationProvider.tr("memory_screen.load_error_dialog.retry"),
       actionCallback: () {
         if (!_isDisposed) _showDialogFinallyPlay();
       },
@@ -404,7 +417,10 @@ class _MemoryScreenState extends State<MemoryScreen>
                           children: [
                             Text(
                               textAlign: TextAlign.center,
-                              "Dificultad: ${infoResult.message.difficulty}",
+                              _translationProvider.trParams(
+                                  "memory_screen.result_dialog.difficulty", {
+                                "difficulty": infoResult.message.difficulty!
+                              }),
                               style: isTablet
                                   ? StylesApp(context).textStyleBody16.copyWith(
                                         color: StyleColor.cosmicBlue,
@@ -418,7 +434,9 @@ class _MemoryScreenState extends State<MemoryScreen>
                             if (infoResult.score > 0)
                               Text(
                                 textAlign: TextAlign.center,
-                                "Puntaje obtenido: ${infoResult.score}",
+                                _translationProvider.trParams(
+                                    "memory_screen.result_dialog.score",
+                                    {"score": infoResult.score.toString()}),
                                 style: isTablet
                                     ? StylesApp(context)
                                         .textStyleBody20
@@ -448,7 +466,8 @@ class _MemoryScreenState extends State<MemoryScreen>
             padding: EdgeInsets.all(isTablet ? 20.0 : 16.0),
             child: Center(
               child: ButtonThemeWidget(
-                text: "Jugar de nuevo",
+                text: _translationProvider
+                    .tr("memory_screen.result_dialog.play_again"),
                 width: isTablet ? 250 : null,
                 height: isTablet ? 55 : null,
                 buttonStyle: isTablet
@@ -504,7 +523,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                 ),
                 SizedBox(height: isTablet ? 20.0 : 16),
                 Text(
-                  '¡Tiempo terminado!',
+                  _translationProvider.tr("memory_screen.time_up_dialog.title"),
                   style: isTablet
                       ? StylesApp(context).textStyleBody24.copyWith(
                             color: StyleColor.redDark,
@@ -517,7 +536,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                 ),
                 SizedBox(height: isTablet ? 12.0 : 8),
                 Text(
-                  'Se acabó el tiempo. ¿Quieres intentarlo de nuevo?',
+                  _translationProvider
+                      .tr("memory_screen.time_up_dialog.message"),
                   style: isTablet
                       ? StylesApp(context).textStyleBody18.copyWith(
                             color: StyleColor.black,
@@ -532,7 +552,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ButtonThemeWidget(
-                      text: "Jugar de nuevo",
+                      text: _translationProvider
+                          .tr("memory_screen.time_up_dialog.play_again"),
                       width: isTablet ? 200 : null,
                       height: isTablet ? 50 : null,
                       buttonStyle: isTablet
@@ -608,9 +629,10 @@ class _MemoryScreenState extends State<MemoryScreen>
       context,
       message: message,
       dialogType: DialogTypeAction.error,
-      textButton: "Reintentar",
+      textButton:
+          _translationProvider.tr("memory_screen.load_error_dialog.retry"),
       actionCallback: () => _loadData(),
-      buttonOk: "Volver",
+      buttonOk: _translationProvider.tr("memory_screen.load_error_dialog.back"),
       actionCallbackOk: () {
         Navigator.pushNamed(context, "/layoutPage");
         _audioService.stopBackgroundMusic();
@@ -620,8 +642,9 @@ class _MemoryScreenState extends State<MemoryScreen>
   }
 
   void _handleCardTap(int index) async {
-    if (!canFlip || flippedCards[index] || matchedCards[index] || _isDisposed)
+    if (!canFlip || flippedCards[index] || matchedCards[index] || _isDisposed) {
       return;
+    }
 
     await _audioService.playCardTapSound();
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -751,7 +774,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                                 ),
                                 SizedBox(height: 12),
                                 Text(
-                                  "Memoria Bíblica",
+                                  _translationProvider
+                                      .tr("memory_screen.game_play.title"),
                                   style: StylesApp(context)
                                       .textStyleBody24
                                       .copyWith(
@@ -762,7 +786,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                                 ),
                                 SizedBox(height: 8),
                                 Text(
-                                  "¡Encuentra los pares para ganar!",
+                                  _translationProvider
+                                      .tr("memory_screen.game_play.subtitle"),
                                   style: StylesApp(context)
                                       .textStyleBody18
                                       .copyWith(
@@ -781,7 +806,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                             margin: EdgeInsets.only(bottom: 20.0),
                             decoration: BoxDecoration(
                               color: _getDifficultyColor(difficulty)
-                                  .withOpacity(0.1),
+                                  .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12.0),
                               border: Border.all(
                                 color: _getDifficultyColor(difficulty),
@@ -801,7 +826,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Dificultad",
+                                      _translationProvider.tr(
+                                          "memory_screen.game_play.difficulty_label"),
                                       style: StylesApp(context)
                                           .textStyleBody16
                                           .copyWith(
@@ -828,7 +854,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                           Container(
                             padding: EdgeInsets.all(20.0),
                             decoration: BoxDecoration(
-                              color: StyleColor.blueLight.withOpacity(0.1),
+                              color:
+                                  StyleColor.blueLight.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12.0),
                               border: Border.all(
                                 color: StyleColor.cosmicBlue,
@@ -847,7 +874,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                                     ),
                                     SizedBox(width: 12),
                                     Text(
-                                      "Tiempo",
+                                      _translationProvider.tr(
+                                          "memory_screen.game_play.time_label"),
                                       style: StylesApp(context)
                                           .textStyleBody16
                                           .copyWith(
@@ -871,7 +899,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                                 ),
                                 SizedBox(height: 8),
                                 Text(
-                                  "Tiempo restante",
+                                  _translationProvider.tr(
+                                      "memory_screen.game_play.time_remaining"),
                                   style: StylesApp(context)
                                       .textStyleBody14
                                       .copyWith(
@@ -887,7 +916,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                             margin: EdgeInsets.only(top: 20.0),
                             padding: EdgeInsets.all(16.0),
                             decoration: BoxDecoration(
-                              color: StyleColor.orange.withOpacity(0.05),
+                              color: StyleColor.orange.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                             child: Column(
@@ -897,7 +926,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "Cartas encontradas:",
+                                      _translationProvider.tr(
+                                          "memory_screen.game_play.stats.found"),
                                       style: StylesApp(context)
                                           .textStyleBody16
                                           .copyWith(
@@ -921,7 +951,8 @@ class _MemoryScreenState extends State<MemoryScreen>
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "Total de pares:",
+                                      _translationProvider.tr(
+                                          "memory_screen.game_play.stats.total"),
                                       style: StylesApp(context)
                                           .textStyleBody16
                                           .copyWith(
@@ -947,16 +978,17 @@ class _MemoryScreenState extends State<MemoryScreen>
                           Container(
                             margin: EdgeInsets.only(top: 24.0),
                             child: ButtonThemeWidget(
-                              text: "Cambiar dificultad",
+                              text: _translationProvider.tr(
+                                  "memory_screen.game_play.change_difficulty_button"),
                               width: double.infinity,
                               height: 48,
-                              buttonStyle: StylesApp(context)
-                                  .btnWidgetSmall
-                                  .copyWith(
-                                    backgroundColor: WidgetStatePropertyAll(
-                                      StyleColor.grayMedium.withOpacity(0.8),
-                                    ),
-                                  ),
+                              buttonStyle:
+                                  StylesApp(context).btnWidgetSmall.copyWith(
+                                        backgroundColor: WidgetStatePropertyAll(
+                                          StyleColor.grayMedium
+                                              .withValues(alpha: 0.8),
+                                        ),
+                                      ),
                               onPressed: () {
                                 setState(() {
                                   difficulty = '';
@@ -1000,7 +1032,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                         //   margin: EdgeInsets.only(bottom: 16.0),
                         //   padding: EdgeInsets.all(12.0),
                         //   decoration: BoxDecoration(
-                        //     color: StyleColor.turquoise.withOpacity(0.1),
+                        //     color: StyleColor.turquoise.withValues(alpha: 0.1),
                         //     borderRadius: BorderRadius.circular(12.0),
                         //   ),
                         //   child: Row(
@@ -1075,7 +1107,7 @@ class _MemoryScreenState extends State<MemoryScreen>
         Padding(
           padding: EdgeInsets.symmetric(horizontal: isTablet ? 32.0 : 16.0),
           child: Text(
-            "¡Encuentra los pares para ganar!",
+            _translationProvider.tr("memory_screen.game_play.subtitle"),
             style: isTablet
                 ? StylesApp(context).textStyleBody24.copyWith(
                       color: StyleColor.black,
@@ -1122,7 +1154,9 @@ class _MemoryScreenState extends State<MemoryScreen>
           child: Column(
             children: [
               Text(
-                "Dificultad: $difficulty",
+                _translationProvider.trParams(
+                    "memory_screen.result_dialog.difficulty",
+                    {"difficulty": difficulty}),
                 style: isTablet
                     ? StylesApp(context).textStyleBody18.copyWith(
                           color: StyleColor.black,
@@ -1143,7 +1177,7 @@ class _MemoryScreenState extends State<MemoryScreen>
                   ),
                   SizedBox(width: isTablet ? 12.0 : 8),
                   Text(
-                    "Tiempo Restante: ",
+                    _translationProvider.tr("memory_screen.game_play.time_remaining"),
                     style: isTablet
                         ? StylesApp(context).textStyleBody18.copyWith(
                               color: StyleColor.black,
@@ -1223,8 +1257,8 @@ class _CountDownWidgetState extends State<CountDownWidget> {
       ),
       decoration: BoxDecoration(
         color: _currentCount <= 10
-            ? StyleColor.redLight.withOpacity(0.2)
-            : StyleColor.blueLight.withOpacity(0.2),
+            ? StyleColor.redLight.withValues(alpha: 0.2)
+            : StyleColor.blueLight.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(widget.isTablet ? 12.0 : 8.0),
         border: Border.all(
           color:

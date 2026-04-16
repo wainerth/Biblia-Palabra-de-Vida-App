@@ -207,7 +207,7 @@ class _OfferingsScreenState extends State<OfferingsScreen> {
                         setState(() {
                           _selectedCurrency = newValue?.value;
                           _selectedAmount =
-                              null; // Resetear monto al cambiar moneda
+                              null; // Reset monto al cambiar moneda
                           _donationSelectorKey = UniqueKey();
                         });
                       },
@@ -660,7 +660,7 @@ class _OfferingsScreenState extends State<OfferingsScreen> {
                           borderRadius: BorderRadius.circular(8.0),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               offset: const Offset(0, 2),
                               blurRadius: 4,
                             ),

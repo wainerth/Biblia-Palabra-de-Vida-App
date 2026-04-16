@@ -1,11 +1,14 @@
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/authentication_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/catalogue_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/whatsAppScheduleDialog.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -20,9 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   int _currentStep = 0; // Controla el paso actual
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _autoValidate = false;
-  final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -41,12 +42,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool setIsBaptized = false;
   ModelData? _selectedDataArea;
   ModelData? _selectedData;
-  Country? _selectedCountry;
+  // Country? _selectedCountry;
   AreaCode? _selectedPrefix;
   late List<Country> countries;
   late List<AreaCode> prefixCodes;
   late List<ModelData> dropDownListArea;
-  late List<ModelData> dropDownList;
+  List<ModelData> dropDownList = [];
+  bool enabledReceived = false;
+  List<ScheduleModel> listHours = [];
+  ModelData? _selectedCountry;
 
   // Método para detectar si es tablet
   bool _isTablet(BuildContext context) {
@@ -76,6 +80,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadCountry(context);
+      // _showScheduleDialog();
+      // _showDialogVerify(
+      //     context,
+      //     VerificationResponse(
+      //       userId: "2",
+      //       showVerifyPinModal: true,
+      //     ).toMap(),
+      //     "pedpab.12@gmail.com");
     });
   }
 
@@ -105,19 +117,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     final bool isTablet = _isTablet(context);
 
     return Scaffold(
       body: SafeArea(
         child: isTablet
-            ? _buildTabletLayout(context)
-            : _buildMobileLayout(context),
+            ? _buildTabletLayout(context, translationProvider)
+            : _buildMobileLayout(context, translationProvider),
       ),
     );
   }
 
   // Layout para móvil (manteniendo el diseño actual)
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Container(
       height: MediaQuery.sizeOf(context).height,
       width: MediaQuery.sizeOf(context).width,
@@ -136,8 +151,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   HeadWidget(
                     showLeftStar: _currentStep == 0,
                     showRightStar: _currentStep != 0,
-                    title: "¡La Biblia\n  Palabra De\n Vida!",
-                    subtitle: "Registro",
+                    title: translationProvider.tr('register_screen.title'),
+                    subtitle:
+                        translationProvider.tr('register_screen.subtitle'),
                   ),
                   if (_currentStep == 1) ...{
                     Align(
@@ -191,7 +207,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           if (_currentStep == 0) ...[
                             UserInfoStep(
-                              userIdController: _userIdController,
                               emailController: _emailController,
                               passwordController: _passwordController,
                               confirmPasswordController:
@@ -202,7 +217,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   setState(() => _obscureTextPass = value),
                               onObscureTextRepeatChanged: (value) =>
                                   setState(() => _obscureTextRepeat = value),
-                              userNameController: _userNameController,
+                              dropDownList: dropDownList, // Lista de países
+                              selectedCountry: _selectedCountry,
+                              onCountrySelected: (newValue) {
+                                setState(() {
+                                  _selectedCountry = newValue;
+                                });
+                              },
+                              onAreCodeSelected:(value) =>  _selectedPrefix = value,
+                              prefixNumberController: _prefixNumberController,
+                              phoneNumberController: _phoneNumberController,
                             )
                           ] else if (_currentStep == 1) ...[
                             PersonalInfoStep(
@@ -212,40 +236,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               selectedDate: _selectedDate,
                               onDateSelected: (picked) =>
                                   setState(() => _selectedDate = picked),
-                              dropDownListArea: dropDownListArea,
-                              dropDownList: dropDownList,
-                              selectedDataArea: _selectedDataArea,
-                              selectedData: _selectedData,
-                              selectedCountry: _selectedCountry,
-                              onPrefixSelected: (newValue) {
-                                setState(() {
-                                  _selectedDataArea = newValue;
-
-                                  _selectedPrefix = prefixCodes.firstWhere(
-                                      (country) =>
-                                          country.id == newValue!.value);
-                                  _prefixNumberController.text =
-                                      newValue!.value;
-                                });
-                              },
-                              onCountrySelected: (newValue) {
-                                if (newValue != null) {
-                                  setState(() {
-                                    _selectedData = newValue;
-                                    _selectedCountry =
-                                        _selectedData?.originalData;
-                                    _prefixNumberController.text =
-                                        _selectedCountry!.countryCode!.code;
-                                  });
-                                } else {
-                                  setState(() {
-                                    _selectedData = null;
-                                    _selectedCountry = null;
-                                  });
-                                }
-                              },
-                              prefixNumberController: _prefixNumberController,
-                              phoneNumberController: _phoneNumberController,
                               gender: setGender,
                               onChangeGender: (newValue) {
                                 setState(() {
@@ -267,9 +257,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ButtonThemeWidget(
                             textStyle: StylesApp(context).buttonTextStyle,
                             onPressed: () async {
-                              initRegister();
+                              initRegister(translationProvider);
                             },
-                            text: _currentStep == 0 ? "Continuar" : "Registrar",
+                            text: _currentStep == 0
+                                ? translationProvider
+                                    .tr('register_screen.continue')
+                                : translationProvider
+                                    .tr('register_screen.register'),
                             buttonStyle: StylesApp(context).btnSecondarySmall,
                             width: isTablet(context)
                                 ? StylesApp(context).formWidth
@@ -304,7 +298,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               Navigator.pushNamed(context, '/loginPage');
                             },
                             child: Text(
-                              'Ir a iniciar session',
+                              translationProvider
+                                  .tr('register_screen.go_to_login'),
                               textAlign: TextAlign.center,
                               style: StylesApp(context).textStyleBody4,
                             ),
@@ -324,7 +319,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'o',
+                            "O",
                             style: StylesApp(context).textStyleBody4,
                           ),
                         ),
@@ -347,261 +342,281 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Layout para tablet con 2 columnas
-  Widget _buildTabletLayout(BuildContext context) {
-    return Container(
-      height: MediaQuery.sizeOf(context).height,
-      width: MediaQuery.sizeOf(context).width,
-      decoration: BoxDecoration(
-        color: Color(0Xff12CBC4),
-      ),
-      child: Row(
-        children: [
-          // Columna izquierda: Logo y título (40% del ancho)
-          Expanded(
-            flex: 4,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(0Xff12CBC4),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 40),
-                    HeadWidget(
-                      showLeftStar: _currentStep == 0,
-                      showRightStar: _currentStep != 0,
-                      title: "¡La Biblia\n  Palabra De\n Vida!",
-                      subtitle: "Registro",
-                    ),
-                    SizedBox(height: 30),
-
-                    // Indicador de pasos
-                    _buildStepIndicator(),
-                    SizedBox(height: 40),
-
-                    // Información adicional
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildInfoItem(
-                              icon: Icons.security,
-                              text: "Datos seguros y protegidos",
-                            ),
-                            SizedBox(height: 20),
-                            _buildInfoItem(
-                              icon: Icons.speed,
-                              text: "Registro rápido y sencillo",
-                            ),
-                            SizedBox(height: 20),
-                            _buildInfoItem(
-                              icon: Icons.people,
-                              text: "Únete a nuestra comunidad",
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Enlace a login
-                    if (_currentStep == 0)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 30),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/loginPage');
-                          },
-                          child: Text.rich(
-                            TextSpan(children: [
-                              TextSpan(
-                                text: '¿Ya tienes cuenta? ',
-                                style:
-                                    StylesApp(context).textStyleBody16.copyWith(
-                                          color: StyleColor.white
-                                              .withValues(alpha: 0.8),
-                                          fontSize: 16,
-                                        ),
-                              ),
-                              TextSpan(
-                                text: 'Inicia sesión',
-                                style:
-                                    StylesApp(context).textStyleBody16.copyWith(
-                                          color: StyleColor.white,
-                                          fontSize: 18,
-                                          // decoration: TextDecoration.underline,
-                                        ),
-                              ),
-                            ]),
-                            style: StylesApp(context).textStyleBody16.copyWith(
-                                  color: StyleColor.white,
-                                  fontSize: 16,
-                                  // decoration: TextDecoration.underline,
-                                ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Columna derecha: Formulario (60% del ancho)
-          Expanded(
-            flex: 6,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+  Widget _buildTabletLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
+    return SingleChildScrollView(
+      child: Container(
+        height: MediaQuery.sizeOf(context).height,
+        width: MediaQuery.sizeOf(context).width,
+        decoration: BoxDecoration(
+          color: Color(0Xff12CBC4),
+        ),
+        child: Row(
+          children: [
+            // Columna izquierda: Logo y título (40% del ancho)
+            Expanded(
+              flex: 4,
               child: Container(
                 decoration: BoxDecoration(
-                  color: StyleColor.white,
+                  color: Color(0Xff12CBC4),
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    bottomLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 30,
-                      offset: Offset(-5, 0),
-                    ),
-                  ],
                 ),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 40),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Botón de retroceso (solo en paso 2)
-                        if (_currentStep == 1)
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _currentStep--;
-                              });
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(bottom: 30),
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: StyleColor.orange,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.arrow_back,
-                                color: StyleColor.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 40),
+                      HeadWidget(
+                        showLeftStar: _currentStep == 0,
+                        showRightStar: _currentStep != 0,
+                        title: translationProvider.tr('register_screen.title'),
+                        subtitle:
+                            translationProvider.tr('register_screen.subtitle'),
+                      ),
+                      SizedBox(height: 30),
 
-                        // Título del paso actual
-                        Text(
-                          _currentStep == 0
-                              ? "Información de Usuario"
-                              : "Información Personal",
-                          style: StylesApp(context).textStyleBody20.copyWith(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0Xff12CBC4),
-                              ),
-                        ),
-                        SizedBox(height: 10),
+                      // Indicador de pasos
+                      _buildStepIndicator(translationProvider),
+                      SizedBox(height: 40),
 
-                        // Descripción del paso
-                        Text(
-                          _currentStep == 0
-                              ? "Completa tus datos básicos para crear tu cuenta"
-                              : "Completa tu información personal para continuar",
-                          style: StylesApp(context).textStyleBody14.copyWith(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                        ),
-                        SizedBox(height: 30),
-
-                        // Formulario
-                        Form(
-                          key: _formKey,
-                          autovalidateMode: _autoValidate
-                              ? AutovalidateMode.always
-                              : AutovalidateMode.disabled,
+                      // Información adicional
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              if (_currentStep == 0) ...[
-                                _buildTabletUserInfoStep(),
-                              ] else if (_currentStep == 1) ...[
-                                _buildTabletPersonalInfoStep(),
-                              ],
-                              SizedBox(height: 12),
-
-                              // Botón de acción
-                              Container(
-                                width: 400,
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    initRegister();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: StyleColor.orange,
-                                    foregroundColor: StyleColor.white,
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 16, horizontal: 40),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 4,
-                                    shadowColor: StyleColor.orange
-                                        .withValues(alpha: 0.3),
-                                  ),
-                                  child: Text(
-                                    _currentStep == 0
-                                        ? "Continuar →"
-                                        : "Registrarse",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
+                              _buildInfoItem(
+                                icon: Icons.security,
+                                text: translationProvider
+                                    .tr('register_screen.secure_data'),
                               ),
-
-                              // Espaciado adicional para tablet
-                              SizedBox(height: 10),
+                              SizedBox(height: 20),
+                              _buildInfoItem(
+                                icon: Icons.speed,
+                                text: translationProvider
+                                    .tr('register_screen.fast_registration'),
+                              ),
+                              SizedBox(height: 20),
+                              _buildInfoItem(
+                                icon: Icons.people,
+                                text: translationProvider
+                                    .tr('register_screen.join_community'),
+                              ),
                             ],
                           ),
                         ),
-                      ],
+                      ),
+
+                      // Enlace a login
+                      if (_currentStep == 0)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 30),
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/loginPage');
+                            },
+                            child: Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                  text: translationProvider.tr(
+                                      'register_screen.already_have_account'),
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        color: StyleColor.white
+                                            .withValues(alpha: 0.8),
+                                        fontSize: 16,
+                                      ),
+                                ),
+                                TextSpan(
+                                  text: translationProvider
+                                      .tr('register_screen.login_here'),
+                                  style: StylesApp(context)
+                                      .textStyleBody16
+                                      .copyWith(
+                                        color: StyleColor.white,
+                                        fontSize: 18,
+                                        // decoration: TextDecoration.underline,
+                                      ),
+                                ),
+                              ]),
+                              style:
+                                  StylesApp(context).textStyleBody16.copyWith(
+                                        color: StyleColor.white,
+                                        fontSize: 16,
+                                        // decoration: TextDecoration.underline,
+                                      ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Columna derecha: Formulario (60% del ancho)
+            Expanded(
+              flex: 6,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: StyleColor.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      bottomLeft: Radius.circular(30),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 30,
+                        offset: Offset(-5, 0),
+                      ),
+                    ],
+                  ),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 40),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Botón de retroceso (solo en paso 2)
+                          if (_currentStep == 1)
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _currentStep--;
+                                });
+                              },
+                              child: Container(
+                                margin: EdgeInsets.only(bottom: 30),
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: StyleColor.orange,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.2),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.arrow_back,
+                                  color: StyleColor.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+
+                          // Título del paso actual
+                          Text(
+                            _currentStep == 0
+                                ? translationProvider
+                                    .tr('register_screen.user_info_title')
+                                : translationProvider
+                                    .tr('register_screen.personal_info_title'),
+                            style: StylesApp(context).textStyleBody20.copyWith(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0Xff12CBC4),
+                                ),
+                          ),
+                          SizedBox(height: 10),
+
+                          // Descripción del paso
+                          Text(
+                            _currentStep == 0
+                                ? translationProvider
+                                    .tr('register_screen.user_info_description')
+                                : translationProvider.tr(
+                                    'register_screen.personal_info_description'),
+                            style: StylesApp(context).textStyleBody14.copyWith(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                          ),
+                          SizedBox(height: 30),
+
+                          // Formulario
+                          Form(
+                            key: _formKey,
+                            autovalidateMode: _autoValidate
+                                ? AutovalidateMode.always
+                                : AutovalidateMode.disabled,
+                            child: Column(
+                              children: [
+                                if (_currentStep == 0) ...[
+                                  _buildTabletUserInfoStep(translationProvider),
+                                ] else if (_currentStep == 1) ...[
+                                  _buildTabletPersonalInfoStep(
+                                      translationProvider),
+                                ],
+                                SizedBox(height: 12),
+
+                                // Botón de acción
+                                Container(
+                                  width: 400,
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      initRegister(translationProvider);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: StyleColor.orange,
+                                      foregroundColor: StyleColor.white,
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 16, horizontal: 40),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      elevation: 4,
+                                      shadowColor: StyleColor.orange
+                                          .withValues(alpha: 0.3),
+                                    ),
+                                    child: Text(
+                                      _currentStep == 0
+                                          ? "${translationProvider.tr('register_screen.continue')} →"
+                                          : translationProvider
+                                              .tr('register_screen.register'),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Espaciado adicional para tablet
+                                SizedBox(height: 10),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   // Widget para el indicador de pasos en tablet
-  Widget _buildStepIndicator() {
+  Widget _buildStepIndicator(AppTranslationProvider translationProvider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -621,7 +636,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           child: Center(
             child: Text(
-              "1",
+              translationProvider.tr('register_screen.step_1'),
               style: StylesApp(context).textStyleBody16.copyWith(
                     color:
                         _currentStep >= 0 ? StyleColor.white : Colors.grey[400],
@@ -653,7 +668,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           child: Center(
             child: Text(
-              "2",
+              translationProvider.tr('register_screen.step_2'),
               style: TextStyle(
                 color: _currentStep >= 1 ? StyleColor.white : Colors.grey[400],
                 fontWeight: FontWeight.bold,
@@ -691,7 +706,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Paso de información de usuario optimizado para tablet
-  Widget _buildTabletUserInfoStep() {
+  Widget _buildTabletUserInfoStep(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Row(
@@ -703,7 +718,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     UserInfoStep(
-                      userIdController: _userIdController,
                       emailController: _emailController,
                       passwordController: _passwordController,
                       confirmPasswordController: _confirmPasswordController,
@@ -713,7 +727,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           setState(() => _obscureTextPass = value),
                       onObscureTextRepeatChanged: (value) =>
                           setState(() => _obscureTextRepeat = value),
-                      userNameController: _userNameController,
+                      dropDownList: dropDownList, // Lista de países
+                      selectedCountry: _selectedCountry,
+                      onCountrySelected: (newValue) {
+                        setState(() {
+                          _selectedCountry = newValue;
+                        });
+                      },
+                       onAreCodeSelected:(value) =>  _selectedPrefix = value,
+                      prefixNumberController: _prefixNumberController,
+                      phoneNumberController: _phoneNumberController,
                     )
                   ],
                 ),
@@ -726,7 +749,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Paso de información personal optimizado para tablet
-  Widget _buildTabletPersonalInfoStep() {
+  Widget _buildTabletPersonalInfoStep(
+      AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Row(
@@ -739,37 +763,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 selectedDate: _selectedDate,
                 onDateSelected: (picked) =>
                     setState(() => _selectedDate = picked),
-                dropDownListArea: dropDownListArea,
-                dropDownList: dropDownList,
-                selectedDataArea: _selectedDataArea,
-                selectedData: _selectedData,
-                selectedCountry: _selectedCountry,
-                onPrefixSelected: (ModelData? newValue) {
-                  setState(() {
-                    _selectedDataArea = newValue;
-
-                    _selectedPrefix = AreaCode(
-                        id: _selectedDataArea!.value,
-                        code: _selectedDataArea!.label);
-                  });
-                },
-                onCountrySelected: (newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _selectedData = newValue;
-                      _selectedCountry = _selectedData?.originalData;
-                      _prefixNumberController.text =
-                          _selectedCountry!.countryCode!.code;
-                    });
-                  } else {
-                    setState(() {
-                      _selectedData = null;
-                      _selectedCountry = null;
-                    });
-                  }
-                },
-                prefixNumberController: _prefixNumberController,
-                phoneNumberController: _phoneNumberController,
                 gender: setGender,
                 onChangeGender: (newValue) {
                   setState(() {
@@ -791,19 +784,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void initRegister() async {
+  void initRegister(AppTranslationProvider translationProvider) async {
     if (_currentStep == 0) {
       _nextStep();
     } else {
+      // abrir dialogo para preguntar se desea recibir mensajes via whatsapp
+      final dialog = await _showScheduleDialog();
       setState(() {
         _autoValidate = true; // Activar validaciones
       });
 
+      // }
       // Esperar un frame para que se actualice el estado
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final bool isValid = _formKey.currentState?.validate() ?? false;
         if (!isValid) {
-          showSnackBar('Por favor completa todos los campos requeridos',
+          showSnackBar(
+              translationProvider.tr('register_screen.dialogs.complete_fields'),
               type: SnackBarType.info);
           return;
         }
@@ -814,10 +811,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  Future<void> _showScheduleDialog() async {
+    await WhatsAppScheduleDialogExtension.show(
+      context: context,
+      onSave: (enabled, hours) {
+        setState(() {
+          enabledReceived = enabled;
+          listHours = hours;
+        });
+      },
+    );
+  }
+
   void _proceedWithRegistration() async {
     LoadingService().showLoading(context);
     final authenticationProvider =
         Provider.of<AuthenticationProvider>(context, listen: false);
+print(_selectedPrefix);
 
     final dataToRegister = SignupInput(
       name: _nameController.text,
@@ -825,14 +835,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       email: _emailController.text,
       birthdate: _dateController.text,
       codeAreaId: _selectedPrefix?.id,
-      countryId: _selectedCountry?.id,
-      identifier: _userIdController.text,
+      countryId: _selectedCountry?.value,
+      identifier: null,
       password: _passwordController.text,
       phoneNumber:
           _phoneNumberController.text.replaceAll(RegExp(r'[^\d]+'), ''),
       city: null,
       state: null,
-      username: _userNameController.text,
+      username: null,
       isBaptized: setIsBaptized,
       gender: setGender,
     );
@@ -840,16 +850,67 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final ResponseData response =
         await authenticationProvider.registerUser(dataToRegister);
 
-    LoadingService().hideLoading();
-
     if (response.error != null) {
+      LoadingService().hideLoading();
       await showCustomDialog(context,
           messageDetail: response.error!,
           message: response.userFriendlyError!,
           showDetails: true,
           dialogType: DialogType.error);
     } else {
-      Navigator.popAndPushNamed(context, '/layoutPage');
+      final data = VerificationResponse.fromJson(response.data);
+      List<String> hours = listHours.map((toElement) => toElement.id).toList();
+      final responseSaveWhatsAppConfig =
+          await saveWhatsAppConfig(data.userId, enabledReceived, hours);
+      if (responseSaveWhatsAppConfig.error != null) {
+        if (kDebugMode) {
+          print(
+              "Error al actualizar preferencias de usuario ${responseSaveWhatsAppConfig.error}");
+        }
+      }
+      LoadingService().hideLoading();
+      if (data.showVerifyPinModal) {
+        // levantar diálogo  de verificador de pin
+        _showDialogVerify(context, response.data, _emailController.text);
+      } else {
+        Navigator.popAndPushNamed(context, '/layoutPage');
+      }
     }
+  }
+
+  // En tu código original
+  void _showDialogVerify(
+      BuildContext context, Map<String, dynamic> data, String email) {
+    showVerifyPinDialog(
+      context: context,
+      email: email,
+      onPinVerified: (pin) async {
+        // Aquí llamas a tu API o lógica de verificación
+        final response = await context
+            .read<AuthenticationProvider>()
+            .verifyPinWithApi(email, pin);
+        if (response.error != null) {
+          await showCustomDialog(context,
+              message: response.error!, dialogType: DialogType.error);
+          _showDialogVerify(context, data, email);
+        } else {
+          Navigator.popAndPushNamed(context, '/layoutPage');
+        }
+      },
+      onResendCode: () async {
+        // Lógica para reenviar el código
+        if (kDebugMode) {
+          print('Reenviando código a $email');
+        }
+        final timeZone = await getDeviceTimeZone();
+        final response = await resendVerificationCode(email, timeZone);
+
+        if (response.error != null) {
+          await showCustomDialog(context,
+              message: response.error!, dialogType: DialogType.error);
+          _showDialogVerify(context, data, email);
+        }
+      },
+    );
   }
 }

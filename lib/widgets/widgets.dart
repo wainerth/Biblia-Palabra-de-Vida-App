@@ -110,4 +110,7 @@ export 'package:biblia_palabra_de_vida_app/widgets/custom_snack_bar.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/color_picker_bottom_sheet.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/improved_slow_connection_widget.dart';
 export 'package:biblia_palabra_de_vida_app/widgets/card_search_text_widget.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/verify_pin_dialog.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/message_card.dart';
+export 'package:biblia_palabra_de_vida_app/widgets/card_promise_widget.dart';
 

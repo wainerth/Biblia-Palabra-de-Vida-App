@@ -35,7 +35,7 @@ class _VersionSelectionDialogState extends State<VersionSelectionDialog> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.max,
         children: [
           Text(
             'Seleccione la versión de la Biblia',

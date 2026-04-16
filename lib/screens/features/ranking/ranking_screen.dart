@@ -15,6 +15,7 @@ class RankingScreen extends StatefulWidget {
 }
 
 class _RankingScreenState extends State<RankingScreen> {
+  final translationProvider = AppTranslationProvider();
   List<League> leagues = [];
   String? errorMessage;
   bool isLoading = true;
@@ -44,7 +45,8 @@ class _RankingScreenState extends State<RankingScreen> {
       leagues = List.from(catalogueProvider.allLeagues);
 
       if (leagues.isEmpty) {
-        setState(() => errorMessage = "No se encontraron ligas");
+        setState(() =>
+            errorMessage = translationProvider.tr("ranking.errors.no_leagues"));
       }
     } catch (e) {
       setState(() => errorMessage = e.toString());
@@ -77,6 +79,8 @@ class RankingScreenView extends StatefulWidget {
 }
 
 class _RankingScreenViewState extends State<RankingScreenView> {
+  final translationProvider = AppTranslationProvider();
+
   List<MemberModel> members = [];
   String activeLeagueId = "";
   bool noActiveLigue = false;
@@ -103,20 +107,17 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     }
   }
 
-  // Nueva función para determinar si es tablet
-  bool _isTablet(BuildContext context) {
-    final shortestSide = MediaQuery.of(context).size.shortestSide;
-    return shortestSide >= 600;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bool isTablet = _isTablet(context);
-    
+    isTablet(context);
+
     return Scaffold(
       backgroundColor: StyleColor.turquoise,
       body: SafeArea(
-        child: isTablet ? _buildTabletLayout() : _buildMobileLayout(),
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(),
+          tablet: _buildTabletLayout(),
+        ),
       ),
     );
   }
@@ -172,7 +173,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
           ),
           child: Column(
             children: [
-              if (!noActiveLigue) 
+              if (!noActiveLigue)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: LeagueTimeRemaining(),
@@ -181,7 +182,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
             ],
           ),
         ),
-        
+
         // Columna derecha: Ranking (70% del ancho)
         Expanded(
           child: Container(
@@ -190,9 +191,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: noActiveLigue
-                ? _buildNoLeagueWidget()
-                : _buildRankingList(),
+            child: noActiveLigue ? _buildNoLeagueWidget() : _buildRankingList(),
           ),
         ),
       ],
@@ -220,7 +219,9 @@ class _RankingScreenViewState extends State<RankingScreenView> {
         margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isActive ? StyleColor.turquoise.withValues(alpha: 0.1) : Colors.white,
+          color: isActive
+              ? StyleColor.turquoise.withValues(alpha: 0.1)
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isActive ? StyleColor.turquoise : Colors.transparent,
@@ -262,9 +263,10 @@ class _RankingScreenViewState extends State<RankingScreenView> {
               child: Text(
                 league.name,
                 style: StylesApp(context).textStyleBody16.copyWith(
-                  color: isActive ? StyleColor.turquoise : Colors.black,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                ),
+                      color: isActive ? StyleColor.turquoise : Colors.black,
+                      fontWeight:
+                          isActive ? FontWeight.bold : FontWeight.normal,
+                    ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -380,14 +382,14 @@ class _RankingScreenViewState extends State<RankingScreenView> {
               ),
             ),
             Text(
-              'No tienes una liga activa',
+              translationProvider.tr("ranking.no_league.title"),
               style: StylesApp(context).textStyleBody18.copyWith(
                     color: const Color.fromARGB(255, 22, 22, 22),
                   ),
             ),
             Text(
               textAlign: TextAlign.center,
-              'Juega Aventuras para conseguir una liga',
+              translationProvider.tr("ranking.no_league.subtitle"),
               style: StylesApp(context).textStyleBody15.copyWith(
                     color: const Color.fromARGB(255, 22, 22, 22),
                   ),
@@ -408,7 +410,9 @@ class _RankingScreenViewState extends State<RankingScreenView> {
 
   Widget _buildRankingItem(int index) {
     final member = members[index];
-    final isCurrentUser = (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username);
+    final isCurrentUser =
+        (members[index].userId == userData?.currentUser?.userId &&
+            members[index].username == userData?.currentUser?.username);
     final position = index + 1;
 
     if (position == 6) return _buildPromotionZone(index);
@@ -427,14 +431,16 @@ class _RankingScreenViewState extends State<RankingScreenView> {
       children: [
         if (!_isLastLeague())
           _buildZoneHeader(
-            text: 'Zona de Ascenso',
+            text: translationProvider.tr("ranking.zones.promotion"),
             icon: Icons.arrow_upward_rounded,
             color: StyleColor.turquoise,
           ),
         _buildMemberRow(
           index: index,
           member: members[index],
-          isCurrentUser: (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username),
+          isCurrentUser:
+              (members[index].userId == userData?.currentUser?.userId &&
+                  members[index].username == userData?.currentUser?.username),
           showSpecialZones: true,
         ),
       ],
@@ -446,14 +452,16 @@ class _RankingScreenViewState extends State<RankingScreenView> {
       children: [
         if (!_isFirstLeague())
           _buildZoneHeader(
-            text: 'Zona de Descenso',
+            text: translationProvider.tr("ranking.zones.relegation"),
             icon: Icons.arrow_downward_rounded,
             color: StyleColor.redDark,
           ),
         _buildMemberRow(
           index: index,
           member: members[index],
-          isCurrentUser: (members[index].userId == userData?.currentUser?.userId && members[index].username == userData?.currentUser?.username),
+          isCurrentUser:
+              (members[index].userId == userData?.currentUser?.userId &&
+                  members[index].username == userData?.currentUser?.username),
           showSpecialZones: true,
         ),
       ],
@@ -535,12 +543,13 @@ class _RankingScreenViewState extends State<RankingScreenView> {
             // Puntos del usuario
             isTopThree
                 ? TextWithGradient(
-                    text: 'exp ${member.currentPoints}',
+                    text:
+                        '${translationProvider.tr("ranking.points")} ${member.currentPoints}',
                     colorList: _getColorsGradient(index),
                     font: StylesApp(context).textStyleBody18,
                   )
                 : Text(
-                    'exp ${member.currentPoints}',
+                    '${translationProvider.tr("ranking.points")} ${member.currentPoints}',
                     style: StylesApp(context).textStyleBody18.copyWith(
                           color: Colors.black,
                         ),
@@ -696,7 +705,6 @@ class _RankingScreenViewState extends State<RankingScreenView> {
 
 class LeagueTimeRemaining extends StatelessWidget {
   const LeagueTimeRemaining({super.key});
-
   DateTime _getFechaFinDeSemana() {
     final now = DateTime.now();
     final currentWeekday = now.weekday;
@@ -711,6 +719,7 @@ class LeagueTimeRemaining extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = AppTranslationProvider();
     return StreamBuilder(
       stream: Stream.periodic(const Duration(seconds: 1), (_) {
         final now = DateTime.now();
@@ -721,7 +730,7 @@ class LeagueTimeRemaining extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Text(
-            'Cargando...',
+            translationProvider.tr("ranking.loading"),
             style: StylesApp(context).textStyleBody18.copyWith(
                   color: Colors.white,
                 ),
@@ -736,10 +745,15 @@ class LeagueTimeRemaining extends StatelessWidget {
         return Text.rich(TextSpan(
           children: [
             TextSpan(
-                text: "Tiempo Restante:  ",
+                text: "${translationProvider.tr("ranking.time_remaining")}  ",
                 style: StylesApp(context).textStyleBody14),
             TextSpan(
-              text: '$days días $hours:$minutes:$seconds',
+              text: translationProvider.trParams("ranking.format", {
+                "days": days,
+                "hours": hours,
+                "minutes": minutes,
+                "seconds": seconds
+              }),
               style: StylesApp(context).textStyleBody14.copyWith(
                     color: Colors.white,
                   ),

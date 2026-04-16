@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
-import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -60,20 +59,20 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+     
+     final translationProvider = context.read<AppTranslationProvider>();
 
     return Scaffold(
       body: SafeArea(
-        child: isTablet
-            ? _buildTabletLayout(context)
-            : _buildMobileLayout(context),
+        child: ResponsiveLayout(
+            mobile: _buildMobileLayout(context, translationProvider),
+            tablet: _buildTabletLayout(context, translationProvider)),
       ),
     );
   }
 
   // DISEÑO TABLET A DOS COLUMNAS
-  Widget _buildTabletLayout(BuildContext context) {
+  Widget _buildTabletLayout(BuildContext context, AppTranslationProvider translationProvider) {
     return Container(
       decoration: BoxDecoration(color: StyleColor.turquoise),
       child: Column(
@@ -125,7 +124,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Respuestas de",
+                        translationProvider.tr('list_request_screen.title.responses_of'),
                         style: StylesApp(context).textStyleBody1.copyWith(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
@@ -133,7 +132,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                             ),
                       ),
                       Text(
-                        "Pedidos de Oración",
+                       translationProvider.tr('list_request_screen.title.prayer_request'),
                         style: StylesApp(context).textStyleTitleOrange.copyWith(
                               fontSize: 24,
                               fontWeight: FontWeight.w800,
@@ -189,7 +188,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                                   .textStyleSmallBlack
                                   .copyWith(fontSize: 16),
                               decoration: InputDecoration(
-                                hintText: 'Buscar en mis peticiones...',
+                                hintText: translationProvider.tr('list_request_screen.search.placeholder'),
                                 hintStyle: StylesApp(context)
                                     .textStyleBody14
                                     .copyWith(
@@ -232,21 +231,21 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                               children: [
                                 _buildStatCard(
                                   context,
-                                  'Total Peticiones',
+                                 translationProvider.tr('list_request_screen.stats.total_requests'),
                                   '${pagination.totalItems}',
                                   Icons.list_alt,
                                   StyleColor.orange,
                                 ),
                                 _buildStatCard(
                                   context,
-                                  'Página Actual',
+                                  translationProvider.tr('list_request_screen.stats.current_page'),
                                   '${pagination.currentPage}',
                                   Icons.pages,
                                   StyleColor.blue,
                                 ),
                                 _buildStatCard(
                                   context,
-                                  'Por Página',
+                                  translationProvider.tr('list_request_screen.stats.per_page'),
                                   '$itemPerPageValue',
                                   Icons.format_list_numbered,
                                   StyleColor.greenMedium,
@@ -269,13 +268,13 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                                       onBack: () => Navigator.pop(context),
                                     )
                                   : listRequest.isEmpty
-                                      ? _buildEmptyState(context)
+                                      ? _buildEmptyState(context, translationProvider)
                                       : ListView.builder(
                                           padding: EdgeInsets.all(20.0),
                                           itemCount: listRequest.length,
                                           itemBuilder: (context, index) {
                                             return _buildTabletListItem(
-                                                context, index);
+                                                context, index, translationProvider);
                                           },
                                         ),
                         ),
@@ -327,8 +326,8 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                   child: Container(
                     color: Colors.white,
                     child: dataSeleccionada != null
-                        ? _buildDetailPanel(context)
-                        : _buildEmptyDetailPanel(context),
+                        ? _buildDetailPanel(context, translationProvider)
+                        : _buildEmptyDetailPanel(context, translationProvider),
                   ),
                 ),
               ],
@@ -340,7 +339,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
   }
 
   // Item de lista para tablet
-  Widget _buildTabletListItem(BuildContext context, int index) {
+  Widget _buildTabletListItem(BuildContext context, int index,AppTranslationProvider translationProvider) {
     final prayer = listRequest[index];
     final bool isSelected = dataSeleccionada == listRequest[index];
 
@@ -406,13 +405,13 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                           onPressed: () {
                             _showMOdalInfo(context, prayer);
                           },
-                          tooltip: 'Ver detalles',
+                          tooltip: translationProvider.tr('list_request_screen.list_item.view_details'),
                         ),
                         IconButton(
                           icon: Icon(Icons.delete_outline,
                               size: 22, color: Colors.red[400]),
-                          onPressed: () => _deleteItem(prayer.requestId),
-                          tooltip: 'Eliminar',
+                          onPressed: () => _deleteItem(prayer.requestId, translationProvider),
+                          tooltip: translationProvider.tr('list_request_screen.list_item.delete'),
                         ),
                       ],
                     ),
@@ -444,7 +443,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Por: ${prayer.prayedFor}',
+                            '${translationProvider.tr('list_request_screen.list_item.by')} ${prayer.prayedFor}',
                             style: StylesApp(context).textStyleBody14.copyWith(
                                   fontSize: 14.0,
                                   color: Colors.grey[600],
@@ -531,7 +530,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                                 size: 12, color: Colors.green),
                             SizedBox(width: 4),
                             Text(
-                              'Con respuesta',
+                             translationProvider.tr('list_request_screen.list_item.with_response'),
                               style:
                                   StylesApp(context).textStyleBody14.copyWith(
                                         fontSize: 11,
@@ -553,7 +552,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
   }
 
   // Panel de detalles para columna derecha
-  Widget _buildDetailPanel(BuildContext context) {
+  Widget _buildDetailPanel(BuildContext context, AppTranslationProvider translationProvider) {
     final prayer = dataSeleccionada as PrayerModel;
 
     return SingleChildScrollView(
@@ -566,7 +565,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Detalles de la Petición',
+                translationProvider.tr('list_request_screen.list_item.title'),
                 style: StylesApp(context).textStyleBody24.copyWith(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -603,7 +602,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                         color: StyleColor.orange, size: 20),
                     SizedBox(width: 10),
                     Text(
-                      'Fecha: ${prayer.requestDate}',
+                      '${translationProvider.tr('list_request_screen.detail_panel.date')} ${prayer.requestDate}',
                       style: StylesApp(context).textStyleBody16.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -618,7 +617,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     Icon(Icons.person, color: StyleColor.blue, size: 20),
                     SizedBox(width: 10),
                     Text(
-                      'Solicitado por: ${prayer.requestedBy}',
+                      '${translationProvider.tr('list_request_screen.detail_panel.request_by')} ${prayer.requestedBy}',
                       style: StylesApp(context).textStyleBody16.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -635,7 +634,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
 
           // Categorías
           Text(
-            'Categorías',
+            translationProvider.tr('list_request_screen.detail_panel.categories_title'),
             style: StylesApp(context).textStyleBody18.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -657,7 +656,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Categoría Principal',
+                        translationProvider.tr('list_request_screen.detail_panel.main_category'),
                         style: StylesApp(context).textStyleBody12.copyWith(
                               fontSize: 13,
                               color: Colors.grey[600],
@@ -689,7 +688,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Subcategoría',
+                        translationProvider.tr('list_request_screen.detail_panel.subcategory'),
                         style: StylesApp(context).textStyleBody14.copyWith(
                               fontSize: 13,
                               color: Colors.grey[600],
@@ -715,7 +714,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
 
           // Detalle de la oración
           Text(
-            'Petición de Oración',
+            translationProvider.tr('list_request_screen.detail_panel.prayer_request'),
             style: StylesApp(context).textStyleBody18.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -745,7 +744,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
           // Respuestas (si existen)
           if (prayer.responser != null) ...[
             Text(
-              'Respuestas Recibidas',
+              translationProvider.tr('list_request_screen.detail_panel.prayer_request'),
               style: StylesApp(context).textStyleBody18.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -768,7 +767,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                       Icon(Icons.check_circle, color: Colors.green, size: 20),
                       SizedBox(width: 10),
                       Text(
-                        'Respuesta del equipo de oración',
+                        translationProvider.tr('list_request_screen.detail_panel.response_from_team'),
                         style: StylesApp(context).textStyleBody16.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -811,7 +810,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     Icon(Icons.visibility, color: Colors.white),
                     SizedBox(width: 8),
                     Text(
-                      'Ver Completo',
+                      translationProvider.tr('list_request_screen.detail_panel.view_full'),
                       style: StylesApp(context).textStyleBody16.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -823,7 +822,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
               ),
               SizedBox(width: 15),
               OutlinedButton(
-                onPressed: () => _deleteItem(prayer.requestId),
+                onPressed: () => _deleteItem(prayer.requestId, translationProvider),
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -836,7 +835,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     Icon(Icons.delete_outline, color: Colors.red),
                     SizedBox(width: 8),
                     Text(
-                      'Eliminar',
+                      translationProvider.tr('list_request_screen.detail_panel.delete'),
                       style: StylesApp(context).textStyleBody16.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -854,7 +853,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
   }
 
   // Panel vacío para columna derecha
-  Widget _buildEmptyDetailPanel(BuildContext context) {
+  Widget _buildEmptyDetailPanel(BuildContext context, AppTranslationProvider translationProvider) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -866,7 +865,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
           ),
           SizedBox(height: 20),
           Text(
-            'Selecciona una petición',
+            translationProvider.tr('list_request_screen.empty_detail.title'),
             style: StylesApp(context).textStyleBody20.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -875,7 +874,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
           ),
           SizedBox(height: 10),
           Text(
-            'Haz clic en una petición de la lista\npara ver sus detalles aquí',
+            translationProvider.tr('list_request_screen.empty_detail.subtitle'),
             textAlign: TextAlign.center,
             style: StylesApp(context).textStyleBody15.copyWith(
                   fontSize: 15,
@@ -932,7 +931,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
   }
 
   // Estado vacío
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, AppTranslationProvider translationProvider) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -944,7 +943,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
           ),
           SizedBox(height: 20),
           Text(
-            "No has realizado aún\nPedidos de Oración",
+            translationProvider.tr('list_request_screen.empty_state.title'),
             textAlign: TextAlign.center,
             style: StylesApp(context).textStyleBody16.copyWith(
                   fontSize: 18,
@@ -953,7 +952,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
           ),
           SizedBox(height: 10),
           Text(
-            "Cuando realices peticiones,\naparecerán aquí",
+            translationProvider.tr('list_request_screen.empty_state.subtitle'),
             textAlign: TextAlign.center,
             style: StylesApp(context).textStyleBody14.copyWith(
                   fontSize: 14,
@@ -966,7 +965,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
   }
 
   // DISEÑO MÓVIL (se mantiene exactamente igual)
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(BuildContext context, AppTranslationProvider translationProvider) {
     return Container(
       decoration: BoxDecoration(
         color: StyleColor.turquoise,
@@ -974,7 +973,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
       child: Column(
         children: [
           HeadScreenNotAvatar(
-            title: "Respuestas de\n Pedidos de Oración",
+            title: "${translationProvider.tr('list_request_screen.title.responses_of')}\n ${translationProvider.tr('list_request_screen.title.prayer_requests')}",
             onRoute: () {
               Navigator.pop(context);
             },
@@ -1003,7 +1002,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                   style: StylesApp(context).textStyleSmallBlack,
                   decoration:
                       StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                            hintText: 'Buscar...',
+                            hintText: translationProvider.tr('list_request_screen.search.hint') ,
                             hintStyle: StylesApp(context)
                                 .textStyleBody14
                                 .copyWith(color: StyleColor.grayMedium),
@@ -1034,7 +1033,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                           padding: EdgeInsets.all(18.0),
                           child: Text(
                             textAlign: TextAlign.center,
-                            "No Haz Realizado aun Pedido de Oración",
+                            translationProvider.tr('list_request_screen.empty_state.title'),
                             style: StylesApp(context).textStyleBody16,
                           ),
                         ),
@@ -1042,7 +1041,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                     : ListView.builder(
                         itemCount: listRequest.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return _cardListItem(context, index);
+                          return _cardListItem(context, index, translationProvider);
                         }),
               ),
               Padding(
@@ -1080,7 +1079,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
   }
 
   // Métodos existentes (se mantienen igual)
-  Container _cardListItem(BuildContext context, int index) {
+  Container _cardListItem(BuildContext context, int index, AppTranslationProvider translationProvider) {
     return Container(
       constraints: BoxConstraints(
         minHeight: 100.0,
@@ -1102,7 +1101,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: "Fecha hora: ",
+                      text: "${translationProvider.tr('list_request_screen.mobile.date')} ",
                       style: StylesApp(context).textStyleBody14.copyWith(
                             color: StyleColor.orange,
                           ),
@@ -1121,7 +1120,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: "Por: ",
+                      text: "${translationProvider.tr('list_request_screen.mobile.by')} ",
                       style: StylesApp(context).textStyleBody14.copyWith(
                             color: StyleColor.orange,
                           ),
@@ -1140,7 +1139,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: "Oración por: ",
+                      text:"${translationProvider.tr('list_request_screen.mobile.prayer_for')} ",
                       style: StylesApp(context).textStyleBody14.copyWith(
                             color: StyleColor.orange,
                           ),
@@ -1189,7 +1188,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
             right: 0,
             child: IconButton(
               onPressed: () {
-                _deleteItem(listRequest[index].requestId);
+                _deleteItem(listRequest[index].requestId, translationProvider);
               },
               icon: Icon(Icons.delete_outline),
             ),
@@ -1286,19 +1285,19 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
     }
   }
 
-  _deleteItem(String id) {
+  _deleteItem(String id, AppTranslationProvider translationProvider) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            "Confirmación",
+            translationProvider.tr('list_request_screen.delete_dialog.title'),
             style: StylesApp(context)
                 .textStyleBody2
                 .copyWith(color: StyleColor.black),
           ),
           content: Text(
-            "¿Está seguro de que desea eliminar esta petición?",
+            translationProvider.tr('list_request_screen.delete_dialog.message'),
             style: StylesApp(context)
                 .textStyleBody16
                 .copyWith(color: StyleColor.black),
@@ -1306,7 +1305,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
           actions: [
             TextButton(
               child: Text(
-                "No",
+               translationProvider.tr('list_request_screen.delete_dialog.cancel'),
                 style: StylesApp(context)
                     .textStyleBody10
                     .copyWith(color: StyleColor.lavenderMist),
@@ -1317,7 +1316,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
             ),
             TextButton(
               child: Text(
-                "Sí",
+                translationProvider.tr('list_request_screen.delete_dialog.confirm'),
                 style: StylesApp(context)
                     .textStyleBody10
                     .copyWith(color: StyleColor.lavenderMist),
@@ -1359,7 +1358,7 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                       if (listRequest.isEmpty && pagination.currentPage > 1) {
                         // Si la página actual quedó vacía y no es la primera página
                         // ir a la página anterior
-                        _loadPreviousPageIfNeeded();
+                        _loadPreviousPageIfNeeded(translationProvider);
                       }
 
                       // 4. Limpiar selección si se eliminó
@@ -1367,13 +1366,13 @@ class _ListRequestScreenState extends State<ListRequestScreen> {
                         dataSeleccionada = null;
                       }
                     });
-showSnackBar("Petición eliminada correctamente", type: SnackBarType.success);
-
+                    showSnackBar(translationProvider.tr('list_request_screen.message.deleted_success'),
+                        type: SnackBarType.success);
                   }
                 } catch (e) {
                   if (mounted) {
                     await showCustomDialog(context,
-                        messageDetail: "Inténtalo de nuevo más tarde.",
+                        messageDetail:translationProvider.tr('list_request_screen.message.try_again_later'),
                         message: e.toString(),
                         dialogType: DialogType.error);
                   }
@@ -1388,7 +1387,7 @@ showSnackBar("Petición eliminada correctamente", type: SnackBarType.success);
   }
 
 // Método para cargar la página anterior si es necesario
-  void _loadPreviousPageIfNeeded() async {
+  void _loadPreviousPageIfNeeded(AppTranslationProvider translationProvider) async {
     if (listRequest.isEmpty && pagination.currentPage > 1) {
       try {
         LoadingService().showLoading(context);
@@ -1397,8 +1396,8 @@ showSnackBar("Petición eliminada correctamente", type: SnackBarType.success);
         LoadingService().hideLoading();
       } catch (e) {
         LoadingService().hideLoading();
-        showSnackBar("Error al cargar página anterior: ${e.toString()}", type: SnackBarType.error);
-        
+        showSnackBar("${translationProvider.tr('list_request_screen.message.load_previous_page_error')} ${e.toString()}",
+            type: SnackBarType.error);
       }
     }
   }

@@ -1,9 +1,22 @@
 class GraphQLConfig {
+
+  // para emulador android
+  // 'http://10.0.2.2:4020/graphql' 
+  // para web
+  //'http://localhost:4020'; 
+  // para dispositivo físico
+  //'http://192.168.1.102:4020/graphql'; 
+  // para el servido Desarrollo
+  // 'https://labibliapalabradevida.com:2443/dev-services/'
+  // para el servidor producción
+  //// 'https://labibliapalabradevida.com/services/'
+  
+  
   static const String baseUrl =
-      'https://labibliapalabradevida.com/services/'; //'http://192.168.1.102:4020/graphql'; //'http://localhost:4020'; // 'http://10.0.2.2:4020' // 'https://labibliapalabradevida.com/services/' 'https://labibliapalabradevida.com:2443/dev-services/';
+      'http://10.0.2.2:4020/graphql';
   static const String urlServidor = 'https://labibliapalabradevida.com/';
   static const urlSocketDev = 'wss://labibliapalabradevida.com:2443';
-  static const urlSocketProd = 'wss://labibliapalabradevida.com';
+  static const urlSocketProd = 'wss://labibliapalabradevida.com:2443'; //'wss://labibliapalabradevida.com';
   static const String authToken = '';
   static const bool development = false;
   static const String urlApkRadio = 'https://apk.e-droid.net/apk/app3557953-xlahe3.apk?v=5';

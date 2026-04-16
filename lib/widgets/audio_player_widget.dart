@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:dio/dio.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
@@ -108,73 +110,9 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     }
   }
 
-  // Future<void> downloadFile(
-  //     BuildContext context1, String url, String fileName) async {
-  //   LoadingService().showLoading(context);
-  //   Directory? downloadDir;
-
-  //   try {
-  //     // Obtengo los diferentes directorios dependiendo de la plataforma
-  //     if (Platform.isAndroid) {
-  //       downloadDir = await _getInternalDownloadDirectory();
-  //       // internalDir = await getExternalStorageDirectory();
-  //     } else {
-  //       downloadDir = await getApplicationDocumentsDirectory();
-  //     }
-
-  //     // tomo el directorio de descarga si tengo permisos uso el externo si no el interno
-  //     // Crear directorio si no existe
-  //     final savedDir = Directory('${downloadDir?.path}/Download');
-
-  //     if (!await savedDir.exists()) {
-  //       await savedDir.create(recursive: true);
-  //     }
-
-  //     // ✅ VERIFICAR que tenemos permisos de escritura (no storage)
-  //     final canWrite = await _checkWritePermission(downloadDir!);
-  //     if (!canWrite) {
-  //       throw Exception('No se pudo escribir en el directorio');
-  //     }
-
-  //     Future.delayed(Duration(seconds: 1));
-  //     final taskId = await FlutterDownloader.enqueue(
-  //       url: url,
-  //       savedDir: savedDir.path,
-  //       fileName: "$fileName.mp3",
-  //       showNotification: true,
-  //       openFileFromNotification: Platform.isIOS ? false : true,
-  //     );
-
-  //     if (kDebugMode) {
-  //       print('Descarga iniciada con ID: $taskId');
-  //     }
-  //     if (taskId != null) {
-  //       if (mounted) {
-  //         showSnackBar(
-  //             '✅ Descarga iniciada. El archivo se guardará en: ${savedDir.path}',
-  //             type: SnackBarType.success);
-  //       }
-  //     } else {
-  //       if (mounted) {
-  //         showSnackBar('Error al iniciar la descarga.',
-  //             type: SnackBarType.error);
-  //       }
-  //     }
-
-  //     LoadingService().hideLoading();
-  //   } catch (e) {
-  //     LoadingService().hideLoading();
-  //     if (mounted) {
-  //       await showCustomDialog(context,
-  //           message: e.toString(), dialogType: DialogType.error);
-  //     }
-  //   } finally {
-  //     LoadingService().hideLoading();
-  //   }
-  // }
-
   Future<void> downloadFile(
       BuildContext context1, String url, String fileName) async {
+    final translationProvider = context.read<AppTranslationProvider>();
     LoadingService().showLoading(context);
 
     try {
@@ -211,7 +149,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       // 4. Mostrar éxito y opciones
       if (mounted) {
         showSnackBar(
-          '✅ Audio descargado correctamente',
+          translationProvider.tr('audio_player.download_success'),
           type: SnackBarType.success,
         );
 
@@ -222,7 +160,9 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       LoadingService().hideLoading();
       if (mounted) {
         showSnackBar(
-          '❌ Error al descargar: ${e.toString()}',
+          translationProvider
+              .tr('audio_player.download_error')
+              .replaceFirst('%s', e.toString()),
           type: SnackBarType.error,
         );
       }
@@ -231,6 +171,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -268,8 +209,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 children: [
                   if (loading) //_isPlaying && _position == null && _duration == null)
                     SizedBox(
-                      width: 25.sp,
-                      height: 25.sp,
+                      width: 25,
+                      height: 25,
                       child: CircularProgressIndicator(
                         color: widget.controlsColor,
                         strokeWidth: 2.0,
@@ -294,7 +235,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                           },
                     icon: Icon(
                       _isPlaying ? Icons.pause : Icons.play_arrow,
-                      size: 25.sp,
+                      size: 25,
                       color: widget.controlsColor,
                     ),
                   ),
@@ -304,7 +245,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             Expanded(
               flex: 2,
               child: Text.rich(
-                style: TextStyle(color: widget.actionColor, fontSize: 12.sp),
+                style: TextStyle(color: widget.actionColor, fontSize: 12),
                 TextSpan(
                   text: _position != null && _durationText.isNotEmpty
                       ? '${_positionText.substring(3)} / ${_durationText.substring(3)}'
@@ -359,7 +300,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       icon: Icon(
                         volume > 0 ? Icons.volume_up : Icons.volume_off,
                         color: widget.controlsColor,
-                        size: 25.sp,
+                        size: 25,
                       ),
                     ),
                   ),
@@ -414,7 +355,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                       }),
                                       ListTile(
                                         leading: Icon(Icons.download),
-                                        title: Text('Descargar'),
+                                        title: Text(translationProvider
+                                            .tr('audio_player.menu.download')),
                                         onTap: widget.pathUrl.isEmpty
                                             ? null
                                             : () async {
@@ -430,7 +372,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                       ),
                                       ListTile(
                                         leading: Icon(Icons.share),
-                                        title: Text('Compartir'),
+                                        title: Text(translationProvider
+                                            .tr('audio_player.menu.share')),
                                         onTap: widget.pathUrl.isEmpty
                                             ? null
                                             : () async {
@@ -461,8 +404,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                                     files: [
                                                       XFile(tempFile.path),
                                                     ],
-                                                    text:
-                                                        '¡Escucha este audio!',
+                                                    text: translationProvider.tr(
+                                                        'audio_player.share_text'),
                                                   ));
 
                                                   // 4. Opcional: Eliminar el temporal después de compartir
@@ -474,7 +417,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                                     if (currentContext
                                                         .mounted) {
                                                       showSnackBar(
-                                                          'Error al compartir el audio',
+                                                          translationProvider.tr(
+                                                              'audio_player.share_error'),
                                                           type: SnackBarType
                                                               .error);
                                                     }
@@ -556,37 +500,6 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     }
   }
 
-  Future _checkWritePermission(Directory downloadDir) async {
-    try {
-      // Intentar crear un archivo temporal
-      final testFile = File('${downloadDir.path}/.test_write_permission.tmp');
-      await testFile.writeAsString('test');
-      await testFile.delete();
-      return true;
-    } catch (e) {
-      if (kDebugMode) print('🚫 Error escritura: $e');
-      return false;
-    }
-  }
-
-  Future<Directory?> _getInternalDownloadDirectory() async {
-    if (Platform.isAndroid) {
-      // Para Android 10+, usar el directorio específico de la app
-      final appDocDir = await getApplicationDocumentsDirectory();
-      final downloadDir = Directory('${appDocDir.path}/Download');
-
-      if (!await downloadDir.exists()) {
-        await downloadDir.create(recursive: true);
-      }
-
-      return downloadDir;
-    } else {
-      // Para iOS
-      final appDocDir = await getApplicationDocumentsDirectory();
-      return appDocDir;
-    }
-  }
-
   Future<void> downloadFileDirect(
       BuildContext context1, String url, String fileName) async {
     LoadingService().showLoading(context);
@@ -652,6 +565,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   // Agregar esta función en AudioPlayerWidgetState
   Future<void> _showDownloadOptions(
       BuildContext context, String filePath, String fileName) async {
+    final translationProvider = context.read<AppTranslationProvider>();
     await showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -660,22 +574,14 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           children: [
             ListTile(
               leading: Icon(Icons.check_circle, color: Colors.green),
-              title: Text('Descarga completada'),
+              title: Text(
+                  translationProvider.tr('audio_player.download_complete')),
               subtitle: Text('$fileName.mp3'),
             ),
             Divider(height: 1),
-            // ListTile(
-            //   leading: Icon(Icons.play_arrow, color: Colors.blue),
-            //   title: Text('Escuchar ahora'),
-            //   onTap: () {
-            //     Navigator.pop(context);
-            //     // Aquí puedes reproducir el audio descargado
-            //     _playLocalAudio(filePath);
-            //   },
-            // ),
             ListTile(
               leading: Icon(Icons.share, color: Colors.green),
-              title: Text('Compartir audio'),
+              title: Text(translationProvider.tr('audio_player.menu.share')),
               onTap: () {
                 Navigator.pop(context);
                 _shareAudioFile(filePath, fileName);
@@ -683,8 +589,10 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             ),
             ListTile(
               leading: Icon(Icons.save_alt, color: Colors.orange),
-              title: Text('Guardar en galería (opcional)'),
-              subtitle: Text('Requiere permiso de almacenamiento'),
+              title:
+                  Text(translationProvider.tr('audio_player.save_to_gallery')),
+              subtitle: Text(translationProvider
+                  .tr('audio_player.storage_permission_required')),
               onTap: () async {
                 Navigator.pop(context);
                 // SOLO aquí pedir permiso para guardar externamente
@@ -699,23 +607,32 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   Future<void> _shareAudioFile(String filePath, String fileName) async {
+    final translationProvider = context.read<AppTranslationProvider>();
     try {
       final file = File(filePath);
       if (await file.exists()) {
-        await Share.shareXFiles(
-          [XFile(filePath)],
-          text: 'Audio de la Biblia - $fileName',
-          subject: 'Palabra de Vida',
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [
+              XFile(filePath),
+            ],
+            text:
+                '${translationProvider.tr('audio_player.share_text')} - $fileName',
+            subject: translationProvider.tr('audio_player.share_subject'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        showSnackBar('Error al compartir', type: SnackBarType.error);
+        showSnackBar(translationProvider.tr('audio_player.share_error'),
+            type: SnackBarType.error);
       }
     }
   }
 
   Future<void> _saveToExternalStorage(String filePath, String fileName) async {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     try {
       // SOLO para Android
       if (Platform.isAndroid) {
@@ -725,7 +642,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         if (!status.isGranted) {
           if (mounted) {
             showSnackBar(
-              'Permiso necesario para guardar en galería',
+              translationProvider.tr('audio_player.save_permission_warning'),
               type: SnackBarType.warning,
             );
           }
@@ -748,7 +665,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
           if (mounted) {
             showSnackBar(
-              '✅ Audio guardado en Descargas/Biblia',
+              translationProvider.tr('audio_player.save_success'),
               type: SnackBarType.success,
             );
           }
@@ -756,7 +673,11 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       }
     } catch (e) {
       if (mounted) {
-        showSnackBar('Error al guardar: $e', type: SnackBarType.error);
+        showSnackBar(
+            translationProvider
+                .tr('audio_player.save_error')
+                .replaceFirst('%s', e.toString()),
+            type: SnackBarType.error);
       }
     }
   }
@@ -767,57 +688,5 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         .replaceAll(RegExp(r'[^\w\s-]'), '') // Quitar caracteres especiales
         .replaceAll(RegExp(r'\s+'), '_') // Espacios a guiones bajos
         .toLowerCase();
-  }
-
-  Future<void> _playLocalAudio(String filePath) async {
-    try {
-      // Verificar si el archivo existe
-      final file = File(filePath);
-      if (!await file.exists()) {
-        showSnackBar('El archivo no existe', type: SnackBarType.error);
-        return;
-      }
-
-      // Detener reproducción actual si hay
-      if (_isPlaying) {
-        await player.stop();
-        setState(() {
-          _isPlaying = false;
-          _position = Duration.zero;
-        });
-      }
-
-      // Reproducir archivo local
-      setState(() {
-        loading = true;
-      });
-
-      await player.play(DeviceFileSource(filePath));
-
-      setState(() {
-        loading = false;
-        _isPlaying = true;
-      });
-
-      if (kDebugMode) {
-        print('▶️ Reproduciendo audio local: $filePath');
-      }
-    } catch (e) {
-      setState(() {
-        loading = false;
-        _isPlaying = false;
-      });
-
-      if (mounted) {
-        showSnackBar(
-          'Error al reproducir archivo local: ${e.toString()}',
-          type: SnackBarType.error,
-        );
-      }
-
-      if (kDebugMode) {
-        print('❌ Error reproduciendo local: $e');
-      }
-    }
   }
 }

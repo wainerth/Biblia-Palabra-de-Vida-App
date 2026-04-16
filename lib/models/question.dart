@@ -19,6 +19,17 @@ class Question {
     required this.isOrdering,
   });
 
+  Question copyWith({String? id, String? question}) {
+    return Question(
+        id: id ?? this.id,
+        question: question ?? this.question,
+        answers: answers,
+        isOrdering: isOrdering,
+        status: status,
+        timeline: timeline,
+        difficulty: difficulty);
+  }
+
   factory Question.fromJson(Map<String, dynamic> json) {
     List<Answer> listAnswer = [];
     if (json['isOrdering']) {
@@ -67,6 +78,18 @@ class Answer {
     required this.status,
     this.option = '',
   });
+
+  Answer copyWith({
+    String? answer
+  }){
+    return Answer(
+      id: id, 
+      answer: answer ?? this.answer, 
+      isCorrect: isCorrect, 
+      questionId: questionId, 
+      status: status);
+  }
+
 
   factory Answer.fromJson(Map<String, dynamic> json) {
     return Answer(

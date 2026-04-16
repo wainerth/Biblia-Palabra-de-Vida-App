@@ -1,6 +1,16 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+
+extension TranslateExtension on BuildContext {
+  String tr(String key) {
+    // Obtén tu translationProvider del contexto
+    final provider = Provider.of<AppTranslationProvider>(this, listen: true);
+    return provider.tr(key);
+  }
+}
 
 class HeadScreenNotAvatar extends StatelessWidget {
   final String title;
@@ -55,7 +65,7 @@ class HeadScreenNotAvatar extends StatelessWidget {
               Center(
                 child: Text(
                   textAlign: TextAlign.center,
-                  title,
+                  context.tr(title),
                   style: StylesApp(context).textStyleTitleOrange,
                 ),
               ),

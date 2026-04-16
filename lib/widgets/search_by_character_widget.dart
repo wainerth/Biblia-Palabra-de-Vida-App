@@ -22,6 +22,8 @@ class SearchByCharacterWidget extends StatefulWidget {
 }
 
 class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
+  final translationProvider = AppTranslationProvider();
+
   LoginUser? userData;
   TextEditingController searchTextController = TextEditingController();
   String _searchText = '';
@@ -106,12 +108,12 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
           await showCustomDialogWithAction(context,
               message: responseCharacter.error!,
               dialogType: DialogTypeAction.info,
-              buttonOk: 'Volver',
+              buttonOk: translationProvider.tr("common.back"),
               actionCallbackOk: () {
                 Navigator.pop(context);
               },
               showAction: true,
-              textButton: 'Reintentar',
+              textButton: translationProvider.tr("common.retry"),
               actionCallback: () async {
                 Navigator.pop(context);
                 await _loadData(1, limit, "");
@@ -132,19 +134,19 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
         loading = false;
       });
     } catch (e) {
-      setState(() {
-        loading = false;
-      });
       if (mounted) {
+        setState(() {
+          loading = false;
+        });
         await showCustomDialogWithAction(context,
             message: e.toString(),
             dialogType: DialogTypeAction.info,
-            buttonOk: 'Volver',
+            buttonOk: translationProvider.tr("common.back"),
             actionCallbackOk: () {
               Navigator.pop(context);
             },
             showAction: true,
-            textButton: 'Reintentar',
+            textButton: translationProvider.tr("common.retry"),
             actionCallback: () async {
               Navigator.pop(context);
               await _loadData(1, limit, "");
@@ -158,12 +160,10 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
     final themeProvider =
         Provider.of<BibleThemeProvider>(context, listen: false);
     currentTheme = themeProvider.themeData;
-
-    if (isTablet) {
-      return _buildTabletLayout();
-    } else {
-      return _buildMobileLayout();
-    }
+    return ResponsiveLayout(
+      mobile: _buildMobileLayout(),
+      tablet: _buildTabletLayout(),
+    );
   }
 
   // ============ DISEÑO PARA TABLET ============
@@ -195,39 +195,100 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: spacingHeight),
-        Container(
-          // color: currentTheme.backgroundColor,
+        Padding(
           padding: horizontalPadding,
-          constraints: BoxConstraints(
-            minWidth: 160.0,
-            maxWidth: StylesApp(context).sizeTextFormField.width,
-          ),
-          child: FocusScope(
-            node: FocusScopeNode(),
-            child: TextFormField(
-              controller: searchTextController,
-              style: StylesApp(context).textStyleSmallBlack,
-              decoration:
-                  StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                        hintText: 'Buscar Personaje...',
-                        border: OutlineInputBorder(),
-                        suffixIcon: _searchText.isNotEmpty
-                            ? IconButton(
-                                icon: Icon(Icons.clear),
-                                onPressed: () {
-                                  setState(() {
-                                    cleanSearch();
-                                  });
-                                },
-                              )
-                            : Icon(Icons.search),
+          child: Container(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: currentTheme.buttonColor,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            constraints: BoxConstraints(
+              minWidth: 160.0,
+              maxWidth: StylesApp(context).sizeTextFormField.width,
+            ),
+            child: FocusScope(
+              node: FocusScopeNode(),
+              child: TextFormField(
+                controller: searchTextController,
+                style: StylesApp(context).textStyleSmallBlack.copyWith(
+                      color: currentTheme.textColor,
+                    ),
+                decoration: InputDecoration(
+                  hintText: translationProvider
+                      .tr("search_by_character.search.placeholder"),
+                  fillColor: currentTheme.backgroundColor,
+                  filled: true,
+                  hintStyle: StylesApp(context).textStyleBody15.copyWith(
+                        color: currentTheme.textColor.withValues(alpha: 0.6),
                       ),
-              onChanged: (value) {
-                setState(() {
-                  _searchText = value;
-                });
-                _onSearchChanged(value);
-              },
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+
+                    borderSide: BorderSide.none, // Sin borde visible
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: currentTheme.textColor.withValues(
+                          alpha: 0.6), // Borde cuando está habilitado
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color:
+                          currentTheme.textColor, // Borde cuando está enfocado
+                      width: 2.0,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.red, // Borde de error
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: currentTheme.textColor.withValues(
+                          alpha: 0.3), // Borde cuando está deshabilitado
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  suffixIcon: _searchText.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.clear,
+                            color: currentTheme.buttonColor,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              cleanSearch();
+                            });
+                          },
+                        )
+                      : Icon(Icons.search, color: currentTheme.buttonColor),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchText = value;
+                  });
+                  _onSearchChanged(value);
+                },
+              ),
             ),
           ),
         ),
@@ -257,7 +318,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
               ),
               SizedBox(width: 12),
               Text(
-                "Búsqueda de Personajes Bíblicos",
+                translationProvider.tr("search_by_character.search.label_text"),
                 style: StylesApp(context).textStyleBody18.copyWith(
                       color: currentTheme.textColor,
                       fontSize: 22,
@@ -295,12 +356,21 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                             fontSize: 16,
                           ),
                       decoration: InputDecoration(
-                        hintText: 'Escribe aquí el nombre del personaje...',
+                        hintText: translationProvider.tr(
+                            "search_by_character.search.placeholder_tablet"),
                         hintStyle: TextStyle(
                           color: currentTheme.textColor.withValues(alpha: 0.6),
                           fontSize: 15,
                         ),
-                        border: InputBorder.none,
+                        fillColor: currentTheme.backgroundColor,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomLeft: Radius.circular(12),
+                          ),
+                          borderSide: BorderSide.none, // Sin borde visible
+                        ),
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 18,
@@ -370,7 +440,9 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          "${pagination.totalItems} personajes encontrados",
+                          translationProvider.trParams(
+                              "search_by_character.search.results_count",
+                              {"count": pagination.totalItems.toString()}),
                           style: StylesApp(context).textStyleBody12.copyWith(
                                 color: currentTheme.textColor,
                                 fontWeight: FontWeight.w500,
@@ -390,7 +462,11 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                       ),
                     ),
                     child: Text(
-                      "Página ${pagination.currentPage} de ${pagination.totalPages}",
+                      translationProvider
+                          .trParams("search_by_character.search.page_info", {
+                        "current": pagination.currentPage.toString(),
+                        "total": pagination.totalPages.toString()
+                      }),
                       style: StylesApp(context).textStyleBody12.copyWith(
                             color:
                                 currentTheme.textColor.withValues(alpha: 0.7),
@@ -417,7 +493,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
             ),
             SizedBox(height: 16),
             Text(
-              "Buscando personajes...",
+              translationProvider.tr("search_by_character.search.searching"),
               style: StylesApp(context).textStyleBody14.copyWith(
                     color: currentTheme.textColor.withValues(alpha: 0.7),
                   ),
@@ -462,7 +538,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
             Center(
               child: Text(
                 textAlign: TextAlign.center,
-                "No hay resultados...",
+                translationProvider
+                    .tr("search_by_character.results.empty.no_results"),
                 style: StylesApp(context).textStyleBody18.copyWith(
                       color: currentTheme.textColor,
                     ),
@@ -624,7 +701,11 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                             ),
                             SizedBox(width: 4),
                             Text(
-                              'Tiene ${character.relatedCharacters.length} relacionados',
+                              translationProvider.trParams(
+                                  "search_by_character.card.related_count", {
+                                "count": character.relatedCharacters.length
+                                    .toString()
+                              }),
                               style:
                                   StylesApp(context).textStyleBody12.copyWith(
                                         fontSize: 12,
@@ -659,7 +740,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Ver detalles',
+                        translationProvider
+                            .tr("search_by_character.card.view_button"),
                         style: TextStyle(
                           color: currentTheme.buttonColor,
                           fontWeight: FontWeight.w600,
@@ -698,7 +780,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
             ),
             SizedBox(height: 20),
             Text(
-              "No se encontraron personajes",
+              translationProvider.tr("search_by_character.results.empty.title"),
               style: StylesApp(context).textStyleBody18.copyWith(
                     color: currentTheme.textColor,
                     fontSize: isTablet ? 22 : 18,
@@ -707,8 +789,11 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
             SizedBox(height: 12),
             Text(
               _searchText.isEmpty
-                  ? "Comienza a buscar personajes bíblicos escribiendo en el campo de búsqueda"
-                  : "No se encontraron resultados para '$_searchText'",
+                  ? translationProvider
+                      .tr("search_by_character.results.empty.message_start")
+                  : translationProvider.trParams(
+                      "search_by_character.results.empty.message_not_found",
+                      {"query": _searchText}),
               textAlign: TextAlign.center,
               style: StylesApp(context).textStyleBody14.copyWith(
                     color: currentTheme.textColor.withValues(alpha: 0.6),
@@ -808,7 +893,8 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                     children: [
                       Expanded(
                         child: Text(
-                          'Personajes Relacionados',
+                          translationProvider.tr(
+                              "search_by_character.dialog.related_characters"),
                           style: StylesApp(context).textStyleBody18.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -1066,6 +1152,8 @@ class DialogInternalCharacter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = AppTranslationProvider();
+
     final color = Color(int.parse('0XFF${data.color}')).withAlpha(77);
 
     return Dialog(
@@ -1089,7 +1177,8 @@ class DialogInternalCharacter extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Detalles del Personaje',
+                    translationProvider
+                        .tr("search_by_character.dialog.character_details"),
                     style: StylesApp(context).textStyleBody18.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -1191,7 +1280,8 @@ class DialogInternalCharacter extends StatelessWidget {
                                   ),
                                   SizedBox(width: 8),
                                   Text(
-                                    'Color identificador',
+                                    translationProvider.tr(
+                                        "search_by_character.card.color_label"),
                                     style: TextStyle(
                                       color: currentTheme.textColor
                                           .withValues(alpha: 0.7),
@@ -1233,7 +1323,8 @@ class DialogInternalCharacter extends StatelessWidget {
                               ),
                               SizedBox(width: 8),
                               Text(
-                                'Descripción',
+                                translationProvider.tr(
+                                    "search_by_character.dialog.description"),
                                 style:
                                     StylesApp(context).textStyleBody16.copyWith(
                                           color: currentTheme.textColor,
@@ -1278,7 +1369,8 @@ class DialogInternalCharacter extends StatelessWidget {
                             ),
                             SizedBox(width: 8),
                             Text(
-                              'Personaje del Nuevo Testamento',
+                              translationProvider.tr(
+                                  "search_by_character.dialog.new_testament"),
                               style: TextStyle(
                                 color: Colors.green[800],
                                 fontWeight: FontWeight.w500,

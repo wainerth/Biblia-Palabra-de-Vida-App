@@ -1,5 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -32,8 +33,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+    final translationProvider = context.read<AppTranslationProvider>();
+    final _isTablet = isTablet(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -58,14 +59,14 @@ class _PrayerScreenState extends State<PrayerScreen> {
           color: StyleColor.white,
           icon: Icon(
             Icons.arrow_back,
-            size: isTablet ? 36 : 30,
+            size: _isTablet ? 36 : 30,
           ),
         ),
         backgroundColor: StyleColor.white,
         actions: [
           Image.asset(
             "assets/kawaii_fire.png",
-            height: isTablet ? 64.0 : 52.0,
+            height: _isTablet ? 64.0 : 52.0,
             fit: BoxFit.contain,
           )
         ],
@@ -75,16 +76,18 @@ class _PrayerScreenState extends State<PrayerScreen> {
         child: isLoading
             ? LoadingIndicator()
             : isPrayerGroup && !showRequestPrayer
-                ? _buildPrayerStart(context, isTablet)
-                : isTablet
-                    ? _buildTwoColumnLayout(context)
-                    : _buildMobileLayout(context),
+                ? _buildPrayerStart(context, _isTablet, translationProvider)
+                : ResponsiveLayout(
+                    mobile: _buildMobileLayout(context, translationProvider),
+                    tablet:
+                        _buildTwoColumnLayout(context, translationProvider)),
       ),
     );
   }
 
   // DISEÑO DE DOS COLUMNAS PARA TABLET
-  Widget _buildTwoColumnLayout(BuildContext context) {
+  Widget _buildTwoColumnLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -107,7 +110,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
                 // color: Colors.transparent,
                 child: Center(
                   child: Text(
-                    'Pedidos de Oración',
+                    translationProvider.tr('prayer_screen.title'),
                     style: StylesApp(context).textStyleTitleOrange.copyWith(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -140,7 +143,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
                         SizedBox(height: 20.0),
                         // Botón "Ver respuestas"
                         ButtonThemeWidget(
-                          text: "Ver respuestas de tus Pedidos de oración",
+                          text: translationProvider
+                              .tr('prayer_screen.view_responses'),
                           width: double.infinity,
                           height: 60,
                           buttonStyle:
@@ -162,7 +166,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
                         // Título "Hacer Pedido de Oración"
                         Text(
-                          "Hacer Pedido de Oración",
+                          translationProvider.tr('prayer_screen.make_request'),
                           style: StylesApp(context).textStyleBody5.copyWith(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,
@@ -206,7 +210,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
                                   ),
                                   SizedBox(height: 8),
                                   Text(
-                                    "Selecciona una categoría",
+                                    translationProvider
+                                        .tr('prayer_screen.select_category'),
                                     style: StylesApp(context)
                                         .textStyleBody18
                                         .copyWith(
@@ -220,7 +225,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
                               ),
                               SizedBox(height: 10),
                               Text(
-                                "Elige de la lista a la derecha",
+                                translationProvider
+                                    .tr('prayer_screen.choose_from_list'),
                                 style:
                                     StylesApp(context).textStyleBody15.copyWith(
                                           fontSize: 15,
@@ -253,7 +259,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
                                       color: StyleColor.orange, size: 22),
                                   SizedBox(width: 10),
                                   Text(
-                                    "¿Cómo funciona?",
+                                    translationProvider
+                                        .tr('prayer_screen.how_it_works'),
                                     style: StylesApp(context)
                                         .textStyleBody16
                                         .copyWith(
@@ -266,10 +273,10 @@ class _PrayerScreenState extends State<PrayerScreen> {
                               ),
                               SizedBox(height: 12),
                               Text(
-                                "1. Selecciona una categoría de la lista\n"
-                                "2. Completa tu petición de oración\n"
-                                "3. Nuestro equipo intercederá por ti\n"
-                                "4. Recibirás notificaciones de respuestas",
+                                "${translationProvider.tr('prayer_screen.step_1')}\n"
+                                "${translationProvider.tr('prayer_screen.step_2')}\n"
+                                "${translationProvider.tr('prayer_screen.step_3')}\n"
+                                "${translationProvider.tr('prayer_screen.step_4')}\n",
                                 style:
                                     StylesApp(context).textStyleBody12.copyWith(
                                           fontSize: 13,
@@ -323,7 +330,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
                             color: StyleColor.orange, size: 24),
                         SizedBox(width: 12),
                         Text(
-                          "Categorías de Oración",
+                          translationProvider
+                              .tr('prayer_screen.categories_title'),
                           style: StylesApp(context).textStyleBody20.copyWith(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w700,
@@ -348,7 +356,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
                                 ),
                                 SizedBox(height: 20),
                                 Text(
-                                  "Cargando categorías...",
+                                  translationProvider
+                                      .tr('prayer_screen.loading_categories'),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -378,8 +387,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      "💬 Cada petición es tratada con absoluta confidencialidad y respeto. "
-                      "Tu privacidad es nuestra prioridad.",
+                      translationProvider
+                          .tr('prayer_screen.confidentiality_note'),
                       style: StylesApp(context).textStyleBody12.copyWith(
                             // fontSize: 12.sp,
                             color: Colors.grey[700],
@@ -479,7 +488,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
   }
 
   // DISEÑO MÓVIL (se mantiene exactamente igual)
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Container(
@@ -497,7 +507,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
               SizedBox(height: 48.0),
               Center(
                 child: Text(
-                  'Pedidos de Oración',
+                  translationProvider.tr('prayer_screen.title'),
                   style: StylesApp(context).textStyleTitleOrange,
                   textAlign: TextAlign.center,
                 ),
@@ -512,7 +522,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(color: Color(0XFF12CBC4)),
             child: Center(
-              child: _buildButtonActionsMobile(context),
+              child: _buildButtonActionsMobile(context, translationProvider),
             ),
           ),
         ),
@@ -520,12 +530,13 @@ class _PrayerScreenState extends State<PrayerScreen> {
     );
   }
 
-  Widget _buildButtonActionsMobile(BuildContext context) {
+  Widget _buildButtonActionsMobile(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Column(
         children: [
           ButtonThemeWidget(
-            text: "Ver respuestas de tus Pedidos de oración",
+            text: translationProvider.tr('prayer_screen.view_responses'),
             width: 264.sp,
             height: 52.sp,
             buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -536,7 +547,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
           ),
           SizedBox(height: 84.0),
           Text(
-            "Hacer Pedido de Oración",
+            translationProvider.tr('prayer_screen.make_request'),
             style: StylesApp(context).textStyleBody5,
           ),
           SizedBox(height: 5.0),
@@ -563,14 +574,15 @@ class _PrayerScreenState extends State<PrayerScreen> {
     );
   }
 
-  Widget _buildPrayerStart(BuildContext context, bool isTablet) {
+  Widget _buildPrayerStart(BuildContext context, bool isTablet,
+      AppTranslationProvider translationProvider) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           ButtonThemeWidget(
-            text: "Tomar Pedidos de oración",
+            text: translationProvider.tr('prayer_screen.take_prayers'),
             width: isTablet ? 400 : 264.sp,
             height: isTablet ? 60 : 52.sp,
             buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
@@ -587,7 +599,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
           ),
           SizedBox(height: isTablet ? 25.sp : 10.sp),
           ButtonThemeWidget(
-            text: "Hacer Pedido de Oración",
+            text: translationProvider.tr('prayer_screen.make_request'),
             width: isTablet ? 400 : 264.sp,
             height: isTablet ? 60 : 52.sp,
             buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(

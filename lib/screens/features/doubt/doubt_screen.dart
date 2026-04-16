@@ -1,36 +1,29 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
-import 'package:flutter/material.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DoubtScreen extends StatelessWidget {
   const DoubtScreen({super.key});
 
-  // Método para detectar si es tablet
-  bool _isTablet(BuildContext context) {
-    final shortestSide = MediaQuery.of(context).size.shortestSide;
-    return shortestSide >= 600;
-  }
-
   // Método para determinar la acción del botón de retroceso
   void _handleBackButton(BuildContext context) {
-    // Verificar si hay rutas anteriores en el Navigator
     final bool canPop = Navigator.canPop(context);
 
     if (canPop) {
-      // Si puede hacer pop, significa que llegamos por Navigator.push
       Navigator.pop(context);
     } else {
-      // Si no puede hacer pop, significa que llegamos directamente (por bottomBar)
       Navigator.pushNamed(context, "/layoutPage");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isTablet = _isTablet(context);
+    final bool _isTablet = isTablet(context);
+    final translationProvider = context.read<AppTranslationProvider>();
 
     return Scaffold(
       backgroundColor: const Color(0xFF12CBC4),
@@ -54,24 +47,27 @@ class DoubtScreen extends StatelessWidget {
         ),
         backgroundColor: StyleColor.white,
         title: Text(
-          'Dudas Frecuentes',
+          translationProvider.tr('doubts.title'),
           style: StylesApp(context).textStyleBody20.copyWith(
                 color: StyleColor.orange,
                 fontFamily: 'LuckiestGuy',
-                fontSize: isTablet ? 24 : 20,
+                fontSize: _isTablet ? 24 : 20,
               ),
         ),
       ),
       body: SafeArea(
-        child: isTablet
-            ? _buildTabletLayout(context)
-            : _buildMobileLayout(context),
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(context),
+          tablet: _buildTabletLayout(context),
+        ),
       ),
     );
   }
 
   // Layout para móvil (manteniendo el diseño original)
   Widget _buildMobileLayout(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -98,7 +94,7 @@ class DoubtScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  '¿Tienes dudas?',
+                  translationProvider.tr('doubts.have_doubts'),
                   style: StylesApp(context).textStyleBody24.copyWith(
                         color: Color(0xFFFF914D),
                         fontFamily: 'LuckiestGuy',
@@ -114,7 +110,7 @@ class DoubtScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Text(
-              'Aquí ALgunas de las preguntas más frecuentes sobre la app y su uso.',
+              translationProvider.tr('doubts.description'),
               textAlign: TextAlign.center,
               style: StylesApp(context).textStyleBody16.copyWith(
                     color: Colors.white,
@@ -137,28 +133,23 @@ class DoubtScreen extends StatelessWidget {
               children: [
                 _buildQuestion(
                   context,
-                  question: '¿Cómo puedo buscar un versículo?',
-                  answer:
-                      'En la pantalla principal, Ingresas a la opción de la Biblia y el los iconos de la parte superior donde esta la lupa ...\n Encontraras las opciones que te permiten moverte sobre los Versiones, libros capítulos y versículos, ademas de acceder, a la sección de enseñanzas, y personajes...',
+                  question: translationProvider.tr('doubts.question_1'),
+                  answer: translationProvider.tr('doubts.answer_1'),
                 ),
                 _buildQuestion(
                   context,
-                  question: '¿Puedo leer la Biblia sin conexión?',
-                  answer:
-                      'No,necesitas estar conectado a internet, para poder acceder a las funcionalidades de la Biblia',
+                  question: translationProvider.tr('doubts.question_2'),
+                  answer: translationProvider.tr('doubts.answer_2'),
                 ),
                 _buildQuestion(
                   context,
-                  question: '¿Cómo puedo cambiar el tema de la app?',
-                  answer:
-                      'Solo puedes cambiar el tema de colores en la sección de la Biblia. \n Ve a la biblia usas el icono de personalización  y selecciona el tema que prefieras: claro, oscuro o personalizado. \n Ademas puedes cambiar el tipo de fuente, ajustar el tamaño de la fuente, estos\n datos permanecen guardados dentro del store de la aplicación',
+                  question: translationProvider.tr('doubts.question_3'),
+                  answer: translationProvider.tr('doubts.answer_3'),
                 ),
                 _buildQuestion(
                   context,
-                  question:
-                      '¿Dónde puedo enviar sugerencias o reportar errores?',
-                  answer:
-                      'a traves del correo Electrónico, que encuentras en configuración "acerca de la app", puedes enviarnos tus sugerencias o reportar cualquier inconveniente.',
+                  question: translationProvider.tr('doubts.question_4'),
+                  answer: translationProvider.tr('doubts.answer_4'),
                 ),
               ],
             ),
@@ -175,33 +166,37 @@ class DoubtScreen extends StatelessWidget {
                 scheme: 'mailto',
                 path: GraphQLConfig.emailContact,
                 queryParameters: {
-                  'subject': 'Consulta - Biblia Palabra de Vida',
-                  'body': 'Hola, tengo una consulta sobre la aplicación:',
+                  'subject': translationProvider.tr('doubts.email_subject'),
+                  'body': translationProvider.tr('doubts.email_body'),
                 },
               );
 
               if (await canLaunchUrl(emailLaunchUri)) {
                 await launchUrl(emailLaunchUri);
               } else {
-                showSnackBar("'No se pudo abrir la aplicación de correo'", type: SnackBarType.error);
+                showSnackBar(translationProvider.tr('doubts.email_error'),
+                    type: SnackBarType.error);
               }
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
-                '¿No encontraste tu respuesta? Escríbenos a ${GraphQLConfig.emailContact}',
+                '${translationProvider.tr('doubts.not_found_answer')} ${GraphQLConfig.emailContact}',
                 textAlign: TextAlign.center,
                 style: StylesApp(context).textStyleBody14.copyWith(
                       color: Colors.white70,
                       fontFamily: 'Montserrat',
+                      textBaseline: TextBaseline.alphabetic,
                       decoration: TextDecoration.underline,
+                      decorationColor: StyleColor.white,
+                      decorationStyle: TextDecorationStyle.solid,
                     ),
               ),
             ),
           ),
           const SizedBox(height: 20),
           Text(
-            '© 2025 Biblia Palabra de Vida',
+            translationProvider.tr('doubts.copyright'),
             style: StylesApp(context).textStyleBody10.copyWith(
                   color: Colors.white70,
                   fontSize: 13,
@@ -216,6 +211,8 @@ class DoubtScreen extends StatelessWidget {
 
   // Layout para tablet con header en izquierda y grid de dudas en derecha
   Widget _buildTabletLayout(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
@@ -253,7 +250,7 @@ class DoubtScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '¿Tienes dudas?',
+                          translationProvider.tr('doubts.have_doubts'),
                           style: StylesApp(context).textStyleBody24.copyWith(
                                 color: Color(0xFFFF914D),
                                 fontFamily: 'LuckiestGuy',
@@ -269,7 +266,7 @@ class DoubtScreen extends StatelessWidget {
 
                   // Texto descriptivo
                   Text(
-                    'Aquí ALgunas de las preguntas más frecuentes sobre la app y su uso.',
+                    translationProvider.tr('doubts.description'),
                     textAlign: TextAlign.center,
                     style: StylesApp(context).textStyleBody18.copyWith(
                           color: Colors.white,
@@ -292,23 +289,24 @@ class DoubtScreen extends StatelessWidget {
                         scheme: 'mailto',
                         path: GraphQLConfig.emailContact,
                         queryParameters: {
-                          'subject': 'Consulta - Biblia Palabra de Vida',
-                          'body':
-                              'Hola, tengo una consulta sobre la aplicación:',
+                          'subject':
+                              translationProvider.tr('doubts.email_subject'),
+                          'body': translationProvider.tr('doubts.email_body'),
                         },
                       );
 
                       if (await canLaunchUrl(emailLaunchUri)) {
                         await launchUrl(emailLaunchUri);
                       } else {
-                        showSnackBar("No se pudo abrir la aplicación de correo", type: SnackBarType.error);
-
+                        showSnackBar(
+                            translationProvider.tr('doubts.email_error'),
+                            type: SnackBarType.error);
                       }
                     },
                     child: Column(
                       children: [
                         Text(
-                          'O escríbenos a:',
+                          translationProvider.tr('doubts.or_write_to'),
                           textAlign: TextAlign.center,
                           style: StylesApp(context).textStyleBody14.copyWith(
                                 color: Colors.white70,
@@ -343,7 +341,7 @@ class DoubtScreen extends StatelessWidget {
 
                   // Copyright
                   Text(
-                    '© 2025 Biblia Palabra de Vida',
+                    translationProvider.tr('doubts.copyright'),
                     style: StylesApp(context).textStyleBody12.copyWith(
                           color: Colors.white70,
                           fontSize: 14,
@@ -363,7 +361,7 @@ class DoubtScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Preguntas Frecuentes',
+                    translationProvider.tr('doubts.frequent_questions'),
                     style: StylesApp(context).textStyleBody24.copyWith(
                           color: Colors.white,
                           fontFamily: 'LuckiestGuy',
@@ -385,28 +383,23 @@ class DoubtScreen extends StatelessWidget {
                       children: [
                         _buildQuestionCard(
                           context,
-                          question: '¿Cómo puedo buscar un versículo?',
-                          answer:
-                              'En la pantalla principal, Ingresas a la opción de la Biblia y el los iconos de la parte superior donde esta la lupa ...\n Encontraras las opciones que te permiten moverte sobre los Versiones, libros capítulos y versículos, ademas de acceder, a la sección de enseñanzas, y personajes...',
+                          question: translationProvider.tr('doubts.question_1'),
+                          answer: translationProvider.tr('doubts.answer_1'),
                         ),
                         _buildQuestionCard(
                           context,
-                          question: '¿Puedo leer la Biblia sin conexión?',
-                          answer:
-                              'No,necesitas estar conectado a internet, para poder acceder a las funcionalidades de la Biblia',
+                          question: translationProvider.tr('doubts.question_2'),
+                          answer: translationProvider.tr('doubts.answer_2'),
                         ),
                         _buildQuestionCard(
                           context,
-                          question: '¿Cómo puedo cambiar el tema de la app?',
-                          answer:
-                              'Solo puedes cambiar el tema de colores en la sección de la Biblia. \n Ve a la biblia usas el icono de personalización y selecciona el tema que prefieras: claro, oscuro o personalizado. \n Ademas puedes cambiar el tipo de fuente, ajustar el tamaño de la fuente, estos\n datos permanecen guardados dentro del store de la aplicación',
+                          question: translationProvider.tr('doubts.question_3'),
+                          answer: translationProvider.tr('doubts.answer_3'),
                         ),
                         _buildQuestionCard(
                           context,
-                          question:
-                              '¿Dónde puedo enviar sugerencias o reportar errores?',
-                          answer:
-                              'a traves del correo Electrónico, que encuentras en configuración "acerca de la app", puedes enviarnos tus sugerencias o reportar cualquier inconveniente.',
+                          question: translationProvider.tr('doubts.question_4'),
+                          answer: translationProvider.tr('doubts.answer_4'),
                         ),
                       ],
                     ),
@@ -431,7 +424,8 @@ class DoubtScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+          border:
+              Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
         ),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -467,22 +461,24 @@ class DoubtScreen extends StatelessWidget {
 
   // Widget para botón de contacto en tablet
   Widget _buildContactButton(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return ElevatedButton(
       onPressed: () async {
         final Uri emailLaunchUri = Uri(
           scheme: 'mailto',
           path: GraphQLConfig.emailContact,
           queryParameters: {
-            'subject': 'Consulta - Biblia Palabra de Vida',
-            'body': 'Hola, tengo una consulta sobre la aplicación:',
+            'subject': translationProvider.tr('doubts.email_subject'),
+            'body': translationProvider.tr('doubts.email_body'),
           },
         );
 
         if (await canLaunchUrl(emailLaunchUri)) {
           await launchUrl(emailLaunchUri);
         } else {
-          showSnackBar("No se pudo abrir la aplicación de correo", type: SnackBarType.error);
-          
+          showSnackBar(translationProvider.tr('doubts.email_error'),
+              type: SnackBarType.error);
         }
       },
       style: ElevatedButton.styleFrom(
@@ -500,7 +496,7 @@ class DoubtScreen extends StatelessWidget {
           Icon(Icons.email, size: 24),
           const SizedBox(width: 12),
           Text(
-            'Contáctanos',
+            translationProvider.tr('doubts.contact_us'),
             style: StylesApp(context).textStyleBody18.copyWith(
                   fontFamily: 'Montserrat',
                   fontWeight: FontWeight.w600,
@@ -543,18 +539,80 @@ class DoubtScreen extends StatelessWidget {
             padding: forTablet
                 ? const EdgeInsets.all(20.0)
                 : const EdgeInsets.only(bottom: 12.0, left: 8, right: 8),
-            child: Text(
-              answer,
-              style: StylesApp(context).textStyleBody14.copyWith(
-                    color: Colors.white70,
-                    fontFamily: 'Montserrat',
-                    fontSize: forTablet ? 16 : 14,
-                    height: 1.5,
-                  ),
+            child: _buildFormattedText(
+              context,
+              text: answer,
+              forTablet: forTablet,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFormattedText(BuildContext context,
+      {required String text, required bool forTablet}) {
+    final RegExp regex = RegExp(r'\*(.*?)\*');
+    final List<TextSpan> spans = [];
+    int currentIndex = 0;
+
+    final baseStyle = StylesApp(context).textStyleBody14.copyWith(
+          color: Colors.white70,
+          fontFamily: 'Montserrat',
+          fontSize: forTablet ? 16 : 14,
+          height: 1.5,
+        );
+
+    final boldStyle = baseStyle.copyWith(
+      fontWeight: FontWeight.bold,
+      color: Colors.white, // Opcional: un poco más brillante para la negrita
+    );
+
+    // Encontrar todas las coincidencias
+    final matches = regex.allMatches(text);
+
+    for (final match in matches) {
+      // Texto normal antes de la negrita
+      if (match.start > currentIndex) {
+        spans.add(
+          TextSpan(
+            text: text.substring(currentIndex, match.start),
+            style: baseStyle,
+          ),
+        );
+      }
+
+      // Texto en negrita (sin los asteriscos)
+      spans.add(
+        TextSpan(
+          text: match.group(1),
+          style: boldStyle,
+        ),
+      );
+
+      currentIndex = match.end;
+    }
+
+    // Texto normal después de la última negrita
+    if (currentIndex < text.length) {
+      spans.add(
+        TextSpan(
+          text: text.substring(currentIndex),
+          style: baseStyle,
+        ),
+      );
+    }
+
+    // Si no hay asteriscos, mostrar texto normal
+    if (spans.isEmpty) {
+      return Text(
+        text,
+        style: baseStyle,
+      );
+    }
+
+    return RichText(
+      text: TextSpan(children: spans),
     );
   }
 }

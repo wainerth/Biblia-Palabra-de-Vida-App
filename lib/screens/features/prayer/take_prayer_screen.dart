@@ -52,6 +52,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
   bool showRecordAudio = false;
 
   PrayerModel? dataSeleccionada;
+  final _translationProvider = AppTranslationProvider();
 
   @override
   void initState() {
@@ -70,18 +71,18 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+    isTablet(context);
     final themeProvider = Provider.of<BibleThemeProvider>(context);
     final currentTheme = themeProvider.themeData;
 
     return Scaffold(
         // backgroundColor: StyleColor.turquoise,
         body: SafeArea(
-          child: isTablet
-              ? _buildTabletLayout(context, currentTheme)
-              : _buildMobileLayout(context, currentTheme),
-        ));
+      child: ResponsiveLayout(
+        mobile: _buildMobileLayout(context, currentTheme),
+        tablet: _buildTabletLayout(context, currentTheme),
+      ),
+    ));
   }
 
   // DISEÑO PARA TABLET A DOS COLUMNAS
@@ -137,7 +138,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Tomar Pedidos de",
+                        _translationProvider
+                            .tr('take_prayer_screen.title.take'),
                         style: StylesApp(context).textStyleBody1.copyWith(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
@@ -145,7 +147,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                             ),
                       ),
                       Text(
-                        "Oración",
+                        _translationProvider
+                            .tr('take_prayer_screen.title.prayer'),
                         style: StylesApp(context).textStyleTitleOrange.copyWith(
                               fontSize: 24,
                               fontWeight: FontWeight.w800,
@@ -200,7 +203,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                                   .textStyleSmallBlack
                                   .copyWith(fontSize: 16),
                               decoration: InputDecoration(
-                                hintText: 'Buscar peticiones...',
+                                hintText: _translationProvider.tr(
+                                    'take_prayer_screen.search.placeholder'),
                                 hintStyle: StylesApp(context)
                                     .textStyleBody14
                                     .copyWith(
@@ -243,21 +247,24 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                               children: [
                                 _buildStatCard(
                                   context,
-                                  'Total Peticiones',
+                                  _translationProvider.tr(
+                                      'take_prayer_screen.stats.total_requests'),
                                   '${pagination.totalItems}',
                                   Icons.list_alt,
                                   StyleColor.orange,
                                 ),
                                 _buildStatCard(
                                   context,
-                                  'Por Atender',
+                                  _translationProvider
+                                      .tr('take_prayer_screen.stats.pending'),
                                   '${listRequest.length}',
                                   Icons.access_time,
                                   StyleColor.blue,
                                 ),
                                 _buildStatCard(
                                   context,
-                                  'Por Página',
+                                  _translationProvider
+                                      .tr('take_prayer_screen.stats.per_page'),
                                   '$itemPerPageValue',
                                   Icons.format_list_numbered,
                                   StyleColor.greenMedium,
@@ -416,7 +423,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Por Atender',
+                        _translationProvider
+                            .tr('take_prayer_screen.stats.pending'),
                         style: TextStyle(
                           fontSize: 11,
                           color: StyleColor.orange,
@@ -451,7 +459,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Por: ${prayer.prayedFor}',
+                            '${_translationProvider.tr('take_prayer_screen.list_item.by')} ${prayer.prayedFor}',
                             style: StylesApp(context).textStyleBody14.copyWith(
                                   color: Colors.grey[600],
                                 ),
@@ -525,7 +533,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                   child: ButtonThemeWidget(
                     width: double.infinity,
                     height: 45,
-                    text: "Asistir Esta Petición",
+                    text: _translationProvider
+                        .tr('take_prayer_screen.list_item.assist_button'),
                     buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                           textStyle: WidgetStatePropertyAll(
                             TextStyle(
@@ -559,7 +568,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Detalles de la Petición',
+                _translationProvider
+                    .tr('take_prayer_screen.detail_panel.title'),
                 style: StylesApp(context).textStyleBody24.copyWith(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -596,7 +606,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                         color: StyleColor.orange, size: 20),
                     SizedBox(width: 10),
                     Text(
-                      'Fecha: ${prayer.requestDate}',
+                      '${_translationProvider.tr('take_prayer_screen.detail_panel.date')} ${prayer.requestDate}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -611,7 +621,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                     Icon(Icons.person, color: StyleColor.blue, size: 20),
                     SizedBox(width: 10),
                     Text(
-                      'Solicitado por: ${prayer.requestedBy}',
+                      '${_translationProvider.tr('take_prayer_screen.detail_panel.requested_by')} ${prayer.requestedBy}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -626,7 +636,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                     Icon(Icons.people, color: StyleColor.greenMedium, size: 20),
                     SizedBox(width: 10),
                     Text(
-                      'Pide oración por: ${prayer.prayedFor}',
+                      '${_translationProvider.tr('take_prayer_screen.detail_panel.prayer_for')} ${prayer.prayedFor}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -643,7 +653,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
 
           // Categorías
           Text(
-            'Categorías',
+            _translationProvider
+                .tr('take_prayer_screen.detail_panel.categories_title'),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -665,7 +676,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Categoría Principal',
+                        _translationProvider.tr(
+                            'take_prayer_screen.detail_panel.main_category'),
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey[600],
@@ -697,7 +709,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Subcategoría',
+                        _translationProvider
+                            .tr('take_prayer_screen.detail_panel.subcategory'),
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey[600],
@@ -723,7 +736,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
 
           // Detalle de la oración
           Text(
-            'Petición de Oración',
+            _translationProvider
+                .tr('take_prayer_screen.detail_panel.prayer_request'),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -753,7 +767,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
           // Audio (si existe)
           if (prayer.audioPrayer != null) ...[
             Text(
-              'Audio de la Petición',
+              _translationProvider
+                  .tr('take_prayer_screen.detail_panel.audio_title'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -774,7 +789,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                   SizedBox(width: 15),
                   Expanded(
                     child: Text(
-                      'Audio disponible',
+                      _translationProvider.tr(
+                          'take_prayer_screen.detail_panel.audio_available'),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -795,7 +811,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
             child: ButtonThemeWidget(
               width: 300,
               height: 50,
-              text: "Asistir Esta Petición",
+              text: _translationProvider
+                  .tr('take_prayer_screen.detail_panel.assist_button'),
               buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
                     textStyle: WidgetStatePropertyAll(
                       TextStyle(
@@ -825,7 +842,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
           ),
           SizedBox(height: 20),
           Text(
-            'Selecciona una petición',
+            _translationProvider.tr('take_prayer_screen.empty_detail.title'),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -834,7 +851,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
           ),
           SizedBox(height: 10),
           Text(
-            'Haz clic en una petición de la lista\npara ver sus detalles aquí',
+            _translationProvider.tr('take_prayer_screen.empty_detail.subtitle'),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15,
@@ -903,7 +920,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
           ),
           SizedBox(height: 20),
           Text(
-            '¡Excelente trabajo!',
+            _translationProvider.tr('take_prayer_screen.empty_state.title'),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w800,
@@ -912,9 +929,7 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
           ),
           SizedBox(height: 10),
           Text(
-            'No hay peticiones pendientes por atender.\n\n'
-            'Has atendido todas las peticiones disponibles '
-            'o no hay nuevas peticiones en este momento.',
+            _translationProvider.tr('take_prayer_screen.empty_state.subtitle'),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
@@ -924,7 +939,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
           ),
           SizedBox(height: 30),
           ButtonThemeWidget(
-            text: "Actualizar",
+            text: _translationProvider
+                .tr('take_prayer_screen.empty_state.refresh_button'),
             buttonStyle: StylesApp(context).btnWidgetSmall,
             width: 200,
             height: 50,
@@ -941,13 +957,11 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
   // DISEÑO MÓVIL (se mantiene exactamente igual)
   Widget _buildMobileLayout(BuildContext context, BibleTheme currentTheme) {
     return Container(
-      decoration: BoxDecoration(
-        color: StyleColor.turquoise
-      ),
+      decoration: BoxDecoration(color: StyleColor.turquoise),
       child: Column(
         children: [
           HeadScreenNotAvatar(
-            title: "Respuestas de\n Pedidos de Oración",
+            title: _translationProvider.tr('take_prayer_screen.mobile.title'),
             onRoute: () {
               Navigator.pop(context);
             },
@@ -974,7 +988,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                   style: StylesApp(context).textStyleSmallBlack,
                   decoration:
                       StylesApp(context).inputDecorationOutlineStyle.copyWith(
-                            hintText: 'Buscar...',
+                            hintText: _translationProvider
+                                .tr('take_prayer_screen.search.hint'),
                             border: OutlineInputBorder(),
                             suffixIcon: searchText.isNotEmpty
                                 ? IconButton(
@@ -1057,7 +1072,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: "Fecha hora: ",
+                      text:
+                          "${_translationProvider.tr('take_prayer_screen.mobile.date')} ",
                       style: StylesApp(context).textStyleBody12.copyWith(
                             color: StyleColor.orange,
                           ),
@@ -1075,7 +1091,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: "Por: ",
+                      text:
+                          "${_translationProvider.tr('take_prayer_screen.mobile.by')} ",
                       style: StylesApp(context).textStyleBody12.copyWith(
                             color: StyleColor.orange,
                           ),
@@ -1094,7 +1111,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: "Oración por: ",
+                      text:
+                          "${_translationProvider.tr('take_prayer_screen.mobile.prayer_for')} ",
                       style: StylesApp(context).textStyleBody12.copyWith(
                             color: StyleColor.orange,
                           ),
@@ -1124,7 +1142,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
               Center(
                 child: ButtonThemeWidget(
                   width: 180,
-                  text: "Asistir Petición",
+                  text: _translationProvider
+                      .tr('take_prayer_screen.list_item.assist_button_mobile'),
                   buttonStyle: StylesApp(context).btnWidgetSmall,
                   onPressed: () async =>
                       _handleAssistPrayer(listRequest[index], index),
@@ -1245,7 +1264,8 @@ class _TakePrayerScreenState extends State<TakePrayerScreen> {
     try {
       _generateData(context, pagination.currentPage, pagination.currentPage);
     } catch (e) {
-      debugPrint("error al filtrar $e");
+      debugPrint(
+          "${_translationProvider.tr('take_prayer_screen.messages.error_filter')} $e");
     }
   }
 }

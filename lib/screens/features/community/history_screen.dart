@@ -1,4 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -51,7 +53,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       _confettiController = ConfettiController(duration: Duration(seconds: 10));
       _initTTS(); // Inicializar TTS
       _generateData(context);
-      // _controllerPage.addListener(_pageListener);
       getFontSizeText();
     });
   }
@@ -63,7 +64,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _generateData(BuildContext context) async {
     if (!mounted) return;
-
+    final translationProvider = context.read<AppTranslationProvider>();
     LoadingService().showLoading(context);
 
     setState(() {
@@ -77,7 +78,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (args == null) {
       _cleanupLoading();
       setState(() {
-        errorMessage = "No se proporcionaron argumentos";
+        errorMessage = translationProvider.tr('history_screen.error_arguments');
         isLoading = false;
       });
       return;
@@ -91,7 +92,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       // Validar IDs
       if (levelId.isEmpty || sectionId.isEmpty || courseId.isEmpty) {
         setState(() {
-          errorMessage = "Faltan parámetros requeridos";
+          errorMessage =
+              translationProvider.tr('history_screen.error_parameters');
         });
       }
       setState(() {});
@@ -101,7 +103,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       if (userData == null) {
         setState(() {
-          errorMessage = "Usuario no autenticado";
+          errorMessage =
+              translationProvider.tr('history_screen.user_no_authenticate');
         });
       }
 
@@ -144,7 +147,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
       if (historyResponse.data == null ||
           (historyResponse.data is List && historyResponse.data.isEmpty)) {
-        errorMessage = "No hay historias disponibles.";
+        errorMessage = translationProvider.tr('history_screen.no_stories');
         return;
       }
       setState(() {
@@ -152,12 +155,38 @@ class _HistoryScreenState extends State<HistoryScreen> {
             .map((story) => History.fromJson(removeTypename(story)))
             .cast<History>()
             .toList();
-
+        // stories.insert(
+        //     0,
+        //     History(
+        //       id: '11111111111',
+        //       orderCard: 1,
+        //       level: IntermediateLevel(unLockLevel: true, levelNumber: 2),
+        //       status: 1,
+        //       text:
+        //           ' texto normal  y texto en idioma  וַיָּמָת יוֹסֵף בֶּן־מֵאָה וָעֶשֶׂר שָׁנִים וַיַּחַנְטוּ אֹתוֹ וַיִּישֶׂם בָּאָרוֹן בְּמִצְרָֽיִם',
+        //       img: Img(urlImg: 'assets/intro.png'),
+        //       audio: null,
+        //       video: null,
+        //     ));
+        // stories.insert(
+        //     1,
+        //     History(
+        //       id: '11111111111',
+        //       orderCard: 1,
+        //       level: IntermediateLevel(unLockLevel: true, levelNumber: 2),
+        //       status: 1,
+        //       text:
+        //           'Love is patient, love is kind. It does not envy, it does not boast, it is not proud. It does not dishonor others, it is not self-seeking, it is not easily angered, it keeps no record of wrongs.',
+        //       img: Img(urlImg: 'assets/intro.png'),
+        //       audio: null,
+        //       video: null,
+        //     ));
         isPlaying = true;
       });
       _togglePlayPause(stories[0]);
     } catch (e) {
-      errorMessage = "Un Error a Ocurrido: $e";
+      errorMessage =
+          "${translationProvider.tr('history_screen.an_error_occurred')}: $e";
     } finally {
       LoadingService().hideLoading();
       setState(() {
@@ -189,22 +218,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
 // Función para detectar si es tablet
-  bool get _isTablet {
-    final data = MediaQueryData.fromView(View.of(context));
-    final shortestSide = data.size.shortestSide;
-    return shortestSide >= 600;
-  }
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     return Scaffold(
       body: SafeArea(
-        child: _isTablet ? _buildTabletLayout() : _buildMobileLayout(),
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(translationProvider),
+          tablet: _buildTabletLayout(translationProvider),
+        ),
       ),
     );
   }
 
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(AppTranslationProvider translationProvider) {
     return Row(
       children: [
         // Columna izquierda: Información del curso y controles
@@ -225,7 +254,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     )
                   } else ...{
                     HeaderNotDetailsStageWidget(
-                      title: "Conoce el ${course?.titleCourse}",
+                      title:
+                          "${translationProvider.tr('history_screen.title')} ${course?.titleCourse}",
                       stage:
                           stage != null ? stage!.sectionNumber.toString() : '',
                       subtitle: stage != null ? stage!.sectionName : '',
@@ -255,7 +285,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "Paso ${finalStory ? stories.length : (isPage + 1).floorToDouble().toStringAsFixed(0)} de ${stories.length}",
+                            "${translationProvider.tr('history_screen.level_name')} ${finalStory ? stories.length : (isPage + 1).floorToDouble().toStringAsFixed(0)} de ${stories.length}",
                             style: StylesApp(context).textStyleBody5.copyWith(
                                   fontSize: 14,
                                 ),
@@ -280,7 +310,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Control de voz',
+                                  translationProvider
+                                      .tr('history_screen.voice_control'),
                                   style: StylesApp(context)
                                       .textStyleBody16
                                       .copyWith(
@@ -319,7 +350,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     min: 0.1,
                                     max: 1.0,
                                     divisions: 9,
-                                    label: _getSpeedLabel(_speechRate),
+                                    label: _getSpeedLabel(
+                                        _speechRate, translationProvider),
                                     activeColor: StyleColor.turquoise,
                                     inactiveColor: StyleColor.turquoise
                                         .withValues(alpha: 0.3),
@@ -366,7 +398,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 child: ElevatedButton.icon(
                                   icon: Icon(Icons.skip_previous),
                                   label: Text(
-                                    'Inicio',
+                                    translationProvider
+                                        .tr('history_screen.beginning'),
                                     style: StylesApp(context)
                                         .textStyleBody10
                                         .copyWith(
@@ -398,7 +431,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 child: ElevatedButton.icon(
                                   icon: Icon(Icons.skip_next),
                                   label: Text(
-                                    'Final',
+                                    translationProvider
+                                        .tr('history_screen.end'),
                                     style: StylesApp(context)
                                         .textStyleBody10
                                         .copyWith(
@@ -457,7 +491,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Progreso: ${((isPage / (stories.length > 1 ? stories.length - 1 : stories.length)) * 100).toStringAsFixed(0)}%',
+                              '${translationProvider.tr('history_screen.progress')}: ${((isPage / (stories.length > 1 ? stories.length - 1 : stories.length)) * 100).toStringAsFixed(0)}%',
                               style:
                                   StylesApp(context).textStyleBody12.copyWith(
                                         color: Colors.grey[600],
@@ -484,7 +518,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         child: Column(
                           children: [
                             Text(
-                              "¡Felicidades!",
+                              translationProvider
+                                  .tr('history_screen.congratulations'),
                               style:
                                   StylesApp(context).textStyleBody18.copyWith(
                                         fontSize: 18,
@@ -494,7 +529,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              "Has llegado al final de la historia",
+                              "${translationProvider.tr('history_screen.congratulations')} ${translationProvider.tr('history_screen.completed_story')}",
                               textAlign: TextAlign.center,
                               style:
                                   StylesApp(context).textStyleBody16.copyWith(
@@ -523,7 +558,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     minimumSize: Size(double.infinity, 48),
                                   ),
                                   child: Text(
-                                    'Volver a Iniciar',
+                                    translationProvider
+                                        .tr('history_screen.restart_story'),
                                     style: StylesApp(context)
                                         .textStyleBody16
                                         .copyWith(
@@ -550,7 +586,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     minimumSize: Size(double.infinity, 48),
                                   ),
                                   child: Text(
-                                    'Continuar con Preguntas',
+                                    translationProvider.tr(
+                                        'history_screen.continue_questions'),
                                     style: StylesApp(context)
                                         .textStyleBody16
                                         .copyWith(
@@ -655,7 +692,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   child: Column(
                                     children: [
                                       Text(
-                                        "¡Felicidades!",
+                                        translationProvider.tr(
+                                            'history_screen.congratulations'),
                                         style: TextStyle(
                                           fontSize: 32,
                                           fontWeight: FontWeight.bold,
@@ -664,7 +702,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ),
                                       SizedBox(height: 10),
                                       Text(
-                                        "Has completado esta historia",
+                                        translationProvider.tr(
+                                            'history_screen.has_completed_story'),
                                         style: TextStyle(
                                           fontSize: 18,
                                           color: Colors.grey[700],
@@ -672,7 +711,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ),
                                       SizedBox(height: 20),
                                       Text(
-                                        "¡Sigue así! Cada historia te acerca más al conocimiento.",
+                                        translationProvider.tr(
+                                            'history_screen.continue_learning'),
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontSize: 16,
@@ -736,7 +776,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           final ScrollController pageScrollController =
                               ScrollController();
                           return _buildTabletStoryContent(
-                              story, pageScrollController);
+                              story, pageScrollController, translationProvider);
                         },
                       ),
                     ),
@@ -745,7 +785,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     Expanded(
                       child: Center(
                         child: Text(
-                          "No hay historias disponibles",
+                          translationProvider.tr('history_screen.no_stories'),
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.grey[600],
@@ -830,7 +870,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   // Contenido de historia para tablet
   Widget _buildTabletStoryContent(
-      History story, ScrollController scrollController) {
+      History story,
+      ScrollController scrollController,
+      AppTranslationProvider translationProvider) {
     return Container(
       margin: EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -901,7 +943,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 if (story.audio != null && story.audio!.url != '')
                   IconButton(
                     onPressed: () {
-                      _showAudioDialog(story);
+                      _showAudioDialog(story, translationProvider);
                     },
                     icon: Icon(Icons.audiotrack, size: 28),
                     color: _selectedButtonIndex == 2
@@ -947,6 +989,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     SizedBox(width: 8),
                     Icon(Icons.text_increase,
                         size: 20, color: Colors.grey[600]),
+                    IconButton(
+                      onPressed: () {
+                        _copyStory(stories[storyIndex], translationProvider);
+                      },
+                      icon: Icon(
+                        Icons.copy,
+                        color: StyleColor.turquoise,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -964,7 +1015,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 radius: Radius.circular(3),
                 child: SingleChildScrollView(
                   controller: scrollController,
-                  child: _buildRichTextWithLinks(story.text, context),
+                  child: _buildRichTextWithLinks(
+                      story.text, context, translationProvider),
                 ),
               ),
             ),
@@ -974,7 +1026,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  void _showAudioDialog(History story) {
+  void _showAudioDialog(
+      History story, AppTranslationProvider translationProvider) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -992,7 +1045,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Audio de la historia',
+                      translationProvider.tr('history_screen.audio_story'),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -1075,7 +1128,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   // Layout para móvil (mismo que el original)
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         if (isLoading) ...{
@@ -1089,7 +1142,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             )
           } else ...{
             HeaderNotDetailsStageWidget(
-              title: "Conoce el ${course?.titleCourse}",
+              title:
+                  "${translationProvider.tr('history_screen.title')} ${course?.titleCourse}",
               stage: stage != null ? stage!.sectionNumber.toString() : '',
               subtitle: stage != null ? stage!.sectionName : '',
               details: stage,
@@ -1105,7 +1159,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   color: StyleColor.orange,
                   borderRadius: BorderRadius.circular(8.0)),
               child: Text(
-                " ${level != null ? level!.name : ''} - Paso ${(isPage + 1).floorToDouble().toStringAsFixed(0)}",
+                " ${level != null ? level!.name : ''} - ${translationProvider.tr('history_screen.level_name')} ${(isPage + 1).floorToDouble().toStringAsFixed(0)}",
                 style: StylesApp(context).textStyleBody5,
               ),
             ),
@@ -1148,7 +1202,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             child: Center(
                               child: Text(
                                 textAlign: TextAlign.center,
-                                "¡Felicidades! Has llegado al final de la historia.",
+                                "${translationProvider.tr('history_screen.congratulations')} ${translationProvider.tr('history_screen.completed_story')}",
                                 style: StylesApp(context)
                                     .textStyleBody18
                                     .copyWith(color: Colors.black),
@@ -1165,7 +1219,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               children: [
                                 ButtonThemeWidget(
                                   textCenter: true,
-                                  text: "Volver a Iniciar la Historia",
+                                  text: translationProvider
+                                      .tr('history_screen.restart_story'),
                                   buttonStyle:
                                       StylesApp(context).btnWidgetSmall,
                                   height: null,
@@ -1182,7 +1237,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 ),
                                 ButtonThemeWidget(
                                   textCenter: true,
-                                  text: "Continuar con las Preguntas",
+                                  text: translationProvider.tr(
+                                      'history_screen.continue_questions'),
                                   buttonStyle:
                                       StylesApp(context).btnWidgetSmall,
                                   height: null,
@@ -1230,8 +1286,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           // Crear un nuevo ScrollController *dentro* del itemBuilder
                           final ScrollController pageScrollController =
                               ScrollController();
-                          return _buildItemPageView(
-                              story, context, pageScrollController);
+                          return _buildItemPageView(story, context,
+                              pageScrollController, translationProvider);
                         }
                         return Container();
                       },
@@ -1269,7 +1325,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               color: Colors.black,
                             ),
                       ),
-                    )
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        _copyStory(stories[storyIndex], translationProvider);
+                      },
+                      icon: Icon(
+                        Icons.copy,
+                        color: StyleColor.turquoise,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1437,7 +1502,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildItemPageView(
-      History story, BuildContext context, ScrollController scrollController) {
+      History story,
+      BuildContext context,
+      ScrollController scrollController,
+      AppTranslationProvider translationProvider) {
     return Container(
       color: Colors.white,
       child: Column(
@@ -1697,7 +1765,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       min: 0.1,
                                       max: 1.0,
                                       divisions: 9,
-                                      label: _getSpeedLabel(_speechRate),
+                                      label: _getSpeedLabel(
+                                          _speechRate, translationProvider),
                                       activeColor: StyleColor.turquoise,
                                       inactiveColor: StyleColor.turquoise
                                           .withValues(alpha: 0.3),
@@ -1711,7 +1780,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   ),
                                   SizedBox(width: 8),
                                   Text(
-                                    _getSpeedLabel(_speechRate),
+                                    _getSpeedLabel(
+                                        _speechRate, translationProvider),
                                     style: TextStyle(
                                       color: StyleColor.black,
                                       fontSize: 12,
@@ -1720,7 +1790,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 ],
                               ),
                               Text(
-                                'Velocidad: ${(_speechRate * 100).round()}%',
+                                '${translationProvider.tr('history_screen.speed')}: ${(_speechRate * 100).round()}%',
                                 style: TextStyle(
                                   color: StyleColor.black,
                                   fontSize: 10,
@@ -1781,7 +1851,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           SizedBox(
                             height: 21.0,
                           ),
-                          _buildRichTextWithLinks(story.text, context),
+                          _buildRichTextWithLinks(
+                              story.text, context, translationProvider),
                         ],
                       ),
                     ),
@@ -1799,6 +1870,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     flutterTts = FlutterTts();
 
     await flutterTts.setLanguage("es-ES"); // Configurar idioma
+    await flutterTts.setSharedInstance(true);
+
+    // 2. Establecer idioma hebreo
     // await flutterTts.setVoice({"name": "es-es-x-ana-local", "locale": "es-ES"});
     await flutterTts.setSpeechRate(0.5); // Velocidad de habla (0-1)
     await flutterTts.setVolume(1.0); // Volumen (0-1)
@@ -1823,11 +1897,156 @@ class _HistoryScreenState extends State<HistoryScreen> {
       showSnackBar("Error en TTS: $msg", type: SnackBarType.error);
     });
   }
+// Agrega estas funciones en tu clase _HistoryScreenState
 
-  String _getSpeedLabel(double speed) {
-    if (speed <= 0.4) return 'Lento';
-    if (speed <= 0.6) return 'Normal';
-    return 'Rápido';
+  String _detectLanguage(String text) {
+    // 1. Primero verificar hebreo (más específico)
+    final hebrewRegex = RegExp(r'[\u0590-\u05FF\uFB1D-\uFB4F]');
+    final hebrewCount = hebrewRegex.allMatches(text).length;
+
+    if (hebrewCount > 0) {
+      print("✅ Detectado HEBREO por caracteres hebreos: $hebrewCount");
+      return "hebrew";
+    }
+
+    // 2. Palabras clave ESPECÍFICAS en español (prioridad alta)
+    final spanishKeywords = AppConstants.spanishKeywords;
+
+    // 3. Palabras clave en inglés
+    final englishKeywords = AppConstants.englishKeywords;
+
+    // 4. Contar ocurrencias
+    int spanishScore = 0;
+    int englishScore = 0;
+
+    final textLower = text.toLowerCase();
+
+    for (final keyword in spanishKeywords) {
+      // Buscar palabra completa (con límites de palabra)
+      final pattern = RegExp(r'\b' + RegExp.escape(keyword) + r'\b');
+      spanishScore += pattern.allMatches(textLower).length;
+    }
+
+    for (final keyword in englishKeywords) {
+      final pattern = RegExp(r'\b' + RegExp.escape(keyword) + r'\b');
+      englishScore += pattern.allMatches(textLower).length;
+    }
+
+    // 5. Verificar tildes españolas (caracteres especiales)
+    final spanishTildesRegex = RegExp(r'[áéíóúÁÉÍÓÚñÑ]');
+    final spanishTildesCount = spanishTildesRegex.allMatches(text).length;
+    spanishScore += spanishTildesCount * 3; // Peso extra por tildes
+
+    if (kDebugMode) {
+      print("""
+  🔍 Análisis de idioma:
+  - Puntos español: $spanishScore (keywords: ${spanishScore - spanishTildesCount}, tildes: $spanishTildesCount)
+  - Puntos inglés: $englishScore
+  """);
+    }
+
+    // 6. Decidir idioma (umbral mínimo)
+    if (spanishScore > englishScore && spanishScore >= 2) {
+      if (kDebugMode) {
+        print("✅ Idioma detectado: ESPAÑOL");
+      }
+      return "spanish";
+    } else if (englishScore > spanishScore && englishScore >= 2) {
+      if (kDebugMode) {
+        print("✅ Idioma detectado: INGLÉS");
+      }
+      return "english";
+    }
+
+    // 7. Si está muy parejo o no hay keywords, usar REGLAS POR DEFECTO
+    final totalLetters =
+        text.replaceAll(RegExp(r'[^a-zA-ZáéíóúÁÉÍÓÚñÑ]'), '').length;
+    if (totalLetters > 0) {
+      // Porcentaje de tildes
+      final tildesPercentage = spanishTildesCount / totalLetters;
+
+      if (tildesPercentage > 0.02) {
+        // 2% de tildes → español
+        if (kDebugMode) {
+          print("✅ Español detectado por tildes ($tildesPercentage%)");
+        }
+        return "spanish";
+      }
+    }
+
+    // 8. DEFAULT: Español para textos bíblicos (tu caso)
+    print("⚠️ Idioma no claro, usando ESPAÑOL por defecto");
+    return "spanish";
+  }
+
+  /// Configurar FlutterTTS según idioma detectado
+  Future<void> _configureTTSForLanguage(String language) async {
+    try {
+      switch (language.toLowerCase()) {
+        case "hebrew":
+        case "he":
+        case "iw":
+          // Intentar diferentes códigos de hebreo
+          final hebrewCodes = ["he-IL", "he", "iw-IL", "iw"];
+          bool configured = false;
+
+          for (final code in hebrewCodes) {
+            if (await flutterTts.isLanguageAvailable(code)) {
+              await flutterTts.setLanguage(code);
+              await flutterTts.setSpeechRate(0.3); // Más lento para hebreo
+              if (kDebugMode) {
+                print("✅ TTS configurado para HEBREO con código: $code");
+              }
+              configured = true;
+              break;
+            }
+          }
+
+          if (!configured) {
+            if (kDebugMode) {
+              print("⚠️ Voz hebrea no disponible, usando español");
+            }
+            await flutterTts.setLanguage("es-ES");
+          }
+          break;
+
+        case "spanish":
+        case "es":
+          await flutterTts.setLanguage("es-ES");
+          await flutterTts.setSpeechRate(_speechRate);
+          if (kDebugMode) {
+            print("✅ TTS configurado para ESPAÑOL");
+          }
+          break;
+
+        case "english":
+        case "en":
+          await flutterTts.setLanguage("en-US");
+          await flutterTts.setSpeechRate(_speechRate);
+          if (kDebugMode) {
+            print("✅ TTS configurado para INGLÉS");
+          }
+          break;
+
+        default:
+          await flutterTts.setLanguage("es-ES");
+          if (kDebugMode) {
+            print("✅ TTS configurado para ESPAÑOL (por defecto)");
+          }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("❌ Error configurando TTS: $e");
+      }
+      await flutterTts.setLanguage("es-ES"); // Fallback
+    }
+  }
+
+  String _getSpeedLabel(
+      double speed, AppTranslationProvider translationProvider) {
+    if (speed <= 0.4) return translationProvider.tr('history_screen.slow');
+    if (speed <= 0.6) return translationProvider.tr('history_screen.normal');
+    return translationProvider.tr('history_screen.fast');
   }
 
   Future<void> _togglePlayPause(story) async {
@@ -1842,7 +2061,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
         RegExp(r'\{\(([^\/\)]+)(?:\/[^\)]*)?\)\}'),
         (Match match) => (match.group(1) ?? '').trim(),
       );
-// 2. Eliminar todos los emojis del texto
+      // 2. DETECTAR IDIOMA automáticamente
+      final detectedLanguage = _detectLanguage(cleanText);
+
+      // 3. CONFIGURAR TTS para ese idioma
+      await _configureTTSForLanguage(detectedLanguage);
+
+      // 4. Eliminar todos los emojis del texto
       String textWithoutEmojis = cleanText.replaceAll(
         RegExp(
           r'[\u{1F600}-\u{1F64F}' // Emoticons
@@ -1885,7 +2110,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  _buildRichTextWithLinks(String text, BuildContext context) {
+  _buildRichTextWithLinks(String text, BuildContext context,
+      AppTranslationProvider translationProvider) {
     // Busca las partes de la cadena que coincidan con {( )} y las resalta.
     final curlyRegExp = RegExp(r'\{\((.*?)\)\}'); // Coincide con {( ... )}
 
@@ -1945,7 +2171,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   final ResponseReferenceBiblicalModel reference =
                       ResponseReferenceBiblicalModel.fromJson(
                           responseDetailLink.data);
-                  _buildModalShowDetailLink(matchedText, reference);
+                  _buildModalShowDetailLink(
+                      matchedText, reference, translationProvider);
                 });
                 LoadingService().hideLoading();
               } catch (e) {
@@ -1983,7 +2210,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _buildModalShowDetailLink(
-      String matchedText, ResponseReferenceBiblicalModel reference) {
+      String matchedText,
+      ResponseReferenceBiblicalModel reference,
+      AppTranslationProvider translationProvider) {
     // Mover las variables al nivel superior del widget Stateful
     final versions = Provider.of<CatalogueProvider>(context, listen: false)
         .allBibleVersion
@@ -2022,7 +2251,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 children: [
                   Text(
                     textAlign: TextAlign.center,
-                    "Biblia  Version\n ${localReference!.bibleName}",
+                    "${translationProvider.tr('history_screen.bible_version')}\n ${localReference!.bibleName}",
                     style: StylesApp(context)
                         .textStyleBody18
                         .copyWith(color: StyleColor.black),
@@ -2036,7 +2265,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         maxWidth: StylesApp(context).sizeTextFormField.width,
                       ),
                       child: CustomDropdownBottomWidget(
-                        hintText: "Seleccione la Versión",
+                        hintText: translationProvider
+                            .tr('history_screen.select_version'),
                         items: versions,
                         onChanged: (ModelData? newVersion) async {
                           if (newVersion == null) return;
@@ -2218,7 +2448,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                     onPressed: () => Navigator.pop(context),
                     child: Text(
-                      "Cerrar",
+                      translationProvider.tr('history_screen.close'),
                       style: StylesApp(context).textStyleBody5.copyWith(
                             color: Colors.white,
                           ),
@@ -2254,5 +2484,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   initConfetti() {
     _confettiController.play();
+  }
+
+  void _copyStory(History story, AppTranslationProvider translationProvider) {
+    Clipboard.setData(ClipboardData(text: story.text));
+    showSnackBar(translationProvider.tr('history_screen.story_copied'),
+        type: SnackBarType.success);
   }
 }

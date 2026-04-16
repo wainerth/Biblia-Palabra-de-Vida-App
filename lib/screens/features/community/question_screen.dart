@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/services/streak_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -26,13 +28,8 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
-  final options = [
-    {"option": "A", "color": "A8A1E7"},
-    {"option": "B", "color": "C3F0F9"},
-    {"option": "C", "color": "E1D8D8"},
-    {"option": "D", "color": "A8B9F1"}
-  ];
-
+  final options = AppConstants.listOption;
+  final _translation = AppTranslationProvider();
   LoginUser? userData;
   late Map<String, dynamic> config;
   CourseDetail? course;
@@ -95,15 +92,76 @@ class _QuestionScreenState extends State<QuestionScreen> {
   int currentIndex = 0;
   int failedAttempts = 0;
 
+  int? _selectedAnswerIndex;
+  int? _correctAnswerIndex;
+
   double score = 0;
 //draggable variables
   bool orderedCompleted = false;
   List<Answer> orderedAnswers = [];
 
   // Constantes
+  // ignore: non_constant_identifier_names
   int MAX_SCORE = 0;
+  // ignore: non_constant_identifier_names
   int MEDIUM_SCORE = 0;
+  // ignore: non_constant_identifier_names
   int LOW_SCORE = 0;
+
+  // Añade estas variables para TTS
+  FlutterTts flutterTts = FlutterTts();
+  bool isTtsEnabled = false;
+  bool isTtsSpeaking = false;
+  double ttsVolume = 1.0;
+  double ttsRate = 0.5;
+  double ttsPitch = 1.0;
+
+  final Question orderingQuestionCreacion = Question(
+    id: "ordering_creacion_001",
+    question:
+        "Ordena los días de la creación en la secuencia correcta, Ordena los días de la creación en la secuencia correcta Ordena los días de la creación en la secuencia correctaOrdena los días de la creación en la secuencia correcta Ordena los días de la creación en la secuencia correcta",
+    difficulty: "Fácil",
+    status: 1,
+    isOrdering: true,
+    answers: [
+      Answer(
+        questionId: "2",
+        status: 1,
+        id: "ans_c01",
+        answer: "Día 1: Separación de la luz y las tinieblas",
+        isCorrect: true,
+        option: "A",
+        correctOrder: 1,
+      ),
+      Answer(
+        questionId: "2",
+        status: 1,
+        id: "ans_c02",
+        answer: "Día 2: Separación de las aguas y creación del firmamento",
+        isCorrect: true,
+        option: "B",
+        correctOrder: 2,
+      ),
+      Answer(
+        questionId: "2",
+        status: 1,
+        id: "ans_c03",
+        answer: "Día 3: Creación de la tierra seca, plantas y árboles",
+        isCorrect: true,
+        option: "C",
+        correctOrder: 3,
+      ),
+      Answer(
+        questionId: "2",
+        status: 1,
+        id: "ans_c04",
+        answer: "Día 4: Creación del sol, la luna y las estrellas",
+        isCorrect: true,
+        option: "D",
+        correctOrder: 4,
+      ),
+    ],
+  );
 
   @override
   void initState() {
@@ -111,12 +169,145 @@ class _QuestionScreenState extends State<QuestionScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generateData(context);
       getFontSizeText();
+      _initTts();
     });
   }
 
   @override
   void dispose() {
+    flutterTts.stop();
     super.dispose();
+  }
+
+  // Inicializar TTS
+  Future<void> _initTts() async {
+    // Verificar preferencias de usuario para TTS
+    bool? savedTtsEnabled = await PreferencesManager().getTtsEnabled();
+    setState(() {
+      isTtsEnabled = savedTtsEnabled ?? true;
+    });
+
+    // Configurar TTS
+    await flutterTts.setVolume(ttsVolume);
+    await flutterTts.setSpeechRate(ttsRate);
+    await flutterTts.setPitch(ttsPitch);
+    await flutterTts.setLanguage("es-ES");
+
+    // Configurar handlers de eventos
+    flutterTts.setStartHandler(() {
+      setState(() {
+        isTtsSpeaking = true;
+      });
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isTtsSpeaking = false;
+      });
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        isTtsSpeaking = false;
+      });
+      if (kDebugMode) {
+        print("TTS Error: $msg");
+      }
+    });
+  }
+
+  // Leer pregunta actual
+  Future<void> _speakQuestion() async {
+    if (!isTtsEnabled || currentQuestion.question.isEmpty) return;
+
+    String textToSpeak =
+        "${_translation.tr("question_screen.tts.question_prefix")} $numberQuestion ${_translation.tr("question_screen.tts.of")} ${questions.length}. "
+        "${currentQuestion.question}";
+
+    await flutterTts.speak(textToSpeak);
+  }
+
+// Leer el resultado del ordenamiento
+  Future<void> _speakOrderingResult(bool isCorrect) async {
+    if (!isTtsEnabled) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    StringBuffer resultText = StringBuffer();
+
+    if (isCorrect) {
+      // Mensaje para respuesta correcta
+      resultText.write("¡Excelente! El orden es correcto. ");
+
+      // Leer el orden actual
+      resultText.write("El orden que has establecido es: ");
+      for (int i = 0; i < orderedAnswers.length; i++) {
+        resultText.write("${i + 1}. ${orderedAnswers[i].answer}. ");
+      }
+
+      resultText
+          .write("¡Felicidades! Has completado correctamente el ordenamiento.");
+    } else {
+      // Mensaje para respuesta incorrecta
+      resultText.write("Lo siento, el orden no es correcto. ");
+
+      // Leer el orden actual
+      if (orderedAnswers.isNotEmpty) {
+        resultText.write("Tu orden actual es: ");
+        for (int i = 0; i < orderedAnswers.length; i++) {
+          resultText.write("${i + 1}. ${orderedAnswers[i].answer}. ");
+        }
+      }
+
+      // Leer el orden correcto
+      List<Answer> sortedAnswers = List.from(orderedAnswers);
+      sortedAnswers.sort((a, b) => a.correctOrder!.compareTo(b.correctOrder!));
+
+      resultText.write("El orden correcto debería ser: ");
+      for (int i = 0; i < sortedAnswers.length; i++) {
+        resultText.write("${i + 1}. ${sortedAnswers[i].answer}. ");
+      }
+
+      resultText.write("Intenta de nuevo. ¡Tú puedes hacerlo!");
+    }
+
+    await flutterTts.speak(resultText.toString());
+  }
+
+  // Leer respuesta específica
+  Future<void> _speakAnswer(int index) async {
+    if (!isTtsEnabled || index >= currentAnswers.length) return;
+
+    String textToSpeak =
+        "${_translation.tr("question_screen.tts.option")} ${String.fromCharCode(65 + index)}: "
+        "${currentAnswers[index].answer}";
+
+    await flutterTts.speak(textToSpeak);
+  }
+
+  // Detener TTS
+  Future<void> _stopTts() async {
+    await flutterTts.stop();
+    setState(() {
+      isTtsSpeaking = false;
+    });
+  }
+
+  // Alternar estado TTS
+  Future<void> _toggleTts() async {
+    bool newState = !isTtsEnabled;
+    setState(() {
+      isTtsEnabled = newState;
+    });
+
+    await PreferencesManager().setTtsEnabled(newState);
+
+    if (!newState) {
+      await _stopTts();
+    }
   }
 
   Future<void> getFontSizeText() async {
@@ -181,7 +372,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         }
         _initializeQuestions(questionResponse.data);
       } catch (e) {
-        errorMessage = "An error occurred: $e";
+        errorMessage = "${_translation.tr("question_screen.error_generic")} $e";
       } finally {
         LoadingService().hideLoading();
         setState(() {
@@ -198,9 +389,19 @@ class _QuestionScreenState extends State<QuestionScreen> {
           .cast<Question>()
           .toList();
 
+      // Insertar al principio el item orderingQuestionCreacion
+      // questions = [orderingQuestionCreacion, ...questions];
+
       for (int i = 0; i < questions.length; i++) {
         for (int j = 0; j < questions[i].answers.length; j++) {
           questions[i].answers[j].option = options[j]["option"];
+          // questions[i] = questions[i].copyWith(
+          //   question: "esto es una prueba de una pregun muuuuuyy larga para poder revisa si se puede obtenr un scroll que permita vizualiozar todo el contenido"
+          // );
+          // questions[i].answers[j] = questions[i].answers[j].copyWith(
+          //   answer:  "Esta es una respuesta o opción muy larga que se va  a implemenatr para validar que tanto pueden extenderse las cajas y que tanto es el scrooll de la pantalla que va  apermirt para el usuario pueda ver todas las opciones en el dispositivo movíl , "
+          // );
+          
         }
       }
       currentQuestion = questions[currentIndex];
@@ -213,12 +414,31 @@ class _QuestionScreenState extends State<QuestionScreen> {
   /// Función que se encarga de marcar respuesta seleccionada
   ///
   void _answerSelected(BuildContext context, int index) {
+    // Determinar si es correcta
+    _isCorrect =
+        (currentAnswers.isNotEmpty) ? currentAnswers[index].isCorrect : false;
+
+    // Encontrar el índice de la respuesta correcta
+    int correctIndex = -1;
+    for (int i = 0; i < currentAnswers.length; i++) {
+      if (currentAnswers[i].isCorrect) {
+        correctIndex = i;
+        break;
+      }
+    }
+
+    // Leer el resultado de la respuesta (CORREGIDO: pasar isCorrect)
+    if (isTtsEnabled) {
+      _speakAnswerResult(index, _isCorrect);
+    }
+
     setState(() {
       _isAnswerSelected = true;
       _suggestionSelected = false;
+      _selectedAnswerIndex = index;
+      _correctAnswerIndex = correctIndex;
     });
-    _isCorrect =
-        (currentAnswers.isNotEmpty) ? currentAnswers[index].isCorrect : false;
+
     if (userData != null) {
       responses.add(UserResponses(
         answerId: currentAnswers[index].id,
@@ -237,14 +457,211 @@ class _QuestionScreenState extends State<QuestionScreen> {
         _suggestionSelected = true;
       });
     }
+
     setState(() {
       _selectionCompleted = true;
     });
+
     _showAnswerSnackbar(context);
   }
 
+  Future<void> _speakAnswerResult(int index, bool isCorrect) async {
+    if (!isTtsEnabled) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    StringBuffer resultText = StringBuffer();
+    String selectedOption = String.fromCharCode(65 + index);
+    String selectedAnswer = currentAnswers[index].answer;
+
+    // Encontrar la respuesta correcta
+    Answer? correctAnswerObj;
+    for (var answer in currentAnswers) {
+      if (answer.isCorrect) {
+        correctAnswerObj = answer;
+        break;
+      }
+    }
+
+    if (isCorrect) {
+      resultText.write("¡Excelente! ");
+      resultText.write("La opción $selectedOption es correcta. ");
+      resultText.write("$selectedAnswer. ");
+      resultText.write("¡Muy bien! Has acertado. ");
+    } else {
+      resultText.write("Lo siento, esa no es la respuesta correcta. ");
+
+      if (correctAnswerObj != null) {
+        int correctIndex = currentAnswers.indexOf(correctAnswerObj);
+        String correctOption = String.fromCharCode(65 + correctIndex);
+        resultText.write("La opción correcta es la $correctOption: "
+            "${correctAnswerObj.answer}. ");
+      }
+      resultText.write("¡No te desanimes, sigue intentándolo!");
+    }
+
+    // Usar la función mejorada para leer
+    await _speakWithTTS(resultText.toString());
+  }
+
+  String _formatTextForTTS(String text) {
+    if (text.isEmpty) return text;
+
+    String processedText = text;
+
+    // 1. Eliminar emojis (usando tu regex)
+    processedText = processedText.replaceAll(
+      RegExp(
+        r'[\u{1F600}-\u{1F64F}' // Emoticons
+        r'\u{1F300}-\u{1F5FF}' // Símbolos y pictogramas
+        r'\u{1F680}-\u{1F6FF}' // Transporte y símbolos
+        r'\u{1F1E0}-\u{1F1FF}' // Banderas (iOS)
+        r'\u{1F018}-\u{1F270}' // Varios símbolos
+        r'[\u{1F000}-\u{1F9FF}' // Emojis principales y suplementarios
+        r'\u{2600}-\u{26FF}' // Símbolos misceláneos
+        r'\u{2700}-\u{27BF}' // Dingbats
+        r'\u{2300}-\u{23FF}' // Símbolos técnicos (incluye ⭐)
+        r'\u{2B50}-\u{2BFF}' // Símbolos y flechas (incluye ⭐)
+        r'\u{FE00}-\u{FE0F}' // Variantes de emojis
+        r'\u{1F900}-\u{1F9FF}' // Emojis suplementarios
+        r'\u{1FA70}-\u{1FAFF}' // Símbolos extendidos
+        r']',
+        unicode: true,
+      ),
+      '',
+    );
+
+    // 2. Procesar referencias bíblicas (formato "Libro Capítulo:Versículo" o "Libro Capítulo:Versículo-Versículo")
+    // Patrón para capturar: "Juan 2:4" o "Juan 4:4-5"
+    processedText = processedText.replaceAllMapped(
+      RegExp(
+        r'\b([A-Za-záéíóúñÑ]+)\s+(\d+):(\d+)(?:-(\d+))?\b',
+        caseSensitive: false,
+      ),
+      (match) {
+        String book = match.group(1)!;
+        String chapter = match.group(2)!;
+        String verse = match.group(3)!;
+        String? endVerse = match.group(4);
+
+        // Capitalizar primera letra del libro
+        book = book[0].toUpperCase() + book.substring(1).toLowerCase();
+
+        if (endVerse != null) {
+          return '$book capítulo $chapter versículo $verse al $endVerse';
+        } else {
+          return '$book capítulo $chapter versículo $verse';
+        }
+      },
+    );
+
+    // 3. Limpiar espacios múltiples
+    processedText = processedText.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    return processedText;
+  }
+
+  String _detectLanguage(String text) {
+    // Eliminar emojis y números para mejor detección
+    String cleanText = text.replaceAll(RegExp(r'[0-9\s]'), '');
+    cleanText = cleanText.replaceAll(
+      RegExp(
+        r'[\u{1F600}-\u{1F64F}' // Emoticons
+        r'\u{1F300}-\u{1F5FF}' // Símbolos y pictogramas
+        r'\u{1F680}-\u{1F6FF}' // Transporte y símbolos
+        r'\u{1F1E0}-\u{1F1FF}' // Banderas
+        r'\u{2600}-\u{26FF}' // Símbolos misceláneos
+        r'\u{2700}-\u{27BF}' // Dingbats
+        r'\u{2300}-\u{23FF}' // Símbolos técnicos
+        r'\u{2B50}-\u{2BFF}' // Símbolos y flechas
+        r']',
+        unicode: true,
+      ),
+      '',
+    );
+
+    if (cleanText.isEmpty) return 'es-ES'; // Default si no hay texto
+
+    // Detectar por rango Unicode (ejemplo para hebreo)
+    final hebrewRegex = RegExp(r'[\u0590-\u05FF]');
+    if (hebrewRegex.hasMatch(cleanText)) {
+      return 'he-IL';
+    }
+
+    // Detectar por palabras clave
+    final spanishWords = ['el', 'la', 'los', 'las', 'y', 'con', 'para', 'por'];
+    final englishWords = ['the', 'and', 'with', 'for', 'this', 'that', 'from'];
+
+    int spanishScore = 0;
+    int englishScore = 0;
+
+    for (var word in spanishWords) {
+      if (cleanText.toLowerCase().contains(word)) spanishScore++;
+    }
+
+    for (var word in englishWords) {
+      if (cleanText.toLowerCase().contains(word)) englishScore++;
+    }
+
+    // Detectar tildes españolas
+    final tildesRegex = RegExp(r'[áéíóúüñ]');
+    spanishScore += tildesRegex.allMatches(cleanText.toLowerCase()).length;
+
+    if (spanishScore > englishScore) {
+      return 'es-ES';
+    } else if (englishScore > spanishScore) {
+      return 'en-US';
+    }
+
+    return 'es-ES'; // Default
+  }
+
+  Future<void> _speakWithTTS(String text) async {
+    if (!isTtsEnabled || text.isEmpty) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    // 1. Limpiar y formatear el texto
+    String formattedText = _formatTextForTTS(text);
+
+    // 2. Detectar idioma
+    String language = _detectLanguage(text);
+
+    // 3. Configurar idioma en TTS
+    await flutterTts.setLanguage(language);
+
+    // 4. Ajustar velocidad según idioma (opcional)
+    if (language == 'he-IL') {
+      await flutterTts.setSpeechRate(0.3); // Hebreo más lento
+    } else {
+      await flutterTts.setSpeechRate(ttsRate);
+    }
+
+    // 5. Leer el texto formateado
+    await flutterTts.speak(formattedText);
+  }
+
   void _showAnswerSnackbar(BuildContext context) {
-    
+    if (!mounted) return;
+
+    final translationProvider = context.read<AppTranslationProvider>();
+
+    // // Leer feedback de respuesta
+    // if (isTtsEnabled) {
+    //   String feedback = _isCorrect
+    //       ? translationProvider
+    //           .tr('question_screen.tts_feedback.correct_answer')
+    //       : translationProvider
+    //           .tr('question_screen.tts_feedback.incorrect_answer');
+    //   flutterTts.speak(feedback);
+    // }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: Duration(hours: 24),
@@ -256,21 +673,34 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 Icon(_isCorrect ? Icons.check_circle : Icons.error,
                     color: Colors.white),
                 SizedBox(width: 8),
-                Text(_isCorrect ? '¡Muy bien!' : '¡Oh, lo siento!'),
+                Text(_isCorrect
+                    ? translationProvider
+                        .tr('question_screen.answer_actions.very_good')
+                    : translationProvider
+                        .tr('question_screen.answer_actions.oh_sorry')),
               ],
             ),
             TextButton(
               onPressed: () async {
+                // DETENER TTS ANTES DE CONTINUAR
+                if (isTtsEnabled && isTtsSpeaking) {
+                  await _stopTts();
+                }
+
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 await funcAnswerValidate();
                 if (mounted) {
                   setState(() {
                     _isAnswerSelected = false;
                     _suggestionSelected = false;
+                    _selectedAnswerIndex = null; // Limpiar selección
+                    _correctAnswerIndex = null; // Limpiar correcta
                   });
                 }
               },
-              child: Text('Siguiente', style: TextStyle(color: Colors.white)),
+              child: Text(
+                  translationProvider.tr('question_screen.answer_actions.next'),
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -279,16 +709,69 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
+  // Leer instrucciones del ordenamiento
+  Future<void> _speakOrderingInstructions() async {
+    if (!isTtsEnabled) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    String instructions =
+        "Para esta pregunta, debes ordenar los eventos en la secuencia correcta. "
+        "Mantén presionada cada opción y arrástrala al espacio vacío correspondiente. "
+        "Una vez que hayas colocado todas las opciones, presiona el botón Verificar Orden. "
+        "Puedes escuchar cada opción presionando el ícono de altavoz o manteniendo presionada la opción.";
+
+    await flutterTts.speak(instructions);
+  }
+
+  ///
+  /// Leer el orden actual
+  ///
+  Future<void> _speakCurrentOrder() async {
+    if (!isTtsEnabled || orderedAnswers.isEmpty) return;
+
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    StringBuffer orderText = StringBuffer();
+
+    if (orderedAnswers.isEmpty) {
+      orderText.write("Aún no has colocado ninguna opción.");
+    } else {
+      orderText.write("El orden actual es: ");
+      for (int i = 0; i < orderedAnswers.length; i++) {
+        orderText.write("${i + 1}. ${orderedAnswers[i].answer}. ");
+      }
+    }
+
+    await flutterTts.speak(orderText.toString());
+  }
+
   ///
   /// Función que se encarga de verificar el orden de las respuestas
   ///
   void verifyOrdered(BuildContext context, int index) {
+    // DETENER TTS ANTES DE NADA
+    if (isTtsEnabled && isTtsSpeaking) {
+      _stopTts();
+    }
+
     bool isCorrectOrder = true;
     for (int i = 0; i < orderedAnswers.length; i++) {
       if (orderedAnswers[i].correctOrder != i + 1) {
         isCorrectOrder = false;
         break;
       }
+    }
+
+    // LEER EL RESULTADO
+    if (isTtsEnabled) {
+      _speakOrderingResult(isCorrectOrder);
     }
 
     if (isCorrectOrder) {
@@ -310,6 +793,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
   /// Función que se encarga de validar las respuestas enviadas
   ///
   funcAnswerValidate() async {
+    if (isTtsEnabled && isTtsSpeaking) {
+      _stopTts();
+    }
+
     // si no es la ultima pregunta
     if (currentIndex < questions.length - 1) {
       setState(() {
@@ -334,7 +821,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
               failedAttempts: failedAttempts,
               scoreLastAttempt: 0,
               completed: false,
-              level: LevelUser(levelNumber: level!.levelNumber, id: "", name: ""),
+              level:
+                  LevelUser(levelNumber: level!.levelNumber, id: "", name: ""),
               status: true);
           activityIsCompleted = true;
           showStepCompleted = true;
@@ -397,7 +885,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
         int experience = 0;
         int energy = 0;
         // si no ha obtenido todos los puntos
-        // print("es nuevo record : ${levelProgress!.newRecord}");
         if (levelProgress!.newRecord) {
           experience = levelProgress!.score > levelProgress!.scoreLastAttempt
               ? levelProgress!.score - levelProgress!.scoreLastAttempt
@@ -531,6 +1018,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
+
     userData = Provider.of<UserProvider>(context, listen: false).currentUser;
     config = Provider.of<CatalogueProvider>(context, listen: false).allConfig;
     MAX_SCORE = config["highScore"];
@@ -544,13 +1033,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
       },
       child: Scaffold(
         body: SafeArea(
-          child: _buildMainContent(),
+          child: _buildMainContent(translationProvider),
         ),
       ),
     );
   }
 
-  Widget _buildMainContent() {
+  Widget _buildMainContent(AppTranslationProvider translationProvider) {
     if (isLoading) return Container();
     if (errorMessage != null) {
       return BuildErrorWidget(
@@ -562,35 +1051,132 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     // Usar ResponsiveLayout para manejar móvil/tablet
     return ResponsiveLayout(
-      mobile: _buildMobileLayout(),
-      tablet: _buildTabletLayout(),
+      mobile: _buildMobileLayout(translationProvider),
+      tablet: _buildTabletLayout(translationProvider),
     );
   }
 
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         _buildCommonHeader(),
-        if (_shouldShowQuestionContent()) ...[
-          SizedBox(height: 19),
-          QuestionCard(
-            question: currentQuestion.question,
-            numberQuestion: numberQuestion,
-            totalQuestions: questions.length,
-            failedAttempts: failedAttempts,
-            fontSize: fontSizeText,
-            isTablet: false,
+        Expanded(
+            child: SingleChildScrollView(
+          child: Column(
+            children: [
+              if (_shouldShowQuestionContent()) ...[
+                SizedBox(height: 19),
+                _buildTtsControls(translationProvider),
+                QuestionCard(
+                  question: currentQuestion.question,
+                  numberQuestion: numberQuestion,
+                  totalQuestions: questions.length,
+                  failedAttempts: failedAttempts,
+                  fontSize: fontSizeText,
+                  isTablet: false,
+                  onSpeakQuestion: isTtsEnabled ? _speakQuestion : null,
+                ),
+                SizedBox(height: 38),
+                Container(
+                    margin: EdgeInsets.symmetric(horizontal: 10.0),
+                    // decoration: BoxDecoration(
+                    //   border: Border.all(
+                    //     color: Colors.red
+                    //   )
+                    // ),
+                    child: _buildQuestionBody()),
+              ] else if (activityIsCompleted) ...[
+                _buildResultScreen(context, translationProvider),
+              ],
+            ],
           ),
-          SizedBox(height: 38),
-          Expanded(child: _buildQuestionBody()),
-        ] else if (activityIsCompleted) ...[
-          Expanded(child: _buildResultScreen(context)),
-        ],
+        ))
       ],
+    );
+
+    //  SingleChildScrollView(
+    //   child: Column(
+    //     children: [
+    //       _buildCommonHeader(),
+    //       if (_shouldShowQuestionContent()) ...[
+    //         SizedBox(height: 19),
+    //         _buildTtsControls(translationProvider),
+    //         QuestionCard(
+    //           question: currentQuestion.question,
+    //           numberQuestion: numberQuestion,
+    //           totalQuestions: questions.length,
+    //           failedAttempts: failedAttempts,
+    //           fontSize: fontSizeText,
+    //           isTablet: false,
+    //           onSpeakQuestion: isTtsEnabled ? _speakQuestion : null,
+    //         ),
+    //         SizedBox(height: 38),
+    //         Container(
+    //             margin: EdgeInsets.symmetric(horizontal: 10.0),
+    //             // decoration: BoxDecoration(
+    //             //   border: Border.all(
+    //             //     color: Colors.red
+    //             //   )
+    //             // ),
+    //             child: _buildQuestionBody()),
+    //       ] else if (activityIsCompleted) ...[
+    //         _buildResultScreen(context, translationProvider),
+    //       ],
+    //     ],
+    //   ),
+    // );
+  }
+
+// Widget para controles TTS
+  Widget _buildTtsControls(AppTranslationProvider translationProvider) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Botón para activar/desactivar TTS
+          IconButton(
+            icon: Icon(
+              isTtsEnabled ? Icons.volume_up : Icons.volume_off,
+              color: isTtsEnabled ? Colors.blue : Colors.grey,
+            ),
+            onPressed: _toggleTts,
+            tooltip: isTtsEnabled
+                ? translationProvider
+                    .tr('question_screen.tts_controls.deactivate_reading')
+                : translationProvider
+                    .tr('question_screen.tts_controls.activate_reading'),
+          ),
+
+          // Controles de TTS solo si está activado
+          if (isTtsEnabled) ...[
+            // Botón para leer pregunta
+            IconButton(
+              icon: Icon(
+                isTtsSpeaking ? Icons.stop : Icons.play_arrow,
+                color: Colors.blue,
+              ),
+              onPressed: isTtsSpeaking ? _stopTts : _speakFullQuestion,
+              tooltip: isTtsSpeaking
+                  ? translationProvider
+                      .tr('question_screen.tts_controls.stop_reading')
+                  : translationProvider
+                      .tr('question_screen.tts_controls.reading_question'),
+            ),
+          ],
+
+          // Espaciador
+          Spacer(),
+
+          // Opcional: ajustar velocidad
+          if (isTtsEnabled && isTablet(context))
+            _buildSpeedControl(translationProvider),
+        ],
+      ),
     );
   }
 
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         _buildCommonHeader(),
@@ -614,6 +1200,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          _buildTtsControls(translationProvider),
                           QuestionCard(
                             question: currentQuestion.question,
                             numberQuestion: numberQuestion,
@@ -621,6 +1208,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                             failedAttempts: failedAttempts,
                             fontSize: fontSizeText,
                             isTablet: true,
+                            onSpeakQuestion:
+                                isTtsEnabled ? _speakQuestion : null,
                           ),
                           SizedBox(height: 20),
                           ProgressControls(
@@ -631,7 +1220,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                             isTablet: true,
                           ),
                           Spacer(),
-                          _buildLevelInfo(),
+                          _buildLevelInfo(translationProvider),
                         ],
                       ),
                     ),
@@ -649,7 +1238,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         border: Border.all(color: Colors.grey[200]!),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha: 0.1),
                             blurRadius: 10,
                             offset: Offset(0, 4),
                           ),
@@ -663,7 +1252,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
           ),
         ] else if (activityIsCompleted) ...[
-          Expanded(child: _buildResultScreen(context)),
+          Expanded(child: _buildResultScreen(context, translationProvider)),
         ],
       ],
     );
@@ -696,6 +1285,18 @@ class _QuestionScreenState extends State<QuestionScreen> {
         answerSelected: verifyOrdered,
         showError: showError,
         onContinue: funcAnswerValidate,
+        isTtsEnabled: isTtsEnabled,
+        onSpeakOption: isTtsEnabled
+            ? (index) {
+                if (index < currentAnswers.length) {
+                  _speakAnswer(index);
+                }
+              }
+            : null,
+        onSpeakInstructions: isTtsEnabled ? _speakOrderingInstructions : null,
+        onSpeakCurrentOrder: isTtsEnabled && orderedAnswers.isNotEmpty
+            ? _speakCurrentOrder
+            : null,
       );
     }
 
@@ -709,15 +1310,22 @@ class _QuestionScreenState extends State<QuestionScreen> {
       answerSelected: _answerSelected,
       callBackContinue: () {},
       isAnswerSelected: _isAnswerSelected,
+      selectedAnswerIndex: _selectedAnswerIndex, // NUEVO
+      correctAnswerIndex: _correctAnswerIndex,
     );
   }
 
-  Widget _buildResultScreen(BuildContext context) {
-    if (showStepCompleted) return _buildActivityCompleted();
+  Widget _buildResultScreen(
+      BuildContext context, AppTranslationProvider translationProvider) {
+    if (showStepCompleted) return _buildActivityCompleted(translationProvider);
     if (showRewardObtained) return _buildRewardScreen();
-    if (showLastStageCompleted) return _buildLastStage(context);
-    if (showPrizeWon) return _buildPrizeWon(context);
-    if (showTitleObtained) return _buildAchievementUnlocked(context);
+    if (showLastStageCompleted) {
+      return _buildLastStage(context, translationProvider);
+    }
+    if (showPrizeWon) return _buildPrizeWon(context, translationProvider);
+    if (showTitleObtained) {
+      return _buildAchievementUnlocked(context, translationProvider);
+    }
     return Container();
   }
 
@@ -754,18 +1362,19 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     final score = levelProgress!.score;
     if (score > MEDIUM_SCORE) return "assets/boxStartFull.png";
-    if (score > LOW_SCORE && score <= MEDIUM_SCORE)
+    if (score > LOW_SCORE && score <= MEDIUM_SCORE) {
       return "assets/boxStartMedium.png";
+    }
     if (score > 0 && score <= LOW_SCORE) return "assets/boxStartLow.png";
     return "assets/boxStartFailed.png";
   }
 
   // Método reutilizable para construir contenido del resultado
-  Widget _buildResultContent() {
+  Widget _buildResultContent(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         Text(
-          '${levelProgress!.score > 0 ? levelProgress!.message.resultTitle : "Ya casi lo\n logras!"}',
+          '${levelProgress!.score > 0 ? levelProgress!.message.resultTitle : translationProvider.tr('question_screen.activity_completed.almost_there')}',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white,
@@ -776,31 +1385,33 @@ class _QuestionScreenState extends State<QuestionScreen> {
         SizedBox(height: isTablet(context) ? 16 : 8),
         Text(
           levelProgress!.score > 0
-              ? 'Culminaste el Paso ${levelProgress!.level.levelNumber}'
-              : "Intenta nuevamente el\n Paso ${levelProgress!.level.levelNumber} para avanzar",
+              ? '${translationProvider.tr('question_screen.activity_completed.step_completed')} ${levelProgress!.level.levelNumber}'
+              : "${translationProvider.tr('question_screen.activity_completed.try_again')} ${levelProgress!.level.levelNumber} ${translationProvider.tr('question_screen.activity_completed.to_advance')}",
           textAlign: TextAlign.center,
           style: StylesApp(context).textStyleBody16.copyWith(
-            color: Colors.white,
-            fontSize: isTablet(context) ? 20 : 16,
-          ),
+                color: Colors.white,
+                fontSize: isTablet(context) ? 20 : 16,
+              ),
         ),
         if (levelProgress!.score > 0 && !showReview) ...[
           SizedBox(height: isTablet(context) ? 20 : 8),
           Text(
-            'Haz ganado\n ${levelProgress!.energy} LMs de energía',
+            translationProvider
+                .tr('question_screen.activity_completed.energy_earned')
+                .replaceFirst("%s", levelProgress!.energy.toString()),
             textAlign: TextAlign.center,
             style: StylesApp(context).textStyleBody16.copyWith(
-              color: Colors.white,
-              fontSize: isTablet(context) ? 18 : 16,
-            ),
+                  color: Colors.white,
+                  fontSize: isTablet(context) ? 18 : 16,
+                ),
           ),
         ],
       ],
     );
   }
 
-  // Método reutilizable para construir acciones del resultado
-  Widget _buildResultActions() {
+  // Método para construir acciones del resultado
+  Widget _buildResultActions(AppTranslationProvider translationProvider) {
     return Column(
       children: [
         if (levelProgress!.score > 0 && !showReview) ...[
@@ -813,14 +1424,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
           Text(
             "${levelProgress!.energy.toStringAsFixed(0)} lms",
             style: StylesApp(context).textStyleBody16.copyWith(
-              color: Color(0XFFFD8C43),
-              fontSize: isTablet(context) ? 18 : 16,
-            ),
+                  color: Color(0XFFFD8C43),
+                  fontSize: isTablet(context) ? 18 : 16,
+                ),
           ),
           SizedBox(height: 20),
         ],
         ButtonThemeWidget(
-          text: "Continuar",
+          text: translationProvider
+              .tr('question_screen.activity_completed.continue'),
           width: isTablet(context) ? 200 : 132,
           height: isTablet(context) ? 48 : 32,
           buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
@@ -837,7 +1449,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   void _handleContinue() async {
-    // Lógica reutilizable para continuar
     if (!sendScore!.hasBeenPlayedSection &&
         sendScore!.rewardObtained &&
         reward != null &&
@@ -853,7 +1464,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  // Helper para verificar si mostrar contenido de pregunta
+  // verifica si mostrar contenido de pregunta
   bool _shouldShowQuestionContent() {
     return !activityIsCompleted &&
         !showTitleObtained &&
@@ -862,21 +1473,23 @@ class _QuestionScreenState extends State<QuestionScreen> {
         !showLastStageCompleted;
   }
 
-  // Helper para info de nivel en tablet
-  Widget _buildLevelInfo() {
+  // info de nivel en tablet
+  Widget _buildLevelInfo(AppTranslationProvider translationProvider) {
     if (level == null) return Container();
 
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.teal.withOpacity(0.1),
+        color: Colors.teal.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.teal.withOpacity(0.3)),
+        border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Nivel actual",
+          Text(
+              translationProvider
+                  .tr('question_screen.level_info.current_level'),
               style: StylesApp(context)
                   .textStyleBody12
                   .copyWith(fontSize: 12, color: Colors.grey[600])),
@@ -886,7 +1499,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   fontWeight: FontWeight.bold,
                   color: Colors.teal)),
           SizedBox(height: 4),
-          Text("Paso $numberQuestion",
+          Text(
+              "${translationProvider.tr('question_screen.level_info.step')} $numberQuestion",
               style: StylesApp(context)
                   .textStyleBody14
                   .copyWith(fontSize: 14, color: Colors.grey[700])),
@@ -906,7 +1520,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     double maxPossibleHeight = score / 1000 * 112;
 
     if (score >= MAX_SCORE) {
-      return 112; // Alto fijo cuando los puntos son mayores o iguales a 1000
+      return 112;
     } else {
       double width = ((maxPossibleHeight * 100)) / 112;
 
@@ -914,20 +1528,22 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  // esta parte es para mostrar nivel Completado
-  Widget _buildActivityCompleted() {
-    // Usar el mismo componente para móvil y tablet con diseño responsivo interno
+  // mostrar nivel Completado
+  Widget _buildActivityCompleted(AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(isTablet(context) ? 24 : 20),
       child: Center(
         child: Container(
+          clipBehavior: Clip.none,
           constraints: BoxConstraints(
-              maxWidth: isTablet(context) ? 800 : double.infinity),
+            maxWidth: isTablet(context) ? 800 : double.infinity,
+          ),
           child: Column(
             children: [
               // Contenido adaptable según tamaño
               Container(
-                padding: EdgeInsets.all(isTablet(context) ? 32 : 20),
+                clipBehavior: Clip.none,
+                padding: EdgeInsets.all(isTablet(context) ? 32 : 70),
                 decoration: BoxDecoration(
                   borderRadius:
                       BorderRadius.circular(isTablet(context) ? 16 : 8),
@@ -936,10 +1552,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     fit: BoxFit.cover,
                   ),
                 ),
-                child: _buildResultContent(),
+                child: _buildResultContent(translationProvider),
               ),
               SizedBox(height: isTablet(context) ? 32 : 20),
-              _buildResultActions(),
+              _buildResultActions(translationProvider),
             ],
           ),
         ),
@@ -948,7 +1564,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // sección de Sección o etapa completada
-  _buildLastStage(BuildContext context) {
+  _buildLastStage(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20),
@@ -957,10 +1574,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/boxOrange.png'),
-                    fit: BoxFit.fill,
-                    alignment: Alignment.topCenter)),
+              image: DecorationImage(
+                  image: AssetImage('assets/boxOrange.png'),
+                  fit: BoxFit.fill,
+                  alignment: Alignment.topCenter),
+            ),
             child: Column(
               children: [
                 SizedBox(
@@ -968,7 +1586,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 Text(
                   textAlign: TextAlign.center,
-                  "Etapa $sectionId Completada",
+                  translationProvider
+                      .tr('question_screen.stage_completed.stage_completed')
+                      .replaceFirst("%s", sectionId.toString()),
                   style: StylesApp(context)
                       .textStyleCongratulation
                       .copyWith(color: Colors.white),
@@ -978,7 +1598,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 Text(
                   textAlign: TextAlign.center,
-                  'El esfuerzo valió la pena  completaste la Etapa $sectionId \n “${stage?.sectionName}” \n fue completada con éxito"',
+                  '${translationProvider.tr('question_screen.stage_completed.effort_worth')} $sectionId \n “${stage?.sectionName}” \n ${translationProvider.tr('question_screen.stage_completed.stage_completed_success')}"',
                   style: StylesApp(context).textStyleBody20,
                 ),
                 SizedBox(
@@ -1008,17 +1628,24 @@ class _QuestionScreenState extends State<QuestionScreen> {
               height: 32,
               colorIcon: Colors.white,
               buttonStyle: StylesApp(context).btnPrimary,
-              text: "Compartir logro",
+              text: translationProvider
+                  .tr('question_screen.achievement_unlocked.share_achievement'),
               onPressed: () async {
                 await SharePlus.instance.share(ShareParams(
-                  text:
-                      "¡Etapa $stage.sectionNumber-${stage?.sectionName} completada",
-                  subject: "¡Felicita a ${userData!.username}! ",
+                  text: translationProvider.trParams(
+                      'question_screen.achievement_unlocked.share_subject', {
+                    "sectionNumber": stage?.sectionNumber.toString() ?? "",
+                    "sectionName": stage?.sectionName ?? ""
+                  }),
+                  subject: translationProvider.trParams(
+                      'question_screen.achievement_unlocked.share_subject',
+                      {"username": userData!.username!}),
                 ));
               }),
           SizedBox(height: 43),
           ButtonThemeWidget(
-            text: "Continuar",
+            text: translationProvider
+                .tr('question_screen.achievement_unlocked.continue'),
             width: 208,
             height: 32,
             buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -1042,7 +1669,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // premio Obtenido
-  _buildPrizeWon(BuildContext context) {
+  _buildPrizeWon(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,
@@ -1063,7 +1691,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   ),
                   Text(
                     textAlign: TextAlign.center,
-                    "¡Felicidades\n por completar\n este curso!",
+                    translationProvider.tr('question_screen.prize_won'),
                     style: StylesApp(context)
                         .textStyleCongratulation
                         .copyWith(color: Colors.white),
@@ -1075,7 +1703,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       textAlign: TextAlign.center,
-                      'Haz ganado un ${prize!.typeStone} para\n tu colección',
+                      translationProvider.trParams(
+                          'question_screen.prize_won.prize_earned',
+                          {"typeStone": prize!.typeStone}),
                       style: StylesApp(context).textStyleBody20,
                     ),
                   ),
@@ -1131,7 +1761,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
             Text(
               textAlign: TextAlign.center,
-              "Cuando lo requieras puede canjearlo\n por ${prize?.exchangeValue.toInt()}lms de energía",
+              translationProvider
+                  .tr('question_screen.prize_won.congratulation_course')
+                  .replaceFirst("%s", prize!.exchangeValue.toString()),
               style: StylesApp(context)
                   .textStyleBody14
                   .copyWith(color: Colors.black),
@@ -1166,7 +1798,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   width: 29,
                 ),
                 ButtonThemeWidget(
-                  text: "Continuar",
+                  text: translationProvider
+                      .tr('question_screen.prize_won.continue'),
                   width: 132,
                   height: 32,
                   buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -1195,8 +1828,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  // esta parte es para mostrar titulo obtenido
-  _buildAchievementUnlocked(BuildContext context) {
+  // mostrar titulo obtenido
+  _buildAchievementUnlocked(
+      BuildContext context, AppTranslationProvider translationProvider) {
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,
@@ -1217,7 +1851,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   ),
                   Text(
                     textAlign: TextAlign.center,
-                    "Haz obtenido\n el titulo de\n ${title?.title}!",
+                    translationProvider
+                        .tr('question_screen.achievement_unlocked.title_obtained')
+                        .replaceFirst("%s", title!.title),
                     style: StylesApp(context)
                         .textStyleCongratulation
                         .copyWith(color: Colors.white),
@@ -1261,7 +1897,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
               width: 245,
               height: 32,
               buttonStyle: StylesApp(context).btnPrimary,
-              text: "Descargar certificado",
+              text: translationProvider.tr(
+                  'question_screen.achievement_unlocked.download_certificate'),
               onPressed: () async {
                 try {
                   final responseDownloadCertificate =
@@ -1292,21 +1929,22 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         await showCustomDialogWithAction(
                           context,
                           message:
-                              "Certificado descargado exitosamente en: $filePath",
+                              "${translationProvider.tr('question_screen.certificate.download_success')} $filePath",
                           dialogType: DialogTypeAction.info,
-                          buttonOk: "Ok",
+                          buttonOk: translationProvider.tr('buttons.ok'),
                           actionCallbackOk: () {
                             Navigator.pop(context);
                           },
-                          textButton: "Abrir directorio",
+                          textButton: translationProvider
+                              .tr('question_screen.certificate.open_directory'),
                           actionCallback: () async {
                             try {
                               await launchUrl(Uri.file(directory.path));
                             } catch (e) {
                               await showCustomDialog(
                                 context,
-                                message:
-                                    "No se pudo abrir la carpeta de descargas.",
+                                message: translationProvider.tr(
+                                    'question_screen.certificate.folder_error'),
                                 dialogType: DialogType.error,
                               );
                             }
@@ -1315,14 +1953,16 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       } else {
                         await showCustomDialog(
                           context,
-                          message: "No se pudo descargar el certificado.",
+                          message: translationProvider
+                              .tr('question_screen.certificate.download_error'),
                           dialogType: DialogType.error,
                         );
                       }
                     } catch (e) {
                       await showCustomDialog(
                         context,
-                        message: "Error al descargar el certificado: $e",
+                        message:
+                            "${translationProvider.tr('question_screen.certificate.download_error_generic')} $e",
                         dialogType: DialogType.error,
                       );
                     }
@@ -1347,11 +1987,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
               height: 32,
               colorIcon: Colors.white,
               buttonStyle: StylesApp(context).btnPrimary,
-              text: "Compartir logro",
+              text: translationProvider
+                  .tr('question_screen.certificate.share_tile'),
               onPressed: () async {
                 await SharePlus.instance.share(ShareParams(
-                  text: "¡He obtenido el titulo de ${title?.title}!",
-                  subject: "¡Felicita a ${userData!.username}! ",
+                  text:
+                      "${translationProvider.tr('question_screen.share_message.title_share')} ${title?.title}!",
+                  subject:
+                      "${translationProvider.tr('question_screen.share_message.congratulate_user')} ${userData!.username}! ",
                 ));
               },
             ),
@@ -1385,7 +2028,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 Center(
                   child: ButtonThemeWidget(
-                    text: "Continuar",
+                    text: translationProvider.tr('button.continue'),
                     width: 132,
                     height: 32,
                     buttonStyle: StylesApp(context).btnWidgetSmall,
@@ -1401,6 +2044,40 @@ class _QuestionScreenState extends State<QuestionScreen> {
         ),
       ),
     );
+  }
+
+// Leer pregunta y opciones como un solo bloque
+  Future<void> _speakFullQuestion() async {
+    if (!isTtsEnabled) return;
+
+    // Construir el texto completo
+    StringBuffer fullText = StringBuffer();
+
+    // 1. Número de pregunta
+    await _speakWithTTS(
+        "${_translation.tr("question_screen.tts.question_prefix")} "
+        "$numberQuestion ${_translation.tr("question_screen.tts.of")} ${questions.length}. ");
+
+    // 2. La pregunta
+    await _speakWithTTS(currentQuestion.question.toString());
+
+    // 3. Las opciones
+    await _speakWithTTS(_translation.tr("question_screen.tts.options"));
+
+    for (int i = 0; i < currentAnswers.length; i++) {
+      await _speakWithTTS("${_translation.tr("question_screen.tts.option")} "
+          "${String.fromCharCode(65 + i)}: ");
+      await _speakWithTTS(currentAnswers[i].answer);
+    }
+
+    // Detener cualquier reproducción anterior
+    if (isTtsSpeaking) {
+      await _stopTts();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    // Leer el texto completo
+    await flutterTts.speak(fullText.toString());
   }
 
   double _calculateProgressValue() {
@@ -1421,7 +2098,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     // Verificar si deberíamos mostrar la celebración
     final shouldShow = await StreakService.shouldShowCelebration();
 
-    if (shouldShow) {
+    if (!shouldShow) {
       // Obtener datos del calendario
       final ResponseData response =
           await streaksCalendar(userData!.userId, DateTime.now().month);
@@ -1442,5 +2119,33 @@ class _QuestionScreenState extends State<QuestionScreen> {
         });
       }
     }
+  }
+
+  // Control de velocidad separado para mejor organización
+  Widget _buildSpeedControl(AppTranslationProvider translationProvider) {
+    return Row(
+      children: [
+        Icon(Icons.speed, size: 16, color: Colors.grey),
+        SizedBox(width: 4),
+        Text(
+          translationProvider.tr('question_screen.speed_control.speed'),
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        SizedBox(width: 8),
+        SizedBox(
+          width: 100,
+          child: Slider(
+            value: ttsRate,
+            min: 0.0,
+            max: 1.0,
+            divisions: 10,
+            onChanged: (value) async {
+              setState(() => ttsRate = value);
+              await flutterTts.setSpeechRate(value);
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

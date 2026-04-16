@@ -1,6 +1,5 @@
 //Authentication
 
-
 export 'package:biblia_palabra_de_vida_app/screens/features/notification/notification_screen.dart';
 
 export 'package:biblia_palabra_de_vida_app/screens/soon/soon_screen.dart';
@@ -22,7 +21,6 @@ export 'package:biblia_palabra_de_vida_app/screens/features/preach/preach_screen
 export 'package:biblia_palabra_de_vida_app/screens/authentication/login/login_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/authentication/signup/register_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/authentication/recovery/recover_pass_screen.dart';
-export 'package:biblia_palabra_de_vida_app/screens/authentication/recovery/change_pass_screen.dart';
 
 //Onboarding
 export 'package:biblia_palabra_de_vida_app/screens/onboarding/welcome_screen.dart';
@@ -43,7 +41,7 @@ export 'package:biblia_palabra_de_vida_app/screens/features/settings/about_scree
 //Features
 export 'package:biblia_palabra_de_vida_app/screens/features/bible/bible_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/bible/search_bible_screen.dart';
-export 'package:biblia_palabra_de_vida_app/screens/features/audio/audio_screen.dart';
+export 'package:biblia_palabra_de_vida_app/screens/features/audio/radio_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/favorite/favorite_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/community/community_screen.dart';
 export 'package:biblia_palabra_de_vida_app/screens/features/community/map_screen.dart';
@@ -80,4 +78,13 @@ export 'package:biblia_palabra_de_vida_app/screens/features/theme_editor/theme_e
 
 //404
 export 'package:biblia_palabra_de_vida_app/screens/404/unknown_screen.dart';
+
+// splash
+export 'package:biblia_palabra_de_vida_app/screens/splash/splash_screen.dart';
+
+// maintenance
+export 'package:biblia_palabra_de_vida_app/screens/maintenance/maintenance_screen.dart';
+
+// forceUpdate
+export 'package:biblia_palabra_de_vida_app/screens/forceUpdate/force_update_screen.dart';
 

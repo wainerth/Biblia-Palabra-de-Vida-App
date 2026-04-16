@@ -13,6 +13,12 @@ class OrderingQuestionDraggableWidget extends StatefulWidget {
   final Function(BuildContext context, int) answerSelected;
   final Function()? onContinue;
   final bool isTablet;
+  
+  // Nuevas propiedades para TTS
+  final bool isTtsEnabled;
+  final Function(int index)? onSpeakOption;
+  final Function()? onSpeakInstructions;
+  final Function()? onSpeakCurrentOrder;
 
   const OrderingQuestionDraggableWidget({
     super.key,
@@ -25,6 +31,11 @@ class OrderingQuestionDraggableWidget extends StatefulWidget {
     this.fontSize = 14.0,
     this.onContinue,
     this.isTablet = false,
+    // Nuevos parámetros TTS
+    this.isTtsEnabled = false,
+    this.onSpeakOption,
+    this.onSpeakInstructions,
+    this.onSpeakCurrentOrder,
   });
 
   @override
@@ -72,21 +83,35 @@ class _OrderingQuestionDraggableStateWidget
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    Icons.drag_handle,
-                    color: StyleColor.turquoise,
-                    size: 24,
-                  ),
-                  SizedBox(width: 12),
-                  Text(
-                    "Arrastra las respuestas a los espacios vacíos",
-                    style: StylesApp(context).textStyleBody16.copyWith(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.drag_handle,
+                          color: StyleColor.turquoise,
+                          size: 24,
                         ),
+                        SizedBox(width: 12),
+                        Text(
+                          "Arrastra las respuestas a los espacios vacíos",
+                          style: StylesApp(context).textStyleBody16.copyWith(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
+                  // Botón para escuchar instrucciones
+                  if (widget.isTtsEnabled && widget.onSpeakInstructions != null)
+                    IconButton(
+                      icon: Icon(Icons.volume_up, size: 20),
+                      onPressed: widget.onSpeakInstructions,
+                      tooltip: "Escuchar instrucciones",
+                    ),
                 ],
               ),
             ),
@@ -101,22 +126,39 @@ class _OrderingQuestionDraggableStateWidget
             SizedBox(height: widget.isTablet ? 24.0 : 10.0),
             
             // Botón de verificar
-            ButtonThemeWidget(
-              width: widget.isTablet ? 200.0 : 150.0,
-              height: widget.isTablet ? 40.0 : 27.0,
-              text: "Verificar Orden",
-              buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
-                backgroundColor: WidgetStatePropertyAll(
-                  widget.orderedAnswers.length < countList
-                      ? StyleColor.grayMedium
-                      : StyleColor.orange,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ButtonThemeWidget(
+                  width: widget.isTablet ? 200.0 : 150.0,
+                  height: widget.isTablet ? 40.0 : 27.0,
+                  text: "Verificar Orden",
+                  buttonStyle: StylesApp(context).btnWidgetSmall.copyWith(
+                    backgroundColor: WidgetStatePropertyAll(
+                      widget.orderedAnswers.length < countList
+                          ? StyleColor.grayMedium
+                          : StyleColor.orange,
+                    ),
+                  ),
+                  onPressed: widget.orderedAnswers.length < countList
+                      ? null
+                      : () {
+                          widget.answerSelected(context, currentIndex);
+                        },
                 ),
-              ),
-              onPressed: widget.orderedAnswers.length < countList
-                  ? null
-                  : () {
-                      widget.answerSelected(context, currentIndex);
-                    },
+                // Botón para escuchar orden actual
+                if (widget.isTtsEnabled && 
+                    widget.onSpeakCurrentOrder != null && 
+                    widget.orderedAnswers.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(left: 12.0),
+                    child: IconButton(
+                      icon: Icon(Icons.volume_up, size: 20),
+                      onPressed: widget.onSpeakCurrentOrder,
+                      tooltip: "Escuchar orden actual",
+                    ),
+                  ),
+              ],
             ),
             
             SizedBox(height: widget.isTablet ? 24.0 : 10.0),
@@ -156,12 +198,24 @@ class _OrderingQuestionDraggableStateWidget
       ),
       child: Column(
         children: [
-          Text(
-            "Orden Actual",
-            style: StylesApp(context).textStyleBody16.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: StyleColor.turquoise,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Orden Actual",
+                style: StylesApp(context).textStyleBody16.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: StyleColor.turquoise,
+                    ),
+              ),
+              // Botón para escuchar orden actual
+              if (widget.isTtsEnabled && widget.onSpeakCurrentOrder != null)
+                IconButton(
+                  icon: Icon(Icons.volume_up, size: 20),
+                  onPressed: widget.onSpeakCurrentOrder,
+                  tooltip: "Escuchar orden actual",
                 ),
+            ],
           ),
           SizedBox(height: 16),
           Wrap(
@@ -182,6 +236,15 @@ class _OrderingQuestionDraggableStateWidget
                       widget.orderedAnswers[dropIndex] = data.data;
                     } else {
                       widget.orderedAnswers.add(data.data);
+                    }
+                    // Leer la opción colocada si TTS está activado
+                    if (widget.isTtsEnabled && widget.onSpeakOption != null) {
+                      // Encontrar el índice de la respuesta original
+                      int originalIndex = currentAnswers.indexWhere(
+                          (answer) => answer.id == data.data.id);
+                      if (originalIndex != -1) {
+                        widget.onSpeakOption!(originalIndex);
+                      }
                     }
                   });
                 },
@@ -237,15 +300,37 @@ class _OrderingQuestionDraggableStateWidget
                                   Expanded(
                                     child: Padding(
                                       padding: EdgeInsets.only(right: 30),
-                                      child: Text(
-                                        widget.orderedAnswers[index].answer,
-                                        style: StylesApp(context)
-                                            .textStyleBody14
-                                            .copyWith(
-                                              fontSize: widget.isTablet ? 16 : widget.fontSize,
-                                            ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
+                                      child: GestureDetector(
+                                        onTap: widget.isTtsEnabled &&
+                                                widget.onSpeakOption != null
+                                            ? () {
+                                                // Encontrar el índice de la respuesta original
+                                                int originalIndex = currentAnswers.indexWhere(
+                                                    (answer) =>
+                                                        answer.id ==
+                                                        widget.orderedAnswers[index].id);
+                                                if (originalIndex != -1) {
+                                                  widget.onSpeakOption!(
+                                                      originalIndex);
+                                                }
+                                              }
+                                            : null,
+                                        child: Text(
+                                          widget.orderedAnswers[index].answer,
+                                          style: StylesApp(context)
+                                              .textStyleBody14
+                                              .copyWith(
+                                                fontSize: widget.isTablet
+                                                    ? 16
+                                                    : widget.fontSize,
+                                                decoration: widget.isTtsEnabled
+                                                    ? TextDecoration.underline
+                                                    : TextDecoration.none,
+                                                decorationColor: Colors.blue,
+                                              ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -332,7 +417,7 @@ class _OrderingQuestionDraggableStateWidget
               countList,
               (index) {
                 return _searchExistedOrdered(currentAnswers[index].id)
-                    ? Container() // Ocultar opciones ya seleccionadas
+                    ? Container()
                     : LongPressDraggable(
                         data: currentAnswers[index],
                         feedback: Material(
@@ -406,53 +491,74 @@ class _OrderingQuestionDraggableStateWidget
                             ),
                           ),
                         ),
-                        child: Container(
-                          width: widget.isTablet ? 220 : null,
-                          height: widget.isTablet ? 60 : 40,
-                          decoration: BoxDecoration(
-                            color: StyleColor.turquoise,
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: widget.isTablet ? 40 : 32,
-                                height: widget.isTablet ? 40 : 32,
-                                margin: EdgeInsets.only(left: 8.0),
-                                decoration: BoxDecoration(
-                                  color: Color(
-                                    int.parse(
-                                        '0XFF${widget.options[index]["color"]}'),
+                        child: GestureDetector(
+                          onTap: widget.isTtsEnabled &&
+                                  widget.onSpeakOption != null
+                              ? () => widget.onSpeakOption!(index)
+                              : null,
+                          child: Container(
+                            width: widget.isTablet ? 220 : null,
+                            height: widget.isTablet ? 60 : 40,
+                            decoration: BoxDecoration(
+                              color: StyleColor.turquoise,
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: widget.isTablet ? 40 : 32,
+                                  height: widget.isTablet ? 40 : 32,
+                                  margin: EdgeInsets.only(left: 8.0),
+                                  decoration: BoxDecoration(
+                                    color: Color(
+                                      int.parse(
+                                          '0XFF${widget.options[index]["color"]}'),
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                  borderRadius: BorderRadius.circular(20),
+                                  child: Center(
+                                    child: Text(
+                                      currentAnswers[index].option!,
+                                      style: StylesApp(context)
+                                          .textStyleBody14
+                                          .copyWith(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ),
                                 ),
-                                child: Center(
+                                SizedBox(width: 12),
+                                Expanded(
                                   child: Text(
-                                    currentAnswers[index].option!,
+                                    currentAnswers[index].answer,
                                     style: StylesApp(context)
                                         .textStyleBody14
                                         .copyWith(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          fontSize: widget.isTablet ? 16 : widget.fontSize,
+                                          decoration: widget.isTtsEnabled
+                                              ? TextDecoration.underline
+                                              : TextDecoration.none,
+                                          decorationColor: Colors.white,
                                         ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              ),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  currentAnswers[index].answer,
-                                  style: StylesApp(context)
-                                      .textStyleBody14
-                                      .copyWith(
-                                        color: Colors.white,
-                                        fontSize: widget.isTablet ? 16 : widget.fontSize,
-                                      ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                                // Botón de altavoz pequeño
+                                // if (widget.isTtsEnabled &&
+                                //     widget.onSpeakOption != null)
+                                //   Padding(
+                                //     padding: EdgeInsets.only(right: 8.0),
+                                //     child: Icon(
+                                //       Icons.volume_up,
+                                //       size: 16,
+                                //       color: Colors.white,
+                                //     ),
+                                //   ),
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -498,12 +604,26 @@ class _OrderingQuestionDraggableStateWidget
             ),
             child: Column(
               children: [
-                Icon(
-                  widget.showError ? Icons.cancel : Icons.check_circle,
-                  size: 64,
-                  color: widget.showError
-                      ? StyleColor.redLight
-                      : StyleColor.greenDark,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      widget.showError ? Icons.cancel : Icons.check_circle,
+                      size: 64,
+                      color: widget.showError
+                          ? StyleColor.redLight
+                          : StyleColor.greenDark,
+                    ),
+                    if (widget.isTtsEnabled && widget.onSpeakCurrentOrder != null)
+                      Padding(
+                        padding: EdgeInsets.only(left: 20.0),
+                        child: IconButton(
+                          icon: Icon(Icons.volume_up, size: 32),
+                          onPressed: widget.onSpeakCurrentOrder,
+                          tooltip: "Escuchar resultado",
+                        ),
+                      ),
+                  ],
                 ),
                 SizedBox(height: 12),
                 Text(
@@ -553,54 +673,73 @@ class _OrderingQuestionDraggableStateWidget
                     child: Column(
                       children: [
                         for (int i = 0; i < widget.orderedAnswers.length; i++)
-                          Container(
-                            margin: EdgeInsets.only(bottom: 12.0),
-                            padding: EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12.0),
-                              border: Border.all(
-                                color: StyleColor.turquoise,
-                                width: 1.0,
+                          GestureDetector(
+                            onTap: widget.isTtsEnabled &&
+                                    widget.onSpeakOption != null
+                                ? () {
+                                    // Encontrar el índice de la respuesta original
+                                    int originalIndex = currentAnswers.indexWhere(
+                                        (answer) =>
+                                            answer.id ==
+                                            widget.orderedAnswers[i].id);
+                                    if (originalIndex != -1) {
+                                      widget.onSpeakOption!(originalIndex);
+                                    }
+                                  }
+                                : null,
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: 12.0),
+                              padding: EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12.0),
+                                border: Border.all(
+                                  color: StyleColor.turquoise,
+                                  width: 1.0,
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: Color(
-                                      int.parse(
-                                          '0XFF${widget.options[i]["color"]}'),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: Color(
+                                        int.parse(
+                                            '0XFF${widget.options[i]["color"]}'),
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
-                                    borderRadius: BorderRadius.circular(16),
+                                    child: Center(
+                                      child: Text(
+                                        (i + 1).toString(),
+                                        style: StylesApp(context)
+                                            .textStyleBody14
+                                            .copyWith(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                    ),
                                   ),
-                                  child: Center(
+                                  SizedBox(width: 16),
+                                  Expanded(
                                     child: Text(
-                                      (i + 1).toString(),
+                                      widget.orderedAnswers[i].answer,
                                       style: StylesApp(context)
-                                          .textStyleBody14
+                                          .textStyleBody16
                                           .copyWith(
                                             color: Colors.black,
-                                            fontWeight: FontWeight.bold,
+                                            height: 1.4,
+                                            decoration: widget.isTtsEnabled
+                                                ? TextDecoration.underline
+                                                : TextDecoration.none,
+                                            decorationColor: Colors.blue,
                                           ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(width: 16),
-                                Expanded(
-                                  child: Text(
-                                    widget.orderedAnswers[i].answer,
-                                    style: StylesApp(context)
-                                        .textStyleBody16
-                                        .copyWith(
-                                          color: Colors.black,
-                                          height: 1.4,
-                                        ),
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                       ],
@@ -640,7 +779,7 @@ class _OrderingQuestionDraggableStateWidget
     );
   }
 
-  // ========== MÉTODOS PARA MÓVIL (mantener original) ==========
+  // ========== MÉTODOS PARA MÓVIL (actualizados con TTS) ==========
 
   Widget _buildMobileDragTargetArea() {
     return DragTarget<Answer>(
@@ -680,6 +819,24 @@ class _OrderingQuestionDraggableStateWidget
                       children: [
                         Row(
                           children: [
+                            // Botón de altavoz para TTS
+                            // if (widget.isTtsEnabled &&
+                            //     widget.onSpeakOption != null)
+                            //   IconButton(
+                            //     icon: Icon(Icons.volume_up, size: 14),
+                            //     onPressed: () {
+                            //       // Encontrar el índice de la respuesta original
+                            //       int originalIndex = currentAnswers.indexWhere(
+                            //           (answer) =>
+                            //               answer.id ==
+                            //               widget.orderedAnswers[index].id);
+                            //       if (originalIndex != -1) {
+                            //         widget.onSpeakOption!(originalIndex);
+                            //       }
+                            //     },
+                            //     padding: EdgeInsets.zero,
+                            //     constraints: BoxConstraints(),
+                            //   ),
                             Expanded(
                               flex: 0,
                               child: Container(
@@ -707,13 +864,35 @@ class _OrderingQuestionDraggableStateWidget
                             ),
                             Expanded(
                               flex: 2,
-                              child: Center(
+                              child: GestureDetector(
+                                onTap: widget.isTtsEnabled &&
+                                        widget.onSpeakOption != null
+                                    ? () {
+                                        // Encontrar el índice de la respuesta original
+                                        int originalIndex = currentAnswers.indexWhere(
+                                            (answer) =>
+                                                answer.id ==
+                                                widget.orderedAnswers[index].id);
+                                        if (originalIndex != -1) {
+                                          widget.onSpeakOption!(originalIndex);
+                                        }
+                                      }
+                                    : null,
+                                child: Center(
                                   child: Text(
-                                widget.orderedAnswers[index].answer,
-                                style: StylesApp(context)
-                                    .textStyleBody12
-                                    .copyWith(fontSize: widget.fontSize),
-                              )),
+                                    widget.orderedAnswers[index].answer,
+                                    style: StylesApp(context)
+                                        .textStyleBody12
+                                        .copyWith(
+                                          fontSize: widget.fontSize,
+                                          decoration: widget.isTtsEnabled
+                                              ? TextDecoration.underline
+                                              : TextDecoration.none,
+                                          decorationColor: Colors.blue,
+                                        ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -812,12 +991,13 @@ class _OrderingQuestionDraggableStateWidget
                           Expanded(
                             flex: 2,
                             child: Center(
-                                child: Text(
-                              currentAnswers[index].answer,
-                              style: StylesApp(context)
-                                  .textStyleBody12
-                                  .copyWith(fontSize: widget.fontSize),
-                            )),
+                              child: Text(
+                                currentAnswers[index].answer,
+                                style: StylesApp(context)
+                                    .textStyleBody12
+                                    .copyWith(fontSize: widget.fontSize),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -833,49 +1013,70 @@ class _OrderingQuestionDraggableStateWidget
                       border: Border.all(color: StyleColor.turquoise),
                     ),
                   ),
-                  child: Container(
-                    margin:
-                        EdgeInsets.only(bottom: 10.0, left: 6.0, right: 6.0),
-                    constraints: BoxConstraints(minHeight: 40.0),
-                    decoration: BoxDecoration(
-                      color: StyleColor.turquoise,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 0,
-                          child: Container(
-                            width: 32.0,
-                            height: 32.0,
-                            margin: EdgeInsets.only(left: 10.0),
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              color: Color(
-                                int.parse(
-                                    '0XFF${widget.options[index]["color"]}'),
+                  child: GestureDetector(
+                    onTap: widget.isTtsEnabled && widget.onSpeakOption != null
+                        ? () => widget.onSpeakOption!(index)
+                        : null,
+                    child: Container(
+                      margin:
+                          EdgeInsets.only(bottom: 10.0, left: 6.0, right: 6.0),
+                      constraints: BoxConstraints(minHeight: 40.0),
+                      decoration: BoxDecoration(
+                        color: StyleColor.turquoise,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Row(
+                        children: [
+                          // Botón de altavoz para TTS
+                          // if (widget.isTtsEnabled &&
+                          //     widget.onSpeakOption != null)
+                          //   IconButton(
+                          //     icon: Icon(Icons.volume_up, size: 14),
+                          //     onPressed: () => widget.onSpeakOption!(index),
+                          //     padding: EdgeInsets.zero,
+                          //     constraints: BoxConstraints(),
+                          //   ),
+                          Expanded(
+                            flex: 0,
+                            child: Container(
+                              width: 32.0,
+                              height: 32.0,
+                              margin: EdgeInsets.only(left: 10.0),
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                color: Color(
+                                  int.parse(
+                                      '0XFF${widget.options[index]["color"]}'),
+                                ),
+                                borderRadius: BorderRadius.circular(32.0),
                               ),
-                              borderRadius: BorderRadius.circular(32.0),
-                            ),
-                            child: Center(
-                              child: Text(
-                                currentAnswers[index].option!,
-                                style: StylesApp(context)
-                                    .textStyleBody12
-                                    .copyWith(color: Colors.black),
+                              child: Center(
+                                child: Text(
+                                  currentAnswers[index].option!,
+                                  style: StylesApp(context)
+                                      .textStyleBody12
+                                      .copyWith(color: Colors.black),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Center(
+                          Expanded(
+                            flex: 2,
+                            child: Center(
                               child: Text(
-                            currentAnswers[index].answer,
-                            style: StylesApp(context).textStyleBody12,
-                          )),
-                        ),
-                      ],
+                                currentAnswers[index].answer,
+                                style: StylesApp(context).textStyleBody12
+                                    .copyWith(
+                                  decoration: widget.isTtsEnabled
+                                      ? TextDecoration.underline
+                                      : TextDecoration.none,
+                                  decorationColor: Colors.blue,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -913,15 +1114,26 @@ class _OrderingQuestionDraggableStateWidget
               ),
               Expanded(
                 flex: 0,
-                child: Text(
-                  textAlign: TextAlign.center,
-                  widget.showError
-                      ? "Respuesta\n incorrecta"
-                      : "Respuesta\n Correcta",
-                  style: StylesApp(context).textStyleBodyAso32.copyWith(
-                      color: widget.showError
-                          ? StyleColor.redLight
-                          : StyleColor.turquoise),
+                child: Column(
+                  children: [
+                    Text(
+                      textAlign: TextAlign.center,
+                      widget.showError
+                          ? "Respuesta\n incorrecta"
+                          : "Respuesta\n Correcta",
+                      style: StylesApp(context).textStyleBodyAso32.copyWith(
+                          color: widget.showError
+                              ? StyleColor.redLight
+                              : StyleColor.turquoise),
+                    ),
+                    // Botón para escuchar resultado
+                    if (widget.isTtsEnabled && widget.onSpeakCurrentOrder != null)
+                      IconButton(
+                        icon: Icon(Icons.volume_up, size: 20),
+                        onPressed: widget.onSpeakCurrentOrder,
+                        tooltip: "Escuchar resultado",
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -960,14 +1172,25 @@ class _OrderingQuestionDraggableStateWidget
                         SizedBox(height: 21.0),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            textAlign: TextAlign.center,
-                            getCorrectOrderString(),
-                            style: StylesApp(context)
-                                .textStyleBodyAso20
-                                .copyWith(
+                          child: GestureDetector(
+                            onTap: widget.isTtsEnabled &&
+                                    widget.onSpeakCurrentOrder != null
+                                ? widget.onSpeakCurrentOrder
+                                : null,
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              getCorrectOrderString(),
+                              style: StylesApp(context)
+                                  .textStyleBodyAso20
+                                  .copyWith(
                                     color: StyleColor.orange,
-                                    letterSpacing: 0.6),
+                                    letterSpacing: 0.6,
+                                    decoration: widget.isTtsEnabled
+                                        ? TextDecoration.underline
+                                        : TextDecoration.none,
+                                    decorationColor: StyleColor.orange,
+                                  ),
+                            ),
                           ),
                         )
                       ],

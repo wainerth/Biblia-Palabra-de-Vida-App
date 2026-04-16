@@ -1,5 +1,8 @@
 // screens/search_bible_route_screen.dart
+import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
+import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/search_by_book_widget.dart';
@@ -29,17 +32,14 @@ class SearchBibleScreen extends StatefulWidget {
 }
 
 class _SearchBibleScreenState extends State<SearchBibleScreen> {
+  final translationProvider = AppTranslationProvider();
+
   late BibleTheme currentTheme;
   LoginUser? userData;
   bool isInitialized = false;
   var _selectedIndex = 0;
 
-  List tabs = [
-    {"title": 'Libro', "placeholder": 'Buscar por libro'},
-    {"title": 'Texto', "placeholder": 'Buscar por texto'},
-    {"title": 'Tema', "placeholder": 'Buscar por tema'},
-    {"title": 'Personajes', "placeholder": 'Buscar personajes'},
-  ];
+  List tabs = AppConstants.tabsSearchBible;
 
   @override
   void initState() {
@@ -57,7 +57,9 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
 
       setState(() => isInitialized = true);
     } catch (e) {
-      print("Error initializing search screen: $e");
+      if (kDebugMode) {
+        print("Error initializing search screen: $e");
+      }
     }
   }
 
@@ -87,23 +89,25 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: currentTheme.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: currentTheme.appBarColor,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: currentTheme.buttonTextColor),
-          onPressed: () => Navigator.pop(context),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: currentTheme.backgroundColor,
+        appBar: AppBar(
+          backgroundColor: currentTheme.appBarColor,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: currentTheme.buttonTextColor),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            translationProvider.tr('search_bible_screen.title'),
+            style: StylesApp(context).textStyleBody18.copyWith(
+                  color: currentTheme.buttonTextColor,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
         ),
-        title: Text(
-          'Buscar en la Biblia',
-          style: StylesApp(context).textStyleBody18.copyWith(
-                color: currentTheme.buttonTextColor,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
+        body: isTablet(context) ? _buildTabletLayout() : _buildMobileLayout(),
       ),
-      body: isTablet(context) ? _buildTabletLayout() : _buildMobileLayout(),
     );
   }
 
@@ -123,7 +127,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                   int index = entry.key;
                   var tab = entry.value;
                   bool isSelected = _selectedIndex == index;
-          
+
                   return GestureDetector(
                     onTap: () => setState(() => _selectedIndex = index),
                     child: Container(
@@ -142,7 +146,8 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                           ),
                         ),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Row(
                         children: [
                           Icon(
@@ -153,11 +158,12 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              tab["title"],
-                              style: StylesApp(context).textStyleBody14.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                              translationProvider.tr(tab["title"]),
+                              style:
+                                  StylesApp(context).textStyleBody14.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -172,7 +178,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -198,11 +204,12 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
         children: [
           Container(
             width: double.infinity,
+            padding: EdgeInsets.only(top: 8),
             decoration: BoxDecoration(
               color: currentTheme.backgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
+                  color: Colors.black.withValues(alpha: 0.25),
                   spreadRadius: 0,
                   offset: const Offset(0, 4),
                 )
@@ -248,7 +255,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Center(
                       child: Text(
-                        tab["title"],
+                       translationProvider.tr(tab["title"]),
                         maxLines: 1,
                       ),
                     ),
@@ -273,7 +280,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
         widget.chapter == null) {
       return Center(
         child: Text(
-          'Datos no disponibles',
+          translationProvider.tr('search_bible_screen.messages.data_unavailable'),
           style: TextStyle(color: currentTheme.textColor),
         ),
       );
@@ -307,7 +314,7 @@ class _SearchBibleScreenState extends State<SearchBibleScreen> {
     if (widget.version == null ||
         widget.book == null ||
         widget.chapter == null) {
-      return List.filled(4, Center(child: Text('Datos no disponibles')));
+      return List.filled(4, Center(child: Text(translationProvider.tr('search_bible_screen.messages.data_unavailable'))));
     }
 
     return [

@@ -1,6 +1,9 @@
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class CustomModalWidget extends StatelessWidget {
   final String title;
@@ -23,8 +26,9 @@ class CustomModalWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
 
-    bool isTablet = MediaQuery.sizeOf(context).width >= 600;
+    bool _isTablet = isTablet(context);
   final ScrollController scrollController = ScrollController();
 
     return Dialog(
@@ -35,7 +39,7 @@ class CustomModalWidget extends StatelessWidget {
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: isTablet ? 400.0 : double.infinity,
+          maxWidth: _isTablet ? 400.0 : double.infinity,
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -84,7 +88,7 @@ class CustomModalWidget extends StatelessWidget {
                                           borderRadius:
                                               BorderRadius.circular(28)),
                                       child: Text(
-                                        "Etapa $id",
+                                        "${ translationProvider.tr("detail_course.stage")} $id",
                                         style: StylesApp(context).textStyleBody4,
                                       )),
                                   Container(
@@ -184,7 +188,7 @@ class CustomModalWidget extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  text: "Aceptar",
+                  text: translationProvider.tr('detail_course.accept'),
                   buttonStyle: StylesApp(context).btnWidgetSmall,
                   textStyle: StylesApp(context).textStyleBody6,
                 ),

@@ -19,6 +19,7 @@ class HeadScoreWidget extends StatefulWidget {
 class _HeadScoreWidgetState extends State<HeadScoreWidget> {
   @override
   Widget build(BuildContext context) {
+    final translationProvider = context.read<AppTranslationProvider>();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final LoginUser? userData = userProvider.currentUser;
     return Container(
@@ -33,7 +34,9 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
             TextSpan(
               style: StylesApp(context).textStyleBody12,
               children: [
-                TextSpan(text: "Exp: "),
+                TextSpan(
+                    text:
+                        "${translationProvider.tr("header_adventure.experience")}: "),
                 TextSpan(text: "${userData?.expTotalUser}"),
               ],
             ),
@@ -42,8 +45,14 @@ class _HeadScoreWidgetState extends State<HeadScoreWidget> {
             TextSpan(
               style: StylesApp(context).textStyleBody12,
               children: [
-                TextSpan(text: "Racha: "),
-                TextSpan(text: "${userData?.streakDaysCount} días"),
+                TextSpan(
+                    text:
+                        "${translationProvider.tr("header_adventure.streak")}: "),
+                TextSpan(
+                    text: translationProvider
+                        .tr("header_adventure.days")
+                        .replaceAll(
+                            "%s", userData != null ? userData.streakDaysCount.toString() : '')),
               ],
             ),
           ),

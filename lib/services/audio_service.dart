@@ -3,25 +3,35 @@ import 'package:flutter/foundation.dart';
 
 class AudioService {
   late AudioPlayer _backgroundPlayer;
-  late AudioPlayer _sfxPlayer; // Para efectos de sonido largos
-  final Map<String, AudioPlayer> _shortSoundPlayers = {};
+  late AudioPlayer _sfxPlayer;
+  
+  // Cache para sonidos cortos
+  final Map<String, AudioPlayer> _soundCache = {};
+  
   bool _isDisposed = false;
   bool _isBackgroundPlaying = false;
+  bool _isCacheInitialized = false;
 
   AudioService() {
     _initialize();
   }
+
   Future<void> _initialize() async {
     _backgroundPlayer = AudioPlayer()
       ..setReleaseMode(ReleaseMode.loop)
       ..setVolume(0.3)
-      ..setPlayerMode(
-          PlayerMode.mediaPlayer); // 🔥 Modo media para música larga
+      ..setPlayerMode(PlayerMode.mediaPlayer);
 
     _sfxPlayer = AudioPlayer()
-      ..setPlayerMode(PlayerMode.lowLatency); // 🔥 Modo baja latencia para SFX
+      ..setPlayerMode(PlayerMode.lowLatency);
 
-    // 🔥 Configurar manejado de eventos para la música de fondo
+    _setupBackgroundMusicListeners();
+    
+    // Inicializar caché de sonidos
+    await _initializeSoundCache();
+  }
+
+  void _setupBackgroundMusicListeners() {
     _backgroundPlayer.onPlayerStateChanged.listen((state) {
       if (state == PlayerState.stopped) {
         _isBackgroundPlaying = false;
@@ -31,12 +41,127 @@ class AudioService {
     });
 
     _backgroundPlayer.onPlayerComplete.listen((event) {
-      // 🔥 Asegurar que la música continúe en loop
       if (!_isDisposed && _isBackgroundPlaying) {
         _backgroundPlayer.resume();
       }
     });
   }
+
+  Future<void> _initializeSoundCache() async {
+    if (_isCacheInitialized) return;
+    
+    final stopwatch = Stopwatch()..start();
+    
+    try {
+      final soundFiles = [
+        'sounds/card_tap.mp3',
+        'sounds/match_success.mp3',
+        'sounds/match_fail.mp3',
+        'sounds/time_up.mp3',
+        'sounds/counter-clock.mp3',
+        'sounds/failed-attempts.mp3',
+        'sounds/correct-answer.mp3',
+        'sounds/wrong-answer.mp3',
+        'sounds/win_game.mp3',
+      ];
+      
+      await Future.wait(soundFiles.map((file) => _preloadSound(file)));
+      
+      _isCacheInitialized = true;
+      
+      if (kDebugMode) {
+        print('✅ Cache de audios inicializado en ${stopwatch.elapsedMilliseconds}ms');
+        print('📊 Sonidos cacheados: ${_soundCache.length}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error inicializando caché de audios: $e');
+      }
+    }
+  }
+
+  Future<void> _preloadSound(String source) async {
+    if (_soundCache.containsKey(source)) return;
+    
+    try {
+      final player = AudioPlayer()..setPlayerMode(PlayerMode.lowLatency);
+      await player.setSource(AssetSource(source));
+      await player.setVolume(1.0);
+      
+      _soundCache[source] = player;
+      
+      if (kDebugMode) {
+        print('✅ Sonido precargado: $source');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error precargando $source: $e');
+      }
+    }
+  }
+
+  // 🔥 MÉTODO CORREGIDO - Versión simplificada que funciona
+  Future<void> _playShortSound(String source) async {
+    if (_isDisposed) return;
+
+    try {
+      // Crear un player NUEVO cada vez (más confiable)
+      final player = AudioPlayer()..setPlayerMode(PlayerMode.lowLatency);
+      
+      await player.setSource(AssetSource(source));
+      await player.setVolume(1.0);
+      
+      // Reproducir
+      await player.resume();
+      
+      if (kDebugMode) {
+        print('🔊 Reproduciendo: $source');
+      }
+      
+      // Auto-limpiar después de reproducir
+      Future.delayed(const Duration(seconds: 2), () {
+        if (player.state == PlayerState.playing) {
+          player.stop();
+        }
+        player.dispose();
+      });
+      
+    } catch (e) {
+      if (!_isDisposed && kDebugMode) {
+        print('Error reproduciendo $source: $e');
+      }
+    }
+    
+    _ensureBackgroundMusic();
+  }
+
+  // 🔥 VERSIÓN ALTERNATIVA - Usando AudioCache para mayor confiabilidad
+  /*
+  Future<void> _playShortSound(String source) async {
+    if (_isDisposed) return;
+    
+    try {
+      final player = AudioPlayer();
+      final result = await player.play(AssetSource(source));
+      
+      if (kDebugMode) {
+        print('🔊 Reproduciendo: $source');
+      }
+      
+      // Auto-limpiar después de reproducir
+      Future.delayed(const Duration(seconds: 2), () {
+        player.dispose();
+      });
+      
+    } catch (e) {
+      if (!_isDisposed && kDebugMode) {
+        print('Error reproduciendo $source: $e');
+      }
+    }
+    
+    _ensureBackgroundMusic();
+  }
+  */
 
   // --- Música de Fondo ---
   Future<void> playBackgroundMusic() async {
@@ -47,13 +172,16 @@ class AudioService {
         await _backgroundPlayer.setSource(AssetSource('sounds/bg_music.mp3'));
         await _backgroundPlayer.resume();
         _isBackgroundPlaying = true;
+        
+        if (kDebugMode) {
+          print('🎵 Música de fondo iniciada');
+        }
       }
     } catch (e) {
       if (!_isDisposed) {
         if (kDebugMode) {
           print('Error playing background music: $e');
         }
-        // 🔥 Reintentar en caso de error
         _isBackgroundPlaying = false;
       }
     }
@@ -64,6 +192,10 @@ class AudioService {
     try {
       await _backgroundPlayer.pause();
       _isBackgroundPlaying = false;
+      
+      if (kDebugMode) {
+        print('🎵 Música de fondo pausada');
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error pausing background music: $e');
@@ -76,6 +208,10 @@ class AudioService {
     try {
       await _backgroundPlayer.stop();
       _isBackgroundPlaying = false;
+      
+      if (kDebugMode) {
+        print('🎵 Música de fondo detenida');
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error stopping background music: $e');
@@ -84,7 +220,6 @@ class AudioService {
     }
   }
 
-  // 🔥 Verificar y restaurar música de fondo si se detuvo
   Future<void> _ensureBackgroundMusic() async {
     if (_isBackgroundPlaying && !_isDisposed) {
       final state = _backgroundPlayer.state;
@@ -97,31 +232,49 @@ class AudioService {
     }
   }
 
+  bool get isBackgroundMusicPlaying => _isBackgroundPlaying;
+
+  Future<void> restoreBackgroundMusic() async {
+    if (_isDisposed) return;
+
+    if (!_isBackgroundPlaying) {
+      if (kDebugMode) {
+        print('Restaurando música de fondo manualmente...');
+      }
+      await playBackgroundMusic();
+    } else {
+      final state = _backgroundPlayer.state;
+      if (state != PlayerState.playing) {
+        if (kDebugMode) {
+          print('Música marcada como playing pero no lo está. Restaurando...');
+        }
+        _isBackgroundPlaying = false;
+        await playBackgroundMusic();
+      }
+    }
+  }
+
   // --- Efectos de Sonido (SFX) ---
-  Future<void> playCardTapSound() async {
-    await _playShortSound('sounds/card_tap.mp3');
-    await _ensureBackgroundMusic(); // 🔥 Verificar música después del sonido
-  }
-
-  Future<void> playMatchSound() async {
-    await _playShortSound('sounds/match_success.mp3');
-    await _ensureBackgroundMusic();
-  }
-
-  Future<void> playNoMatchSound() async {
-    await _playShortSound('sounds/match_fail.mp3');
-    await _ensureBackgroundMusic();
-  }
+  Future<void> playCardTapSound() => _playShortSound('sounds/card_tap.mp3');
+  Future<void> playMatchSound() => _playShortSound('sounds/match_success.mp3');
+  Future<void> playNoMatchSound() => _playShortSound('sounds/match_fail.mp3');
+  Future<void> playFailedAttempts() => _playShortSound('sounds/failed-attempts.mp3');
+  Future<void> playCorrectAnswer() => _playShortSound('sounds/correct-answer.mp3');
+  Future<void> playWrongAnswer() => _playShortSound('sounds/wrong-answer.mp3');
+  Future<void> playWinSound() => _playShortSound('sounds/win_game.mp3');
+  Future<void> playSuccessSound() => _playShortSound('sounds/win_game.mp3');
 
   Future<void> playTimeUpSound() async {
     if (_isDisposed) return;
 
     try {
-      // 🔥 Usar player separado para no interferir con música
       await _sfxPlayer.setSource(AssetSource('sounds/time_up.mp3'));
       await _sfxPlayer.resume();
+      
+      if (kDebugMode) {
+        print('🔊 Time up sound');
+      }
 
-      // Verificar música después de que termine el sonido
       _sfxPlayer.onPlayerComplete.listen((_) async {
         await _ensureBackgroundMusic();
       });
@@ -152,8 +305,10 @@ class AudioService {
     try {
       await _sfxPlayer.setSource(AssetSource('sounds/counter-clock.mp3'));
       await _sfxPlayer.resume();
-
-      // La música sigue sonando mientras el contador corre
+      
+      if (kDebugMode) {
+        print('🔊 Counter clock');
+      }
     } catch (e) {
       if (!_isDisposed) {
         if (kDebugMode) {
@@ -174,89 +329,6 @@ class AudioService {
     }
   }
 
-  Future<void> playFailedAttempts() async {
-    await _playShortSound('sounds/failed-attempts.mp3');
-    await _ensureBackgroundMusic();
-  }
-
-  Future<void> playCorrectAnswer() async {
-    await _playShortSound('sounds/correct-answer.mp3');
-    await _ensureBackgroundMusic();
-  }
-
-  Future<void> playWrongAnswer() async {
-    await _playShortSound('sounds/wrong-answer.mp3');
-    await _ensureBackgroundMusic();
-  }
-
-  Future<void> playWinSound() async {
-    await _playShortSound('sounds/win_game.mp3');
-    await _ensureBackgroundMusic();
-  }
-
-  Future<void> playSuccessSound() async {
-    await _playShortSound('sounds/win_game.mp3');
-    await _ensureBackgroundMusic();
-  }
-
-  // 🔥 Método optimizado para sonidos cortos
-  Future<void> _playShortSound(String source) async {
-    if (_isDisposed) return;
-
-    final player = AudioPlayer()..setPlayerMode(PlayerMode.lowLatency);
-
-    try {
-      await player.setSource(AssetSource(source));
-      await player.resume();
-
-      // Limpieza automática sin afectar música
-      player.onPlayerComplete.listen((_) {
-        _safeDisposePlayer(player);
-      });
-
-      // Timeout de seguridad
-      Future.delayed(const Duration(seconds: 3), () {
-        _safeDisposePlayer(player);
-      });
-    } catch (e) {
-      _safeDisposePlayer(player);
-      if (!_isDisposed) {
-        if (kDebugMode) {
-          print('Error playing short sound $source: $e');
-        }
-      }
-    }
-  }
-
-  void _safeDisposePlayer(AudioPlayer player) {
-    player.dispose();
-  }
-
-  // 🔥 Método para verificar estado de la música
-  bool get isBackgroundMusicPlaying => _isBackgroundPlaying;
-
-  // 🔥 Método para restaurar música si se perdió
-  Future<void> restoreBackgroundMusic() async {
-    if (_isDisposed) return;
-
-    if (!_isBackgroundPlaying) {
-      if (kDebugMode) {
-        print('Restaurando música de fondo manualmente...');
-      }
-      await playBackgroundMusic();
-    } else {
-      // Verificar que realmente esté sonando
-      final state = _backgroundPlayer.state;
-      if (state != PlayerState.playing) {
-        if (kDebugMode) {
-          print('Música marcada como playing pero no lo está. Restaurando...');
-        }
-        _isBackgroundPlaying = false;
-        await playBackgroundMusic();
-      }
-    }
-  }
-
   Future<void> stopSuccessSound() async {
     await _sfxPlayer.stop();
   }
@@ -269,9 +341,13 @@ class AudioService {
     _backgroundPlayer.dispose();
     _sfxPlayer.dispose();
 
-    _shortSoundPlayers.forEach((key, player) {
-      _safeDisposePlayer(player);
-    });
-    _shortSoundPlayers.clear();
+    for (var player in _soundCache.values) {
+      player.dispose();
+    }
+    _soundCache.clear();
+    
+    if (kDebugMode) {
+      print('🔇 AudioService disposed');
+    }
   }
 }
