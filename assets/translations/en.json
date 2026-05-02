@@ -120,7 +120,7 @@
         "usa": "United States: SSN",
         "brazil": "Brazil: RG or CPF",
         "numbers_only": "Numbers only, no dots or dashes.",
-         "country": "Country*",
+        "country": "Country*",
         "country_hint": "Select a country",
         "country_search_hint": "Search and select your country",
         "country_error": "Please select a country",
@@ -1520,7 +1520,12 @@
         "logout_confirmation": "Are you sure you want to log out?",
         "logout_warning": "Your current session will be closed and you will need to log in again",
         "cancel": "Cancel",
-        "logout_button": "Log Out"
+        "logout_button": "Log Out",
+        "notifications": "Notifications",
+        "receive_notifications": "Receive notifications",
+        "receive_email": "Receive emails",
+        "preferences_error": "Error loading preferences",
+        "emails": "Emails"
     },
     "progress": {
         "registration": "Registration",

@@ -13,7 +13,7 @@ class GraphQLConfig {
   
   
   static const String baseUrl =
-      'http://10.0.2.2:4020/graphql';
+      'https://labibliapalabradevida.com:2443/dev-services/';
   static const String urlServidor = 'https://labibliapalabradevida.com/';
   static const urlSocketDev = 'wss://labibliapalabradevida.com:2443';
   static const urlSocketProd = 'wss://labibliapalabradevida.com:2443'; //'wss://labibliapalabradevida.com';
