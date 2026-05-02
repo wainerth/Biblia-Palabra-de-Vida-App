@@ -3,6 +3,7 @@ class NotificationModel {
   final String title;
   final String message;
   final bool isRead;
+  final bool isView;
   final String action;
   final String actionLabel;
   final String notificationType;
@@ -17,6 +18,7 @@ class NotificationModel {
     required this.title,
     required this.message,
     required this.isRead,
+    required this.isView, 
     required this.action,
     required this.actionLabel,
     required this.notificationType,
@@ -42,6 +44,7 @@ class NotificationModel {
       title: title ?? this.title,
       message: message ?? this.message,
       isRead: isRead ?? this.isRead,
+      isView: isView ?? this.isView,
       action: action ?? this.action,
       actionLabel: actionLabel ?? this.actionLabel,
       notificationType: notificationType ?? this.notificationType,
@@ -58,6 +61,7 @@ class NotificationModel {
       title: json['title'],
       message: json['message'],
       isRead: json['isRead'],
+      isView: json['isView'] ?? false,
       action: json['action'] ?? '',
       actionLabel: json['actionLabel'] ?? '',
       notificationType: json['notificationType'],
@@ -74,6 +78,7 @@ class NotificationModel {
       "title": title,
       "message": message,
       "isRead": isRead,
+      "isView": isView,
       "action": action,
       "actionLabel": actionLabel,
       "notificationType": notificationType,

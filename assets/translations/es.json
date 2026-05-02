@@ -1532,7 +1532,12 @@
         "cancel": "Cancelar",
         "logout_button": "Cerrar Sesión",
         "whatsapp_notifications": "Notificaciones por WhatsApp",
-        "edit_schedule_hours": "Editar horarios de notificación"
+        "edit_schedule_hours": "Editar horarios de notificación",
+        "notifications": "Notificaciones",
+        "receive_notifications": "Recibir notificaciones",
+        "receive_email": "Recibir correos electrónicos",
+        "preferences_error":"Error al cargar preferencias",
+        "emails": "Correos electrónicos"
     },
     "progress": {
         "registration": "Registro",

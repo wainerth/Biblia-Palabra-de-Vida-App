@@ -20,7 +20,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
     with SingleTickerProviderStateMixin {
   List<NotificationModel> notifications = [];
   late SocketClientProvider notificationProvider;
-  late TabController _tabController; // ✅ NUEVO: Controlador para los tabs
+  late TabController _tabController;
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget>
     _tabController = TabController(
       length: 2,
       vsync: this,
-      initialIndex: 0, // ← Fuerza el tab inicial
+      initialIndex: 0, // Fuerza el tab inicial
     );
     // Listen for changes in notifications
     notificationProvider.addListener(_onNotificationsChanged);

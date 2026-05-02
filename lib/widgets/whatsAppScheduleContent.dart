@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
+import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
@@ -234,7 +235,7 @@ class WhatsAppScheduleContentState extends State<WhatsAppScheduleContent> {
         ),
         SizedBox(height: 8),
         Text(
-          'Mínimo 2 horas - Máximo 3 horas',
+          'Mínimo 1 horas - Máximo 3 horas',
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey.shade600,
@@ -366,8 +367,8 @@ class WhatsAppScheduleContentState extends State<WhatsAppScheduleContent> {
             buttonStyle: StylesApp(context).btnWidgetSmall,
             onPressed: () {
               if (widget.receiveWhatsApp) {
-                if (widget.selectedHours.length < 2) {
-                  _showLimitSnackBar('Debes seleccionar al menos 2 horas');
+                if (widget.selectedHours.length < 1) {
+                  _showLimitSnackBar('Debes seleccionar al menos 1 hora');
                   return;
                 }
                 if (widget.selectedHours.length > 3) {
@@ -385,14 +386,54 @@ class WhatsAppScheduleContentState extends State<WhatsAppScheduleContent> {
   }
 
   void _showLimitSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: Duration(seconds: 2),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
+    // Cerrar cualquier snackbar existente
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    // Crear una entrada de overlay
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 30,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
+
+    // Insertar el overlay
+    Overlay.of(context).insert(overlayEntry);
+
+    // Remover después de 2 segundos
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
   }
 
   // Estilos

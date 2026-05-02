@@ -1132,6 +1132,49 @@ Future<ResponseData> markAsReadOneNotification(String notificationId) async {
   }
 }
 
+Future<ResponseData> markAsViewNotification() async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+  operationName = 'MarkAsViewNotification';
+  MutationOptions mutateGql = MutationOptions(
+    operationName: operationName,
+    document: gql(r'''
+     mutation MarkAsViewNotification {
+        markAsViewNotification {
+          message
+          success
+        }
+      }
+      '''),
+    fetchPolicy: FetchPolicy.noCache,
+  );
+  try {
+    final QueryResult result = await client.mutate(mutateGql);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['markAsViewNotification'] == null) {
+      return ResponseData(
+        data: null,
+        userFriendlyError:
+            "No se pudo marcar la notificación como vista. Inténtalo nuevamente.",
+        error:
+            'Notificación de marcar como vista fallida: no se devolvieron datos',
+      );
+    }
+
+    return ResponseData(
+      data: data['markAsViewNotification'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Marcar notificación como vistas");
+  }
+}
+
 Future<ResponseData> markAllAsReadNotifications(String userId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
@@ -1738,7 +1781,7 @@ Future<ResponseData> resendVerificationCode(
   final GraphQLClient client = createClient();
 
   final MutationOptions options = MutationOptions(
-    operationName:"ResendEmailVerificationCode",
+    operationName: "ResendEmailVerificationCode",
     document: gql(r'''
         mutation ResendEmailVerificationCode($email: String!, $timezone: String) {
           resendEmailVerificationCode(email: $email, timezone: $timezone)
@@ -1778,11 +1821,12 @@ Future<ResponseData> resendVerificationCode(
   }
 }
 
-Future<ResponseData> saveWhatsAppConfig(String userId, bool isActivatedSendWhatsApp,List<String> scheduleHours ) async {
+Future<ResponseData> saveWhatsAppConfig(String userId,
+    bool isActivatedSendWhatsApp, List<String> scheduleHours) async {
   final GraphQLClient client = createClient();
 
   final MutationOptions options = MutationOptions(
-    operationName:"UpdatePreferencesWhatsapp",
+    operationName: "UpdatePreferencesWhatsapp",
     document: gql(r'''
        mutation UpdatePreferencesWhatsapp($userId: ID!, $isActiveSendWhatsapp: Boolean!, $scheduleHours: [String!]) {
           updatePreferencesWhatsapp(user_id: $userId, is_active_send_whatsapp: $isActiveSendWhatsapp, , scheduleHours: $scheduleHours) {
@@ -1796,7 +1840,7 @@ Future<ResponseData> saveWhatsAppConfig(String userId, bool isActivatedSendWhats
     variables: {
       'userId': userId,
       'isActiveSendWhatsapp': isActivatedSendWhatsApp,
-      'scheduleHours':scheduleHours
+      'scheduleHours': scheduleHours
     },
   );
 
@@ -1814,13 +1858,119 @@ Future<ResponseData> saveWhatsAppConfig(String userId, bool isActivatedSendWhats
         userFriendlyError:
             'No se pudo enviar actualizar Preferencias del usuario. Inténtalo nuevamente.',
         error:
-            'Reenvió actualizar Preferencias del usuario  fallida: no se devolvieron datos',
+            'actualizar Preferencias del usuario  fallida: no se devolvieron datos',
         errorType: ErrorType.noData,
       );
     }
 
     return ResponseData(
       data: data['updatePreferencesWhatsapp'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Actualizar preferencias de usuario");
+  }
+}
+
+Future<ResponseData> updatePreferencesEmail(
+    String userId, bool isActivateSendEmail) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  final MutationOptions options = MutationOptions(
+    operationName: "UpdatePreferencesEmail",
+    document: gql(r'''
+      mutation UpdatePreferencesEmail($userId: ID!, $isActivateSendEmail: Boolean!) {
+        updatePreferencesEmail(user_id: $userId, is_activate_send_email: $isActivateSendEmail) {
+          success
+          message
+          userPreferences {
+          user_id
+            is_activate_send_email
+            activated_at_send_email
+          }
+        }
+      }
+              '''),
+    variables: {'userId': userId, 'isActivateSendEmail': isActivateSendEmail},
+  );
+
+  try {
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['updatePreferencesEmail'] == null) {
+      return ResponseData(
+        data: null,
+        userFriendlyError:
+            'No se pudo enviar actualizar Preferencias del usuario. Inténtalo nuevamente.',
+        error:
+            'actualizar Preferencias del usuario  fallida: no se devolvieron datos',
+        errorType: ErrorType.noData,
+      );
+    }
+
+    return ResponseData(
+      data: data['updatePreferencesEmail'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "Actualizar preferencias de usuario");
+  }
+}
+
+Future<ResponseData> updatePreferencesNotifications(
+    String userId, bool isActivateSendNotifications) async {
+  String? userToken = await PreferencesManager().getUserToken();
+
+  final GraphQLClient client = createClient(authToken: userToken);
+
+  final MutationOptions options = MutationOptions(
+    operationName: "UpdatePreferencesNotifications",
+    document: gql(r'''
+         mutation UpdatePreferencesNotifications($userId: ID!, $isActivateSendNotifications: Boolean!) {
+          updatePreferencesNotifications(user_id: $userId, is_activate_send_notifications: $isActivateSendNotifications) {
+            success
+            message
+            userPreferences {
+              is_activate_send_notifications
+              activated_at_send_notifications
+            }
+          }
+        }
+              '''),
+    variables: {
+      'userId': userId,
+      'isActivateSendNotifications': isActivateSendNotifications
+    },
+  );
+
+  try {
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['updatePreferencesNotifications'] == null) {
+      return ResponseData(
+        data: null,
+        userFriendlyError:
+            'No se pudo enviar actualizar Preferencias del usuario. Inténtalo nuevamente.',
+        error:
+            'Reenvió actualizar Preferencias del usuario  fallida: no se devolvieron datos',
+        errorType: ErrorType.noData,
+      );
+    }
+
+    return ResponseData(
+      data: data['updatePreferencesNotifications'],
       error: null,
     );
   } catch (e) {

@@ -2303,6 +2303,7 @@ Future<ResponseData> getAllNotification(
            title
            message
            isRead
+           isView
            action
            actionLabel
            notificationType
@@ -3314,21 +3315,23 @@ Future<ResponseData> getSchedule({int? limit, int? offset}) async {
   }
 }
 
-Future<ResponseData> getUserWhatsAppPreferences(String? userId) async {
+Future<ResponseData> getUserPreferences(String? userId) async {
   String? userToken = await PreferencesManager().getUserToken();
 
   final GraphQLClient client = createClient(authToken: userToken);
 
   final options = QueryOptions(
-    operationName: "GetPreferencesWhatsApp",
+    operationName: "GetUserPreferences",
     document: gql(r'''
-          query GetPreferencesWhatsApp($userId: ID!) {
-            getPreferencesWhatsApp(userId: $userId) {
+          query GetUserPreferences($userId: ID!) {
+            getUserPreferences(userId: $userId) {
               success
               message
               userPreferences {
                 user_id
-                is_active_send_whatsapp
+                 is_active_send_whatsapp
+                is_activate_send_notifications
+                is_activate_send_email
                 user_schedules {
                   id
                   schedule {
@@ -3354,21 +3357,22 @@ Future<ResponseData> getUserWhatsAppPreferences(String? userId) async {
     }
 
     final data = removeTypename(result.data);
-    if (!data['getPreferencesWhatsApp']["success"]) {
+    if (!data['getUserPreferences']["success"]) {
       return ResponseData(
           data: null,
           userFriendlyError:
-              'No se pudieron obtener las configuraciones de whatsApp.',
+              'No se pudieron obtener las configuraciones Preferencias de usuario.',
           error:
-              'Error al obtener las configuraciones de whatsApp: no se devolvieron datos',
+              'Error al obtener las configuraciones de Preferencias de usuario: no se devolvieron datos',
           errorType: ErrorType.noData);
     }
 
     return ResponseData(
-      data: data['getPreferencesWhatsApp']['userPreferences'],
+      data: data['getUserPreferences']['userPreferences'],
       error: null,
     );
   } catch (e) {
-    return handleGenericError(e, "Obtener las configuraciones de whatsApp");
+    return handleGenericError(
+        e, "Obtener las configuraciones de Preferencias de usuario");
   }
 }

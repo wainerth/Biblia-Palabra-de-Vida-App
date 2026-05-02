@@ -2487,7 +2487,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _copyStory(History story, AppTranslationProvider translationProvider) {
-    Clipboard.setData(ClipboardData(text: story.text));
+    final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+    Clipboard.setData(ClipboardData(text:'${ story.text}\n $baseUrl'));
     showSnackBar(translationProvider.tr('history_screen.story_copied'),
         type: SnackBarType.success);
   }

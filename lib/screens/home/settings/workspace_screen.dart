@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/utils/route_observer.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/notification_list_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -284,6 +285,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                                 BorderRadius.vertical(top: Radius.circular(20)),
                           ),
                           builder: (BuildContext context) {
+                            // aquí debo mandar a marcar a las notificaciones como vistas
+                            _markNotificationsAsViewed();
                             return const NotificationListWidget();
                           },
                         );
@@ -1251,6 +1254,32 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
   void _updateUnreadCount() {
     _unreadCount =
         _notificationProvider.notifications.where((n) => !n.isRead).length;
+  }
+
+  Future<void> _markNotificationsAsViewed() async {
+    try {
+      // Llamar a la mutation
+      final response = await markAsViewNotification();
+
+      if (response.error != null) {
+        if (kDebugMode) {
+          print(
+              '❌ Error al marcar notificaciones como vistas: ${response.error}');
+        }
+        return;
+      }
+      // Forzar actualización del contador
+      _updateUnreadCount();
+      setState(() {});
+
+      if (kDebugMode) {
+        print('✅ Notificaciones marcadas como vistas exitosamente');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Excepción al marcar notificaciones como vistas: $e');
+      }
+    }
   }
 }
 

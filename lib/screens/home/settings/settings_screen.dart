@@ -10,7 +10,6 @@ import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/whatsAppScheduleDialog.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/translated_widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -24,6 +23,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool showNotification = false;
 
   int _refreshKey = 0;
+
+  UserPreference? _cachedPreferences;
+  bool _isLoadingPreferences = false;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserPreferences();
+  }
+
+  // Metódo para cargar preferencias del usuario
+  Future<void> _loadUserPreferences() async {
+    final userProvider = context.read<UserProvider>();
+    final userId = userProvider.currentUser?.userId;
+
+    if (userId == null) {
+      setState(() {
+        _isLoadingPreferences = false;
+        _cachedPreferences = null;
+        _hasError = true;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoadingPreferences = true;
+      _hasError = false;
+    });
+
+    try {
+      final preferences = await _getUserPreferences(userId.toString());
+      setState(() {
+        _cachedPreferences = preferences;
+        _isLoadingPreferences = false;
+        _hasError = false;
+      });
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _isLoadingPreferences = false;
+      });
+    }
+  }
+
+  Future<void> _refreshPreferences() async {
+    setState(() {
+      _isLoadingPreferences = true;
+      _hasError = false;
+    });
+
+    await _loadUserPreferences();
+    setState(() {
+      _refreshKey++;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +109,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     children: [
                       _buildWhatsAppSettingsItem(context),
+                      _buildNotificationsSettingsItem(context),
+                      _buildEmailSettingsItem(context),
                       _buildSettingsItem(
                         context,
                         path: 'settings.language',
@@ -389,7 +446,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         return FutureBuilder<UserPreference?>(
           key: ValueKey(_refreshKey),
-          future: _getUserWhatsAppPreferences(userId.toString()),
+          future: _getUserPreferences(userId.toString()),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return _buildTabletSettingsItem(
@@ -766,7 +823,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         return FutureBuilder<UserPreference?>(
           key: ValueKey(_refreshKey),
-          future: _getUserWhatsAppPreferences(userId.toString()),
+          future: _getUserPreferences(userId.toString()),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return _buildSettingsItem(
@@ -855,22 +912,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       },
     );
-
-    // Si el usuario guardó, refrescar la pantalla
-    // if (result == true) {
-    //   await Future.delayed(Duration(milliseconds: 1500));
-
-    //   if (mounted) {
-    //     setState(() {
-    //       _refreshKey++;
-    //     });
-    //   }
-    // }
   }
 
   // Obtener preferencias del usuario
-  Future<UserPreference?> _getUserWhatsAppPreferences(String userId) async {
-    final response = await getUserWhatsAppPreferences(userId);
+  Future<UserPreference?> _getUserPreferences(String userId) async {
+    final response = await getUserPreferences(userId);
     if (response.error != null || response.data == null) {
       return null;
     }
@@ -904,12 +950,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final scheduleIds = selectedHours.map((h) => h.id.toString()).toList();
 
       // Llamar a tu mutation
-      await saveWhatsAppConfig(
+      final response = await saveWhatsAppConfig(
         userId,
         enabled,
         scheduleIds,
       );
-
+      if (response.error != null) {
+        LoadingService().hideLoading();
+        await showCustomDialog(
+          context,
+          showDetails: true,
+          message: response.userFriendlyError!,
+          messageDetail: response.error!,
+          dialogType: DialogType.error,
+        );
+        return;
+      }
       LoadingService().hideLoading();
       _showSnackBar(
           context,
@@ -919,6 +975,258 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (e) {
       LoadingService().hideLoading();
       _showSnackBar(context, 'Error: ${e.toString()}', isError: true);
+    }
+  }
+
+  // Widget de activar o desactivar notificaciones
+  Widget _buildNotificationsSettingsItem(BuildContext context) {
+    return Consumer<UserProvider>(builder: (context, userProvider, child) {
+      final userId = userProvider.currentUser?.userId;
+
+      if (userId == null) {
+        return _buildSettingsItem(
+          context,
+          path: 'settings.notifications',
+          subtitle: 'Inicia sesión para configurar',
+          onTap: () {},
+        );
+      }
+      if (_isLoadingPreferences) {
+        return _buildSettingsItem(
+          context,
+          path: 'settings.notifications',
+          subtitle: 'Cargando...',
+          trailing: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          onTap: () {},
+        );
+      }
+
+      if (_hasError || _cachedPreferences == null) {
+        return _buildSettingsItem(
+          context,
+          path: 'settings.notifications',
+          subtitle: 'settings.preferences_error',
+          onTap: () {},
+        );
+      }
+      final preferences = _cachedPreferences!;
+      final isActive = preferences.is_activate_send_notifications;
+
+      return _buildSettingsItemWithSwitch(
+        context,
+        path: 'settings.notifications',
+        subtitle: 'settings.receive_notifications',
+        value: isActive,
+        onChanged: (bool newValue) async {
+          await _saveNotificationsPreferences(
+            context,
+            userId.toString(),
+            newValue,
+          );
+          if (mounted) {
+            await _refreshPreferences(); // Refrescar cache después de guardar
+          }
+        },
+      );
+    });
+  }
+
+  Widget _buildEmailSettingsItem(BuildContext context) {
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        final userId = userProvider.currentUser?.userId;
+
+        if (userId == null) {
+          return _buildSettingsItem(
+            context,
+            path: 'settings.emails',
+            subtitle: 'Inicia sesión para configurar',
+            onTap: () {},
+          );
+        }
+        if (_isLoadingPreferences) {
+          return _buildSettingsItem(
+            context,
+            path: 'settings.emails',
+            trailing: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            onTap: () {},
+          );
+        }
+
+        if (_hasError || _cachedPreferences == null) {
+          return _buildSettingsItem(
+            context,
+            path: 'settings.emails',
+            subtitle: 'settings.preferences_error',
+            onTap: () {},
+          );
+        }
+
+        final preferences = _cachedPreferences!;
+        final isActive = preferences.is_activate_send_email;
+        print('Notifications value: $isActive');
+        return _buildSettingsItemWithSwitch(
+          context,
+          path: 'settings.emails',
+          subtitle: 'settings.receive_email',
+          value: isActive,
+          onChanged: (bool newValue) async {
+            await _saveEmailPreferences(
+              context,
+              userId.toString(),
+              newValue,
+            );
+            if (mounted) {
+              await _refreshPreferences(); // Refrescar cache después de guardar
+            }
+          },
+        );
+      },
+    );
+  }
+
+// widget para SettingsItem con Switch
+  Widget _buildSettingsItemWithSwitch(
+    BuildContext context, {
+    required String path,
+    String? subtitle,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    // Versión de prueba sin Consumer
+    return Consumer<AppTranslationProvider>(
+        builder: (context, provider, child) {
+      return Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        provider
+                            .tr(path), // Temporal: muestra el path directamente
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                      if (subtitle != null)
+                        Text(
+                          provider.tr(subtitle),
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 10),
+                        ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: value,
+                  onChanged: onChanged,
+                  activeColor: StyleColor.orange, // ovalo
+                  activeTrackColor:
+                      StyleColor.white, // fondo del switch cuando está activo
+                  inactiveThumbColor: Colors.grey,
+                  inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
+                ),
+              ],
+            ),
+          ),
+          Divider(
+            height: 2,
+            thickness: 5,
+            color: Colors.white.withValues(alpha: 0.50),
+            endIndent: 10,
+            indent: 10,
+          ),
+        ],
+      );
+    });
+  }
+
+// Métodos para guardar preferencias
+  Future<void> _saveNotificationsPreferences(
+    BuildContext context,
+    String userId,
+    bool enabled,
+  ) async {
+    try {
+      LoadingService().showLoading(context);
+
+      final response = await updatePreferencesNotifications(userId, enabled);
+      if (response.error != null) {
+        LoadingService().hideLoading();
+        await showCustomDialog(
+          context,
+          showDetails: true,
+          message: response.userFriendlyError!,
+          messageDetail: response.error!,
+          dialogType: DialogType.error,
+        );
+        return;
+      }
+      LoadingService().hideLoading();
+      _showSnackBar(
+        context,
+        enabled ? 'Notificaciones activadas' : 'Notificaciones desactivadas',
+      );
+    } catch (e) {
+      LoadingService().hideLoading();
+      await showCustomDialog(
+        context,
+        showDetails: true,
+        message: "Error al actualizar preferencias de notificaciones",
+        messageDetail: e.toString(),
+        dialogType: DialogType.error,
+      );
+    }
+  }
+
+  Future<void> _saveEmailPreferences(
+    BuildContext context,
+    String userId,
+    bool enabled,
+  ) async {
+    try {
+      LoadingService().showLoading(context);
+
+      final response = await updatePreferencesEmail(userId, enabled);
+      if (response.error != null) {
+        LoadingService().hideLoading();
+        await showCustomDialog(
+          context,
+          showDetails: true,
+          message: response.userFriendlyError!,
+          messageDetail: response.error!,
+          dialogType: DialogType.error,
+        );
+        return;
+      }
+      LoadingService().hideLoading();
+      _showSnackBar(
+        context,
+        enabled
+            ? 'Correos electrónicos activados'
+            : 'Correos electrónicos desactivados',
+      );
+    } catch (e) {
+      LoadingService().hideLoading();
+      await showCustomDialog(
+        context,
+        showDetails: true,
+        message: "Error al actualizar preferencias de correos electrónicos",
+        messageDetail: e.toString(),
+        dialogType: DialogType.error,
+      );
     }
   }
 }
