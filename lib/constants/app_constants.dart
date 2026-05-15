@@ -4,18 +4,21 @@ class AppConstants {
   static final List<Map<String, dynamic>> homeCards = [
     {
       'label': 'workspace.cards.adventure',
+      'subTitle':"workspace.cards.adventure_sub_title",
       'key':'Aventura',
-      'img': 'assets/aventure.gif',
+      'img': 'assets/aventure-bolso.png',
       'route': '/introAventurePage',
     },
     {
       'label': 'workspace.cards.bible',
+      'subTitle':"workspace.cards.bible_sub_title",
       'key':'Biblia',
-      'img': 'assets/biblia.png',
+      'img': 'assets/bible-icon.png',
       'route': '/bibliaPage',
     },
     {
       'label': 'workspace.cards.community',
+      'subTitle':"workspace.cards.community_sub_title",
       'key':'Comunidad',
       'img': 'assets/comunidad.png',
       'route': '/communityPage',

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/utils/route_observer.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/auto_scroll_text.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/notification_list_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -53,7 +54,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
   int _unreadCount = 0;
   dynamic Function(dynamic)? _notificationListener;
   late final SocketClientProvider _notificationProvider;
-
+  String wavingHand = '👋';
   @override
   void initState() {
     super.initState();
@@ -262,82 +263,14 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Visibility(
-                  visible: true,
-                  child: Container(
-                    width: _isTablet ? 70 : 35,
-                    height: _isTablet ? 70 : 35,
-                    decoration: const BoxDecoration(
-                      color: Colors.transparent,
-                    ),
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      iconSize: _isTablet ? 70 : 35,
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          builder: (BuildContext context) {
-                            // aquí debo mandar a marcar a las notificaciones como vistas
-                            _markNotificationsAsViewed();
-                            return const NotificationListWidget();
-                          },
-                        );
-                      },
-                      icon: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Icon(
-                            Icons.notifications,
-                            size: _isTablet ? 60 : 40,
-                            color: StyleColor.redLight,
-                          ),
-                          Positioned(
-                            right: _isTablet ? 22 : 6,
-                            top: _isTablet ? 18 : 12,
-                            child: Container(
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  int.parse(getUnreadCountNotification()) > 0
-                                      ? getUnreadCountNotification()
-                                      : '',
-                                  style: StylesApp(context)
-                                      .textStyleBody10
-                                      .copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               Column(
                 children: [
-                  const SizedBox(height: 15.0),
-                  // Sección de cards superiores - Responsive
+                  const SizedBox(height: 25.0),
                   _isTablet
                       ? _buildTabletCardSection(
                           context, cardList, translationProvider)
-                      : _buildMobileCardSection(
-                          context, cardList, translationProvider),
+                      : _buildPositionSection(
+                          context, dataUser, translationProvider),
 
                   const SizedBox(height: 12.0),
 
@@ -350,6 +283,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                   SizedBox(height: kBottomNavigationBarHeight - 40),
                 ],
               ),
+              // Positioned(
+              //   top: 0,
+              //   right: 0,
+              //   child: _buildNotificationButton(_isTablet),
+              // ),
             ],
           ),
         ),
@@ -361,9 +299,13 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
   Widget _buildMobileLayout(
       BuildContext context, AppTranslationProvider translationProvider) {
     return Column(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         dataUser != null
-            ? _buildPositionSection(context, dataUser, translationProvider)
+            ? _buildMobileCardSection(
+                context, AppConstants.homeCards, translationProvider)
+            // _buildPositionSection(context, dataUser, translationProvider)
             : Container(),
         const SizedBox(height: 12.0),
         _buildProverbsSection(
@@ -430,19 +372,120 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
 
   // ============ COMPONENTES REUTILIZABLES ============
 
+// Función para construir el ícono de notificaciones con contador
+  Widget _buildNotificationIcon(bool isTablet) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Icon(
+          Icons.notifications,
+          size: isTablet ? 40 : 40,
+          color: StyleColor.white,
+        ),
+        Positioned(
+          right: 0,
+          top: 0,
+          child: _buildNotificationBadge(),
+        ),
+      ],
+    );
+  }
+
+// Función para construir el badge del contador
+  Widget _buildNotificationBadge() {
+    final unreadCount = getUnreadCountNotification();
+    final hasNotifications = int.parse(unreadCount) > 0;
+
+    return hasNotifications
+        ? Container(
+            decoration: BoxDecoration(
+                color: StyleColor.redDark,
+                borderRadius: BorderRadius.circular(100)),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 20,
+              minHeight: 20,
+            ),
+            child: Center(
+              child: Text(
+                hasNotifications ? unreadCount : '',
+                style: StylesApp(context).textStyleBody10.copyWith(
+                      // color: StyleColor.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          )
+        : Container();
+  }
+
+// Función para construir el botón de notificaciones completo
+  Widget _buildNotificationButton(bool isTablet) {
+    return Visibility(
+      visible: true,
+      child: Container(
+        width: 40,
+        height: 40,
+        // decoration: const BoxDecoration(
+        //   color: Colors.transparent,
+        // ),
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          iconSize: isTablet ? 35 : 35,
+          onPressed: () => _showNotificationsModal(context),
+          icon: _buildNotificationIcon(isTablet),
+        ),
+      ),
+    );
+  }
+
   // Cards superiores para móvil
   Widget _buildMobileCardSection(
       BuildContext context,
       List<Map<String, dynamic>> cards,
       AppTranslationProvider translationProvider) {
+    List<List<Color>> listGradients = [
+      [Color(0xFF2AC8F4), Color(0xFF12CBC4)],
+      [Color(0xFF3579F6), Color(0xFF3C0BFF)]
+    ];
     return SingleChildScrollView(
+      padding: EdgeInsets.all(0),
       scrollDirection: Axis.horizontal,
       child: Row(
+        spacing: 10.0,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: cards
             .where((card) =>
-                (card['key'] != 'Comunidad' && !GraphQLConfig.development))
-            .map((card) => _buildCard(context, card, translationProvider))
-            .toList(),
+                (card['key'] != 'Comunidad' /*&& !GraphQLConfig.development*/))
+            .map((
+          card,
+        ) {
+          List<Color> gradientColors;
+          switch (card['key']) {
+            case 'Aventura':
+              gradientColors = listGradients[0];
+              break;
+            case 'Biblia':
+              gradientColors = listGradients[1];
+              break;
+            default:
+              gradientColors = listGradients[0];
+          }
+
+          return Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15.0),
+                // image: DecorationImage(
+                //     image: AssetImage('assets/background_player.jpg'),
+                //     fit: BoxFit.cover,
+                //     opacity: 0.25),
+                gradient: LinearGradient(colors: gradientColors)),
+            width: 190,
+            child: _buildCard(context, card, translationProvider),
+          );
+        }).toList(),
       ),
     );
   }
@@ -461,84 +504,204 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: filteredCards
-            .map((card) => _buildTabletCard(context, card, translationProvider))
-            .toList(),
+        children: filteredCards.map((card) {
+          List<List<Color>> listGradients = [
+            [Color(0xFF2AC8F4), Color(0xFF12CBC4)],
+            [Color(0xFF3579F6), Color(0xFF3C0BFF)]
+          ];
+
+          List<Color> gradientColors;
+          switch (card['key']) {
+            case 'Aventura':
+              gradientColors = listGradients[0];
+              break;
+            case 'Biblia':
+              gradientColors = listGradients[1];
+              break;
+            default:
+              gradientColors = listGradients[0];
+          }
+          return Container(
+              constraints: BoxConstraints(maxWidth: 300.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.0),
+                gradient: LinearGradient(colors: gradientColors),
+              ),
+              child: _buildCard(context, card,
+                  translationProvider) // _buildTabletCard(context, card, translationProvider)
+              );
+        }).toList(),
       ),
     );
   }
 
-  Widget _buildTabletCard(BuildContext context, Map<String, dynamic> card,
-      AppTranslationProvider translationProvider) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: GestureDetector(
-          onTap: () => _onCardTap(context, card),
-          child: Column(
-            children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(60),
-                  image: DecorationImage(
-                    image: AssetImage(card['img']!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              Text(
-                translationProvider.tr(card['label']!),
-                textAlign: TextAlign.center,
-                style: StylesApp(context).textStyleBody4.copyWith(
-                      color: const Color(0xFFFD8C43),
-                      fontSize: 14.sp,
-                    ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildTabletCard(BuildContext context, Map<String, dynamic> card,
+  //     AppTranslationProvider translationProvider) {
+  //   return GestureDetector(
+  //     onTap: () => _onCardTap(context, card),
+  //     child: Stack(children: [
+  //       Center(
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(8.0),
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.center,
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: [
+  //               Container(
+  //                 // decoration: BoxDecoration(
+  //                 //   boxShadow: [
+  //                 //     BoxShadow(
+  //                 //       color: StyleColor.black.withValues(alpha: 0.2),
+  //                 //       blurRadius: 5,
+  //                 //       spreadRadius: 2,
+  //                 //       offset: Offset(0, 4),
+  //                 //     )
+  //                 //   ],
+  //                 // ),
+  //                 clipBehavior: Clip.none,
+  //                 child: Image.asset(
+  //                   card['img']!,
+  //                   height: 80,
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 8.0),
+  //               Text(
+  //                 translationProvider.tr(card['label']!),
+  //                 textAlign: TextAlign.center,
+  //                 style: StylesApp(context).textStyleBody4.copyWith(
+  //                       color: StyleColor.white,
+  //                     ),
+  //               ),
+  //               AutoScrollText(
+  //                 translationProvider.tr(card['subTitle']!),
+  //                 style: StylesApp(context).textStyleBody12.copyWith(
+  //                       color: StyleColor.white,
+  //                     ),
+  //                 maxWidth: 150, // Ajusta según el tamaño de tu card
+  //                 scrollDuration: Duration(seconds: 3),
+  //                 pauseDuration: Duration(seconds: 1),
+  //               )
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //       Positioned(
+  //           bottom: 10,
+  //           right: 5,
+  //           child: Container(
+  //               padding: EdgeInsets.all(2),
+  //               decoration: BoxDecoration(
+  //                   color: StyleColor.white.withValues(alpha: 0.45),
+  //                   borderRadius: BorderRadius.circular(50)),
+  //               child: Icon(
+  //                 Icons.arrow_forward_ios_rounded,
+  //                 size: 20.0,
+  //               )))
+  //     ]),
+  //   );
+  // }
 
   Widget _buildCard(BuildContext context, Map<String, dynamic> card,
       AppTranslationProvider translationProvider) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      child: GestureDetector(
-        onTap: () => _onCardTap(context, card),
-        child: Column(
-          children: [
-            Container(
-              width: StylesApp(context).sizeContainerCard.width,
-              height: StylesApp(context).sizeContainerCard.height,
-              clipBehavior: Clip.none,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(
-                    StylesApp(context).sizeContainerCard.width),
-                image: DecorationImage(
-                  alignment: Alignment.center,
-                  image: AssetImage(card['img']!),
-                  fit: BoxFit.fitHeight,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8.0),
-            Text(
-              translationProvider.tr(card['label']!),
-              textAlign: TextAlign.center,
-              style: StylesApp(context).textStyleBody4.copyWith(
-                    color: const Color(0xFFFD8C43),
+    return GestureDetector(
+      onTap: () => _onCardTap(context, card),
+      child: Stack(children: [
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  // decoration: BoxDecoration(
+                  //   boxShadow: [
+                  //     BoxShadow(
+                  //       color: StyleColor.black.withValues(alpha: 0.2),
+                  //       blurRadius: 5,
+                  //       spreadRadius: 2,
+                  //       offset: Offset(0, 4),
+                  //     )
+                  //   ],
+                  // ),
+                  clipBehavior: Clip.none,
+                  child: Image.asset(
+                    card['img']!,
+                    height: 80,
                   ),
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  translationProvider.tr(card['label']!),
+                  textAlign: TextAlign.center,
+                  style: StylesApp(context).textStyleBody4.copyWith(
+                        color: StyleColor.white,
+                      ),
+                ),
+                AutoScrollText(
+                  translationProvider.tr(card['subTitle']!),
+                  style: StylesApp(context).textStyleBody12.copyWith(
+                        color: StyleColor.white,
+                      ),
+                  maxWidth: 150, // Ajusta según el tamaño de tu card
+                  scrollDuration: Duration(seconds: 3),
+                  pauseDuration: Duration(seconds: 1),
+                )
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        Positioned(
+            bottom: 10,
+            right: 5,
+            child: Container(
+                padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                    color: StyleColor.white.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(50)),
+                child: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 20.0,
+                )))
+      ]),
     );
   }
+
+  // Widget _buildCard(BuildContext context, Map<String, dynamic> card,
+  //     AppTranslationProvider translationProvider) {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 10.0),
+  //     child: GestureDetector(
+  //       onTap: () => _onCardTap(context, card),
+  //       child: Column(
+  //         children: [
+  //           Container(
+  //             width: StylesApp(context).sizeContainerCard.width,
+  //             height: StylesApp(context).sizeContainerCard.height,
+  //             clipBehavior: Clip.none,
+  //             decoration: BoxDecoration(
+  //               borderRadius: BorderRadius.circular(
+  //                   StylesApp(context).sizeContainerCard.width),
+  //               image: DecorationImage(
+  //                 alignment: Alignment.center,
+  //                 image: AssetImage(card['img']!),
+  //                 fit: BoxFit.fitHeight,
+  //               ),
+  //             ),
+  //           ),
+  //           const SizedBox(height: 8.0),
+  //           Text(
+  //             translationProvider.tr(card['label']!),
+  //             textAlign: TextAlign.center,
+  //             style: StylesApp(context).textStyleBody4.copyWith(
+  //                   color: const Color(0xFFFD8C43),
+  //                 ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Future<void> _onCardTap(
       BuildContext context, Map<String, dynamic> card) async {
@@ -850,6 +1013,10 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
     bool loading = false;
     return Container(
       decoration: BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage('assets/background_player.jpg'),
+            fit: BoxFit.cover,
+            opacity: 0.25),
         color: const Color(0xFF12CBC4),
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -1038,9 +1205,19 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
 
   _buildPositionSection(BuildContext context, userData,
       AppTranslationProvider translationProvider) {
+    double sizeAvatar = getSizeFire(dataUser!.energyPoints);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF12CBC4),
+        // image: DecorationImage(
+        //     image: AssetImage('assets/background_player.jpg'),
+        //     fit: BoxFit.cover,
+        //     opacity: 0.25),
+        color: StyleColor.turquoise,
+        // gradient: LinearGradient(colors: [
+        //   StyleColor.white,
+        //   StyleColor.blueLight,
+        //   StyleColor.blue,
+        // ], begin: Alignment.topRight, end: Alignment.topLeft),
         borderRadius: BorderRadius.circular(8.0),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -1056,20 +1233,19 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        flex: 1,
-                        child: Center(
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: StylesApp(context)
-                                    .sizeContainerAvatar
-                                    .height,
-                                width: StylesApp(context)
-                                    .sizeContainerAvatar
-                                    .width,
+                        child: Row(
+                          spacing: 12.0,
+                          children: [
+                            SizedBox(
+                              width: 80.0,
+                              height: 80.0,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 2.0, color: StyleColor.white),
+                                    borderRadius: BorderRadius.circular(80.0)),
                                 child: ClipOval(
                                   child: (userData != null &&
                                           userData!.imgProfileUser != null)
@@ -1093,125 +1269,259 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                                         ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.pushNamed(context, '/layoutPage1',
-                                    arguments: {'selectedIndex': 2});
-                              },
-                              child: Container(
-                                constraints: BoxConstraints(
-                                    maxWidth:
-                                        StylesApp(context).sizeTextPosition,
-                                    minHeight: 20),
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFC7AA34),
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    textAlign: TextAlign.center,
-                                    "${userData?.league != null ? userData.league.leagueName : translationProvider.tr('workspace.user_profile.welcome_herd')}",
-                                    style: userData?.league != null
-                                        ? StylesApp(context)
-                                            .textStyleBody6
-                                            .copyWith(color: Colors.white)
-                                        : StylesApp(context)
-                                            .textStyleBody10
-                                            .copyWith(
-                                                color: Colors.white,
-                                                fontSize: 14.0),
-                                  ),
-                                ),
-                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: isTablet(context) ? 59 : 30,
-                              child: Image.asset(
-                                'assets/kawaii_fire.png',
-                                alignment: Alignment.center,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${translationProvider.trParams("workspace.hello", {
+                                        "name": getCapitalizedFirstName(
+                                            userData.name)
+                                      })} $wavingHand",
+                                  style: StylesApp(context)
+                                      .textStyleBody20
+                                      .copyWith(color: StyleColor.white),
+                                  // .copyWith(fontSize: 22),
+                                ),
+                                Text(
+                                  translationProvider
+                                      .tr("workspace.great_work"),
+                                  style: StylesApp(context).textStyleBody12,
+                                )
+                              ],
+                            )
                           ],
                         ),
                       ),
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Center(
-                          child: Text(
-                            textAlign: TextAlign.center,
-                            softWrap: true,
-                            dataUser != null
-                                ? dataUser!.name
-                                        .split(' ')[0][0]
-                                        .toUpperCase() +
-                                    dataUser!.name.split(' ')[0].substring(1)
-                                : '',
-                            style: StylesApp(context)
-                                .textStyleBody6
-                                .copyWith(color: Colors.white),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(5.0),
+                    decoration: BoxDecoration(
+                        color: StyleColor.white,
+                        borderRadius: BorderRadius.circular(12.0)),
+                    child: Row(
+                      spacing: 6.0,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          // flex: 1,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  spacing: 5,
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_month_outlined,
+                                      color: StyleColor.blueMedium,
+                                      size: 16,
+                                    ),
+                                    Expanded(
+                                      child: Text("Constancia",
+                                          style: StylesApp(context)
+                                              .textStyleBody14
+                                              .copyWith(
+                                                  color: StyleColor.black),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis),
+                                    ),
+                                  ],
+                                ),
+                                Center(
+                                  child: Text(
+                                    softWrap: true,
+                                    maxLines: 2,
+                                    "${dataUser != null ? dataUser!.streakDaysCount.toString() : ''} Días",
+                                    style: StylesApp(context)
+                                        .textStyleBody6
+                                        .copyWith(color: Colors.black),
+                                  ),
+                                ),
+                              ]),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(left: 2.0, right: 2.0),
+                          width: 0.5,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: StyleColor.black,
                           ),
                         ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Center(
-                          child: Text(
-                            textAlign: TextAlign.center,
-                            translationProvider
-                                .tr('workspace.user_profile.streak_days')
-                                .replaceFirst(
-                                    '%s', userData.streakDaysCount.toString()),
-                            style: StylesApp(context)
-                                .textStyleBody6
-                                .copyWith(color: Colors.white),
+                        Expanded(
+                          // flex: 1,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context, '/layoutPage1',
+                                  arguments: {'selectedIndex': 2});
+                            },
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.stars_rounded,
+                                        color: StyleColor.yellowLight,
+                                        size: 16,
+                                      ),
+                                      Expanded(
+                                        child: Text("Nivel",
+                                            style: StylesApp(context)
+                                                .textStyleBody14
+                                                .copyWith(
+                                                    color: StyleColor.black),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    textAlign: TextAlign.center,
+                                    "${userData?.league != null ? userData.league.leagueName : translationProvider.tr('workspace.user_profile.welcome_herd')}",
+                                    style: userData?.league != null
+                                        ? StylesApp(context)
+                                            .textStyleBody6
+                                            .copyWith(color: Colors.black)
+                                        : StylesApp(context)
+                                            .textStyleBody10
+                                            .copyWith(
+                                                color: Colors.black,
+                                                fontSize: 14.0),
+                                  )
+                                ]),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Center(
-                          child: Text(
-                            translationProvider
-                                .tr('workspace.user_profile.energy_points')
-                                .replaceFirst(
-                                    '%s', userData.energyPoints.toString()),
-                            style: StylesApp(context)
-                                .textStyleBody6
-                                .copyWith(color: Colors.white),
+                        Container(
+                          width: 0.5,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: StyleColor.black,
                           ),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            // crossAxisAlignment: CrossAxisAlignment.start,
+                            // mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: sizeAvatar,
+                                      child: Image.asset(
+                                        'assets/go-aventure.gif',
+                                        alignment: Alignment.center,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    // Expanded(
+                                    //   child: Text("Monedas",
+                                    //       style: StylesApp(context)
+                                    //           .textStyleBody14
+                                    //           .copyWith(color: StyleColor.black),
+                                    //       maxLines: 1,
+                                    //       overflow: TextOverflow.ellipsis),
+                                    // ),
+                                  ],
+                                ),
+                              ),
+                              Center(
+                                child: Text(
+                                  translationProvider
+                                      .tr(
+                                          'workspace.user_profile.energy_points')
+                                      .replaceFirst('%s',
+                                          userData.energyPoints.toString()),
+                                  style: StylesApp(context)
+                                      .textStyleBody6
+                                      .copyWith(color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20.0,
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                        color: StyleColor.white,
+                        borderRadius: BorderRadius.circular(12.0)),
+                    child: Row(
+                      spacing: 5.0,
+                      children: [
+                        Container(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.stars,
+                                color: StyleColor.yellowLight,
+                              ),
+                              Text(
+                                "Objetivo Semanal",
+                                style: StylesApp(context)
+                                    .textStyleBody12
+                                    .copyWith(color: StyleColor.black),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Si estás mostrando progreso de una tarea
+                        Expanded(
+                          flex: 1,
+                          child: LinearProgressIndicator(
+                            borderRadius: BorderRadius.circular(8),
+                            minHeight: 15.0,
+                            color: StyleColor.redDark,
+                            backgroundColor:
+                                StyleColor.grayDark.withValues(alpha: 0.3),
+                            value: (dataUser?.streakDaysCount ?? 0) /
+                                7, // Variable que cambia
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                StyleColor.turquoise),
+                          ),
+                        ),
+                        Text("${dataUser?.streakDaysCount} / 7"),
+                        Text(
+                          "¡Sigue Así!",
+                          style: StylesApp(context)
+                              .textStyleBody12
+                              .copyWith(color: StyleColor.black),
+                        )
+                      ],
+                    ),
                   )
                 ],
               ),
               Positioned(
-                right: -3,
-                top: -10,
-                child: SizedBox(
+                top: 0,
+                right: 0,
+                child: Container(
+                    // decoration: BoxDecoration(
+                    //   border: Border.all(width: 2.0)
+                    // ),
+                    width: 40.0.sp,
+                    height: 30.0.sp,
+                    child: _buildNotificationButton(isTablet(context))),
+              ),
+              Positioned(
+                top: 50,
+                right: 0,
+                child: Container(
+                  // decoration: BoxDecoration(
+                  //   border: Border.all(width: 2.0)
+                  // ),
                   width: 40.0.sp,
                   height: 30.0.sp,
                   child: IconButton(
@@ -1279,6 +1589,30 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
       if (kDebugMode) {
         print('❌ Excepción al marcar notificaciones como vistas: $e');
       }
+    }
+  }
+
+  void _showNotificationsModal(BuildContext context) {
+    _markNotificationsAsViewed();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return const NotificationListWidget();
+      },
+    );
+  }
+
+  double getSizeFire(int energyPoints) {
+    if (energyPoints > 500) {
+      return isTablet(context) ? 60: 40;
+    } else if (energyPoints > 250) {
+      return isTablet(context) ?  50 : 30;
+    } else {
+      return isTablet(context) ? 40 : 20;
     }
   }
 }

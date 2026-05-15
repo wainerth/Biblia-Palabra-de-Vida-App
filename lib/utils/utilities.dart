@@ -503,3 +503,10 @@ class KeyboardUtils {
     }
   }
 }
+
+String getCapitalizedFirstName(String? fullName) {
+  if (fullName == null || fullName.isEmpty) return '';
+  final firstName = fullName.split(' ').first;
+  if (firstName.isEmpty) return '';
+  return firstName[0].toUpperCase() + firstName.substring(1).toLowerCase();
+}

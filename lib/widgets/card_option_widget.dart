@@ -17,10 +17,15 @@ class CardOptionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         constraints: BoxConstraints(
-            minHeight: MediaQuery.sizeOf(context).width > 400 ? 120 : 40.sp,
+            minHeight: MediaQuery.sizeOf(context).width > 400 ? 70 : 40,
             maxWidth: 170.0.sp),
         width: double.infinity,
+        
         decoration: BoxDecoration(
+          // image: DecorationImage(
+          //   image: AssetImage('assets/background_player.jpg'),
+          //   fit: BoxFit.cover,
+          //   opacity: 0.25),
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,

@@ -1256,13 +1256,16 @@
         "title": "Home",
         "notifications": "Notifications",
         "see_all": "See All...",
+        "hello": "Hello, {{name}} ",
+        "great_work": "Good is with you today",
+        "constancy":"Constancia",
         "no_unread_notifications": "You have no unread notifications.",
         "no_read_notifications": "You have no read notifications.",
         "unread": "Unread",
         "read": "Read",
         "cards": {
             "community": "Community",
-            "adventure": "Adventure",
+            "adventure": "Discipleship",
             "bible": "The Bible",
             "library": "Library"
         },

@@ -1,4 +1,5 @@
 // import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
@@ -18,8 +19,8 @@ class _PageScreenState extends State<PageScreen> {
     WorkspaceScreen(),
     BibleScreen(),
     PrayerScreen(),
-    // RadioScreen(),
-    // GraphQLConfig.development ? OfferingsScreen() : SoonScreen(),
+    if (GraphQLConfig.development) RadioScreen(),
+    if (GraphQLConfig.development) OfferingsScreen(),
     SettingsScreen(),
   ];
 
@@ -36,9 +37,11 @@ class _PageScreenState extends State<PageScreen> {
     super.didChangeDependencies();
     if (_hasProcessedInitialArguments) return;
     final Object? args = ModalRoute.of(context)!.settings.arguments;
-    if (args != null && args is Map<String, dynamic> && args.containsKey('selectedIndex')) {
+    if (args != null &&
+        args is Map<String, dynamic> &&
+        args.containsKey('selectedIndex')) {
       setState(() {
-         _hasProcessedInitialArguments = true; 
+        _hasProcessedInitialArguments = true;
         _selectedIndex = (args as Map<String, dynamic>)["selectedIndex"];
       });
     }

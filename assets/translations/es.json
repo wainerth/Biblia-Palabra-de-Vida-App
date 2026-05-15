@@ -1269,14 +1269,21 @@
         "title": "Inicio",
         "notifications": "Notificaciones",
         "see_all": "Ver Todas...",
+        "hello":"Hola {{name}} ",
+        "great_work":"Dios te acompaña hoy",
+        "constancy":"Constancia",
         "no_unread_notifications": "No tienes notificaciones no leídas.",
         "no_read_notifications": "No tienes notificaciones leídas.",
         "unread": "No leídas",
         "read": "Leídas",
         "cards": {
             "community": "Comunidad",
-            "adventure": "Aventura",
+            "community_sub_title":"",
+            "adventure": "Discipulado",
+            "adventure_sub_title":"Sigue tu camino de Fé",
             "bible": "La Biblia",
+            "bible_sub_title":"Lee y medita la Palabra",
+
             "library": "Librería"
         },
         "sections": {

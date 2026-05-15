@@ -1257,13 +1257,16 @@
         "title": "Accueil",
         "notifications": "Notifications",
         "see_all": "Voir Toutes...",
+        "hello":"Bonjour, %s ",
+        "great_work":"Dieu est avec vous aujourd'hui",
+        "constancy":"Constancia",
         "no_unread_notifications": "Vous n'avez pas de notifications non lues.",
         "no_read_notifications": "Vous n'avez pas de notifications lues.",
         "unread": "Non lues",
         "read": "Lues",
         "cards": {
             "community": "Communauté",
-            "adventure": "Aventure",
+            "adventure": "Discipulat",
             "bible": "La Bible",
             "library": "Bibliothèque"
         },
