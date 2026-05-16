@@ -16,8 +16,9 @@ class CardOptionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.all(8.0),
         constraints: BoxConstraints(
-            minHeight: MediaQuery.sizeOf(context).width > 400 ? 70 : 40,
+            minHeight: MediaQuery.sizeOf(context).width > 400 ? 70 : 45,
             maxWidth: 170.0.sp),
         width: double.infinity,
         
@@ -39,8 +40,8 @@ class CardOptionWidget extends StatelessWidget {
             Center(
               child: Image.asset(
                 imageBackground,
-                fit: BoxFit.cover,
-                height: 50,
+                fit: BoxFit.fitHeight,
+                height: 40,
               ),
             ),
             Center(

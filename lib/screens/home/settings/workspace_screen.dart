@@ -38,6 +38,7 @@ class WorkspaceScreen extends StatefulWidget {
 
 class _WorkspaceScreenState extends State<WorkspaceScreen>
     with SafeStateMixin, RouteAware {
+  final AppTranslationProvider _translationProvider = AppTranslationProvider();
   LoginUser? dataUser;
   late final CatalogueProvider catalogueProvider;
   PaginationInfo? paginate;
@@ -182,7 +183,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
     List<NotificationModel> notifies = [];
     Provider.of<SocketClientProvider>(context, listen: false)
         .cleanNotification();
-    final translationProvider = context.read<AppTranslationProvider>();
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final useData = userProvider.currentUser;
@@ -211,7 +211,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
       });
     } catch (e) {
       String error =
-          "${translationProvider.tr('workspace.errors.load_notifications')}:  ${e.toString()}";
+          "${_translationProvider.tr('workspace.errors.load_notifications')}:  ${e.toString()}";
       if (mounted) {
         await showCustomDialog(context,
             message: error, dialogType: DialogType.error);
@@ -249,7 +249,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
 
   @override
   Widget build(BuildContext context) {
-    final translationProvider = context.read<AppTranslationProvider>();
     final userProvider = Provider.of<UserProvider>(context);
     final _isTablet = isTablet(context);
     dataUser = userProvider.currentUser;
@@ -268,26 +267,21 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                   const SizedBox(height: 25.0),
                   _isTablet
                       ? _buildTabletCardSection(
-                          context, cardList, translationProvider)
+                          context, cardList, _translationProvider)
                       : _buildPositionSection(
-                          context, dataUser, translationProvider),
+                          context, dataUser, _translationProvider),
 
                   const SizedBox(height: 12.0),
 
                   // Layout principal responsive
                   ResponsiveLayout(
-                    mobile: _buildMobileLayout(context, translationProvider),
-                    tablet: _buildTabletLayout(context, translationProvider),
+                    mobile: _buildMobileLayout(context, _translationProvider),
+                    tablet: _buildTabletLayout(context, _translationProvider),
                   ),
 
                   SizedBox(height: kBottomNavigationBarHeight - 40),
                 ],
               ),
-              // Positioned(
-              //   top: 0,
-              //   right: 0,
-              //   child: _buildNotificationButton(_isTablet),
-              // ),
             ],
           ),
         ),
@@ -303,9 +297,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         dataUser != null
-            ? _buildMobileCardSection(
-                context, AppConstants.homeCards, translationProvider)
-            // _buildPositionSection(context, dataUser, translationProvider)
+            ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _buildMobileCardSection(
+                    context, AppConstants.homeCards, translationProvider),
+              )
             : Container(),
         const SizedBox(height: 12.0),
         _buildProverbsSection(
@@ -379,7 +375,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
       children: [
         Icon(
           Icons.notifications,
-          size: isTablet ? 40 : 40,
+          size: isTablet ? 30 : 30,
           color: StyleColor.white,
         ),
         Positioned(
@@ -425,8 +421,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
     return Visibility(
       visible: true,
       child: Container(
-        width: 40,
-        height: 40,
+        width: 30,
+        height: 30,
         // decoration: const BoxDecoration(
         //   color: Colors.transparent,
         // ),
@@ -476,13 +472,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
 
           return Container(
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15.0),
-                // image: DecorationImage(
-                //     image: AssetImage('assets/background_player.jpg'),
-                //     fit: BoxFit.cover,
-                //     opacity: 0.25),
-                gradient: LinearGradient(colors: gradientColors)),
-            width: 190,
+              borderRadius: BorderRadius.circular(15.0),
+              // image: DecorationImage(
+              //     image: AssetImage('assets/background_player.jpg'),
+              //     fit: BoxFit.cover,
+              //     opacity: 0.25),
+              gradient: LinearGradient(colors: gradientColors),
+            ),
+            constraints: BoxConstraints(
+              maxWidth: 180,
+            ),
             child: _buildCard(context, card, translationProvider),
           );
         }).toList(),
@@ -534,72 +533,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
       ),
     );
   }
-
-  // Widget _buildTabletCard(BuildContext context, Map<String, dynamic> card,
-  //     AppTranslationProvider translationProvider) {
-  //   return GestureDetector(
-  //     onTap: () => _onCardTap(context, card),
-  //     child: Stack(children: [
-  //       Center(
-  //         child: Padding(
-  //           padding: const EdgeInsets.all(8.0),
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.center,
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: [
-  //               Container(
-  //                 // decoration: BoxDecoration(
-  //                 //   boxShadow: [
-  //                 //     BoxShadow(
-  //                 //       color: StyleColor.black.withValues(alpha: 0.2),
-  //                 //       blurRadius: 5,
-  //                 //       spreadRadius: 2,
-  //                 //       offset: Offset(0, 4),
-  //                 //     )
-  //                 //   ],
-  //                 // ),
-  //                 clipBehavior: Clip.none,
-  //                 child: Image.asset(
-  //                   card['img']!,
-  //                   height: 80,
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 8.0),
-  //               Text(
-  //                 translationProvider.tr(card['label']!),
-  //                 textAlign: TextAlign.center,
-  //                 style: StylesApp(context).textStyleBody4.copyWith(
-  //                       color: StyleColor.white,
-  //                     ),
-  //               ),
-  //               AutoScrollText(
-  //                 translationProvider.tr(card['subTitle']!),
-  //                 style: StylesApp(context).textStyleBody12.copyWith(
-  //                       color: StyleColor.white,
-  //                     ),
-  //                 maxWidth: 150, // Ajusta según el tamaño de tu card
-  //                 scrollDuration: Duration(seconds: 3),
-  //                 pauseDuration: Duration(seconds: 1),
-  //               )
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //       Positioned(
-  //           bottom: 10,
-  //           right: 5,
-  //           child: Container(
-  //               padding: EdgeInsets.all(2),
-  //               decoration: BoxDecoration(
-  //                   color: StyleColor.white.withValues(alpha: 0.45),
-  //                   borderRadius: BorderRadius.circular(50)),
-  //               child: Icon(
-  //                 Icons.arrow_forward_ios_rounded,
-  //                 size: 20.0,
-  //               )))
-  //     ]),
-  //   );
-  // }
 
   Widget _buildCard(BuildContext context, Map<String, dynamic> card,
       AppTranslationProvider translationProvider) {
@@ -667,41 +600,188 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
     );
   }
 
-  // Widget _buildCard(BuildContext context, Map<String, dynamic> card,
-  //     AppTranslationProvider translationProvider) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 10.0),
-  //     child: GestureDetector(
-  //       onTap: () => _onCardTap(context, card),
-  //       child: Column(
-  //         children: [
-  //           Container(
-  //             width: StylesApp(context).sizeContainerCard.width,
-  //             height: StylesApp(context).sizeContainerCard.height,
-  //             clipBehavior: Clip.none,
-  //             decoration: BoxDecoration(
-  //               borderRadius: BorderRadius.circular(
-  //                   StylesApp(context).sizeContainerCard.width),
-  //               image: DecorationImage(
-  //                 alignment: Alignment.center,
-  //                 image: AssetImage(card['img']!),
-  //                 fit: BoxFit.fitHeight,
-  //               ),
-  //             ),
-  //           ),
-  //           const SizedBox(height: 8.0),
-  //           Text(
-  //             translationProvider.tr(card['label']!),
-  //             textAlign: TextAlign.center,
-  //             style: StylesApp(context).textStyleBody4.copyWith(
-  //                   color: const Color(0xFFFD8C43),
-  //                 ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
+  Widget _buildLibrarySection(
+      BuildContext context, AppTranslationProvider translationProvider) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/layoutLibrary');
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 26.0, vertical: 16.0),
+        decoration: BoxDecoration(
+          color: const Color(0XFF5C9EDB),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              translationProvider.tr('workspace.sections.christian_library'),
+              style: StylesApp(context).textStyleBody7,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/books.png',
+                width: 52.sp,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============ MANTENER EL RESTO DE LOS MÉTODOS EXISTENTES ============
+
+  _buildStoriesSection(BuildContext context, reflection,
+      AppTranslationProvider translationProvider) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            spacing: 5.0,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: Container(
+                  margin: EdgeInsets.all(8.0),
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: StyleColor.blueLight,
+                      border: Border.all(
+                        width: 2.0,
+                        color: StyleColor.white,
+                      ),
+                      borderRadius: BorderRadius.circular(40)),
+                  child: Icon(
+                    Icons.menu_book_sharp,
+                    size: 30,
+                    color: StyleColor.white,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text(
+                          translationProvider
+                              .tr('workspace.sections.stories_to_reflect'),
+                          style: StylesApp(context)
+                              .textStyleBody5
+                              .copyWith(color: const Color(0xFFFE8D43)),
+                        ),
+                        SizedBox(
+                          width: 25,
+                          height: 20,
+                          child: IconButton(
+                            padding: EdgeInsets.all(0),
+                            onPressed: () => handleTapShowStories(),
+                            icon: Icon(
+                              Icons.add_circle_outline_sharp,
+                              color: StyleColor.orange,
+                              size: 20,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    AudioPlayerWidget(
+                        showImage: false,
+                        inactiveColor: StyleColor.orange,
+                        backgroundColor: Colors.white,
+                        controlsColor: StyleColor.turquoise,
+                        fileName: reflection != null ? reflection.title : '',
+                        pathUrl: reflection != null
+                            ? "${GraphQLConfig.urlServidor}${reflection.url}"
+                            : ''),
+                  ],
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  _buildGridViewSection(
+      BuildContext context, AppTranslationProvider translationProvider) {
+    return Wrap(
+      spacing: 10.0,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4.0, bottom: 15.0),
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/preachPage'),
+            child: CardOptionWidget(
+                imageBackground: "assets/predicas.png",
+                labelCard:
+                    translationProvider.tr('workspace.sections.preachings'),
+                gradientColors: [
+                  const Color(0XFF1FEFEC),
+                  const Color(0XFF0159A7),
+                ]),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/playPage'),
+            child: CardOptionWidget(
+                imageBackground: "assets/games.png",
+                labelCard: translationProvider.tr('workspace.sections.games'),
+                gradientColors: [
+                  const Color(0XFF3531F3),
+                  const Color(0XFF040681)
+                ]),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 4.0, bottom: 15.0),
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/promisePage'),
+            child: CardOptionWidget(
+                imageBackground: "assets/promesas.png",
+                labelCard:
+                    translationProvider.tr('workspace.sections.promises'),
+                gradientColors: [
+                  const Color(0XFF58AC5F),
+                  const Color(0XFF2F6624),
+                ]),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
+          child: GestureDetector(
+            onTap: () async {
+              handleNavigateTo();
+            },
+            child: CardOptionWidget(
+                imageBackground: "assets/ranking.png",
+                labelCard: translationProvider.tr('workspace.cards.adventure'),
+                gradientColors: [
+                  const Color(0XFFA731EC),
+                  const Color(0XFF620188)
+                ]),
+          ),
+        ),
+      ],
+    );
+  }
 
   Future<void> _onCardTap(
       BuildContext context, Map<String, dynamic> card) async {
@@ -751,221 +831,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
     } else {
       Navigator.pushNamed(context, card['route']!);
     }
-  }
-
-  Widget _buildLibrarySection(
-      BuildContext context, AppTranslationProvider translationProvider) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, '/layoutLibrary');
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10.0),
-        padding: const EdgeInsets.symmetric(horizontal: 26.0, vertical: 16.0),
-        decoration: BoxDecoration(
-          color: const Color(0XFF5C9EDB),
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              translationProvider.tr('workspace.sections.christian_library'),
-              style: StylesApp(context).textStyleBody7,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(
-                'assets/books.png',
-                width: 52.sp,
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ============ MANTENER EL RESTO DE LOS MÉTODOS EXISTENTES ============
-
-  _buildStoriesSection(BuildContext context, reflection,
-      AppTranslationProvider translationProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              translationProvider.tr('workspace.sections.stories_to_reflect'),
-              style: StylesApp(context)
-                  .textStyleBody5
-                  .copyWith(color: const Color(0xFFFE8D43)),
-            ),
-            IconButton(
-              onPressed: () async {
-                LoadingService().showLoading(context);
-                final limit = 12;
-                final page = 1;
-                final responseReflection =
-                    await getAllReflections(page, limit, '');
-                if (responseReflection.error != null) {
-                  LoadingService().hideLoading();
-                  await showCustomDialog(
-                    context,
-                    message: responseReflection.error!,
-                    dialogType: DialogType.error,
-                  );
-                  return;
-                }
-                LoadingService().hideLoading();
-                List reflections = responseReflection.data['data']
-                    .map<Reflection>(
-                        (reflex) => Reflection.fromJson(removeTypename(reflex)))
-                    .toList();
-                final PaginationInfo paginate = PaginationInfo.fromJson(
-                    removeTypename(responseReflection.data['meta']));
-                buttonsData = reflections
-                    .map<ButtonData>((reflection) => ButtonData(
-                        id: reflection.id,
-                        name: reflection.title,
-                        urlAudio: reflection.url))
-                    .toList();
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return ModalTalesWidget(
-                        data: buttonsData, pagination: paginate);
-                  },
-                );
-              },
-              icon: Icon(
-                Icons.add_circle_outline_sharp,
-                color: StyleColor.orange,
-                size: 20,
-              ),
-            )
-          ],
-        ),
-        AudioPlayerWidget(
-            showImage: false,
-            inactiveColor: StyleColor.orange,
-            backgroundColor: Colors.white,
-            controlsColor: StyleColor.turquoise,
-            fileName: reflection != null ? reflection.title : '',
-            pathUrl: reflection != null
-                ? "${GraphQLConfig.urlServidor}${reflection.url}"
-                : ''),
-      ],
-    );
-  }
-
-  _buildGridViewSection(
-      BuildContext context, AppTranslationProvider translationProvider) {
-    return Wrap(
-      spacing: 0.0,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
-          child: GestureDetector(
-            onTap: () async {
-              await _loadProgress(context);
-              if (error) return;
-
-              if (progressUser != null && progressUser!.success == true) {
-                if (progressUser!.message
-                    .contains('El curso ya fue finalizado')) {
-                  await showCustomDialogWithAction(
-                    context,
-                    message: progressUser!.message,
-                    dialogType: DialogTypeAction.info,
-                    buttonOk: translationProvider
-                        .tr('workspace.dialogs.see_more_courses'),
-                    textButton: translationProvider
-                        .tr('workspace.dialogs.go_to_course'),
-                    showAction: true,
-                    actionCallbackOk: () {
-                      Navigator.pushNamed(context, '/layoutPage1',
-                          arguments: {'selectedIndex': 1});
-                    },
-                    actionCallback: () {
-                      Navigator.pushNamed(context, '/mapPage', arguments: {
-                        'courseId': progressUser?.data?.courseId,
-                        'sectionId': progressUser?.data?.sectionId
-                      });
-                    },
-                  );
-                  return;
-                } else {
-                  if (mounted) {
-                    final currentContext = context;
-
-                    if (currentContext.mounted) {
-                      Navigator.pushNamed(currentContext, '/mapPage',
-                          arguments: {
-                            'courseId': progressUser!.data?.courseId,
-                            'sectionId': progressUser!.data?.sectionId
-                          });
-                    }
-                  }
-                }
-              } else {
-                Navigator.pushNamed(context, '/introAventurePage');
-              }
-            },
-            child: CardOptionWidget(
-                imageBackground: "assets/ranking.png",
-                labelCard: translationProvider.tr('workspace.cards.adventure'),
-                gradientColors: [
-                  const Color(0XFFA731EC),
-                  const Color(0XFF620188)
-                ]),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 4.0, bottom: 15.0),
-          child: GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/preachPage'),
-            child: CardOptionWidget(
-                imageBackground: "assets/predicas.png",
-                labelCard:
-                    translationProvider.tr('workspace.sections.preachings'),
-                gradientColors: [
-                  const Color(0XFF1FEFEC),
-                  const Color(0XFF0159A7),
-                ]),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 4.0, bottom: 15.0),
-          child: GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/playPage'),
-            child: CardOptionWidget(
-                imageBackground: "assets/games.png",
-                labelCard: translationProvider.tr('workspace.sections.games'),
-                gradientColors: [
-                  const Color(0XFF3531F3),
-                  const Color(0XFF040681)
-                ]),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 4.0, bottom: 15.0),
-          child: GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/promisePage'),
-            child: CardOptionWidget(
-                imageBackground: "assets/promesas.png",
-                labelCard:
-                    translationProvider.tr('workspace.sections.promises'),
-                gradientColors: [
-                  const Color(0XFF58AC5F),
-                  const Color(0XFF2F6624),
-                ]),
-          ),
-        )
-      ],
-    );
   }
 
   Future<void> getDailyProverb() async {
@@ -1406,8 +1271,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                         Expanded(
                           flex: 1,
                           child: Column(
-                            // crossAxisAlignment: CrossAxisAlignment.start,
-                            // mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Center(
                                 child: Row(
@@ -1608,12 +1471,90 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
 
   double getSizeFire(int energyPoints) {
     if (energyPoints > 500) {
-      return isTablet(context) ? 60: 40;
+      return isTablet(context) ? 60 : 50;
     } else if (energyPoints > 250) {
-      return isTablet(context) ?  50 : 30;
+      return isTablet(context) ? 50 : 40;
     } else {
-      return isTablet(context) ? 40 : 20;
+      return isTablet(context) ? 40 : 30;
     }
+  }
+
+  void handleNavigateTo() async {
+    await _loadProgress(context);
+    if (error) return;
+
+    if (progressUser != null && progressUser!.success == true) {
+      if (progressUser!.message.contains('El curso ya fue finalizado')) {
+        await showCustomDialogWithAction(
+          context,
+          message: progressUser!.message,
+          dialogType: DialogTypeAction.info,
+          buttonOk:
+              _translationProvider.tr('workspace.dialogs.see_more_courses'),
+          textButton: _translationProvider.tr('workspace.dialogs.go_to_course'),
+          showAction: true,
+          actionCallbackOk: () {
+            Navigator.pushNamed(context, '/layoutPage1',
+                arguments: {'selectedIndex': 1});
+          },
+          actionCallback: () {
+            Navigator.pushNamed(context, '/mapPage', arguments: {
+              'courseId': progressUser?.data?.courseId,
+              'sectionId': progressUser?.data?.sectionId
+            });
+          },
+        );
+        return;
+      } else {
+        if (mounted) {
+          final currentContext = context;
+
+          if (currentContext.mounted) {
+            Navigator.pushNamed(currentContext, '/mapPage', arguments: {
+              'courseId': progressUser!.data?.courseId,
+              'sectionId': progressUser!.data?.sectionId
+            });
+          }
+        }
+      }
+    } else {
+      Navigator.pushNamed(context, '/introAventurePage');
+    }
+  }
+
+  void handleTapShowStories() async {
+    LoadingService().showLoading(context);
+    final limit = 12;
+    final page = 1;
+    final responseReflection = await getAllReflections(page, limit, '');
+    if (responseReflection.error != null) {
+      LoadingService().hideLoading();
+      await showCustomDialog(
+        context,
+        message: responseReflection.error!,
+        dialogType: DialogType.error,
+      );
+      return;
+    }
+    LoadingService().hideLoading();
+    List reflections = responseReflection.data['data']
+        .map<Reflection>(
+            (reflex) => Reflection.fromJson(removeTypename(reflex)))
+        .toList();
+    final PaginationInfo paginate = PaginationInfo.fromJson(
+        removeTypename(responseReflection.data['meta']));
+    buttonsData = reflections
+        .map<ButtonData>((reflection) => ButtonData(
+            id: reflection.id,
+            name: reflection.title,
+            urlAudio: reflection.url))
+        .toList();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ModalTalesWidget(data: buttonsData, pagination: paginate);
+      },
+    );
   }
 }
 
