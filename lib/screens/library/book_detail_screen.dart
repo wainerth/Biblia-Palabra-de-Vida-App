@@ -1,15 +1,47 @@
-
-import 'package:biblia_palabra_de_vida_app/models/models.dart';
-import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
-import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
-import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
-import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
+import 'package:biblia_palabra_de_vida_app/api_rest/endpoint/cart_endpoints.dart';
+
+import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
+
+import 'package:biblia_palabra_de_vida_app/models/library/index.dart';
+import 'package:biblia_palabra_de_vida_app/models/model_data.dart';
+
+import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
+
+import 'package:biblia_palabra_de_vida_app/widgets/book_format_card.dart';
+import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+
+// ============================================
+// CONSTANTES
+// ============================================
+const _kBottomNavBarHeight = 20.0;
+const _kBookImageWidth = 122.0;
+const _kBookImageHeight = 200.0;
+const _kStarSize = 29.0;
+const _kShadowBlurRadius = 4.0;
+const _kShadowOffset = Offset(0, 2);
+const _kMinDescriptionHeight = 146.0;
+
+const _monthNames = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre'
+];
+
 class BookDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> book;
+  final BookModel book;
 
   const BookDetailScreen({super.key, required this.book});
 
@@ -18,565 +50,623 @@ class BookDetailScreen extends StatefulWidget {
 }
 
 class _BookDetailScreenState extends State<BookDetailScreen> {
+  // controles
   final ScrollController _scrollController = ScrollController();
+
+  // Estado
   List<ModelData> _listCountries = [];
+  ModelData? selectedCountry;
+  ModelData? selectedCurrency;
+
+  // Constantes
   final List<ModelData> _lisCurrencies = [
     ModelData(label: "USD", value: "1"),
     ModelData(label: "UYU", value: "2"),
     ModelData(label: "COP", value: "3"),
     ModelData(label: "BS", value: "1"),
   ];
-  ModelData? selectedCountry;
-  ModelData? selectedCurrency;
 
+  final List<Color> booKmarkColor = [
+    StyleColor.blueMedium,
+    StyleColor.cyanMedium,
+    StyleColor.greenLight,
+  ];
+
+// ============================================
+// CICLO DE VIDA
+// ============================================
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initData();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initData());
+  }
+
+  // ============================================
+  // MÉTODOS DE CÁLCULO Y FORMATO
+  // ============================================
+  double getAverageRating(List<ReviewModel>? reviews) {
+    if (reviews == null || reviews.isEmpty) return 0;
+
+    final sum =
+        reviews.fold<int>(0, (total, review) => total + (review.rating ?? 0));
+    return sum / reviews.length;
+  }
+
+  String _formatPublishedDate(String? publishedDate) {
+    if (publishedDate == null || publishedDate.isEmpty) return 'N/A';
+    try {
+      final date = DateTime.parse(publishedDate);
+      final month = _monthNames[date.month - 1];
+      return '${date.day} $month  ${date.year}';
+    } catch (_) {
+      return publishedDate;
+    }
+  }
+
+  String? _formatIsbn(String? isbn) {
+    if (isbn == null || isbn.isEmpty) return null;
+
+    final cleanIsbn = isbn.replaceAll('-', '').replaceAll(' ', '');
+
+    if (cleanIsbn.length == 10) {
+      return '${cleanIsbn.substring(0, 1)}-${cleanIsbn.substring(1, 4)}-'
+          '${cleanIsbn.substring(4, 9)}-${cleanIsbn.substring(9)}';
+    } else if (cleanIsbn.length == 13) {
+      return '${cleanIsbn.substring(0, 3)}-${cleanIsbn.substring(3, 13)}';
+    }
+
+    return isbn;
+  }
+
+// ============================================
+// MÉTODOS DE ACCIÓN
+// ============================================
+  Future<void> _initData() async {
+    final catalogueProvider =
+        Provider.of<CatalogueProvider>(context, listen: false);
+    setState(() {
+      _listCountries = catalogueProvider.allCountries
+          .map((country) => ModelData(
+                label: country.name,
+                value: country.id,
+                originalData: country,
+              ))
+          .toList();
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton.filled(
-          style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(StyleColor.orange),
-              foregroundColor: WidgetStatePropertyAll(StyleColor.white)),
-          padding: EdgeInsets.all(0),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          splashColor: StyleColor.orange,
-          color: StyleColor.white,
-          icon: Icon(
-            Icons.arrow_back,
-            size: 30,
+  Future<void> _handleAddToCart(BookFormat form, int quantity) async {
+    // try {
+      // llamamos post para agregar al carrito
+      final cartEndpoints = CartEndpoints();
+      final response = await cartEndpoints.addToCart(
+        form.bookId.toString(),
+        form.id.toString(),
+        quantity,
+      );
+
+      if (response.error != null) {
+        await showCustomDialog(context,
+            message: response.userFriendlyError!,
+            dialogType: DialogType.error,
+            showDetails: true,
+            messageDetail: response.error!);
+      }
+    // } catch (e) {
+    //   if (kDebugMode) {
+    //     print('Error al agregar al carrito: $e');
+    //   }
+    // }
+  }
+
+  void _showSample(BookFormat form) {
+    // consultamos la preview de pdf o audio dependiendo del formato
+    if (form.fileUrl != null) {
+      // Lógica para mostrar la muestra del formato
+      if (kDebugMode) {
+        print('Mostrar muestra de ${form.formatType.displayName}');
+      }
+    } else {
+      if (kDebugMode) {
+        print('No hay muestra disponible para ${form.formatType.displayName}');
+      }
+    }
+  }
+
+// ============================================
+  // MÉTODOS DE CONSTRUCCIÓN DE UI
+  // ============================================
+
+  Widget _buildRatingStars(double averageRating) {
+    return Row(
+      children: List.generate(5, (index) {
+        if (index < averageRating.floor()) {
+          return const Icon(Icons.star,
+              color: StyleColor.orange, size: _kStarSize);
+        } else if (index < averageRating.ceil() && averageRating % 1 != 0) {
+          return const Icon(Icons.star_half,
+              color: StyleColor.orange, size: _kStarSize);
+        } else {
+          return const Icon(Icons.star_border,
+              color: StyleColor.orange, size: _kStarSize);
+        }
+      }),
+    );
+  }
+
+  Widget _buildBookHeader(double averageRating) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBookImage(),
+          const SizedBox(width: 8.0),
+          Expanded(child: _buildBookInfo(averageRating)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBookImage() {
+    return Hero(
+      tag: 'book-image-${widget.book.id}',
+      child: SizedBox(
+        width: _kBookImageWidth,
+        height: _kBookImageHeight,
+        child: Image.network(
+          widget.book.coverImageUrl ??
+              'https://via.placeholder.com/122x134.png?text=No+Image',
+          height: _kBookImageHeight,
+          fit: BoxFit.fitHeight,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBookInfo(double averageRating) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.book.title ?? 'Título no disponible',
+          style: StylesApp(context).textStyleBody16.copyWith(
+                color: StyleColor.black,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        Text(
+          widget.book.author ?? 'Autor no disponible',
+          style: StylesApp(context).textStyleBody14.copyWith(
+                color: StyleColor.greenDark,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        _buildInfoRow('Publicado: ',
+            _formatPublishedDate(widget.book.publishedDate.toString())),
+        _buildInfoRow('Editorial: ', widget.book.publisher ?? 'N/A'),
+        _buildInfoRow('ISBN: ', _formatIsbn(widget.book.isbn) ?? 'N/A'),
+        _buildInfoRow(
+          'Tipo: ',
+          widget.book.formats!
+              .map((form) => form.formatType.displayName)
+              .join(" / "),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Text.rich(
+      TextSpan(
+        text: label,
+        style: StylesApp(context).textStyleBody14.copyWith(
+              color: StyleColor.grayDark,
+              fontWeight: FontWeight.bold,
+            ),
+        children: [
+          TextSpan(
+            text: value,
+            style: StylesApp(context).textStyleBody14.copyWith(
+                  color: StyleColor.grayDark,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatingSection(double averageRating) {
+    return Padding(
+      padding: const EdgeInsets.all(9.0),
+      child: Row(
+        children: [
+          Text(
+            "Resumen",
+            style: StylesApp(context).textStyleBody14.copyWith(
+                  color: StyleColor.turquoise,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(width: 8.0),
+          _buildRatingStars(averageRating),
+          const SizedBox(width: 8.0),
+          if (averageRating > 0)
+            Text(
+              "(${averageRating.toStringAsFixed(1)})",
+              style: StylesApp(context).textStyleBody14.copyWith(
+                    color: StyleColor.grayDark,
+                  ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDescription() {
+    return Padding(
+      padding: const EdgeInsets.all(9.0),
+      child: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        trackVisibility: true,
+        thickness: 4.0,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Container(
+            decoration: BoxDecoration(
+              color: StyleColor.white,
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: [
+                BoxShadow(
+                  color: StyleColor.black.withValues(alpha: 0.2),
+                  blurRadius: _kShadowBlurRadius,
+                  offset: _kShadowOffset,
+                ),
+              ],
+            ),
+            constraints:
+                const BoxConstraints(minHeight: _kMinDescriptionHeight),
+            child: Text(
+              widget.book.description ??
+                  'No hay descripción disponible para este libro.',
+              style: StylesApp(context).textStyleBody12.copyWith(
+                    color: StyleColor.black,
+                  ),
+            ),
           ),
         ),
-        title: Text("Librería Cristiana"),
-        titleTextStyle: StylesApp(context)
-            .textStyleBody20
-            .copyWith(color: StyleColor.white),
-        backgroundColor: StyleColor.turquoise,
       ),
+    );
+  }
+
+  Widget _buildFormatsList() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 9.0),
+      child: Column(
+        children: widget.book.formats!.asMap().entries.map((entry) {
+          final index = entry.key;
+          final format = entry.value;
+
+          return BookFormatCard(
+            formatType: format.formatType.displayName,
+            sampleText: "Muestra",
+            disabledBtn: format.stock <= 0,
+            bookmarkColor: booKmarkColor[index % booKmarkColor.length],
+            price: format.price.toString(),
+            onAddToCart: () => _handleAddToCart(format, 1),
+            onBuy: () => _handleBuy(format),
+            onShowSample: () => _showSample(format),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  void _handleBuy(BookFormat format) {
+    if (kDebugMode) {
+      print('Comprar ${format.formatType.displayName}');
+    }
+  }
+
+  // ============================================
+  // BUILD PRINCIPAL
+  // ============================================
+  @override
+  Widget build(BuildContext context) {
+    final averageRating = getAverageRating(widget.book.reviews);
+
+    return Scaffold(
+      appBar: _buildAppBar(),
       body: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight + _kBottomNavBarHeight),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             SizedBox(
               height: 21,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Imagen con Hero animation
-                Hero(
-                  tag:
-                      'book-image-${widget.book['id']}', // Mismo tag que en la lista
-                  child: SizedBox(
-                    width: 122,
-                    height: 134,
-                    child: Image.network(
-                      widget.book['image'],
-                      height: 134,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.0),
-                Expanded(
-                  child: SizedBox(
-                    // padding: EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.book['title'] ?? 'Título no disponible',
-                          style: StylesApp(context).textStyleBody16.copyWith(
-                              color: StyleColor.black,
-                              fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          widget.book['author'] ?? 'Autor no disponible',
-                          style: StylesApp(context).textStyleBody16.copyWith(
-                              color: StyleColor.greenDark,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Text.rich(TextSpan(
-                          text: "Publicado: ",
-                          style: StylesApp(context).textStyleBody14.copyWith(
-                              color: StyleColor.grayDark,
-                              fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: "${widget.book['date_published'] ?? 'N/A'}",
-                            ),
-                          ],
-                        )),
-                        Text.rich(TextSpan(
-                          text: "Editorial: ",
-                          style: StylesApp(context).textStyleBody14.copyWith(
-                              color: StyleColor.grayDark,
-                              fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: "${widget.book['publisher'] ?? 'N/A'}",
-                              style: StylesApp(context)
-                                  .textStyleBody16
-                                  .copyWith(
-                                      color: StyleColor.grayDark,
-                                      fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        )),
-                        Text.rich(TextSpan(
-                          text: "ISBN: ",
-                          style: StylesApp(context).textStyleBody14.copyWith(
-                              color: StyleColor.grayDark,
-                              fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: "${widget.book['isbn'] ?? 'N/A'}",
-                              style: StylesApp(context)
-                                  .textStyleBody16
-                                  .copyWith(
-                                      color: StyleColor.grayDark,
-                                      fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        )),
-                        Text.rich(TextSpan(
-                          text: "Tipo: ",
-                          style: StylesApp(context).textStyleBody14.copyWith(
-                              color: StyleColor.grayDark,
-                              fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: "${widget.book['type'] ?? 'N/A'}",
-                              style: StylesApp(context)
-                                  .textStyleBody16
-                                  .copyWith(
-                                      color: StyleColor.grayDark,
-                                      fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        )),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            _buildBookHeader(averageRating),
             SizedBox(height: 18.0),
-            Padding(
-              padding: const EdgeInsets.all(9.0),
-              child: Row(
-                children: [
-                  Text(
-                    "Resumen",
-                    style: StylesApp(context).textStyleBody14.copyWith(
-                        color: StyleColor.turquoise,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(width: 8.0),
-                  Row(
-                    children: List.generate(5, (index) {
-                      return Icon(
-                        index < (widget.book['rating'] ?? 0)
-                            ? Icons.star
-                            : Icons.star_border,
-                        color: StyleColor.orange,
-                        size: 20,
-                      );
-                    }),
-                  ),
-                  SizedBox(width: 8.0),
-                  Text(
-                    "(${widget.book['rating'] ?? 0})",
-                    style: StylesApp(context).textStyleBody14.copyWith(
-                          color: StyleColor.grayDark,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(9.0),
-              child: Scrollbar(
-                controller: _scrollController,
-                thumbVisibility: true,
-                trackVisibility: true,
-                thickness: 4.0,
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: StyleColor.white,
-                      borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: StyleColor.black.withValues(alpha: 0.2),
-                          blurRadius: 4.0,
-                          offset:
-                              Offset(0, 2), // Cambia la dirección de la sombra
-                        ),
-                      ],
-                    ),
-                    constraints: BoxConstraints(
-                      minHeight: 146,
-                    ),
-                    child: Text(
-                      widget.book['description'],
-                      style: StylesApp(context)
-                          .textStyleBody12
-                          .copyWith(color: StyleColor.black),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            GenericCoordinationWidget<ModelData>(
-              countryDropdown: CustomDropdownBottomWidget<ModelData>(
-                hintText: "Seleccione un país",
-                items: _listCountries,
-                onChanged: (newValue) =>
-                    setState(() => selectedCountry = newValue),
-                selectedItem: selectedCountry,
-              ),
-              currencyDropdown: CustomDropdownBottomWidget<ModelData>(
-                hintText: "Seleccione una moneda",
-                items: _lisCurrencies,
-                onChanged: (newValue) =>
-                    setState(() => selectedCurrency = newValue),
-                selectedItem: selectedCurrency,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 9.0),
-              child: Column(
-                children: [
-                  // AudioLibro
-                  BookFormatCard(
-                    formatType: 'Audiolibro',
-                    sampleText: 'Muestra',
-                    bookmarkColor: StyleColor.blueMedium,
-                    price: '2.04 USD',
-                    onAddToCart: () {
-                      // Lógica para agregar audiolibro al carrito
-                      if (kDebugMode) {
-                          print('Agregar audiolibro al carrito');
-                      }
-                    },
-                    onBuy: () {
-                      // Lógica para comprar audiolibro
-                      if (kDebugMode) {
-                        print('Comprar audiolibro');
-                      }
-                    },
-                  ),
-                  SizedBox(height: 9),
-                  // Online (PDF)
-                  BookFormatCard(
-                    formatType: 'Online',
-                    bookmarkColor: StyleColor.cyanMedium,
-                    sampleText: 'Muestra',
-                    price: '2.04 USD',
-                    onAddToCart: () {
-                      // Lógica para agregar versión online al carrito
-                      if (kDebugMode) {
-                        print('Agregar versión online al carrito');
-                      }
-                    },
-                    onBuy: () {
-                      // Lógica para comprar versión online
-                      if (kDebugMode) {
-                        print('Comprar versión online');
-                      }
-                    },
-                  ),
-                  SizedBox(height: 9),
-                  // Libro físico
-                  BookFormatCard(
-                    formatType: 'Libro',
-                    bookmarkColor: StyleColor.greenLight,
-                    sampleText: 'Quedan',
-                    price: '20,09 USD',
-                    hasShippingCosts: true,
-                    onAddToCart: () {
-                      // Lógica para agregar libro físico al carrito
-                      if (kDebugMode) {
-                        print('Agregar libro físico al carrito');
-                      }
-                    },
-                    onBuy: () {
-                      // Lógica para comprar libro físico
-                        if (kDebugMode) {
-                          print('Comprar libro físico');
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-              SizedBox(height: 12.0),
+            _buildRatingSection(averageRating),
+            _buildDescription(),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.start,
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       // Imagen con Hero animation
+            //       Hero(
+            //         tag:
+            //             'book-image-${widget.book.id}', // Mismo tag que en la lista
+            //         child: SizedBox(
+            //           width: 122,
+            //           height: 200,
+            //           child: Image.network(
+            //             widget.book.coverImageUrl ??
+            //                 'https://via.placeholder.com/122x134.png?text=No+Image',
+            //             height: 200,
+            //             fit: BoxFit.fitHeight,
+            //           ),
+            //         ),
+            //       ),
+            //       SizedBox(width: 8.0),
+            //       Expanded(
+            //         child: SizedBox(
+            //           // padding: EdgeInsets.all(16),
+            //           child: Column(
+            //             crossAxisAlignment: CrossAxisAlignment.start,
+            //             children: [
+            //               Text(
+            //                 widget.book.title ?? 'Título no disponible',
+            //                 style: StylesApp(context).textStyleBody16.copyWith(
+            //                     color: StyleColor.black,
+            //                     fontWeight: FontWeight.bold),
+            //                 textAlign: TextAlign.center,
+            //               ),
+            //               Text(
+            //                 widget.book.author ?? 'Autor no disponible',
+            //                 style: StylesApp(context).textStyleBody14.copyWith(
+            //                     color: StyleColor.greenDark,
+            //                     fontWeight: FontWeight.bold),
+            //               ),
+            //               Text.rich(TextSpan(
+            //                 text: "Publicado: ",
+            //                 style: StylesApp(context).textStyleBody14.copyWith(
+            //                     color: StyleColor.grayDark,
+            //                     fontWeight: FontWeight.bold),
+            //                 children: [
+            //                   TextSpan(
+            //                     text: _formatPublishedDate(
+            //                         widget.book.publishedDate.toString()),
+            //                   ),
+            //                 ],
+            //               )),
+            //               Text.rich(TextSpan(
+            //                 text: "Editorial: ",
+            //                 style: StylesApp(context).textStyleBody14.copyWith(
+            //                     color: StyleColor.grayDark,
+            //                     fontWeight: FontWeight.bold),
+            //                 children: [
+            //                   TextSpan(
+            //                     text: "${widget.book.publisher ?? 'N/A'}",
+            //                     style: StylesApp(context)
+            //                         .textStyleBody14
+            //                         .copyWith(
+            //                             color: StyleColor.grayDark,
+            //                             fontWeight: FontWeight.bold),
+            //                   ),
+            //                 ],
+            //               )),
+            //               Text.rich(TextSpan(
+            //                 text: "ISBN: ",
+            //                 style: StylesApp(context).textStyleBody14.copyWith(
+            //                     color: StyleColor.grayDark,
+            //                     fontWeight: FontWeight.bold),
+            //                 children: [
+            //                   TextSpan(
+            //                     text:
+            //                         "${_getFormatIsbn(widget.book.isbn) ?? 'N/A'}",
+            //                     style: StylesApp(context)
+            //                         .textStyleBody14
+            //                         .copyWith(
+            //                             color: StyleColor.grayDark,
+            //                             fontWeight: FontWeight.bold),
+            //                   ),
+            //                 ],
+            //               )),
+            //               Text.rich(TextSpan(
+            //                 text: "Tipo: ",
+            //                 style: StylesApp(context).textStyleBody14.copyWith(
+            //                     color: StyleColor.grayDark,
+            //                     fontWeight: FontWeight.bold),
+            //                 children: [
+            //                   TextSpan(
+            //                     text: widget.book.formats!
+            //                         .map((form) => form.formatType.displayName)
+            //                         .join(" / "),
+            //                   ),
+            //                 ],
+            //               )),
+            //             ],
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            // Padding(
+            //   padding: const EdgeInsets.all(9.0),
+            //   child: Row(
+            //     children: [
+            //       Text(
+            //         "Resumen",
+            //         style: StylesApp(context).textStyleBody14.copyWith(
+            //             color: StyleColor.turquoise,
+            //             fontWeight: FontWeight.bold),
+            //       ),
+            //       SizedBox(width: 8.0),
+            //       Row(
+            //         children: List.generate(5, (index) {
+            //           final double size = 29;
+            //           if (index < averageRating.floor()) {
+            //             // Estrella llena
+            //             return Icon(
+            //               Icons.star,
+            //               color: StyleColor.orange,
+            //               size: size,
+            //             );
+            //           } else if (index < averageRating.ceil() &&
+            //               averageRating % 1 != 0) {
+            //             // Media estrella (si hay decimal)
+            //             return Icon(
+            //               Icons.star_half,
+            //               color: StyleColor.orange,
+            //               size: size,
+            //             );
+            //           } else {
+            //             // Estrella vacía
+            //             return Icon(
+            //               Icons.star_border,
+            //               color: StyleColor.orange,
+            //               size: size,
+            //             );
+            //           }
+            //         }),
+            //       ),
+            //       SizedBox(width: 8.0),
+            //       if (averageRating > 0)
+            //         Text(
+            //           "(${averageRating.toStringAsFixed(1)})",
+            //           style: StylesApp(context).textStyleBody14.copyWith(
+            //                 color: StyleColor.grayDark,
+            //               ),
+            //         ),
+            //     ],
+            //   ),
+            // ),
+            // Padding(
+            //   padding: const EdgeInsets.all(9.0),
+            //   child: Scrollbar(
+            //     controller: _scrollController,
+            //     thumbVisibility: true,
+            //     trackVisibility: true,
+            //     thickness: 4.0,
+            //     child: SingleChildScrollView(
+            //       controller: _scrollController,
+            //       child: Container(
+            //         decoration: BoxDecoration(
+            //           color: StyleColor.white,
+            //           borderRadius: BorderRadius.circular(8.0),
+            //           boxShadow: [
+            //             BoxShadow(
+            //               color: StyleColor.black.withValues(alpha: 0.2),
+            //               blurRadius: 4.0,
+            //               offset:
+            //                   Offset(0, 2), // Cambia la dirección de la sombra
+            //             ),
+            //           ],
+            //         ),
+            //         constraints: BoxConstraints(
+            //           minHeight: 146,
+            //         ),
+            //         child: Text(
+            //           widget.book.description ??
+            //               'No hay descripción disponible para este libro.',
+            //           style: StylesApp(context)
+            //               .textStyleBody12
+            //               .copyWith(color: StyleColor.black),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            // GenericCoordinationWidget<ModelData>(
+            //   countryDropdown: CustomDropdownBottomWidget<ModelData>(
+            //     hintText: "Seleccione un país",
+            //     items: _listCountries,
+            //     onChanged: (newValue) =>
+            //         setState(() => selectedCountry = newValue),
+            //     selectedItem: selectedCountry,
+            //   ),
+            //   currencyDropdown: CustomDropdownBottomWidget<ModelData>(
+            //     hintText: "Seleccione una moneda",
+            //     items: _lisCurrencies,
+            //     onChanged: (newValue) =>
+            //         setState(() => selectedCurrency = newValue),
+            //     selectedItem: selectedCurrency,
+            //   ),
+            // ),
+            _buildFormatsList(),
+            const SizedBox(height: 12.0),
+            // Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: 9.0),
+            //   child: Column(
+            //     children: [
+            //       // AudioLibro
+            //       ...widget.book.formats!.map((form) {
+            //         final index = widget.book.formats!.indexOf(form);
 
+            //         return BookFormatCard(
+            //           formatType: form.formatType.displayName,
+            //           sampleText: "Muestra",
+            //           disabledBtn: form.stock <= 0,
+            //           bookmarkColor: booKmarkColor[index],
+            //           price: form.price.toString(),
+            //           onAddToCart: () {
+            //             if (kDebugMode) {
+            //               print(
+            //                   'Agregar ${form.formatType.displayName} al carrito');
+            //             }
+
+            //             _handlerAddToCart(form, 1);
+            //           },
+            //           onBuy: () {
+            //             // Lógica para comprar audiolibro
+            //             if (kDebugMode) {
+            //               print('Comprar audiolibro');
+            //             }
+            //           },
+            //           onShowSample: () => _showSample(form),
+            //         );
+            //       }),
+            //     ],
+            //   ),
+            // ),
+            // SizedBox(height: 12.0),
           ],
         ),
       ),
     );
   }
 
-  Future<void> _initData() async {
-    _listCountries = Provider.of<CatalogueProvider>(context, listen: false)
-        .allCountries
-        .map<ModelData>((country) => ModelData(
-            label: country.name, value: country.id, originalData: country))
-        .toList();
-  }
-}
-
-class BookFormatCard extends StatelessWidget {
-  final String formatType;
-  final String sampleText;
-  final String price;
-  final bool hasShippingCosts;
-  final Color bookmarkColor;
-  final bool isSelected;
-  final VoidCallback onAddToCart;
-  final VoidCallback onBuy;
-
-  const BookFormatCard({
-    super.key,
-    required this.formatType,
-    required this.sampleText,
-    required this.bookmarkColor,
-    required this.price,
-    this.hasShippingCosts = false,
-    this.isSelected = false,
-    required this.onAddToCart,
-    required this.onBuy,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.sizeOf(context).width,
-      // margin: EdgeInsets.symmetric(vertical: 8),
-      constraints: BoxConstraints(
-        minHeight: 80,
-      ),
-      decoration: BoxDecoration(
-        color:  Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              spacing: 2.0,
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: Container(
-                    padding: EdgeInsets.all(0),
-                    constraints: BoxConstraints(
-                      minHeight: 40,
-                      maxHeight: 40,
-                      minWidth: 30,
-                      maxWidth: 90,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: SizedBox(
-                            width:
-                                double.infinity, // Ocupa todo el ancho disponible
-                            height: double
-                                .infinity, // Ocupa toda la altura disponible
-                            child: SvgPicture.asset(
-                              'assets/book_format.svg',
-                              fit: BoxFit.cover,
-                              color: bookmarkColor,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 1,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: Text(formatType,
-                                style: StylesApp(context).textStyleBody10),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Muestra
-                Expanded(flex: 4,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: StyleColor.galaxyPurple,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          sampleText,
-                          style: StylesApp(context).textStyleBody10,
-                        ),
-                        SizedBox(width: 4),
-                        Icon(Icons.visibility, size: 16, color: StyleColor.white),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Precio
-                Expanded(flex: 4,
-                  child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: StyleColor.orange,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        price,
-                        style: StylesApp(context).textStyleBody10,
-                      )),
-                ),
-                // Botones
-                Expanded(flex: 4,
-                  child: SizedBox(
-                   
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          width: 100, // Mismo ancho que el botón Agregar
-                          height: 30,
-                          child: IconTextButton(
-                            icon: Icons.shopping_cart,
-                            padding:
-                                EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                            text: 'Agregar',
-                            iconPosition: 'right',
-                            onPressed: onAddToCart,
-                            iconSize: 15,
-                            style: StylesApp(context).textStyleBody10.copyWith(
-                                  color: StyleColor.white,
-                                ),
-                            backgroundColor: StyleColor.turquoise,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        SizedBox(
-                          width:100 , // Mismo ancho que el botón Agregar
-                          height: 30,
-                          child: IconTextButton(
-                            noIcon: false,
-                            padding:
-                                EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                            text: 'Comprar',
-                            onPressed: () {},
-                            style: StylesApp(context).textStyleBody10.copyWith(
-                                  color: StyleColor.white,
-                                ),
-                            backgroundColor: StyleColor.yellowLight,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Costos de envío (solo para algunos formatos)
-            if (hasShippingCosts) ...[
-              SizedBox(height: 8),
-              Text(
-                'Puede aplicar costos adicionales de envío',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.orange[700],
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+ AppBar _buildAppBar() {
+    return AppBar(
+      centerTitle: true,
+      leading: _buildBackButton(),
+      title: const Text("Librería Cristiana"),
+      titleTextStyle: StylesApp(context)
+          .textStyleBody20
+          .copyWith(color: StyleColor.white),
+      backgroundColor: StyleColor.turquoise,
     );
   }
-}
 
-class ArrowPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color.fromARGB(255, 47, 13, 196)
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width / 2, size.height);
-    path.lineTo(size.width, 0);
-    path.close();
-
-    canvas.drawPath(path, paint);
-
-    // Sombra para la flecha
-    final shadowPath = Path();
-    shadowPath.moveTo(0, 0);
-    shadowPath.lineTo(size.width / 2, size.height);
-    shadowPath.lineTo(size.width, 0);
-
-    canvas.drawShadow(shadowPath, Colors.black12, 2, false);
+  Widget _buildBackButton() {
+    return IconButton.filled(
+      style: ButtonStyle(
+        backgroundColor: WidgetStatePropertyAll(StyleColor.orange),
+        foregroundColor: WidgetStatePropertyAll(StyleColor.white),
+      ),
+      padding: EdgeInsets.zero,
+      onPressed: () => Navigator.pop(context),
+      splashColor: StyleColor.orange,
+      color: StyleColor.white,
+      icon: const Icon(Icons.arrow_back, size: 30),
+    );
   }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-class TrianglePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color.fromARGB(255, 112, 18, 18);
-    final path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width / 2, size.height);
-    path.lineTo(size.width, 0);
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class IconTextButton extends StatelessWidget {

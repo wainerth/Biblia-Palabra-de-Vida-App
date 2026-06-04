@@ -5,7 +5,7 @@ import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
 import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -2373,7 +2373,7 @@ class _BibleScreenState extends State<BibleScreen> {
                             ? PlayerYoutubeWidget(videoUrl: video.url)
                             : PlayerNoYoutube(
                                 url:
-                                    "${GraphQLConfig.urlServidor}${video.url}"),
+                                    "${GraphQLConfig.endpoint}${video.url}"),
                       ),
                     ),
                   ),
@@ -3084,7 +3084,7 @@ class _BibleScreenState extends State<BibleScreen> {
     Clipboard.setData(
       ClipboardData(
         text:
-            "$reference\n$versesToCopy ${GraphQLConfig.urlServidor}OfficialBible",
+            "$reference\n$versesToCopy ${GraphQLConfig.endpoint}OfficialBible",
       ),
     );
     showSnackBar('Versículos copiados', type: SnackBarType.success);
@@ -3108,7 +3108,7 @@ class _BibleScreenState extends State<BibleScreen> {
         "${currentVersion?.version}\n${currentBook?.modernName} ${currentChapter?.chapter}:${getSelectedVerses().first.verse}${getSelectedVerses().first != getSelectedVerses().last ? '-' : ''}${getSelectedVerses().first != getSelectedVerses().last ? getSelectedVerses().last.verse : ''}";
     SharePlus.instance.share(ShareParams(
       text:
-          "$reference\n$versesToShare ${GraphQLConfig.urlServidor}OfficialBible",
+          "$reference\n$versesToShare ${GraphQLConfig.endpoint}OfficialBible",
       subject: 'Versículo de ${currentBook?.modernName}',
     ));
   }

@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -90,7 +90,7 @@ class _DialogReferenceState extends State<DialogReference> {
                                 widget.onActionReferences(dataToSend);
                                 Navigator.pop(context);
                               },
-                              baseUrl: GraphQLConfig.urlServidor,
+                              baseUrl: GraphQLConfig.endpoint,
                             ),
                           );
                         },

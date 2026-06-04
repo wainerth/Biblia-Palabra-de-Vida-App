@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/utils/route_observer.dart';
@@ -14,7 +15,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -310,7 +311,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
         const SizedBox(height: 12.0),
         _buildGridViewSection(context, translationProvider),
         const SizedBox(height: 12.0),
-        if (GraphQLConfig.development)
+        if (ApiConfig.development)
           _buildLibrarySection(context, translationProvider),
       ],
     );
@@ -353,7 +354,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                   children: [
                     _buildGridViewSection(context, translationProvider),
                     const SizedBox(height: 16.0),
-                    if (GraphQLConfig.development)
+                    if (ApiConfig.development)
                       _buildLibrarySection(context, translationProvider),
                   ],
                 ),
@@ -454,7 +455,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: cards
             .where((card) =>
-                (card['key'] != 'Comunidad' /*&& !GraphQLConfig.development*/))
+                (card['key'] != 'Comunidad' /*&& !ApiConfig.development*/))
             .map((
           card,
         ) {
@@ -495,8 +496,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
       List<Map<String, dynamic>> cards,
       AppTranslationProvider translationProvider) {
     final filteredCards = cards
-        .where((card) =>
-            (card['key'] != 'Comunidad' && !GraphQLConfig.development))
+        .where((card) => (card['key'] != 'Comunidad' && !ApiConfig.development))
         .toList();
 
     return Container(
@@ -706,7 +706,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                         controlsColor: StyleColor.turquoise,
                         fileName: reflection != null ? reflection.title : '',
                         pathUrl: reflection != null
-                            ? "${GraphQLConfig.urlServidor}${reflection.url}"
+                            ? "${GraphQLConfig.endpoint}${reflection.url}"
                             : ''),
                   ],
                 ),
@@ -995,7 +995,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                                 onPressed: () {
                                   Clipboard.setData(ClipboardData(
                                       text:
-                                          " ${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible"));
+                                          " ${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.endpoint}OfficialBible"));
                                   showSnackBar(
                                       translationProvider.tr(
                                           'workspace.daily_proverb.copy_success'),
@@ -1017,7 +1017,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                               onPressed: () async {
                                 await SharePlus.instance.share(ShareParams(
                                   text:
-                                      "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.urlServidor}OfficialBible",
+                                      "${dailyWord.book!.modernName} ${dailyWord.chapter!.chapter}:${dailyWord.verse!.verse}\n ${dailyWord.verse!.text}.\n ${GraphQLConfig.endpoint}OfficialBible",
                                   subject: translationProvider.tr(
                                       'workspace.daily_proverb.share_subject'),
                                 ));
@@ -1070,7 +1070,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
 
   _buildPositionSection(BuildContext context, userData,
       AppTranslationProvider translationProvider) {
-    double sizeAvatar = getSizeFire(dataUser!.energyPoints);
+    double sizeAvatar =
+        getSizeFire(dataUser != null ? dataUser!.energyPoints : 150);
     return Container(
       decoration: BoxDecoration(
         // image: DecorationImage(
@@ -1117,7 +1118,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                                       ? CachedNetworkImage(
                                           fit: BoxFit.cover,
                                           alignment: Alignment.topCenter,
-                                          imageUrl: GraphQLConfig.urlServidor +
+                                          imageUrl: ApiConfig.baseUrl +
                                               userData.imgProfileUser.urlImg +
                                               '?timestamp=${DateTime.now().millisecondsSinceEpoch}',
                                           placeholder: (context, url) =>

@@ -1,8 +1,12 @@
+import 'package:biblia_palabra_de_vida_app/api_rest/endpoint/book_endpoints.dart';
+import 'package:biblia_palabra_de_vida_app/api_rest/endpoint/cart_endpoints.dart';
+import 'package:biblia_palabra_de_vida_app/models/library/index.dart';
+import 'package:biblia_palabra_de_vida_app/models/model_data.dart';
 import 'package:biblia_palabra_de_vida_app/screens/library/delivery_coordination_screen.dart';
+import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/screens/library/book_detail_screen.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -61,491 +65,17 @@ class _LibraryScreenState extends State<LibraryScreen>
     }
   ];
   Map<String, List<Map<String, dynamic>>> booksForCategory = {};
-  Map<String, List<Map<String, dynamic>>> booksForType = {};
-  List<Map<String, dynamic>> booksInCart = [
-    {
-      "id": 1,
-      "name": "Flutter en Acción",
-      "title": "Guía completa de desarrollo Flutter",
-      "author": "John Doe",
-      "date_published": "2023-01-01",
-      "price": 29.99,
-      "original_price": 39.99,
-      "isbn": "978-3-16-148410-0",
-      "stock": 10,
-      "rating": 4.5,
-      "reviews_count": 128,
-      "language": "Español",
-      "type": "Ebook",
-      "formats": ["PDF", "ePub", "Kindle"],
-      "pages": 350,
-      "publisher": "Editorial Tech",
-      "description":
-          "Aprende desarrollo móvil con Flutter desde cero. Incluye proyectos prácticos y ejemplos reales.",
-      "category": "Programación",
-      "subcategory": "Desarrollo Móvil",
-      "tags": ["flutter", "dart", "mobile", "android", "ios"],
-      "image": "https://i.ibb.co/ynyK9dxc/flutter-accion.jpg",
-      "extra_images": [
-        "https://i.ibb.co/abc123/preview1.jpg",
-        "https://i.ibb.co/def456/preview2.jpg"
-      ],
-      "weight": 0.5,
-      "dimensions": "15x21 cm",
-      "on_sale": true,
-      "discount": 25,
-      "featured": true,
-      "new": true,
-      "date_added": "2023-10-15",
-      "selected": false,
-    },
-    {
-      "id": 2,
-      "name": "Dart: Desde Cero",
-      "title": "Domina el lenguaje de Flutter",
-      "author": "María Rodríguez",
-      "date_published": "2022-08-15",
-      "price": 24.99,
-      "original_price": 29.99,
-      "isbn": "978-3-16-148411-7",
-      "stock": 15,
-      "rating": 4.3,
-      "reviews_count": 89,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 280,
-      "publisher": "Editorial Code",
-      "description":
-          "Domina el lenguaje Dart para desarrollo Flutter. Desde fundamentos hasta conceptos avanzados.",
-      "category": "Programación",
-      "subcategory": "Lenguajes de Programación",
-      "tags": ["dart", "flutter", "programación"],
-      "image": "https://i.ibb.co/zWWs2R4y/dart-desde-cero.jpg",
-      "weight": 0.4,
-      "dimensions": "14x20 cm",
-      "on_sale": true,
-      "discount": 17,
-      "featured": false,
-      "new": false,
-      "date_added": "2022-09-10",
-      "selected": false,
-    },
-    {
-      "id": 12,
-      "name": "La creación de Dios tan Colorida",
-      "title": "Reflexiones espirituales en mensaje poético",
-      "author": "Blanca P. Hernández",
-      "date_published": "2022-01-15",
-      "price": 16.99,
-      "original_price": 19.99,
-      "isbn": "N.D.LDO21555",
-      "stock": 35,
-      "rating": 4.7,
-      "reviews_count": 94,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 180,
-      "publisher": "Editorial Mundo Hispano",
-      "description":
-          "Obra que explora reflexiones espirituales y filosóficas en un mensaje poético sobre la vida, el amor y la naturaleza.",
-      "category": "Espiritualidad",
-      "subcategory": "Poesía Espiritual",
-      "tags": ["espiritualidad", "poesía", "naturaleza", "reflexión"],
-      "image": "https://i.ibb.co/abc123/creacion-dios-colorida.jpg",
-      "weight": 0.35,
-      "dimensions": "13x19 cm",
-      "on_sale": true,
-      "discount": 15,
-      "featured": true,
-      "new": true,
-      "date_added": "2023-02-28",
-      "selected": false,
-    }
-  ];
-  List<Map<String, dynamic>> books = [
-    {
-      "id": 1,
-      "name": "Flutter en Acción",
-      "title": "Guía completa de desarrollo Flutter",
-      "author": "John Doe",
-      "date_published": "2023-01-01",
-      "price": 29.99,
-      "original_price": 39.99,
-      "isbn": "978-3-16-148410-0",
-      "stock": 10,
-      "rating": 4.5,
-      "reviews_count": 128,
-      "language": "Español",
-      "type": "Ebook",
-      "formats": ["PDF", "ePub", "Kindle"],
-      "pages": 350,
-      "publisher": "Editorial Tech",
-      "description":
-          "Aprende desarrollo móvil con Flutter desde cero. Incluye proyectos prácticos y ejemplos reales.",
-      "category": "Programación",
-      "subcategory": "Desarrollo Móvil",
-      "tags": ["flutter", "dart", "mobile", "android", "ios"],
-      "image": "https://i.ibb.co/ynyK9dxc/flutter-accion.jpg",
-      "extra_images": [
-        "https://i.ibb.co/abc123/preview1.jpg",
-        "https://i.ibb.co/def456/preview2.jpg"
-      ],
-      "weight": 0.5,
-      "dimensions": "15x21 cm",
-      "on_sale": true,
-      "discount": 25,
-      "featured": true,
-      "new": true,
-      "date_added": "2023-10-15"
-    },
-    {
-      "id": 2,
-      "name": "Dart: Desde Cero",
-      "title": "Domina el lenguaje de Flutter",
-      "author": "María Rodríguez",
-      "date_published": "2022-08-15",
-      "price": 24.99,
-      "original_price": 29.99,
-      "isbn": "978-3-16-148411-7",
-      "stock": 15,
-      "rating": 4.3,
-      "reviews_count": 89,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 280,
-      "publisher": "Editorial Code",
-      "description":
-          "Domina el lenguaje Dart para desarrollo Flutter. Desde fundamentos hasta conceptos avanzados.",
-      "category": "Programación",
-      "subcategory": "Lenguajes de Programación",
-      "tags": ["dart", "flutter", "programación"],
-      "image": "https://i.ibb.co/zWWs2R4y/dart-desde-cero.jpg",
-      "weight": 0.4,
-      "dimensions": "14x20 cm",
-      "on_sale": true,
-      "discount": 17,
-      "featured": false,
-      "new": false,
-      "date_added": "2022-09-10"
-    },
-    {
-      "id": 3,
-      "name": "El Principito",
-      "title": "Clásico de la literatura universal",
-      "author": "Antoine de Saint-Exupéry",
-      "date_published": "1943-04-06",
-      "price": 15.50,
-      "original_price": 18.99,
-      "isbn": "978-3-16-148412-4",
-      "stock": 25,
-      "rating": 4.8,
-      "reviews_count": 356,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa dura", "Tapa blanda"],
-      "pages": 96,
-      "publisher": "Editorial Salamandra",
-      "description":
-          "Clásico de la literatura francesa con profundas reflexiones sobre la vida y la amistad.",
-      "category": "Literatura",
-      "subcategory": "Clásicos",
-      "tags": ["clásico", "literatura", "filosofía"],
-      "image": "https://i.ibb.co/BVRZ2QLS/principito.jpg",
-      "weight": 0.3,
-      "dimensions": "12x18 cm",
-      "on_sale": false,
-      "discount": 0,
-      "featured": true,
-      "new": false,
-      "date_added": "2021-05-20"
-    },
-    {
-      "id": 4,
-      "name": "Cien Años de Soledad",
-      "title": "Obra maestra de García Márquez",
-      "author": "Gabriel García Márquez",
-      "date_published": "1967-05-30",
-      "price": 22.99,
-      "original_price": 27.50,
-      "isbn": "978-3-16-148413-1",
-      "stock": 18,
-      "rating": 4.7,
-      "reviews_count": 421,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 432,
-      "publisher": "Editorial Sudamericana",
-      "description":
-          "Obra maestra del realismo mágico de Gabriel García Márquez que narra la historia de la familia Buendía.",
-      "category": "Literatura",
-      "subcategory": "Realismo Mágico",
-      "tags": ["realismo mágico", "clásico", "nobel"],
-      "image": "https://i.ibb.co/399vxphj/cien-anos-soledad.jpg",
-      "weight": 0.6,
-      "dimensions": "13x20 cm",
-      "on_sale": true,
-      "discount": 16,
-      "featured": true,
-      "new": false,
-      "date_added": "2021-07-12"
-    },
-    {
-      "id": 5,
-      "name": "El Arte de la Guerra",
-      "title": "Estrategias milenarias",
-      "author": "Sun Tzu",
-      "date_published": "2018-03-10",
-      "price": 12.99,
-      "original_price": 15.99,
-      "isbn": "978-3-16-148414-8",
-      "stock": 30,
-      "rating": 4.4,
-      "reviews_count": 215,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 128,
-      "publisher": "Editorial Estrategia",
-      "description":
-          "Tratado militar clásico con aplicaciones modernas en negocios y estrategia personal.",
-      "category": "Estrategia",
-      "subcategory": "Negocios",
-      "tags": ["estrategia", "negocios", "filosofía"],
-      "image": "https://i.ibb.co/vCvM34TF/arte-guerra.jpg",
-      "weight": 0.2,
-      "dimensions": "11x17 cm",
-      "on_sale": true,
-      "discount": 19,
-      "featured": false,
-      "new": false,
-      "date_added": "2022-02-18"
-    },
-    {
-      "id": 6,
-      "name": "Padre Rico, Padre Pobre",
-      "title": "Educación financiera esencial",
-      "author": "Robert Kiyosaki",
-      "date_published": "1997-04-01",
-      "price": 19.99,
-      "original_price": 24.99,
-      "isbn": "978-3-16-148415-5",
-      "stock": 22,
-      "rating": 4.6,
-      "reviews_count": 389,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 336,
-      "publisher": "Editorial Finanzas",
-      "description":
-          "Clásico de educación financiera personal que desafía conceptos tradicionales sobre el dinero.",
-      "category": "Finanzas",
-      "subcategory": "Educación Financiera",
-      "tags": ["finanzas", "inversión", "educación financiera"],
-      "image": "https://i.ibb.co/nq7nhgqP/padre-rico.jpg",
-      "weight": 0.5,
-      "dimensions": "14x21 cm",
-      "on_sale": true,
-      "discount": 20,
-      "featured": true,
-      "new": false,
-      "date_added": "2022-01-05"
-    },
-    {
-      "id": 7,
-      "name": "Atomic Habits",
-      "title": "Hábitos para el éxito",
-      "author": "James Clear",
-      "date_published": "2018-10-16",
-      "price": 21.50,
-      "original_price": 25.99,
-      "isbn": "978-3-16-148416-2",
-      "stock": 17,
-      "rating": 4.7,
-      "reviews_count": 512,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa dura", "Tapa blanda"],
-      "pages": 320,
-      "publisher": "Editorial Hábitos",
-      "description":
-          "Cómo construir buenos hábitos y romper malos. Métodos comprobados para transformar tu vida.",
-      "category": "Desarrollo Personal",
-      "subcategory": "Hábitos",
-      "tags": ["hábitos", "productividad", "desarrollo personal"],
-      "image": "https://i.ibb.co/v4mmCttZ/atomic-habits.jpg",
-      "weight": 0.55,
-      "dimensions": "14x21 cm",
-      "on_sale": false,
-      "discount": 0,
-      "featured": true,
-      "new": true,
-      "date_added": "2023-03-22"
-    },
-    {
-      "id": 8,
-      "name": "El Poder del Ahora",
-      "title": "Vive en el presente",
-      "author": "Eckhart Tolle",
-      "date_published": "1997-01-01",
-      "price": 18.75,
-      "original_price": 22.50,
-      "isbn": "978-3-16-148417-9",
-      "stock": 14,
-      "rating": 4.5,
-      "reviews_count": 287,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 256,
-      "publisher": "Editorial Conciencia",
-      "description":
-          "Guía para la iluminación espiritual que enseña a vivir en el momento presente.",
-      "category": "Espiritualidad",
-      "subcategory": "Mindfulness",
-      "tags": ["espiritualidad", "mindfulness", "meditación"],
-      "image": "https://i.ibb.co/XZxym9FM/poder-ahora.jpg",
-      "weight": 0.4,
-      "dimensions": "13x20 cm",
-      "on_sale": true,
-      "discount": 17,
-      "featured": false,
-      "new": false,
-      "date_added": "2022-11-08"
-    },
-    {
-      "id": 9,
-      "name": "Sapiens",
-      "title": "Historia de la humanidad",
-      "author": "Yuval Noah Harari",
-      "date_published": "2014-02-10",
-      "price": 26.99,
-      "original_price": 32.00,
-      "isbn": "978-3-16-148418-6",
-      "stock": 20,
-      "rating": 4.8,
-      "reviews_count": 643,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 496,
-      "publisher": "Editorial Historia",
-      "description":
-          "Breve historia de la humanidad que explora cómo los humanos llegaron a dominar el mundo.",
-      "category": "Historia",
-      "subcategory": "Historia Universal",
-      "tags": ["historia", "evolución", "humanidad"],
-      "image": "https://i.ibb.co/pvcvYJ2j/sapiens.jpg",
-      "weight": 0.7,
-      "dimensions": "15x23 cm",
-      "on_sale": true,
-      "discount": 16,
-      "featured": true,
-      "new": false,
-      "date_added": "2022-06-14"
-    },
-    {
-      "id": 10,
-      "name": "El Universo en una Cáscara de Nuez",
-      "title": "Los secretos del cosmos",
-      "author": "Stephen Hawking",
-      "date_published": "2001-11-06",
-      "price": 23.50,
-      "original_price": 28.75,
-      "isbn": "978-3-16-148419-3",
-      "stock": 12,
-      "rating": 4.6,
-      "reviews_count": 198,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa dura"],
-      "pages": 224,
-      "publisher": "Editorial Ciencia",
-      "description":
-          "Exploración de los misterios del cosmos y las teorías más avanzadas de la física moderna.",
-      "category": "Ciencia",
-      "subcategory": "Física",
-      "tags": ["ciencia", "física", "cosmos", "hawking"],
-      "image": "https://i.ibb.co/chvzphwG/universo-cascara.jpg",
-      "weight": 0.65,
-      "dimensions": "16x24 cm",
-      "on_sale": false,
-      "discount": 0,
-      "featured": false,
-      "new": false,
-      "date_added": "2021-09-30"
-    },
-    {
-      "id": 11,
-      "name": "Clean Code",
-      "title": "Código limpio, desarrollo eficiente",
-      "author": "Robert C. Martin",
-      "date_published": "2008-08-01",
-      "price": 34.99,
-      "original_price": 42.50,
-      "isbn": "978-3-16-148420-9",
-      "stock": 8,
-      "rating": 4.9,
-      "reviews_count": 325,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 464,
-      "publisher": "Editorial Programación",
-      "description":
-          "Principios para escribir código limpio y mantenible. Esencial para todo desarrollador profesional.",
-      "category": "Programación",
-      "subcategory": "Buenas Prácticas",
-      "tags": ["programación", "código limpio", "desarrollo", "best practices"],
-      "image": "https://i.ibb.co/1thDR0B8/clean-code.jpg",
-      "weight": 0.8,
-      "dimensions": "17x24 cm",
-      "on_sale": true,
-      "discount": 18,
-      "featured": true,
-      "new": false,
-      "date_added": "2022-04-17"
-    },
-    {
-      "id": 12,
-      "name": "La creación de Dios tan Colorida",
-      "title": "Reflexiones espirituales en mensaje poético",
-      "author": "Blanca P. Hernández",
-      "date_published": "2022-01-15",
-      "price": 16.99,
-      "original_price": 19.99,
-      "isbn": "N.D.LDO21555",
-      "stock": 35,
-      "rating": 4.7,
-      "reviews_count": 94,
-      "language": "Español",
-      "type": "Libro Físico",
-      "formats": ["Tapa blanda"],
-      "pages": 180,
-      "publisher": "Editorial Mundo Hispano",
-      "description":
-          "Obra que explora reflexiones espirituales y filosóficas en un mensaje poético sobre la vida, el amor y la naturaleza.",
-      "category": "Espiritualidad",
-      "subcategory": "Poesía Espiritual",
-      "tags": ["espiritualidad", "poesía", "naturaleza", "reflexión"],
-      "image": "https://i.ibb.co/abc123/creacion-dios-colorida.jpg",
-      "weight": 0.35,
-      "dimensions": "13x19 cm",
-      "on_sale": true,
-      "discount": 15,
-      "featured": true,
-      "new": true,
-      "date_added": "2023-02-28"
-    }
-  ];
+  Map<String, List<BookModel>> booksForType = {};
+
+  ShoppingCartModel? userCart;
+
+  List<CartItemModel> booksInCart = [];
+  List<BookModel> books = [];
 
   @override
   void initState() {
     super.initState();
+
     _tabController = TabController(
       length: tabs.length,
       vsync: this,
@@ -559,7 +89,7 @@ class _LibraryScreenState extends State<LibraryScreen>
         });
       }
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       loadStatus();
     });
   }
@@ -567,8 +97,16 @@ class _LibraryScreenState extends State<LibraryScreen>
   Future<void> loadStatus() async {
     setState(() => loading = true);
     try {
-      await _initData(); // Carga datos generales (categorías)
-      await _initTipoData(); // Carga datos específicos de "Tipo"
+      // cargamos todos los libros para luego filtrar
+      await loadBooks();
+
+      // Carga datos generales
+      await _initData();
+
+      loadCart();
+
+      // Carga datos específicos de "Tipo"
+      await _initTipoData();
     } catch (e) {
       setState(() => loading = false);
     } finally {
@@ -612,6 +150,7 @@ class _LibraryScreenState extends State<LibraryScreen>
           backgroundColor: StyleColor.turquoise,
         ),
         body: SafeArea(
+          maintainBottomViewPadding: true,
           child: loading
               ? LoadingIndicator()
               : Column(
@@ -731,10 +270,6 @@ class _LibraryScreenState extends State<LibraryScreen>
                         ],
                       ),
                     ),
-
-                    // Center(
-                    //   child: Text("Librería"),
-                    // ),
                   ],
                 ),
         ),
@@ -818,7 +353,7 @@ class _LibraryScreenState extends State<LibraryScreen>
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
-                    "${tab["title"]} ${tab["title"] == 'Carrito' ? '(${booksInCart.length})' : ''}"),
+                    "${tab["title"]} ${tab["title"] == 'Carrito' ? '(${userCart?.total_items ?? 0})' : ''}"),
               ),
             ),
           ),
@@ -850,11 +385,11 @@ class _LibraryScreenState extends State<LibraryScreen>
   Future<void> _initTipoData() async {
     // Ejemplo: Los primeros 3 libros son "Novedades"
     booksForType["Novedades"] =
-        books.where((book) => book['new'] == true).toList();
+        books.where((book) => book.isNewRelease == true).toList();
 
     // Ejemplo: Los siguientes 4 son "Más vendidos"
     booksForType["Más vendidos"] =
-        books.where((book) => book['featured'] == true).toList();
+        books.where((book) => book.isBestseller == true).toList();
 
     // El resto son "Más"
     booksForType["Más"] = books.skip(7).toList();
@@ -876,7 +411,7 @@ class _LibraryScreenState extends State<LibraryScreen>
         itemCount: dataBooks.length,
         itemBuilder: (context, index) {
           String category = dataBooks.keys.elementAt(index);
-          List<Map<String, dynamic>> booksCategories = dataBooks[category]!;
+          List<BookModel> booksCategories = dataBooks[category]!;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -913,7 +448,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                         },
                         child: Hero(
                           tag:
-                              "book-image-$category-${booksCategories[indexLibro]['id'].toString()}",
+                              "book-image-$category-${booksCategories[indexLibro].id.toString()}",
                           child: Container(
                             width:
                                 100, // Ancho fijo para cada item del carrusel
@@ -935,7 +470,8 @@ class _LibraryScreenState extends State<LibraryScreen>
                               ],
                               image: DecorationImage(
                                 image: NetworkImage(
-                                  booksCategories[indexLibro]['image'],
+                                  booksCategories[indexLibro].coverImageUrl ??
+                                      'https://via.placeholder.com/150',
                                 ),
                                 fit: BoxFit.cover,
                               ),
@@ -977,7 +513,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                   ),
                 ),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 25),
             ],
           );
         },
@@ -985,7 +521,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     );
   }
 
-  Widget _buildSectionGrid(List<Map<String, dynamic>> books) {
+  Widget _buildSectionGrid(List<BookModel> books) {
     return SingleChildScrollView(
       padding: EdgeInsets.only(
         bottom: kBottomNavigationBarHeight,
@@ -1009,8 +545,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                     );
                   },
                   child: Hero(
-                    tag:
-                        'book-image-${book['id']}', // Tag único para cada libro
+                    tag: 'book-image-${book.id}', // Tag único para cada libro
                     child: Container(
                       width: 100, // Ancho fijo para cada item del carrusel
                       height: 130,
@@ -1030,7 +565,8 @@ class _LibraryScreenState extends State<LibraryScreen>
                         ],
                         image: DecorationImage(
                           image: NetworkImage(
-                            book['image'] ?? 'https://via.placeholder.com/150',
+                            book.coverImageUrl ??
+                                'https://via.placeholder.com/150',
                           ),
                           onError: (exception, stackTrace) {
                             // Handle the error, e.g., log it or show a placeholder
@@ -1077,22 +613,22 @@ class _LibraryScreenState extends State<LibraryScreen>
     );
   }
 
-  Widget _buildTabCart(dataBooks) {
+  Widget _buildTabCart(List<CartItemModel> dataBooks) {
     return StatefulBuilder(builder: (context, setState) {
       void updateSelectedCount() {
         setState(() {});
       }
 
       int selectedCount =
-          dataBooks.where((book) => book['selected'] == true).length;
+          dataBooks.where((book) => book.selected == true).length;
       return Column(
         children: [
           Expanded(
             child: ListView.builder(
               itemCount: dataBooks.length,
               itemBuilder: (context, index) {
-                TextEditingController quantityNumber =
-                    TextEditingController(text: "1");
+                TextEditingController quantityNumber = TextEditingController(
+                    text: dataBooks[index].quantity.toString());
 
                 return Padding(
                   padding: const EdgeInsets.all(6.0),
@@ -1113,7 +649,8 @@ class _LibraryScreenState extends State<LibraryScreen>
                         SizedBox(
                           width: 80,
                           child: Image.network(
-                            dataBooks[index]['image'],
+                            dataBooks[index].book?.coverImageUrl ??
+                                'https://via.placeholder.com/150',
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -1133,7 +670,8 @@ class _LibraryScreenState extends State<LibraryScreen>
                                     Expanded(
                                       flex: 2,
                                       child: Text(
-                                        dataBooks[index]['title'],
+                                        dataBooks[index].book?.title ??
+                                            'Título no disponible',
                                         style: StylesApp(context)
                                             .textStyleBody16
                                             .copyWith(
@@ -1160,7 +698,9 @@ class _LibraryScreenState extends State<LibraryScreen>
                                                 borderRadius:
                                                     BorderRadius.circular(8.0)),
                                             child: Text(
-                                              dataBooks[index]['type'] ?? '',
+                                              displayName(dataBooks[index]
+                                                      .format_type ??
+                                                  ''),
                                               style: StylesApp(context)
                                                   .textStyleBody12,
                                               textAlign: TextAlign.center,
@@ -1175,7 +715,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                                                 borderRadius:
                                                     BorderRadius.circular(8.0)),
                                             child: Text(
-                                              '${dataBooks[index]['price']} USD',
+                                              "${getFormattedPrice((dataBooks[index].unit_price! * dataBooks[index].quantity).toString() ?? 0.toString())} USD",
                                               style: StylesApp(context)
                                                   .textStyleBody12,
                                               textAlign: TextAlign.center,
@@ -1192,6 +732,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                                             size: 24),
                                         onPressed: () {
                                           showModalBottomSheet(
+                                            useSafeArea: true,
                                             context: context,
                                             builder: (context) {
                                               return Column(
@@ -1201,16 +742,12 @@ class _LibraryScreenState extends State<LibraryScreen>
                                                     leading: Icon(
                                                         Icons.info_outline),
                                                     title: Text('Ver detalle'),
-                                                    onTap: () {
-                                                      Navigator.pop(context);
-                                                      showModalBottomSheet(
-                                                        context: context,
-                                                        builder: (context) =>
-                                                            DetailBookWidget(
-                                                          bookCategory:
-                                                              dataBooks[index],
-                                                        ),
-                                                      );
+                                                    onTap: () async {
+                                                      _showDetailBook(
+                                                          context,
+                                                          int.parse(
+                                                              dataBooks[index]
+                                                                  .book_id));
                                                     },
                                                   ),
                                                   ListTile(
@@ -1225,6 +762,11 @@ class _LibraryScreenState extends State<LibraryScreen>
                                                       });
                                                     },
                                                   ),
+                                                  SizedBox(
+                                                    height:
+                                                        kBottomNavigationBarHeight +
+                                                            20,
+                                                  )
                                                 ],
                                               );
                                             },
@@ -1240,6 +782,7 @@ class _LibraryScreenState extends State<LibraryScreen>
 
                                 // Segunda fila: Precio Original y controles de cantidad
                                 Row(
+                                  spacing: 5.0,
                                   children: [
                                     // Precio Original
                                     Container(
@@ -1250,13 +793,15 @@ class _LibraryScreenState extends State<LibraryScreen>
                                           borderRadius:
                                               BorderRadius.circular(8.0)),
                                       child: Text(
-                                        '${dataBooks[index]['original_price']} USD',
+                                        softWrap: true,
+                                        maxLines: 2,
+                                        getFormattedPrice(dataBooks[index]
+                                            .unit_price
+                                            .toString()),
                                         style:
                                             StylesApp(context).textStyleBody12,
                                       ),
                                     ),
-
-                                    Spacer(),
 
                                     // Controles de cantidad
                                     Container(
@@ -1311,17 +856,20 @@ class _LibraryScreenState extends State<LibraryScreen>
                                         ],
                                       ),
                                     ),
-                                    Checkbox(
-                                      activeColor: StyleColor.turquoise,
-                                      value:
-                                          dataBooks[index]['selected'] ?? false,
-                                      onChanged: (bool? value) {
-                                        setState(() {
-                                          dataBooks[index]['selected'] =
-                                              value ?? false;
-                                        });
-                                        updateSelectedCount();
-                                      },
+                                    Expanded(
+                                      child: Checkbox(
+                                        activeColor: StyleColor.turquoise,
+                                        value:
+                                            dataBooks[index].selected ?? false,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            dataBooks[index] = dataBooks[index]
+                                                .copyWith(
+                                                    selected: value ?? false);
+                                          });
+                                          updateSelectedCount();
+                                        },
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1364,6 +912,59 @@ class _LibraryScreenState extends State<LibraryScreen>
   }
 
   void _onSuggestionSelected(String p1) {}
+
+  // Función para leer el carrito del usuario
+  void loadCart() async {
+    final cartEndpoints = CartEndpoints();
+    final response = await cartEndpoints.getCart();
+    if (response.error != null) {
+      debugPrint('Error al cargar el carrito: ${response.error}');
+      // Aquí podrías mostrar un mensaje de error al usuario usando un SnackBar, Dialog, etc.
+      return;
+    }
+
+    userCart = ShoppingCartModel.fromJson(response.data);
+
+    print(userCart);
+    setState(() {
+      booksInCart = userCart!.items;
+    });
+  }
+
+  Future<void> loadBooks() async {
+    final booksEndpoints = BookEndpoints();
+    final result = await booksEndpoints.getBooks();
+    if (result.error != null) {
+      debugPrint('Error al cargar los libros: ${result.error}');
+      // Aquí podrías mostrar un mensaje de error al usuario usando un SnackBar, Dialog, etc.
+      return;
+    }
+    setState(() {
+      books = result.data
+          .map<BookModel>((book) => BookModel.fromJson(book))
+          .toList();
+    });
+  }
+
+  void _showDetailBook(BuildContext context, int bookId) async {
+    final bookEndpoint = BookEndpoints();
+    final responseBook = await bookEndpoint.getBookById(bookId);
+    if (responseBook.error != null) {
+      debugPrint('Error al cargar el libro: ${responseBook.error}');
+      // Aquí podrías mostrar un mensaje de error al usuario usando un SnackBar, Dialog, etc.
+      return;
+    }
+    final bookDetail = BookModel.fromJson(responseBook.data);
+
+    Navigator.pop(context);
+    showModalBottomSheet(
+      useSafeArea: true,
+      context: context,
+      builder: (context) => DetailBookWidget(
+        bookCategory: bookDetail,
+      ),
+    );
+  }
 }
 
 class DetailBookWidget extends StatelessWidget {
@@ -1372,7 +973,7 @@ class DetailBookWidget extends StatelessWidget {
     required this.bookCategory,
   });
 
-  final Map<String, dynamic> bookCategory;
+  final BookModel bookCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -1389,7 +990,7 @@ class DetailBookWidget extends StatelessWidget {
           ),
           SizedBox(height: 25),
           Text(
-            bookCategory['description'] ?? "Sin descripción disponible",
+            bookCategory.description ?? "Sin descripción disponible",
             style: StylesApp(context)
                 .textStyleBody14
                 .copyWith(color: StyleColor.grayMedium),

@@ -1,6 +1,6 @@
 import 'package:biblia_palabra_de_vida_app/class/rate_limiter.dart';
 import 'package:biblia_palabra_de_vida_app/class/security_utils.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -102,12 +102,12 @@ Future<ResponseData> loginGoogle() async {
     );
   } else if (kIsWeb) {
     googleSignIn = GoogleSignIn(
-        clientId: GraphQLConfig.clientId,
+        clientId: ApiConfig.clientId,
         forceCodeForRefreshToken: true,
         scopes: ["email"]);
   } else {
     googleSignIn = GoogleSignIn(
-        serverClientId: GraphQLConfig.serverClientId,
+        serverClientId: ApiConfig.serverClientId,
         forceCodeForRefreshToken: true,
         scopes: [
           "email",

@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/login_user.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -48,7 +48,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                         ? CircleAvatar(
                             radius: 50,
                             backgroundImage: NetworkImage(
-                              "${GraphQLConfig.urlServidor}${userData?.imgProfileUser?.urlImg}?timestamp=${DateTime.now().millisecondsSinceEpoch}",
+                              "${GraphQLConfig.endpoint}${userData?.imgProfileUser?.urlImg}?timestamp=${DateTime.now().millisecondsSinceEpoch}",
                             ),
                             onBackgroundImageError: (_, __) {
                               setState(() {});

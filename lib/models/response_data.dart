@@ -5,12 +5,14 @@ class ResponseData {
   final String? error;
   final String? userFriendlyError;
   final ErrorType? errorType;
+  final bool? success;
 
   ResponseData({
     required this.data,
     this.error,
     this.userFriendlyError,
     this.errorType,
+    this.success,
   });
 
   bool get hasError => error != null;
@@ -19,13 +21,58 @@ class ResponseData {
   factory ResponseData.fromQueryResult(QueryResult result) {
     final errorInfo = _extractErrorInfo(result);
     final userFriendlyMessage = _mapToUserFriendlyMessage(errorInfo);
-    
+
     return ResponseData(
       data: _removeTypename(result.data),
       error: errorInfo.message,
       userFriendlyError: userFriendlyMessage,
       errorType: errorInfo.type,
     );
+  }
+
+  //  Factory para REST (Map/Dynamic)
+  factory ResponseData.fromREST(dynamic responseData) {
+    try {
+      // Si la respuesta ya es un Map
+      if (responseData is Map<String, dynamic>) {
+        // Verificar si tiene la estructura { success: true, data: ... }
+        final success = responseData['success'] ?? true;
+
+        if (!success) {
+          final error = responseData['error'] ??
+              responseData['message'] ??
+              'Error desconocido';
+          return ResponseData(
+            data: null,
+            error: error.toString(),
+            userFriendlyError: _mapRESTErrorToUserFriendly(error.toString()),
+            errorType: _mapRESTErrorType(error.toString()),
+            success: false,
+          );
+        }
+
+        // Extraer data (puede estar en 'data' o directamente)
+        final data = responseData['data'] ?? responseData;
+        return ResponseData(
+          data: data,
+          success: true,
+        );
+      }
+
+      // Si es otro tipo, simplemente devolverlo como data
+      return ResponseData(
+        data: responseData,
+        success: true,
+      );
+    } catch (e) {
+      return ResponseData(
+        data: null,
+        error: e.toString(),
+        userFriendlyError: 'Error al procesar la respuesta del servidor',
+        errorType: ErrorType.parsing,
+        success: false,
+      );
+    }
   }
 
   static ErrorInfo _extractErrorInfo(QueryResult result) {
@@ -42,9 +89,9 @@ class ResponseData {
     if (exception.graphqlErrors.isNotEmpty) {
       final firstError = exception.graphqlErrors.first;
       errorMessage = firstError.message;
-      
+
       // Mapear tipos comunes de errores GraphQL
-      if (firstError.message.contains('Unauthorized') || 
+      if (firstError.message.contains('Unauthorized') ||
           firstError.message.contains('Authentication')) {
         errorType = ErrorType.unauthorized;
       } else if (firstError.message.contains('Validation')) {
@@ -61,22 +108,19 @@ class ResponseData {
     else if (exception.linkException != null) {
       final linkException = exception.linkException.toString();
       errorMessage = linkException;
-      
+
       // Detectar tipo de error de conexión
-      if (linkException.contains('TimeoutException') || 
+      if (linkException.contains('TimeoutException') ||
           linkException.contains('timed out') ||
           linkException.contains('0:00:05')) {
         errorType = ErrorType.timeout;
-      } 
-      else if (linkException.contains('SocketException') ||
-               linkException.contains('Network') ||
-               linkException.contains('Connection')) {
+      } else if (linkException.contains('SocketException') ||
+          linkException.contains('Network') ||
+          linkException.contains('Connection')) {
         errorType = ErrorType.network;
-      }
-      else if (linkException.contains('No stream event')) {
+      } else if (linkException.contains('No stream event')) {
         errorType = ErrorType.noData;
-      }
-      else if (linkException.contains('UnknownException')) {
+      } else if (linkException.contains('UnknownException')) {
         errorType = ErrorType.unknown;
       }
     }
@@ -88,7 +132,7 @@ class ResponseData {
 
     // Extraer mensaje más limpio si es posible
     final cleanedMessage = _cleanErrorMessage(errorMessage);
-    
+
     return ErrorInfo(
       message: cleanedMessage,
       type: errorType,
@@ -104,12 +148,12 @@ class ResponseData {
       RegExp(r'hashCode\s*=\s*\w+'), // Remover hashCodes
       RegExp(r'runtimeType\s*=\s*\w+'), // Remover runtime types
     ];
-    
+
     var cleaned = errorMessage;
     for (final pattern in patterns) {
       cleaned = cleaned.replaceAll(pattern, '');
     }
-    
+
     // Tomar solo la primera línea si es muy largo
     if (cleaned.length > 200) {
       final firstLine = cleaned.split('\n').first;
@@ -119,7 +163,7 @@ class ResponseData {
         cleaned = '${cleaned.substring(0, 150)}...';
       }
     }
-    
+
     return cleaned.trim();
   }
 
@@ -127,25 +171,25 @@ class ResponseData {
     switch (errorInfo.type) {
       case ErrorType.timeout:
         return 'El servidor no respondió a tiempo. Verifica tu conexión a internet e intenta nuevamente.';
-      
+
       case ErrorType.network:
         return 'Problema de conexión. Por favor, verifica tu conexión a internet.';
-      
+
       case ErrorType.noData:
         return 'No se recibieron datos del servidor. El servicio podría estar temporalmente no disponible.';
-      
+
       case ErrorType.unauthorized:
         return 'No tienes permiso para realizar esta acción. Por favor, inicia sesión nuevamente.';
-      
+
       case ErrorType.validation:
         return 'Los datos enviados no son válidos. Por favor, verifica la información.';
-      
+
       case ErrorType.notFound:
         return 'El recurso solicitado no fue encontrado.';
-      
+
       case ErrorType.server:
         return 'Error del servidor. Por favor, intenta más tarde.';
-      
+
       case ErrorType.graphql:
         // Intentar extraer mensaje útil del error GraphQL
         final msg = errorInfo.message.toLowerCase();
@@ -156,10 +200,10 @@ class ResponseData {
           return 'Este elemento ya existe.';
         }
         return 'Error al procesar la solicitud.';
-      
+
       case ErrorType.operation:
         return 'Error en la operación. Por favor, intenta nuevamente.';
-      
+
       case ErrorType.unknown:
       default:
         return 'Ocurrió un error inesperado. Por favor, intenta más tarde.';
@@ -183,6 +227,38 @@ class ResponseData {
     }
     return values;
   }
+
+  static String _mapRESTErrorToUserFriendly(String error) {
+    final errorLower = error.toLowerCase();
+    if (errorLower.contains('timeout')) {
+      return 'El servidor no respondió a tiempo. Verifica tu conexión.';
+    }
+    if (errorLower.contains('network') || errorLower.contains('connection')) {
+      return 'Problema de conexión a internet.';
+    }
+    if (errorLower.contains('unauthorized') || errorLower.contains('401')) {
+      return 'Sesión expirada. Por favor, inicia sesión nuevamente.';
+    }
+    if (errorLower.contains('404')) {
+      return 'El recurso solicitado no existe.';
+    }
+    if (errorLower.contains('500')) {
+      return 'Error interno del servidor. Intenta más tarde.';
+    }
+    return error;
+  }
+
+  static ErrorType _mapRESTErrorType(String error) {
+    final errorLower = error.toLowerCase();
+    if (errorLower.contains('timeout')) return ErrorType.timeout;
+    if (errorLower.contains('network') || errorLower.contains('connection'))
+      return ErrorType.network;
+    if (errorLower.contains('unauthorized') || errorLower.contains('401'))
+      return ErrorType.unauthorized;
+    if (errorLower.contains('404')) return ErrorType.notFound;
+    if (errorLower.contains('500')) return ErrorType.server;
+    return ErrorType.unknown;
+  }
 }
 
 // Clases de soporte para mejor manejo de errores
@@ -197,6 +273,7 @@ enum ErrorType {
   graphql,
   operation,
   unknown,
+  parsing,
   none,
 }
 

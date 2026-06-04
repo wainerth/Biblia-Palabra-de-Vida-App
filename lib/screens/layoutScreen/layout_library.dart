@@ -36,15 +36,19 @@ class _LayoutLibraryState extends State<LayoutLibrary> {
             onTap: _onItemTapped));
   }
 
-/// método para moverse dentro de buttonNavigator
+  /// método para moverse dentro de buttonNavigator
   void _onItemTapped(int value) {
-    if (value == 1) {
-      Navigator.popAndPushNamed(context, '/layoutPage');
+    if (value == 0) {
+      Navigator.popAndPushNamed(
+        context,
+        '/layoutPage',
+        arguments: {'selectedIndex': value},
+      );
       return;
     }
-
     setState(() {
       _selectedIndex = value;
     });
+
   }
 }

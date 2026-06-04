@@ -1,4 +1,5 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -71,7 +72,7 @@ class CardAventureWidget extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(100.0),
                                     image: DecorationImage(
                                       image: NetworkImage(
-                                          GraphQLConfig.urlServidor +
+                                          ApiConfig.baseUrl +
                                               course.img.urlImg),
                                       fit: BoxFit.cover,
                                     ),

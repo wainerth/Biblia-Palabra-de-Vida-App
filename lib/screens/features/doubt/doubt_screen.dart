@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -164,7 +164,7 @@ class DoubtScreen extends StatelessWidget {
             onTap: () async {
               final Uri emailLaunchUri = Uri(
                 scheme: 'mailto',
-                path: GraphQLConfig.emailContact,
+                path: ApiConfig.emailContact,
                 queryParameters: {
                   'subject': translationProvider.tr('doubts.email_subject'),
                   'body': translationProvider.tr('doubts.email_body'),
@@ -181,7 +181,7 @@ class DoubtScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
-                '${translationProvider.tr('doubts.not_found_answer')} ${GraphQLConfig.emailContact}',
+                '${translationProvider.tr('doubts.not_found_answer')} ${ApiConfig.emailContact}',
                 textAlign: TextAlign.center,
                 style: StylesApp(context).textStyleBody14.copyWith(
                       color: Colors.white70,
@@ -287,7 +287,7 @@ class DoubtScreen extends StatelessWidget {
                     onTap: () async {
                       final Uri emailLaunchUri = Uri(
                         scheme: 'mailto',
-                        path: GraphQLConfig.emailContact,
+                        path: ApiConfig.emailContact,
                         queryParameters: {
                           'subject':
                               translationProvider.tr('doubts.email_subject'),
@@ -327,7 +327,7 @@ class DoubtScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          GraphQLConfig.emailContact,
+                          ApiConfig.emailContact,
                           textAlign: TextAlign.center,
                           style: StylesApp(context).textStyleBody14.copyWith(
                                 color: Colors.white70,
@@ -467,7 +467,7 @@ class DoubtScreen extends StatelessWidget {
       onPressed: () async {
         final Uri emailLaunchUri = Uri(
           scheme: 'mailto',
-          path: GraphQLConfig.emailContact,
+          path: ApiConfig.emailContact,
           queryParameters: {
             'subject': translationProvider.tr('doubts.email_subject'),
             'body': translationProvider.tr('doubts.email_body'),

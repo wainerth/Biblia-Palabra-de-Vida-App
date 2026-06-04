@@ -1,4 +1,5 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
@@ -27,7 +28,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       return const AssetImage('assets/no-image.jpg');
     }
 
-    final fullImageUrl = '${GraphQLConfig.urlServidor}${widget.avatarImg}';
+    final fullImageUrl = '${ApiConfig.baseUrl}${widget.avatarImg}';
 
     // Agregar timestamp solo si la URL ha cambiado
     if (_lastImageUrl != fullImageUrl) {

@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/services/device_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -134,7 +134,7 @@ class _AboutScreenState extends State<AboutScreen> {
                 onTap: () async {
                   final Uri emailLaunchUri = Uri(
                     scheme: 'mailto',
-                    path: GraphQLConfig.emailContact,
+                    path: ApiConfig.emailContact,
                     queryParameters: {
                       'subject': translationProvider.tr('about.email_subject'),
                       'body': translationProvider.tr('about.email_body'),
@@ -149,7 +149,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   }
                 },
                 child: Text(
-                  '${translationProvider.tr('about.contact')} ${GraphQLConfig.emailContact}',
+                  '${translationProvider.tr('about.contact')} ${ApiConfig.emailContact}',
                   style: StylesApp(context).textStyleBody16.copyWith(
                         color: Colors.white,
                         fontSize: 15,
@@ -448,7 +448,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                     onTap: () async {
                                       final Uri emailLaunchUri = Uri(
                                         scheme: 'mailto',
-                                        path: GraphQLConfig.emailContact,
+                                        path: ApiConfig.emailContact,
                                         queryParameters: {
                                           'subject':
                                               translationProvider.tr('about.email_subject'),
@@ -475,7 +475,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                         const SizedBox(width: 10),
                                         Expanded(
                                           child: Text(
-                                            GraphQLConfig.emailContact,
+                                            ApiConfig.emailContact,
                                             style: StylesApp(context)
                                                 .textStyleBody16
                                                 .copyWith(

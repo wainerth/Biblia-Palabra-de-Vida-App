@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -1036,7 +1036,7 @@ class _SearchByTextWidgetState extends State<SearchByTextWidget> {
 
   Future<void> _copyToClipboard(
       BuildContext context, WordSearchResult data) async {
-    final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+    final baseUrl = "${GraphQLConfig.endpoint}OfficialBible";
     final copyString =
         "${data.book.modernName} ${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
     await Clipboard.setData(ClipboardData(text: copyString));

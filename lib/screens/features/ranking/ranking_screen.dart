@@ -1,5 +1,6 @@
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -252,7 +253,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                   color: Color(int.parse("0xFF${league.colorFront}")),
                 ),
                 child: Image.network(
-                  GraphQLConfig.urlServidor + league.img!.urlImg,
+                  ApiConfig.baseUrl + league.img!.urlImg,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -337,7 +338,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                   color: Color(int.parse("0xFF${league.colorFront}")),
                 ),
                 child: Image.network(
-                  GraphQLConfig.urlServidor + league.img!.urlImg,
+                  ApiConfig.baseUrl + league.img!.urlImg,
                 ),
               ),
             ),
@@ -516,7 +517,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
                 CircleAvatar(
                   radius: 20,
                   backgroundImage: NetworkImage(
-                    GraphQLConfig.urlServidor + member.profilePicture,
+                    GraphQLConfig.endpoint + member.profilePicture,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -657,7 +658,7 @@ class _RankingScreenViewState extends State<RankingScreenView> {
               ),
               const SizedBox(height: 10),
               Image.network(
-                GraphQLConfig.urlServidor + league.img!.urlImg,
+                ApiConfig.baseUrl + league.img!.urlImg,
                 height: 120,
               ),
               const SizedBox(height: 10),

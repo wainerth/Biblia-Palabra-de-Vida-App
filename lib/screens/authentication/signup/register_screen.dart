@@ -40,9 +40,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureTextRepeat = true;
   String setGender = '';
   bool setIsBaptized = false;
-  ModelData? _selectedDataArea;
-  ModelData? _selectedData;
-  // Country? _selectedCountry;
   AreaCode? _selectedPrefix;
   late List<Country> countries;
   late List<AreaCode> prefixCodes;
@@ -224,7 +221,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   _selectedCountry = newValue;
                                 });
                               },
-                              onAreCodeSelected:(value) =>  _selectedPrefix = value,
+                              onAreCodeSelected: (value) =>
+                                  _selectedPrefix = value,
                               prefixNumberController: _prefixNumberController,
                               phoneNumberController: _phoneNumberController,
                             )
@@ -566,7 +564,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 SizedBox(height: 12),
 
                                 // Botón de acción
-                                Container(
+                                SizedBox(
                                   width: 400,
                                   child: ElevatedButton(
                                     onPressed: () async {
@@ -734,7 +732,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           _selectedCountry = newValue;
                         });
                       },
-                       onAreCodeSelected:(value) =>  _selectedPrefix = value,
+                      onAreCodeSelected: (value) => _selectedPrefix = value,
                       prefixNumberController: _prefixNumberController,
                       phoneNumberController: _phoneNumberController,
                     )
@@ -789,7 +787,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _nextStep();
     } else {
       // abrir dialogo para preguntar se desea recibir mensajes via whatsapp
-      final dialog = await _showScheduleDialog();
+      await _showScheduleDialog();
       setState(() {
         _autoValidate = true; // Activar validaciones
       });
@@ -824,10 +822,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _proceedWithRegistration() async {
+    if (!mounted) return;
+
     LoadingService().showLoading(context);
     final authenticationProvider =
         Provider.of<AuthenticationProvider>(context, listen: false);
-print(_selectedPrefix);
+    if (kDebugMode) {
+      print(_selectedPrefix);
+    }
 
     final dataToRegister = SignupInput(
       name: _nameController.text,
@@ -850,6 +852,8 @@ print(_selectedPrefix);
     final ResponseData response =
         await authenticationProvider.registerUser(dataToRegister);
 
+    if (!mounted) return;
+
     if (response.error != null) {
       LoadingService().hideLoading();
       await showCustomDialog(context,
@@ -868,7 +872,10 @@ print(_selectedPrefix);
               "Error al actualizar preferencias de usuario ${responseSaveWhatsAppConfig.error}");
         }
       }
+      if (!mounted) return;
+
       LoadingService().hideLoading();
+
       if (data.showVerifyPinModal) {
         // levantar diálogo  de verificador de pin
         _showDialogVerify(context, response.data, _emailController.text);
@@ -881,14 +888,23 @@ print(_selectedPrefix);
   // En tu código original
   void _showDialogVerify(
       BuildContext context, Map<String, dynamic> data, String email) {
+    final dialogContext = context;
+
     showVerifyPinDialog(
       context: context,
       email: email,
       onPinVerified: (pin) async {
-        // Aquí llamas a tu API o lógica de verificación
-        final response = await context
-            .read<AuthenticationProvider>()
-            .verifyPinWithApi(email, pin);
+        if (!mounted) return;
+
+        final authProvider = Provider.of<AuthenticationProvider>(
+          dialogContext,
+          listen: false,
+        );
+
+        final response = await authProvider.verifyPinWithApi(email, pin);
+
+        if (!mounted) return;
+
         if (response.error != null) {
           await showCustomDialog(context,
               message: response.error!, dialogType: DialogType.error);

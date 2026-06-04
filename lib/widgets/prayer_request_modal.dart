@@ -1,5 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -175,7 +175,7 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
                             SizedBox(height: 10),
                             AudioPlayerWidget(
                               pathUrl:
-                                  "${GraphQLConfig.urlServidor}${widget.prayerRequest.audioPrayer!.url}",
+                                  "${GraphQLConfig.endpoint}${widget.prayerRequest.audioPrayer!.url}",
                               showImage: false,
                             ),
                           ],
@@ -936,7 +936,7 @@ class _PrayerRequestModalState extends State<PrayerRequestModal> {
             SizedBox(height: 12.0),
             AudioPlayerWidget(
               pathUrl: widget.prayerRequest.audioPrayer != null
-                  ? "${GraphQLConfig.urlServidor}${widget.prayerRequest.audioPrayer!.url}"
+                  ? "${GraphQLConfig.endpoint}${widget.prayerRequest.audioPrayer!.url}"
                   : '',
               showImage: false,
             ),

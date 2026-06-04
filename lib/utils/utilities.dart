@@ -1,8 +1,9 @@
 import 'dart:async' show TimeoutException;
 import 'dart:io' show SocketException;
 
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/main.dart';
+import 'package:biblia_palabra_de_vida_app/models/library/book_format_model.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/services/country_search_service.dart';
@@ -261,7 +262,7 @@ formatColor(String? color) {
 
 Future<String> copyChapter(VersionModel? currentVersion, BookModel? currentBook,
     ChapterModel? chapter) async {
-  final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+  final baseUrl = "${GraphQLConfig.endpoint}OfficialBible";
   if (chapter == null) return '';
   StringBuffer buffer = StringBuffer();
   for (var verse in chapter.verses!) {
@@ -271,7 +272,7 @@ Future<String> copyChapter(VersionModel? currentVersion, BookModel? currentBook,
 }
 
 Future<void> copyToClipboard(BuildContext context, dynamic data) async {
-  final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+  final baseUrl = "${GraphQLConfig.endpoint}OfficialBible";
   final copyString =
       "${data.book.modernName}\n${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
   await Clipboard.setData(ClipboardData(text: copyString));
@@ -290,7 +291,7 @@ Future<void> copyToClipboard(BuildContext context, dynamic data) async {
 }
 
 Future<void> shareVerse(BuildContext context, dynamic data) async {
-  final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+  final baseUrl = "${GraphQLConfig.endpoint}OfficialBible";
   final shareText =
       "${data.book.modernName}\n${data.chapter.chapter}:${data.verse.verse} \n${data.verse.text}\n$baseUrl";
   await SharePlus.instance.share(ShareParams(
@@ -509,4 +510,28 @@ String getCapitalizedFirstName(String? fullName) {
   final firstName = fullName.split(' ').first;
   if (firstName.isEmpty) return '';
   return firstName[0].toUpperCase() + firstName.substring(1).toLowerCase();
+}
+
+String getFormattedPrice(String price) {
+  try {
+    // Convierte a número si es String
+    final priceValue = double.parse(price);
+
+    // Formato con separadores de miles (ej: $29,900.00)
+    final formatter = NumberFormat.currency(
+      locale:
+          'es_CO', // 'es_CO' para Colombia, 'es_MX' para México, 'en_US' para USA
+      symbol: '\$',
+      decimalDigits: 0, // 0 si no quieres decimales, 2 si quieres .00
+    );
+
+    return formatter.format(priceValue);
+  } catch (e) {
+    return '\$$price';
+  }
+}
+
+String displayName(String type) {
+  final formatType = FormatType.fromString(type);
+  return formatType.displayName;
 }

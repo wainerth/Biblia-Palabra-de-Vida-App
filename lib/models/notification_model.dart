@@ -44,7 +44,7 @@ class NotificationModel {
       title: title ?? this.title,
       message: message ?? this.message,
       isRead: isRead ?? this.isRead,
-      isView: isView ?? this.isView,
+      isView: isView ,
       action: action ?? this.action,
       actionLabel: actionLabel ?? this.actionLabel,
       notificationType: notificationType ?? this.notificationType,

@@ -1,5 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
-import 'package:biblia_palabra_de_vida_app/screens/home/new_dashboard.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/screens/layoutScreen/layout_library.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/services/navigation_service.dart';
@@ -9,7 +8,6 @@ final Map<String, WidgetBuilder> routes = {
   '/loading': (context) => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
-      '/new-dashboard': (context) => NewDashboard(),
   '/splashPage': (BuildContext context) => SplashScreen(onComplete: ()=>
      NavigationService().goToInitialScreen()
   ),
@@ -21,7 +19,7 @@ final Map<String, WidgetBuilder> routes = {
   '/layoutPage': (BuildContext context) => AuthGuard(child: PageScreen()),
   '/layoutPage1': (BuildContext context) => const LayoutScreen(),
   '/layoutLibrary': (BuildContext context) =>
-      GraphQLConfig.development ? const LayoutLibrary() : SoonScreen(),
+      ApiConfig.development ? const LayoutLibrary() : SoonScreen(),
   '/mapPage': (BuildContext context) => const MapScreen(),
   '/introAventurePage': (BuildContext context) => IntroAventureScreen(),
   '/aventurePage': (BuildContext context) => AventureScreen(),
@@ -37,7 +35,7 @@ final Map<String, WidgetBuilder> routes = {
     );
   },
   '/communityPage': (BuildContext context) =>
-      GraphQLConfig.development ? CommunityScreen() : SoonScreen(),
+      ApiConfig.development ? CommunityScreen() : SoonScreen(),
   '/profilePage': (BuildContext context) => ProfileScreen(),
   '/workspacePage': (BuildContext context) =>
       AuthGuard(child: WorkspaceScreen()),

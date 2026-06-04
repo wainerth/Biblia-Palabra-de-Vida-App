@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/services/streak_service.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -1736,7 +1737,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         ),
                       ]),
                       child: Image.network(
-                        GraphQLConfig.urlServidor + prize!.img.urlImg,
+                        ApiConfig.baseUrl + prize!.img.urlImg,
                         height: 80,
                       ),
                     ),
@@ -1879,7 +1880,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 child: Column(
                   children: [
                     Image.network(
-                      GraphQLConfig.urlServidor + title!.img.urlImg,
+                      ApiConfig.baseUrl + title!.img.urlImg,
                       height: 80,
                     ),
                     Text(
@@ -1913,7 +1914,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   }
                   if (responseDownloadCertificate.data != null) {
                     final url =
-                        "${GraphQLConfig.urlServidor}${responseDownloadCertificate.data['url']}";
+                        "${GraphQLConfig.endpoint}${responseDownloadCertificate.data['url']}";
                     try {
                       final response = await http.get(Uri.parse(url));
                       if (response.statusCode == 200) {

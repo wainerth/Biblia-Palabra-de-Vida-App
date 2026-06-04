@@ -1,4 +1,5 @@
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -9,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:confetti/confetti.dart';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -895,7 +896,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               height: 300,
               width: double.infinity,
               child: Image.network(
-                GraphQLConfig.urlServidor + story.img.urlImg,
+                ApiConfig.baseUrl + story.img.urlImg,
                 width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (BuildContext context, Object error,
@@ -1517,7 +1518,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               // Usamos un Stack para superponer los botones a la imagen
               children: [
                 Image.network(
-                  GraphQLConfig.urlServidor + story.img.urlImg,
+                  ApiConfig.baseUrl + story.img.urlImg,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (BuildContext context, Object error,
@@ -2487,7 +2488,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _copyStory(History story, AppTranslationProvider translationProvider) {
-    final baseUrl = "${GraphQLConfig.urlServidor}OfficialBible";
+    final baseUrl = "${GraphQLConfig.endpoint}OfficialBible";
     Clipboard.setData(ClipboardData(text:'${ story.text}\n $baseUrl'));
     showSnackBar(translationProvider.tr('history_screen.story_copied'),
         type: SnackBarType.success);

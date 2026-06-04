@@ -1,12 +1,13 @@
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/services/audio_service.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
 import 'package:biblia_palabra_de_vida_app/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class Personaje {
@@ -75,8 +76,8 @@ class _ReddleScreenState extends State<ReddleScreen> {
           personajes = guessResponse.data['data']
               .map<GuessCharacter>((guess) => GuessCharacter.fromJson(guess))
               .toList();
-          // List<GuessCharacter> randomCharacter = personajes..shuffle();
-          personajeActual = personajes.first;
+          List<GuessCharacter> randomCharacter = personajes..shuffle();
+          personajeActual = randomCharacter.first;
           respuestaSeleccionada = null;
           mostrarImagen = false;
           respuestaCorrecta = false;
@@ -490,7 +491,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                             child: Center(
                               child: mostrarImagen && personajeActual != null
                                   ? Image.network(
-                                      "${GraphQLConfig.urlServidor}${personajeActual!.character.img.urlImg}",
+                                      "${ApiConfig.baseUrl}${personajeActual!.character.img.urlImg}",
                                       fit: BoxFit.contain,
                                     )
                                   : Icon(
@@ -809,7 +810,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                   ]),
               child: mostrarImagen && personajeActual != null
                   ? Image.network(
-                      "${GraphQLConfig.urlServidor}${personajeActual!.character.img.urlImg}",
+                      "${ApiConfig.baseUrl}${personajeActual!.character.img.urlImg}",
                       color: StyleColor.black,
                     )
                   : Icon(
@@ -905,7 +906,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
     }
 
     final opciones = personaje.clues;
-    return opciones.map((opcion) {
+    return opciones.map((option) {
       return Container(
         padding: EdgeInsets.all(16.0),
         margin: EdgeInsets.only(bottom: 12.0),
@@ -929,7 +930,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
               ),
               child: Center(
                 child: Text(
-                  "${opciones.indexOf(opcion) + 1}",
+                  "${opciones.indexOf(option) + 1}",
                   style: StylesApp(context).textStyleBody14.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -940,7 +941,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
             SizedBox(width: 16),
             Expanded(
               child: Text(
-                opcion.description,
+                option.description,
                 style: StylesApp(context).textStyleBody14.copyWith(
                       color: StyleColor.black,
                       height: 1.5,
@@ -955,8 +956,10 @@ class _ReddleScreenState extends State<ReddleScreen> {
 
   List<Widget> _buildOpciones(GuessCharacter personaje) {
     final opciones = personaje.clues;
-    print(personaje.character.name);
-    return opciones.map((opcion) {
+    if (kDebugMode) {
+      print(personaje.character.name);
+    }
+    return opciones.map((option) {
       return Padding(
           padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
           child: Container(
@@ -973,7 +976,7 @@ class _ReddleScreenState extends State<ReddleScreen> {
                       blurRadius: 12)
                 ]),
             child: Text(
-              opcion.description,
+              option.description,
               style: StylesApp(context).textStyleBody14,
             ),
           ));

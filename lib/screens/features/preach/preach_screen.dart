@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/constants/app_constants.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
@@ -777,7 +777,7 @@ class _PreachScreenState extends State<PreachScreen> {
               return MessageCard(
                 id: preach.id!,
                 imageUrl:
-                    "${GraphQLConfig.urlServidor}${preach.video!.img!.urlImg}",
+                    "${ApiConfig.baseUrl}${preach.video!.img!.urlImg}",
                 urlVideo: preach.video!.url!,
                 title: preach.title!,
                 author: preach.preachers!,
@@ -866,7 +866,7 @@ class MessageCardTablet extends StatelessWidget {
                     FadeInImage.memoryNetwork(
                       placeholder: kTransparentImage,
                       image:
-                          "${GraphQLConfig.urlServidor}${preach.video!.img!.urlImg}",
+                          "${ApiConfig.baseUrl}${preach.video!.img!.urlImg}",
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: double.infinity,

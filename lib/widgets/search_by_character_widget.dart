@@ -1,7 +1,8 @@
 import 'dart:async';
 
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -651,7 +652,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                           borderRadius: BorderRadius.circular(8),
                           image: DecorationImage(
                             image: NetworkImage(
-                                "${GraphQLConfig.urlServidor}${character.img.urlImg}"),
+                                "${ApiConfig.baseUrl}${character.img.urlImg}"),
                             fit: BoxFit.fitHeight,
                           ),
                         ),
@@ -922,7 +923,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
                             image: DecorationImage(
-                              image: NetworkImage(GraphQLConfig.urlServidor +
+                              image: NetworkImage(ApiConfig.baseUrl +
                                   character.img.urlImg),
                               fit: BoxFit.fitHeight,
                             ),
@@ -1043,7 +1044,7 @@ class _SearchByCharacterWidgetState extends State<SearchByCharacterWidget> {
                     borderRadius: BorderRadius.circular(6),
                     image: DecorationImage(
                       image: NetworkImage(
-                          GraphQLConfig.urlServidor + character.img.urlImg),
+                          ApiConfig.baseUrl + character.img.urlImg),
                       fit: BoxFit.fitHeight,
                     ),
                   ),
@@ -1212,7 +1213,7 @@ class DialogInternalCharacter extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               image: DecorationImage(
-                                image: NetworkImage(GraphQLConfig.urlServidor +
+                                image: NetworkImage(ApiConfig.baseUrl +
                                     data.img.urlImg),
                                 fit: BoxFit.cover,
                               ),

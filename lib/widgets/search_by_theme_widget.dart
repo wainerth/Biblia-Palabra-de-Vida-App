@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -653,7 +653,7 @@ class _SearchByThemeWidgetState extends State<SearchByThemeWidget> {
                             BoxConstraints(minHeight: 81, maxHeight: 81),
                         child: Image.network(
                             // color: widget.currentTheme.textColor,
-                            '${GraphQLConfig.urlServidor}${teaching.img.urlImg}'),
+                            '${ApiConfig.baseUrl}${teaching.img.urlImg}'),
                       ),
                     ),
                     // DESCRIPCIÓN

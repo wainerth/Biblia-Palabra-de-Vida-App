@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/utilities.dart';
@@ -135,7 +135,7 @@ class _RadioScreenState extends State<RadioScreen> {
   Widget build(BuildContext context) {
     setState(() {
       playStoreUrl = "market://details?id=$appPackageName";
-      playStoreWebUrl = GraphQLConfig.urlApkRadio;
+      playStoreWebUrl = ApiConfig.urlApkRadio;
     });
     return Scaffold(
       appBar: AppBar(

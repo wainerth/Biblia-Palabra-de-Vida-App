@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/services/device_service.dart';
@@ -276,11 +276,8 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
     required String username,
     required String email,
   }) async {
-    final urlSocket = GraphQLConfig.development
-        ? GraphQLConfig.urlSocketDev
-        : GraphQLConfig.urlSocketProd;
-    String pathSocket =
-        GraphQLConfig.development ? '/socket.io-dev' : '/socket.io';
+    final urlSocket = GraphQLConfig.webSocketEndpoint;
+    String pathSocket = GraphQLConfig.webSocketPath;
     final timeZone = await getDeviceTimeZone();
     _initializedSocket = true;
     initializeObserver();

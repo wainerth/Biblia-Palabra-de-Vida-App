@@ -1,4 +1,5 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -57,7 +58,7 @@ class _CardCharacterWidgetState extends State<CardCharacterWidget> {
               constraints: BoxConstraints(minHeight: 81, maxHeight: 81),
               child: Image.network(
                   color: widget.currentTheme.textColor,
-                  '${GraphQLConfig.urlServidor}${widget.data.img.urlImg}'),
+                  '${ApiConfig.baseUrl}${widget.data.img.urlImg}'),
             ),
           ],
         ),

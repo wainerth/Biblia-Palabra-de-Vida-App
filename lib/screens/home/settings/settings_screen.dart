@@ -1,6 +1,6 @@
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/main.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/models/whats_app_response.dart';
@@ -34,7 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadUserPreferences();
   }
 
-  // Metódo para cargar preferencias del usuario
+  // Método para cargar preferencias del usuario
   Future<void> _loadUserPreferences() async {
     final userProvider = context.read<UserProvider>();
     final userId = userProvider.currentUser?.userId;
@@ -115,7 +115,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                         path: 'settings.language',
                         trailingText: translationProvider.currentLanguageName,
-                        onTap: () => GraphQLConfig.development
+                        onTap: () => ApiConfig.development
                             ? () => _showLanguageDialog(context)
                             : () {},
                       ),
@@ -358,7 +358,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               icon: Icons.language,
                               path: 'settings.language',
                               subtitle: translationProvider.currentLanguageName,
-                              onTap: GraphQLConfig.development
+                              onTap: ApiConfig.development
                                   ? () => _showLanguageDialog(context)
                                   : () {},
                             ),
@@ -892,7 +892,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // Convertir los horarios actuales a List<ScheduleModel> para el diálogo
     final currentHours = currentSchedules.map((us) => us.schedule).toList();
 
-    final result = await WhatsAppScheduleDialogExtension.show(
+    await WhatsAppScheduleDialogExtension.show(
       context: context,
       initialEnabled: currentIsActive,
       initialHours: currentHours,

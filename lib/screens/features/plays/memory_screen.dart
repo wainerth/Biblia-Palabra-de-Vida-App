@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:biblia_palabra_de_vida_app/class/preferences_manager.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/user_provider.dart';
@@ -716,7 +716,7 @@ class _MemoryScreenState extends State<MemoryScreen>
     try {
       final List<Future<void>> precacheFutures = [];
       for (final memoryItem in lisMemory) {
-        final imageUrl = "${GraphQLConfig.urlServidor}${memoryItem.img.urlImg}";
+        final imageUrl = "${ApiConfig.baseUrl}${memoryItem.img.urlImg}";
         precacheFutures.add(precacheImage(
           NetworkImage(imageUrl),
           context,
@@ -1367,7 +1367,7 @@ class MemoryCard extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(isTablet ? 8.0 : 4.0),
           child: Image.network(
-            "${GraphQLConfig.urlServidor}${card.img.urlImg}",
+            "${ApiConfig.baseUrl}${card.img.urlImg}",
             fit: BoxFit.contain,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;

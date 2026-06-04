@@ -1,5 +1,5 @@
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -711,7 +711,7 @@ class _DetailCorseScreenState extends State<DetailCourseScreen> {
               image: course?.imgCourseUrl.isNotEmpty == true
                   ? DecorationImage(
                       image: NetworkImage(
-                          "${GraphQLConfig.urlServidor}${course!.imgCourseUrl}"),
+                          "${ApiConfig.baseUrl}${course!.imgCourseUrl}"),
                       fit: BoxFit.cover,
                     )
                   : null,

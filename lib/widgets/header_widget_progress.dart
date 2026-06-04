@@ -1,4 +1,5 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -76,7 +77,7 @@ class HeaderWidgetProgress extends StatelessWidget {
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
                               imageUrl: userData!.imgProfileUser != null
-                              ? GraphQLConfig.urlServidor+userData.imgProfileUser!.urlImg
+                              ? ApiConfig.baseUrl+userData.imgProfileUser!.urlImg
                               : 'assets/no-image.jpg',
                               placeholder:(context, url ) => Image.asset('assets/no-image.jpg'),
                               errorWidget:(context, url , error) => Image.asset('assets/no-image.jpg')

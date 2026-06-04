@@ -1,4 +1,4 @@
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/style_color.dart';
@@ -114,7 +114,7 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                         SizedBox(height: 10),
                         AudioPlayerWidget(
                           pathUrl:
-                              "${GraphQLConfig.urlServidor}${widget.dataSeleccionada.responser?.audioResponse!.url}",
+                              "${GraphQLConfig.endpoint}${widget.dataSeleccionada.responser?.audioResponse!.url}",
                           showImage: false,
                         ),
                       ],
@@ -318,7 +318,7 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
                           SizedBox(height: 10),
                           AudioPlayerWidget(
                             pathUrl:
-                                "${GraphQLConfig.urlServidor}${widget.dataSeleccionada.audioPrayer!.url}",
+                                "${GraphQLConfig.endpoint}${widget.dataSeleccionada.audioPrayer!.url}",
                             showImage: false,
                           ),
                         ],
@@ -390,7 +390,7 @@ class _InfoModalWidgetState extends State<InfoModalWidget> {
           SizedBox(height: 10),
           AudioPlayerWidget(
             pathUrl:
-                "${GraphQLConfig.urlServidor}${widget.dataSeleccionada.audioPrayer!.url}",
+                "${GraphQLConfig.endpoint}${widget.dataSeleccionada.audioPrayer!.url}",
             showImage: false,
           ),
         ],

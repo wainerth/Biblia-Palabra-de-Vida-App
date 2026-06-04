@@ -1,5 +1,6 @@
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/themes/bible_themes.dart';
@@ -142,7 +143,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
                           borderRadius: BorderRadius.circular(12),
                           image: DecorationImage(
                             image: NetworkImage(
-                                '${GraphQLConfig.urlServidor}${widget.data.img.urlImg}'),
+                                '${ApiConfig.baseUrl}${widget.data.img.urlImg}'),
                             fit: BoxFit.cover,
                           ),
                           boxShadow: [
@@ -559,7 +560,7 @@ class _DialogInternalTeachingState extends State<DialogInternalTeaching> {
               children: [
                 Center(
                   child: Image.network(
-                      '${GraphQLConfig.urlServidor}${widget.data.img.urlImg}'),
+                      '${ApiConfig.baseUrl}${widget.data.img.urlImg}'),
                 ),
                 Text(
                   textAlign: TextAlign.center,

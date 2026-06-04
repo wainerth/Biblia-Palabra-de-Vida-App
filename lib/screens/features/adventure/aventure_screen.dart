@@ -1,5 +1,5 @@
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
 import 'package:biblia_palabra_de_vida_app/providers/bible_theme_provider.dart';
@@ -67,6 +67,7 @@ class _AventureScreenState extends State<AventureScreen> {
     setState(() {
       errorMessage = null;
     });
+    BuildContext? localContext = context;
     try {
       final result = await loadCoursesByUserAndChurch(
           page,
@@ -75,21 +76,22 @@ class _AventureScreenState extends State<AventureScreen> {
           dataUser!.userChurch.isNotEmpty
               ? dataUser!.userChurch.first.id
               : null);
+    if (!localContext.mounted) return;
       if (result.error != null) {
         LoadingService().hideLoading();
         if (result.error.contains("Información")) {
-          await showCustomDialogWithAction(context,
+          await showCustomDialogWithAction(localContext,
               message: result.error!,
               dialogType: DialogTypeAction.info,
               buttonOk: translationProvider.tr('adventure_screen.go_back'),
               actionCallbackOk: () {
-                Navigator.popAndPushNamed(context, '/workspacePage');
+                Navigator.popAndPushNamed(localContext, '/workspacePage');
               },
               showAction: true,
               textButton: translationProvider
                   .tr('adventure_screen.affiliate_to_church'),
               actionCallback: () {
-                Navigator.popAndPushNamed(context, '/profilePage');
+                Navigator.popAndPushNamed(localContext, '/profilePage');
               });
           errorMessage = result.error;
         } else {
@@ -231,7 +233,7 @@ class _AventureScreenState extends State<AventureScreen> {
                     ),
                     child: courses[index].img.urlImg.isNotEmpty
                         ? Image.network(
-                            GraphQLConfig.urlServidor +
+                            ApiConfig.baseUrl +
                                 courses[index].img.urlImg,
                             fit: BoxFit.cover,
                             loadingBuilder: (context, child, loadingProgress) {

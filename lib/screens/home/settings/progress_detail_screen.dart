@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -7,7 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/query.dart';
-import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
+import 'package:biblia_palabra_de_vida_app/config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_providers.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
@@ -613,7 +614,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                   borderRadius: BorderRadius.circular(8),
                   image: DecorationImage(
                     image: NetworkImage(
-                      '${GraphQLConfig.urlServidor}${title.img.urlImg}',
+                      '${ApiConfig.baseUrl}${title.img.urlImg}',
                     ),
                     fit: BoxFit.cover,
                   ),
@@ -895,7 +896,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                               BorderRadius.circular(8),
                                           image: DecorationImage(
                                             image: NetworkImage(
-                                              GraphQLConfig.urlServidor +
+                                              ApiConfig.baseUrl +
                                                   award.img.urlImg,
                                             ),
                                             fit: BoxFit.cover,
@@ -1233,7 +1234,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                                       BorderRadius.circular(_isTablet ? 10 : 8),
                                   image: DecorationImage(
                                     image: NetworkImage(
-                                      '${GraphQLConfig.urlServidor}${titles![index].img.urlImg}',
+                                      '${ApiConfig.baseUrl}${titles![index].img.urlImg}',
                                     ),
                                     fit: BoxFit.cover,
                                   ),
@@ -1316,7 +1317,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                           width: 80.0,
                           height: 84.0,
                           child: Image.network(
-                              GraphQLConfig.urlServidor + item.img.urlImg,
+                              ApiConfig.baseUrl + item.img.urlImg,
                               fit: BoxFit.fill),
                         ),
                         Text(item.biblicalName),
@@ -1549,7 +1550,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                 child: Column(
                   children: [
                     Image.network(
-                      GraphQLConfig.urlServidor + title.img.urlImg,
+                      ApiConfig.baseUrl + title.img.urlImg,
                       height: 80,
                     ),
                     Text(
@@ -1582,7 +1583,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                   }
                   if (responseDownloadCertificate.data != null) {
                     final url =
-                        "${GraphQLConfig.urlServidor}${responseDownloadCertificate.data['url']}";
+                        "${GraphQLConfig.endpoint}${responseDownloadCertificate.data['url']}";
                     try {
                       final response = await http.get(Uri.parse(url));
                       if (response.statusCode == 200) {
@@ -1660,7 +1661,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
               onPressed: () async {
                 await SharePlus.instance.share(ShareParams(
                   text:
-                      "${translationProvider.tr('progress_detail_screen.title_message_shared').replaceFirst("{{title}}", title.title)} \n ${GraphQLConfig.urlServidor}OfficialBible",
+                      "${translationProvider.tr('progress_detail_screen.title_message_shared').replaceFirst("{{title}}", title.title)} \n ${GraphQLConfig.endpoint}OfficialBible",
                   subject: translationProvider
                       .tr('progress_detail_screen.subject_shared')
                       .replaceFirst("%s", title.title),
