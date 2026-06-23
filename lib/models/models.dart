@@ -1,3 +1,7 @@
+export 'package:biblia_palabra_de_vida_app/models/assistance_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/church_model.dart';
+export 'package:biblia_palabra_de_vida_app/models/medal_model.dart';
+
 export 'package:biblia_palabra_de_vida_app/models/schedule_model.dart';
 
 export 'package:biblia_palabra_de_vida_app/models/audio.dart';

@@ -238,6 +238,47 @@ List<BottomNavigationBarItem> getBottomNavigationBarItems(
       activeIcon: Column(
         children: [
           Icon(
+            Icons.qr_code_scanner,
+            size: StylesApp(context).sizeIconBottomBar,
+            color: StyleColor.blue,
+          ),
+          Text(
+           'Asistencia',
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.blue,
+                ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              color: StyleColor.blue,
+              borderRadius: BorderRadius.circular(5),
+            ),
+          )
+        ],
+      ),
+      icon: Column(
+        children: [
+          Icon(
+            Icons.qr_code_scanner,
+            size: StylesApp(context).sizeIconBottomBar,
+            color: StyleColor.grayMedium,
+          ),
+          Text(
+            "Asistencia",
+            style: StylesApp(context).textStyleBody10.copyWith(
+                  color: StyleColor.grayMedium,
+                ),
+          ),
+        ],
+      ),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      activeIcon: Column(
+        children: [
+          Icon(
             Icons.settings,
             size: StylesApp(context).sizeIconBottomBar,
             color: StyleColor.grayMedium,

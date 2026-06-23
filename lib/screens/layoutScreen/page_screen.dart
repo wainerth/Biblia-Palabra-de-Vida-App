@@ -1,5 +1,6 @@
 // import 'package:biblia_palabra_de_vida_app/graphql-config/graphql_config.dart';
 import 'package:biblia_palabra_de_vida_app/config/api_config.dart';
+import 'package:biblia_palabra_de_vida_app/screens/features/QR_Assistance/qr_assistance_page.dart';
 import 'package:biblia_palabra_de_vida_app/screens/screens.dart';
 import 'package:biblia_palabra_de_vida_app/themes/styles_app.dart';
 import 'package:biblia_palabra_de_vida_app/utils/bottom_navigation_items.dart';
@@ -21,6 +22,7 @@ class _PageScreenState extends State<PageScreen> {
     PrayerScreen(),
     if (ApiConfig.development) RadioScreen(),
     if (ApiConfig.development) OfferingsScreen(),
+    QRAssistancePage(),
     SettingsScreen(),
   ];
 

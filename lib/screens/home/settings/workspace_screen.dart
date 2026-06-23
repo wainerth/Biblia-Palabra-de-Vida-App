@@ -305,6 +305,11 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
               )
             : Container(),
         const SizedBox(height: 12.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: _buildCalendarEvent(context, translationProvider),
+        ),
+        const SizedBox(height: 12.0),
         _buildProverbsSection(
             context, loadingDaily, errorDaily, dailyWord, translationProvider),
         _buildStoriesSection(context, reflection, translationProvider),
@@ -1246,18 +1251,20 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                                       ),
                                     ],
                                   ),
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    "${userData?.league != null ? userData.league.leagueName : translationProvider.tr('workspace.user_profile.welcome_herd')}",
-                                    style: userData?.league != null
-                                        ? StylesApp(context)
-                                            .textStyleBody6
-                                            .copyWith(color: Colors.black)
-                                        : StylesApp(context)
-                                            .textStyleBody10
-                                            .copyWith(
-                                                color: Colors.black,
-                                                fontSize: 14.0),
+                                  Center(
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      "${userData?.league != null ? userData.league.leagueName : translationProvider.tr('workspace.user_profile.welcome_herd')}",
+                                      style: userData?.league != null
+                                          ? StylesApp(context)
+                                              .textStyleBody6
+                                              .copyWith(color: Colors.black)
+                                          : StylesApp(context)
+                                              .textStyleBody10
+                                              .copyWith(
+                                                  color: Colors.black,
+                                                  fontSize: 14.0),
+                                    ),
                                   )
                                 ]),
                           ),
@@ -1555,6 +1562,99 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
       builder: (BuildContext context) {
         return ModalTalesWidget(data: buttonsData, pagination: paginate);
       },
+    );
+  }
+
+  _buildCalendarEvent(
+      BuildContext context, AppTranslationProvider translationProvider) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      color: Colors.transparent,
+      semanticContainer: false,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              colors: [StyleColor.turquoise, StyleColor.blueLight]),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_month_outlined,
+                            size: 80,
+                            color: StyleColor.white,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Calendario de Eventos",
+                                style: StylesApp(context)
+                                    .textStyleBody16
+                                    .copyWith(color: StyleColor.black),
+                              ),
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                        text:
+                                            "ver actividades de las\n iglesias "),
+                                    TextSpan(
+                                        text: "Palabra de Vida",
+                                        style: StylesApp(context)
+                                            .textStyleBody14
+                                            .copyWith(
+                                                color: StyleColor.orange)),
+                                  ],
+                                  style: StylesApp(context)
+                                      .textStyleBody14
+                                      .copyWith(
+                                        color: StyleColor.black,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                  IconButton(
+                    iconSize: 20,
+                    padding: EdgeInsets.all(0),
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStatePropertyAll(StyleColor.turquoise),
+                    ),
+                    onPressed: () {
+                      Navigator.pushNamed(context, "/eventCalendarPage");
+                    },
+                    icon: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: StyleColor.white,
+                    ),
+                  )
+                  // Container(
+                  //   padding: EdgeInsets.all(8.0),
+                  //   decoration: BoxDecoration(
+                  //       color: StyleColor.turquoise, shape: BoxShape.circle),
+                  //   child:
+                  // )
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

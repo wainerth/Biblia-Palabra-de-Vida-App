@@ -1,5 +1,5 @@
 class ApiConfig {
-  static const bool development = true;
+  static const bool development = false;
   static const String baseUrl = 'https://labibliapalabradevida.com/';
   static const String authToken = '';
     static const String urlApkRadio =

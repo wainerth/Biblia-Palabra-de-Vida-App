@@ -87,6 +87,9 @@ final Map<String, WidgetBuilder> routes = {
       message: args["message"],
       storeUrl: args["storeUrl"],
     );
+  },
+  '/eventCalendarPage':(context) {
+    return EventCalendarPage();
   }
 };
 
