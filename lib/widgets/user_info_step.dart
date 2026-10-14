@@ -190,6 +190,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
             child: TextFormField(
               controller: widget.passwordController,
               obscureText: widget.obscureTextPass,
+              enableSuggestions: false,
+              autocorrect: false,
               textAlignVertical: TextAlignVertical.center,
               decoration: StylesApp(context)
                   .inputDecorationOutlineStyle
@@ -233,6 +235,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
             child: TextFormField(
               controller: widget.confirmPasswordController,
               obscureText: widget.obscureTextRepeat,
+              enableSuggestions: false,
+              autocorrect: false,
               textAlignVertical: TextAlignVertical.center,
               decoration:
                   StylesApp(context).inputDecorationOutlineStyle.copyWith(
@@ -444,6 +448,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                           child: TextFormField(
                             controller: widget.passwordController,
                             obscureText: widget.obscureTextPass,
+                            enableSuggestions: false,
+                            autocorrect: false,
                             decoration: StylesApp(context)
                                 .inputDecorationOutlineStyle
                                 .copyWith(
@@ -508,6 +514,8 @@ class _UserInfoStepState extends State<UserInfoStep> {
                           child: TextFormField(
                             controller: widget.confirmPasswordController,
                             obscureText: widget.obscureTextRepeat,
+                            enableSuggestions: false,
+                            autocorrect: false,
                             decoration: StylesApp(context)
                                 .inputDecorationOutlineStyle
                                 .copyWith(

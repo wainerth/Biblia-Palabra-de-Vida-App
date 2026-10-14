@@ -89,11 +89,9 @@ class SocketClientProvider with ChangeNotifier, WidgetsBindingObserver {
 
     // Obtener token FCM
     _fcmToken = await FCMService.getFCMToken();
-    print('Token FCM obtenido: $_fcmToken');
-
-    // if (_fcmToken != null) {
-    //   _sendFcmTokenToServer(_fcmToken!);
-    // }
+    if (kDebugMode) {
+      debugPrint('Token FCM obtenido: ${_fcmToken?.substring(0,8)}....');
+    }
   }
 
 // Método para inicializar notificaciones locales

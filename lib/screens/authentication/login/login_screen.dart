@@ -78,6 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: textPass,
                     cursorHeight: 16.sp,
                     obscureText: _obscureTextPass,
+                    enableSuggestions: false,
+                    autocorrect: false, 
                     textAlignVertical: TextAlignVertical.center,
                     style: StylesApp(context)
                         .textStyleBody12

@@ -14,7 +14,7 @@ class FCMService {
   static Future<void> initialize() async {
     if (kIsWeb) {
       if (kDebugMode) {
-        print('🌐 FCM deshabilitado para web');
+        debugPrint('🌐 FCM deshabilitado para web');
       }
       return;
     }
@@ -61,7 +61,7 @@ class FCMService {
       provisional: true,
     );
     if (kDebugMode) {
-      print('Permisos de notificación: ${settings.authorizationStatus}');
+      debugPrint('Permisos de notificación: ${settings.authorizationStatus}');
     }
   }
 
@@ -73,7 +73,7 @@ class FCMService {
     // Escuchar refresco de token
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
       if (kDebugMode) {
-        print('Nuevo token FCM: $newToken');
+        debugPrint('Nuevo token FCM: ${newToken.substring(0,8)}...');
       }
       _sendTokenToServer(newToken);
     });
@@ -81,14 +81,14 @@ class FCMService {
 
   static void _handleForegroundMessage(RemoteMessage message) {
     if (kDebugMode) {
-      print('Notificación en primer plano: ${message.messageId}');
+      debugPrint('Notificación en primer plano: ${message.messageId}');
     }
     _showLocalNotification(message);
   }
 
   static void _handleBackgroundMessage(RemoteMessage message) {
     if (kDebugMode) {
-      print('Notificación en segundo plano: ${message.messageId}');
+      debugPrint('Notificación en segundo plano: ${message.messageId}');
     }
     _navigateToScreen(message);
   }
@@ -96,7 +96,7 @@ class FCMService {
   static void _handleInitialMessage(RemoteMessage? message) {
     if (message != null) {
       if (kDebugMode) {
-        print('Notificación con app cerrada: ${message.messageId}');
+        debugPrint('Notificación con app cerrada: ${message.messageId}');
       }
       _navigateToScreen(message);
     }
@@ -153,7 +153,7 @@ class FCMService {
       return await _firebaseMessaging.getToken();
     } catch (e) {
       if (kDebugMode) {
-        print('Error obteniendo token FCM: $e');
+        debugPrint('Error obteniendo token FCM: $e');
       }
       return null;
     }
@@ -162,7 +162,7 @@ class FCMService {
   static Future<void> _sendTokenToServer(String token) async {
     // Implementar envío de token a tu backend
     if (kDebugMode) {
-      print('Enviando token al servidor: $token');
+      debugPrint('Enviando token al servidor: ${token.substring(0,8)}...');
     }
     // Ejemplo: await apiService.updateFcmToken(token);
   }

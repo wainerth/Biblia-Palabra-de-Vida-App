@@ -108,6 +108,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: _emailController,
+                                    enableSuggestions: false,
+                                    autocorrect: false,
                                     keyboardType: TextInputType.emailAddress,
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
@@ -147,6 +149,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   width: StylesApp(context).formWidth,
                                   child: TextFormField(
                                     controller: __recoveryCodeController,
+                                    enableSuggestions: false,
+                                    autocorrect: false,
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
@@ -172,6 +176,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   child: TextFormField(
                                     controller: _passwordController,
                                     obscureText: _obscureTextPass,
+                                    enableSuggestions: false,
+                                    autocorrect: false,
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
@@ -215,6 +221,8 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                   child: TextFormField(
                                     controller: _confirmPasswordController,
                                     obscureText: _obscureTextRepeat,
+                                    enableSuggestions: false,
+                                    autocorrect: false,
                                     decoration: StylesApp(context)
                                         .inputDecorationOutlineStyle
                                         .copyWith(
@@ -301,7 +309,6 @@ class _RecoverPassScreenState extends State<RecoverPassScreen> {
                                         await showCustomDialog(
                                           context,
                                           showDetails: true,
-
                                           message: response.userFriendlyError!,
                                           messageDetail: response.error!,
                                           dialogType: DialogType.error,
