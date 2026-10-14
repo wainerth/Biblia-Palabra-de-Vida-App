@@ -2099,7 +2099,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     // Verificar si deberíamos mostrar la celebración
     final shouldShow = await StreakService.shouldShowCelebration();
 
-    if (!shouldShow) {
+    if (shouldShow) {
       // Obtener datos del calendario
       final ResponseData response =
           await streaksCalendar(userData!.userId, DateTime.now().month);
@@ -2109,6 +2109,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
         // Mostrar diálogo de celebración
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
           StreakService.showStreakCelebration(
             context: context,
             streakCalendar: streakCalendar,
