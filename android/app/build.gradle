@@ -12,7 +12,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.renuevo.palabradevidabiblia"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = "25.1.8937393"
 
     compileOptions {

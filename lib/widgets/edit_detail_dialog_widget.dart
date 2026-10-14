@@ -754,7 +754,7 @@ class _EditDetailDialogWidget extends State<EditDetailDialogWidget> {
         .toList();
     List<ModelData> optionsSex = [
       ModelData(value: 'm', label: translationProvider.tr('profile.gender_options.male')),
-      ModelData(value: 'f', label: translationProvider.tr('profile.gender_options.male'))
+      ModelData(value: 'f', label: translationProvider.tr('profile.gender_options.female'))
     ];
 
     return Container(

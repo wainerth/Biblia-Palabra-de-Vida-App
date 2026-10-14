@@ -401,7 +401,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
           // questions[i].answers[j] = questions[i].answers[j].copyWith(
           //   answer:  "Esta es una respuesta o opción muy larga que se va  a implemenatr para validar que tanto pueden extenderse las cajas y que tanto es el scrooll de la pantalla que va  apermirt para el usuario pueda ver todas las opciones en el dispositivo movíl , "
           // );
-          
         }
       }
       currentQuestion = questions[currentIndex];
@@ -2098,16 +2097,16 @@ class _QuestionScreenState extends State<QuestionScreen> {
     // Verificar si deberíamos mostrar la celebración
     final shouldShow = await StreakService.shouldShowCelebration();
 
-    if (!shouldShow) {
+    if (shouldShow) {
       // Obtener datos del calendario
       final ResponseData response =
           await streaksCalendar(userData!.userId, DateTime.now().month);
 
       if (response.error == null) {
         final streakCalendar = DateCalendar.fromJson(response.data);
-
         // Mostrar diálogo de celebración
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
           StreakService.showStreakCelebration(
             context: context,
             streakCalendar: streakCalendar,
