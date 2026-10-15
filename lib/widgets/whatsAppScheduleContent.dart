@@ -63,6 +63,8 @@ class WhatsAppScheduleContentState extends State<WhatsAppScheduleContent> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(), // scroll fluido
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -246,6 +248,7 @@ class WhatsAppScheduleContentState extends State<WhatsAppScheduleContent> {
           constraints: BoxConstraints(maxHeight: 300),
           child: GridView.builder(
             shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               crossAxisSpacing: 8,
