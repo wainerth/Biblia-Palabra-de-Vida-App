@@ -401,12 +401,18 @@ class AuthenticationProvider extends ChangeNotifier {
       final ResponseData response = await verifyPinPassword(email, code);
       error = response.error;
       if (error != null) {
-        return ResponseData(data: null,userFriendlyError: response.userFriendlyError, error: error);
+        return ResponseData(
+            data: null,
+            userFriendlyError: response.userFriendlyError,
+            error: error);
       }
       final ResponseData recovery = await resetPassword(email, password);
       error = recovery.error;
       if (error != null) {
-        return ResponseData(data: null,userFriendlyError: response.userFriendlyError, error: error);
+        return ResponseData(
+            data: null,
+            userFriendlyError: response.userFriendlyError,
+            error: error);
       }
       return ResponseData(data: response.data, error: error);
     } catch (e) {
@@ -441,28 +447,42 @@ class AuthenticationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<ResponseData> verifyPinWithApi(String email, String pin) async {
+  Future<ResponseData> verifyPinWithApi(String email, String pin,
+      {String? password}) async {
     // llamamos a verificar pin
-    final verifyPin = await verifyPinAndCompleteRegistration(email, pin);
+    final verifyPin = await verifyPinEmailVerification(email, pin);
     if (verifyPin.error != null) {
-      return ResponseData(data: null, error: verifyPin.error);
+      return ResponseData(
+          data: null,
+          error: verifyPin.error,
+          userFriendlyError: verifyPin.userFriendlyError);
     }
 
     // lamamos a leer perfil del usuario
     try {
-      final userId = verifyPin.data["id"];
-      final token = verifyPin.data["userJwtToken"]["token"];
-
-      await PreferencesManager().setUserToken(token);
-
-      // consultamos perfil del usuario
-      final ResponseData response = await loadProfileUser(userId, token);
-
-      if (response.error != null) {
-        return ResponseData(data: null, error: response.error);
+      if (password != null && password.isNotEmpty) {
+        final response = await loginUser(context, email, password);
+        return ResponseData(data: response.data, error: null);
+      } else {
+        return ResponseData(
+          data: null,
+          error: 'Verificación exitosa, Problemas de timeout',
+          userFriendlyError: 'No se Puede iniciar Session, inténtelo más Tarde');
       }
 
-      return ResponseData(data: response.data, error: null);
+      // final userId = verifyPin.data["id"];
+      // final token = verifyPin.data["userJwtToken"]["token"];
+
+      // await PreferencesManager().setUserToken(token);
+
+      // // consultamos perfil del usuario
+      // final ResponseData response = await loadProfileUser(userId, token);
+
+      // if (response.error != null) {
+      //   return ResponseData(data: null, error: response.error);
+      // }
+
+      // return ResponseData(data: response.data, error: null);
     } catch (e) {
       return handleGenericError(e, "Login con usuario y contraseña");
     }

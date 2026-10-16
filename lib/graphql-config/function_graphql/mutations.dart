@@ -1722,6 +1722,61 @@ Future<ResponseData> confirmPaymentWithBackend({
   }
 }
 
+Future<ResponseData> verifyPinEmailVerification(
+    String email, String verificationCode) async {
+  final GraphQLClient client = createClient();
+
+  final MutationOptions options = MutationOptions(
+    operationName: "VerifyPinEmailVerification",
+    document: gql(r'''
+        mutation VerifyPinEmailVerification($input: verifyPinAndCompleteRegistrationInput!) {
+          verifyPinEmailVerification(input: $input) {
+            success
+            alreadyVerified
+            email
+          }
+        }
+'''),
+    variables: {
+      "input": {"email": email, "verificationCode": verificationCode}
+    },
+  );
+
+  try {
+    final QueryResult result = await client.mutate(options);
+    if (result.hasException) {
+      return ResponseData.fromQueryResult(result);
+    }
+
+    final data = result.data;
+    if (data == null || data['verifyPinEmailVerification'] == null) {
+      return ResponseData(
+        data: null,
+        userFriendlyError: 'No se pudo eRealizar la Verificación de email.',
+        error:
+            'envió de código de verificación  fallida: no se devolvieron datos',
+        errorType: ErrorType.noData,
+      );
+    }
+
+    return ResponseData(
+      data: data['verifyPinEmailVerification'],
+      error: null,
+    );
+  } catch (e) {
+    return handleGenericError(e, "verificación de email mediante código");
+  }
+}
+
+/// Verifica el PIN y completa el registro del usuario.
+///
+/// **Deprecado:** Este método hace demasiado (verifica PIN + autentica +
+/// carga perfil + socket). Usa en su lugar [verifyPin] seguido de [loginUser].
+@Deprecated(
+  'Hace demasiado trabajo (verify + auth + perfil). '
+  'Usa verifyPin() y luego loginUser(). '
+  'Se eliminará en la versión 3.0.0.',
+)
 Future<ResponseData> verifyPinAndCompleteRegistration(
     String email, String verificationCode) async {
   final GraphQLClient client = createClient();

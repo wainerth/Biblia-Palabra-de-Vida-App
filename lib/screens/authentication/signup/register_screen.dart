@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:biblia_palabra_de_vida_app/graphql-config/function_graphql/mutations.dart';
 import 'package:biblia_palabra_de_vida_app/models/models.dart';
 import 'package:biblia_palabra_de_vida_app/providers/app_translation_provider.dart';
@@ -40,6 +42,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureTextRepeat = true;
   String setGender = '';
   bool setIsBaptized = false;
+  ModelData? _selectedDataArea;
+  ModelData? _selectedData;
+  // Country? _selectedCountry;
   AreaCode? _selectedPrefix;
   late List<Country> countries;
   late List<AreaCode> prefixCodes;
@@ -48,6 +53,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool enabledReceived = false;
   List<ScheduleModel> listHours = [];
   ModelData? _selectedCountry;
+
+  /// Bloquea múltiples envíos (registro en curso o PIN pendiente)
+  bool _registrationLocked = false;
+
+  /// Guard para evitar dobles navegaciones al modal de PIN
+  bool _pinDialogOpen = false;
 
   // Método para detectar si es tablet
   bool _isTablet(BuildContext context) {
@@ -118,11 +129,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final bool isTablet = _isTablet(context);
 
-    return Scaffold(
-      body: SafeArea(
-        child: isTablet
-            ? _buildTabletLayout(context, translationProvider)
-            : _buildMobileLayout(context, translationProvider),
+    return PopScope(
+      canPop: !_registrationLocked && !_pinDialogOpen,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: isTablet
+              ? _buildTabletLayout(context, translationProvider)
+              : _buildMobileLayout(context, translationProvider),
+        ),
       ),
     );
   }
@@ -252,21 +269,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(
                             height: 23,
                           ),
-                          ButtonThemeWidget(
-                            textStyle: StylesApp(context).buttonTextStyle,
-                            onPressed: () async {
-                              initRegister(translationProvider);
-                            },
-                            text: _currentStep == 0
-                                ? translationProvider
-                                    .tr('register_screen.continue')
-                                : translationProvider
-                                    .tr('register_screen.register'),
-                            buttonStyle: StylesApp(context).btnSecondarySmall,
-                            width: isTablet(context)
-                                ? StylesApp(context).formWidth
-                                : StylesApp(context).btnHeight.width,
-                            height: StylesApp(context).btnHeight.height,
+                          AbsorbPointer(
+                            absorbing: _registrationLocked,
+                            child: Opacity(
+                              opacity: _registrationLocked ? 0.6 : 1.0,
+                              child: ButtonThemeWidget(
+                                textStyle: StylesApp(context).buttonTextStyle,
+                                onPressed: _registrationLocked
+                                    ? null
+                                    : () async {
+                                        initRegister(translationProvider);
+                                      },
+                                text: _currentStep == 0
+                                    ? translationProvider
+                                        .tr('register_screen.continue')
+                                    : translationProvider
+                                        .tr('register_screen.register'),
+                                buttonStyle:
+                                    StylesApp(context).btnSecondarySmall,
+                                width: isTablet(context)
+                                    ? StylesApp(context).formWidth
+                                    : StylesApp(context).btnHeight.width,
+                                height: StylesApp(context).btnHeight.height,
+                              ),
+                            ),
                           ),
                           const SizedBox(
                             height: 41,
@@ -564,32 +590,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 SizedBox(height: 12),
 
                                 // Botón de acción
-                                SizedBox(
+                                Container(
                                   width: 400,
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      initRegister(translationProvider);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: StyleColor.orange,
-                                      foregroundColor: StyleColor.white,
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 16, horizontal: 40),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      elevation: 4,
-                                      shadowColor: StyleColor.orange
-                                          .withValues(alpha: 0.3),
-                                    ),
-                                    child: Text(
-                                      _currentStep == 0
-                                          ? "${translationProvider.tr('register_screen.continue')} →"
-                                          : translationProvider
-                                              .tr('register_screen.register'),
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
+                                  child: AbsorbPointer(
+                                    absorbing: _registrationLocked,
+                                    child: Opacity(
+                                      opacity: _registrationLocked ? 0.6 : 1.0,
+                                      child: ElevatedButton(
+                                        onPressed: _registrationLocked
+                                            ? null
+                                            : () async {
+                                                initRegister(
+                                                    translationProvider);
+                                              },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: StyleColor.orange,
+                                          foregroundColor: StyleColor.white,
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 16, horizontal: 40),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          elevation: 4,
+                                          shadowColor: StyleColor.orange
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                        child: Text(
+                                          _currentStep == 0
+                                              ? "${translationProvider.tr('register_screen.continue')} →"
+                                              : translationProvider.tr(
+                                                  'register_screen.register'),
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -783,29 +819,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void initRegister(AppTranslationProvider translationProvider) async {
+    if (_registrationLocked) return;
+
     if (_currentStep == 0) {
       _nextStep();
-    } else {
+      return;
+    }
+
+    setState(() => _registrationLocked = true);
+
+    try {
       // abrir dialogo para preguntar se desea recibir mensajes via whatsapp
       await _showScheduleDialog();
-      setState(() {
-        _autoValidate = true; // Activar validaciones
-      });
 
-      // }
-      // Esperar un frame para que se actualice el estado
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() => _autoValidate = true);
+
+      await Future.microtask(() async {
         final bool isValid = _formKey.currentState?.validate() ?? false;
         if (!isValid) {
           showSnackBar(
               translationProvider.tr('register_screen.dialogs.complete_fields'),
               type: SnackBarType.info);
+          setState(() => _registrationLocked = false);
           return;
         }
-
-        // Si es válido, proceder con el registro
         _proceedWithRegistration();
       });
+    } catch (e) {
+      debugPrint('initRegister error: $e');
+      setState(() => _registrationLocked = false);
     }
   }
 
@@ -822,96 +864,107 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _proceedWithRegistration() async {
-    if (!mounted) return;
-
     LoadingService().showLoading(context);
-    final authenticationProvider =
-        Provider.of<AuthenticationProvider>(context, listen: false);
-    if (kDebugMode) {
-      print(_selectedPrefix);
-    }
 
-    final dataToRegister = SignupInput(
-      name: _nameController.text,
-      lastname: _lastNameController.text,
-      email: _emailController.text,
-      birthdate: _dateController.text,
-      codeAreaId: _selectedPrefix?.id,
-      countryId: _selectedCountry?.value,
-      identifier: null,
-      password: _passwordController.text,
-      phoneNumber:
-          _phoneNumberController.text.replaceAll(RegExp(r'[^\d]+'), ''),
-      city: null,
-      state: null,
-      username: null,
-      isBaptized: setIsBaptized,
-      gender: setGender,
-    );
+    try {
+      final authenticationProvider =
+          Provider.of<AuthenticationProvider>(context, listen: false);
+      final dataToRegister = SignupInput(
+        name: _nameController.text,
+        lastname: _lastNameController.text,
+        email: _emailController.text,
+        birthdate: _dateController.text,
+        codeAreaId: _selectedPrefix?.id,
+        countryId: _selectedCountry?.value,
+        identifier: null,
+        password: _passwordController.text,
+        phoneNumber:
+            _phoneNumberController.text.replaceAll(RegExp(r'[^\d]+'), ''),
+        city: null,
+        state: null,
+        username: null,
+        isBaptized: setIsBaptized,
+        gender: setGender,
+      );
 
-    final ResponseData response =
-        await authenticationProvider.registerUser(dataToRegister);
+      final ResponseData response =
+          await authenticationProvider.registerUser(dataToRegister);
 
-    if (!mounted) return;
+      if (response.error != null) {
+        await showCustomDialog(context,
+            messageDetail: response.error!,
+            message: response.userFriendlyError!,
+            showDetails: true,
+            dialogType: DialogType.error);
 
-    if (response.error != null) {
-      LoadingService().hideLoading();
-      await showCustomDialog(context,
-          messageDetail: response.error!,
-          message: response.userFriendlyError!,
-          showDetails: true,
-          dialogType: DialogType.error);
-    } else {
-      final data = VerificationResponse.fromJson(response.data);
-      List<String> hours = listHours.map((toElement) => toElement.id).toList();
-      final responseSaveWhatsAppConfig =
-          await saveWhatsAppConfig(data.userId, enabledReceived, hours);
-      if (responseSaveWhatsAppConfig.error != null) {
-        if (kDebugMode) {
-          print(
-              "Error al actualizar preferencias de usuario ${responseSaveWhatsAppConfig.error}");
-        }
+        if (mounted) setState(() => _registrationLocked = false);
+        return;
       }
-      if (!mounted) return;
 
-      LoadingService().hideLoading();
+      
+
+      final data = VerificationResponse.fromJson(response.data);
+
+      // WhatsApp config: no bloqueante. No esperes por él.
+
+      final hours = listHours.map((e) => e.id).toList();
+      unawaited(
+        saveWhatsAppConfig(data.userId, enabledReceived, hours).catchError((e) {
+          if (kDebugMode) {
+            print('Error al actualizar preferencias de usuario $e');
+          }
+          return ResponseData(data: null, error: e.toString());
+        }),
+      );
 
       if (data.showVerifyPinModal) {
-        // levantar diálogo  de verificador de pin
+        // El lock SIGUE activo hasta que se verifique el PIN o se cierre el modal
         _showDialogVerify(context, response.data, _emailController.text);
       } else {
-        Navigator.popAndPushNamed(context, '/layoutPage');
+        if (mounted) {
+          Navigator.popAndPushNamed(context, '/layoutPage');
+        }
       }
+    } catch (e, st) {
+      debugPrint('Error en _proceedWithRegistration: $e\n$st');
+      if (mounted) {
+        await showCustomDialog(
+          context,
+          message: 'Ocurrió un error inesperado al registrar.',
+          dialogType: DialogType.error,
+        );
+        setState(() => _registrationLocked = false);
+      }
+    } finally {
+      LoadingService().hideLoading();
     }
   }
 
   // En tu código original
   void _showDialogVerify(
       BuildContext context, Map<String, dynamic> data, String email) {
-    final dialogContext = context;
+    if (_pinDialogOpen) return;
+
+    _pinDialogOpen = true;
 
     showVerifyPinDialog(
       context: context,
       email: email,
       onPinVerified: (pin) async {
-        if (!mounted) return;
-
-        final authProvider = Provider.of<AuthenticationProvider>(
-          dialogContext,
-          listen: false,
-        );
-
-        final response = await authProvider.verifyPinWithApi(email, pin);
-
-        if (!mounted) return;
-
+        final response = await context
+            .read<AuthenticationProvider>()
+            .verifyPinWithApi(email, pin, password: _passwordController.text);
         if (response.error != null) {
           await showCustomDialog(context,
               message: response.error!, dialogType: DialogType.error);
           _showDialogVerify(context, data, email);
-        } else {
-          Navigator.popAndPushNamed(context, '/layoutPage');
+          return;
         }
+
+        _pinDialogOpen = false;
+        // ahora sí, liberar y navegar
+        if (mounted) setState(() => _registrationLocked = false);
+        Navigator.popAndPushNamed(context, '/layoutPage');
       },
       onResendCode: () async {
         // Lógica para reenviar el código

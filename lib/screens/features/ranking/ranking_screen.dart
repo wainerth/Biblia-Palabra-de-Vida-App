@@ -499,7 +499,8 @@ class _RankingScreenViewState extends State<RankingScreenView> {
     final position = index + 1;
     _getPositionColor(position);
     final isTopThree = position <= 3;
-
+    debugPrint(
+        " Imagen de perfil : ${GraphQLConfig.endpoint + member.profilePicture}");
     return Container(
       decoration: BoxDecoration(
         color: isCurrentUser ? StyleColor.blueMedium.withAlpha(70) : null,
@@ -510,42 +511,44 @@ class _RankingScreenViewState extends State<RankingScreenView> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Información del usuario
-            Row(
-              children: [
-                _buildPositionIndicator(position, isTopThree),
-                const SizedBox(width: 10),
-                CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(
-                    GraphQLConfig.endpoint + member.profilePicture,
+            Expanded(
+              child: Row(
+                children: [
+                  _buildPositionIndicator(position, isTopThree),
+                  const SizedBox(width: 10),
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundImage: NetworkImage(
+                      GraphQLConfig.endpoint + member.profilePicture,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 140,
-                  child: isTopThree
-                      ? TextWithGradient(
-                          text: _formatUsername(member.username),
-                          colorList: _getColorsGradient(index),
-                          font: StylesApp(context).textStyleBody18.copyWith(
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                        )
-                      : Text(
-                          _formatUsername(member.username),
-                          overflow: TextOverflow.ellipsis,
-                          style: StylesApp(context).textStyleBody18.copyWith(
-                                color: Colors.black,
-                              ),
-                        ),
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  Expanded(
+                    // width: 140,
+                    child: isTopThree
+                        ? TextWithGradient(
+                            text: _formatUsername(member.username),
+                            colorList: _getColorsGradient(index),
+                            font: StylesApp(context).textStyleBody18.copyWith(
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                          )
+                        : Text(
+                            _formatUsername(member.username),
+                            overflow: TextOverflow.ellipsis,
+                            style: StylesApp(context).textStyleBody18.copyWith(
+                                  color: Colors.black,
+                                ),
+                          ),
+                  ),
+                ],
+              ),
             ),
             // Puntos del usuario
             isTopThree
                 ? TextWithGradient(
                     text:
-                        '${translationProvider.tr("ranking.points")} ${member.currentPoints}',
+                        '${translationProvider.tr("ranking.points")} ${_formatPoints(member.currentPoints)}',
                     colorList: _getColorsGradient(index),
                     font: StylesApp(context).textStyleBody18,
                   )
@@ -609,6 +612,12 @@ class _RankingScreenViewState extends State<RankingScreenView> {
       default:
         return '';
     }
+  }
+
+  String _formatPoints(int points) {
+    if (points < 1000) return points.toString();
+    if (points < 1000000) return '${(points / 1000).toStringAsFixed(2)}k';
+    return '${(points / 1000000).toStringAsFixed(1)}M';
   }
 
   List<Color> _getColorsGradient(int index) {

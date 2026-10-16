@@ -1142,7 +1142,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen>
                                 Text(
                                   "${translationProvider.trParams("workspace.hello", {
                                         "name": getCapitalizedFirstName(
-                                            userData.name)
+                                            userData != null ? userData.name: '')
                                       })} $wavingHand",
                                   style: StylesApp(context)
                                       .textStyleBody20

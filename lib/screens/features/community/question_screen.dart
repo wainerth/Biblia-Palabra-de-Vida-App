@@ -177,6 +177,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
   @override
   void dispose() {
     flutterTts.stop();
+    flutterTts.setStartHandler(() {});
+    flutterTts.setCompletionHandler(() {});
+    flutterTts.setErrorHandler((_) {});
     super.dispose();
   }
 
@@ -402,7 +405,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
           // questions[i].answers[j] = questions[i].answers[j].copyWith(
           //   answer:  "Esta es una respuesta o opción muy larga que se va  a implemenatr para validar que tanto pueden extenderse las cajas y que tanto es el scrooll de la pantalla que va  apermirt para el usuario pueda ver todas las opciones en el dispositivo movíl , "
           // );
-          
         }
       }
       currentQuestion = questions[currentIndex];
@@ -665,7 +667,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        duration: Duration(hours: 24),
+        duration: Duration(days: 1),
         content: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -756,10 +758,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
   ///
   /// Función que se encarga de verificar el orden de las respuestas
   ///
-  void verifyOrdered(BuildContext context, int index) {
+  void verifyOrdered(BuildContext context, int index) async {
     // DETENER TTS ANTES DE NADA
     if (isTtsEnabled && isTtsSpeaking) {
-      _stopTts();
+      await _stopTts();
     }
 
     bool isCorrectOrder = true;
@@ -772,7 +774,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     // LEER EL RESULTADO
     if (isTtsEnabled) {
-      _speakOrderingResult(isCorrectOrder);
+      await _speakOrderingResult(isCorrectOrder);
     }
 
     if (isCorrectOrder) {
@@ -982,7 +984,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     if (responseTitle.error != null) {
       // si desbloqueo un titulo
-      LoadingService().hideLoading();
+      // LoadingService().hideLoading();
       await showCustomDialog(context,
           message: responseTitle.error!, dialogType: DialogType.error);
       return;
@@ -997,7 +999,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     final responsePrizeWon = await getPrizeByUserId(userData!.userId, courseId);
     if (responsePrizeWon.error != null) {
       // si desbloqueo un titulo
-      LoadingService().hideLoading();
+      // LoadingService().hideLoading();
       await showCustomDialog(context,
           message: responsePrizeWon.error!, dialogType: DialogType.error);
       return;
@@ -1058,6 +1060,16 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   Widget _buildMobileLayout(AppTranslationProvider translationProvider) {
+    if (activityIsCompleted) {
+      return Column(
+        children: [
+          _buildCommonHeader(),
+          Expanded(
+            child: _buildResultScreen(context, translationProvider),
+          ),
+        ],
+      );
+    }
     return Column(
       children: [
         _buildCommonHeader(),
@@ -1086,9 +1098,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     //   )
                     // ),
                     child: _buildQuestionBody()),
-              ] else if (activityIsCompleted) ...[
-                _buildResultScreen(context, translationProvider),
-              ],
+              ]
             ],
           ),
         ))

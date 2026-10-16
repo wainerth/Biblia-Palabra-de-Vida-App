@@ -1495,6 +1495,8 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
       context: context,
       isScrollControlled:
           true, // Permite que el modal ocupe casi toda la pantalla
+      useSafeArea: true,
+
       backgroundColor: Colors.transparent, // Fondo transparente para el modal
       builder: (context) => _buildTitleDetailContent(context, title, userData),
     );
@@ -1700,7 +1702,7 @@ class _ProgressDetailScreenState extends State<ProgressDetailScreen> {
                 ),
               ],
             ),
-            SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+            SizedBox(height: kBottomNavigationBarHeight),
           ],
         ),
       ),
